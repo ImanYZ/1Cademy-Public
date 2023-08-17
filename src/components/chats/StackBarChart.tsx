@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 import { ISemesterStudent } from "src/types/ICourse";
 
@@ -182,20 +182,6 @@ function drawChart(
       .style("fill", colorAlpha(subgroup) as string);
   });
 
-  window.addEventListener("click", e => {
-    e.preventDefault();
-    if (!e || !e.target || !event || !event.target) return;
-    //@ts-ignore
-    if (!e.target.id.includes("bar-subgroup")) {
-      tooltip.style("pointer-events", "none").style("opacity", 0);
-      return;
-    }
-    tooltip.style("pointer-events", "auto").style("opacity", 1);
-    d3.select(`#${event.target.id}`)
-      .transition()
-      .style("fill", colorAlpha(subgroup) as string);
-  });
-
   svg
     .select("#bars")
     .selectAll("g")
@@ -361,6 +347,26 @@ export const StackBarChart = ({
       isDailyPracticeRequired,
     ]
   );
+
+  useEffect(() => {
+    const removeBoxTooltip = (e: any) => {
+      if (!e || !e.target) return;
+
+      const boxBlotTooltipElement = document.getElementById("boxplot-tooltip");
+      if (!boxBlotTooltipElement) return;
+
+      if (!e.target.id.includes("bar-subgroup")) {
+        boxBlotTooltipElement.style.pointerEvents = "none";
+        boxBlotTooltipElement.style.opacity = "0";
+        return;
+      }
+      boxBlotTooltipElement.style.pointerEvents = "auto";
+      boxBlotTooltipElement.style.opacity = "1";
+    };
+
+    window.addEventListener("click", removeBoxTooltip);
+    return () => window.removeEventListener("click", removeBoxTooltip);
+  }, []);
 
   return (
     <div style={{ position: "relative" }}>

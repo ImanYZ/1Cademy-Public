@@ -1,6 +1,18 @@
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import ImageIcon from "@mui/icons-material/Image";
-import { Box, Divider, Stack, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  IconButton,
+  Skeleton,
+  Stack,
+  SxProps,
+  TextField,
+  Theme,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
@@ -17,6 +29,7 @@ import {
 import * as yup from "yup";
 
 import { useUploadImage } from "@/hooks/useUploadImage";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { CustomButton } from "../Buttons/Buttons";
@@ -39,6 +52,7 @@ const INITIAL_VALUES: QuestionForm = {
 // const EMPTY_RUBRIC: Rubrics = { prompt: "", upvotes: 0, downvotes: 0 };
 
 export const Assignments = ({ username }: AssignmentsProps) => {
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [displayQuestionForm, setDisplayQuestionForm] = useState<boolean>(false);
@@ -73,6 +87,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
         return acu;
       }, prev);
       setSelectedQuestion(prev => (prev ? tt.find(c => c.id === prev.id) ?? null : null));
+      setIsLoadingQuestions(false);
       return tt;
     });
   };
@@ -82,7 +97,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
   }, [db]);
 
   return (
-    <Box sx={{ height: "100%" }}>
+    <Box sx={{ height: "100%", width: "100%" }}>
       {selectedQuestion && (
         <RubricsEditor
           question={selectedQuestion}
@@ -108,7 +123,14 @@ export const Assignments = ({ username }: AssignmentsProps) => {
 
           <Divider sx={{ my: "12px" }} />
 
-          {!displayQuestionForm && (
+          {isLoadingQuestions && !displayQuestionForm && (
+            <Stack spacing={"16px"}>
+              {[1, 2, 3].map(cur => (
+                <Skeleton key={cur} variant="rectangular" width={"100%"} height={170} />
+              ))}
+            </Stack>
+          )}
+          {!isLoadingQuestions && !displayQuestionForm && (
             <Stack spacing={"16px"}>
               {questions.map(cur => (
                 <QuestionItem key={cur.id} question={cur} onSelectQuestion={setSelectedQuestion} />
@@ -157,8 +179,14 @@ export const Assignments = ({ username }: AssignmentsProps) => {
                     <ImageInput
                       imageUrl={formik.values.imageUrl}
                       updateImageUrl={url => formik.setFieldValue("imageUrl", url)}
+                      removeImage={() => formik.setFieldValue("imageUrl", "")}
+                      sx={{ minWidth: "50px", minHeight: "50px" }}
                     />
-                    <CustomButton variant="contained" type="submit" disabled={formik.isSubmitting}>
+                    <CustomButton
+                      variant="contained"
+                      onClick={() => formik.handleSubmit()}
+                      disabled={formik.isSubmitting}
+                    >
                       {formik.isSubmitting ? "Saving ..." : "Save"}
                     </CustomButton>
                   </Stack>
@@ -175,14 +203,19 @@ export const Assignments = ({ username }: AssignmentsProps) => {
 type ImageInputProps = {
   imageUrl: string;
   updateImageUrl: (url: string) => void;
+  removeImage: () => void;
+  sx?: SxProps<Theme>;
 };
-const ImageInput = ({ updateImageUrl, imageUrl }: ImageInputProps) => {
+const ImageInput = ({ updateImageUrl, imageUrl, removeImage, sx }: ImageInputProps) => {
   const storage = getStorage();
-  const inputEl = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
+
   const uploadImageClicked = useCallback(() => {
-    inputEl?.current?.click();
-  }, [inputEl]);
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = "";
+    fileInputRef.current.click();
+  }, []);
 
   const onUploadImage = (event: any) => {
     let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
@@ -196,22 +229,35 @@ const ImageInput = ({ updateImageUrl, imageUrl }: ImageInputProps) => {
   };
 
   return (
-    <Box
-      id={"question-image"}
-      onClick={() => uploadImageClicked()}
-      sx={{
-        // background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-        color: "inherit",
-        fontWeight: 400,
-        // border: "solid 1px pink",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-      }}
-    >
-      <>
-        <input type="file" ref={inputEl} onChange={onUploadImage} hidden />
+    <Box sx={{ position: "relative" }}>
+      <Box
+        id={"question-image"}
+        onClick={uploadImageClicked}
+        onKeyDown={e => e.key === "Enter" && uploadImageClicked()}
+        tabIndex={0}
+        role="button"
+        aria-label="Click me to upload an image to the question"
+        sx={{
+          color: "inherit",
+          fontWeight: 400,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          p: "10px",
+          borderRadius: "8px",
+          background: (theme: any) =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG800 : DESIGN_SYSTEM_COLORS.gray250,
+          ":hover": {
+            background: (theme: any) =>
+              theme.palette.mode === "dark"
+                ? theme.palette.common.darkBackground2
+                : theme.palette.common.lightBackground2,
+          },
+          ...sx,
+        }}
+      >
+        <input type="file" ref={fileInputRef} onChange={onUploadImage} hidden />
 
         {isUploading && (
           <span style={{ width: "100%", fontSize: "24px", textAlign: "center", padding: "12px" }}>
@@ -221,25 +267,20 @@ const ImageInput = ({ updateImageUrl, imageUrl }: ImageInputProps) => {
 
         {!isUploading && imageUrl && <img src={imageUrl} alt="question image" width={"100%"} />}
         {!isUploading && !imageUrl && (
-          <Stack
-            alignItems={"center"}
-            justifyContent={"center"}
-            sx={{
-              p: "10px",
-              borderRadius: "8px",
-              ":hover": {
-                background: (theme: any) =>
-                  theme.palette.mode === "dark"
-                    ? theme.palette.common.darkBackground2
-                    : theme.palette.common.lightBackground2,
-              },
-            }}
-          >
+          <Stack alignItems={"center"} justifyContent={"center"}>
             <Typography>Choose an Image</Typography>
             <ImageIcon sx={{ fontSize: "32px" }} />
           </Stack>
         )}
-      </>
+      </Box>
+
+      {!isUploading && imageUrl && (
+        <Tooltip title="Remove Image">
+          <IconButton onClick={removeImage} sx={{ position: "absolute", top: "10px", right: "10px", p: "4px" }}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 };
