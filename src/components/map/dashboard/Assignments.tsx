@@ -25,16 +25,20 @@ import {
   getQuestionSnapshot,
   Question,
   QuestionChanges,
+  Rubric,
+  updateQuestion,
 } from "src/client/firestore/questions.firestore";
 import * as yup from "yup";
 
 import { useUploadImage } from "@/hooks/useUploadImage";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { newId } from "@/lib/utils/newFirestoreId";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { CustomButton } from "../Buttons/Buttons";
 import { QuestionItem } from "./QuestionItem";
-import { RubricsEditor } from "./RubricsEditor";
+import { generateEmptyRubric, RubricsEditor } from "./RubricsEditor";
 
 dayjs.extend(relativeTime);
 
@@ -65,6 +69,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
     imageUrl: yup.string(),
     rubrics: yup.array(),
   });
+
   const onToggleQuestionForm = () => setDisplayQuestionForm(prev => !prev);
 
   const onSubmit = async (values: QuestionForm, { setSubmitting, setTouched }: FormikHelpers<QuestionForm>) => {
@@ -73,9 +78,21 @@ export const Assignments = ({ username }: AssignmentsProps) => {
       title: true,
       description: true,
     });
-    await addQuestion(db, { ...values, user: username });
+
+    const questionId = await addQuestion(db, { ...values, user: username });
     setSubmitting(false);
     setDisplayQuestionForm(false);
+
+    const generatedRubricItems: string[] = await Post("/assignment/generateRubrics", {
+      questionDescription: values.description,
+    });
+    if (!generatedRubricItems) console.warn("Was not possible generate first rubric");
+    const id = newId(db);
+    const newRubric: Rubric = {
+      ...generateEmptyRubric(id, questionId, username),
+      prompts: generatedRubricItems.map(c => ({ prompt: c, point: 1 })),
+    };
+    await updateQuestion(db, questionId, { rubrics: [newRubric] });
   };
 
   const syncQuestions = (questionChanges: QuestionChanges[]) => {
