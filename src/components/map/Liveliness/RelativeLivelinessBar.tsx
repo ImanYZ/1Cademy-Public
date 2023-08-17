@@ -1,16 +1,25 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ActionsTracksChange, getActionTrackSnapshot } from "src/client/firestore/actionTracks.firestore";
 import { User } from "src/knowledgeTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-import { PAST_24H, synchronizeActionsTracks, UserInteractionData, UserInteractions } from "./LivelinessBar";
+import {
+  PAST_24H,
+  SynchronizeActionTracksFunction,
+  synchronizeInteractions,
+  synchronizeReputations,
+  UserInteractionData,
+  UserInteractions,
+} from "./LivelinessBar";
 import { UserBubble } from "./UserBubble";
 
 type RelativeLivelinessBarProps = {
+  variant: RelativeLivelinessTypes;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   onToggleDisplay: () => void;
@@ -20,6 +29,7 @@ type RelativeLivelinessBarProps = {
 };
 
 const RelativeLivelinessBar = ({
+  variant,
   onToggleDisplay,
   onlineUsers,
   open,
@@ -36,16 +46,6 @@ const RelativeLivelinessBar = ({
         .map(key => ({ ...usersInteractions[key], uname: key }))
         .sort((a, b) => a.count - b.count),
     [usersInteractions]
-  );
-
-  const userAboveUsersLogged = useMemo(
-    (): UserInteractionData[] => getUsersAbove({ usersInteractionsSortedArray, uname: user.uname }),
-    [user.uname, usersInteractionsSortedArray]
-  );
-
-  const userBellowUsersLogged = useMemo(
-    (): UserInteractionData[] => getUsersBellow({ usersInteractionsSortedArray, uname: user.uname }),
-    [user.uname, usersInteractionsSortedArray]
   );
 
   const userLogged = useMemo((): UserInteractionData => {
@@ -66,23 +66,14 @@ const RelativeLivelinessBar = ({
   }, [user.chooseUname, user.email, user.fName, user.imageUrl, user.lName, user.uname, usersInteractionsSortedArray]);
 
   const userActionsToDisplay: (UserInteractionData | null)[] = useMemo(() => {
+    const usersAboveLoggedUser = getUsersAbove({ usersInteractionsSortedArray, uname: user.uname });
+    const usersBellowLoggedUser = getUsersBellow({ usersInteractionsSortedArray, uname: user.uname }).reverse();
     return [
-      ...[0, 1, 2].map(c => userAboveUsersLogged[c] ?? null).reverse(),
+      ...[0, 1, 2].map(c => usersAboveLoggedUser[c] ?? null).reverse(),
       userLogged,
-      ...[0, 1, 2].map(c => userBellowUsersLogged[c] ?? null).reverse(),
+      ...[0, 1, 2].map(c => usersBellowLoggedUser[c] ?? null),
     ];
-  }, [userAboveUsersLogged, userBellowUsersLogged, userLogged]);
-
-  const syncLivelinessBar = useCallback(
-    (changes: ActionsTracksChange[]) => {
-      setUsersInteractions(prevUsersInteractions => {
-        return changes.reduce((acu, cur) => synchronizeActionsTracks(acu, cur, authEmail || ""), {
-          ...prevUsersInteractions,
-        });
-      });
-    },
-    [authEmail]
-  );
+  }, [user.uname, userLogged, usersInteractionsSortedArray]);
 
   const numberOfUsersNoVisibleAbove = useMemo(
     () => getNumberOfUsersNoVisibleAbove({ uname: user.uname, usersInteractionsSortedArray }),
@@ -95,13 +86,15 @@ const RelativeLivelinessBar = ({
   );
 
   useEffect(() => {
-    const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, syncLivelinessBar);
+    const onSynchronize = (changes: ActionsTracksChange[]) =>
+      setUsersInteractions(prev => changes.reduce(synchronize[variant].fn, { ...prev }));
+    const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, onSynchronize);
     return () => killSnapshot();
-  }, [db, syncLivelinessBar]);
+  }, [db, variant]);
 
   return (
     <Box
-      id="live-bar-reputation"
+      id={synchronize[variant].id}
       sx={{
         top: "100px",
         bottom: "100px",
@@ -130,14 +123,26 @@ const RelativeLivelinessBar = ({
           {/* number of no visible users above */}
           <Typography>+{numberOfUsersNoVisibleAbove}</Typography>
           <Stack justifyContent={"space-between"} sx={{ height: "100%", transition: "0.2s", position: "relative" }}>
+            <KeyboardArrowDownIcon
+              sx={{
+                fontSize: "20px",
+                position: "absolute",
+                left: "50%",
+                top: "-8px",
+                transform: "translateX(-50%)",
+                color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
+              }}
+            />
             {/* background line */}
             <Box
               sx={{
                 position: "absolute",
                 left: "50%",
-                border: theme => (theme.palette.mode === "dark" ? "1px solid #bebebe" : "1px solid rgba(0, 0, 0, 0.6)"),
                 top: "0px",
+                borderLeft: theme =>
+                  theme.palette.mode === "dark" ? "2px solid #bebebe" : "1px solid rgba(0, 0, 0, 0.6)",
                 bottom: "0px",
+                transform: "translateX(-1px)",
               }}
             />
 
@@ -146,7 +151,7 @@ const RelativeLivelinessBar = ({
               cur ? (
                 <UserBubble
                   key={cur.uname}
-                  displayEmails={false}
+                  displayEmails={authEmail === "oneweb@umich.edu"}
                   isOnline={onlineUsers.includes(cur.uname)}
                   openUserInfoSidebar={openUserInfoSidebar}
                   userInteraction={cur}
@@ -163,7 +168,13 @@ const RelativeLivelinessBar = ({
       </Box>
 
       {/* toggle button */}
-      <Tooltip title={open ? "Hide relative reputation liveness bar" : "Display relative reputation liveness bar"}>
+      <Tooltip
+        title={
+          open
+            ? `Hide relative ${synchronize[variant].name} liveness bar`
+            : `Display relative ${synchronize[variant].name} liveness bar`
+        }
+      >
         <IconButton
           sx={{
             background: theme =>
@@ -244,4 +255,13 @@ export const getNumberOfUsersNoVisibleBellow = ({
 }: NumberOfUsersNoVisibleBellowInput) => {
   const index = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
   return Math.max(index - 3, 0);
+};
+
+type RelativeLivelinessTypes = "interactions" | "reputations";
+
+const synchronize: {
+  [key in RelativeLivelinessTypes]: { id: string; name: string; fn: SynchronizeActionTracksFunction };
+} = {
+  interactions: { id: "live-bar-interaction", name: "interaction", fn: synchronizeInteractions },
+  reputations: { id: "live-bar-reputation", name: "reputation", fn: synchronizeReputations },
 };

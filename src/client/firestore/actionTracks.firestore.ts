@@ -24,7 +24,6 @@ export const getActionTrackSnapshot = (
       const document = change.doc.data() as IActionTrack;
       return { type: change.type, data: { id: change.doc.id, ...document } };
     });
-    console.log("01", { actionTrackDocuments });
     callback(actionTrackDocuments);
   });
   return killSnapshot;

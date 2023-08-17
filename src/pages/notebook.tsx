@@ -7491,6 +7491,7 @@ const Notebook = ({}: NotebookProps) => {
               open={openLivelinessBar}
               openUserInfoSidebar={openUserInfoSidebar}
               user={user}
+              variant="interactions"
             />
           )}
 

@@ -3,7 +3,7 @@ import { ActionsTracksChange } from "src/client/firestore/actionTracks.firestore
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { MockData } from "testUtils/mockCollections";
 
-import { synchronizeActionsTracks, UserInteractions } from "@/components/map/Liveliness/LivelinessBar";
+import { synchronizeInteractions, UserInteractions } from "@/components/map/Liveliness/LivelinessBar";
 
 describe("should test utils functions of LivelinnessBar", () => {
   const users = [getDefaultUser({}), createUser({})];
@@ -50,7 +50,7 @@ describe("should test utils functions of LivelinnessBar", () => {
     };
 
     const authEmail = "oneweb@umich.edu";
-    const newUserInteractions = synchronizeActionsTracks(userInteractions, actionTrackChange, authEmail);
+    const newUserInteractions = synchronizeInteractions(userInteractions, actionTrackChange, authEmail);
     expect(newUserInteractions).toHaveProperty("jjnnx");
     expect(newUserInteractions["jjnnx"].count).toEqual(1);
   });
@@ -87,7 +87,7 @@ describe("should test utils functions of LivelinnessBar", () => {
     };
 
     const authEmail = "oneweb@umich.edu";
-    const newUserInteractions = synchronizeActionsTracks(userInteractions, actionTrackChange, authEmail);
+    const newUserInteractions = synchronizeInteractions(userInteractions, actionTrackChange, authEmail);
     expect(newUserInteractions).toHaveProperty("jjnnx");
     expect(newUserInteractions["jjnnx"].count).toEqual(1);
   });
