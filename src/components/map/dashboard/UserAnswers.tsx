@@ -349,7 +349,7 @@ type UserListAnswersProps = {
 };
 
 const validationSchema = yup.object({
-  answer: yup.string().required("User answer is required."),
+  answer: yup.string().required("Student answer is required."),
 });
 
 export const UserListAnswers = ({
@@ -515,7 +515,7 @@ export const UserListAnswers = ({
               // disabled={formik.isSubmitting}
             >
               <AddIcon sx={{ mr: "8px" }} />
-              Add User Answer
+              Add Student Response
             </CustomButton>
           )}
         </Stack>
