@@ -143,7 +143,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
       onSnapshot(
         q,
         async snapshot => {
-          if (snapshot.empty) return;
+          if (snapshot.empty) return setIsLoading(false); // TODO: manage when there is no semesters
           const docChanges = snapshot.docChanges();
           const instructor = docChanges[0].doc.data() as Instructor;
           setInstructor(instructor);
