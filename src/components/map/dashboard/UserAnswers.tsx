@@ -480,14 +480,16 @@ export const UserListAnswers = ({
         ))}
         <Divider />
         <Stack direction={"row-reverse"} justifyContent={"space-between"} spacing={"8px"} sx={{ mt: "12px" }}>
-          <CustomButton
-            variant="contained"
-            onClick={() => onTryRubricOnAnswers(usersAnswers)}
-            disabled={!userAnswersCopy.length}
-          >
-            <PlayArrowIcon sx={{ mr: "4px" }} />
-            Grade All
-          </CustomButton>
+          {userAnswersCopy.length > 1 && (
+            <CustomButton
+              variant="contained"
+              onClick={() => onTryRubricOnAnswers(usersAnswers)}
+              disabled={!userAnswersCopy.length}
+            >
+              <PlayArrowIcon sx={{ mr: "4px" }} />
+              Grade All
+            </CustomButton>
+          )}
           {!newAnswerId && (
             <CustomButton
               onClick={onAddUserAnswer}

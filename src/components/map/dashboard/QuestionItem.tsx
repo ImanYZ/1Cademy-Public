@@ -22,8 +22,8 @@ export const QuestionItem = ({ question, onSelectQuestion }: QuestionItemProps) 
         borderRadius: "8px",
       }}
     >
-      <Typography sx={{ fontWeight: 700, fontSize: "20px" }}>{question.title}</Typography>
-      {expanded && <Typography>{question.description}</Typography>}
+      <Typography sx={{ fontWeight: 700, fontSize: "25px", mb: "5px" }}>{question.title}</Typography>
+      {expanded && <Typography sx={{ mb: "25px" }}>{question.description}</Typography>}
       {expanded && question.imageUrl && <img src={question.imageUrl} alt="question image" style={{ width: "100%" }} />}
       <Button onClick={() => setExpanded(prev => !prev)}>
         {expanded ? "Show less" : "Show more"}
