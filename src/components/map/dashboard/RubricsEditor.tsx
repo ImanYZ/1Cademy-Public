@@ -32,8 +32,8 @@ export type SelectedUserAnswer = {
 
 // export type UserAnswerProcessed = UserAnswer & { points: number };
 
-const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
-  id: "",
+export const generateEmptyRubric = (id: string, questionId: string, username: string): Rubric => ({
+  id,
   questionId,
   prompts: [],
   downvotesBy: [],
@@ -59,16 +59,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const onAddRubric = () => {
     setDisableAddRubric(true);
     const id = newId(db);
-    // const response: RubricItemGenerated[] = await Post("/assignment/generateRubrics", {
-    //   questionDescription: question.description,
-    // });
-    // console.log({ response });
-    const newRubric: Rubric = {
-      ...generateEmptyRubric(question.id, username),
-      id,
-      // prompts: response.map(c => c.key_phrase),
-    };
-
+    const newRubric: Rubric = generateEmptyRubric(id, question.id, username);
     setRubrics(prev => [...prev, newRubric]);
     setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
     setDisableAddRubric(false);
