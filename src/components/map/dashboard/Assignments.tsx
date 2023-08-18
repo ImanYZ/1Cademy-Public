@@ -85,6 +85,7 @@ export const Assignments = ({ username }: AssignmentsProps) => {
 
     const generatedRubricItems: string[] = await Post("/assignment/generateRubrics", {
       questionDescription: values.description,
+      questionTitle: values.title,
     });
     if (!generatedRubricItems) console.warn("Was not possible generate first rubric");
     const id = newId(db);
@@ -110,7 +111,8 @@ export const Assignments = ({ username }: AssignmentsProps) => {
   };
 
   useEffect(() => {
-    getQuestionSnapshot(db, {}, syncQuestions);
+    const killSnapshot = getQuestionSnapshot(db, {}, syncQuestions);
+    return () => killSnapshot();
   }, [db]);
 
   return (
