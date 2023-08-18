@@ -47,10 +47,6 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
     return () => killSnapshot();
   }, [db, variant]);
 
-  // useEffect(() => {
-  //   setBarHeight(parseFloat(String(document.getElementById("liveliness-seekbar")?.clientHeight)));
-  // }, [windowHeight]);
-
   useEffect(() => {
     if (!barRef.current) return;
     setBarHeight(barRef.current.clientHeight);
@@ -62,230 +58,6 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
   }, [barHeight, usersInteractions]);
 
   return (
-    // <>
-    //   <Box
-    //     sx={{
-    //       top: "50%",
-    //       transform: "translateY(-50%)",
-    //       right: "0px",
-    //       zIndex: 1199,
-    //       position: "absolute",
-    //       height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
-    //       border: "solid 1px red",
-    //     }}
-    //   >
-    //     <Box
-    //       id="live-bar-interaction"
-    //       sx={{
-    //         opacity: disabled ? 0.8 : 1,
-    //         width: "56px",
-    //         background: theme =>
-    //           theme.palette.mode === "dark"
-    //             ? theme.palette.common.darkBackground
-    //             : theme.palette.common.lightBackground,
-    //         borderRadius: "10px 0px 0px 10px",
-    //         right: 0,
-    //         top: 0,
-    //         position: "absolute",
-    //         height: "100%",
-    //         transform: !open ? "translate(calc(100%), 0px)" : null,
-    //         transition: "all 0.2s 0s ease",
-    //         padding: "5px 0px 0px 28px",
-    //       }}
-    //     >
-    //       <Tooltip title={"24-hour Interactions Leaderboard."} placement="left">
-    //         <Box sx={{ width: "100%", height: "100%", position: "absolute", right: "0px" }}></Box>
-    //       </Tooltip>
-
-    //       <Box
-    //         className="seekbar"
-    //         sx={{
-    //           height: `calc(100% - ${window.innerHeight > 799 ? "30px" : "28px"})`,
-    //           width: "1px",
-    //           borderRight: theme =>
-    //             theme.palette.mode === "dark" ? "2px solid #bebebe" : "2px solid rgba(0, 0, 0, 0.6)",
-    //           color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
-    //           position: "relative",
-    //           marginTop: "10px",
-    //         }}
-    //       >
-    //         <KeyboardArrowDownIcon
-    //           sx={{
-    //             fontSize: "20px",
-    //             position: "absolute",
-    //             top: "0px",
-    //             transform: "translate(-9px, -9px)",
-    //           }}
-    //         />
-    //         <Box
-    //           className="seekbar-users"
-    //           id="liveliness-seekbar"
-    //           sx={{
-    //             width: "100%",
-    //             height: "100%",
-    //             position: "absolute",
-    //             top: "0px",
-    //           }}
-    //         >
-    //           {disabled &&
-    //             [1, 2, 3].map(cur => {
-    //               return (
-    //                 <Box
-    //                   key={cur}
-    //                   sx={{
-    //                     width: "28px",
-    //                     height: "28px",
-    //                     position: "absolute",
-    //                     transform: `translate(-50%, ${cur * 10}px)`,
-    //                     borderRadius: "50%",
-    //                     background: theme => (theme.palette.mode === "dark" ? "#575757ff" : "#d4d4d4"),
-    //                   }}
-    //                 />
-    //               );
-    //             })}
-    //           {!disabled &&
-    //             Object.keys(usersInteractions).map((uname: string) => {
-    //               const maxActionsLog = Math.log(maxActions);
-    //               const totalInteraction = usersInteractions[uname].count + Math.abs(minActions);
-    //               const _count = Math.log(totalInteraction > 0 ? totalInteraction : 1);
-    //               const seekPosition = -1 * ((_count / maxActionsLog) * barHeight - (_count === 0 ? 0 : 35));
-    //               return (
-    //                 <Tooltip
-    //                   key={uname}
-    //                   title={
-    //                     <Box sx={{ textAlign: "center" }}>
-    //                       <Box component={"span"}>
-    //                         {usersInteractions[uname].chooseUname ? uname : usersInteractions[uname].fullname}
-    //                       </Box>
-    //                       {authEmail === "oneweb@umich.edu" && (
-    //                         <Box component={"p"} sx={{ my: 0 }}>
-    //                           {usersInteractions[uname].email}
-    //                         </Box>
-    //                       )}
-    //                       <Box component={"p"} sx={{ my: 0 }}>
-    //                         {usersInteractions[uname].count} Interaction{usersInteractions[uname].count > 1 ? "s" : ""}
-    //                       </Box>
-    //                     </Box>
-    //                   }
-    //                 >
-    //                   <Box
-    //                     onClick={() =>
-    //                       openUserInfoSidebar(
-    //                         uname,
-    //                         usersInteractions[uname].imageUrl,
-    //                         usersInteractions[uname].fullname,
-    //                         usersInteractions[uname].chooseUname ? "1" : ""
-    //                       )
-    //                     }
-    //                     className={
-    //                       usersInteractions[uname].reputation === "Gain"
-    //                         ? "GainedPoint"
-    //                         : usersInteractions[uname].reputation === "Loss"
-    //                         ? "LostPoint"
-    //                         : ""
-    //                     }
-    //                     sx={{
-    //                       width: "28px",
-    //                       height: "28px",
-    //                       cursor: "pointer",
-    //                       // display: "inline-block",
-    //                       position: "absolute",
-    //                       left: "0px",
-    //                       bottom: "0px",
-    //                       transition: "all 0.2s 0s ease",
-    //                       transform: `translate(-50%, ${seekPosition}px)`,
-    //                       "& > .user-image": {
-    //                         borderRadius: "50%",
-    //                         overflow: "hidden",
-    //                         width: "28px",
-    //                         height: "28px",
-    //                       },
-    //                       "&.GainedPoint": {
-    //                         "& > .user-image": {
-    //                           boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
-    //                         },
-    //                       },
-    //                       "&.LostPoint": {
-    //                         "& > .user-image": {
-    //                           boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
-    //                         },
-    //                       },
-    //                       "@keyframes slidein": {
-    //                         from: {
-    //                           transform: "translateY(0%)",
-    //                         },
-    //                         to: {
-    //                           transform: "translateY(100%)",
-    //                         },
-    //                       },
-    //                     }}
-    //                   >
-    //                     <Box
-    //                       sx={{
-    //                         // display: "block",
-    //                         position: "absolute",
-    //                         bottom: "6px",
-    //                         left: "-16px",
-    //                       }}
-    //                     >
-    //                       {usersInteractions[uname].actions.map((action, index) => {
-    //                         return <MemoizedActionBubble key={index} actionType={action} />;
-    //                       })}
-    //                     </Box>
-    //                     <Box className="user-image">
-    //                       <OptimizedAvatar2
-    //                         alt={usersInteractions[uname].fullname}
-    //                         imageUrl={usersInteractions[uname].imageUrl}
-    //                         size={28}
-    //                         sx={{ border: "none" }}
-    //                       />
-    //                     </Box>
-    //                     {onlineUsers.includes(uname) && (
-    //                       <Box
-    //                         sx={{
-    //                           background: "#12B76A",
-    //                         }}
-    //                         className="UserStatusOnlineIcon"
-    //                       />
-    //                     )}
-    //                   </Box>
-    //                 </Tooltip>
-    //               );
-    //             })}
-    //         </Box>
-    //       </Box>
-    //       <Box
-    //         sx={{
-    //           background: theme =>
-    //             theme.palette.mode === "dark"
-    //               ? theme.palette.common.darkBackground
-    //               : theme.palette.common.lightBackground,
-    //           display: "flex",
-    //           top: "50%",
-    //           transform: "translate(0px, -50%)",
-    //           left: "-22px",
-    //           width: "28px",
-    //           height: "36px",
-    //           color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
-    //           position: "absolute",
-    //           alignItems: "center",
-    //           justifyContent: "center",
-    //           fontSize: "20px",
-    //           borderRadius: "6px 0px 0px 6px",
-    //           cursor: "pointer",
-    //         }}
-    //         onClick={() => setOpen(!open)}
-    //       >
-    //         <ArrowForwardIosIcon
-    //           fontSize="inherit"
-    //           sx={{
-    //             transform: !open ? "scaleX(-1)" : null,
-    //           }}
-    //         />
-    //       </Box>
-    //     </Box>
-    //   </Box>
-    // </>
     <Box
       id={SYNCHRONIZE[variant].id}
       sx={{
@@ -301,7 +73,6 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
         borderRadius: "10px 0px 0px 10px",
         transform: !open ? "translate(calc(100%), 0px)" : null,
         transition: "all 0.2s 0s ease",
-        border: "solid 1px olive",
       }}
     >
       {/* bubble users bar */}
@@ -315,10 +86,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
             height: "100%",
           }}
         >
-          <Box
-            ref={barRef}
-            sx={{ width: "100%", height: "100%", transition: "0.2s", position: "relative", border: "solid 1px olive" }}
-          >
+          <Box ref={barRef} sx={{ width: "100%", height: "100%", transition: "0.2s", position: "relative" }}>
             <KeyboardArrowDownIcon
               sx={{
                 fontSize: "20px",
@@ -359,11 +127,13 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
                       transform: "translateX(-50%)",
                     }}
                   />
+                  {/* TODO: improve this by pushing and removing the new action dynamically
+                  also this improvement is possible todo in the synchronization function */}
                   {cur.actions.map((action, index) => (
                     <MemoizedActionBubble
                       key={index}
                       actionType={action}
-                      sx={{ position: "absolute", bottom: cur.positionY + 8, left: "-4px" }}
+                      sx={{ position: "absolute", bottom: cur.positionY + 5 + index * 3, left: "-4px" }}
                     />
                   ))}
                 </>
