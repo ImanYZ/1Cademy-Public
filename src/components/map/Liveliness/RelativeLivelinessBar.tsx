@@ -9,17 +9,20 @@ import { User } from "src/knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import {
-  PAST_24H,
-  SynchronizeActionTracksFunction,
-  synchronizeInteractions,
-  synchronizeReputations,
+  getNumberOfUsersNoVisibleAbove,
+  getNumberOfUsersNoVisibleBellow,
+  getUsersAbove,
+  getUsersBellow,
+  LivelinessTypes,
+  SYNCHRONIZE,
   UserInteractionData,
   UserInteractions,
-} from "./LivelinessBar";
+} from "./liveliness.utils";
+import { PAST_24H } from "./LivelinessBar";
 import { UserBubble } from "./UserBubble";
 
 type RelativeLivelinessBarProps = {
-  variant: RelativeLivelinessTypes;
+  variant: LivelinessTypes;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   onToggleDisplay: () => void;
@@ -87,17 +90,17 @@ const RelativeLivelinessBar = ({
 
   useEffect(() => {
     const onSynchronize = (changes: ActionsTracksChange[]) =>
-      setUsersInteractions(prev => changes.reduce(synchronize[variant].fn, { ...prev }));
+      setUsersInteractions(prev => changes.reduce(SYNCHRONIZE[variant].fn, { ...prev }));
     const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, onSynchronize);
     return () => killSnapshot();
   }, [db, variant]);
 
   return (
     <Box
-      id={synchronize[variant].id}
+      id={SYNCHRONIZE[variant].id}
       sx={{
-        top: "100px",
-        bottom: "100px",
+        top: "200px",
+        bottom: "200px",
         right: "0px",
         zIndex: 998,
         position: "absolute",
@@ -107,6 +110,7 @@ const RelativeLivelinessBar = ({
         borderRadius: "10px 0px 0px 10px",
         transform: !open ? "translate(calc(100%), 0px)" : null,
         transition: "all 0.2s 0s ease",
+        border: "solid 1px blue",
       }}
     >
       {/* bubble users bar */}
@@ -146,7 +150,6 @@ const RelativeLivelinessBar = ({
               }}
             />
 
-            {/* userAboveUsersLogged */}
             {userActionsToDisplay.map((cur, idx) =>
               cur ? (
                 <UserBubble
@@ -168,13 +171,7 @@ const RelativeLivelinessBar = ({
       </Box>
 
       {/* toggle button */}
-      <Tooltip
-        title={
-          open
-            ? `Hide relative ${synchronize[variant].name} liveness bar`
-            : `Display relative ${synchronize[variant].name} liveness bar`
-        }
-      >
+      <Tooltip title={open ? `Hide ${SYNCHRONIZE[variant].name}` : `Display ${SYNCHRONIZE[variant].name}`}>
         <IconButton
           sx={{
             background: theme =>
@@ -214,54 +211,3 @@ const RelativeLivelinessBar = ({
 };
 
 export const MemoizedRelativeLivelinessBar = React.memo(RelativeLivelinessBar);
-
-type GetUsersAboveInput = { usersInteractionsSortedArray: UserInteractionData[]; uname: string };
-
-/**
- * usersInteractionsSortedArray: ascendant sorted array by count property
- */
-export const getUsersAbove = ({ usersInteractionsSortedArray, uname }: GetUsersAboveInput) => {
-  const userIndex = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
-  if (userIndex < 0) return usersInteractionsSortedArray;
-  return usersInteractionsSortedArray.slice(userIndex + 1, userIndex + 4);
-};
-
-type GetUsersBellowInput = { usersInteractionsSortedArray: UserInteractionData[]; uname: string };
-
-/**
- * usersInteractionsSortedArray: ascendant sorted array by count property
- */
-export const getUsersBellow = ({ usersInteractionsSortedArray, uname }: GetUsersBellowInput) => {
-  const userIndex = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
-  if (userIndex < 0) return [];
-  return usersInteractionsSortedArray.slice(Math.max(userIndex - 3, 0), userIndex);
-};
-
-type NumberOfUsersNoVisibleAboveInput = { uname: string; usersInteractionsSortedArray: UserInteractionData[] };
-
-export const getNumberOfUsersNoVisibleAbove = ({
-  uname,
-  usersInteractionsSortedArray,
-}: NumberOfUsersNoVisibleAboveInput) => {
-  const index = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
-  return Math.max(usersInteractionsSortedArray.length - (index + 4), 0);
-};
-
-type NumberOfUsersNoVisibleBellowInput = { uname: string; usersInteractionsSortedArray: UserInteractionData[] };
-
-export const getNumberOfUsersNoVisibleBellow = ({
-  uname,
-  usersInteractionsSortedArray,
-}: NumberOfUsersNoVisibleBellowInput) => {
-  const index = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
-  return Math.max(index - 3, 0);
-};
-
-type RelativeLivelinessTypes = "interactions" | "reputations";
-
-const synchronize: {
-  [key in RelativeLivelinessTypes]: { id: string; name: string; fn: SynchronizeActionTracksFunction };
-} = {
-  interactions: { id: "live-bar-interaction", name: "interaction", fn: synchronizeInteractions },
-  reputations: { id: "live-bar-reputation", name: "reputation", fn: synchronizeReputations },
-};

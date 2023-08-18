@@ -7491,7 +7491,7 @@ const Notebook = ({}: NotebookProps) => {
               open={openLivelinessBar}
               openUserInfoSidebar={openUserInfoSidebar}
               user={user}
-              variant="interactions"
+              variant="relativeInteractions"
             />
           )}
 
@@ -7504,6 +7504,8 @@ const Notebook = ({}: NotebookProps) => {
               open={openLivelinessBar}
               setOpen={setOpenLivelinessBar}
               windowHeight={windowHeight}
+              variant="absoluteInteractions"
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
           )}
 

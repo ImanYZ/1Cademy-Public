@@ -1,9 +1,9 @@
-import { Box, Tooltip } from "@mui/material";
+import { Box, SxProps, Theme, Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
-import { UserInteraction, UserInteractionData } from "./LivelinessBar";
+import { UserInteractionData } from "./liveliness.utils";
 
 type UserBubbleProps = {
   userInteraction: UserInteractionData;
@@ -11,15 +11,16 @@ type UserBubbleProps = {
   isOnline: boolean;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   size?: number;
+  sx?: SxProps<Theme>;
 };
 
 export const UserBubble = ({
   userInteraction,
-  // uname,
   displayEmails,
   isOnline,
   openUserInfoSidebar,
   size = 28,
+  sx,
 }: UserBubbleProps) => {
   const [className, setClassName] = useState("");
 
@@ -35,7 +36,7 @@ export const UserBubble = ({
   return (
     <Tooltip
       title={
-        <Box sx={{ textAlign: "center" }}>
+        <Box sx={{ textAlign: "center", ...sx }}>
           <Box component={"span"}>{userInteraction.chooseUname ? userInteraction.uname : userInteraction.fullname}</Box>
           {displayEmails && (
             <Box component={"p"} sx={{ my: 0 }}>

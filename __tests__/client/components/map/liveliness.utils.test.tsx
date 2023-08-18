@@ -1,10 +1,11 @@
-import { UserInteractionData } from "@/components/map/Liveliness/LivelinessBar";
 import {
+  calculateVerticalPositionWithLogarithm,
   getNumberOfUsersNoVisibleAbove,
   getNumberOfUsersNoVisibleBellow,
   getUsersAbove,
   getUsersBellow,
-} from "@/components/map/Liveliness/RelativeLivelinessBar";
+  UserInteractionData,
+} from "@/components/map/Liveliness/liveliness.utils";
 
 describe("should test utils functions of relative Liveliness Bar", () => {
   it("should return the 3 users above the logged user from user interactions", async () => {
@@ -367,5 +368,38 @@ describe("should return the number of not visible users bellow", () => {
 
     const response = getNumberOfUsersNoVisibleBellow({ usersInteractionsSortedArray, uname: "u05" });
     expect(response).toBe(1);
+  });
+});
+
+describe("should calculate vertical positions with logarithm function", () => {
+  it("should return 0 and 100, with the only 2 elements", () => {
+    const usersInteractionsSortedArray: UserInteractionData[] = [
+      {
+        actions: ["ChildNode"],
+        chooseUname: false,
+        count: 0,
+        fullname: "user1 pp",
+        reputation: "Gain",
+        email: "empty@example.com",
+        id: "01",
+        imageUrl: "",
+        uname: "u01",
+      },
+      {
+        actions: ["ChildNode"],
+        chooseUname: false,
+        count: 10,
+        fullname: "user1 pp",
+        reputation: "Gain",
+        email: "empty@example.com",
+        id: "01",
+        imageUrl: "",
+        uname: "u01",
+      },
+    ];
+
+    const response = calculateVerticalPositionWithLogarithm({ data: usersInteractionsSortedArray, maxHeight: 100 });
+    expect(response[0].positionY).toBe(0);
+    expect(response[0].positionY).toBe(100);
   });
 });
