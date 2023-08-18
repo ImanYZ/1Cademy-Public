@@ -45,13 +45,14 @@ export type QuestionChanges = {
   type: SnapshotChangesTypes;
 };
 
-export const addQuestion = async (db: Firestore, data: AddQuestionInput): Promise<void> => {
+export const addQuestion = async (db: Firestore, data: AddQuestionInput): Promise<string> => {
   const reference = doc(collection(db, "questions"));
   await setDoc(reference, {
     ...data,
     createdAt: Timestamp.fromDate(new Date()),
     updatedAt: Timestamp.fromDate(new Date()),
   });
+  return reference.id;
 };
 
 export const updateQuestion = async (db: Firestore, id: string, data: UpdateQuestionInput): Promise<void> => {
