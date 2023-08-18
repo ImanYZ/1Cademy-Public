@@ -48,9 +48,15 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
   }, [db, variant]);
 
   useEffect(() => {
-    if (!barRef.current) return;
-    setBarHeight(barRef.current.clientHeight);
-  }, []); // TODO: update with height window state
+    const handleResize = () => {
+      if (!barRef.current) return;
+      setBarHeight(barRef.current.clientHeight);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const usersInteractionsArray: UserInteractionDataProcessed[] = useMemo(() => {
     const data = Object.keys(usersInteractions).map(key => ({ ...usersInteractions[key], uname: key }));

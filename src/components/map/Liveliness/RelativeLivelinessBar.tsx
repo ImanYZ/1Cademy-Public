@@ -99,18 +99,16 @@ const RelativeLivelinessBar = ({
     <Box
       id={SYNCHRONIZE[variant].id}
       sx={{
-        top: "200px",
-        bottom: "200px",
         right: "0px",
         zIndex: 998,
         position: "absolute",
+        top: "50%",
+        transform: `translate(${open ? "0px" : "calc(100%)"}, -50%)`,
         width: "56px",
         background: theme =>
           theme.palette.mode === "dark" ? theme.palette.common.darkBackground : theme.palette.common.lightBackground,
         borderRadius: "10px 0px 0px 10px",
-        transform: !open ? "translate(calc(100%), 0px)" : null,
         transition: "all 0.2s 0s ease",
-        border: "solid 1px blue",
       }}
     >
       {/* bubble users bar */}
@@ -125,14 +123,20 @@ const RelativeLivelinessBar = ({
           }}
         >
           {/* number of no visible users above */}
-          <Typography>+{numberOfUsersNoVisibleAbove}</Typography>
-          <Stack justifyContent={"space-between"} sx={{ height: "100%", transition: "0.2s", position: "relative" }}>
+          <Box sx={{ minHeight: "25px" }}>
+            <Typography>{numberOfUsersNoVisibleAbove > 0 && `+ ${numberOfUsersNoVisibleAbove}`}</Typography>
+          </Box>
+          <Stack
+            justifyContent={"space-between"}
+            spacing={"2px"}
+            sx={{ height: "100%", transition: "0.2s", position: "relative" }}
+          >
             <KeyboardArrowDownIcon
               sx={{
                 fontSize: "20px",
                 position: "absolute",
                 left: "50%",
-                top: "-8px",
+                top: "-14px",
                 transform: "translateX(-50%)",
                 color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
               }}
@@ -142,11 +146,11 @@ const RelativeLivelinessBar = ({
               sx={{
                 position: "absolute",
                 left: "50%",
-                top: "0px",
+                top: "-8px",
+                bottom: "-8px",
+                transform: "translateX(-1px)",
                 borderLeft: theme =>
                   theme.palette.mode === "dark" ? "2px solid #bebebe" : "1px solid rgba(0, 0, 0, 0.6)",
-                bottom: "0px",
-                transform: "translateX(-1px)",
               }}
             />
 
@@ -166,7 +170,9 @@ const RelativeLivelinessBar = ({
             )}
           </Stack>
           {/* number of no visible users bellow */}
-          <Typography>+{numberOfUsersNoVisibleBellow}</Typography>
+          <Box sx={{ minHeight: "25px" }}>
+            <Typography>{numberOfUsersNoVisibleBellow > 0 && `+ ${numberOfUsersNoVisibleBellow}`}</Typography>
+          </Box>
         </Stack>
       </Box>
 
