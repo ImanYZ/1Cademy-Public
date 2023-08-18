@@ -207,27 +207,35 @@ export const SYNCHRONIZE: {
 type CalculateVerticalPositionWithLogarithmInput = {
   data: UserInteractionData[];
   minHeight?: number;
-  maxHeight: number;
+  height: number;
 };
 
 export type UserInteractionDataProcessed = UserInteractionData & {
   positionY: number;
 };
 
+const getVerticalPosition = (item: UserInteractionData, minCount: number, range: number, height: number): number => {
+  const relativeCount = item.count - minCount;
+  if (relativeCount <= 0) return 0;
+
+  const countInScale = (relativeCount * 10) / range; // between 0 to 10, to use with log10
+  const logarithm = Math.abs(Math.log10(countInScale));
+  const positionY = countInScale ? Math.floor(logarithm * height) : 0;
+  return positionY;
+};
+
 export const calculateVerticalPositionWithLogarithm = ({
   data,
-  minHeight = 0,
-  maxHeight,
+  height,
 }: CalculateVerticalPositionWithLogarithmInput): UserInteractionDataProcessed[] => {
-  const minCount = Math.min(...data.map(item => item.count));
+  const minCountTmp = Math.min(...data.map(item => (item.count > 0 ? item.count : 0)));
   const maxCount = Math.max(...data.map(item => item.count));
-  console.log({ minCount, maxCount });
+  const minCount = minCountTmp === maxCount ? 0 : minCountTmp;
+  const range = maxCount - minCount;
 
-  const scaleFactor = Math.log(maxHeight - minHeight + 1) / Math.log(maxCount - minCount + 1);
-
-  console.log({ scaleFactor });
-  return data.map(item => ({
-    ...item,
-    positionY: Math.round(minHeight + scaleFactor * Math.log(item.count - minCount + 1)),
-  }));
+  return data.map(item => {
+    const positionY = getVerticalPosition(item, minCount, range, height);
+    console.log("all", { count: item.count, positionY });
+    return { ...item, positionY };
+  });
 };

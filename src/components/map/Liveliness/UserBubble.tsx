@@ -36,8 +36,10 @@ export const UserBubble = ({
   return (
     <Tooltip
       title={
-        <Box sx={{ textAlign: "center", ...sx }}>
-          <Box component={"span"}>{userInteraction.chooseUname ? userInteraction.uname : userInteraction.fullname}</Box>
+        <Box sx={{ textAlign: "center" }}>
+          <Box id={userInteraction.uname}>
+            {userInteraction.chooseUname ? userInteraction.uname : userInteraction.fullname}
+          </Box>
           {displayEmails && (
             <Box component={"p"} sx={{ my: 0 }}>
               {userInteraction.email}
@@ -51,6 +53,7 @@ export const UserBubble = ({
       }
     >
       <Box
+        id={userInteraction.uname}
         onClick={() =>
           openUserInfoSidebar(
             userInteraction.uname,
@@ -96,6 +99,7 @@ export const UserBubble = ({
               transform: "translateY(100%)",
             },
           },
+          ...sx,
         }}
       >
         <Box className="user-image">

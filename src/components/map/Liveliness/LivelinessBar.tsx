@@ -8,6 +8,7 @@ import { ActionsTracksChange, getActionTrackSnapshot } from "src/client/firestor
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
+import { MemoizedActionBubble } from "./ActionBubble";
 import {
   calculateVerticalPositionWithLogarithm,
   LivelinessTypes,
@@ -31,6 +32,7 @@ type ILivelinessBarProps = {
 };
 
 export const PAST_24H = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+const USER_BUBBLE_SIZE = 28;
 
 const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
@@ -56,7 +58,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
 
   const usersInteractionsArray: UserInteractionDataProcessed[] = useMemo(() => {
     const data = Object.keys(usersInteractions).map(key => ({ ...usersInteractions[key], uname: key }));
-    return calculateVerticalPositionWithLogarithm({ data, maxHeight: barHeight });
+    return calculateVerticalPositionWithLogarithm({ data, height: barHeight });
   }, [barHeight, usersInteractions]);
 
   return (
@@ -290,7 +292,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
         top: "100px",
         bottom: "100px",
         right: "0px",
-        p: "10px",
+        p: `${USER_BUBBLE_SIZE / 2 + 20}px 10px`,
         zIndex: 998,
         position: "absolute",
         width: "56px",
@@ -299,7 +301,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
         borderRadius: "10px 0px 0px 10px",
         transform: !open ? "translate(calc(100%), 0px)" : null,
         transition: "all 0.2s 0s ease",
-        border: "solid 1px red",
+        border: "solid 1px olive",
       }}
     >
       {/* bubble users bar */}
@@ -313,13 +315,16 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
             height: "100%",
           }}
         >
-          <Box ref={barRef} sx={{ height: "100%", transition: "0.2s", position: "relative", border: "solid 1px red" }}>
+          <Box
+            ref={barRef}
+            sx={{ width: "100%", height: "100%", transition: "0.2s", position: "relative", border: "solid 1px olive" }}
+          >
             <KeyboardArrowDownIcon
               sx={{
                 fontSize: "20px",
                 position: "absolute",
                 left: "50%",
-                top: "-8px",
+                top: `-${USER_BUBBLE_SIZE / 2 + 16}px`,
                 transform: "translateX(-50%)",
                 color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
               }}
@@ -329,25 +334,39 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
               sx={{
                 position: "absolute",
                 left: "50%",
-                top: "0px",
+                top: `-${USER_BUBBLE_SIZE / 2 + 8}px`,
                 borderLeft: theme =>
                   theme.palette.mode === "dark" ? "2px solid #bebebe" : "1px solid rgba(0, 0, 0, 0.6)",
-                bottom: "0px",
+                bottom: `-${USER_BUBBLE_SIZE / 2 + 8}px`,
                 transform: "translateX(-1px)",
               }}
             />
 
             {usersInteractionsArray.map((cur, idx) =>
               cur ? (
-                <UserBubble
-                  key={cur.uname}
-                  displayEmails={authEmail === "oneweb@umich.edu"}
-                  isOnline={onlineUsers.includes(cur.uname)}
-                  openUserInfoSidebar={openUserInfoSidebar}
-                  userInteraction={cur}
-                  size={28}
-                  sx={{ position: "absolute", top: cur.positionY }}
-                />
+                <>
+                  <UserBubble
+                    key={cur.uname}
+                    displayEmails={authEmail === "oneweb@umich.edu"}
+                    isOnline={onlineUsers.includes(cur.uname)}
+                    openUserInfoSidebar={openUserInfoSidebar}
+                    userInteraction={cur}
+                    size={USER_BUBBLE_SIZE}
+                    sx={{
+                      position: "absolute",
+                      bottom: cur.positionY - USER_BUBBLE_SIZE / 2,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                    }}
+                  />
+                  {cur.actions.map((action, index) => (
+                    <MemoizedActionBubble
+                      key={index}
+                      actionType={action}
+                      sx={{ position: "absolute", bottom: cur.positionY + 8, left: "-4px" }}
+                    />
+                  ))}
+                </>
               ) : (
                 <Box key={idx} sx={{ width: "28px", height: "28px" }} />
               )

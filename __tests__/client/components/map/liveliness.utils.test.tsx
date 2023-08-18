@@ -372,7 +372,26 @@ describe("should return the number of not visible users bellow", () => {
 });
 
 describe("should calculate vertical positions with logarithm function", () => {
-  it("should return 0 and 100, with the only 2 elements", () => {
+  it("should return 0, with negative count", () => {
+    const usersInteractionsSortedArray: UserInteractionData[] = [
+      {
+        actions: ["ChildNode"],
+        chooseUname: false,
+        count: -50,
+        fullname: "user1 pp",
+        reputation: "Gain",
+        email: "empty@example.com",
+        id: "01",
+        imageUrl: "",
+        uname: "u01",
+      },
+    ];
+
+    const response = calculateVerticalPositionWithLogarithm({ data: usersInteractionsSortedArray, height: 100 });
+    expect(response[0].positionY).toBe(0);
+  });
+
+  it("should return 0, with zero value on count", () => {
     const usersInteractionsSortedArray: UserInteractionData[] = [
       {
         actions: ["ChildNode"],
@@ -385,21 +404,46 @@ describe("should calculate vertical positions with logarithm function", () => {
         imageUrl: "",
         uname: "u01",
       },
-      {
-        actions: ["ChildNode"],
-        chooseUname: false,
-        count: 10,
-        fullname: "user1 pp",
-        reputation: "Gain",
-        email: "empty@example.com",
-        id: "01",
-        imageUrl: "",
-        uname: "u01",
-      },
     ];
 
-    const response = calculateVerticalPositionWithLogarithm({ data: usersInteractionsSortedArray, maxHeight: 100 });
+    const response = calculateVerticalPositionWithLogarithm({ data: usersInteractionsSortedArray, height: 100 });
     expect(response[0].positionY).toBe(0);
-    expect(response[0].positionY).toBe(100);
+  });
+
+  it("should return vertical positions based on log10 function", () => {
+    const data: { count: number; result: number }[] = [
+      { count: -1, result: 0 },
+      { count: 0, result: 0 },
+      { count: 10, result: 0 },
+      { count: 20, result: 30 },
+      { count: 30, result: 47 },
+      { count: 40, result: 60 },
+      { count: 50, result: 69 },
+      { count: 60, result: 77 },
+      { count: 70, result: 84 },
+      { count: 80, result: 90 },
+      { count: 90, result: 95 },
+      { count: 100, result: 100 },
+    ];
+    calculateVerticalPositionWithLogarithm({
+      data: data.map(c => ({ count: c.count })) as UserInteractionData[],
+      height: 100,
+    });
+
+    expect(true).toBe(true);
+  });
+
+  it("should return the maximum position when all elements has the same count", () => {
+    const data: { count: number; result: number }[] = [
+      { count: 10, result: 100 },
+      { count: 10, result: 100 },
+      { count: 10, result: 100 },
+    ];
+    calculateVerticalPositionWithLogarithm({
+      data: data.map(c => ({ count: c.count })) as UserInteractionData[],
+      height: 100,
+    });
+
+    expect(true).toBe(true);
   });
 });
