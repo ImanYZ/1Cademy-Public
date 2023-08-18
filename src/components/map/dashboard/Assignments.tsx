@@ -110,7 +110,8 @@ export const Assignments = ({ username }: AssignmentsProps) => {
   };
 
   useEffect(() => {
-    getQuestionSnapshot(db, {}, syncQuestions);
+    const killSnapshot = getQuestionSnapshot(db, {}, syncQuestions);
+    return () => killSnapshot();
   }, [db]);
 
   return (
