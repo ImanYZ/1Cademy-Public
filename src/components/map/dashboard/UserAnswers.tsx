@@ -7,8 +7,6 @@ import { Formik, FormikHelpers } from "formik";
 import React, { useEffect, useMemo, useState } from "react";
 import { addAnswer, Answer, updateAnswer } from "src/client/firestore/answer.firestore";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
-import { getNUsers } from "src/client/firestore/user.firestore";
-import { User } from "src/knowledgeTypes";
 import { TryRubricResponse } from "src/types";
 import stringSimilarity from "string-similarity-js";
 import model from "wink-eng-lite-web-model";
@@ -360,31 +358,16 @@ export const UserListAnswers = ({
   questionId,
 }: UserListAnswersProps) => {
   const db = getFirestore();
-  // const [userAnswersCopy,setUserAnswersCopy]=UserStatus
   const [userAnswersCopy, setUserAnswersCopy] = useState<Answer[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  // const [tryingUserAnswerIdx, setTryingUserAnswerIdx] = useState(-1);
   const [newAnswerId, setNewAnswerId] = useState("");
-  // const [isPending, startTransition] = useTransition();
 
-  // const onTryUserAnswer = async (userAnswer: Answer, idx: number) => {
-  //   setTryingUserAnswerIdx(idx);
-  //   await onTryRubricOnAnswer(
-  //     { answer: userAnswer.answer, user: userAnswer.user, userImage: userAnswer.userImage },
-  //     userAnswer.id
-  //   );
-  //   setTryingUserAnswerIdx(-1);
-  // };
+  const onAddUserAnswer = async () => {
+    if (!window.fetch) return;
 
-  const onAddUserAnswer = () => {
-    let randomUser = users[Math.floor(Math.random() * users.length - 1)];
+    const res = await fetch("https://randomuser.me/api/");
+    const data = await res.json();
+    const randomUser = data?.results[0];
     if (!randomUser) return console.error("Error: there is not users, set up users in the project", { randomUser });
-
-    if (userAnswersCopy.map(c => c.user).includes(randomUser.uname)) {
-      // second try
-      randomUser = users[Math.floor(Math.random() * users.length - 1)];
-      if (!randomUser) return console.error("Error: there is not users, set up users in the project", { randomUser });
-    }
 
     const id = newId(db);
     const newUserAnswer: Answer = {
@@ -393,9 +376,9 @@ export const UserListAnswers = ({
       question: questionId,
       id,
       updatedAt: new Date(),
-      user: randomUser.uname,
-      fullName: `${randomUser.fName} ${randomUser.lName}`,
-      userImage: randomUser.imageUrl ?? "",
+      user: randomUser.name.first,
+      fullName: `${randomUser.name.first} ${randomUser.name.last}`,
+      userImage: randomUser.picture.large ?? "",
     };
     setNewAnswerId(id);
     setUserAnswersCopy(prev => [...prev, newUserAnswer]);
@@ -420,16 +403,6 @@ export const UserListAnswers = ({
     }
     formikHelpers.setSubmitting(false);
   };
-
-  useEffect(() => {
-    const getUsers = async () => {
-      // INFO: this solution is only for simulation
-      // to implement the solution on NOT_SIMULATION we need to get all user answers and chose 10
-      const randomUsers: User[] = await getNUsers(db, 100);
-      setUsers(randomUsers);
-    };
-    getUsers();
-  }, [db]);
 
   useEffect(() => {
     setUserAnswersCopy(usersAnswers);
@@ -515,7 +488,7 @@ export const UserListAnswers = ({
             <PlayArrowIcon sx={{ mr: "4px" }} />
             Grade All
           </CustomButton>
-          {Boolean(users.length) && !newAnswerId && (
+          {!newAnswerId && (
             <CustomButton
               onClick={onAddUserAnswer}
               variant="contained"
