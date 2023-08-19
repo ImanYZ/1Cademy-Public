@@ -98,6 +98,8 @@ const RelativeLivelinessBar = ({
   return (
     <Box
       id={SYNCHRONIZE[variant].id}
+      role="feed"
+      aria-label={`${SYNCHRONIZE[variant].name}`}
       sx={{
         right: "0px",
         zIndex: 998,
