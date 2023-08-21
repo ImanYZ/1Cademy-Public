@@ -1,7 +1,7 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
-import { Firestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import { useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
 import { ActionsTracksChange, getActionTrackSnapshot } from "src/client/firestore/actionTracks.firestore";
@@ -10,39 +10,37 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { MemoizedActionBubble } from "./ActionBubble";
 import {
+  AbsoluteLivelinessTypes,
   calculateVerticalPositionWithLogarithm,
-  LivelinessTypes,
-  SYNCHRONIZE,
+  SYNCHRONIZE_ABSOLUTE,
   UserInteractionDataProcessed,
   UserInteractions,
 } from "./liveliness.utils";
 import { UserBubble } from "./UserBubble";
 
 type ILivelinessBarProps = {
-  variant: LivelinessTypes;
-  onToggleDisplay: () => void;
-  db: Firestore;
+  variant: AbsoluteLivelinessTypes;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
-  authEmail: string | undefined;
+  onToggleDisplay: () => void;
   open: boolean;
-  setOpen: (newOpen: boolean) => void;
-  disabled?: boolean;
-  windowHeight: number; // Should we remove it?
+  authEmail?: string;
 };
 
 export const PAST_24H = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
 const USER_BUBBLE_SIZE = 28;
 
 const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILivelinessBarProps) => {
-  const { db, onlineUsers, openUserInfoSidebar, authEmail } = props;
+  const db = getFirestore();
+  const { onlineUsers, openUserInfoSidebar, authEmail } = props;
   const [usersInteractions, setUsersInteractions] = useState<UserInteractions>({});
   const [barHeight, setBarHeight] = useState<number>(0);
   const barRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const onSynchronize = (changes: ActionsTracksChange[]) =>
-      setUsersInteractions(prev => changes.reduce(SYNCHRONIZE[variant].fn, { ...prev }));
+    const onSynchronize = (changes: ActionsTracksChange[]) => {
+      setUsersInteractions(prev => changes.reduce(SYNCHRONIZE_ABSOLUTE[variant].fn, { ...prev }));
+    };
     const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, onSynchronize);
     return () => killSnapshot();
   }, [db, variant]);
@@ -65,7 +63,9 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
 
   return (
     <Box
-      id={SYNCHRONIZE[variant].id}
+      id={SYNCHRONIZE_ABSOLUTE[variant].id}
+      role="feed"
+      aria-label={`${SYNCHRONIZE_ABSOLUTE[variant].name}`}
       sx={{
         top: "100px",
         bottom: "100px",
@@ -118,7 +118,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
 
             {usersInteractionsArray.map((cur, idx) =>
               cur ? (
-                <>
+                <React.Fragment key={idx}>
                   <UserBubble
                     key={cur.uname}
                     displayEmails={authEmail === "oneweb@umich.edu"}
@@ -142,7 +142,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
                       sx={{ position: "absolute", bottom: cur.positionY + 5 + index * 3, left: "-4px" }}
                     />
                   ))}
-                </>
+                </React.Fragment>
               ) : (
                 <Box key={idx} sx={{ width: "28px", height: "28px" }} />
               )
@@ -152,7 +152,9 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
       </Box>
 
       {/* toggle button */}
-      <Tooltip title={open ? `Hide ${SYNCHRONIZE[variant].name}` : `Display ${SYNCHRONIZE[variant].name}`}>
+      <Tooltip
+        title={open ? `Hide ${SYNCHRONIZE_ABSOLUTE[variant].name}` : `Display ${SYNCHRONIZE_ABSOLUTE[variant].name}`}
+      >
         <IconButton
           sx={{
             background: theme =>

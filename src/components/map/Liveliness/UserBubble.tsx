@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
-import { UserInteractionData } from "./liveliness.utils";
+import { UserInteraction, UserInteractionData } from "./liveliness.utils";
 
 type UserBubbleProps = {
   userInteraction: UserInteractionData;

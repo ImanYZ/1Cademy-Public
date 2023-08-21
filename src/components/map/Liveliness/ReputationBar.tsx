@@ -28,6 +28,9 @@ type UserInteractions = {
   };
 };
 
+// TODO: remove this if is wont be used anymore, this component was refactored
+//       with new improvements in relativeLivelinessBar and absoluteLivelinessBard
+
 const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false, windowHeight } = props;
   // const [open, setOpen] = useState(false);

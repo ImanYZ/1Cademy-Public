@@ -188,22 +188,37 @@ export const getNumberOfUsersNoVisibleBellow = ({
   return Math.max(index - 3, 0);
 };
 
-export type LivelinessTypes = "relativeInteractions" | "relativeReputations" | "absoluteInteractions";
+export type RelativeLivelinessTypes = "relativeInteractions" | "relativeReputations";
+export type AbsoluteLivelinessTypes = "absoluteInteractions" | "absoluteReputations";
 
-export const SYNCHRONIZE: {
-  [key in LivelinessTypes]: { id: string; name: string; fn: SynchronizeActionTracksFunction };
+export const SYNCHRONIZE_RELATIVE: {
+  [key in RelativeLivelinessTypes]: { id: string; name: string; fn: SynchronizeActionTracksFunction };
 } = {
   relativeInteractions: {
-    id: "live-bar-interaction",
+    id: "relative-interaction-live-bar",
     name: "relative interaction liveliness bar",
     fn: synchronizeInteractions,
   },
   relativeReputations: {
-    id: "live-bar-reputation",
+    id: "relative-reputation-live-bar",
     name: "relative reputation liveliness bar",
     fn: synchronizeReputations,
   },
-  absoluteInteractions: { id: "live-bar-interaction", name: "interaction liveliness bar", fn: synchronizeInteractions },
+};
+
+export const SYNCHRONIZE_ABSOLUTE: {
+  [key in AbsoluteLivelinessTypes]: { id: string; name: string; fn: SynchronizeActionTracksFunction };
+} = {
+  absoluteInteractions: {
+    id: "absolute-interaction-live-bar",
+    name: "absolute interaction liveliness bar",
+    fn: synchronizeInteractions,
+  },
+  absoluteReputations: {
+    id: "absolute-reputation-live-bar",
+    name: "absolute reputation liveliness bar",
+    fn: synchronizeReputations,
+  },
 };
 
 type CalculateVerticalPositionWithLogarithmInput = {

@@ -63,7 +63,6 @@ import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/Focuse
 import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
-import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/ReputationBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -7475,16 +7474,7 @@ const Notebook = ({}: NotebookProps) => {
 
           {/* end Data from map */}
 
-          {/* <Bar
-            authEmail={user?.email}
-            openUserInfoSidebar={openUserInfoSidebar}
-            onlineUsers={onlineUsers}
-            onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
-            sx={{ position: "absolute", top: "100px", right: "100px", height: windowHeight / 2 }}
-            open={openLivelinessBar}
-          /> */}
-
-          {window.innerHeight > 399 && user?.livelinessBar === "relative" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
             <MemoizedRelativeLivelinessBar
               onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
               onlineUsers={onlineUsers}
@@ -7495,30 +7485,36 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "relativeReputations" && (
+            <MemoizedRelativeLivelinessBar
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+              onlineUsers={onlineUsers}
+              open={openLivelinessBar}
+              openUserInfoSidebar={openUserInfoSidebar}
+              user={user}
+              variant="relativeReputations"
+            />
+          )}
+
+          {window.innerHeight > 399 && user?.livelinessBar === "absoluteInteractions" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
-              onlineUsers={onlineUsers}
-              db={db}
               open={openLivelinessBar}
-              setOpen={setOpenLivelinessBar}
-              windowHeight={windowHeight}
+              onlineUsers={onlineUsers}
               variant="absoluteInteractions"
               onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
           )}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
-            <MemoizedReputationlinessBar
+          {window.innerHeight > 399 && user?.livelinessBar === "absoluteReputations" && (
+            <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
-              db={db}
-              user={user}
               open={openLivelinessBar}
-              setOpen={setOpenLivelinessBar}
-              windowHeight={windowHeight}
+              variant="absoluteReputations"
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
           )}
 

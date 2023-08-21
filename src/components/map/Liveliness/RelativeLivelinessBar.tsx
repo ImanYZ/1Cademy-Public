@@ -13,8 +13,8 @@ import {
   getNumberOfUsersNoVisibleBellow,
   getUsersAbove,
   getUsersBellow,
-  LivelinessTypes,
-  SYNCHRONIZE,
+  RelativeLivelinessTypes,
+  SYNCHRONIZE_RELATIVE,
   UserInteractionData,
   UserInteractions,
 } from "./liveliness.utils";
@@ -22,7 +22,7 @@ import { PAST_24H } from "./LivelinessBar";
 import { UserBubble } from "./UserBubble";
 
 type RelativeLivelinessBarProps = {
-  variant: LivelinessTypes;
+  variant: RelativeLivelinessTypes;
   onlineUsers: string[];
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   onToggleDisplay: () => void;
@@ -90,16 +90,16 @@ const RelativeLivelinessBar = ({
 
   useEffect(() => {
     const onSynchronize = (changes: ActionsTracksChange[]) =>
-      setUsersInteractions(prev => changes.reduce(SYNCHRONIZE[variant].fn, { ...prev }));
+      setUsersInteractions(prev => changes.reduce(SYNCHRONIZE_RELATIVE[variant].fn, { ...prev }));
     const killSnapshot = getActionTrackSnapshot(db, { rewindDate: PAST_24H }, onSynchronize);
     return () => killSnapshot();
   }, [db, variant]);
 
   return (
     <Box
-      id={SYNCHRONIZE[variant].id}
+      id={SYNCHRONIZE_RELATIVE[variant].id}
       role="feed"
-      aria-label={`${SYNCHRONIZE[variant].name}`}
+      aria-label={`${SYNCHRONIZE_RELATIVE[variant].name}`}
       sx={{
         right: "0px",
         zIndex: 998,
@@ -179,7 +179,9 @@ const RelativeLivelinessBar = ({
       </Box>
 
       {/* toggle button */}
-      <Tooltip title={open ? `Hide ${SYNCHRONIZE[variant].name}` : `Display ${SYNCHRONIZE[variant].name}`}>
+      <Tooltip
+        title={open ? `Hide ${SYNCHRONIZE_RELATIVE[variant].name}` : `Display ${SYNCHRONIZE_RELATIVE[variant].name}`}
+      >
         <IconButton
           sx={{
             background: theme =>
