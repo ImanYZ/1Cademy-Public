@@ -2,7 +2,9 @@
  * @jest-environment jsdom
  */
 
-import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { ActionsTracksChange } from "src/client/firestore/actionTracks.firestore";
 import { User } from "src/knowledgeTypes";
@@ -11,8 +13,6 @@ import { SYNCHRONIZE } from "@/components/map/Liveliness/liveliness.utils";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 
 jest.mock("firebase/firestore", () => ({ __esModule: true, getFirestore: jest.fn() }));
-// jest.mock("../../../../src/components/map/Liveliness/liveliness.utils");
-// import { SYNCHRONIZE } from "../../../../src/components/map/Liveliness/liveliness.utils";
 
 jest.mock("src/client/firestore/actionTracks.firestore", () => {
   const originalModule = jest.requireActual<typeof import("src/client/firestore/actionTracks.firestore")>(
@@ -20,7 +20,7 @@ jest.mock("src/client/firestore/actionTracks.firestore", () => {
   );
 
   // @ts-ignore
-  const a = {
+  const actionTrackChange = {
     type: "added",
     data: {
       accepted: false,
@@ -31,7 +31,7 @@ jest.mock("src/client/firestore/actionTracks.firestore", () => {
       receivers: [],
       type: "NodeOpen",
       id: "1",
-      imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+      imageUrl: "",
       chooseUname: true,
       fullname: "jj pp",
     },
@@ -41,14 +41,14 @@ jest.mock("src/client/firestore/actionTracks.firestore", () => {
     __esModule: true,
     ...originalModule,
     getActionTrackSnapshot: (db: any, data: any, callback: (changes: ActionsTracksChange[]) => void) => {
-      callback([a]);
+      callback([actionTrackChange]);
       return jest.fn();
     },
   };
 });
 
 describe("should render relative liveliness bar", () => {
-  it("should relative reputations liveliness bars with the students", async () => {
+  it("should relative interactions liveliness bars with the students", async () => {
     const variant = "relativeInteractions";
     const user = {
       uname: "jjnnx",
@@ -74,12 +74,55 @@ describe("should render relative liveliness bar", () => {
     };
 
     render(<Wrapper />);
-    // debug();
-    // expect(screen.getByRole("feed")).toHaveAttribute("aria-label", SYNCHRONIZE[variant].name);
-    // const component = screen.getByRole("feed");
-    // screen.findByRole("feed");
 
-    // console.log(component);
     expect(screen.getByRole("feed")).toHaveAttribute("aria-label", SYNCHRONIZE[variant].name);
+    const buttonToDisplay = await screen.findByRole("button", { name: "Display relative interaction liveliness bar" });
+    fireEvent.click(buttonToDisplay);
+
+    await screen.findByText("JP"); // find avatar, we don't test image because this should set up a server with images, that should be tested on e2e
+    const buttonToHide = await screen.findByRole("button", { name: "Hide relative interaction liveliness bar" });
+    fireEvent.click(buttonToHide);
+
+    await screen.findByRole("button", { name: "Display relative interaction liveliness bar" });
+  });
+
+  it("should relative reputation liveliness bars with the students", async () => {
+    const variant = "relativeReputations";
+    const user = {
+      uname: "jjnnx",
+      email: "j@gmail.com",
+      fName: "jj",
+      lName: "pp",
+      chooseUname: false,
+      imageUrl: "",
+    } as User;
+
+    const Wrapper = () => {
+      const [open, setOpen] = useState(false);
+      return (
+        <MemoizedRelativeLivelinessBar
+          open={open}
+          onToggleDisplay={() => setOpen(p => !p)}
+          onlineUsers={[]}
+          openUserInfoSidebar={() => {}}
+          user={user}
+          variant={variant}
+        />
+      );
+    };
+
+    render(<Wrapper />);
+
+    expect(screen.getByRole("feed")).toHaveAttribute("aria-label", SYNCHRONIZE[variant].name);
+    const buttonToDisplay = await screen.findByRole("button", { name: "Display relative reputation liveliness bar" });
+    fireEvent.click(buttonToDisplay);
+
+    await screen.findByText("JP"); // find avatar, we don't test image because this should set up a server with images, that should be tested on e2e
+    const moreElementsElement = screen.queryByText("+");
+    expect(moreElementsElement).toBeNull();
+    const buttonToHide = await screen.findByRole("button", { name: "Hide relative reputation liveliness bar" });
+    fireEvent.click(buttonToHide);
+
+    await screen.findByRole("button", { name: "Display relative reputation liveliness bar" });
   });
 });
