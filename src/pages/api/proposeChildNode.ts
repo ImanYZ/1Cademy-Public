@@ -7,7 +7,7 @@ import { INodeType } from "src/types/INodeType";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
 import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
-import { checkInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
+import { shouldInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
 import { detach } from "src/utils/helpers";
 import { IComReputationUpdates } from "src/utils/reputations";
 import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
@@ -143,7 +143,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.body.data.nodeType === "Question") {
       newVersion.choices = req.body.data.choices;
     }
-    const { courseExist, instantApprove } = await checkInstantApprovalForProposal(
+    const { courseExist, instantApprove } = await shouldInstantApprovalForProposal(
       nodeData?.tagIds || [],
       userData.uname
     );

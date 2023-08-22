@@ -1337,7 +1337,7 @@ export const updateStatsOnPractice = async ({ tagIds, correct, uname }: IUpdateS
 
 //we call this function to check if an instructor is creating a new version of a node
 //if yes we approve the version automatically
-export const checkInstantApprovalForProposal = async (tagIds: string[], uname: string) => {
+export const shouldInstantApprovalForProposal = async (tagIds: string[], uname: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
   let isInstructor = false;
   const instructorDocs = await db.collection("instructors").where("uname", "==", uname).get();

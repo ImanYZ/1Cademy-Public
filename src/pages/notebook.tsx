@@ -3928,17 +3928,23 @@ const Notebook = ({}: NotebookProps) => {
       try {
         if (!selectedNotebookId) return;
 
-        devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
+        devLog("SAVE_PROPOSED_PARENT_NODE", { selectedNotebookId, newNodeId, summary, reason });
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-        type CheckInstantApprovalForProposal = { isInstructor: boolean; courseExist: boolean; instantApprove: boolean };
+        const firstChildId = graph.nodes[newNodeId].children[0]?.node;
+        type CheckInstantApprovalForProposal = {
+          isInstructor: boolean;
+          courseExist: boolean;
+          instantApprove: boolean;
+        };
         const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
           "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: newNodeId }
+          { nodeId: firstChildId }
         );
+
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
@@ -4078,7 +4084,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_PARENT_NODE", user: user.uname, data: errorData });
       }
     },
-    [user, selectedNotebookId, nodeBookDispatch, revertNodesOnGraph, scrollToNode, db]
+    [user, selectedNotebookId, nodeBookDispatch, revertNodesOnGraph, scrollToNode, graph, db]
   );
 
   const proposeParentNode = async ({ postData, flashcard }: any) => {
@@ -4116,10 +4122,14 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
+        const firstParentId = graph.nodes[newNodeId].parents[0].node;
+        if (!firstParentId) throw Error("This node has not parent");
+        const tagIds = graph.nodes[firstParentId].tagIds ?? [];
         const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
-            nodeId: newNodeId,
+            tagIds,
+            nodeId: firstParentId,
           }
         );
         setGraph(graph => {
@@ -4210,7 +4220,7 @@ const Notebook = ({}: NotebookProps) => {
 
           const parentNode = graph.nodes[newNode.parents[0].node];
 
-          let willBeApproved = instantApprove;
+          let willBeApproved = false;
           if (courseExist) {
             willBeApproved = instantApprove;
           } else {
@@ -4286,7 +4296,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
       }
     },
-    [selectedNotebookId, user, nodeBookDispatch, revertNodesOnGraph, scrollToNode, db]
+    [selectedNotebookId, user, nodeBookDispatch, graph.nodes, revertNodesOnGraph, scrollToNode, db]
   );
 
   const proposeChildNode = async ({ postData, flashcard }: any) => {
