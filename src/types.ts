@@ -56,6 +56,7 @@ export type NotebookDocument = {
   createdAt: Timestamp | Date;
   updatedAt: Timestamp | Date;
   type: "course" | "chat" | "default";
+  conversation?: string;
 };
 
 export type Notebook = NotebookDocument & {
