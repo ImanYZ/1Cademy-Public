@@ -28,6 +28,9 @@ type UserInteractions = {
   };
 };
 
+// TODO: remove this if is wont be used anymore, this component was refactored
+//       with new improvements in relativeLivelinessBar and absoluteLivelinessBard
+
 const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) => {
   const { db, onlineUsers, openUserInfoSidebar, authEmail, user, disabled = false, windowHeight } = props;
   // const [open, setOpen] = useState(false);
@@ -191,6 +194,7 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
           zIndex: 998,
           position: "absolute",
           height: `calc(100% - ${window.innerHeight > 799 ? "375px" : "420px"})`,
+          border: "solid 2px royalBlue",
         }}
       >
         <Box

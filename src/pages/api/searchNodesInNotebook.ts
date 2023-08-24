@@ -142,6 +142,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<SearchNodesResp
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: allPostsData.length ? allPostsData[0].id : "",
         receivers: [],
+        email: userData.email,
       } as IActionTrack);
     });
 
