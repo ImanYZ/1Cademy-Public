@@ -1,6 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import GradeIcon from "@mui/icons-material/Grade";
 import { Divider, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -34,7 +33,7 @@ type ProposalsListProps = {
   username: string;
 };
 
-const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
+const ProposalsList = ({ ...props }: ProposalsListProps) => {
   const rateProposalClick = useCallback(
     (proposal: INodeVersion, proposalIdx: number, correct: boolean, wrong: boolean, award: boolean) => {
       return props.rateProposal({
@@ -66,29 +65,31 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
   //   [props.deleteProposal, props.proposals]
   // );
 
-  const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
-    return !isAdmin || proposal.proposer === username;
-  };
+  // const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
+  //   return !isAdmin || proposal.proposer === username;
+  // };
 
   return (
     <>
       {props.proposals.map((proposal: any, proposalIdx: number) => {
         const proposalSummaries = proposalSummariesGenerator(proposal);
-        const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
+        // const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
 
         if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
           if (props.openProposal === proposal.id) {
-            let adminTooltip = "# of 1Admins who have awarded this proposal.";
-            if (!props.isAdmin) {
-              adminTooltip += " You cannot give this proposal an award, because you are not the 1Admin of this node.";
-            } else {
-              if (proposal.proposer === username) {
-                adminTooltip += " You cannot give your own proposal an award!";
-              } else {
-                adminTooltip +=
-                  " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
-              }
-            }
+            // TODO: here define the tooltip of the thrash button to remove the proposal
+
+            // let adminTooltip = "# of 1Admins who have awarded this proposal.";
+            // if (!props.isAdmin) {
+            //   adminTooltip += " You cannot give this proposal an award, because you are not the 1Admin of this node.";
+            // } else {
+            //   if (proposal.proposer === username) {
+            //     adminTooltip += " You cannot give your own proposal an award!";
+            //   } else {
+            //     adminTooltip +=
+            //       " You're the 1Admin of this node. Click to give this proposal an award, if you find it exceptionally helpful.";
+            //   }
+            // }
             return (
               <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
                 <Paper
@@ -241,7 +242,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                             rateProposalClick(proposal, proposalIdx, false, true, false);
                           }}
                           sx={{
-                            borderRadius: "0px",
+                            borderRadius: "0px 52px 52px 0px",
                             background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
                             ":hover": {
                               borderWidth: "0px",
@@ -267,7 +268,8 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                             </Typography>
                           </Box>
                         </ContainedButton>
-                        <Divider
+
+                        {/* <Divider
                           orientation="vertical"
                           variant="middle"
                           flexItem
@@ -304,7 +306,7 @@ const ProposalsList = ({ username, ...props }: ProposalsListProps) => {
                               {shortenNumber(proposal.awards, 2, false)}
                             </Typography>
                           </Box>
-                        </ContainedButton>
+                        </ContainedButton> */}
                       </Box>
                     </Box>
                   </Box>
