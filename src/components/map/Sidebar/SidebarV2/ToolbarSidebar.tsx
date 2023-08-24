@@ -47,6 +47,7 @@ import { Delete, Post } from "@/lib/mapApi";
 
 // import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import Logo from "../../../../../public/1Cademy-head.svg";
+import AssistantIcon from "../../../../../public/assistant.svg";
 import BookmarkIcon from "../../../../../public/bookmark.svg";
 import EditIcon from "../../../../../public/edit.svg";
 import GraduatedIcon from "../../../../../public/graduated.svg";
@@ -155,6 +156,7 @@ export const ToolbarSidebar = ({
   const [leaderboardTypeOpen, setLeaderboardTypeOpen] = useState<boolean>(false);
   const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const [displayNotebooks, setDisplayNotebooks] = useState(false);
+  const [displayConversation, setDisplayConversation] = useState(false);
 
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
   const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
@@ -492,6 +494,17 @@ export const ToolbarSidebar = ({
     }
   }, [displayLargeToolbar]);
 
+  const openConversations = (e: any) => {
+    e.preventDefault();
+    setDisplayConversation(displayConversation => !displayConversation);
+    setDisplayNotebooks(false);
+  };
+  const openNotebooks = (e: any) => {
+    e.preventDefault();
+    setDisplayNotebooks(displayNotebooks => !displayNotebooks);
+    setDisplayConversation(false);
+  };
+
   const toolbarContentMemoized = useMemo(() => {
     return (
       <Box
@@ -630,10 +643,7 @@ export const ToolbarSidebar = ({
             <SidebarButton
               id="toolbar-notebooks-button"
               iconSrc={NotebookIcon}
-              onClick={e => {
-                e.preventDefault();
-                setDisplayNotebooks(!displayNotebooks);
-              }}
+              onClick={openNotebooks}
               text="Notebooks"
               toolbarIsOpen={displayLargeToolbar}
               rightOption={
@@ -647,58 +657,68 @@ export const ToolbarSidebar = ({
                 />
               }
             />
-
             {displayNotebooks && displayLargeToolbar && (
               <Box sx={{ width: "100%" }}>
                 <Stack className="scroll-styled" sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
-                  {notebooks.map((cur, idx) => (
-                    <Box
-                      key={idx}
-                      sx={{
-                        p: "10px 16px 10px 27px",
-                        height: "42px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* min-width is making ellipsis works correctly */}
+                  {notebooks
+                    .filter(n => !n.conversation)
+                    .sort((a, b) => {
+                      if (a.id === selectedNotebook) {
+                        return -1;
+                      } else if (b.id === selectedNotebook) {
+                        return 1;
+                      } else {
+                        return 0;
+                      }
+                    })
+                    .map((cur, idx) => (
                       <Box
-                        onClick={() => onChangeNotebook(cur.id)}
-                        sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
+                        key={idx}
+                        sx={{
+                          p: "10px 16px 10px 27px",
+                          height: "42px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          cursor: "pointer",
+                        }}
                       >
-                        <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
-                          <Box
-                            sx={{
-                              background: selectedNotebook === cur.id ? DESIGN_SYSTEM_COLORS.success500 : "none",
-                              minWidth: "10px",
-                              width: "10px",
-                              height: "10px",
-                              borderRadius: "50%",
-                              mr: "10px",
-                            }}
-                          />
-                          <Typography
-                            sx={{
-                              fontSize: "14px",
-                              fontWeight: 500,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              color: ({ palette }) =>
-                                palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
-                            }}
-                          >
-                            {cur.title}
-                          </Typography>
+                        {/* min-width is making ellipsis works correctly */}
+                        <Box
+                          onClick={() => onChangeNotebook(cur.id)}
+                          sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
+                        >
+                          <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
+                            <Box
+                              sx={{
+                                background: selectedNotebook === cur.id ? DESIGN_SYSTEM_COLORS.success500 : "none",
+                                minWidth: "10px",
+                                width: "10px",
+                                height: "10px",
+                                borderRadius: "50%",
+                                mr: "10px",
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                color: ({ palette }) =>
+                                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
+                              }}
+                            >
+                              {cur.title}
+                            </Typography>
+                          </Box>
                         </Box>
+                        <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
+                          <MoreVertIcon sx={{ fontSize: "16px" }} />
+                        </IconButton>
                       </Box>
-                      <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
-                        <MoreVertIcon sx={{ fontSize: "16px" }} />
-                      </IconButton>
-                    </Box>
-                  ))}
+                    ))}
                 </Stack>
 
                 <Divider ref={createNotebookButtonRef} sx={{ width: "162px", float: "right" }} />
@@ -735,6 +755,91 @@ export const ToolbarSidebar = ({
                     </Box>
                   )}
                 </Box>
+              </Box>
+            )}
+
+            {notebooks.filter(n => n.hasOwnProperty("conversation")).length > 0 && (
+              <SidebarButton
+                id="toolbar-converstaions-button"
+                iconSrc={AssistantIcon}
+                onClick={openConversations}
+                text="Conversations"
+                toolbarIsOpen={displayLargeToolbar}
+                rightOption={
+                  <KeyboardArrowDownIcon
+                    sx={{
+                      transition: ".3s",
+                      rotate: displayConversation ? "180deg" : "0deg",
+                      color: theme =>
+                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
+                    }}
+                  />
+                }
+              />
+            )}
+            {displayConversation && displayLargeToolbar && (
+              <Box sx={{ width: "100%" }}>
+                <Stack className="scroll-styled" sx={{ width: "100%", maxHeight: "126px", overflowY: "auto" }}>
+                  {notebooks
+                    .filter(n => n.hasOwnProperty("conversation"))
+                    .sort((a, b) => {
+                      if (a.id === selectedNotebook) {
+                        return -1;
+                      } else if (b.id === selectedNotebook) {
+                        return 1;
+                      } else {
+                        return 0;
+                      }
+                    })
+                    .map((cur, idx) => (
+                      <Box
+                        key={idx}
+                        sx={{
+                          p: "10px 16px 10px 27px",
+                          height: "42px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {/* min-width is making ellipsis works correctly */}
+                        <Box
+                          onClick={() => onChangeNotebook(cur.id)}
+                          sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}
+                        >
+                          <Box sx={{ minWidth: "0px", display: "flex", alignItems: "center" }}>
+                            <Box
+                              sx={{
+                                background: selectedNotebook === cur.id ? DESIGN_SYSTEM_COLORS.success500 : "none",
+                                minWidth: "10px",
+                                width: "10px",
+                                height: "10px",
+                                borderRadius: "50%",
+                                mr: "10px",
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                color: ({ palette }) =>
+                                  palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray800,
+                              }}
+                            >
+                              {cur.title}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <IconButton onClick={() => setEditableNotebook(cur)} sx={{ p: "0px" }}>
+                          <MoreVertIcon sx={{ fontSize: "16px" }} />
+                        </IconButton>
+                      </Box>
+                    ))}
+                </Stack>
               </Box>
             )}
           </Stack>
@@ -1067,6 +1172,7 @@ export const ToolbarSidebar = ({
     pendingProposalsNum,
     onDisplayInstructorPage,
     displayNotebooks,
+    displayConversation,
     notebooks,
     isCreatingNotebook,
     onCreateNotebook,
@@ -1132,6 +1238,7 @@ export const ToolbarSidebar = ({
     setChosenTags,
     chosenTags,
     displayNotebooks,
+    displayConversation,
     displayLargeToolbar,
     notebooks,
     selectedNotebook,
