@@ -32,8 +32,8 @@ export type SelectedUserAnswer = {
 
 // export type UserAnswerProcessed = UserAnswer & { points: number };
 
-const generateEmptyRubric = (questionId: string, username: string): Rubric => ({
-  id: "",
+export const generateEmptyRubric = (id: string, questionId: string, username: string): Rubric => ({
+  id,
   questionId,
   prompts: [],
   downvotesBy: [],
@@ -59,16 +59,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const onAddRubric = () => {
     setDisableAddRubric(true);
     const id = newId(db);
-    // const response: RubricItemGenerated[] = await Post("/assignment/generateRubrics", {
-    //   questionDescription: question.description,
-    // });
-    // console.log({ response });
-    const newRubric: Rubric = {
-      ...generateEmptyRubric(question.id, username),
-      id,
-      // prompts: response.map(c => c.key_phrase),
-    };
-
+    const newRubric: Rubric = generateEmptyRubric(id, question.id, username);
     setRubrics(prev => [...prev, newRubric]);
     setEditedRubric({ data: newRubric, isNew: true, isLoading: false });
     setDisableAddRubric(false);
@@ -197,7 +188,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography variant="h1">Questions</Typography>
+            <Typography variant="h1">Question</Typography>
             <Tooltip title="Return to Questions">
               <IconButton onClick={onReturnToQuestions}>
                 <CloseIcon />
@@ -205,8 +196,8 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             </Tooltip>
           </Box>
           <Divider sx={{ my: "12px" }} />
-          <Typography sx={{ fontWeight: 700, fontSize: "20px" }}>{question.title}</Typography>
-          <Typography>{question.description}</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: "30px", mb: "10px" }}>{question.title}</Typography>
+          <Typography sx={{ mb: "15px" }}>{question.description}</Typography>
           {question.imageUrl && <img src={question.imageUrl} alt="question image" style={{ width: "100%" }} />}
         </Box>
 
@@ -217,7 +208,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
               palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
           }}
         >
-          <Typography sx={{ fontWeight: 600, fontSize: "18px", mb: "32px" }}>Alternative rubrics</Typography>
+          <Typography sx={{ fontWeight: 600, fontSize: "18px", mb: "32px" }}>Rubrics</Typography>
 
           <Stack spacing={"28px"}>
             {rubricsSortedByValuable.map(cur =>

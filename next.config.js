@@ -3,7 +3,13 @@ module.exports = {
   ignorePatterns: ["cypress/**"],
   reactStrictMode: false,
   images: {
-    domains: ["firebasestorage.googleapis.com", "storage.googleapis.com", "node.1cademy.us", "1cademy.us"],
+    domains: [
+      "firebasestorage.googleapis.com",
+      "storage.googleapis.com",
+      "node.1cademy.us",
+      "1cademy.us",
+      "randomuser.me",
+    ],
     minimumCacheTTL: 315360,
   },
 };

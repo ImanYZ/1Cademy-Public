@@ -7,8 +7,6 @@ import { Formik, FormikHelpers } from "formik";
 import React, { useEffect, useMemo, useState } from "react";
 import { addAnswer, Answer, updateAnswer } from "src/client/firestore/answer.firestore";
 import { Rubric, RubricItemType } from "src/client/firestore/questions.firestore";
-import { getNUsers } from "src/client/firestore/user.firestore";
-import { User } from "src/knowledgeTypes";
 import { TryRubricResponse } from "src/types";
 import stringSimilarity from "string-similarity-js";
 import model from "wink-eng-lite-web-model";
@@ -95,7 +93,6 @@ export const UserAnswersProcessed = ({
     <Box
       sx={{
         position: "relative",
-        // border: "solid 1px red",
         height: "100%",
         display: "grid",
         gridTemplateRows: "auto 1fr",
@@ -215,31 +212,34 @@ export const UserAnswersProcessed = ({
           </Box>
         </Box>
       )}
-      {(data.length === 1 || thresholdByPoints === 0) &&
-        dataSorted.map((cur, idx) => (
-          <Box key={idx} sx={{ p: "4px 10px" }}>
-            <UserAnswerProcessed
-              result={cur.result}
-              userAnswer={cur.userAnswer}
-              rubric={rubric}
-              state={cur.state}
-              selectedRubricItem={selectedRubricItem}
-              isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
-              // onSelectUserAnswer={}
-              onSelectUserAnswer={
-                data.length === 1
-                  ? undefined
-                  : () => {
-                      onSelectUserAnswer({
-                        result: cur.result,
-                        userAnswer: cur.userAnswer,
-                        userAnswerId: cur.userAnswerId,
-                      });
-                    }
-              }
-            />
-          </Box>
-        ))}
+      {(data.length === 1 || thresholdByPoints === 0) && (
+        <Stack>
+          {dataSorted.map((cur, idx) => (
+            <Box key={idx} sx={{ p: "4px 10px" }}>
+              <UserAnswerProcessed
+                result={cur.result}
+                userAnswer={cur.userAnswer}
+                rubric={rubric}
+                state={cur.state}
+                selectedRubricItem={selectedRubricItem}
+                isSelected={selectedUserAnswer?.userAnswerId === cur.userAnswerId}
+                // onSelectUserAnswer={}
+                onSelectUserAnswer={
+                  data.length === 1
+                    ? undefined
+                    : () => {
+                        onSelectUserAnswer({
+                          result: cur.result,
+                          userAnswer: cur.userAnswer,
+                          userAnswerId: cur.userAnswerId,
+                        });
+                      }
+                }
+              />
+            </Box>
+          ))}
+        </Stack>
+      )}
     </Box>
   );
 };
@@ -347,7 +347,7 @@ type UserListAnswersProps = {
 };
 
 const validationSchema = yup.object({
-  answer: yup.string().required("User answer is required."),
+  answer: yup.string().required("Student answer is required."),
 });
 
 export const UserListAnswers = ({
@@ -358,24 +358,15 @@ export const UserListAnswers = ({
   questionId,
 }: UserListAnswersProps) => {
   const db = getFirestore();
-  // const [userAnswersCopy,setUserAnswersCopy]=UserStatus
   const [userAnswersCopy, setUserAnswersCopy] = useState<Answer[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  // const [tryingUserAnswerIdx, setTryingUserAnswerIdx] = useState(-1);
   const [newAnswerId, setNewAnswerId] = useState("");
-  // const [isPending, startTransition] = useTransition();
 
-  // const onTryUserAnswer = async (userAnswer: Answer, idx: number) => {
-  //   setTryingUserAnswerIdx(idx);
-  //   await onTryRubricOnAnswer(
-  //     { answer: userAnswer.answer, user: userAnswer.user, userImage: userAnswer.userImage },
-  //     userAnswer.id
-  //   );
-  //   setTryingUserAnswerIdx(-1);
-  // };
+  const onAddUserAnswer = async () => {
+    if (!window.fetch) return;
 
-  const onAddUserAnswer = () => {
-    const randomUser = users[Math.floor(Math.random() * users.length - 1)];
+    const res = await fetch("https://randomuser.me/api/");
+    const data = await res.json();
+    const randomUser = data?.results[0];
     if (!randomUser) return console.error("Error: there is not users, set up users in the project", { randomUser });
 
     const id = newId(db);
@@ -385,8 +376,9 @@ export const UserListAnswers = ({
       question: questionId,
       id,
       updatedAt: new Date(),
-      user: randomUser.uname,
-      userImage: randomUser.imageUrl ?? "",
+      user: randomUser.name.first,
+      fullName: `${randomUser.name.first} ${randomUser.name.last}`,
+      userImage: randomUser.picture.large ?? "",
     };
     setNewAnswerId(id);
     setUserAnswersCopy(prev => [...prev, newUserAnswer]);
@@ -413,14 +405,6 @@ export const UserListAnswers = ({
   };
 
   useEffect(() => {
-    const getUsers = async () => {
-      const randomUsers: User[] = await getNUsers(db, 10);
-      setUsers(randomUsers);
-    };
-    getUsers();
-  }, [db]);
-
-  useEffect(() => {
     setUserAnswersCopy(usersAnswers);
   }, [usersAnswers]);
 
@@ -434,8 +418,8 @@ export const UserListAnswers = ({
               return (
                 <form onSubmit={formik.handleSubmit}>
                   <Stack direction={"row"} alignItems={"center"} spacing={"12px"} sx={{ mb: "8px" }}>
-                    <OptimizedAvatar2 imageUrl={cur.userImage} alt={cur.user} size={40} />
-                    <Typography>{cur.user}</Typography>
+                    <OptimizedAvatar2 imageUrl={cur.userImage} alt={cur.fullName} size={40} />
+                    <Typography>{cur.fullName}</Typography>
                   </Stack>
                   <TextField
                     label=""
@@ -496,15 +480,17 @@ export const UserListAnswers = ({
         ))}
         <Divider />
         <Stack direction={"row-reverse"} justifyContent={"space-between"} spacing={"8px"} sx={{ mt: "12px" }}>
-          <CustomButton
-            variant="contained"
-            onClick={() => onTryRubricOnAnswers(usersAnswers)}
-            disabled={!userAnswersCopy.length}
-          >
-            <PlayArrowIcon sx={{ mr: "4px" }} />
-            Grade All
-          </CustomButton>
-          {Boolean(users.length) && !newAnswerId && (
+          {userAnswersCopy.length > 1 && (
+            <CustomButton
+              variant="contained"
+              onClick={() => onTryRubricOnAnswers(usersAnswers)}
+              disabled={!userAnswersCopy.length}
+            >
+              <PlayArrowIcon sx={{ mr: "4px" }} />
+              Grade All
+            </CustomButton>
+          )}
+          {!newAnswerId && (
             <CustomButton
               onClick={onAddUserAnswer}
               variant="contained"
@@ -513,7 +499,7 @@ export const UserListAnswers = ({
               // disabled={formik.isSubmitting}
             >
               <AddIcon sx={{ mr: "8px" }} />
-              Add User Answer
+              Add Student Response
             </CustomButton>
           )}
         </Stack>

@@ -6,6 +6,8 @@ import { IActionTrack } from "./types/IActionTrack";
 import { IUser } from "./types/IUser";
 admin.initializeApp();
 
+const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
+
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
@@ -206,3 +208,8 @@ function capitalizeFirstLetter(str: string): string {
   const capitalized = str.charAt(0).toUpperCase() + str.slice(1);
   return capitalized;
 }
+exports.assignNodeContributorsInstitutionsStats = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(assignNodeContributorsInstitutionsStats);

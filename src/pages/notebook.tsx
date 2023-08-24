@@ -1539,47 +1539,40 @@ const Notebook = ({}: NotebookProps) => {
     changeSelectedNode();
   }, [db, nodeBookState.selectedNode, user?.sNode, user?.uname]);
 
+  const resetUpdateLink = () => (updatedLinksRef.current = getInitialUpdateLinks());
+
+  const replaceTemporalNode = (newTempNodes: Set<string>) => {
+    tempNodes.clear();
+    newTempNodes.forEach(c => tempNodes.add(c));
+  };
+
+  const replaceChangedNodes = (newChangedNodes: any) => {
+    Object.keys(changedNodes).forEach(c => delete changedNodes[c]);
+    Object.keys(newChangedNodes).forEach(c => (changedNodes[c] = newChangedNodes[c]));
+  };
+
   /**
    * Will revert the graph from last changes (temporal Nodes or other changes)
    */
   const revertNodesOnGraph = useCallback(() => {
     devLog("RELOAD PERMANENT GRAPH");
 
-    setGraph(({ nodes: oldNodes, edges: oldEdges }) => {
-      const updatedNodeIds: string[] = [];
-
-      if (tempNodes.size > 0 || Object.keys(changedNodes).length > 0) {
-        oldNodes = { ...oldNodes };
-        oldEdges = { ...oldEdges };
-      }
-
-      tempNodes.forEach(tempNode => {
-        oldEdges = removeDagAllEdges(g.current, tempNode, oldEdges, updatedNodeIds);
-        oldNodes = removeDagNode(g.current, tempNode, oldNodes);
-        updatedNodeIds.push(tempNode);
-        tempNodes.delete(tempNode);
+    setGraph(({ nodes, edges }) => {
+      const { newChangedNodes, newEdges, newNodes, newTempNodes, updatedNodeIds } = revertNodeChanges({
+        g: g.current,
+        changedNodeIds: Object.keys(changedNodes),
+        changedNodes,
+        oldEdges: edges,
+        oldNodes: nodes,
+        tempNodeIds: Array.from(tempNodes),
+        tempNodes,
+        showClusterOptions: settings.showClusterOptions,
+        allTags,
+        resetUpdateLink,
       });
 
-      for (let cId of Object.keys(changedNodes)) {
-        const changedNode = changedNodes[cId];
-        if (cId in oldNodes) {
-          oldEdges = compareAndUpdateNodeLinks(g.current, oldNodes[cId], cId, changedNode, oldEdges);
-        } else {
-          oldEdges = setNewParentChildrenEdges(g.current, cId, changedNode, oldEdges);
-        }
-        oldNodes = setDagNode(
-          g.current,
-          cId,
-          copyNode(changedNode),
-          oldNodes,
-          allTags,
-          settings.showClusterOptions,
-          null
-        );
-        updatedNodeIds.push(cId);
-        delete changedNodes[cId];
-      }
-      updatedLinksRef.current = getInitialUpdateLinks();
+      replaceTemporalNode(newTempNodes);
+      replaceChangedNodes(newChangedNodes);
 
       setTimeout(() => {
         setNodeUpdates({
@@ -1588,11 +1581,11 @@ const Notebook = ({}: NotebookProps) => {
         });
       }, 200);
       return {
-        nodes: oldNodes,
-        edges: oldEdges,
+        nodes: newNodes,
+        edges: newEdges,
       };
     });
-  }, [setGraph, allTags, settings.showClusterOptions]);
+  }, [allTags, settings.showClusterOptions]);
 
   const openUserInfoSidebar = useCallback(
     (uname: string, imageUrl: string, fullName: string, chooseUname: string) => {
@@ -3600,7 +3593,6 @@ const Notebook = ({}: NotebookProps) => {
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
             const selectedNodeId = notebookRef.current.selectedNode!;
-            const updatedNodeIds: string[] = [selectedNodeId];
 
             if (
               (graph.nodes[selectedNodeId].nodeType === "Concept" ||
@@ -3737,11 +3729,6 @@ const Notebook = ({}: NotebookProps) => {
               });
             }
 
-            const nodes = {
-              ...graph.nodes,
-              [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false },
-            };
-
             const flashcard = postData.flashcard;
             delete postData.flashcard;
             const loadingEvent = new CustomEvent("proposed-node-loading");
@@ -3750,21 +3737,39 @@ const Notebook = ({}: NotebookProps) => {
             updatedLinksRef.current = getInitialUpdateLinks();
             notebookRef.current.selectionType = null;
             nodeBookDispatch({ type: "setSelectionType", payload: null });
-            if (!willBeApproved) revertNodesOnGraph();
-            // const response =  Post("/proposeNodeImprovement", postData, !willBeApproved)
-            // if (!response) return;
-            //   // save flashcard data
-            //   window.dispatchEvent(
-            //     new CustomEvent("propose-flashcard", {
-            //       detail: {
-            //         node: response.node,
-            //         proposal: response.proposal,
-            //         flashcard,
-            //         proposedType: "Improvement",
-            //         token: await getIdToken(),
-            //       },
-            //     })
-            //   );
+            let oldNodes = graph.nodes;
+            let oldEdges = graph.edges;
+            if (willBeApproved) {
+              oldNodes = {
+                ...graph.nodes,
+                [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false }, // e3
+              };
+            } else {
+              // revertNodesOnGraph()
+              const { newChangedNodes, newEdges, newNodes, newTempNodes, updatedNodeIds } = revertNodeChanges({
+                g: g.current,
+                changedNodeIds: [selectedNodeId],
+                changedNodes,
+                oldEdges: graph.edges,
+                oldNodes: graph.nodes,
+                tempNodeIds: [],
+                tempNodes,
+                showClusterOptions: settings.showClusterOptions,
+                allTags,
+                resetUpdateLink,
+              });
+
+              replaceTemporalNode(newTempNodes);
+              replaceChangedNodes(newChangedNodes);
+              oldNodes = newNodes;
+              oldEdges = newEdges;
+              setTimeout(() => {
+                setNodeUpdates({
+                  nodeIds: updatedNodeIds,
+                  updatedAt: new Date(),
+                });
+              }, 200);
+            }
 
             window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -3772,14 +3777,9 @@ const Notebook = ({}: NotebookProps) => {
               scrollToNode(selectedNodeId);
             }, 200);
 
-            setNodeUpdates({
-              nodeIds: updatedNodeIds,
-              updatedAt: new Date(),
-            });
-
             return {
-              nodes,
-              edges: graph.edges,
+              nodes: oldNodes,
+              edges: oldEdges,
             };
           });
 
@@ -3940,17 +3940,23 @@ const Notebook = ({}: NotebookProps) => {
       try {
         if (!selectedNotebookId) return;
 
-        devLog("SAVE_PROPOSED_CHILD_NODE", { selectedNotebookId, newNodeId, summary, reason });
+        devLog("SAVE_PROPOSED_PARENT_NODE", { selectedNotebookId, newNodeId, summary, reason });
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-        type CheckInstantApprovalForProposal = { isInstructor: boolean; courseExist: boolean; instantApprove: boolean };
+        const firstChildId = graph.nodes[newNodeId].children[0]?.node;
+        type CheckInstantApprovalForProposal = {
+          isInstructor: boolean;
+          courseExist: boolean;
+          instantApprove: boolean;
+        };
         const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
           "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: newNodeId }
+          { nodeId: firstChildId }
         );
+
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
@@ -4090,7 +4096,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_PARENT_NODE", user: user.uname, data: errorData });
       }
     },
-    [user, selectedNotebookId, nodeBookDispatch, revertNodesOnGraph, scrollToNode, db]
+    [user, selectedNotebookId, nodeBookDispatch, revertNodesOnGraph, scrollToNode, graph, db]
   );
 
   const proposeParentNode = async ({ postData, flashcard }: any) => {
@@ -4128,14 +4134,18 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
+        const firstParentId = graph.nodes[newNodeId].parents[0].node;
+        if (!firstParentId) throw Error("This node has not parent");
+        const tagIds = graph.nodes[firstParentId].tagIds ?? [];
         const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
-            nodeId: newNodeId,
+            tagIds,
+            nodeId: firstParentId,
           }
         );
         setGraph(graph => {
-          const updatedNodeIds: string[] = [newNodeId];
+          // const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
 
           if (!newNode.title) {
@@ -4186,7 +4196,7 @@ const Notebook = ({}: NotebookProps) => {
             value: 1,
           });
 
-          let { nodes, edges } = graph;
+          let { nodes } = graph;
 
           postData = {
             ...newNode,
@@ -4222,7 +4232,7 @@ const Notebook = ({}: NotebookProps) => {
 
           const parentNode = graph.nodes[newNode.parents[0].node];
 
-          let willBeApproved = instantApprove;
+          let willBeApproved = false;
           if (courseExist) {
             willBeApproved = instantApprove;
           } else {
@@ -4246,7 +4256,9 @@ const Notebook = ({}: NotebookProps) => {
             nodePartChanges.simulated = true;
           }
 
-          nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+          let oldNodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+          let oldEdges = { ...graph.edges };
+          let updatedNodeIds: string[] = [];
 
           const flashcard = postData.flashcard;
           delete postData.flashcard;
@@ -4254,28 +4266,33 @@ const Notebook = ({}: NotebookProps) => {
           window.dispatchEvent(loadingEvent);
           notebookRef.current.selectionType = null;
           nodeBookDispatch({ type: "setSelectionType", payload: null });
-          if (!willBeApproved) revertNodesOnGraph();
+          if (!willBeApproved) {
+            // revertNodesOnGraph();
+            const {
+              newChangedNodes,
+              newEdges,
+              newNodes,
+              newTempNodes,
+              updatedNodeIds: newUpdatedNodeIds,
+            } = revertNodeChanges({
+              g: g.current,
+              changedNodeIds: [firstParentId],
+              changedNodes,
+              oldEdges: oldEdges,
+              oldNodes: oldNodes,
+              tempNodeIds: [newNodeId],
+              tempNodes,
+              showClusterOptions: settings.showClusterOptions,
+              allTags,
+              resetUpdateLink,
+            });
+            replaceTemporalNode(newTempNodes);
+            replaceChangedNodes(newChangedNodes);
+            oldNodes = newNodes;
+            oldEdges = newEdges;
+            updatedNodeIds = [...updatedNodeIds, ...newUpdatedNodeIds];
+          }
           proposeChildNode({ postData, flashcard });
-          // Post("/proposeChildNode", postData, ).then(async (response: any) => {
-          //   if (!response) return;
-          //   // save flashcard data
-          //   if (postData.nodeType !== "Question") {
-          //     window.dispatchEvent(
-          //       new CustomEvent("propose-flashcard", {
-          //         detail: {
-          //           node: response.node,
-          //           proposal: response.proposal,
-          //           flashcard,
-          //           proposedType: "Parent",
-          //           token: await getIdToken(),
-          //         },
-          //       })
-          //     );
-          //   }
-          //   if (postData.nodeType === "Question") {
-          //     window.dispatchEvent(new CustomEvent("question-node-proposed"));
-          //   }
-          // });
 
           window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -4287,7 +4304,7 @@ const Notebook = ({}: NotebookProps) => {
             updatedAt: new Date(),
           });
           scrollToNode(newNodeId);
-          return { nodes, edges };
+          return { nodes: oldNodes, edges: oldEdges };
         });
       } catch (err) {
         console.error(err);
@@ -4298,7 +4315,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
       }
     },
-    [selectedNotebookId, user, nodeBookDispatch, revertNodesOnGraph, scrollToNode, db]
+    [selectedNotebookId, user, nodeBookDispatch, graph.nodes, scrollToNode, settings.showClusterOptions, allTags, db]
   );
 
   const proposeChildNode = async ({ postData, flashcard }: any) => {
@@ -4762,7 +4779,9 @@ const Notebook = ({}: NotebookProps) => {
       try {
         event.preventDefault();
         const image = event.target.files[0];
-        if (
+        if (!image && !image?.type) {
+          alert("Oops! Something went wrong with the image upload. Please try uploading a different image.");
+        } else if (
           image.type !== "image/jpg" &&
           image.type !== "image/jpeg" &&
           image.type !== "image/gif" &&
@@ -4895,11 +4914,7 @@ const Notebook = ({}: NotebookProps) => {
           versionNodeId: newNodeId,
           notebookId: selectedNotebookId,
         };
-        try {
-          Post("/rateVersion", postData);
-        } catch (error) {
-          console.error(error);
-        }
+
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
         type CheckInstantApproval = {
           nodeId: string;
@@ -4930,11 +4945,21 @@ const Notebook = ({}: NotebookProps) => {
               nodeData: oldNodes[nodeBookState.selectedNode],
             });
           }
+
+          if (willBeApproved) {
+            const res = window.confirm("Are you sure you want to approve this proposal?");
+            if (!res) return { nodes: oldNodes, edges };
+          }
+
           if (willBeApproved) {
             proposalsTemp[proposalIdx].accepted = true;
             if (changedNodes.hasOwnProperty(nodeBookState.selectedNode)) {
               delete changedNodes[nodeBookState.selectedNode];
             }
+
+            oldNodes[nodeBookState.selectedNode].title = proposalsTemp[proposalIdx].title;
+            oldNodes[nodeBookState.selectedNode].content = proposalsTemp[proposalIdx].content;
+
             if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
               const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
               if (previewNode) {
@@ -4944,8 +4969,14 @@ const Notebook = ({}: NotebookProps) => {
                 tempNodes.delete(newNodeId);
               }
             }
+            setOpenSidebar(null);
           }
           setProposals(proposalsTemp);
+          try {
+            Post("/rateVersion", postData);
+          } catch (error) {
+            console.error(error);
+          }
           return { nodes: oldNodes, edges };
         });
         setNodeUpdates({
@@ -4954,8 +4985,7 @@ const Notebook = ({}: NotebookProps) => {
         });
       }
     },
-    [selectedNotebookId, user, nodeBookState, selectedNodeType]
-    // [user, nodeBookState, selectedNodeType, reloadPermanentGraph]
+    [selectedNotebookId, user, nodeBookState.selectedNode, nodeBookState.choosingNode, selectedNodeType]
   );
   const removeImage = useCallback(
     (nodeRef: any, nodeId: string) => {
@@ -8102,4 +8132,73 @@ const OpenNode = ({ onOpenNode }: { onOpenNode: (nodeId: string) => void }) => {
       </Button>
     </Stack>
   );
+};
+
+type RevertNodeChangesInput = {
+  g: dagre.graphlib.Graph<{}>;
+  oldNodes: FullNodesData;
+  oldEdges: EdgesData;
+  tempNodeIds: string[];
+  changedNodeIds: string[];
+  tempNodes: Set<string>;
+  changedNodes: any;
+  showClusterOptions: boolean;
+  allTags: any;
+  resetUpdateLink: () => void;
+};
+
+type RevertNodeChangesOutput = {
+  newNodes: FullNodesData;
+  newEdges: EdgesData;
+  newTempNodes: Set<string>;
+  newChangedNodes: any;
+  updatedNodeIds: string[];
+};
+
+const revertNodeChanges = ({
+  g,
+  oldNodes,
+  oldEdges,
+  changedNodes,
+  changedNodeIds,
+  tempNodeIds,
+  tempNodes,
+  showClusterOptions,
+  allTags,
+  resetUpdateLink,
+}: RevertNodeChangesInput): RevertNodeChangesOutput => {
+  const updatedNodeIds: string[] = [];
+  if (!tempNodes.size && !Object.keys(changedNodes).length)
+    return {
+      newChangedNodes: changedNodes,
+      newEdges: oldEdges,
+      newNodes: oldNodes,
+      newTempNodes: tempNodes,
+      updatedNodeIds,
+    };
+  let newNodes = { ...oldNodes };
+  let newEdges = { ...oldEdges };
+
+  tempNodeIds.forEach(localTempNode => {
+    newEdges = removeDagAllEdges(g, localTempNode, newEdges, updatedNodeIds);
+    newNodes = removeDagNode(g, localTempNode, newNodes);
+    updatedNodeIds.push(localTempNode);
+    tempNodes.delete(localTempNode); // IMPROVE
+  });
+
+  changedNodeIds.forEach(cId => {
+    const changedNode = changedNodes[cId];
+    if (cId in newNodes) {
+      newEdges = compareAndUpdateNodeLinks(g, newNodes[cId], cId, changedNode, newEdges);
+    } else {
+      newEdges = setNewParentChildrenEdges(g, cId, changedNode, newEdges);
+    }
+    newNodes = setDagNode(g, cId, copyNode(changedNode), newNodes, allTags, showClusterOptions, null);
+    updatedNodeIds.push(cId);
+    delete changedNodes[cId];
+  });
+
+  resetUpdateLink();
+
+  return { newChangedNodes: changedNodes, newEdges, newNodes, newTempNodes: tempNodes, updatedNodeIds };
 };

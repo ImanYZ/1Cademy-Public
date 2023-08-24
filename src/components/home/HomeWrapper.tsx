@@ -1,15 +1,23 @@
 import { Box } from "@mui/material";
+import { collection, getFirestore, limit, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "react-query";
 
 import { useInView, UseInViewProps } from "../../hooks/useObserver";
-import { getStats } from "../../lib/knowledgeApi";
 import AppHeaderMemoized, { HEADER_HEIGHT, HEADER_HEIGHT_MOBILE } from "../Header/AppHeader";
 import { SectionWrapper } from "./components/SectionWrapper";
 import { HeroMemoized } from "./sections/Hero";
 import { ONE_CADEMY_SECTIONS } from "./SectionsItems";
 
 const observerOption: UseInViewProps = { options: { root: null, rootMargin: "-480px 0px -380px 0px", threshold: 0 } };
+
+export type StatsSchema = {
+  institutions: number;
+  users: number;
+  proposals: number;
+  nodes: number;
+  links: number;
+  communities?: number;
+};
 
 type HomeWrapperProps = {
   mechanismSectionChildren: ReactNode;
@@ -30,6 +38,7 @@ const HomeWrapper = ({
   aboutSectionChildren,
 }: // applySectionChildren,
 HomeWrapperProps) => {
+  const db = getFirestore();
   const isScrolling = useRef(false);
   const timer = useRef<NodeJS.Timeout | null>(null);
 
@@ -42,9 +51,25 @@ HomeWrapperProps) => {
   // const { entry: topicsEntry, inView: topicsInView, ref: TopicsSectionRef } = useInView(observerOption);
   // const { entry: systemsEntry, inView: systemsInView, ref: SystemSectionRef } = useInView(observerOption);
   const { entry: aboutEntry, inView: aboutInView, ref: AboutSectionRef } = useInView(observerOption);
-  // const { entry: applyEntry, inView: applyInView, ref: ApplySectionRef } = useInView(observerOption);
+  const [stats, setStats] = useState<StatsSchema>({
+    institutions: 180,
+    links: 234713,
+    nodes: 44296,
+    proposals: 87566,
+    users: 1529,
+  });
 
-  const { data: stats } = useQuery("stats", getStats);
+  useEffect(() => {
+    const statsRef = collection(db, "stats");
+    const q = query(statsRef, orderBy("createdAt", "desc"), limit(1));
+    const killSnapshot = onSnapshot(q, snapshot => {
+      if (!snapshot.docs.length) return;
+
+      const newStats = snapshot.docs[0].data() as StatsSchema;
+      setStats(newStats);
+    });
+    return () => killSnapshot();
+  }, [db]);
 
   useEffect(() => {
     isScrolling.current = true;

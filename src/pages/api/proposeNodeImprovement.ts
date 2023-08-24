@@ -22,7 +22,7 @@ import { generateTagsOfTagsWithNodes, signalNodeToTypesense, updateNodeContribut
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IActionTrack } from "src/types/IActionTrack";
-import { checkInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
+import { shouldInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
@@ -179,7 +179,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       versionData.changedNodeType = true;
     }
 
-    const { isInstructor, courseExist, instantApprove } = await checkInstantApprovalForProposal(
+    const { isInstructor, courseExist, instantApprove } = await shouldInstantApprovalForProposal(
       tagUpdates.tagIds || [],
       userData.uname
     );

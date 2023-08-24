@@ -617,15 +617,18 @@ export const changeNodeTitle = async ({
         [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
       }
 
-      [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-        batch: newBatch,
-        linkedId: taggedNodeDoc.id,
-        nodeChanges: linkedDataChanges,
-        major: false,
-        currentTimestamp,
-        writeCounts,
-        t,
-        tWriteOperations,
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts = 0;
+        await retrieveAndsignalAllUserNodesChanges({
+          batch,
+          linkedId: taggedNodeDoc.id,
+          nodeChanges: linkedDataChanges,
+          major: false,
+          currentTimestamp,
+          writeCounts,
+        });
+        await commitBatch(batch);
       });
     }
 
@@ -727,15 +730,18 @@ export const changeNodeTitle = async ({
         newBatch.update(linkedRef, linkedDataChanges);
         [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
       }
-      [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-        batch: newBatch,
-        linkedId: citingNodeDoc.id,
-        nodeChanges: linkedDataChanges,
-        major: false,
-        currentTimestamp,
-        writeCounts,
-        t,
-        tWriteOperations,
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts = 0;
+        await retrieveAndsignalAllUserNodesChanges({
+          batch,
+          linkedId: citingNodeDoc.id,
+          nodeChanges: linkedDataChanges,
+          major: false,
+          currentTimestamp,
+          writeCounts,
+        });
+        await commitBatch(batch);
       });
     }
   }

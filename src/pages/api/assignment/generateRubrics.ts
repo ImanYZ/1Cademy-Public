@@ -10,10 +10,12 @@ const extractArray = (arrayString: string) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<string[]>) {
   try {
-    const { questionDescription } = req.body;
+    const { questionDescription, questionTitle } = req.body;
     const prompt =
-      `Write key sentences that a student should mention in their response to the following question to receive a point per key phrase in an array of strings format the response js:\n` +
-      `‘’'\n${questionDescription}‘’'\n`;
+      `Answer the following triple-quoted question comprehensively as a JSON Array of sentences. Each item in the array should be short and mention only one complete sentence for which a student would receive a point if they say it in their response to this question. Do not print anything other than the JSON Array.\n` +
+      `‘’'\n
+      ${questionTitle}\n
+      ${questionDescription}\n‘’'`;
 
     const completion = await sendGPTPrompt("gpt-3.5-turbo", [
       {

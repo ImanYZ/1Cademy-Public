@@ -19,7 +19,6 @@ export const useUploadImage = ({ storage }: UseUploadImage) => {
   const uploadImage = ({ event, path, confirmatory, imageFileName }: UploadImageInput): Promise<string> =>
     new Promise((resolve, reject) => {
       try {
-        event.preventDefault();
         const image = event.target.files[0];
         if (!image) return reject("cancel upload image");
         const hasValidFormat = ["image/jpg", "image/jpeg", "image/gif", "image/png"].includes(image.type);

@@ -1,4 +1,4 @@
-import { Box, SxProps, Theme } from "@mui/material";
+import { Box, LinearProgress, Stack, SxProps, Theme, Typography } from "@mui/material";
 import {
   collection,
   doc,
@@ -85,7 +85,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
 
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [toolbarIsCollapsed, setToolbarIsCollapsed] = useState(false);
-  const [, /* isLoading */ setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
 
   const practiceToolRef = useRef<PracticeToolRef | null>(null);
@@ -103,30 +103,38 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     getAssistantInitialState: practiceToolRef.current ? practiceToolRef.current.getAssistantInitialState : () => "IDLE",
   }));
 
-  const semesterByStudentSnapthot = useCallback(
+  const semesterByStudentSnapshot = useCallback(
     (q: Query<DocumentData>) =>
-      onSnapshot(q, async snaphot => {
-        const docChanges = snaphot.docChanges();
+      onSnapshot(
+        q,
+        async snapshot => {
+          const docChanges = snapshot.docChanges();
 
-        const semestersStudent = docChanges.map(change => {
-          const semesterData: SemesterStudentVoteStat = change.doc.data() as SemesterStudentVoteStat;
-          return {
-            id: change.doc.id,
-            data: semesterData,
-          }; //
-        });
-        const semestersIds = semestersStudent.map(cur => cur.data.tagId);
-        const semesters = await getSemesterByIds(db, semestersIds);
-        const coursesResult = semesters.reduce((acu: CoursesResult, cur: Semester) => {
-          const tmpValues = acu[cur.tagId] ?? [];
-          return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
-        }, {});
+          const semestersStudent = docChanges.map(change => {
+            const semesterData: SemesterStudentVoteStat = change.doc.data() as SemesterStudentVoteStat;
+            return {
+              id: change.doc.id,
+              data: semesterData,
+            }; //
+          });
+          const semestersIds = semestersStudent.map(cur => cur.data.tagId);
+          const semesters = await getSemesterByIds(db, semestersIds);
+          const coursesResult = semesters.reduce((acu: CoursesResult, cur: Semester) => {
+            const tmpValues = acu[cur.tagId] ?? [];
+            return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
+          }, {});
 
-        // const semester = allSemesters.map(cur => cur.title);
-        setAllSemesters(semesters);
-        setAllCourses(coursesResult);
-        // setSelectedSemester(semester[0]);
-      }),
+          // const semester = allSemesters.map(cur => cur.title);
+          setAllSemesters(semesters);
+          setAllCourses(coursesResult);
+          // setSelectedSemester(semester[0]);
+          setIsLoading(false);
+        },
+        (error: any) => {
+          console.error(error);
+          setIsLoading(false);
+        }
+      ),
     [db]
   );
 
@@ -135,18 +143,19 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
       onSnapshot(
         q,
         async snapshot => {
-          if (snapshot.empty) return;
+          if (snapshot.empty) return setIsLoading(false); // TODO: manage when there is no semesters
           const docChanges = snapshot.docChanges();
-          const intructor = docChanges[0].doc.data() as Instructor;
-          setInstructor(intructor);
+          const instructor = docChanges[0].doc.data() as Instructor;
+          setInstructor(instructor);
 
-          const allCourses = getCoursesByInstructor(intructor);
+          const allCourses = getCoursesByInstructor(instructor);
 
-          const semestersIds = intructor.courses.map(course => course.tagId);
+          const semestersIds = instructor.courses.map(course => course.tagId);
           const semesters = await getSemesterByIds(db, semestersIds);
           semesters.sort((a, b) => (b.title > a.title ? 1 : -1));
           setAllSemesters(semesters);
           setAllCourses(allCourses);
+          setIsLoading(false);
         },
         (error: any) => {
           console.error(error);
@@ -168,13 +177,13 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     if (user.role === "STUDENT") {
       const semestersRef = collection(db, "semesterStudentVoteStats");
       const q = query(semestersRef, where("uname", "==", user.uname));
-      killSnapshot = semesterByStudentSnapthot(q);
+      killSnapshot = semesterByStudentSnapshot(q);
     }
 
     return () => {
       if (killSnapshot) killSnapshot();
     };
-  }, [db, semesterByStudentSnapthot, semestersByInstructorSnapshot, user]);
+  }, [db, semesterByStudentSnapshot, semestersByInstructorSnapshot, user]);
 
   useEffect(() => {
     if (currentSemester) return;
@@ -294,6 +303,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
         view={selectToolbarView}
         isCollapsed={toolbarIsCollapsed}
         setIsCollapsed={setToolbarIsCollapsed}
+        isLoading={isLoading}
       />
       <Box
         sx={{
@@ -305,7 +315,13 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
           p: "40px 32px",
         }}
       >
-        {currentSemester && allCourses[currentSemester.tagId] ? (
+        {isLoading && (
+          <Stack spacing={"10px"} sx={{ width: "100%" }}>
+            <Typography sx={{ fontSize: "20px", textAlign: "center" }}>Loading...</Typography>
+            <LinearProgress />
+          </Stack>
+        )}
+        {!isLoading && currentSemester && allCourses[currentSemester.tagId] && (
           <>
             {selectToolbarView === "DASHBOARD" && (
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
@@ -332,7 +348,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             )}
             {selectToolbarView === "ASSIGNMENTS" && <Assignments username={user.uname} />}
           </>
-        ) : (
+        )}
+        {!isLoading && !(currentSemester && allCourses[currentSemester.tagId]) && (
           <NoDataMessage message="No data in this semester" />
         )}
       </Box>
