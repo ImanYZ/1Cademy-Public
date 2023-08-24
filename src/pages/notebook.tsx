@@ -61,7 +61,8 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
 import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
-import { MemoizedReputationlinessBar } from "@/components/map/Liveliness/ReputationBar";
+// import { Bar } from "@/components/map/Liveliness/Bar";
+import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -2127,7 +2128,7 @@ const Notebook = ({}: NotebookProps) => {
       });
 
       if (notebookRef.current.choosingNode) return;
-
+      if (!user) return;
       createActionTrack(
         db,
         "NodeOpen",
@@ -2139,7 +2140,8 @@ const Notebook = ({}: NotebookProps) => {
           imageUrl: String(user?.imageUrl),
         },
         linkedNodeID,
-        []
+        [],
+        user.email
       );
 
       gtmEvent("Interaction", {
@@ -2234,6 +2236,7 @@ const Notebook = ({}: NotebookProps) => {
           const username = user?.uname;
           if (notebookRef.current.choosingNode) return;
           if (!username) return;
+          if (!user) return;
 
           const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
           if (notebookIdx < 0) return console.error("notebook property has invalid values");
@@ -2294,7 +2297,8 @@ const Notebook = ({}: NotebookProps) => {
               imageUrl: String(user?.imageUrl),
             },
             nodeId,
-            []
+            [],
+            user.email
           );
 
           notebookRef.current.selectedNode = parentNode;
@@ -2681,6 +2685,7 @@ const Notebook = ({}: NotebookProps) => {
   const toggleNode = useCallback(
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
+      if (!user) return;
 
       notebookRef.current.selectedNode = nodeId; // CHECK: should we remove? the same code bellow in the setState and this doesn't have the dispatch
 
@@ -2753,7 +2758,8 @@ const Notebook = ({}: NotebookProps) => {
             imageUrl: String(user?.imageUrl),
           },
           nodeId,
-          []
+          [],
+          user.email
         );
         return { nodes: oldNodes, edges };
       });
@@ -2829,6 +2835,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const onNodeShare = useCallback(
     (nodeId: string, platform: string) => {
+      if (!user) return;
       gtmEvent("Interaction", {
         customType: "NodeShare",
       });
@@ -2844,7 +2851,8 @@ const Notebook = ({}: NotebookProps) => {
           imageUrl: String(user?.imageUrl),
         },
         nodeId,
-        []
+        [],
+        user.email
       );
     },
     [db, user]
@@ -2871,6 +2879,7 @@ const Notebook = ({}: NotebookProps) => {
   const markStudied = useCallback(
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
+      if (!user) return;
       setGraph(({ nodes: oldNodes, edges }) => {
         const thisNode = oldNodes[nodeId];
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
@@ -2933,7 +2942,8 @@ const Notebook = ({}: NotebookProps) => {
               imageUrl: String(user?.imageUrl),
             },
             nodeId,
-            []
+            [],
+            user.email
           );
         }
 
@@ -2950,6 +2960,7 @@ const Notebook = ({}: NotebookProps) => {
   const bookmark = useCallback(
     (event: any, nodeId: string) => {
       if (notebookRef.current.choosingNode) return;
+      if (!user) return;
       setGraph(({ nodes: oldNodes, edges }) => {
         const updatedNodeIds: string[] = [];
         updatedNodeIds.push(nodeId);
@@ -3012,7 +3023,8 @@ const Notebook = ({}: NotebookProps) => {
             imageUrl: String(user?.imageUrl),
           },
           nodeId,
-          []
+          [],
+          user.email
         );
         setNodeUpdates({
           nodeIds: updatedNodeIds,
@@ -7492,28 +7504,47 @@ const Notebook = ({}: NotebookProps) => {
 
           {/* end Data from map */}
 
+          {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
+            <MemoizedRelativeLivelinessBar
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+              onlineUsers={onlineUsers}
+              open={openLivelinessBar}
+              openUserInfoSidebar={openUserInfoSidebar}
+              user={user}
+              variant="relativeInteractions"
+            />
+          )}
+
+          {window.innerHeight > 399 && user?.livelinessBar === "relativeReputations" && (
+            <MemoizedRelativeLivelinessBar
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+              onlineUsers={onlineUsers}
+              open={openLivelinessBar}
+              openUserInfoSidebar={openUserInfoSidebar}
+              user={user}
+              variant="relativeReputations"
+            />
+          )}
+
           {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
-              onlineUsers={onlineUsers}
-              db={db}
               open={openLivelinessBar}
-              setOpen={setOpenLivelinessBar}
-              windowHeight={windowHeight}
+              onlineUsers={onlineUsers}
+              variant="absoluteInteractions"
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
           )}
 
           {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
-            <MemoizedReputationlinessBar
+            <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
               onlineUsers={onlineUsers}
-              db={db}
-              user={user}
               open={openLivelinessBar}
-              setOpen={setOpenLivelinessBar}
-              windowHeight={windowHeight}
+              variant="absoluteReputations"
+              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
           )}
 

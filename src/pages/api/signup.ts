@@ -16,6 +16,7 @@ import {
 } from "src/utils/course-helpers";
 import { INotebook } from "src/types/INotebook";
 import { detach } from "src/utils/helpers";
+import { LivelinessBarType } from "src/types";
 
 const addPracticeQuestions = async (
   batch: WriteBatch,
@@ -150,6 +151,13 @@ const initializeReputationObj = () => {
   };
 };
 
+const LIVENESS_BAR_TYPES: LivelinessBarType[] = [
+  "interaction",
+  "interaction",
+  "relativeInteractions",
+  "relativeReputations",
+];
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     let writeCounts = 0;
@@ -196,7 +204,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           "Your institution does not match with your email address. Please enter your institutional email address or change the institution name in the form.",
       });
     }
-    let livebarTypes = ["interaction", "reputation"];
     const userRecord = await getAuth().createUser({
       email: data.email,
       displayName: data.uname,
@@ -313,7 +320,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       privacyPolicyAgreement: data.privacyPolicyAgreement,
       cookiesAgreement: data.cookiesAgreement,
       ageAgreement: data.ageAgreement,
-      livelinessBar: livebarTypes[Math.floor(Math.random() * livebarTypes.length)],
+      livelinessBar: LIVENESS_BAR_TYPES[Math.floor(Math.random() * LIVENESS_BAR_TYPES.length)],
     };
 
     // 25 hour logic in api
