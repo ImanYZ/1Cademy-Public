@@ -4133,7 +4133,7 @@ const Notebook = ({}: NotebookProps) => {
           }
         );
         setGraph(graph => {
-          const updatedNodeIds: string[] = [newNodeId];
+          // const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
 
           if (!newNode.title) {
@@ -4184,7 +4184,7 @@ const Notebook = ({}: NotebookProps) => {
             value: 1,
           });
 
-          let { nodes, edges } = graph;
+          let { nodes } = graph;
 
           postData = {
             ...newNode,
@@ -4244,7 +4244,9 @@ const Notebook = ({}: NotebookProps) => {
             nodePartChanges.simulated = true;
           }
 
-          nodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+          let oldNodes = { ...nodes, [newNodeId]: { ...nodes[newNodeId], changedAt: new Date(), ...nodePartChanges } };
+          let oldEdges = { ...graph.edges };
+          let updatedNodeIds: string[] = [];
 
           const flashcard = postData.flashcard;
           delete postData.flashcard;
@@ -4252,28 +4254,33 @@ const Notebook = ({}: NotebookProps) => {
           window.dispatchEvent(loadingEvent);
           notebookRef.current.selectionType = null;
           nodeBookDispatch({ type: "setSelectionType", payload: null });
-          if (!willBeApproved) revertNodesOnGraph();
+          if (!willBeApproved) {
+            // revertNodesOnGraph();
+            const {
+              newChangedNodes,
+              newEdges,
+              newNodes,
+              newTempNodes,
+              updatedNodeIds: newUpdatedNodeIds,
+            } = revertNodeChanges({
+              g: g.current,
+              changedNodeIds: [firstParentId],
+              changedNodes,
+              oldEdges: oldEdges,
+              oldNodes: oldNodes,
+              tempNodeIds: [newNodeId],
+              tempNodes,
+              showClusterOptions: settings.showClusterOptions,
+              allTags,
+              resetUpdateLink,
+            });
+            replaceTemporalNode(newTempNodes);
+            replaceChangedNodes(newChangedNodes);
+            oldNodes = newNodes;
+            oldEdges = newEdges;
+            updatedNodeIds = [...updatedNodeIds, ...newUpdatedNodeIds];
+          }
           proposeChildNode({ postData, flashcard });
-          // Post("/proposeChildNode", postData, ).then(async (response: any) => {
-          //   if (!response) return;
-          //   // save flashcard data
-          //   if (postData.nodeType !== "Question") {
-          //     window.dispatchEvent(
-          //       new CustomEvent("propose-flashcard", {
-          //         detail: {
-          //           node: response.node,
-          //           proposal: response.proposal,
-          //           flashcard,
-          //           proposedType: "Parent",
-          //           token: await getIdToken(),
-          //         },
-          //       })
-          //     );
-          //   }
-          //   if (postData.nodeType === "Question") {
-          //     window.dispatchEvent(new CustomEvent("question-node-proposed"));
-          //   }
-          // });
 
           window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -4285,7 +4292,7 @@ const Notebook = ({}: NotebookProps) => {
             updatedAt: new Date(),
           });
           scrollToNode(newNodeId);
-          return { nodes, edges };
+          return { nodes: oldNodes, edges: oldEdges };
         });
       } catch (err) {
         console.error(err);
@@ -4296,7 +4303,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
       }
     },
-    [selectedNotebookId, user, nodeBookDispatch, graph.nodes, revertNodesOnGraph, scrollToNode, db]
+    [selectedNotebookId, user, nodeBookDispatch, graph.nodes, scrollToNode, settings.showClusterOptions, allTags, db]
   );
 
   const proposeChildNode = async ({ postData, flashcard }: any) => {

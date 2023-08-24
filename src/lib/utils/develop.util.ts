@@ -6,7 +6,7 @@
  */
 const disableLogsTemporally = false;
 const disableTutorialLogs = true;
-const disableWorkerLogs = true;
+const disableWorkerLogs = false;
 export const devLog = (logInUpperCase: string, otherData = {}, type?: "TUTORIAL" | "WORKER") => {
   if (disableLogsTemporally) return;
   if (process.env.NODE_ENV !== "development") return;
