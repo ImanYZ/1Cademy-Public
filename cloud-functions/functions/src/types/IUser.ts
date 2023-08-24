@@ -2,6 +2,8 @@ import { Timestamp } from "firebase-admin/firestore";
 
 export type ITheme = "Dark" | "Light";
 
+export type LivelinessBarType = "relativeInteractions" | "relativeReputations" | "interaction" | "reputation";
+
 export type IUser = {
   documentId?: string;
   fName: string;
@@ -43,7 +45,7 @@ export type IUser = {
   occupation: string;
   foundFrom: string; // pre-specified values with free text possibility
   fieldOfInterest: string; // free text
-  livelinessBar: "interaction" | "reputation" | "interactionSimplified" | "reputationSimplified";
+  livelinessBar: LivelinessBarType;
   birthDate?: Date | Timestamp | null;
   reason: string;
   createdAt: Date | Timestamp;

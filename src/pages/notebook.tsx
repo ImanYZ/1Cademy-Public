@@ -7496,7 +7496,7 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "absoluteInteractions" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}
@@ -7507,7 +7507,7 @@ const Notebook = ({}: NotebookProps) => {
             />
           )}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "absoluteReputations" && (
+          {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
             <MemoizedLivelinessBar
               authEmail={user?.email}
               openUserInfoSidebar={openUserInfoSidebar}

@@ -16,12 +16,14 @@ const getUser = async (uname: string) => {
   return user.data() as IUser;
 };
 
+type ConditionActionTrack = "Reputation" | "Interactions" | "RelativeInteractions" | "RelativeReputations";
+
 export const actionTracks = functions.https.onRequest(async (req, res) => {
   const userActionTracks: {
     [uname: string]: {
       uname: string;
       community: string;
-      condition: "Reputation" | "Interactions" | "InteractionSimplified" | "ReputationSimplified";
+      condition: ConditionActionTrack;
       interactions: number;
       reputation: number;
     };
@@ -31,9 +33,11 @@ export const actionTracks = functions.https.onRequest(async (req, res) => {
   } = {};
 
   try {
+    console.log(">:01");
     res.setHeader("Content-Type", "text/plain");
     const actionTracks = await firestore.collection("actionTracks").get();
     for (const actionTrack of actionTracks.docs) {
+      console.log(">:02");
       const actionTrackData = actionTrack.data() as IActionTrack;
       const doer = actionTrackData.doer;
       if (!usersMap[doer]) {
@@ -47,21 +51,12 @@ export const actionTracks = functions.https.onRequest(async (req, res) => {
         userActionTracks[doer] = {
           uname: doer,
           community: usersMap[doer].tag,
-          condition:
-            usersMap[doer].livelinessBar === "reputation"
-              ? "Reputation"
-              : usersMap[doer].livelinessBar === "interaction"
-              ? "Interactions"
-              : usersMap[doer].livelinessBar === "interactionSimplified"
-              ? "InteractionSimplified"
-              : usersMap[doer].livelinessBar === "reputationSimplified"
-              ? "ReputationSimplified"
-              : "Interactions",
+          condition: capitalizeFirstLetter(usersMap[doer].livelinessBar) as ConditionActionTrack,
           interactions: 0,
           reputation: 0,
         };
       }
-
+      console.log(">:03");
       userActionTracks[doer].interactions += 1;
 
       const receivers = actionTrackData.receivers || [];
@@ -89,7 +84,7 @@ export const actionTracks = functions.https.onRequest(async (req, res) => {
         }
         const point = receiverPoints[idx] || defaultPoint;
         const receiver = receivers[idx];
-
+        console.log(">:04");
         if (!usersMap[receiver]) {
           const receiverUser = await getUser(receiver);
           if (!receiverUser) continue;
@@ -99,11 +94,13 @@ export const actionTracks = functions.https.onRequest(async (req, res) => {
           userActionTracks[receiver] = {
             uname: receiver,
             community: usersMap[receiver].tag,
-            condition: usersMap[receiver].livelinessBar === "reputation" ? "Reputation" : "Interactions",
+            condition: capitalizeFirstLetter(usersMap[receiver].livelinessBar) as ConditionActionTrack,
             interactions: 0,
             reputation: 0,
           };
         }
+
+        console.log(">:05");
 
         userActionTracks[receiver].reputation += point;
       }
@@ -204,3 +201,8 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     console.log("error:", error);
   }
 });
+
+function capitalizeFirstLetter(str: string): string {
+  const capitalized = str.charAt(0).toUpperCase() + str.slice(1);
+  return capitalized;
+}
