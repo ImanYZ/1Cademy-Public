@@ -21,15 +21,16 @@ type UseWorkerQueueProps = {
       edges: EdgesData;
     }>
   >;
-  setMapWidth: any;
-  setMapHeight: any;
+  setMapWidth: (value: number) => void;
+  setMapHeight: (value: number) => void;
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
   onComplete: () => void;
-  setClusterNodes: any;
+  setClusterNodes: (value: any) => void;
   withClusters: boolean;
 };
+
 export const useWorkerQueue = ({
   setNodeUpdates,
   g,
@@ -62,6 +63,8 @@ export const useWorkerQueue = ({
       //   workerRef.current.terminate();
       //   workerRef.current = null;
       // }
+      // This was commenter temporally, because is not used, we don't need to force to terminate the worker, we need to wait until worker complete its tasks
+      // remember the worker execute tasks efficiently because we grouped all jobs into 1
 
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
       workerRef.current = worker;

@@ -150,7 +150,7 @@ export const fillDagre = (
 ): { result: { newNodes: FullNodesData; newEdges: EdgesData }; updatedNodeIds: string[] } => {
   let updatedNodeIds: string[] = [];
   const result = fullNodes.reduce(
-    (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+    (acu: { newNodes: FullNodesData; newEdges: EdgesData }, cur) => {
       let tmpNodes = {};
       let tmpEdges = {};
 
