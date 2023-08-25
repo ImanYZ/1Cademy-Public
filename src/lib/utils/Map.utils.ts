@@ -750,7 +750,7 @@ export const createOrUpdateNode = (
   // let height = NODE_HEIGHT;
   // height needs to continually be set to account for variation in node title, content, and image
   // if node is currently hidden on the map
-  if (!(nodeId in oldNodes)) {
+  if (!oldNodes.hasOwnProperty(nodeId)) {
     newNodeData = {
       ...newNode,
       // editable: false,
