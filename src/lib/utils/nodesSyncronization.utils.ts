@@ -74,7 +74,6 @@ export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promis
 };
 
 export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
-  console.log({ userNodesChanges, nodesData });
   // console.log("[BUILD FULL NODES]");
   const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
   const res = userNodesChanges
@@ -122,6 +121,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
 
   return res;
 };
+
 export const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
   return newAllNodes.reduce(
     (acu, cur) => {
