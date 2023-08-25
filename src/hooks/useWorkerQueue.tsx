@@ -58,29 +58,14 @@ export const useWorkerQueue = ({
       let oldNodes = { ...nodesToRecalculate };
       let oldEdges = { ...edgesToRecalculate };
       setIsWorking(true);
-      if (workerRef.current) {
-        workerRef.current.terminate();
-        workerRef.current = null;
-      }
+      // if (workerRef.current) {
+      //   workerRef.current.terminate();
+      //   workerRef.current = null;
+      // }
 
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
       workerRef.current = worker;
 
-      worker.postMessage({
-        oldMapWidth,
-        oldMapHeight,
-        oldNodes,
-        oldEdges,
-        allTags,
-        graph: dagreUtils.mapGraphToObject(g.current),
-        withClusters,
-        computedState: (g.current.graph() as any).computedState,
-      });
-      worker.onerror = err => {
-        console.error("[WORKER]error:", err);
-        worker.terminate();
-        setIsWorking(false);
-      };
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes, computedState } = e.data;
 
@@ -166,6 +151,23 @@ export const useWorkerQueue = ({
         onComplete();
         setIsWorking(false);
       };
+
+      worker.onerror = err => {
+        console.error("[WORKER]error:", err);
+        worker.terminate();
+        setIsWorking(false);
+      };
+
+      worker.postMessage({
+        oldMapWidth,
+        oldMapHeight,
+        oldNodes,
+        oldEdges,
+        allTags,
+        graph: dagreUtils.mapGraphToObject(g.current),
+        withClusters,
+        computedState: (g.current.graph() as any).computedState,
+      });
     },
     [
       allTags,
@@ -211,8 +213,8 @@ export const useWorkerQueue = ({
   );
 
   const queueFinished = useMemo(() => {
-    if (!didWork) return false; // it dident execute a task before
-    if (queue.length) return false; // it has pendient tasks
+    if (!didWork) return false; // it didn't execute a task before
+    if (queue.length) return false; // it has pending tasks
 
     // if (isQueueWorking) return false; // is working now
     return true;
