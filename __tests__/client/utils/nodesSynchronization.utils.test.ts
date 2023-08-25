@@ -1,11 +1,11 @@
-import { FullNodeData, NodesData, UserNodeChanges } from "src/nodeBookTypes";
+import { EdgesData, FullNodeData, FullNodesData, NodesData, UserNodeChanges } from "src/nodeBookTypes";
 
 import { COLUMN_GAP, dagreUtils } from "@/lib/utils/dagre.util";
 import { NODE_WIDTH } from "@/lib/utils/Map.utils";
-import { buildFullNodes, synchronizeGraph } from "@/lib/utils/nodesSyncronization.utils";
+import { buildFullNodes, fillDagre, synchronizeGraph } from "@/lib/utils/nodesSyncronization.utils";
 import { Graph } from "@/pages/notebook";
 
-describe("should test build full nodes function", () => {
+test("should test build full nodes function", () => {
   const expands = [true];
   const notebooks = ["1xjMdGklUUNwZSzwzVpK"];
   const userNodesChanges: UserNodeChanges[] = [
@@ -672,4 +672,217 @@ describe("should test synchronize function", () => {
     expect(g.nodes()).toHaveLength(2);
     expect(g.edges()).toHaveLength(1);
   });
+});
+
+test("should test added, modified and removed options on fill dagre function", () => {
+  const nodeId1 = "nn1vzbHWGSnkIfwAWPq4";
+  const nodeId2 = "nn2vzbHWGSnkIfwAWPq4";
+  const nodeId3 = "nn3vzbHWGSnkIfwAWPq4";
+  const node1: FullNodeData = {
+    changed: true,
+    correct: false,
+    createdAt: new Date("2021-05-25T18:14:07.574Z"),
+    updatedAt: new Date("2023-08-24T23:55:05.912Z"),
+    deleted: false,
+    isStudied: false,
+    bookmarked: false,
+    node: nodeId1,
+    user: "jjnnx",
+    wrong: false,
+    notebooks: ["1xjMdGklUUNwZSzwzVpK"],
+    expands: [true],
+    referenceLabels: [""],
+    // adminPoints: 0.5,
+    changedAt: new Date("2021-06-29T14:32:33.329Z"),
+    // chooseUname: false, // this exist doesn't exist type
+    aChooseUname: false,
+    isTag: false, // this doesn't exist on answer
+    corrects: 1,
+    aFullname: "Sam Winter",
+    nodeType: "Relation",
+    tags: [],
+    versions: 1,
+    institNames: ["University of Michigan - Ann Arbor"],
+    studied: 0,
+    aImgUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2Fundefined%2FMon%2C%2011%20Jan%202021%2020%3A52%3A14%20GMT.png?alt=media&token=95e37cea-40f7-48ed-bad5-7a21af2f5ce8",
+    maxVersionRating: 1,
+    contribNames: ["swinter00"],
+    content: "content of node 1",
+    parents: [],
+    viewers: 4,
+    nodeImage: "",
+    admin: "swinter00",
+    comments: 0,
+    institutions: {
+      "University of Michigan - Ann Arbor": {
+        reputation: 0.5,
+      },
+    },
+    title: "title of node 1",
+    references: ["Python Documentation"],
+    children: [],
+    wrongs: 0,
+    referenceIds: ["srNYrnun6zK1Csh5MWOo"],
+    contributors: {},
+    tagIds: ["MlwLPB5GwSBWXgf1wqTe"],
+    userNodeId: "8rKnI2bYWouj4poAuBXo",
+    nodeChangeType: "added",
+    userNodeChangeType: "added",
+    editable: false,
+    left: 0,
+    top: 0,
+    firstVisit: new Date("2023-08-24T23:55:05.908Z"),
+    lastVisit: new Date("2023-08-24T23:55:05.908Z"),
+    bookmarks: 0,
+    choices: [],
+    nodeChanges: null,
+    visible: true,
+  };
+  const node2: FullNodeData = {
+    changed: true,
+    correct: false,
+    createdAt: new Date("2021-05-25T18:14:07.574Z"),
+    updatedAt: new Date("2023-08-24T23:55:05.912Z"),
+    deleted: false,
+    isStudied: false,
+    bookmarked: false,
+    node: nodeId2,
+    user: "jjnnx",
+    wrong: false,
+    notebooks: ["1xjMdGklUUNwZSzwzVpK"],
+    expands: [true],
+    referenceLabels: [""],
+    // adminPoints: 0.5,
+    changedAt: new Date("2021-06-29T14:32:33.329Z"),
+    // chooseUname: false, // this exist doesn't exist type
+    aChooseUname: false,
+    isTag: false, // this doesn't exist on answer
+    corrects: 1,
+    aFullname: "Sam Winter",
+    nodeType: "Relation",
+    tags: [],
+    versions: 1,
+    institNames: ["University of Michigan - Ann Arbor"],
+    studied: 0,
+    aImgUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2Fundefined%2FMon%2C%2011%20Jan%202021%2020%3A52%3A14%20GMT.png?alt=media&token=95e37cea-40f7-48ed-bad5-7a21af2f5ce8",
+    maxVersionRating: 1,
+    contribNames: ["swinter00"],
+    content: "content of node 2",
+    parents: [],
+    viewers: 4,
+    nodeImage: "",
+    admin: "swinter00",
+    comments: 0,
+    institutions: {
+      "University of Michigan - Ann Arbor": {
+        reputation: 0.5,
+      },
+    },
+    title: "title of node 2",
+    references: ["Python Documentation"],
+    children: [],
+    wrongs: 0,
+    referenceIds: ["srNYrnun6zK1Csh5MWOo"],
+    contributors: {},
+    tagIds: ["MlwLPB5GwSBWXgf1wqTe"],
+    userNodeId: "8rKnI2bYWouj4poAuBXo",
+    nodeChangeType: "added",
+    userNodeChangeType: "added",
+    editable: false,
+    left: 0,
+    top: 0,
+    firstVisit: new Date("2023-08-24T23:55:05.908Z"),
+    lastVisit: new Date("2023-08-24T23:55:05.908Z"),
+    bookmarks: 0,
+    choices: [],
+    nodeChanges: null,
+    visible: true,
+  };
+  const node3: FullNodeData = {
+    changed: true,
+    correct: false,
+    createdAt: new Date("2021-05-25T18:14:07.574Z"),
+    updatedAt: new Date("2023-08-24T23:55:05.912Z"),
+    deleted: false,
+    isStudied: false,
+    bookmarked: false,
+    node: nodeId3,
+    user: "jjnnx",
+    wrong: false,
+    notebooks: ["1xjMdGklUUNwZSzwzVpK"],
+    expands: [true],
+    referenceLabels: [""],
+    // adminPoints: 0.5,
+    changedAt: new Date("2021-06-29T14:32:33.329Z"),
+    // chooseUname: false, // this exist doesn't exist type
+    aChooseUname: false,
+    isTag: false, // this doesn't exist on answer
+    corrects: 1,
+    aFullname: "Sam Winter",
+    nodeType: "Relation",
+    tags: [],
+    versions: 1,
+    institNames: ["University of Michigan - Ann Arbor"],
+    studied: 0,
+    aImgUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2Fundefined%2FMon%2C%2011%20Jan%202021%2020%3A52%3A14%20GMT.png?alt=media&token=95e37cea-40f7-48ed-bad5-7a21af2f5ce8",
+    maxVersionRating: 1,
+    contribNames: ["swinter00"],
+    content: "content of node 3",
+    parents: [],
+    viewers: 4,
+    nodeImage: "",
+    admin: "swinter00",
+    comments: 0,
+    institutions: {
+      "University of Michigan - Ann Arbor": {
+        reputation: 0.5,
+      },
+    },
+    title: "title of node 3",
+    references: ["Python Documentation"],
+    children: [],
+    wrongs: 0,
+    referenceIds: ["srNYrnun6zK1Csh5MWOo"],
+    contributors: {},
+    tagIds: ["MlwLPB5GwSBWXgf1wqTe"],
+    userNodeId: "8rKnI2bYWouj4poAuBXo",
+    nodeChangeType: "added",
+    userNodeChangeType: "added",
+    editable: false,
+    left: 0,
+    top: 0,
+    firstVisit: new Date("2023-08-24T23:55:05.908Z"),
+    lastVisit: new Date("2023-08-24T23:55:05.908Z"),
+    bookmarks: 0,
+    choices: [],
+    nodeChanges: null,
+    visible: true,
+  };
+  const g = dagreUtils.mapObjectToGraph({
+    nodes: [
+      { id: nodeId1, data: { height: 200, width: 200, x: 10, y: 10 } },
+      { id: nodeId2, data: { height: 300, width: 200, x: 200, y: 10 } },
+    ],
+    edges: [],
+    parents: [],
+  });
+  const fullNodes: FullNodeData[] = [
+    { ...node3, userNodeChangeType: "added", nodeChangeType: "added" },
+    { ...node2, title: "node 2 modified", userNodeChangeType: "modified", nodeChangeType: "modified" },
+    { ...node1, userNodeChangeType: "removed", nodeChangeType: "removed" },
+  ];
+  const currentNodes: FullNodesData = { [nodeId1]: node1, [nodeId2]: node2 };
+  const currentEdges: EdgesData = {};
+  const { result, updatedNodeIds } = fillDagre(g, fullNodes, currentNodes, currentEdges, false, {});
+
+  expect(updatedNodeIds).toEqual([nodeId3, nodeId2, nodeId1]);
+  expect(result.newEdges).toEqual({});
+  expect(Object.keys(result.newNodes)).toHaveLength(2);
+  expect(result.newNodes).toHaveProperty(nodeId3);
+  expect(result.newNodes).toHaveProperty(nodeId2);
+  expect(result.newNodes).not.toHaveProperty(nodeId1);
+  // TODO: add case when is not visible and is modified, previously that was working a remove
 });
