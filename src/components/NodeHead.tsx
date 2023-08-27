@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { useEffect, useState } from "react";
 
 import { APP_DOMAIN } from "@/lib/utils/1cademyConfig";
 import { escapeBreaksQuotes, getNodePageWithDomain } from "@/lib/utils/utils";
@@ -102,9 +103,19 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
         ${content} Keywords: ${title} ${keywords} ${nodeImage ? "\nImage: " + nodeImage : ""}
       `);
 
+  const [currentUrl, setCurrentUrl] = useState<string>("");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setCurrentUrl(window.location.href);
+  }, [setCurrentUrl]);
+
+  const nodeUrl = getNodePageWithDomain(title || "", id);
+  const hasAltCanonical = currentUrl && nodeUrl !== currentUrl;
+
   return (
     <Head>
-      <link rel="canonical" href={`${getNodePageWithDomain(title || "", id)}`} key="canonical" />
+      <link rel="canonical" href={`${nodeUrl}`} key="canonical" />
+      {hasAltCanonical ? <link rel="canonical" href={`${currentUrl}`} key="canonical-alt" /> : <></>}
       <meta name="topic" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="subject" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="Classification" content={nodeType} />
