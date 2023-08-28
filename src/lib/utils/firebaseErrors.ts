@@ -14,6 +14,8 @@ export const getFirebaseFriendlyError = (error: FirebaseError): string => {
       return "There is no user record corresponding to this identifier.";
     case "auth/wrong-password":
       return "The password is invalid.";
+    case "auth/too-many-requests":
+      return "This account is temporarily disabled due to multiple failed login attempts. Restore access by resetting your password or trying again later.";
     default:
       return error.message;
   }

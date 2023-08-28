@@ -167,7 +167,7 @@ HomeWrapperProps) => {
         />
       </Box>
 
-      <SectionWrapper ref={MechanismSectionRef} section={ONE_CADEMY_SECTIONS[1]} textAlign="center">
+      <SectionWrapper ref={MechanismSectionRef} section={ONE_CADEMY_SECTIONS[1]} textAlign="center" display="block">
         {mechanismSectionChildren}
       </SectionWrapper>
 

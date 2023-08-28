@@ -27,11 +27,12 @@ type SectionWrapperProps = {
   section: HomepageSection;
   children: ReactNode;
   textAlign?: "center" | "left";
+  display?: "flex" | "block";
   stats?: StatsSchema;
 };
 
 export const SectionWrapper = forwardRef(
-  ({ section, children, textAlign = "left", stats }: SectionWrapperProps, ref) => {
+  ({ section, children, textAlign = "left", stats, display = "flex" }: SectionWrapperProps, ref) => {
     const theme = useTheme();
     const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
     // const { inView, ref: refTT } = useInView(observerOption);
@@ -61,11 +62,11 @@ export const SectionWrapper = forwardRef(
           // border: "solid 2px royalBlue",
         }}
       >
-        {section.label && section.description && (
-          <Box sx={{ mb: "64px", display: "flex", justifyContent: "space-between" }}>
+        {section.title && section.description && (
+          <Box sx={{ mb: "64px", display, justifyContent: "space-between" }}>
             <Box>
-              <Typography sx={{ fontSize: "36px", mb: "20px", textTransform: "uppercase", fontWeight: 600 }}>
-                {section.label}
+              <Typography sx={{ fontSize: "36px", mb: "55px", textTransform: "uppercase", fontWeight: 600 }}>
+                {section.title}
               </Typography>
 
               {/* description */}
