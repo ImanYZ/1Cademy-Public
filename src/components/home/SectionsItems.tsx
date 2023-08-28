@@ -1,4 +1,4 @@
-import { Link, Typography } from "@mui/material";
+import { Grid, Link, Typography } from "@mui/material";
 import { ReactNode } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -23,11 +23,36 @@ export const ONE_CADEMY_SECTIONS: HomepageSection[] = [
   },
   {
     id: "mechanism",
-    title: "How It Works",
-    label: "How It Works",
-    description:
-      // "Through human-AI collaboration, we summarize, link, evaluate, improve, and learn science for long-term.",
-      "Dive into the future of education with 1Cademy, where technology and pedagogy align to elevate the learning experience to unprecedented heights. Your journey towards effective and efficient online education starts here!",
+    title: "DIVE INTO THE FUTURE OF EDUCATION",
+    label: "How it works",
+    description: (
+      <Grid
+        container
+        spacing={10}
+        sx={{
+          textAlign: "justify",
+          fontSize: "19px",
+        }}
+      >
+        <Grid item sm={12} md={6}>
+          1Cademy works along your LMS to optimize learning and teaching through AI-driven practicing,
+          question-answering, grading, and providing feedback on assignments. Our special sauce is the use of a large
+          knowledge graph to guide the AI. A knowledge graph is like a table of contents, with arrows between topics
+          indicating their prerequisite relations. Similar to a course curriculum, content in the knowledge graph is
+          created and understood in a stepwise manner; one must understand the basics before diving into the more
+          advanced subjects.
+        </Grid>
+        <Grid item sm={12} md={6}>
+          The platform is designed to simplify learning complex scientific information by dividing it into microcontent.
+          The collective intelligence of students and instructors dynamically improves each microcontent piece and
+          designs prerequisite relations between them to provide students with learning pathways. This approach aligns
+          with recent trends in students’ preferences for short-form content over long-form. Your journey towards
+          effective and efficient online education starts here!
+        </Grid>
+      </Grid>
+    ),
+    // "Through human-AI collaboration, we summarize, link, evaluate, improve, and learn science for long-term.",
+    // "Dive into the future of education with 1Cademy, where technology and pedagogy align to elevate the learning experience to unprecedented heights. Your journey towards effective and efficient online education starts here!",
     options: [],
   },
   {

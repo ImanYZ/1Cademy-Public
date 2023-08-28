@@ -182,7 +182,10 @@ const Mechanism = ({ mechanisms }: IMechanism) => {
               {cur.title}
             </Typography>
             {cur.description.split("\n").map((paragraph: string, idx: number) => (
-              <Typography key={idx} sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600, mb: "8px" }}>
+              <Typography
+                key={idx}
+                sx={{ color: theme.palette.mode === "dark" ? gray200 : gray600, mb: "8px", textAlign: "justify" }}
+              >
                 {paragraph}
               </Typography>
               // <Typography
