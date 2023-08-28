@@ -2,123 +2,15 @@ import * as admin from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 
-import { IActionTrack } from "./types/IActionTrack";
-import { IUser } from "./types/IUser";
 admin.initializeApp();
 
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
+const { updateInstitutions } = require("./updateInstitutions");
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
 const firestore = admin.firestore();
-
-const getUser = async (uname: string) => {
-  const user = await firestore.collection("users").doc(uname).get();
-  return user.data() as IUser;
-};
-
-export const actionTracks = functions.https.onRequest(async (req, res) => {
-  const userActionTracks: {
-    [uname: string]: {
-      uname: string;
-      community: string;
-      condition: "Reputation" | "Interactions";
-      interactions: number;
-      reputation: number;
-    };
-  } = {};
-  const usersMap: {
-    [userId: string]: IUser;
-  } = {};
-
-  try {
-    res.setHeader("Content-Type", "text/plain");
-    const actionTracks = await firestore.collection("actionTracks").get();
-    for (const actionTrack of actionTracks.docs) {
-      const actionTrackData = actionTrack.data() as IActionTrack;
-      const doer = actionTrackData.doer;
-      if (!usersMap[doer]) {
-        const doerUser = await getUser(doer);
-        if (!doerUser) continue;
-        usersMap[doer] = doerUser;
-      }
-
-      // initialization
-      if (!userActionTracks[doer]) {
-        userActionTracks[doer] = {
-          uname: doer,
-          community: usersMap[doer].tag,
-          condition: usersMap[doer].livelinessBar === "reputation" ? "Reputation" : "Interactions",
-          interactions: 0,
-          reputation: 0,
-        };
-      }
-
-      userActionTracks[doer].interactions += 1;
-
-      const receivers = actionTrackData.receivers || [];
-      const receiverPoints = actionTrackData.receiverPoints || [];
-      for (let idx = 0; idx < receivers.length; idx++) {
-        let defaultPoint = 0;
-        if (actionTrackData.type !== "NodeVote") {
-          if (
-            actionTrackData.action === "Correct" ||
-            actionTrackData.action.startsWith("Correct-") ||
-            actionTrackData.action === "WrongRM" ||
-            actionTrackData.action.startsWith("WrongRM-")
-          ) {
-            defaultPoint = 1;
-          }
-
-          if (
-            actionTrackData.action === "Wrong" ||
-            actionTrackData.action.startsWith("Wrong-") ||
-            actionTrackData.action === "CorrectRM" ||
-            actionTrackData.action.startsWith("CorrectRM-")
-          ) {
-            defaultPoint = -1;
-          }
-        }
-        const point = receiverPoints[idx] || defaultPoint;
-        const receiver = receivers[idx];
-
-        if (!usersMap[receiver]) {
-          const receiverUser = await getUser(receiver);
-          if (!receiverUser) continue;
-          usersMap[receiver] = receiverUser;
-        }
-        if (!userActionTracks[receiver]) {
-          userActionTracks[receiver] = {
-            uname: receiver,
-            community: usersMap[receiver].tag,
-            condition: usersMap[receiver].livelinessBar === "reputation" ? "Reputation" : "Interactions",
-            interactions: 0,
-            reputation: 0,
-          };
-        }
-
-        userActionTracks[receiver].reputation += point;
-      }
-    }
-
-    let response = "username,community,condition,interactions,reputation\n";
-    for (const uname in userActionTracks) {
-      const userActionTrack = userActionTracks[uname];
-      response += `${JSON.stringify(uname)},${JSON.stringify(userActionTrack.community)},${JSON.stringify(
-        userActionTrack.condition
-      )},${JSON.stringify(userActionTrack.interactions)},${JSON.stringify(userActionTrack.reputation)}\n`;
-    }
-    res.status(200).send(response);
-  } catch (e: any) {
-    res.setHeader("Content-Type", "application/json");
-    console.log(e);
-    res.status(500).send({
-      message: e.message,
-    });
-  }
-});
-
 export const onUserStatusChanged = functions.database.ref("/status/{uname}").onUpdate(async (change, context) => {
   // Get the data written to Realtime Database
   const eventStatus = change.after.val();
@@ -197,8 +89,15 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     console.log("error:", error);
   }
 });
+
 exports.assignNodeContributorsInstitutionsStats = functions
   .runWith({ memory: "1GB", timeoutSeconds: 520 })
   .pubsub.schedule("every 25 hours")
   .timeZone("America/Detroit")
   .onRun(assignNodeContributorsInstitutionsStats);
+
+exports.updateInstitutions = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(updateInstitutions);

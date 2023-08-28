@@ -59,6 +59,7 @@ export const Home = () => {
     <>
       <Head>
         <link rel="canonical" href={`${ONECADEMY_DOMAIN}`} key="canonical" />
+        <link rel="canonical" href="https://www.1cademy.com/" key="canonical-alt" />
         <title>1Cademy</title>
       </Head>
       <Box

@@ -9,7 +9,7 @@ import PostAddIcon from "@mui/icons-material/PostAdd";
 import ReplyIcon from "@mui/icons-material/Reply";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { Box } from "@mui/material";
+import { Box, SxProps, Theme } from "@mui/material";
 import { keyframes } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { ActionTrackType } from "src/knowledgeTypes";
@@ -28,6 +28,7 @@ const slideInAnimation = keyframes`
 
 type ActionBubbleProps = {
   actionType: ActionTrackType;
+  sx?: SxProps<Theme>;
 };
 
 const getActionIcon = (actionType: ActionTrackType) => {
@@ -47,7 +48,7 @@ const getActionIcon = (actionType: ActionTrackType) => {
   // throw new Error("Unidentified aciontType");
 };
 
-const ActionBubble = ({ actionType }: ActionBubbleProps) => {
+const ActionBubble = ({ actionType, sx }: ActionBubbleProps) => {
   const Icon = getActionIcon(actionType);
 
   const [showIcon, setShowIcon] = useState(true);
@@ -74,6 +75,7 @@ const ActionBubble = ({ actionType }: ActionBubbleProps) => {
         fontSize: "20px",
         marginBottom: "5px",
         animation: `${slideInAnimation} 1.5s ease-out 0s normal forwards`,
+        ...sx,
       }}
     >
       <Icon

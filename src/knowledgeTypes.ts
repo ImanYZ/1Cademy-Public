@@ -4,7 +4,7 @@ import { AppProps } from "next/app";
 import { NextPage } from "next/types";
 import { Dispatch, ReactElement, ReactNode, SetStateAction } from "react";
 
-import { SimpleNode2 } from "./types";
+import { LivelinessBarType, SimpleNode2 } from "./types";
 
 export enum NodeType {
   "Relation" = "Relation",
@@ -426,7 +426,7 @@ export type User = {
   // instit?: string; //CHECK: I commented this because we have deInstit
   fieldOfInterest: string;
   role: UserRole;
-  livelinessBar?: string;
+  livelinessBar?: LivelinessBarType;
   scaleThreshold?: number;
 };
 

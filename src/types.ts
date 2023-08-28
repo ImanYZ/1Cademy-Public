@@ -16,6 +16,7 @@ export type NodeType =
   | "Sequel"
   | "Advertisement"
   | "Private";
+
 export type SimpleNode2 = {
   id: string;
   title: string;
@@ -88,3 +89,5 @@ export type TryRubricResponse = {
   correct: "YES" | "NO";
   sentences: string[];
 };
+
+export type LivelinessBarType = "relativeInteractions" | "relativeReputations" | "interaction" | "reputation";

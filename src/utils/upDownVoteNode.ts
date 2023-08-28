@@ -478,6 +478,7 @@ export const UpDownVoteNode = async ({
         receiverPoints: receivers.map(
           proposer => changedProposers[proposer].correctVal - changedProposers[proposer].wrongVal
         ),
+        email: userData.email,
       } as IActionTrack);
     }
 
