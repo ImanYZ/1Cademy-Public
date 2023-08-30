@@ -51,7 +51,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
   const [tryUserAnswers, setTryUserAnswers] = useState<UserAnswerData[]>([]);
   const [disableAddRubric, setDisableAddRubric] = useState(false);
   // const [selectedTryUserAnswer, setSelectedTryUserAnswer] = useState<UserAnswerData | null>(null);
-  const [selectedRubricItem, setSelectedRubricItem] = useState<{ index: Number } | null>(null);
+  const [selectedRubricItem, setSelectedRubricItem] = useState<string | null>(null);
   const [selectedUserAnswer, setSelectedUserAnswer] = useState<SelectedUserAnswer>(null);
 
   // const [userAnswerGraded, setUserAnswersGraded] = useState([]);
