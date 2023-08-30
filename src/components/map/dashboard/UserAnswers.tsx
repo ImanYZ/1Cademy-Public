@@ -35,7 +35,7 @@ type UserAnswersProcessedProps = {
   data: UserAnswerData[];
   rubric: Rubric;
   onBack: () => void;
-  selectedRubricItem: { index: Number } | null;
+  selectedRubricItem: string | null;
   selectedUserAnswer: SelectedUserAnswer;
   onSelectUserAnswer: (newValue: SelectedUserAnswer) => void;
 };
@@ -275,16 +275,19 @@ export const UserAnswerProcessed = ({
     ].reduce((acu: string, cur) => {
       const isHighlighted = Boolean(selectedRubricItem && selectedRubricItem === cur.rubric_item);
 
+      let sentences = [...cur.sentences];
+
+      const color = sentences.length > 0 ? getColorFromResult(cur, theme.palette.mode, isHighlighted) : null;
+
       if (!isHighlighted) {
-        cur.sentences = cur.sentences.filter(
+        sentences = sentences.filter(
           curSentence =>
             !highlitedSentences.includes(curSentence) &&
             highlitedSentences.filter(cur => cur.includes(curSentence.replace(".", ""))).length === 0
         );
       }
 
-      const color = getColorFromResult(cur, theme.palette.mode, isHighlighted);
-      return color ? highlightSentences({ color, sentences: cur.sentences, text: acu }) : acu;
+      return color ? highlightSentences({ color, sentences, text: acu }) : acu;
     }, userAnswer.answer);
   }, [result, selectedRubricItem, theme.palette.mode, userAnswer.answer]);
 

@@ -125,12 +125,7 @@ export const RubricItem = ({
                   userAnswerWhereProcessed &&
                   selectedRubricItem &&
                   selectedRubricItem === c.prompt && {
-                    border: theme =>
-                      `solid 1px ${
-                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
-                      }`,
-                    backgroundColor: theme =>
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300,
+                    outline: `solid 2px ${DESIGN_SYSTEM_COLORS.notebookG600}`,
                   }),
                 ...(isSelected &&
                   userAnswerWhereProcessed && {
