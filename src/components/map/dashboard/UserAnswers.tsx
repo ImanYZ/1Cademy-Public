@@ -249,7 +249,7 @@ type UserAnswerProcessed = {
   result: TryRubricResponse[];
   state: UserAnswerState;
   rubric: Rubric;
-  selectedRubricItem: string;
+  selectedRubricItem: string | null;
   isSelected: boolean;
   onSelectUserAnswer?: () => void;
 };
