@@ -249,7 +249,7 @@ type UserAnswerProcessed = {
   result: TryRubricResponse[];
   state: UserAnswerState;
   rubric: Rubric;
-  selectedRubricItem: { index: Number } | null;
+  selectedRubricItem: string;
   isSelected: boolean;
   onSelectUserAnswer?: () => void;
 };
@@ -267,8 +267,22 @@ export const UserAnswerProcessed = ({
   const points = useMemo(() => getPointsFromResult(result, rubric.prompts), [result, rubric.prompts]);
 
   const resultHighlighted = useMemo(() => {
-    return result.reduce((acu: string, cur, idx) => {
-      const isHighlighted = Boolean(selectedRubricItem && selectedRubricItem.index === idx);
+    let highlitedSentences = result.find(cur => cur.rubric_item === selectedRubricItem)?.sentences ?? [];
+
+    return [
+      ...result.filter(cur => cur.rubric_item === selectedRubricItem),
+      ...result.filter(cur => cur.rubric_item !== selectedRubricItem),
+    ].reduce((acu: string, cur) => {
+      const isHighlighted = Boolean(selectedRubricItem && selectedRubricItem === cur.rubric_item);
+
+      if (!isHighlighted) {
+        cur.sentences = cur.sentences.filter(
+          curSentence =>
+            !highlitedSentences.includes(curSentence) &&
+            highlitedSentences.filter(cur => cur.includes(curSentence.replace(".", ""))).length === 0
+        );
+      }
+
       const color = getColorFromResult(cur, theme.palette.mode, isHighlighted);
       return color ? highlightSentences({ color, sentences: cur.sentences, text: acu }) : acu;
     }, userAnswer.answer);
@@ -514,23 +528,32 @@ export const getColorFromResult = (
   highlight = false
 ): string => {
   if (!resultItem) return "";
-  if (resultItem.correct === "YES" && resultItem.mentioned === "YES")
+  const isCorrect = resultItem.correct.toLocaleLowerCase() === "yes";
+  const isMentioned = resultItem.mentioned.toLocaleLowerCase() === "yes";
+  const isNotCorrect = resultItem.correct.toLocaleLowerCase() === "no";
+  const isNotMentioned = resultItem.mentioned.toLocaleLowerCase() === "no";
+  //correct and mentioned
+  if (isCorrect && isMentioned)
     return highlight ? TEXT_HIGHLIGHT["highlightSuccess"][theme] : TEXT_HIGHLIGHT["success"][theme];
-  if (resultItem.correct === "NO" && resultItem.mentioned === "YES")
+  //not correct and mentioned
+  if (isNotCorrect && isMentioned)
     return highlight ? TEXT_HIGHLIGHT["highlightWarning"][theme] : TEXT_HIGHLIGHT["warning"][theme];
-  if (resultItem.correct === "NO" && resultItem.mentioned === "NO")
+  //not correct and not mentioned
+  if (isNotCorrect && isNotMentioned)
     return highlight ? TEXT_HIGHLIGHT["highlightError"][theme] : TEXT_HIGHLIGHT["error"][theme];
   return "";
 };
 
 export const getHelperTextFromResult = (resultItem: TryRubricResponse): string => {
   if (!resultItem) return "";
-  if (resultItem.correct === "YES" && resultItem.mentioned === "YES")
-    return "This rubric was correctly mentioned in student’s answer.";
-  if (resultItem.correct === "NO" && resultItem.mentioned === "YES")
-    return "This rubric was explained incorrectly in student’s answer.";
-  if (resultItem.correct === "NO" && resultItem.mentioned === "NO")
-    return "This rubric was not mentioned in student’s answer.";
+  const isCorrect = resultItem.correct.toLocaleLowerCase() === "yes";
+  const isMentioned = resultItem.mentioned.toLocaleLowerCase() === "yes";
+  const isNotCorrect = resultItem.correct.toLocaleLowerCase() === "no";
+  const isNotMentioned = resultItem.mentioned.toLocaleLowerCase() === "no";
+
+  if (isCorrect && isMentioned) return "This rubric was correctly mentioned in student’s answer.";
+  if (isNotCorrect && isMentioned) return "This rubric was explained incorrectly in student’s answer.";
+  if (isNotCorrect && isNotMentioned) return "This rubric was not mentioned in student’s answer.";
   return "";
 };
 
@@ -545,7 +568,7 @@ type HighlightSentencesInput = { sentences: string[]; text: string; color: strin
  */
 export const highlightSentences = ({ sentences, text, color }: HighlightSentencesInput) => {
   const threshold = 0.9;
-  const tt = sentences.reduce((acuHightLight, curSentence) => {
+  const hightLightedResponse = sentences.reduce((acuHightLight, curSentence) => {
     const fixedSentence = curSentence.replace(/^[\(\[.?!]|[\)\].?!]$/g, "");
     const sentenceIsOnText = acuHightLight.includes(fixedSentence);
 
@@ -567,5 +590,5 @@ export const highlightSentences = ({ sentences, text, color }: HighlightSentence
 
     return acuHightLight.replace(similarResult, `<span style=background-color:${color}>${similarResult}</span>`);
   }, text);
-  return tt;
+  return hightLightedResponse;
 };

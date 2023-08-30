@@ -34,8 +34,8 @@ type RubricItemProps = {
     userAnswer: UserAnswer;
     result: TryRubricResponse[];
   }[];
-  onSelectRubricItem: (params: { index: Number } | null) => void;
-  selectedRubricItem: { index: Number } | null;
+  onSelectRubricItem: (params: string | null) => void;
+  selectedRubricItem: string | null;
   selectedUserAnswer: SelectedUserAnswer;
 };
 
@@ -108,11 +108,11 @@ export const RubricItem = ({
 
       <Box component={"table"} sx={{ borderCollapse: "collapse" }}>
         <tbody>
-          {rubric.prompts.map((c, i) => (
+          {rubric.prompts.map((c, idx) => (
             <Box
               component={"tr"}
               // component={"li"}
-              key={i}
+              key={idx}
               sx={{
                 border: "solid 2px transparent",
                 borderRadius: "8px",
@@ -124,7 +124,7 @@ export const RubricItem = ({
                 ...(isSelected &&
                   userAnswerWhereProcessed &&
                   selectedRubricItem &&
-                  selectedRubricItem.index === i && {
+                  selectedRubricItem === c.prompt && {
                     border: theme =>
                       `solid 1px ${
                         theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray300
@@ -145,7 +145,7 @@ export const RubricItem = ({
                     },
                   }),
               }}
-              onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem({ index: i }) : undefined)}
+              onClick={() => (isSelected && userAnswerWhereProcessed ? onSelectRubricItem(c.prompt) : undefined)}
             >
               <Box component={"td"} sx={{ p: "8px 4px" }}>
                 <MarkdownRender
@@ -155,7 +155,7 @@ export const RubricItem = ({
                     flexGrow: 1,
                     ...(isSelected &&
                       selectedUserAnswer && {
-                        backgroundColor: getColorFromResult(selectedUserAnswer.result[i], theme.palette.mode),
+                        backgroundColor: getColorFromResult(selectedUserAnswer.result[idx], theme.palette.mode),
                       }),
                   }}
                 />
