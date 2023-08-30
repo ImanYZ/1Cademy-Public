@@ -81,7 +81,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     };
 
     const userNodeRef = db.collection("answerResultFromCache").doc();
-    userNodeRef.set(userAnswerData); //INFO: we don't wait this because we want to return ASAP
+    userNodeRef.set(userAnswerData); //INFO: we don't await this because we want to return ASAP
 
     console.log("not-from-cache");
     return res.status(200).json(responseArray);
