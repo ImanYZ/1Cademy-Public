@@ -79,34 +79,42 @@ export const Assignments = ({ username }: AssignmentsProps) => {
       description: true,
     });
 
-    const questionId = await addQuestion(db, { ...values, user: username });
+    const questionId = await addQuestion(db, { ...values, user: username, loadingRubrics: true });
+
     setSubmitting(false);
     setDisplayQuestionForm(false);
+    setSelectedQuestion({ ...values, id: questionId, loadingRubrics: true, createdAt: new Date() });
 
-    const generatedRubricItems: string[] = await Post("/assignment/generateRubrics", {
-      questionDescription: values.description,
-      questionTitle: values.title,
-    });
-    if (!generatedRubricItems) console.warn("Was not possible generate first rubric");
-    const id = newId(db);
-    const newRubric: Rubric = {
-      ...generateEmptyRubric(id, questionId, username),
-      prompts: generatedRubricItems.map(c => ({ prompt: c, point: 1 })),
-    };
-    await updateQuestion(db, questionId, { rubrics: [newRubric] });
+    try {
+      const generatedRubricItems: string[] = await Post("/assignment/generateRubrics", {
+        questionDescription: values.description,
+        questionTitle: values.title,
+      });
+      const id = newId(db);
+      const newRubric: Rubric = {
+        ...generateEmptyRubric(id, questionId, username),
+        prompts: generatedRubricItems.map(c => ({ prompt: c, point: 1 })),
+      };
+      await updateQuestion(db, questionId, { rubrics: [newRubric], loadingRubrics: false });
+    } catch (error) {
+      await updateQuestion(db, questionId, { loadingRubrics: false, errorLoadingRubrics: true });
+      console.warn("Was not possible generate first rubric");
+    }
   };
 
   const syncQuestions = (questionChanges: QuestionChanges[]) => {
     setQuestions(prev => {
-      const tt = questionChanges.reduce((acu: Question[], cur) => {
-        if (cur.type === "added") return [...acu, cur.data];
-        if (cur.type === "modified") return acu.map(c => (c.id === cur.data.id ? cur.data : c));
+      const questions = questionChanges.reduce((acu: Question[], cur) => {
+        if (cur.type === "added") return [...acu, { ...cur.data, createdAt: cur.data.createdAt.toDate() }];
+        if (cur.type === "modified")
+          return acu.map(c => (c.id === cur.data.id ? { ...cur.data, createdAt: cur.data.createdAt.toDate() } : c));
         if (cur.type === "removed") return acu.filter(c => c.id !== cur.data.id);
         return acu;
       }, prev);
-      setSelectedQuestion(prev => (prev ? tt.find(c => c.id === prev.id) ?? null : null));
+      setSelectedQuestion(prev => (prev ? questions.find(c => c.id === prev.id) ?? null : null));
       setIsLoadingQuestions(false);
-      return tt;
+      questions.sort((a, b) => (a.createdAt.getTime() - b.createdAt.getTime() > 0 ? -1 : 1));
+      return questions;
     });
   };
 

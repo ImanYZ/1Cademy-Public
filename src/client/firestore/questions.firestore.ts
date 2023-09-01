@@ -27,6 +27,8 @@ export type AddQuestionInput = {
   description: string;
   imageUrl: string;
   rubrics: Rubric[];
+  loadingRubrics?: boolean;
+  errorLoadingRubrics?: boolean;
 };
 
 export type UpdateQuestionInput = Partial<AddQuestionInput>;
@@ -37,11 +39,13 @@ type QuestionDocument = {
   imageUrl: string;
   createdAt: Date;
   rubrics: Rubric[];
+  loadingRubrics?: boolean;
+  errorLoadingRubrics?: boolean;
 };
 export type Question = { id: string } & QuestionDocument;
 
 export type QuestionChanges = {
-  data: Question;
+  data: { createdAt: Timestamp } & Question;
   type: SnapshotChangesTypes;
 };
 

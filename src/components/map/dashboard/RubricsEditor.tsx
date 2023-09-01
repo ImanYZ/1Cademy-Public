@@ -1,7 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import { Box, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, CircularProgress, Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Answer, getAnswersByQuestion } from "src/client/firestore/answer.firestore";
@@ -210,34 +210,55 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
         >
           <Typography sx={{ fontWeight: 600, fontSize: "18px", mb: "32px" }}>Rubrics</Typography>
 
-          <Stack spacing={"28px"}>
-            {rubricsSortedByValuable.map(cur =>
-              editedRubric && cur.id === editedRubric.data.id ? (
-                <RubricForm key={cur.id} rubric={editedRubric.data} onSave={onSaveRubric} cancelFn={onCancelRubric} />
-              ) : (
-                <RubricItem
-                  key={cur.id}
-                  username={username}
-                  onDuplicateRubric={() => onDuplicateRubric(cur)}
-                  rubric={cur}
-                  onTryIt={() => {
-                    setTryRubric(cur);
-                    setTryUserAnswers([]);
-                    setSelectedRubricItem(null);
-                    // setSelectedTryUserAnswer(null);
-                  }}
-                  onSave={onSaveRubric}
-                  onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
-                  onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
-                  isSelected={tryRubric?.id === cur.id}
-                  tryUserAnswers={tryUserAnswers}
-                  onSelectRubricItem={setSelectedRubricItem}
-                  selectedRubricItem={selectedRubricItem}
-                  selectedUserAnswer={selectedUserAnswer}
-                />
-              )
-            )}
-          </Stack>
+          {question.loadingRubrics ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexDirection: "column",
+              }}
+            >
+              <CircularProgress />
+              <br />
+              <Typography sx={{ mt: "5px" }}> Loading Rubrics...</Typography>
+            </Box>
+          ) : (
+            <Stack spacing={"28px"}>
+              {rubricsSortedByValuable.length === 0 && question.errorLoadingRubrics && (
+                <Typography variant="body1" color="error" sx={{ mb: "32px" }}>
+                  {"The're was an error generating the rubrics using GPT4"}
+                </Typography>
+              )}
+
+              {rubricsSortedByValuable.map(cur =>
+                editedRubric && cur.id === editedRubric.data.id ? (
+                  <RubricForm key={cur.id} rubric={editedRubric.data} onSave={onSaveRubric} cancelFn={onCancelRubric} />
+                ) : (
+                  <RubricItem
+                    key={cur.id}
+                    username={username}
+                    onDuplicateRubric={() => onDuplicateRubric(cur)}
+                    rubric={cur}
+                    onTryIt={() => {
+                      setTryRubric(cur);
+                      setTryUserAnswers([]);
+                      setSelectedRubricItem(null);
+                      // setSelectedTryUserAnswer(null);
+                    }}
+                    onSave={onSaveRubric}
+                    onDisplayForm={rubricIsEditable(cur, username) ? () => onDisplayForm(cur) : undefined}
+                    onRemoveRubric={cur.createdBy === username ? () => onRemoveRubric(cur.id) : undefined}
+                    isSelected={tryRubric?.id === cur.id}
+                    tryUserAnswers={tryUserAnswers}
+                    onSelectRubricItem={setSelectedRubricItem}
+                    selectedRubricItem={selectedRubricItem}
+                    selectedUserAnswer={selectedUserAnswer}
+                  />
+                )
+              )}
+            </Stack>
+          )}
 
           <Divider sx={{ mt: "32px", mb: "36px" }} />
 

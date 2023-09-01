@@ -59,15 +59,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       `"sentences": [an array of sentences from the student's answer, which mention the key phrase.] If the student has not mentioned the key phrase anywhere in their answer, the value should be an empty array [].\n` +
       `}\n` +
       `Do not print anything other than this array of objects.`;
+    let gptResponse: string = "";
+    let numRequests = 0;
+    while (!gptResponse) {
+      try {
+        if (numRequests++ > 3) {
+          break;
+        }
+        const completion = await sendGPTPrompt("gpt-4", [
+          {
+            content: prompt,
+            role: "user",
+          },
+        ]);
+        gptResponse = completion?.choices?.[0]?.message?.content || "";
+      } catch (error) {
+        gptResponse = "";
+      }
+    }
 
-    const completion = await sendGPTPrompt("gpt-4", [
-      {
-        content: prompt,
-        role: "user",
-      },
-    ]);
-    let gptResponse: any = completion?.choices?.[0]?.message?.content || "";
-    console.log({ gptResponse });
+    if (!gptResponse) {
+      return res.status(500).send({
+        error: true,
+        reason: "GPT-4 failed to respond",
+      });
+    }
 
     const responseArray = JSON.parse(extractArray(gptResponse));
 
