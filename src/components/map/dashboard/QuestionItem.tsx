@@ -3,10 +3,13 @@ import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import SortIcon from "@mui/icons-material/Sort";
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useState } from "react";
 import { Question } from "src/client/firestore/questions.firestore";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+dayjs.extend(relativeTime);
 
 type QuestionItemProps = { question: Question; onSelectQuestion: (selectedQuestion: Question) => void };
 
@@ -33,9 +36,9 @@ export const QuestionItem = ({ question, onSelectQuestion }: QuestionItemProps) 
         <Stack direction="row" alignItems={"center"}>
           <SortIcon sx={{ mr: "8px", color: DESIGN_SYSTEM_COLORS.primary600 }} />
           <Typography>
-            {dayjs(question.createdAt).fromNow().includes("NaN")
+            {dayjs(new Date(question.createdAt)).fromNow().includes("NaN")
               ? "a few minutes ago"
-              : `${dayjs(question.createdAt).fromNow()}`}
+              : `${dayjs(new Date(question.createdAt)).fromNow()}`}
           </Typography>
         </Stack>
         <Stack direction={"row"}>
