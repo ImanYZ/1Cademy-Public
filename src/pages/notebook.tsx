@@ -422,7 +422,7 @@ const Notebook = ({}: NotebookProps) => {
 
   // const pathwayRef = useRef({ node: "", parent: "", child: "" });
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
-  const [selectedNotebookId, setSelectedNotebookId] = useState(user?.sNotebook);
+  const [selectedNotebookId, setSelectedNotebookId] = useState(user?.sNotebook || "");
   const selectedPreviousNotebookIdRef = useRef("");
   const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState<{ result: boolean }>({ result: true }); // this is used to trigger assistant sleep animation
 
