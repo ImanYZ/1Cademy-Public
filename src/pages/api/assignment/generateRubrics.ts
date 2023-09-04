@@ -17,13 +17,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<string[]>) {
       ${questionTitle}\n
       ${questionDescription}\n‘’'`;
 
-    const completion = await sendGPTPrompt("gpt-3.5-turbo", [
-      {
-        content: prompt,
-        role: "user",
-      },
-    ]);
-    let gptResponse: any = completion?.choices?.[0]?.message?.content || "";
+    let gptResponse: string = "";
+    let numRequests = 0;
+    while (!gptResponse) {
+      try {
+        if (numRequests++ > 3) {
+          break;
+        }
+        const completion = await sendGPTPrompt("gpt-4", [
+          {
+            content: prompt,
+            role: "user",
+          },
+        ]);
+        gptResponse = completion?.choices?.[0]?.message?.content || "";
+      } catch (error) {
+        gptResponse = "";
+      }
+    }
+
+    if (!gptResponse) {
+      return res.status(500).json(["failed"]);
+    }
+
     console.log({ gptResponse });
 
     const responseArray = JSON.parse(extractArray(gptResponse));

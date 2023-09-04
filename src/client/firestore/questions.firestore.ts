@@ -27,6 +27,8 @@ export type AddQuestionInput = {
   description: string;
   imageUrl: string;
   rubrics: Rubric[];
+  loadingRubrics?: boolean;
+  errorLoadingRubrics?: boolean;
 };
 
 export type UpdateQuestionInput = Partial<AddQuestionInput>;
@@ -35,13 +37,14 @@ type QuestionDocument = {
   title: string;
   description: string;
   imageUrl: string;
-  createdAt: Date;
   rubrics: Rubric[];
+  loadingRubrics?: boolean;
+  errorLoadingRubrics?: boolean;
 };
-export type Question = { id: string } & QuestionDocument;
+export type Question = { id: string; createdAt: Date } & QuestionDocument;
 
 export type QuestionChanges = {
-  data: Question;
+  data: { createdAt: Timestamp; id: string } & QuestionDocument;
   type: SnapshotChangesTypes;
 };
 
@@ -74,7 +77,7 @@ export const getQuestionSnapshot = (
     const docChanges = snapshot.docChanges();
 
     const questionDocuments: QuestionChanges[] = docChanges.map(change => {
-      const document = change.doc.data() as QuestionDocument;
+      const document = change.doc.data() as { createdAt: Timestamp } & QuestionDocument;
       return { type: change.type, data: { id: change.doc.id, ...document } };
     });
 
