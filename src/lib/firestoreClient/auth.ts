@@ -78,6 +78,7 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
       tagId: userData.tagId,
       deCredits: userData.deCredits,
       sNode: "sNode" in userData ? userData.sNode : null,
+      sNotebook: "sNotebook" in userData ? userData.sNotebook : null,
       practicing: userData.practicing,
       imageUrl: userData.imageUrl,
       fName: userData.fName,

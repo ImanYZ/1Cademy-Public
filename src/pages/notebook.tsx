@@ -421,9 +421,8 @@ const Notebook = ({}: NotebookProps) => {
   } = useInteractiveTutorial({ user });
 
   // const pathwayRef = useRef({ node: "", parent: "", child: "" });
-
   const [notebooks, setNotebooks] = useState<Notebook[]>([]);
-  const [selectedNotebookId, setSelectedNotebookId] = useState("");
+  const [selectedNotebookId, setSelectedNotebookId] = useState(user?.sNotebook || "");
   const selectedPreviousNotebookIdRef = useRef("");
   const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState<{ result: boolean }>({ result: true }); // this is used to trigger assistant sleep animation
 
@@ -1527,7 +1526,7 @@ const Notebook = ({}: NotebookProps) => {
       const usersRef = collection(db, "users");
       const userRef = doc(usersRef, user.uname);
 
-      await updateDoc(userRef, { sNode: nodeBookState.selectedNode });
+      await updateDoc(userRef, { sNode: nodeBookState.selectedNode, sNotebook: selectedNotebookId });
 
       const userNodeSelectLogRef = collection(db, "userNodeSelectLog");
       setDoc(doc(userNodeSelectLogRef), {

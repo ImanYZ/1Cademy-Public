@@ -410,6 +410,7 @@ export type User = {
   practicing?: boolean;
   // stateInfo?: string;// CHECK: I comment and add state
   sNode?: string;
+  sNotebook?: string;
   tag?: string;
   tagId?: string;
   uname: string;
