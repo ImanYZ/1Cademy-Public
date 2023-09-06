@@ -201,7 +201,6 @@ const UserSettigsSidebar = ({
 
   const [settingsValue, setSettingsValue] = React.useState(-1);
   const [settingsSubValue, setSettingsSubValue] = React.useState(-1);
-
   // const [levelThreshold, setLevelThreshold] = useState<number>(user.scaleThreshold ?? 100);
 
   const handleSettingsValue = (newValue: number) => {
@@ -841,7 +840,7 @@ const UserSettigsSidebar = ({
       }
       await batch.commit();
     }
-  }, [db, user.uname]);
+  }, [db, user.uname, selectedNotebookId]);
   //
   const loadOlderProposalsClick = useCallback(() => {
     if (lastIndex >= proposals.length) return;
