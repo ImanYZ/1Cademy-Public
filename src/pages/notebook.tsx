@@ -803,7 +803,6 @@ const Notebook = ({}: NotebookProps) => {
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}, selectNode = true) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
-
       const expanded = openWithDefaultValues.hasOwnProperty("open") ? Boolean(openWithDefaultValues.open) : true;
       // update graph with preloaded data, to get changes immediately
       setGraph(graph => {
@@ -884,6 +883,7 @@ const Notebook = ({}: NotebookProps) => {
             userNodeData.updatedAt = Timestamp.fromDate(new Date());
             delete userNodeData?.visible;
             delete userNodeData?.open;
+
             batch.update(userNodeRef, userNodeData);
           } else {
             userNodeData = {
@@ -896,6 +896,7 @@ const Notebook = ({}: NotebookProps) => {
               isStudied: false,
               bookmarked: false,
               node: nodeId,
+
               user: user.uname,
               wrong: false,
               notebooks: [selectedNotebookId],
@@ -7053,7 +7054,7 @@ const Notebook = ({}: NotebookProps) => {
         }}
       >
         {/* {isWritingOnDB && <NotebookPopup showIcon={false}>Writing DB</NotebookPopup>} */}
-        {Object.keys(graph.nodes).length === 0 && (
+        {Object.keys(graph.nodes).length === 0 && !firstLoading && (
           <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
         )}
 
