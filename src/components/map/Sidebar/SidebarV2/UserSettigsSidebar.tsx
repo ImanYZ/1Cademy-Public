@@ -38,6 +38,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getAuth } from "firebase/auth";
 import {
+  arrayRemove,
   collection,
   doc,
   getDocs,
@@ -826,12 +827,16 @@ const UserSettigsSidebar = ({
     if (confirm("Are you sure to hide all the nodes")) {
       const batch = writeBatch(db);
       const userNodesCol = collection(db, "userNodes");
-      const q = query(userNodesCol, where("user", "==", user.uname), where("visible", "==", true));
+      const q = query(
+        userNodesCol,
+        where("user", "==", user.uname),
+        where("notebooks", "array-contains", selectedNotebookId)
+      );
       const visibleUserNodes = await getDocs(q);
       for (const visibleUserNode of visibleUserNodes.docs) {
         const userNodeRef = doc(db, "userNodes", visibleUserNode.id);
         batch.update(userNodeRef, {
-          visible: false,
+          notebooks: arrayRemove(selectedNotebookId),
         });
       }
       await batch.commit();
