@@ -3,7 +3,7 @@ import React, { Dispatch } from "react";
 
 import { SimpleQuestionNode } from "./instructorsTypes";
 import { ActionTrackType, KnowledgeChoice } from "./knowledgeTypes";
-import { NodeType } from "./types";
+import { NodeType, SnapshotChangesTypes } from "./types";
 import { Flashcard } from "./types/IAssitantConversation";
 
 export type OpenPart = "LinkingWords" | "Tags" | "References" | undefined;
@@ -392,9 +392,9 @@ export type NodeFireStore = {
   locked?: boolean;
 };
 
-export type UserNodeChanges = { cType: string; uNodeId: string; uNodeData: UserNodeFirestore };
+export type UserNodeChanges = { cType: SnapshotChangesTypes; uNodeId: string; uNodeData: UserNodeFirestore };
 
-export type NodesData = { cType: string; nId: string; nData: NodeFireStore } | null;
+export type NodesData = { cType: SnapshotChangesTypes; nId: string; nData: NodeFireStore } | null;
 
 export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "updatedAt"> &
   Omit<NodeFireStore, "changedAt" | "createdAt" | "updatedAt" | "bookmarks"> & {
@@ -404,8 +404,8 @@ export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "
     isNew?: boolean;
     top: number;
     userNodeId: string;
-    nodeChangeType: string /*'added' | ''*/;
-    userNodeChangeType: string /*'added' | ''*/;
+    nodeChangeType: SnapshotChangesTypes; // TODO: check if we can remove it
+    userNodeChangeType: SnapshotChangesTypes;
     firstVisit: Date;
     lastVisit: Date;
     changedAt: Date;

@@ -21,15 +21,16 @@ type UseWorkerQueueProps = {
       edges: EdgesData;
     }>
   >;
-  setMapWidth: any;
-  setMapHeight: any;
+  setMapWidth: (value: number) => void;
+  setMapHeight: (value: number) => void;
   mapWidth: number;
   mapHeight: number;
   allTags: AllTagsTreeView;
   onComplete: () => void;
-  setClusterNodes: any;
+  setClusterNodes: (value: any) => void;
   withClusters: boolean;
 };
+
 export const useWorkerQueue = ({
   setNodeUpdates,
   g,
@@ -58,29 +59,16 @@ export const useWorkerQueue = ({
       let oldNodes = { ...nodesToRecalculate };
       let oldEdges = { ...edgesToRecalculate };
       setIsWorking(true);
-      if (workerRef.current) {
-        workerRef.current.terminate();
-        workerRef.current = null;
-      }
+      // if (workerRef.current) {
+      //   workerRef.current.terminate();
+      //   workerRef.current = null;
+      // }
+      // This was commenter temporally, because is not used, we don't need to force to terminate the worker, we need to wait until worker complete its tasks
+      // remember the worker execute tasks efficiently because we grouped all jobs into 1
 
       const worker: Worker = new Worker(new URL("../workers/MapWorker.ts", import.meta.url));
       workerRef.current = worker;
 
-      worker.postMessage({
-        oldMapWidth,
-        oldMapHeight,
-        oldNodes,
-        oldEdges,
-        allTags,
-        graph: dagreUtils.mapGraphToObject(g.current),
-        withClusters,
-        computedState: (g.current.graph() as any).computedState,
-      });
-      worker.onerror = err => {
-        console.error("[WORKER]error:", err);
-        worker.terminate();
-        setIsWorking(false);
-      };
       worker.onmessage = e => {
         const { oldMapWidth, oldMapHeight, oldNodes, oldEdges, graph, oldClusterNodes, computedState } = e.data;
 
@@ -166,6 +154,23 @@ export const useWorkerQueue = ({
         onComplete();
         setIsWorking(false);
       };
+
+      worker.onerror = err => {
+        console.error("[WORKER]error:", err);
+        worker.terminate();
+        setIsWorking(false);
+      };
+
+      worker.postMessage({
+        oldMapWidth,
+        oldMapHeight,
+        oldNodes,
+        oldEdges,
+        allTags,
+        graph: dagreUtils.mapGraphToObject(g.current),
+        withClusters,
+        computedState: (g.current.graph() as any).computedState,
+      });
     },
     [
       allTags,
@@ -211,8 +216,8 @@ export const useWorkerQueue = ({
   );
 
   const queueFinished = useMemo(() => {
-    if (!didWork) return false; // it dident execute a task before
-    if (queue.length) return false; // it has pendient tasks
+    if (!didWork) return false; // it didn't execute a task before
+    if (queue.length) return false; // it has pending tasks
 
     // if (isQueueWorking) return false; // is working now
     return true;
