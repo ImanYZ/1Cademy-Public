@@ -585,7 +585,9 @@ export const UpDownVoteNode = async ({
     wrongs: nodeData.wrongs + wrongChange,
     corrects: nodeData.corrects + correctChange,
   };
-  if (!deleteNode) {
+  if (deleteNode) {
+    nodeChanges.deleted = true;
+  } else {
     // TODO: move these to queue
     await detach(async () => {
       let batch = db.batch();
