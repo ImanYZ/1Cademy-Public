@@ -227,7 +227,7 @@ export const RubricsEditor = ({ question, username, onReturnToQuestions, onSetQu
             <Stack spacing={"28px"}>
               {rubricsSortedByValuable.length === 0 && question.errorLoadingRubrics && (
                 <Typography variant="body1" color="error" sx={{ mb: "32px" }}>
-                  {"The're was an error generating the rubrics using GPT4"}
+                  {"There was an error generating the rubrics. Please try again."}
                 </Typography>
               )}
 
