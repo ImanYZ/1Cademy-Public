@@ -24,6 +24,7 @@ export const signalFlashcardChanges = async (nodeId: string, type: string) => {
             flashcard.fullname = nodeData.aFullname;
             flashcard.user = nodeData.admin;
             flashcard.userImage = nodeData.aImgUrl;
+            flashcard.type = nodeData.nodeType;
           }
         }
       });
