@@ -213,6 +213,8 @@ const layoutHandler = (
  * to update cache, increase SERVICE_WORKER_VERSION in service-worker.js
  */
 
+// g -> class -> | obj -> class -> layout() -> obj -> | class
+
 onmessage = e => {
   const {
     /*mapChangedFlag,*/

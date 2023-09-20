@@ -18,6 +18,8 @@ import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { getNodeTypesFromNode, MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
+import { AllTagsTreeView } from "@/components/TagsSearcher";
+
 import { EdgesData, FullNodeData, FullNodesData, NodeFireStore } from "../../nodeBookTypes";
 import { getTypedCollections } from "./getTypedCollections";
 import { gtmEvent } from "./utils";
@@ -289,11 +291,11 @@ export const setDagNode = (
   g: dagre.graphlib.Graph<{}>,
   nodeId: string,
   node: any,
-  oldNodes: any,
-  allTags: any,
+  oldNodes: FullNodesData,
+  allTags: AllTagsTreeView,
   withClusters: boolean,
   callback?: any
-) => {
+): FullNodesData => {
   let newNode: any = {};
   node.width ? node.width : NODE_WIDTH;
   if ("width" in node) {
@@ -715,9 +717,9 @@ export const createOrUpdateNode = (
   g: dagre.graphlib.Graph<{}>,
   newNode: FullNodeData,
   nodeId: string,
-  oldNodes: any,
+  oldNodes: FullNodesData,
   oldEdges: EdgesData,
-  allTags: any,
+  allTags: AllTagsTreeView,
   withClusters: boolean
 ) => {
   // CHECK: object.children was node by I changed with newNode
@@ -750,7 +752,7 @@ export const createOrUpdateNode = (
   // let height = NODE_HEIGHT;
   // height needs to continually be set to account for variation in node title, content, and image
   // if node is currently hidden on the map
-  if (!(nodeId in oldNodes)) {
+  if (!oldNodes.hasOwnProperty(nodeId)) {
     newNodeData = {
       ...newNode,
       // editable: false,

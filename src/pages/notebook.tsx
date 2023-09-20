@@ -191,7 +191,7 @@ export type ChosenType = "Proposals" | "Citations";
 export type OnSelectNodeInput = { nodeId: string; chosenType: ChosenType; nodeType: any };
 export type OnChangeChosenNode = { nodeId: string; title: string };
 
-type RateProosale = {
+type RateProposal = {
   proposals: INodeVersion[];
   setProposals: (proposals: INodeVersion[]) => void;
   proposalId: string;
@@ -4851,7 +4851,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const rateProposal = useCallback(
-    async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProosale) => {
+    async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProposal) => {
       if (!selectedNotebookId) return;
       if (!user) return;
       if (!nodeBookState.selectedNode) return;

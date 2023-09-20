@@ -4,7 +4,7 @@
  * - this will print [FUNCTION_NAME]
  * - logInUpperCase must be writer to sho log like this: FUNCTION_NAME
  */
-const disableLogsTemporally = true;
+const disableLogsTemporally = false;
 const disableTutorialLogs = true;
 const disableWorkerLogs = false;
 export const devLog = (logInUpperCase: string, otherData = {}, type?: "TUTORIAL" | "WORKER") => {

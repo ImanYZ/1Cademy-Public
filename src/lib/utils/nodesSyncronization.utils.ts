@@ -121,6 +121,7 @@ export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: N
 
   return res;
 };
+
 export const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
   return newAllNodes.reduce(
     (acu, cur) => {
@@ -149,7 +150,7 @@ export const fillDagre = (
 ): { result: { newNodes: FullNodesData; newEdges: EdgesData }; updatedNodeIds: string[] } => {
   let updatedNodeIds: string[] = [];
   const result = fullNodes.reduce(
-    (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
+    (acu: { newNodes: FullNodesData; newEdges: EdgesData }, cur) => {
       let tmpNodes = {};
       let tmpEdges = {};
 
@@ -269,7 +270,6 @@ export const synchronizeGraph = ({
     // if this doesn't exist will set top:0 and left: 0 + NODE_WIDTH + COLUMN_GAP
     const nodeParent = hasParent ? nodes[cur.parents[0].node] : null;
     const topParent = nodeParent?.top ?? 0;
-
     const leftParent = nodeParent?.left ?? 0;
     const notebookIdx = (cur?.notebooks ?? []).findIndex(c => c === selectedNotebookId);
 
