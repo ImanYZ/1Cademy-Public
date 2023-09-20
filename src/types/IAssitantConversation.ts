@@ -81,6 +81,9 @@ export type Flashcard = {
   proposal?: string;
   flashcardId?: string;
   id?: string;
+  userImage?: string;
+  user?: string;
+  fullname?: string;
 };
 
 export type FlashcardResponse = Flashcard[];

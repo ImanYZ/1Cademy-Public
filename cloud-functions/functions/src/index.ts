@@ -4,6 +4,8 @@ import * as functions from "firebase-functions";
 
 admin.initializeApp();
 
+import { signalFlashcardChanges } from "./helpers";
+
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
 
@@ -85,6 +87,25 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
     const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
     recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
+
+export const onNodeUpdated = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const newValue = change.after.data();
+    const previousValue = change.before.data();
+    const nodeId = change.after.id;
+
+    if (newValue.content !== previousValue.content || newValue.title !== previousValue.title) {
+      console.log("node updated", nodeId);
+      signalFlashcardChanges(nodeId, "update");
+    }
+    if (newValue.deleted) {
+      console.log("node deleted", nodeId);
+      signalFlashcardChanges(nodeId, "delete");
+    }
   } catch (error) {
     console.log("error:", error);
   }

@@ -445,7 +445,7 @@ describe("POST /api/wrongNode", () => {
     expect(res._getStatusCode()).toEqual(200);
   });
 
-  it("Should be deleted field true of nodes", async () => {
+  it("Should be deleted: field=true of nodes", async () => {
     expect(nodeDoc.data()?.deleted).toEqual(true);
   });
 
