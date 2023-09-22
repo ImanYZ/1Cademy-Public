@@ -15,6 +15,7 @@ export const signalFlashcardChanges = async (nodeId: string, type: string) => {
         if (flashcard.node === nodeId) {
           needUpdate = true;
           if (type === "delete") {
+            flashcard.deleted = true;
             flashcard.proposed = false;
             flashcard.node = "";
             flashcard.proposal = "";
