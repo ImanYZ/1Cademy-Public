@@ -239,6 +239,7 @@ export const sendMessageToGPT4 = async (
 ): Promise<CreateChatCompletionResponse> => {
   const config = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_API_ORG_ID,
   });
 
   const openai = new OpenAIApi(config);
@@ -264,6 +265,7 @@ export const sendMessageToGPT4V2 = async (
 ): Promise<CreateChatCompletionResponse> => {
   const config = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_API_ORG_ID,
   });
 
   const openai = new OpenAIApi(config);
@@ -285,6 +287,7 @@ export const sendMessageToGPT4V2 = async (
 export const sendGPTPrompt = async (model: "gpt-3.5-turbo" | "gpt-4", messages: ChatCompletionRequestMessage[]) => {
   const config = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_API_ORG_ID,
   });
 
   const openai = new OpenAIApi(config);
