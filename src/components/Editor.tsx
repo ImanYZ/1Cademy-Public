@@ -37,8 +37,6 @@ export const Editor = ({
   editOption = "EDIT",
   showEditPreviewSection = true,
   disabled = false,
-  proposalsSelected = false,
-  added = false,
 }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
@@ -124,16 +122,15 @@ export const Editor = ({
             />
           ) : (
             <Box>
-              {proposalsSelected && (
+              {/* {proposalsSelected && (
                 <Box dangerouslySetInnerHTML={{ __html: value }} sx={{ ...sxPreview, color: added ? "green" : "" }} />
-              )}
-              {!proposalsSelected && (
-                <MarkdownRender
-                  text={value}
-                  customClass={"custom-react-markdown"}
-                  sx={{ ...sxPreview, fontWeight: 400, letterSpacing: "inherit" }}
-                />
-              )}
+              )} */}
+
+              <MarkdownRender
+                text={value}
+                customClass={"custom-react-markdown"}
+                sx={{ ...sxPreview, fontWeight: 400, letterSpacing: "inherit" }}
+              />
             </Box>
           )}
         </Box>
