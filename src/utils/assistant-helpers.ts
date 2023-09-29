@@ -1127,3 +1127,56 @@ export const generateQuestionNode = async (
     return await generateQuestionNode(nodeTitle, nodeContent, context);
   }
 };
+
+export const generateFlashcard = async (
+  passages: string[],
+  context: ChatCompletionRequestMessage[]
+): Promise<{
+  Stem: string;
+  Choices: {
+    choice: string;
+    correct: boolean;
+    feedback: string;
+  }[];
+}> => {
+  let prompt: string =
+    `Flashcards are in two types: Concept or Relation\n` +
+    `A "Concept" flashcard defines/explains a single concept.The format of this flashcard should be in a single paragraph.\n` +
+    `A "Relation" flashcard explains some relationships between multiple concepts.\n` +
+    `Print as many flashcards as possible for students' learning  ONLY from the following triple-quoted text:` +
+    `'''\n` +
+    JSON.stringify(passages) +
+    `\n'''` +
+    `NEVER print any information beyond the provided text.\n` +
+    `Print a array of flashcards, a flashcard as a JSON object with the following keys:\n` +
+    `{\n` +
+    `"title": The flashcard title as a string. Each title should be stand-alone such that a student would understand it without any need to look up images or other resources.\n` +
+    `"content": The flashcard content as a string,\n` +
+    `"type": Concept or Relation\n` +
+    `}\n` +
+    `If you cannot extract any valuable information from the text, print an empty array [].`;
+
+  context.push({
+    content: prompt,
+    role: "user",
+  });
+
+  const gptResponse = await sendGPTPrompt("gpt-4", context);
+
+  const response: string = gptResponse?.choices?.[0]?.message?.content || "";
+  console.log(response);
+  if (gptResponse?.choices?.[0]) {
+    context.push({
+      content: gptResponse?.choices?.[0]?.message?.content!,
+      role: "assistant",
+    });
+  }
+  try {
+    const start = response.indexOf("[");
+    const end = response.lastIndexOf("]");
+    const jsonArrayString = response.slice(start, end + 1);
+    return JSON.parse(jsonArrayString);
+  } catch (err) {
+    return await generateFlashcard(passages, context);
+  }
+};
