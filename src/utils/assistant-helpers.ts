@@ -1139,22 +1139,23 @@ export const generateFlashcard = async (
     feedback: string;
   }[];
 }> => {
-  let prompt: string =
-    `Flashcards are in two types: Concept or Relation\n` +
-    `A "Concept" flashcard defines/explains a single concept.The format of this flashcard should be in a single paragraph.\n` +
-    `A "Relation" flashcard explains some relationships between multiple concepts.\n` +
-    `Print as many flashcards as possible for students' learning  ONLY from the following triple-quoted text:` +
-    `'''\n` +
-    JSON.stringify(passages) +
-    `\n'''` +
-    `NEVER print any information beyond the provided text.\n` +
-    `Print a array of flashcards, a flashcard as a JSON object with the following keys:\n` +
-    `{\n` +
-    `"title": The flashcard title as a string. Each title should be stand-alone such that a student would understand it without any need to look up images or other resources.\n` +
-    `"content": The flashcard content as a string,\n` +
-    `"type": Concept or Relation\n` +
-    `}\n` +
-    `If you cannot extract any valuable information from the text, print an empty array [].`;
+  let prompt: string = `
+  Flashcards are in two types: Concept or Relation\n
+  - A "Concept" flashcard defines/explains a concept.\n
+  - A "Relation" flashcard explains some relationships between multiple concepts.\n
+  Print a JSON array of objects, each representing a flashcard. Include as many flashcards as possible for students to learn, ONLY from the following triple-quoted JSON object of paragraphs:\n
+  '''
+  ${JSON.stringify(passages)}
+  '''\n
+  Do not include any information beyond the provided text. Each array item (flashcard) should be a JSON object with the following keys:\n
+  {
+  "why_matters": A string explaining why this flashcard is important for students to learn.,
+  "paragraphs": [An array of the paragraph keys that were used in the flashcard. The keys come from the JSON object.],
+  "title": The flashcard title as a string,
+  "content": The flashcard content as a paraphrased string,,
+  "type": Concept or Relation,
+  "image":[Optional. If the flashcard includes an image, the image key should be included here.]
+  }`;
 
   context.push({
     content: prompt,
@@ -1171,12 +1172,9 @@ export const generateFlashcard = async (
       role: "assistant",
     });
   }
-  try {
-    const start = response.indexOf("[");
-    const end = response.lastIndexOf("]");
-    const jsonArrayString = response.slice(start, end + 1);
-    return JSON.parse(jsonArrayString);
-  } catch (err) {
-    return await generateFlashcard(passages, context);
-  }
+
+  const start = response.indexOf("[");
+  const end = response.lastIndexOf("]");
+  const jsonArrayString = response.slice(start, end + 1);
+  return JSON.parse(jsonArrayString);
 };
