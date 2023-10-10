@@ -1,4 +1,5 @@
 // const { db } = require("./admin");
+import { db } from "./admin";
 const fs = require("fs");
 const axios = require("axios");
 // On 1Cademy.com when users sign up, we do not make the corresponding changes
@@ -10,9 +11,9 @@ exports.updateInstitutions = async () => {
   for (let institObj of JSON.parse(rawdata)) {
     institutionCountries[institObj.name] = institObj.country;
   }
-  let userDocs = await db.collection("users").get();
-  userDocs = [...userDocs.docs];
-  for (let userDoc of userDocs) {
+  const userDocs = await db.collection("users").get();
+
+  for (let userDoc of userDocs.docs) {
     const userData = userDoc.data();
 
     if (userData.deInstit && !userData.institUpdated) {

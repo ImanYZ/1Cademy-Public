@@ -9,6 +9,8 @@ import { signalFlashcardChanges } from "./helpers";
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
 
+import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
+
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
@@ -121,6 +123,21 @@ export const onNodeUpdated = functions.firestore.document("/nodes/{id}").onUpdat
     }
   } catch (error) {
     console.log("error:", error);
+  }
+});
+
+export const onNodeDeleted = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const updatedData = change.after.data();
+    const previousData = change.before.data();
+    const nodeId = change.after.id;
+    console.log("updatedData.deleted", updatedData.deleted);
+    if (!previousData.deleted && updatedData.deleted) {
+      console.log("node deleted", nodeId);
+      await nodeDeletedUpdates({ nodeId, nodeData: updatedData });
+    }
+  } catch (error) {
+    console.log("error onNodeDeleted:", error);
   }
 });
 

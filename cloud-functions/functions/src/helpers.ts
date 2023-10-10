@@ -1,4 +1,4 @@
-const { db, commitBatch, batchUpdate } = require("./admin");
+import { db, commitBatch, batchUpdate } from "./admin";
 
 export const signalFlashcardChanges = async (nodeId: string, type: string) => {
   const nodeDoc = await db.collection("nodes").doc(nodeId).get();
