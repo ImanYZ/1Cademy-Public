@@ -21,7 +21,7 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   // corresponding Firestore document.
   const userStatusFirestoreRef = firestore.doc(`status/${context.params.uname}`);
   const userStatusDoc = await userStatusFirestoreRef.get();
-  const sessionIds = [];
+  const sessionIds: any = [];
 
   if (userStatusDoc.exists) {
     const userStatusData = userStatusDoc.data();
@@ -80,8 +80,21 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     const MILLISECONDS_IN_A_DAY = 86400000;
     // expired is -2 days ago, to remove document in 24h, because TTL remove in 72h
     const twoDaysAgo = new Date(Number(today) - 2 * MILLISECONDS_IN_A_DAY);
-    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo) });
 
+    const receiversData: any = {};
+
+    for (let receiver of data.receivers) {
+      const receiverDoc = await firestore.collection("users").doc(receiver).get();
+      if (receiverDoc.exists) {
+        const receiverData = receiverDoc.data();
+        receiversData[receiver] = {
+          fullname: receiverData?.fName + " " + receiverData?.lName,
+          chooseUname: receiverData?.chooseUname,
+          imageUrl: receiverData?.imageUrl,
+        };
+      }
+    }
+    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo), receiversData });
     // create recentUserNodes
     const recentUserNodesRef = firestore.collection("recentUserNodes");
     // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
