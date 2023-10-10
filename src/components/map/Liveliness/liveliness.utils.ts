@@ -88,16 +88,18 @@ export const synchronizeReputations: SynchronizeActionTracksFunction = (prevUser
   const docType = actionTrackChange.type;
   const curData = actionTrackChange.data as IActionTrack & { id: string };
 
-  curData.receivers.forEach(receiverData => {
-    const index = curData.receivers.indexOf(receiverData);
+  curData.receivers.forEach((receiver, index: number) => {
+    //const uname = receiver;
+    //const index = curData.receivers.findIndex(receiverData);
+    const receiverData = curData.receiversData[receiver];
 
     if (docType === "added") {
-      if (!prevUserInteractions.hasOwnProperty(receiverData)) {
-        prevUserInteractions[receiverData] = {
-          id: curData.id,
-          imageUrl: curData.imageUrl,
-          chooseUname: curData.chooseUname,
-          fullname: curData.fullname,
+      if (!prevUserInteractions.hasOwnProperty(receiver)) {
+        prevUserInteractions[receiver] = {
+          id: receiver,
+          imageUrl: receiverData.imageUrl,
+          chooseUname: receiverData.chooseUname,
+          fullname: receiverData.fullname,
           count: 0,
           actions: [],
           reputation: null,
@@ -105,10 +107,8 @@ export const synchronizeReputations: SynchronizeActionTracksFunction = (prevUser
       }
       if (curData.type === "NodeVote") {
         if (curData.action !== "CorrectRM" && curData.action !== "WrongRM") {
-          prevUserInteractions[receiverData].actions.push(curData.action as ActionTrackType);
-          prevUserInteractions[receiverData].count += curData.receiverPoints
-            ? Number(curData.receiverPoints[index])
-            : 0;
+          prevUserInteractions[receiver].actions.push(curData.action as ActionTrackType);
+          prevUserInteractions[receiver].count += curData.receiverPoints ? Number(curData.receiverPoints[index]) : 0;
           for (const receiver of curData.receivers) {
             if (prevUserInteractions.hasOwnProperty(receiver)) {
               prevUserInteractions[receiver].reputation = curData.action === "Correct" ? "Gain" : "Loss";
@@ -118,10 +118,10 @@ export const synchronizeReputations: SynchronizeActionTracksFunction = (prevUser
       } else if (curData.type === "RateVersion") {
         if (curData.action.includes("Correct-") || curData.action.includes("Wrong-")) {
           const currentAction: ActionTrackType = curData.action.includes("Correct-") ? "Correct" : "Wrong";
-          prevUserInteractions[receiverData].actions.push(currentAction);
-          prevUserInteractions[receiverData].count += curData.action.includes("Correct-") ? 1 : -1;
-          if (prevUserInteractions[receiverData].count < 0) {
-            prevUserInteractions[receiverData].count = 0;
+          prevUserInteractions[receiver].actions.push(currentAction);
+          prevUserInteractions[receiver].count += curData.action.includes("Correct-") ? 1 : -1;
+          if (prevUserInteractions[receiver].count < 0) {
+            prevUserInteractions[receiver].count = 0;
           }
           for (const receiver of curData.receivers) {
             if (prevUserInteractions.hasOwnProperty(receiver)) {
@@ -133,10 +133,10 @@ export const synchronizeReputations: SynchronizeActionTracksFunction = (prevUser
     }
 
     if (docType === "removed") {
-      if (prevUserInteractions.hasOwnProperty(receiverData)) {
-        prevUserInteractions[receiverData].count -= 1;
-        if (prevUserInteractions[receiverData].count <= 0) {
-          delete prevUserInteractions[receiverData];
+      if (prevUserInteractions.hasOwnProperty(receiver)) {
+        prevUserInteractions[receiver].count -= 1;
+        if (prevUserInteractions[receiver].count <= 0) {
+          delete prevUserInteractions[receiver];
         }
       }
     }

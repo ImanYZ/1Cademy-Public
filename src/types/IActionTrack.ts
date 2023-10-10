@@ -27,6 +27,7 @@ export type IActionTrack = {
   fullname: string;
   imageUrl: string;
   receivers: string[]; // single for rateVersion and multiple for node vote
+  receiversData?: any;
   receiverPoints?: number[];
   email: string;
 };

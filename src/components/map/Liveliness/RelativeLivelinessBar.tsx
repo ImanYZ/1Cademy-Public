@@ -159,6 +159,7 @@ const RelativeLivelinessBar = ({
             {userActionsToDisplay.map((cur, idx) =>
               cur ? (
                 <UserBubble
+                  variant={variant}
                   key={cur.uname}
                   displayEmails={authEmail === "oneweb@umich.edu"}
                   isOnline={onlineUsers.includes(cur.uname)}

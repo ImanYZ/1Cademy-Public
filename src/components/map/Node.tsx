@@ -9,6 +9,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ShareIcon from "@mui/icons-material/Share";
+import { LoadingButton } from "@mui/lab";
 import {
   Accordion,
   AccordionDetails,
@@ -378,6 +379,7 @@ const Node = ({
   const [contentCopy, setContentCopy] = useState(content);
   const [isLoading, startTransition] = useTransition();
   const [imageHeight, setImageHeight] = useState(100);
+  const [proposeLoading, setProposeLoading] = useState<boolean>(false);
   const imageElementRef = useRef<HTMLImageElement | null>(null);
 
   const childNodeButtonsAnimation = keyframes({
@@ -612,8 +614,9 @@ const Node = ({
 
   const proposalSubmit = useCallback(
     () => {
+      setProposeLoading(true);
       // here disable button
-      setTimeout(() => {
+      setTimeout(async () => {
         const firstParentId: Parent = parents[0];
         setEditingModeNode(false);
 
@@ -630,7 +633,8 @@ const Node = ({
           return;
         }
 
-        saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        await saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        setProposeLoading(false);
         notebookRef.current.selectedNode = identifier;
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -1467,7 +1471,7 @@ const Node = ({
               >
                 Cancel
               </Button>
-              <Button
+              <LoadingButton
                 id={`${identifier}-button-propose-proposal`}
                 color="success"
                 variant="contained"
@@ -1477,9 +1481,10 @@ const Node = ({
                 sx={{
                   padding: "6px",
                 }}
+                loading={proposeLoading}
               >
                 Propose
-              </Button>
+              </LoadingButton>
             </Box>
           </>
         )}
