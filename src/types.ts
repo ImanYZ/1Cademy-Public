@@ -33,6 +33,7 @@ export type SimpleNode2 = {
   institutions: { name: string }[];
   versions: number;
   studied?: boolean;
+  isTag?: boolean;
 };
 
 export type NotebookDocument = {

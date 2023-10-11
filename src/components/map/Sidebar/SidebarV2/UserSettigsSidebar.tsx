@@ -68,7 +68,8 @@ import { NodeType } from "src/types";
 import { IOSSwitch } from "@/components/IOSSwitcher";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import ResetPasswordForm from "@/components/ResetPasswordForm";
-import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
+import { AllTagsTreeView, ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
+import useConfirmationDialog from "@/hooks/useConfirmDialog";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Post } from "@/lib/mapApi";
@@ -183,7 +184,7 @@ const UserSettigsSidebar = ({
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
   const theme = useTheme();
-
+  const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const { allTags, setAllTags } = useTagsTreeView(user.tagId ? [user.tagId] : []);
   const [languages, setLanguages] = useState<string[]>([]);
   const [countries, setCountries] = useState<ICountry[]>([]);
@@ -271,6 +272,27 @@ const UserSettigsSidebar = ({
     setFoundFromOtherValue(user.foundFrom ?? "");
     setGenderOtherValue(user.gender ?? "");
   }, [user]);
+
+  useEffect(() => {
+    const targetTag: any = user.tagId;
+    setAllTags(oldAllTags => {
+      const updatedTag = {
+        [targetTag]: { ...oldAllTags[targetTag], checked: true },
+      };
+      delete oldAllTags[targetTag];
+      const newAllTags: AllTagsTreeView = {
+        ...updatedTag,
+        ...oldAllTags,
+      };
+
+      for (let aTag in newAllTags) {
+        if (aTag !== targetTag && newAllTags[aTag].checked) {
+          newAllTags[aTag] = { ...newAllTags[aTag], checked: false };
+        }
+      }
+      return newAllTags;
+    });
+  }, [user.tagId]);
 
   useEffect(() => {
     const getLanguages = async () => {
@@ -543,8 +565,11 @@ const UserSettigsSidebar = ({
 
   const choosingNodeClick = useCallback(
     (choosingNodeTag: string) => {
-      notebookRef.current.choosingNode = { id: choosingNodeTag, type: null };
-      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } });
+      notebookRef.current.choosingNode = { id: choosingNodeTag, type: "Tag" };
+      notebookRef.current.chosenNode = null;
+
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: "Tag" } });
     },
     [nodeBookDispatch]
   );
@@ -823,7 +848,7 @@ const UserSettigsSidebar = ({
   };
 
   const removeAllNodes = useCallback(async () => {
-    if (confirm("Are you sure to hide all the nodes")) {
+    if (await confirmIt("Are you sure to hide all the nodes")) {
       const batch = writeBatch(db);
       const userNodesCol = collection(db, "userNodes");
       const q = query(
@@ -1849,7 +1874,7 @@ const UserSettigsSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [newTabsItems, value]);
+  }, [newTabsItems, value, chosenTags]);
 
   const shouldShowTagSearcher = useMemo(() => {
     return nodeBookState?.choosingNode?.id === "Tag";
@@ -1953,6 +1978,7 @@ const UserSettigsSidebar = ({
     allTags,
     choosingNodeClick,
     chosenTags,
+    setChosenTags,
     closeTagSelector,
     instlogoURL,
     isLoading,
@@ -1971,22 +1997,25 @@ const UserSettigsSidebar = ({
   ]);
 
   return (
-    <SidebarWrapper
-      id="sidebar-wrapper-user-settings"
-      title=""
-      contentSignalState={contentSignalState}
-      open={open}
-      onClose={onClose}
-      width={430}
-      SidebarOptions={open ? SidebarOptions : null}
-      SidebarContent={
-        open ? (
-          <Box pb="16px" height={"100%"}>
-            {newTabsItems[value].content}
-          </Box>
-        ) : null
-      }
-    />
+    <Box>
+      <SidebarWrapper
+        id="sidebar-wrapper-user-settings"
+        title=""
+        contentSignalState={contentSignalState}
+        open={open}
+        onClose={onClose}
+        width={430}
+        SidebarOptions={open ? SidebarOptions : null}
+        SidebarContent={
+          open ? (
+            <Box pb="16px" height={"100%"}>
+              {newTabsItems[value].content}
+            </Box>
+          ) : null
+        }
+      />
+      {ConfirmDialog}
+    </Box>
   );
 };
 

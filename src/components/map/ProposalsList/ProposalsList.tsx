@@ -10,6 +10,7 @@ import { INodeVersion } from "src/types/INodeVersion";
 
 import { Editor } from "@/components/Editor";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
+import useConfirmationDialog from "@/hooks/useConfirmDialog";
 
 import { proposalSummariesGenerator } from "../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../lib/utils/shortenNumber";
@@ -36,7 +37,7 @@ type ProposalsListProps = {
 
 const ProposalsList = ({ deleteProposal, ...props }: ProposalsListProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
+  const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const rateProposalClick = useCallback(
     (proposal: INodeVersion, proposalIdx: number, correct: boolean, wrong: boolean, award: boolean) => {
       return props.rateProposal({
@@ -55,8 +56,8 @@ const ProposalsList = ({ deleteProposal, ...props }: ProposalsListProps) => {
 
   const deleteProposalClick = useCallback(
     async (proposal: any, proposalIdx: any) => {
-      let deleteOK = false;
-      deleteOK = window.confirm("You are going to permanently delete this proposal. Are you sure?");
+      let deleteOK: any = false;
+      deleteOK = await confirmIt("You are going to permanently delete this proposal. Are you sure?");
       if (!deleteOK) return;
 
       setIsDeleting(true);
@@ -71,7 +72,7 @@ const ProposalsList = ({ deleteProposal, ...props }: ProposalsListProps) => {
   // };
 
   return (
-    <>
+    <Box>
       {props.proposals.map((proposal: any, proposalIdx: number) => {
         const proposalSummaries = proposalSummariesGenerator(proposal);
         // const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
@@ -110,7 +111,8 @@ const ProposalsList = ({ deleteProposal, ...props }: ProposalsListProps) => {
           }
         }
       })}
-    </>
+      {ConfirmDialog}
+    </Box>
   );
 };
 
