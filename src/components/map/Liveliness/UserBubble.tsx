@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
-import { UserInteraction, UserInteractionData } from "./liveliness.utils";
+import {
+  AbsoluteLivelinessTypes,
+  RelativeLivelinessTypes,
+  UserInteraction,
+  UserInteractionData,
+} from "./liveliness.utils";
 
 type UserBubbleProps = {
   userInteraction: UserInteractionData;
@@ -12,6 +17,7 @@ type UserBubbleProps = {
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   size?: number;
   sx?: SxProps<Theme>;
+  variant: RelativeLivelinessTypes | AbsoluteLivelinessTypes;
 };
 
 export const UserBubble = ({
@@ -21,6 +27,7 @@ export const UserBubble = ({
   openUserInfoSidebar,
   size = 28,
   sx,
+  variant,
 }: UserBubbleProps) => {
   const [className, setClassName] = useState("");
 
@@ -46,7 +53,8 @@ export const UserBubble = ({
             </Box>
           )}
           <Box component={"p"} sx={{ my: 0 }}>
-            {userInteraction.count.toFixed(2)} Point
+            {userInteraction.count.toFixed(2)}{" "}
+            {variant === "absoluteReputations" || variant === "relativeReputations" ? "Points" : "Interactions"}
             {userInteraction.count > 1 ? "s" : ""}
           </Box>
         </Box>

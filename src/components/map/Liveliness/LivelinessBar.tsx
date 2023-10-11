@@ -120,6 +120,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
               cur ? (
                 <React.Fragment key={idx}>
                   <UserBubble
+                    variant={variant}
                     key={cur.uname}
                     displayEmails={authEmail === "oneweb@umich.edu"}
                     isOnline={onlineUsers.includes(cur.uname)}
