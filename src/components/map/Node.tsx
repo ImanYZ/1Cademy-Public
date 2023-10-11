@@ -250,6 +250,7 @@ const Node = ({
   editable,
   unaccepted,
   nodeType,
+  isTag,
   isNew,
   newParent,
   title,
@@ -793,8 +794,13 @@ const Node = ({
       setToBeEligible(false);
       return;
     }
-
-    setToBeEligible(true);
+    if (notebookRef.current.choosingNode?.type === "Tag") {
+      if (isTag) {
+        setToBeEligible(true);
+      }
+    } else {
+      setToBeEligible(true);
+    }
   };
 
   const onMouseLeaveHandler = () => {
@@ -1356,6 +1362,7 @@ const Node = ({
             openPart={openPart}
             nodeType={nodeType}
             isNew={isNew}
+            isTag={isTag}
             admin={admin}
             aImgUrl={aImgUrl}
             aFullname={aFullname}
@@ -1523,6 +1530,7 @@ const Node = ({
               unaccepted={unaccepted}
               openPart={openPart}
               nodeType={nodeType}
+              isTag={isTag}
               isNew={isNew}
               admin={admin}
               aImgUrl={aImgUrl}

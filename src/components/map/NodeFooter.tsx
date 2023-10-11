@@ -79,6 +79,7 @@ type NodeFooterProps = {
   openPart: OpenPart;
   nodeType: any;
   isNew: any;
+  isTag: any;
   admin: any;
   aImgUrl: any;
   aFullname: any;
@@ -147,6 +148,7 @@ const NodeFooter = ({
   openPart,
   nodeType,
   isNew,
+  isTag,
   admin,
   aImgUrl,
   aFullname,
@@ -1751,12 +1753,16 @@ const NodeFooter = ({
               borderRadius: "26px",
               backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
               mt: "5px",
-              display: choosingNode?.type === "Reference" && choosingNode.type !== nodeType ? "none" : "block",
+              display:
+                (choosingNode?.type === "Tag" && !isTag) ||
+                (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
+                  ? "none"
+                  : "block",
             }}
           >
             {choosingNode?.type === "Reference"
               ? "Cite It"
-              : choosingNode?.type === "Tag"
+              : choosingNode?.type === "Tag" && isTag
               ? "Tag it"
               : choosingNode?.type === "Child"
               ? "Link it"
