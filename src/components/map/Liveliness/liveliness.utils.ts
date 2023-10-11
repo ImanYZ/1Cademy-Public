@@ -71,12 +71,12 @@ export const synchronizeInteractions: SynchronizeActionTracksFunction = (
       prevUserInteractions[curData.doer].count += 1;
     }
   }
-  if (docType === "modified") {
+  if (docType === "modified" && prevUserInteractions.hasOwnProperty(curData.doer)) {
     prevUserInteractions[curData.doer].imageUrl = curData.imageUrl;
     prevUserInteractions[curData.doer].fullname = curData.fullname;
   }
 
-  if (docType === "removed") {
+  if (docType === "removed" && prevUserInteractions.hasOwnProperty(curData.doer)) {
     prevUserInteractions[curData.doer].count -= 1;
     if (prevUserInteractions[curData.doer].count <= 0) delete prevUserInteractions[curData.doer];
   }

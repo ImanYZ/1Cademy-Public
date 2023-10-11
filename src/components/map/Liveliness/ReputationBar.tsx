@@ -118,7 +118,7 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
               }
             }
 
-            if (docChange.type === "removed") {
+            if (docChange.type === "removed" && usersInteractions.hasOwnProperty(receiverData)) {
               if (usersInteractions.hasOwnProperty(receiverData)) {
                 usersInteractions[receiverData].count -= 1;
                 if (usersInteractions[receiverData].count <= 0) {
