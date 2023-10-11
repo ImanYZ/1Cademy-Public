@@ -131,8 +131,8 @@ export const onNodeDeleted = functions.firestore.document("/nodes/{id}").onUpdat
     const updatedData = change.after.data();
     const previousData = change.before.data();
     const nodeId = change.after.id;
-    console.log("updatedData.deleted", updatedData.deleted);
     if (!previousData.deleted && updatedData.deleted) {
+      console.log("updatedData.deleted", updatedData.deleted);
       console.log("node deleted", nodeId);
       await nodeDeletedUpdates({ nodeId, nodeData: updatedData });
     }
