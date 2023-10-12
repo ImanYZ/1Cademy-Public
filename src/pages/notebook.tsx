@@ -7141,197 +7141,6 @@ const Notebook = ({}: NotebookProps) => {
             </Button>
           </Box>
         )}
-        {settings.view === "Graph" && (
-          <Box
-            id="MapContent"
-            className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
-            onMouseOver={mapContentMouseOver}
-            onTouchStart={mapContentMouseOver}
-            onMouseUp={onMouseClick}
-          >
-            <MapInteractionCSS
-              textIsHovered={mapHovered}
-              /*identifier={'xdf'}*/
-              value={mapInteractionValue}
-              onChange={navigateWhenNotScrolling}
-            >
-              {/* origin used to measure the the relative position of each node to the ViewPort */}
-              {/* used in onNodeInViewport Callback */}
-              <Box
-                id="map-interaction-origin"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                }}
-              ></Box>
-              {!currentStep?.anchor && tutorial && (
-                <TooltipTutorial
-                  tutorial={tutorial}
-                  tutorialStep={currentStep}
-                  targetClientRect={targetClientRect}
-                  // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-                  onSkip={onSkipTutorial}
-                  onFinalize={onFinalizeTutorial}
-                  onNextStep={onNextTutorialStep}
-                  onPreviousStep={onPreviousTutorialStep}
-                  stepsLength={tutorial.steps.length}
-                  node={graph.nodes[dynamicTargetId]}
-                  forcedTutorial={forcedTutorial}
-                  groupTutorials={tutorialGroup}
-                  onForceTutorial={setForcedTutorial}
-                  parent={graph.nodes[pathway.parent]}
-                  child={graph.nodes[pathway.child]}
-                  tutorialProgress={tutorialProgress}
-                  showNextTutorialStep={showNextTutorialStep}
-                  setShowNextTutorialStep={setShowNextTutorialStep}
-                />
-              )}
-              {settings.showClusterOptions && settings.showClusters && (
-                <MemoizedClustersList clusterNodes={clusterNodes} />
-              )}
-              <MemoizedLinksList
-                edgeIds={edgeIds}
-                edges={graph.edges}
-                onForceRecalculateGraph={onForceRecalculateGraph}
-              />
-              <MemoizedNodeList
-                nodeUpdates={nodeUpdates}
-                notebookRef={notebookRef}
-                setNodeUpdates={setNodeUpdates}
-                setFocusView={setFocusView}
-                nodes={graph.nodes}
-                bookmark={bookmark}
-                markStudied={markStudied}
-                chosenNodeChanged={chosenNodeChanged}
-                referenceLabelChange={referenceLabelChange}
-                deleteLink={deleteLink}
-                cleanEditorLink={cleanEditorLink}
-                openLinkedNode={openLinkedNode}
-                openAllChildren={openAllChildren}
-                openAllParent={openAllParent}
-                hideNodeHandler={hideNodeHandler}
-                hideDescendants={hideDescendants}
-                toggleNode={toggleNode}
-                openNodePart={openNodePart}
-                onNodeShare={onNodeShare}
-                selectNode={onSelectNode}
-                correctNode={correctNode}
-                wrongNode={wrongNode}
-                uploadNodeImage={uploadNodeImage}
-                removeImage={removeImage}
-                setOpenMedia={(imgUrl: string | boolean) => {
-                  setOpenMedia(imgUrl);
-                }}
-                changeNodeHight={changeNodeHight}
-                changeChoice={changeChoice}
-                changeFeedback={changeFeedback}
-                switchChoice={switchChoice}
-                deleteChoice={deleteChoice}
-                addChoice={addChoice}
-                onNodeTitleBlur={onNodeTitleBlur}
-                // setOpenSearch={setOpenSearch}
-                saveProposedChildNode={saveProposedChildNode}
-                saveProposedParentNode={saveProposedParentNode}
-                saveProposedImprovement={saveProposedImprovement}
-                closeSideBar={closeSideBar}
-                reloadPermanentGraph={revertNodesOnGraph}
-                setNodeParts={setNodeParts}
-                citations={citations}
-                setOpenSideBar={setOpenSidebar}
-                proposeNodeImprovement={proposeNodeImprovement}
-                proposeNewChild={proposeNewChild}
-                proposeNewParent={proposeNewParent}
-                scrollToNode={scrollToNode}
-                openSidebar={openSidebar}
-                setOperation={setOperation}
-                openUserInfoSidebar={openUserInfoSidebar}
-                disabledNodes={[]}
-                enableChildElements={[]}
-                // showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
-                // setCurrentTutorial={setCurrentTutorial}
-                ableToPropose={ableToPropose}
-                setAbleToPropose={setAbleToPropose}
-                setOpenPart={onChangeNodePart}
-                // selectedNotebookId={selectedNotebookId}
-                hideNode={hideNodeContent}
-                setAssistantSelectNode={setAssistantSelectNode}
-                assistantSelectNode={assistantSelectNode}
-                onForceRecalculateGraph={onForceRecalculateGraph}
-                setSelectedProposalId={setSelectedProposalId}
-                onChangeChosenNode={onChangeChosenNode}
-                editingModeNode={editingModeNode}
-                setEditingModeNode={setEditingModeNode}
-                displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
-              />
-            </MapInteractionCSS>
-
-            {showRegion && (
-              <Box
-                id="region-stn"
-                sx={{
-                  position: "absolute",
-                  top: windowInnerTop,
-                  bottom: windowInnerBottom,
-                  left: windowInnerLeft,
-                  right: windowInnerRight,
-                  background: "rgba(255,255,255,.125)",
-                  pointerEvents: "none",
-                  borderRadius: "4px",
-                  border: "dashed 4px #f09816",
-                }}
-              ></Box>
-            )}
-
-            <Suspense fallback={<div></div>}>
-              <Modal
-                open={Boolean(openMedia)}
-                onClose={() => setOpenMedia(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-              >
-                <>
-                  <CloseIcon
-                    sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
-                    onClick={() => setOpenMedia(false)}
-                  />
-                  <MapInteractionCSS>
-                    {/* TODO: change open Media variable to string to not validate */}
-                    {typeof openMedia === "string" && (
-                      <Paper
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100vh",
-                          width: "100vw",
-                          background: "transparent",
-                        }}
-                      >
-                        {/* TODO: change to Next Image */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={openMedia} alt="Node image" className="responsive-img" />
-                      </Paper>
-                    )}
-                  </MapInteractionCSS>
-                </>
-              </Modal>
-              {(isSubmitting || (!queueFinished && firstLoading)) && (
-                <div className="CenterredLoadingImageContainer">
-                  <Image
-                    className="CenterredLoadingImage"
-                    loading="lazy"
-                    src={LoadingImg}
-                    alt="Loading"
-                    width={250}
-                    height={250}
-                  />
-                </div>
-              )}
-            </Suspense>
-          </Box>
-        )}
-
         {settings.view === "Masonry" && (
           <Box sx={{ height: "100vh", overflow: "auto" }}>
             <Container>
@@ -7789,6 +7598,197 @@ const Notebook = ({}: NotebookProps) => {
               focusedNode={focusView.selectedNode}
               openLinkedNode={openLinkedNode}
             />
+          )}
+
+          {settings.view === "Graph" && (
+            <Box
+              id="MapContent"
+              className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
+              onMouseOver={mapContentMouseOver}
+              onTouchStart={mapContentMouseOver}
+              onMouseUp={onMouseClick}
+            >
+              <MapInteractionCSS
+                textIsHovered={mapHovered}
+                /*identifier={'xdf'}*/
+                value={mapInteractionValue}
+                onChange={navigateWhenNotScrolling}
+              >
+                {/* origin used to measure the the relative position of each node to the ViewPort */}
+                {/* used in onNodeInViewport Callback */}
+                <Box
+                  id="map-interaction-origin"
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                  }}
+                ></Box>
+                {!currentStep?.anchor && tutorial && (
+                  <TooltipTutorial
+                    tutorial={tutorial}
+                    tutorialStep={currentStep}
+                    targetClientRect={targetClientRect}
+                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                    onSkip={onSkipTutorial}
+                    onFinalize={onFinalizeTutorial}
+                    onNextStep={onNextTutorialStep}
+                    onPreviousStep={onPreviousTutorialStep}
+                    stepsLength={tutorial.steps.length}
+                    node={graph.nodes[dynamicTargetId]}
+                    forcedTutorial={forcedTutorial}
+                    groupTutorials={tutorialGroup}
+                    onForceTutorial={setForcedTutorial}
+                    parent={graph.nodes[pathway.parent]}
+                    child={graph.nodes[pathway.child]}
+                    tutorialProgress={tutorialProgress}
+                    showNextTutorialStep={showNextTutorialStep}
+                    setShowNextTutorialStep={setShowNextTutorialStep}
+                  />
+                )}
+                {settings.showClusterOptions && settings.showClusters && (
+                  <MemoizedClustersList clusterNodes={clusterNodes} />
+                )}
+                <MemoizedLinksList
+                  edgeIds={edgeIds}
+                  edges={graph.edges}
+                  onForceRecalculateGraph={onForceRecalculateGraph}
+                />
+                <MemoizedNodeList
+                  nodeUpdates={nodeUpdates}
+                  notebookRef={notebookRef}
+                  setNodeUpdates={setNodeUpdates}
+                  setFocusView={setFocusView}
+                  nodes={graph.nodes}
+                  bookmark={bookmark}
+                  markStudied={markStudied}
+                  chosenNodeChanged={chosenNodeChanged}
+                  referenceLabelChange={referenceLabelChange}
+                  deleteLink={deleteLink}
+                  cleanEditorLink={cleanEditorLink}
+                  openLinkedNode={openLinkedNode}
+                  openAllChildren={openAllChildren}
+                  openAllParent={openAllParent}
+                  hideNodeHandler={hideNodeHandler}
+                  hideDescendants={hideDescendants}
+                  toggleNode={toggleNode}
+                  openNodePart={openNodePart}
+                  onNodeShare={onNodeShare}
+                  selectNode={onSelectNode}
+                  correctNode={correctNode}
+                  wrongNode={wrongNode}
+                  uploadNodeImage={uploadNodeImage}
+                  removeImage={removeImage}
+                  setOpenMedia={(imgUrl: string | boolean) => {
+                    setOpenMedia(imgUrl);
+                  }}
+                  changeNodeHight={changeNodeHight}
+                  changeChoice={changeChoice}
+                  changeFeedback={changeFeedback}
+                  switchChoice={switchChoice}
+                  deleteChoice={deleteChoice}
+                  addChoice={addChoice}
+                  onNodeTitleBlur={onNodeTitleBlur}
+                  // setOpenSearch={setOpenSearch}
+                  saveProposedChildNode={saveProposedChildNode}
+                  saveProposedParentNode={saveProposedParentNode}
+                  saveProposedImprovement={saveProposedImprovement}
+                  closeSideBar={closeSideBar}
+                  reloadPermanentGraph={revertNodesOnGraph}
+                  setNodeParts={setNodeParts}
+                  citations={citations}
+                  setOpenSideBar={setOpenSidebar}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  proposeNewChild={proposeNewChild}
+                  proposeNewParent={proposeNewParent}
+                  scrollToNode={scrollToNode}
+                  openSidebar={openSidebar}
+                  setOperation={setOperation}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                  disabledNodes={[]}
+                  enableChildElements={[]}
+                  // showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
+                  // setCurrentTutorial={setCurrentTutorial}
+                  ableToPropose={ableToPropose}
+                  setAbleToPropose={setAbleToPropose}
+                  setOpenPart={onChangeNodePart}
+                  // selectedNotebookId={selectedNotebookId}
+                  hideNode={hideNodeContent}
+                  setAssistantSelectNode={setAssistantSelectNode}
+                  assistantSelectNode={assistantSelectNode}
+                  onForceRecalculateGraph={onForceRecalculateGraph}
+                  setSelectedProposalId={setSelectedProposalId}
+                  onChangeChosenNode={onChangeChosenNode}
+                  editingModeNode={editingModeNode}
+                  setEditingModeNode={setEditingModeNode}
+                  displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
+                />
+              </MapInteractionCSS>
+
+              {showRegion && (
+                <Box
+                  id="region-stn"
+                  sx={{
+                    position: "absolute",
+                    top: windowInnerTop,
+                    bottom: windowInnerBottom,
+                    left: windowInnerLeft,
+                    right: windowInnerRight,
+                    background: "rgba(255,255,255,.125)",
+                    pointerEvents: "none",
+                    borderRadius: "4px",
+                    border: "dashed 4px #f09816",
+                  }}
+                ></Box>
+              )}
+
+              <Suspense fallback={<div></div>}>
+                <Modal
+                  open={Boolean(openMedia)}
+                  onClose={() => setOpenMedia(false)}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  <>
+                    <CloseIcon
+                      sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+                      onClick={() => setOpenMedia(false)}
+                    />
+                    <MapInteractionCSS>
+                      {/* TODO: change open Media variable to string to not validate */}
+                      {typeof openMedia === "string" && (
+                        <Paper
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "100vh",
+                            width: "100vw",
+                            background: "transparent",
+                          }}
+                        >
+                          {/* TODO: change to Next Image */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={openMedia} alt="Node image" className="responsive-img" />
+                        </Paper>
+                      )}
+                    </MapInteractionCSS>
+                  </>
+                </Modal>
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
+                  <div className="CenterredLoadingImageContainer">
+                    <Image
+                      className="CenterredLoadingImage"
+                      loading="lazy"
+                      src={LoadingImg}
+                      alt="Loading"
+                      width={250}
+                      height={250}
+                    />
+                  </div>
+                )}
+              </Suspense>
+            </Box>
           )}
 
           <MemoizedTutorialTableOfContent
