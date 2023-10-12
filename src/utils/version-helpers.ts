@@ -2436,15 +2436,20 @@ export const versionCreateUpdate = async ({
 
           //  add this question to the practice tool for every user with the same default tag
           if (childType === "Question") {
-            [batch, writeCounts] = await createPractice({
-              batch,
-              tagIds,
-              nodeId: childNodeRef.id,
-              parentId: childNode.parents?.[0]?.node || "",
-              currentTimestamp,
-              writeCounts,
-              t,
-              tWriteOperations,
+            await detach(async () => {
+              let batch = db.batch();
+              let writeCounts = 0;
+              [batch, writeCounts] = await createPractice({
+                batch,
+                tagIds,
+                nodeId: childNodeRef.id,
+                parentId: childNode.parents?.[0]?.node || "",
+                currentTimestamp,
+                writeCounts,
+                t,
+                tWriteOperations,
+              });
+              await commitBatch(batch);
             });
           }
         }

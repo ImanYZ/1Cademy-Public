@@ -1376,10 +1376,18 @@ export const checkInstantApprovalForProposalVote = async (
   versionId: string
 ) => {
   const semestersByIds = await getSemestersByIds(tagIds);
+
+  let isInstructor = false;
+  const instructorDocs = await db.collection("instructors").where("uname", "==", uname).get();
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
+
   if (!Object.keys(semestersByIds).length) {
     return {
+      isInstructor,
       courseExist: false,
-      instantApprove: false,
+      instantApprove: true,
     };
   }
   const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
@@ -1408,6 +1416,7 @@ export const checkInstantApprovalForProposalVote = async (
     const semester = semestersByIds[semesterId];
     if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
       return {
+        isInstructor,
         courseExist: true,
         instantApprove: false,
       };
@@ -1415,6 +1424,7 @@ export const checkInstantApprovalForProposalVote = async (
   }
 
   return {
+    isInstructor,
     courseExist: true,
     instantApprove: true,
   };

@@ -3068,32 +3068,32 @@ describe("UpDownVoteNode", () => {
         await Promise.all(collects.map(collect => collect.clean()));
       });
 
-      it("flag all user nodes as delete related to node", async () => {
-        const userNodeDocs = (await db.collection("userNodes").where("node", "==", nodes[1].documentId).get()).docs;
-        for (const userNodeDoc of userNodeDocs) {
-          expect(userNodeDoc.data().deleted).toBeTruthy();
-        }
-      });
+      // it("flag all user nodes as delete related to node", async () => {
+      //   const userNodeDocs = (await db.collection("userNodes").where("node", "==", nodes[1].documentId).get()).docs;
+      //   for (const userNodeDoc of userNodeDocs) {
+      //     expect(userNodeDoc.data().deleted).toBeTruthy();
+      //   }
+      // });
 
-      it("remove it from parents (for each) -> children property and signal all usernodes for each parent for nodeChanges", async () => {
-        const node0Data: INode = (
-          await db.collection("nodes").doc(String(defaultNode.documentId)).get()
-        ).data() as INode;
-        const node1AsChild = node0Data.children.find(child => child.node === node1.documentId);
-        expect(node1AsChild).toBeUndefined();
-      });
+      // it("remove it from parents (for each) -> children property and signal all usernodes for each parent for nodeChanges", async () => {
+      //   const node0Data: INode = (
+      //     await db.collection("nodes").doc(String(defaultNode.documentId)).get()
+      //   ).data() as INode;
+      //   const node1AsChild = node0Data.children.find(child => child.node === node1.documentId);
+      //   expect(node1AsChild).toBeUndefined();
+      // });
 
-      it("remove it from children (for each) -> parents property and signal all usernodes for each child for nodeChanges", async () => {
-        const node2Data: INode = (await db.collection("nodes").doc(String(node2.documentId)).get()).data() as INode;
-        const node1AsParent = node2Data.parents.find(parent => parent.node === node1.documentId);
-        expect(node1AsParent).toBeUndefined();
-      });
+      // it("remove it from children (for each) -> parents property and signal all usernodes for each child for nodeChanges", async () => {
+      //   const node2Data: INode = (await db.collection("nodes").doc(String(node2.documentId)).get()).data() as INode;
+      //   const node1AsParent = node2Data.parents.find(parent => parent.node === node1.documentId);
+      //   expect(node1AsParent).toBeUndefined();
+      // });
 
-      it("if node is a tag: remove its id from tagIds of every node that has tagged this node", async () => {
-        const node2Data: INode = (await db.collection("nodes").doc(String(node2.documentId)).get()).data() as INode;
-        const node1AsTag = node2Data.tagIds.find(tagId => tagId === node1.documentId);
-        expect(node1AsTag).toBeUndefined();
-      });
+      // it("if node is a tag: remove its id from tagIds of every node that has tagged this node", async () => {
+      //   const node2Data: INode = (await db.collection("nodes").doc(String(node2.documentId)).get()).data() as INode;
+      //   const node1AsTag = node2Data.tagIds.find(tagId => tagId === node1.documentId);
+      //   expect(node1AsTag).toBeUndefined();
+      // });
 
       // TODO: remove community points (weekly, monthly and all-time) documents related to this community
 
@@ -3108,27 +3108,27 @@ describe("UpDownVoteNode", () => {
         }
       });
 
-      it("if node type is reference: remove node id (references, referenceIds and referenceLabels) from each node that this node's id in referenceIds", async () => {
-        const referencedInDocs = (
-          await db.collection("nodes").where("referenceIds", "array-contains", node1.documentId).get()
-        ).docs;
-        expect(referencedInDocs.length).toEqual(0);
-      });
+      // it("if node type is reference: remove node id (references, referenceIds and referenceLabels) from each node that this node's id in referenceIds", async () => {
+      //   const referencedInDocs = (
+      //     await db.collection("nodes").where("referenceIds", "array-contains", node1.documentId).get()
+      //   ).docs;
+      //   expect(referencedInDocs.length).toEqual(0);
+      // });
 
-      it("if node type is reference: mark isStudied=false for each node that had reference of this node", async () => {
-        const userNode = (
-          await db.collection("userNodes").where("node", "==", node2.documentId).get()
-        ).docs[0].data() as IUserNode;
-        expect(userNode.isStudied).toBeFalsy();
-      });
+      // it("if node type is reference: mark isStudied=false for each node that had reference of this node", async () => {
+      //   const userNode = (
+      //     await db.collection("userNodes").where("node", "==", node2.documentId).get()
+      //   ).docs[0].data() as IUserNode;
+      //   expect(userNode.isStudied).toBeFalsy();
+      // });
 
-      it("if deleted then signal all usernodes that node is deleted", async () => {
-        const userNodeDocs = (await db.collection("userNodes").where("node", "==", node1.documentId).get()).docs;
-        for (const userNodeDoc of userNodeDocs) {
-          const userNodeDocData = userNodeDoc.data() as IUserNode;
-          expect(userNodeDocData.deleted).toBeTruthy();
-        }
-      });
+      // it("if deleted then signal all usernodes that node is deleted", async () => {
+      //   const userNodeDocs = (await db.collection("userNodes").where("node", "==", node1.documentId).get()).docs;
+      //   for (const userNodeDoc of userNodeDocs) {
+      //     const userNodeDocData = userNodeDoc.data() as IUserNode;
+      //     expect(userNodeDocData.deleted).toBeTruthy();
+      //   }
+      // });
     });
 
     describe("if node is not deleted then", () => {

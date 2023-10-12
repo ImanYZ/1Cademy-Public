@@ -9,6 +9,10 @@ import { signalFlashcardChanges } from "./helpers";
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
 
+import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
+import { updateVersions } from "./actions/updateVersions";
+import { checkNeedsUpdates } from "./helpers/version-helpers";
+
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
 // detects authentication from the environment.
@@ -21,7 +25,7 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   // corresponding Firestore document.
   const userStatusFirestoreRef = firestore.doc(`status/${context.params.uname}`);
   const userStatusDoc = await userStatusFirestoreRef.get();
-  const sessionIds = [];
+  const sessionIds: any = [];
 
   if (userStatusDoc.exists) {
     const userStatusData = userStatusDoc.data();
@@ -80,8 +84,21 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     const MILLISECONDS_IN_A_DAY = 86400000;
     // expired is -2 days ago, to remove document in 24h, because TTL remove in 72h
     const twoDaysAgo = new Date(Number(today) - 2 * MILLISECONDS_IN_A_DAY);
-    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo) });
 
+    const receiversData: any = {};
+
+    for (let receiver of data.receivers) {
+      const receiverDoc = await firestore.collection("users").doc(receiver).get();
+      if (receiverDoc.exists) {
+        const receiverData = receiverDoc.data();
+        receiversData[receiver] = {
+          fullname: receiverData?.fName + " " + receiverData?.lName,
+          chooseUname: receiverData?.chooseUname,
+          imageUrl: receiverData?.imageUrl,
+        };
+      }
+    }
+    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo), receiversData });
     // create recentUserNodes
     const recentUserNodesRef = firestore.collection("recentUserNodes");
     // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
@@ -108,6 +125,36 @@ export const onNodeUpdated = functions.firestore.document("/nodes/{id}").onUpdat
     }
   } catch (error) {
     console.log("error:", error);
+  }
+});
+
+export const onNodeUpdatedVersions = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const newValue = change.after.data();
+    const previousValue = change.before.data();
+    const nodeId = change.after.id;
+    const needsUpdates = checkNeedsUpdates({ previousValue, newValue });
+    if (needsUpdates) {
+      updateVersions({ nodeId, nodeData: newValue });
+    }
+    console.log("Done Updating Versions");
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
+
+export const onNodeDeleted = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const updatedData = change.after.data();
+    const previousData = change.before.data();
+    const nodeId = change.after.id;
+    if (!previousData.deleted && updatedData.deleted) {
+      console.log("updatedData.deleted", updatedData.deleted);
+      console.log("node deleted", nodeId);
+      await nodeDeletedUpdates({ nodeId, nodeData: updatedData });
+    }
+  } catch (error) {
+    console.log("error onNodeDeleted:", error);
   }
 });
 

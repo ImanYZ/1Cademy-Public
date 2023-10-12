@@ -2,8 +2,7 @@ steps:
   # Build the container image for NextJS app
   - name: "gcr.io/cloud-builders/docker"
     entrypoint: "bash"
-    args:
-      [
+    args: [
         "-c",
         'docker build -t gcr.io/visualexp-a7d2c/knowledge-dev
         --build-arg=NEXT_PUBLIC_PROJECT_ID="$${NEXT_PUBLIC_PROJECT_ID}"
@@ -77,7 +76,7 @@ steps:
         "VISUALEXPCRED_TOKEN_URI",
         "VISUALEXPCRED_AUTH_PROVIDER_X509_CERT_URL",
         "VISUALEXP_STORAGE_BUCKET",
-        "VISUALEXPCRED_CLIENT_X509_CERT_URL"
+        "VISUALEXPCRED_CLIENT_X509_CERT_URL",
       ]
   # Push the NextJS container image to Container Registry
   - name: "gcr.io/cloud-builders/docker"
@@ -95,7 +94,7 @@ steps:
         "--region",
         "us-central1",
         "--project",
-        "visualexp-a7d2c"
+        "visualexp-a7d2c",
       ]
 images:
   - gcr.io/visualexp-a7d2c/knowledge-dev

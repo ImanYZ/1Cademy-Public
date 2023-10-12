@@ -457,15 +457,15 @@ describe("POST /api/wrongNode", () => {
     expect(Object.keys(node2Doc.data()?.children).length).toEqual(0);
   });
 
-  it("Should be isTag=false in both nodes", async () => {
-    expect(node1Doc.data()?.isTag).toBe(false);
-    expect(node2Doc.data()?.isTag).toBe(false);
-  });
+  // it("Should be isTag=false in both nodes", async () => {
+  //   expect(node1Doc.data()?.isTag).toBe(false);
+  //   expect(node2Doc.data()?.isTag).toBe(false);
+  // });
 
-  it("Should be remove tags from nodes", async () => {
-    expect(Object.keys(node1Doc.data()?.tags).length).toEqual(0);
-    expect(Object.keys(node2Doc.data()?.tags).length).toEqual(0);
-  });
+  // it("Should be remove tags from nodes", async () => {
+  //   expect(Object.keys(node1Doc.data()?.tags).length).toEqual(0);
+  //   expect(Object.keys(node2Doc.data()?.tags).length).toEqual(0);
+  // });
 
   it("Should be update wrong field in version collection", async () => {
     let wrongs = prevVersionDoc.docs[0].data()?.wrongs + 1;

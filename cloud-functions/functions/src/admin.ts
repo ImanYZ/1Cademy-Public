@@ -119,7 +119,7 @@ const batchDelete = async (docRef: any) => {
   }
 };
 
-module.exports = {
+export {
   admin,
   db,
   MAX_TRANSACTION_WRITES,

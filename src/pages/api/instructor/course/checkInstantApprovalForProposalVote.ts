@@ -10,13 +10,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { uname } = req?.body?.data?.user?.userData as IUser;
     const nodeDoc = await db.collection("nodes").doc(nodeId).get();
     const tagIds = nodeDoc.data()?.tagIds;
-    const { courseExist, instantApprove } = await checkInstantApprovalForProposalVote(
+    const { courseExist, instantApprove, isInstructor } = await checkInstantApprovalForProposalVote(
       tagIds,
       uname,
       verisonType,
       versionId
     );
-    return res.status(200).json({ courseExist, instantApprove });
+    return res.status(200).json({ courseExist, instantApprove, isInstructor });
   } catch (error) {
     return res.status(500).json({ error: true });
   }

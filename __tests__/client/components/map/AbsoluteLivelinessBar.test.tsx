@@ -34,6 +34,13 @@ jest.mock("src/client/firestore/actionTracks.firestore", () => {
       chooseUname: true,
       fullname: "jj pp",
       receiverPoints: [-1],
+      receiversData: {
+        jjnnx: {
+          imageUrl: "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png",
+          chooseUname: false,
+          fullname: "jjnnx pp",
+        },
+      },
     },
   } as ActionsTracksChange;
 
