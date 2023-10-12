@@ -101,14 +101,14 @@ steps:
     entrypoint: "bash"
     args:
       - "-c"
-      - "source /root/.bashrc && cd cloud-functions && npm install --legacy-peer-deps"
+      - "source /root/.bashrc && cd cloud-functions/functions && npm install --legacy-peer-deps"
 
   # running firebase deploy
   - name: "gcr.io/onecademy-dev/firebase:latest"
     entrypoint: "bash"
     args:
       - "-c"
-      - "source /root/.bashrc && firebase deploy --only functions"   
+      - "source /root/.bashrc && cd cloud-functions && firebase deploy --only functions"   
 images:
   - gcr.io/visualexp-a7d2c/knowledge-dev
 availableSecrets:
