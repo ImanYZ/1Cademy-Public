@@ -1,5 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import React, { useCallback,useState } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText } from "@mui/material";
+import React, { useCallback, useState } from "react";
 
 const useConfirmationDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,16 +26,15 @@ const useConfirmationDialog = () => {
 
   const ConfirmDialog = (
     <Dialog open={isOpen} onClose={() => closeDialog(false)}>
-      <DialogTitle>Confirm</DialogTitle>
       <DialogContent>
         <DialogContentText>{confirmationMessage}</DialogContentText>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ justifyContent: "center" }}>
         <Button onClick={() => closeDialog(true)} color="primary">
           Yes
         </Button>
         <Button onClick={() => closeDialog(false)} color="primary">
-          No
+          Cancel
         </Button>
       </DialogActions>
     </Dialog>

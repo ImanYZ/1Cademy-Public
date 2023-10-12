@@ -10,6 +10,8 @@ const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContrib
 const { updateInstitutions } = require("./updateInstitutions");
 
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
+import { updateVersions } from "./actions/updateVersions";
+import { checkNeedsUpdates } from "./helpers/version-helpers";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -121,6 +123,21 @@ export const onNodeUpdated = functions.firestore.document("/nodes/{id}").onUpdat
       console.log("node deleted", nodeId);
       signalFlashcardChanges(nodeId, "delete");
     }
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
+
+export const onNodeUpdatedVersions = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const newValue = change.after.data();
+    const previousValue = change.before.data();
+    const nodeId = change.after.id;
+    const needsUpdates = checkNeedsUpdates({ previousValue, newValue });
+    if (needsUpdates) {
+      updateVersions({ nodeId, nodeData: newValue });
+    }
+    console.log("Done Updating Versions");
   } catch (error) {
     console.log("error:", error);
   }
