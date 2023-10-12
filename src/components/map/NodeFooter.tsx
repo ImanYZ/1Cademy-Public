@@ -20,6 +20,7 @@ import {
   ClickAwayListener,
   Divider,
   Grid,
+  LinearProgress,
   MenuItem,
   MenuItemProps,
   MenuList,
@@ -524,6 +525,7 @@ const NodeFooter = ({
                   : `${dayjs(new Date(changedAt)).fromNow()}`}
               </Box>
             </Tooltip>
+
             {open && !choosingNode && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
@@ -691,6 +693,7 @@ const NodeFooter = ({
           </span> */}
           </div>
         </Box>
+        {simulated ? <LinearProgress sx={{ width: "54%", position: "absolute", left: "245px" }} /> : ""}
         <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
           {open ? (
             // REF: Node.css ln 122
