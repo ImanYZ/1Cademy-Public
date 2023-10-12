@@ -98,18 +98,20 @@ steps:
         "--project",
         "visualexp-a7d2c",
       ]
-  - name: "gcr.io/onecademy-1/firebase:latest"
-    entrypoint: "bash"
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
     args:
-      - "-c"
-      - "source /root/.bashrc && cd cloud-functions/functions && npm install --legacy-peer-deps"
-
-  # running firebase deploy
-  - name: "gcr.io/onecademy-1/firebase:latest"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - "source /root/.bashrc && cd cloud-functions && firebase deploy --only functions"  
+      [
+        "functions",
+        "deploy",
+        "--source",
+        "cloud-functions/functions",
+        "--runtime",
+        "nodejs14",
+        "--trigger-http",
+        "--project",
+        "onecademy-1",
+      ] 
 images:
   - gcr.io/visualexp-a7d2c/knowledge
 availableSecrets:
