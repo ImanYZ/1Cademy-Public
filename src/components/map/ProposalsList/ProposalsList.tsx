@@ -98,7 +98,7 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
           } else {
             // THIS Show pending proposal and approved proposals
             return (
-              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", gap: "4px", mt: "5px" }}>
                 <ProposalItem
                   key={proposal.id}
                   proposal={proposal}
