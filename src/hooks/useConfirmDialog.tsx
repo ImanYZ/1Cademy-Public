@@ -34,7 +34,7 @@ const useConfirmationDialog = () => {
           Yes
         </Button>
         <Button onClick={() => closeDialog(false)} color="primary">
-          Cancel
+          No
         </Button>
       </DialogActions>
     </Dialog>
