@@ -75,6 +75,7 @@ import { TagsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/TagsSide
 import { MemoizedUserInfoSidebar } from "@/components/map/Sidebar/SidebarV2/UserInfoSidebar";
 import { MemoizedUserSettingsSidebar } from "@/components/map/Sidebar/SidebarV2/UserSettigsSidebar";
 import { useAuth } from "@/context/AuthContext";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
@@ -257,6 +258,7 @@ const Notebook = ({}: NotebookProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const db = getFirestore();
   // const storage = getStorage();
   const theme = useTheme();
@@ -3070,7 +3072,7 @@ const Notebook = ({}: NotebookProps) => {
       try {
         if (notebookRef.current.choosingNode) return;
 
-        let deleteOK = true;
+        let deleteOK: any = true;
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -3093,28 +3095,28 @@ const Notebook = ({}: NotebookProps) => {
           return { ...node, disableVotes: false };
         });
 
+        const node = graph.nodes[nodeId];
+        let willRemoveNode = false;
+        if (courseExist) {
+          willRemoveNode = instantDelete;
+        } else {
+          willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
+        }
+        if (willRemoveNode) {
+          if (node?.children.length > 0) {
+            window.alert(
+              "To be able to delete this node, you should first delete its children or move them under other parent node."
+            );
+            deleteOK = false;
+          } else {
+            deleteOK = await confirmIt("You are going to permanently delete this node by downvoting it. Are you sure?");
+          }
+        }
+
         setGraph(graph => {
           const updatedNodeIds: string[] = [nodeId];
           const node = graph.nodes[nodeId];
-          let willRemoveNode = false;
-          if (courseExist) {
-            willRemoveNode = instantDelete;
-          } else {
-            willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
-          }
           lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
-          if (willRemoveNode) {
-            if (node?.children.length > 0) {
-              window.alert(
-                "To be able to delete this node, you should first delete its children or move them under other parent node."
-              );
-              deleteOK = false;
-            } else {
-              deleteOK = window.confirm(
-                "You are going to permanently delete this node by downvoting it. Are you sure?"
-              );
-            }
-          }
 
           if (!deleteOK) return graph;
 
@@ -3130,8 +3132,10 @@ const Notebook = ({}: NotebookProps) => {
             nodes = removeDagNode(g.current, nodeId, nodes);
 
             node.parents.forEach(cur => {
-              const newChildren = nodes[cur.node].children.filter(c => c.node !== nodeId);
-              nodes[cur.node].children = newChildren;
+              const newChildren = nodes[cur.node]?.children.filter(c => c.node !== nodeId);
+              if (nodes[cur.node]) {
+                nodes[cur.node].children = newChildren;
+              }
             });
             node.children.forEach(cur => {
               const newParents = nodes[cur.node].parents.filter(c => c.node !== nodeId);
@@ -3563,7 +3567,7 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        let referencesOK = true;
+        let referencesOK: any = true;
         const {
           courseExist,
           isInstructor,
@@ -3574,20 +3578,19 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: notebookRef.current.selectedNode,
           }
         );
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        if (
+          (graph.nodes[selectedNodeId].nodeType === "Concept" ||
+            graph.nodes[selectedNodeId].nodeType === "Relation" ||
+            graph.nodes[selectedNodeId].nodeType === "Question" ||
+            graph.nodes[selectedNodeId].nodeType === "News") &&
+          graph.nodes[selectedNodeId].references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+        }
+
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
-            const selectedNodeId = notebookRef.current.selectedNode!;
-
-            if (
-              (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-                graph.nodes[selectedNodeId].nodeType === "Relation" ||
-                graph.nodes[selectedNodeId].nodeType === "Question" ||
-                graph.nodes[selectedNodeId].nodeType === "News") &&
-              graph.nodes[selectedNodeId].references.length === 0
-            ) {
-              referencesOK = window.confirm("You are proposing a node without any reference. Are you sure?");
-            }
-
             if (!referencesOK) return graph;
 
             gtmEvent("Propose", {
@@ -3940,6 +3943,17 @@ const Notebook = ({}: NotebookProps) => {
           "/instructor/course/checkInstantApprovalForProposal",
           { nodeId: firstChildId }
         );
+        const newNode = graph.nodes[newNodeId];
+        let referencesOK: any = true;
+        if (
+          (newNode.nodeType === "Concept" ||
+            newNode.nodeType === "Relation" ||
+            newNode.nodeType === "Question" ||
+            newNode.nodeType === "News") &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+        }
 
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
@@ -3957,17 +3971,6 @@ const Notebook = ({}: NotebookProps) => {
 
           if (!newNodeId) {
             return graph;
-          }
-
-          let referencesOK = true;
-          if (
-            (newNode.nodeType === "Concept" ||
-              newNode.nodeType === "Relation" ||
-              newNode.nodeType === "Question" ||
-              newNode.nodeType === "News") &&
-            newNode.references.length === 0
-          ) {
-            referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
           }
 
           if (!referencesOK) {
@@ -4128,10 +4131,20 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: firstParentId,
           }
         );
+        const newNode = graph.nodes[newNodeId];
+        let referencesOK: any = true;
+        if (
+          (newNode.nodeType === "Concept" ||
+            newNode.nodeType === "Relation" ||
+            newNode.nodeType === "Question" ||
+            newNode.nodeType === "News") &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+        }
         setGraph(graph => {
           // const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
-
           if (!newNode.title) {
             console.error("title required");
             return graph;
@@ -4144,17 +4157,6 @@ const Notebook = ({}: NotebookProps) => {
 
           if (!newNodeId) {
             return graph;
-          }
-
-          let referencesOK = true;
-          if (
-            (newNode.nodeType === "Concept" ||
-              newNode.nodeType === "Relation" ||
-              newNode.nodeType === "Question" ||
-              newNode.nodeType === "News") &&
-            newNode.references.length === 0
-          ) {
-            referencesOK = window.confirm("You are proposing a node without citing any reference. Are you sure?");
           }
 
           if (!referencesOK) {
@@ -4915,25 +4917,25 @@ const Notebook = ({}: NotebookProps) => {
           "/instructor/course/checkInstantApprovalForProposalVote",
           checkInstantApproval
         );
+        let willBeApproved: boolean = false;
+        if (courseExist) {
+          willBeApproved = instantApprove;
+        } else {
+          willBeApproved = isVersionApproved({
+            corrects: proposalsTemp[proposalIdx].corrects,
+            wrongs: proposalsTemp[proposalIdx].wrongs,
+            nodeData: graph.nodes[nodeBookState.selectedNode],
+          });
+        }
+
+        if (willBeApproved) {
+          const res = await confirmIt("Are you sure you want to approve this proposal?");
+          if (!res) return;
+        }
 
         devLog("COURSEEXIST, INSTANTAPPROVE", { courseExist, instantApprove });
         setGraph(({ nodes: oldNodes, edges }) => {
           if (!nodeBookState.selectedNode) return { nodes: oldNodes, edges };
-          let willBeApproved: boolean = false;
-          if (courseExist) {
-            willBeApproved = instantApprove;
-          } else {
-            willBeApproved = isVersionApproved({
-              corrects: proposalsTemp[proposalIdx].corrects,
-              wrongs: proposalsTemp[proposalIdx].wrongs,
-              nodeData: oldNodes[nodeBookState.selectedNode],
-            });
-          }
-
-          if (willBeApproved) {
-            const res = window.confirm("Are you sure you want to approve this proposal?");
-            if (!res) return { nodes: oldNodes, edges };
-          }
 
           if (willBeApproved) {
             proposalsTemp[proposalIdx].accepted = true;
@@ -8091,6 +8093,7 @@ const Notebook = ({}: NotebookProps) => {
             </Box>
           </ClickAwayListener>
         )}
+        {ConfirmDialog}
       </Box>
     </div>
   );

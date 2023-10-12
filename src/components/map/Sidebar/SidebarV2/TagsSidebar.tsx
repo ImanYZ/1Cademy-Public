@@ -344,7 +344,7 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
             onClick={() => {
               onChangeChosenNode({ nodeId: cur.id, title: cur.title });
             }}
-            linkMessage="Tag it"
+            linkMessage={cur.isTag ? "Tag it" : ""}
             {...cur}
           />
         ))}

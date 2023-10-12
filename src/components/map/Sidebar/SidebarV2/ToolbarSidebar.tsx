@@ -12,6 +12,7 @@ import {
   Divider,
   IconButton,
   InputAdornment,
+  LinearProgress,
   List,
   ListItem,
   ListItemButton,
@@ -39,8 +40,9 @@ import {
 import NextImage from "next/image";
 import React, { Dispatch, SetStateAction, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
+import { AllTagsTreeView, ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
 import { useNodeBook } from "@/context/NodeBookContext";
+import useConfirmationDialog from "@/hooks/useConfirmDialog";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Delete, Post } from "@/lib/mapApi";
@@ -147,6 +149,7 @@ export const ToolbarSidebar = ({
 }: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
+  const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isMenuOpen = isMobile && nodeBookState.isMenuOpen;
 
@@ -163,6 +166,7 @@ export const ToolbarSidebar = ({
   const createNotebookButtonRef = useRef<any>(null);
   const { height } = useWindowSize();
   const [notebookTitleIsEditable, setNotebookTitleEditable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const displayLargeToolbar = useMemo(
     () => isHovered || isMenuOpen || editableNotebook !== null || displayTagSearcher,
@@ -211,10 +215,11 @@ export const ToolbarSidebar = ({
             payload: { ...user, tagId: nodeId, tag: nodeTitle },
           });
           onChangeTagOfNotebookById(selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
+          setIsLoading(true);
           await Post(`/changeDefaultTag/${nodeId}`);
 
           await updateNotebookTag(db, selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
-
+          setIsLoading(false);
           let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
           if (!reputation) throw Error("Cant find Reputation");
           if (!userUpdated) throw Error("Cant find User");
@@ -223,6 +228,7 @@ export const ToolbarSidebar = ({
           dispatch({ type: "setAuthUser", payload: userUpdated });
           setDisplayTagSearcher(false);
         } catch (err) {
+          setIsLoading(false);
           console.error(err);
         }
       }
@@ -242,6 +248,27 @@ export const ToolbarSidebar = ({
     user,
   ]);
 
+  useEffect(() => {
+    const targetTag: any = user.tagId;
+    setAllTags(oldAllTags => {
+      const updatedTag = {
+        [targetTag]: { ...oldAllTags[targetTag], checked: true },
+      };
+      delete oldAllTags[targetTag];
+      const newAllTags: AllTagsTreeView = {
+        ...updatedTag,
+        ...oldAllTags,
+      };
+
+      for (let aTag in newAllTags) {
+        if (aTag !== targetTag && newAllTags[aTag].checked) {
+          newAllTags[aTag] = { ...newAllTags[aTag], checked: false };
+        }
+      }
+      return newAllTags;
+    });
+  }, [user.tagId]);
+
   const onOpenSidebarLog = useCallback(
     async (sidebarType: string) => {
       const userOpenSidebarLogObj: any = {
@@ -260,7 +287,6 @@ export const ToolbarSidebar = ({
 
   const choosingNodeClick = useCallback(
     (choosingNodeTag: string) => {
-      notebookRef.current.choosingNode = { id: choosingNodeTag, type: null };
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } });
     },
     [nodeBookDispatch]
@@ -447,7 +473,7 @@ export const ToolbarSidebar = ({
     try {
       if (!editableNotebook) return;
 
-      if (!window.confirm("Are you sure to delete notebook")) return;
+      if (!(await confirmIt("Are you sure to delete notebook"))) return;
       setNotebooks(prevNotebooks => {
         const newNotebooks = prevNotebooks.filter(cur => cur.id !== editableNotebook.id);
         onChangeNotebook(newNotebooks[0]?.id ?? "");
@@ -892,6 +918,7 @@ export const ToolbarSidebar = ({
                 }}
               >
                 {user.tag}
+                {isLoading && <LinearProgress />}
               </Typography>
             </Box>
           </Button>
@@ -1299,6 +1326,7 @@ export const ToolbarSidebar = ({
           },
         }}
       />
+      {ConfirmDialog}
     </>
   );
 };
