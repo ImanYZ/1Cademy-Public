@@ -1,4 +1,4 @@
-import { CollectionReference, DocumentData, DocumentReference } from "firebase-admin/firestore";
+import { CollectionReference } from "firebase-admin/firestore";
 import { db } from "../admin";
 
 export type NodeType =
