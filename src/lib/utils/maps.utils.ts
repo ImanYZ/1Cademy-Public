@@ -23,4 +23,5 @@ export const mapNodeToSimpleNode = (cur: Node, username: string): SimpleNode2 =>
     .map(institution => ({ name: institution.name })),
   choices: cur.choices || [],
   versions: cur.versions ?? 0,
+  isTag: cur.isTag,
 });

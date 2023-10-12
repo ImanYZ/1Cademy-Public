@@ -33,7 +33,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
         });
         return newTags;
       }),
-    []
+    [chosenTags]
   );
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export const useTagsTreeView = (chosenTags: string[] = []) => {
     });
 
     return () => unsubscribe();
-  }, [setTagsTreeView]);
+  }, [setTagsTreeView, chosenTags]);
 
   return { allTags: tagsTreeView, setAllTags: setTagsTreeView, resetSelectedTags, allTagsLoaded };
 };
