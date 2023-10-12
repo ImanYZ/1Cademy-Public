@@ -223,14 +223,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: versionData.wrongs + wrong,
         nodeData,
       });
-      const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } =
+      const {
+        courseExist,
+        instantApprove,
+        isInstructor,
+      }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
         await checkInstantApprovalForProposalVote(
           nodeData?.tagIds || [],
           uname,
           nodeType as INodeType,
           req.body.versionId
         );
-      if (courseExist && correct === 1) {
+      if ((courseExist || isInstructor) && correct === 1) {
         isApproved = instantApprove;
       }
 

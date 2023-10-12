@@ -20,6 +20,7 @@ type ProposalsSidebarProps = {
   proposeNodeImprovement: any;
   fetchProposals: any;
   rateProposal: any;
+  ratingProposale: boolean;
   selectProposal: any;
   deleteProposal: any;
   proposeNewChild: any;
@@ -42,6 +43,7 @@ const ProposalsSidebar = ({
   proposeNodeImprovement,
   fetchProposals,
   rateProposal,
+  ratingProposale,
   selectProposal,
   deleteProposal,
   proposeNewChild,
@@ -254,6 +256,7 @@ const ProposalsSidebar = ({
                 proposeNodeImprovement={proposeNodeImprovement}
                 fetchProposals={fetchProposals}
                 rateProposal={rateProposal}
+                ratingProposale={ratingProposale}
                 selectProposal={selectProposal}
                 deleteProposal={deleteProposal}
                 editHistory={true}

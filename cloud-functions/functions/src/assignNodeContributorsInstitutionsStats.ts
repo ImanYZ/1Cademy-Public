@@ -1,4 +1,4 @@
-const { db, commitBatch, batchSet, batchUpdate } = require("./admin");
+import { db, commitBatch, batchSet, batchUpdate } from "./admin";
 
 // On 1Cademy.com nodes do not have their list of contributors and institutions
 // assigned to them. We should run this function every 25 hours in a PubSub to

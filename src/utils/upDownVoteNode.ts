@@ -1,13 +1,10 @@
 import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
 import { DocumentData, QueryDocumentSnapshot, WriteBatch } from "firebase-admin/firestore";
 import {
-  baseReputationObj,
-  deleteTagCommunityAndTagsOfTags,
   getAllUserNodes,
   getNode,
   getTypedCollections,
   getUserNode,
-  retrieveAndsignalAllUserNodesChanges,
   signalAllUserNodesChanges,
   updateReputation,
 } from ".";
@@ -123,6 +120,8 @@ export const UpDownVoteNode = async ({
     if (courseExist) {
       willRemoveNode = instantDelete;
     } else {
+      //  if the new change yields node with more downvotes than upvotes, DELETE
+      // node should not be deleted if its a locked node
       willRemoveNode = doNeedToDeleteNode(
         nodeData.corrects + correctChange,
         nodeData.wrongs + wrongChange,
@@ -131,191 +130,12 @@ export const UpDownVoteNode = async ({
     }
   }
 
-  //  if the new change yields node with more downvotes than upvotes, DELETE
-  // node should not be deleted if its a locked node
   if (willRemoveNode) {
     // signal search about deletion of node
-    await indexNodeChange(nodeId, nodeData.title, "DELETE");
-
+    await detach(async () => {
+      await indexNodeChange(nodeId, nodeData.title, "DELETE");
+    });
     deleteNode = true;
-    // TODO: move these to queue
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      [batch, writeCounts] = await signalAllUserNodesChanges({
-        batch,
-        userNodesRefs,
-        userNodesData,
-        nodeChanges: {},
-        major: true,
-        deleted: deleteNode,
-        currentTimestamp,
-        writeCounts,
-      });
-      await commitBatch(batch);
-    });
-
-    // Delete the node from the list of children of each parent node
-    for (let parentLink of nodeData.parents) {
-      const parentId = parentLink.node;
-      const parentNode = await getNode({ nodeId: parentId });
-      //  filter out node to be deleted
-      const newChildren = parentNode.nodeData.children.filter((l: any) => l.node !== nodeId);
-      const nodeChanges = {
-        children: newChildren,
-        changedAt: currentTimestamp,
-        updatedAt: currentTimestamp,
-      };
-      batch.update(parentNode.nodeRef, nodeChanges);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      // TODO: move these to queue
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts = 0;
-        [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-          batch,
-          linkedId: parentId,
-          nodeChanges,
-          major: true,
-          currentTimestamp,
-          writeCounts,
-        });
-        await commitBatch(batch);
-      });
-    }
-    // Delete the node from the list of parents of each child node
-    for (let childLink of nodeData.children) {
-      const childId = childLink.node;
-      const childNode: any = await getNode({ nodeId: childId });
-      //  filter out node to be deleted
-      const newParents = childNode.nodeData.parents.filter((l: any) => l.node !== nodeId);
-      const nodeChanges = {
-        parents: newParents,
-        changedAt: currentTimestamp,
-        updatedAt: currentTimestamp,
-      };
-      batch.update(childNode.nodeRef, nodeChanges);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      // TODO: move these to queue
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts = 0;
-        [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-          batch,
-          linkedId: childId,
-          nodeChanges,
-          major: true,
-          currentTimestamp,
-          writeCounts,
-        });
-        await commitBatch(batch);
-      });
-    }
-    //  retrieve all the nodes that are tagging this current node, then remove current node from their list of tags
-    if (nodeData.isTag) {
-      const taggedNodesRefs = db.collection("nodes").where("tagIds", "array-contains", nodeId);
-      const taggedNodesDocs = await taggedNodesRefs.get();
-      //  Delete tag from the list of nodes that contain it
-      for (let taggedNodeDoc of taggedNodesDocs.docs) {
-        const taggedNodeRef = db.collection("nodes").doc(taggedNodeDoc.id);
-        const taggedNodeData = taggedNodeDoc.data();
-        //  remove tag from node
-        const tagIdx = taggedNodeData.tagIds.findIndex((tagId: any) => tagId === nodeId);
-        if (tagIdx !== -1) {
-          taggedNodeData.tagIds.splice(tagIdx, 1);
-          taggedNodeData.tags.splice(tagIdx, 1);
-          const nodeChanges = {
-            tagIds: taggedNodeData.tagIds,
-            tags: taggedNodeData.tags,
-            changedAt: currentTimestamp,
-            updatedAt: currentTimestamp,
-          };
-          batch.update(taggedNodeRef, nodeChanges);
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          // TODO: move these to queue
-          await detach(async () => {
-            let batch = db.batch();
-            let writeCounts = 0;
-            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-              batch,
-              linkedId: taggedNodeDoc.id,
-              nodeChanges,
-              major: true,
-              currentTimestamp,
-              writeCounts,
-            });
-            await commitBatch(batch);
-          });
-        }
-      }
-      [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({ batch, nodeId, writeCounts, t, tWriteOperations });
-    }
-
-    //  Iterate through tags in nodeData and obtain other nodes with the same tag that are not deleted
-    //  if such nodes exist, set isTag property to false
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      for (let tagId of nodeData.tagIds) {
-        const taggedNodeDocs = await db
-          .collection("nodes")
-          .where("tagIds", "array-contains", tagId)
-          .where("deleted", "==", false)
-          .limit(2)
-          .get();
-        if (taggedNodeDocs.docs.length <= 1) {
-          [batch, writeCounts] = await deleteTagCommunityAndTagsOfTags({
-            batch,
-            nodeId: tagId,
-            writeCounts,
-          });
-          const tagNodeRef = db.collection("nodes").doc(tagId);
-          batch.update(tagNodeRef, { isTag: false, updatedAt: currentTimestamp });
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-        }
-      }
-      await commitBatch(batch);
-    });
-
-    //  query all the nodes that are referencing current node with nodeId
-    if (nodeData.nodeType === "Reference") {
-      const citingNodesRefs = db.collection("nodes").where("referenceIds", "array-contains", nodeId);
-      const citingNodesDocs = await citingNodesRefs.get();
-
-      for (let citingNodeDoc of citingNodesDocs.docs) {
-        const citingNodeRef = db.collection("nodes").doc(citingNodeDoc.id);
-        const citingNodeData = citingNodeDoc.data();
-        const referenceIdx = citingNodeData.referenceIds.indexOf(nodeId);
-        if (referenceIdx !== -1) {
-          citingNodeData.references.splice(referenceIdx, 1);
-          citingNodeData.referenceLabels.splice(referenceIdx, 1);
-          citingNodeData.referenceIds.splice(referenceIdx, 1);
-          const nodeChanges = {
-            references: citingNodeData.references,
-            referenceLabels: citingNodeData.referenceLabels,
-            referenceIds: citingNodeData.referenceIds,
-            changedAt: currentTimestamp,
-            updatedAt: currentTimestamp,
-          };
-          batch.update(citingNodeRef, nodeChanges);
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          // TODO: move these to queue
-          await detach(async () => {
-            let batch = db.batch();
-            let writeCounts = 0;
-            [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-              batch,
-              linkedId: citingNodeDoc.id,
-              nodeChanges,
-              major: true,
-              currentTimestamp,
-              writeCounts,
-            });
-            await commitBatch(batch);
-          });
-        }
-      }
-    }
   }
 
   let typedVersionDocuments: {

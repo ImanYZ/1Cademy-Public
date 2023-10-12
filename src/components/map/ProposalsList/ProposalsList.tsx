@@ -33,9 +33,10 @@ type ProposalsListProps = {
   openProposal: string;
   isAdmin: boolean;
   username: string;
+  ratingProposale: boolean;
 };
 
-const ProposalsList = ({ deleteProposal, ...props }: ProposalsListProps) => {
+const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsListProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const rateProposalClick = useCallback(
@@ -90,6 +91,7 @@ const ProposalsList = ({ deleteProposal, ...props }: ProposalsListProps) => {
                 proposalSummaries={proposalSummaries}
                 rateProposalClick={rateProposalClick}
                 selectProposal={props.selectProposal}
+                ratingProposale={ratingProposale}
                 username={props.username}
               />
             );
@@ -125,6 +127,7 @@ type SelectedProposalItemType = {
   deleteProposalClick: any;
   username: string;
   isDeleting: boolean;
+  ratingProposale: boolean;
 };
 
 const SelectedProposalItem = ({
@@ -136,11 +139,16 @@ const SelectedProposalItem = ({
   deleteProposalClick,
   username,
   isDeleting,
+  ratingProposale,
 }: SelectedProposalItemType) => {
   const canRemoveProposal = useMemo(
     () => !isDeleting && !proposal.accepted && proposal.proposer === username,
     [isDeleting, proposal.accepted, proposal.proposer, username]
   );
+  const upvoteProposal = (e: any) => {
+    e.stopPropagation();
+    rateProposalClick(proposal, proposalIdx, true, false, false);
+  };
 
   return (
     <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
@@ -252,10 +260,7 @@ const SelectedProposalItem = ({
             >
               <ContainedButton
                 title="Click if you find this proposal helpful."
-                onClick={(e: any) => {
-                  e.stopPropagation();
-                  rateProposalClick(proposal, proposalIdx, true, false, false);
-                }}
+                onClick={upvoteProposal}
                 sx={{
                   borderRadius: "52px 0px 0px 52px",
                   background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
@@ -264,6 +269,7 @@ const SelectedProposalItem = ({
                     background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
                   },
                 }}
+                disabled={ratingProposale}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                   <DoneIcon sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit", fontSize: "19px" }} />
