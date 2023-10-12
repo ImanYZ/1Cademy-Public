@@ -235,6 +235,7 @@ const ProposalsSidebar = ({
                 selectProposal={selectProposal}
                 deleteProposal={deleteProposal}
                 editHistory={false}
+                ratingProposale={ratingProposale}
                 proposeNewChild={proposeNewChild}
                 openProposal={openProposal}
                 isAdmin={isAdmin}
