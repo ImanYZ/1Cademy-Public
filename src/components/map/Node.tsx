@@ -30,7 +30,6 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import moment from "moment";
-import Image from "next/image";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
@@ -1158,14 +1157,15 @@ const Node = ({
               <Box id={`${identifier}-node-content-media`}>
                 {nodeImage && (
                   <Box sx={{ position: "relative", minHeight: imageHeight }}>
-                    <Image
+                    {/* TODO: change to Next Image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      ref={imageElementRef}
                       src={nodeImage}
                       alt="Node image"
                       className="responsive-img NodeImage"
                       onLoad={onImageLoad}
                       onClick={onImageClick}
-                      layout="fill"
-                      objectFit="contain"
                     />
 
                     {editable && (
