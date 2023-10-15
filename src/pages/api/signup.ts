@@ -69,7 +69,7 @@ const extractDomain = (email: string) => {
 
 export const checkEmailInstitution = async (email: string, checkFirestore: boolean) => {
   try {
-    let domainName = extractDomain(email);
+    const domainName = extractDomain(email);
     const institutionDoc = await db
       .collection("institutions")
       .where("domains", "array-contains", domainName)
