@@ -66,7 +66,7 @@ const extractDomain = (email: string) => {
   const domain = email.match("@(.+)$")?.[0];
   if (domain) {
     const emailSplit = domain.split(".");
-    return "@" + emailSplit[emailSplit.length - 2] + "." + emailSplit[emailSplit.length - 1];
+    return "@" + emailSplit[emailSplit.length - 2].replace("@", "") + "." + emailSplit[emailSplit.length - 1];
   } else {
     return "";
   }
