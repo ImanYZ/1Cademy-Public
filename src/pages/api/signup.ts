@@ -63,8 +63,13 @@ export const unameExists = async (uname: string) => {
 };
 
 const extractDomain = (email: string) => {
-  const emailSplit = email.split(".");
-  return "@" + emailSplit[emailSplit.length - 2] + "." + emailSplit[emailSplit.length - 1];
+  const domain = email.match("@(.+)$")?.[0];
+  if (domain) {
+    const emailSplit = domain.split(".");
+    return "@" + emailSplit[emailSplit.length - 2] + "." + emailSplit[emailSplit.length - 1];
+  } else {
+    return "";
+  }
 };
 
 export const checkEmailInstitution = async (email: string, checkFirestore: boolean) => {
