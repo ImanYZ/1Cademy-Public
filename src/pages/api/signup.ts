@@ -62,9 +62,14 @@ export const unameExists = async (uname: string) => {
   }
 };
 
+const extractDomain = (email: string) => {
+  const emailSplit = email.split(".");
+  return "@" + emailSplit[emailSplit.length - 2] + "." + emailSplit[emailSplit.length - 1];
+};
+
 export const checkEmailInstitution = async (email: string, checkFirestore: boolean) => {
   try {
-    const domainName = email.match("@(.+)$")?.[0];
+    let domainName = extractDomain(email);
     const institutionDoc = await db
       .collection("institutions")
       .where("domains", "array-contains", domainName)
@@ -290,7 +295,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       state: data.state,
       city: data.city,
       gender: data.gender,
-      birthDate: admin.firestore.Timestamp.fromDate(new Date(data.birthDate || "")),
+      birthDate: data.birthDate ? new Date(data.birthDate) : new Date(),
       foundFrom: data.foundFrom,
       education: data.education,
       occupation: data.occupation,
