@@ -62,19 +62,12 @@ export const unameExists = async (uname: string) => {
   }
 };
 
-const extractDomain = (email: string) => {
-  const domain = email.match("@(.+)$")?.[0];
-  if (domain) {
-    const emailSplit = domain.split(".");
-    return "@" + emailSplit[emailSplit.length - 2].replace("@", "") + "." + emailSplit[emailSplit.length - 1];
-  } else {
-    return "";
-  }
-};
-
 export const checkEmailInstitution = async (email: string, checkFirestore: boolean) => {
   try {
-    const domainName = extractDomain(email);
+    let domainName = email.match("@(.+)$")?.[0];
+    if (domainName?.includes("harvard.edu")) {
+      domainName = "@harvard.edu";
+    }
     const institutionDoc = await db
       .collection("institutions")
       .where("domains", "array-contains", domainName)
