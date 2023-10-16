@@ -4,11 +4,13 @@ import React, { useCallback, useState } from "react";
 const useConfirmationDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [confirmation, setConfirmation] = useState(false);
   const resolveRef = React.useRef<any>(null);
 
-  const confirmIt = useCallback((message: string) => {
+  const confirmIt = useCallback((message: string, confirmation = true) => {
     setConfirmationMessage(message);
     setIsOpen(true);
+    setConfirmation(confirmation);
 
     return new Promise(resolve => {
       resolveRef.current = resolve;
@@ -31,11 +33,13 @@ const useConfirmationDialog = () => {
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center" }}>
         <Button onClick={() => closeDialog(true)} color="primary">
-          Yes
+          {confirmation ? "YES" : "OK"}
         </Button>
-        <Button onClick={() => closeDialog(false)} color="primary">
-          No
-        </Button>
+        {confirmation && (
+          <Button onClick={() => closeDialog(false)} color="primary">
+            No
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

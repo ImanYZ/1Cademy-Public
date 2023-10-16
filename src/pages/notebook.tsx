@@ -3048,8 +3048,9 @@ const Notebook = ({}: NotebookProps) => {
         }
         if (willRemoveNode) {
           if (node?.children.length > 0) {
-            window.alert(
-              "To be able to delete this node, you should first delete its children or move them under other parent node."
+            confirmIt(
+              "To be able to delete this node, you should first delete its children or move them under other parent node.",
+              false
             );
             deleteOK = false;
           } else {
@@ -3594,7 +3595,7 @@ const Notebook = ({}: NotebookProps) => {
             if (isTheSame) {
               onFail();
               setTimeout(() => {
-                window.alert("You've not changed anything yet!");
+                confirmIt("You've not changed anything yet!", false);
               });
               return graph;
             }
@@ -3921,7 +3922,7 @@ const Notebook = ({}: NotebookProps) => {
 
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              window.alert("Please add relevant tag(s) to your proposed node.");
+              confirmIt("Please add relevant tag(s) to your proposed node.", false);
             });
             return graph;
           }
@@ -4106,7 +4107,9 @@ const Notebook = ({}: NotebookProps) => {
 
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              window.alert("Please add relevant tag(s) to your proposed node.");
+              setTimeout(() => {
+                confirmIt("Please add relevant tag(s) to your proposed node.", false);
+              });
             });
             return graph;
           }
