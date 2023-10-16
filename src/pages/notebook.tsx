@@ -742,7 +742,7 @@ const Notebook = ({}: NotebookProps) => {
   // const [openTrends, setOpenTrends] = useState(false);
 
   // flag for whether media is full-screen
-  const [openMedia, setOpenMedia] = useState<string | boolean>(false);
+  const [openMedia, setOpenMedia] = useState<string>("");
 
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
@@ -3309,7 +3309,7 @@ const Notebook = ({}: NotebookProps) => {
     nodeBookDispatch({ type: "setSelectionType", payload: null });
     setSelectedUser(null);
     // nodeBookDispatch({ type: "setOpenToolbar", payload: false });
-    setOpenMedia(false);
+    setOpenMedia("");
     setSelectedProposalId("");
     if (nodeBookState.selectedNode && g.current.hasNode(nodeBookState.selectedNode)) {
       scrollToNode(nodeBookState.selectedNode);
@@ -3542,7 +3542,7 @@ const Notebook = ({}: NotebookProps) => {
         // setOpenSearch(false);
         // setOpenRecentNodes(false);
         // setOpenTrends(false);
-        setOpenMedia(false);
+        setOpenMedia("");
         updatedLinksRef.current = getInitialUpdateLinks();
         setOpenSidebar(null);
       } else {
@@ -7679,7 +7679,7 @@ const Notebook = ({}: NotebookProps) => {
                   wrongNode={wrongNode}
                   uploadNodeImage={uploadNodeImage}
                   removeImage={removeImage}
-                  setOpenMedia={(imgUrl: string | boolean) => {
+                  setOpenMedia={(imgUrl: string) => {
                     setOpenMedia(imgUrl);
                   }}
                   changeNodeHight={changeNodeHight}
@@ -7745,33 +7745,30 @@ const Notebook = ({}: NotebookProps) => {
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
-                  onClose={() => setOpenMedia(false)}
+                  onClose={() => setOpenMedia("")}
                   aria-labelledby="modal-modal-title"
                   aria-describedby="modal-modal-description"
                 >
                   <>
                     <CloseIcon
                       sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
-                      onClick={() => setOpenMedia(false)}
+                      onClick={() => setOpenMedia("")}
                     />
                     <MapInteractionCSS>
-                      {/* TODO: change open Media variable to string to not validate */}
-                      {typeof openMedia === "string" && (
-                        <Paper
-                          sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "100vh",
-                            width: "100vw",
-                            background: "transparent",
-                          }}
-                        >
-                          {/* TODO: change to Next Image */}
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={openMedia} alt="Node image" className="responsive-img" />
-                        </Paper>
-                      )}
+                      <Paper
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100vh",
+                          width: "100vw",
+                          background: "transparent",
+                        }}
+                      >
+                        {/* TODO: change to Next Image */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={openMedia} alt="Node image" className="responsive-img" />
+                      </Paper>
                     </MapInteractionCSS>
                   </>
                 </Modal>
