@@ -7619,7 +7619,7 @@ const Notebook = ({}: NotebookProps) => {
                   wrongNode={wrongNode}
                   uploadNodeImage={uploadNodeImage}
                   removeImage={removeImage}
-                  setOpenMedia={(imgUrl: string | boolean) => {
+                  setOpenMedia={(imgUrl: string) => {
                     setOpenMedia(imgUrl);
                   }}
                   changeNodeHight={changeNodeHight}
