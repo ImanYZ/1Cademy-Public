@@ -7685,33 +7685,34 @@ const Notebook = ({}: NotebookProps) => {
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
-                  onClose={() => setOpenMedia(false)}
+                  onClose={() => setOpenMedia("")}
                   aria-labelledby="modal-modal-title"
                   aria-describedby="modal-modal-description"
                 >
                   <>
                     <CloseIcon
                       sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
-                      onClick={() => setOpenMedia(false)}
+                      onClick={() => setOpenMedia("")}
                     />
                     <MapInteractionCSS>
-                      {/* TODO: change open Media variable to string to not validate */}
-                      {typeof openMedia === "string" && (
-                        <Paper
-                          sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "100vh",
-                            width: "100vw",
-                            background: "transparent",
-                          }}
-                        >
-                          {/* TODO: change to Next Image */}
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={openMedia} alt="Node image" className="responsive-img" />
-                        </Paper>
-                      )}
+                      <Paper
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100vh",
+                          width: "100vw",
+                          background: "transparent",
+                        }}
+                      >
+                        <Image
+                          src={openMedia}
+                          alt="Node image"
+                          className="responsive-img"
+                          layout="fill"
+                          objectFit="contain"
+                        />
+                      </Paper>
                     </MapInteractionCSS>
                   </>
                 </Modal>
