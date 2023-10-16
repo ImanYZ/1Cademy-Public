@@ -3507,11 +3507,22 @@ const Notebook = ({}: NotebookProps) => {
 
       let postData: any = {};
       try {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        const currentNode = graph.nodes[selectedNodeId];
         notebookRef.current.chosenNode = null;
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         let referencesOK: any = true;
+        if (
+          currentNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
+          graph.nodes[selectedNodeId].references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+        }
+        if (!referencesOK) return;
+
         const {
           courseExist,
           isInstructor,
@@ -3522,21 +3533,9 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: notebookRef.current.selectedNode,
           }
         );
-        const selectedNodeId = notebookRef.current.selectedNode!;
-        if (
-          (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-            graph.nodes[selectedNodeId].nodeType === "Relation" ||
-            graph.nodes[selectedNodeId].nodeType === "Question" ||
-            graph.nodes[selectedNodeId].nodeType === "News") &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
-        }
 
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
-            if (!referencesOK) return graph;
-
             gtmEvent("Propose", {
               customType: "improvement",
             });
@@ -3883,21 +3882,24 @@ const Notebook = ({}: NotebookProps) => {
           courseExist: boolean;
           instantApprove: boolean;
         };
-        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
-          "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: firstChildId }
-        );
         const newNode = graph.nodes[newNodeId];
         let referencesOK: any = true;
+
         if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
+          newNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
           referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
         }
+        if (!referencesOK) {
+          return;
+        }
+
+        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
+          "/instructor/course/checkInstantApprovalForProposal",
+          { nodeId: firstChildId }
+        );
 
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
@@ -3914,10 +3916,6 @@ const Notebook = ({}: NotebookProps) => {
           }
 
           if (!newNodeId) {
-            return graph;
-          }
-
-          if (!referencesOK) {
             return graph;
           }
 
@@ -4068,6 +4066,19 @@ const Notebook = ({}: NotebookProps) => {
         const firstParentId = graph.nodes[newNodeId].parents[0].node;
         if (!firstParentId) throw Error("This node has not parent");
         const tagIds = graph.nodes[firstParentId].tagIds ?? [];
+        const newNode = graph.nodes[newNodeId];
+        let referencesOK: any = true;
+        if (
+          newNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+        }
+        if (!referencesOK) {
+          return;
+        }
+
         const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
@@ -4075,17 +4086,7 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: firstParentId,
           }
         );
-        const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
-        if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
-          newNode.references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
-        }
+
         setGraph(graph => {
           // const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
@@ -4100,10 +4101,6 @@ const Notebook = ({}: NotebookProps) => {
           }
 
           if (!newNodeId) {
-            return graph;
-          }
-
-          if (!referencesOK) {
             return graph;
           }
 

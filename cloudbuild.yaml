@@ -98,13 +98,6 @@ steps:
         "visualexp-a7d2c",
       ]
 
-  - name: "gcr.io/cloud-builders/gcloud"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        gcloud functions deploy --runtime=nodejs16 --trigger-http --source=cloud-functions/functions/* \
-        --project=onecademy-1 --region=us-central1
 images:
   - gcr.io/visualexp-a7d2c/knowledge
 availableSecrets:
