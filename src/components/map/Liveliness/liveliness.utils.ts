@@ -80,7 +80,6 @@ export const synchronizeInteractions: SynchronizeActionTracksFunction = (
     prevUserInteractions[curData.doer].count -= 1;
     if (prevUserInteractions[curData.doer].count <= 0) delete prevUserInteractions[curData.doer];
   }
-  console.log({ prevUserInteractions });
   return prevUserInteractions;
 };
 
@@ -252,7 +251,6 @@ export const calculateVerticalPositionWithLogarithm = ({
 
   return data.map(item => {
     const positionY = getVerticalPosition(item, minCount, range, height);
-    console.log("all", { count: item.count, positionY });
     return { ...item, positionY };
   });
 };
