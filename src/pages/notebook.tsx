@@ -7765,9 +7765,13 @@ const Notebook = ({}: NotebookProps) => {
                           background: "transparent",
                         }}
                       >
-                        {/* TODO: change to Next Image */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={openMedia} alt="Node image" className="responsive-img" />
+                        <Image
+                          src={openMedia}
+                          alt="Node image"
+                          className="responsive-img"
+                          layout="fill"
+                          objectFit="contain"
+                        />
                       </Paper>
                     </MapInteractionCSS>
                   </>
