@@ -16,9 +16,9 @@ export const updatesNodeViewers = async ({
     if (nodeDoc.exists) {
       const nodeData = nodeDoc.data();
       console.log(viewers);
-      const newViewers = (nodeData?.viewers || 0) + viewers;
-      const studied = (nodeData?.studied || 0) + isStudiedNum;
-      const bookmarks = (nodeData?.bookmarks || 0) + bookmarkedNum;
+      const newViewers = Math.max(0, (nodeData?.viewers || 0) + viewers);
+      const studied = Math.max((nodeData?.studied || 0) + isStudiedNum);
+      const bookmarks = Math.max((nodeData?.bookmarks || 0) + bookmarkedNum);
       t.update(nodeDoc.ref, { viewers: newViewers, studied, bookmarks, updatedAt: new Date() });
     }
   });
