@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
 import remarkMath from "remark-math";
 type Props = {
   text: string;
@@ -17,7 +18,7 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
-      rehypePlugins={[rehypeKatex]}
+      rehypePlugins={[rehypeKatex, rehypeRaw as any]}
       className={customClass}
       components={{
         p: ({ ...props }) => (
