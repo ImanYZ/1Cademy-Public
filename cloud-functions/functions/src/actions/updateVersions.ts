@@ -50,10 +50,10 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
       }
     }
 
-    if (versionData.title !== nodeData.title) {
+    if (versionData.title.trim() !== nodeData.title.trim()) {
       versionData.changedTitle = true;
     }
-    if (versionData.content !== nodeData.content) {
+    if (versionData.content.trim() !== nodeData.content.trim()) {
       versionData.changedContent = true;
     }
     if (versionData.nodeImage !== "" && nodeData.nodeImage === "") {
