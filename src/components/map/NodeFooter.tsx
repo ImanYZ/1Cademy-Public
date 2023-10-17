@@ -693,7 +693,16 @@ const NodeFooter = ({
           </span> */}
           </div>
         </Box>
-        {simulated ? <LinearProgress sx={{ width: "54%", position: "absolute", left: "245px" }} /> : ""}
+
+        <LinearProgress
+          sx={{
+            display: simulated && !unaccepted ? "block" : "none",
+            width: "54%",
+            position: "absolute",
+            left: "245px",
+          }}
+        />
+
         <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
           {open ? (
             // REF: Node.css ln 122
