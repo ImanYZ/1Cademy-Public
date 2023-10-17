@@ -68,6 +68,7 @@
     "react-query": "^3.39.1",
     "react-syntax-highlighter": "^15.5.0",
     "rehype-katex": "^6.0.2",
+    "rehype-raw": "^7.0.0",
     "remark": "^14.0.2",
     "remark-html": "^15.0.1",
     "remark-math": "^5.1.1",

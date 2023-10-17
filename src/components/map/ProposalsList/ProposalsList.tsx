@@ -82,23 +82,25 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
           if (props.openProposal === proposal.id) {
             // this will display selected proposal
             return (
-              <SelectedProposalItem
-                key={proposal.id}
-                deleteProposalClick={deleteProposalClick}
-                isDeleting={isDeleting}
-                proposal={proposal}
-                proposalIdx={proposalIdx}
-                proposalSummaries={proposalSummaries}
-                rateProposalClick={rateProposalClick}
-                selectProposal={props.selectProposal}
-                ratingProposale={ratingProposale}
-                username={props.username}
-              />
+              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", mt: "5px" }}>
+                <SelectedProposalItem
+                  key={proposal.id}
+                  deleteProposalClick={deleteProposalClick}
+                  isDeleting={isDeleting}
+                  proposal={proposal}
+                  proposalIdx={proposalIdx}
+                  proposalSummaries={proposalSummaries}
+                  rateProposalClick={rateProposalClick}
+                  selectProposal={props.selectProposal}
+                  ratingProposale={ratingProposale}
+                  username={props.username}
+                />
+              </Box>
             );
           } else {
             // THIS Show pending proposal and approved proposals
             return (
-              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", gap: "4px", mt: "5px" }}>
+              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", mt: "5px" }}>
                 <ProposalItem
                   key={proposal.id}
                   proposal={proposal}

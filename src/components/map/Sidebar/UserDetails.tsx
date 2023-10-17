@@ -2,7 +2,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
-import React from "react";
+import React, { useCallback, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
@@ -22,17 +22,22 @@ type UserDetailsProps = {
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }: UserDetailsProps) => {
+  const [imageSource, setImageSource] = useState(imageUrl);
+  const handleImageError = useCallback(() => {
+    setImageSource("https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png");
+  }, [imageSource]);
   return (
     <Stack direction={"row"} alignItems={"center"} component={"section"} spacing={"24px"} mb="18px">
       <Box id={`${id}-picture`} sx={{ "& img": { borderRadius: "50%" }, borderRadius: "8px" }}>
         {imageUrl && imageUrl !== "" && imageUrl !== DEFAULT_PROFILE_URL ? (
           <Image
-            src={imageUrl}
+            src={imageSource || ""}
             alt={`${fName} ${lName}`}
             width={90}
             height={90}
             objectFit="cover"
             objectPosition="center center"
+            onError={handleImageError}
           />
         ) : (
           <Avatar
