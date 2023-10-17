@@ -152,7 +152,6 @@ type GetUsersAboveInput = { usersInteractionsSortedArray: UserInteractionData[];
 export const getUsersAbove = ({ usersInteractionsSortedArray, uname }: GetUsersAboveInput) => {
   const userIndex = usersInteractionsSortedArray.findIndex(c => c.uname === uname);
   if (userIndex < 0) return usersInteractionsSortedArray;
-  console.log({ usersInteractionsSortedArray, userIndex, uname });
   return usersInteractionsSortedArray.slice(userIndex + 1, userIndex + 4);
 };
 

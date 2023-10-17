@@ -1,4 +1,4 @@
-import { db, batchUpdate, commitBatch } from "../admin";
+import { batchUpdate, commitBatch } from "../admin";
 import { getTypedCollections } from "../helpers/getTypedCollections";
 import { compareChoices, compareFlatLinks, compareLinks } from "../helpers/version-helpers";
 type INodeDeletedUpdates = {
@@ -9,12 +9,34 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
   const nodeType = nodeData.nodeType;
   const { versionsColl }: any = getTypedCollections({ nodeType });
   const versionsDocs = await versionsColl.where("node", "==", nodeId).get();
-  const nodeRef = db.collection("nodes").doc(nodeId);
-  const nodeTypes = new Set<string>();
+
   // From here on, we specify the type of the changes that the user is proposing on this node
   // using some boolean fields to be added to the version.
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
+    [
+      "newChild",
+      "addedChoices",
+      "deletedChoices",
+      "changedChoices",
+      "changedTitle",
+      "changedContent",
+      "addedImage",
+      "deletedImage",
+      "changedImage",
+      "addedReferences",
+      "deletedReferences",
+      "changedReferences",
+      "addedTags",
+      "deletedTags",
+      "changedTags",
+      "addedParents",
+      "addedChildren",
+      "removedParents",
+      "removedChildren",
+      "changedNodeType",
+    ].forEach(change => delete versionData[change]);
+
     const parentCompare = compareLinks({ oldLinks: nodeData.parents, newLinks: versionData.parents });
     const childCompare = compareLinks({ oldLinks: nodeData.children, newLinks: versionData.children });
     if (nodeType === "Question" && versionData.choices) {
@@ -27,8 +49,6 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
         versionData.changedChoices = true;
       }
     }
-
-    nodeTypes.add(nodeType);
 
     if (versionData.title !== nodeData.title) {
       versionData.changedTitle = true;
@@ -88,10 +108,7 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
     if (childCompare.removedLinks.length > 0) {
       versionData.removedChildren = true;
     }
+    batchUpdate(versionDoc.ref, versionData);
   }
-
-  batchUpdate(nodeRef, {
-    nodeTypes: Array.from(nodeTypes),
-  });
   await commitBatch();
 };
