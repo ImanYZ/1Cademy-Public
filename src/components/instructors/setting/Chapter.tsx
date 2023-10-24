@@ -21,7 +21,12 @@ import React, { useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type Props = {
-  chapters: any;
+  chapters:
+    | {
+        node: string;
+        title: string;
+      }
+    | any;
   setChapters: any;
   onSubmitHandler?: any;
   selectedCourse?: any;

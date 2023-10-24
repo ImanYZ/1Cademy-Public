@@ -50,6 +50,7 @@ type AppHeaderProps = {
   sections: HomepageSection[];
   selectedSectionId: string;
   onSwitchSection: (sectionId: string) => void;
+  mitpage?: boolean;
   // preUrl?: string;
 };
 

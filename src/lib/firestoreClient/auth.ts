@@ -107,6 +107,7 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
       role,
       livelinessBar: userData.livelinessBar,
       scaleThreshold: userData.scaleThreshold ?? 25,
+      ontologyPath: userData.ontologyPath,
     };
 
     theme = userData.theme;

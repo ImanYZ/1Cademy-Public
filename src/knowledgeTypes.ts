@@ -429,6 +429,7 @@ export type User = {
   role: UserRole;
   livelinessBar?: LivelinessBarType;
   scaleThreshold?: number;
+  ontologyPath?: string[];
 };
 
 export type UserSettings = {
