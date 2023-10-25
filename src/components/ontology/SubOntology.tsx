@@ -90,6 +90,8 @@ const SubOntology = ({
           if (subOntologyIdx !== -1) {
             ontologyData[type].splice(subOntologyIdx, 1);
           }
+          const subOntologyDoc = await getDoc(doc(collection(db, "ontology"), subOntology.id));
+          await updateDoc(subOntologyDoc.ref, { deleted: true });
           await updateDoc(ontologyDoc.ref, ontologyData);
         }
         setOpenOntology((openOntology: any) => {

@@ -20,7 +20,7 @@ export type IOntology = {
   specializations: ISubOntology[];
   editMode: boolean;
   parents?: string[];
-  type: IOntologyTypes;
+  type?: IOntologyTypes;
 };
 
 export type IUserOntology = {
