@@ -13,6 +13,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { IOntology, ISubOntology } from "src/types/IOntology";
 
@@ -22,6 +23,8 @@ import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
 import { useAuth } from "@/context/AuthContext";
 import { newId } from "@/lib/utils/newFirestoreId";
+
+import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 
 type IOntologyPath = {
   id: string;
@@ -273,6 +276,19 @@ const CIOntology = () => {
 
   return (
     <Box>
+      <Box
+        data-testid="auth-layout"
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          position: "fixed",
+          filter: "brightness(1.95)",
+          zIndex: -2,
+        }}
+      >
+        <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
+      </Box>
+
       <AppHeaderMemoized
         ref={headerRef}
         page="ONE_CADEMY"
