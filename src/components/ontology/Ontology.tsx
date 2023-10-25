@@ -3,9 +3,9 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SaveIcon from "@mui/icons-material/Save";
 import { Button, TextField, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { collection, doc, getFirestore, updateDoc } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
-import { IOntology, ISubOntology } from "src/types/IOntology";
+import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
+import React, { useCallback, useState } from "react";
+import { ISubOntology } from "src/types/IOntology";
 
 import { newId } from "@/lib/utils/newFirestoreId";
 
@@ -19,6 +19,8 @@ type IOntologyProps = {
   ontologyPath: any;
   saveSubOntology: any;
   setSnackbarMessage: (message: string) => void;
+  updateUserDoc: (ids: string[]) => void;
+  user: any;
 };
 
 const Ontology = ({
@@ -29,16 +31,13 @@ const Ontology = ({
   setOntologyPath,
   saveSubOntology,
   setSnackbarMessage,
+  updateUserDoc,
+  user,
 }: IOntologyProps) => {
-  const [newTitle, setNewTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  // const [newTitle, setNewTitle] = useState<string>("");
+  // const [description, setDescription] = useState<string>("");
 
   const [isFocused, setIsFocused] = useState(false);
-
-  useEffect(() => {
-    setNewTitle(openOntology.title);
-    setDescription(openOntology.description);
-  }, []);
 
   const handleFocus = () => {
     // if (updatingTitle) return;
@@ -47,10 +46,6 @@ const Ontology = ({
   const handleBlur = () => {
     setIsFocused(false);
   };
-
-  useEffect(() => {
-    setNewTitle(openOntology.title);
-  }, [openOntology.title]);
 
   const db = getFirestore();
   // const {
@@ -64,17 +59,20 @@ const Ontology = ({
     title: "Actor" | "Pre-Condition" | "Post-condition" | "Evaluation" | "Processe" | "Specialization";
     type: "actors" | "preconditions" | "postconditions" | "evaluations" | "processes" | "specializations";
   }) => {
-    const addSubOntology = () => {
-      setOpenOntology((openOntology: IOntology) => {
-        const _openOntology = { ...openOntology };
-        _openOntology[type].push({
-          title: "",
-          id: newId(db),
-          editMode: true,
-          new: true,
-        });
-        return _openOntology;
-      });
+    const addSubOntology = async () => {
+      const id = newId(db);
+      handleLinkNavigation({ id, title: "" });
+      await saveSubOntology({ id, title: "" }, type, openOntology.id);
+      // setOpenOntology((openOntology: IOntology) => {
+      //   const _openOntology = { ...openOntology };
+      //   _openOntology[type].push({
+      //     title: "",
+      //     id: newId(db),
+      //     editMode: true,
+      //     new: true,
+      //   });
+      //   return _openOntology;
+      // });
     };
     return (
       <Button
@@ -84,6 +82,7 @@ const Ontology = ({
           color: theme => theme.palette.common.orange,
         }}
         onClick={addSubOntology}
+        disabled={openOntology.title.trim() === ""}
       >
         New {title}
       </Button>
@@ -91,59 +90,86 @@ const Ontology = ({
   };
 
   const handleEditTitle = (e: any) => {
-    setNewTitle(e.target.value);
+    setOpenOntology((open: any) => {
+      const _open = { ...open };
+      _open.title = e.target.value;
+      return _open;
+    });
   };
   const handleEditDescription = (e: any) => {
-    setDescription(e.target.value);
+    setOpenOntology((open: any) => {
+      const _open = { ...open };
+      _open.description = e.target.value;
+      return _open;
+    });
+  };
+
+  const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
+    for (let type of ["actors", "preconditions", "postconditions", "evaluations", "processes", "specializations"]) {
+      for (let subOnto of parentData[type]) {
+        if (subOnto.id === id) {
+          subOnto.title = newTitle;
+        }
+      }
+    }
   };
 
   const SaveOntologyTitle = useCallback(async () => {
     try {
-      console.info("openOntology.id", openOntology.id, newTitle);
       const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
-      await updateDoc(ontologyRef, {
-        title: newTitle,
-      });
-
-      setOntologyPath((ontologyPath: any) => {
-        const _path = [...ontologyPath];
-        const pathIdx = _path.findIndex(p => p.id === openOntology.id);
-        if (pathIdx !== -1) {
-          _path[pathIdx].title = newTitle;
+      const newOntologyDoc = await getDoc(ontologyRef);
+      if (newOntologyDoc.exists()) {
+        await updateDoc(ontologyRef, {
+          title: openOntology.title,
+        });
+        const pathIdx = ontologyPath.findIndex((p: any) => p.id === openOntology.id);
+        if (pathIdx - 1 !== -1) {
+          const parentId = ontologyPath[pathIdx - 1].id;
+          const parentRef = doc(collection(db, "ontology"), parentId);
+          const parentDoc = await getDoc(parentRef);
+          const parentData = parentDoc.data();
+          editTitleSubOntology({ parentData, newTitle: openOntology.title, id: openOntology.id });
+          await updateDoc(parentRef, parentData);
         }
-        return _path;
-      });
-
-      setOpenOntology((openOntology: any) => {
-        const _openOntology = { ...openOntology };
-        _openOntology.title = newTitle;
-        return _openOntology;
-      });
+        setOntologyPath((ontologyPath: any) => {
+          const _path = [...ontologyPath];
+          const pathIdx = _path.findIndex(p => p.id === openOntology.id);
+          if (pathIdx !== -1) {
+            _path[pathIdx].title = openOntology.title;
+          }
+          return _path;
+        });
+      } else {
+        await setDoc(ontologyRef, {
+          ...openOntology,
+        });
+        setOntologyPath([
+          {
+            id: openOntology.id,
+            title: openOntology.title,
+          },
+        ]);
+        await updateUserDoc([openOntology.id]);
+      }
 
       setSnackbarMessage("Updated Successufly");
     } catch (error) {
       console.error(error);
     }
-  }, [db, newTitle, openOntology]);
+  }, [db, openOntology]);
 
   const SaveOntologyDescription = useCallback(async () => {
     try {
-      console.info(openOntology.id, description, isFocused);
+      console.info(openOntology.id, isFocused);
       const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
       await updateDoc(ontologyRef, {
-        description,
+        description: openOntology.description,
       });
-      const _openOntology = { ...openOntology };
-      _openOntology.title = newTitle;
-      const _path = [...ontologyPath];
-      const pathIdx = _path.findIndex(p => p.id === openOntology.id);
-      _path[pathIdx].description = description;
-      setOpenOntology(_openOntology);
       setSnackbarMessage("Updated Successufly");
     } catch (error) {
       console.error(error);
     }
-  }, [db, description, openOntology, setOpenOntology]);
+  }, [db, openOntology, setOpenOntology]);
 
   const addNote = () => {
     // if (!user) return;
@@ -152,17 +178,45 @@ const Ontology = ({
       _openOntology.notes.push({
         id: newId(db),
         note: "",
-        sender: "user.uname",
+        sender: user.uname,
         editMode: true,
       });
       return _openOntology;
     });
   };
-  const cancelTitleChanges = () => {
-    setNewTitle(openOntology.title);
+
+  // const cancelTitleChanges = () => {
+  //   /* CANCEL TITLE */
+  // };
+  // const cancelDescriptionChanges = () => {
+  //   /* CANCEL DESCRIPTION */
+  // };
+  const saveNote = async () => {
+    try {
+      const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
+      const newOntologyDoc = await getDoc(ontologyRef);
+      if (newOntologyDoc.exists()) {
+        const notes = openOntology.notes.map((note: any) => {
+          delete note.editMode;
+          return note;
+        });
+        await updateDoc(newOntologyDoc.ref, { notes });
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
-  const cancelDescriptionChanges = () => {
-    setDescription(openOntology.description);
+  const cancelNote = () => {};
+
+  const EditNote = (e: any, id: string) => {
+    setOpenOntology((openOntology: any) => {
+      const _openOntology = { ...openOntology };
+      const noteIdx = _openOntology.notes.findIndex((note: any) => note.id === id);
+      if (noteIdx !== -1) {
+        _openOntology.notes[noteIdx].note = e.target.value;
+      }
+      return _openOntology;
+    });
   };
 
   return (
@@ -173,11 +227,11 @@ const Ontology = ({
     >
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <TextField
-          placeholder={``}
+          placeholder={`Title`}
           variant="standard"
           fullWidth
           multiline
-          value={newTitle}
+          value={openOntology.title}
           onChange={handleEditTitle}
           InputProps={{
             style: { fontSize: "36px" },
@@ -200,20 +254,18 @@ const Ontology = ({
             ),
             endAdornment: (
               <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {newTitle !== openOntology.title && (
-                  <Tooltip title="Cancel">
-                    <CancelIcon
-                      sx={{
-                        marginLeft: "10px",
-                        color: "#757575",
-                        ":hover": {
-                          color: theme => theme.palette.common.orange,
-                        },
-                      }}
-                      onClick={cancelTitleChanges}
-                    />
-                  </Tooltip>
-                )}
+                {/* <Tooltip title="Cancel">
+                  <CancelIcon
+                    sx={{
+                      marginLeft: "10px",
+                      color: "#757575",
+                      ":hover": {
+                        color: theme => theme.palette.common.orange,
+                      },
+                    }}
+                    onClick={cancelTitleChanges}
+                  />
+                </Tooltip> */}
               </Box>
             ),
             disableUnderline: true,
@@ -227,7 +279,7 @@ const Ontology = ({
           variant="standard"
           fullWidth
           multiline
-          value={description}
+          value={openOntology.description}
           onChange={handleEditDescription}
           InputProps={{
             style: { fontSize: "15px" },
@@ -250,7 +302,7 @@ const Ontology = ({
             ),
             endAdornment: (
               <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {description !== openOntology.description && (
+                {/* {description !== openOntology.description && (
                   <Tooltip title="Cancel">
                     <CancelIcon
                       sx={{
@@ -263,7 +315,7 @@ const Ontology = ({
                       onClick={cancelDescriptionChanges}
                     />
                   </Tooltip>
-                )}
+                )} */}
               </Box>
             ),
             disableUnderline: true,
@@ -465,7 +517,9 @@ const Ontology = ({
                           fullWidth
                           value={_note.note}
                           multiline
-                          onChange={() => {}}
+                          onChange={e => {
+                            EditNote(e, _note.id);
+                          }}
                           InputProps={{
                             endAdornment: (
                               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
@@ -477,7 +531,7 @@ const Ontology = ({
                                         color: theme => theme.palette.common.orange,
                                       },
                                     }}
-                                    onClick={() => {}}
+                                    onClick={saveNote}
                                   />
                                 </Tooltip>
                                 <Tooltip title={"Cancel"}>
@@ -489,7 +543,7 @@ const Ontology = ({
                                         color: theme => theme.palette.common.orange,
                                       },
                                     }}
-                                    onClick={() => {}}
+                                    onClick={cancelNote}
                                   />
                                 </Tooltip>
                               </Box>

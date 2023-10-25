@@ -1,5 +1,5 @@
 import CancelIcon from "@mui/icons-material/Cancel";
-import CreateIcon from "@mui/icons-material/Create";
+// import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Link, TextField, Tooltip } from "@mui/material";
@@ -63,17 +63,17 @@ const SubOntology = ({
     saveSubOntology(subOntology, type);
   };
 
-  const makeSubOntologyEditable = () => {
-    console.info("makeSubOntologyEditable");
-    setOpenOntology((openOntology: any) => {
-      const _openOntology: any = { ...openOntology };
-      const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
-      if (subOntologyIdx !== -1) {
-        _openOntology[type][subOntologyIdx].editMode = true;
-      }
-      return _openOntology;
-    });
-  };
+  // const makeSubOntologyEditable = () => {
+  //   console.info("makeSubOntologyEditable");
+  //   setOpenOntology((openOntology: any) => {
+  //     const _openOntology: any = { ...openOntology };
+  //     const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
+  //     if (subOntologyIdx !== -1) {
+  //       _openOntology[type][subOntologyIdx].editMode = true;
+  //     }
+  //     return _openOntology;
+  //   });
+  // };
   const deleteSubOntologyEditable = () => {
     console.info("deleteSubOntologyEditable");
 
@@ -89,7 +89,7 @@ const SubOntology = ({
 
   return (
     <Box key={subOntology.id} sx={{ ...sx }}>
-      {subOntology.editMode ? (
+      {false ? (
         <TextField
           placeholder={``}
           variant="standard"
@@ -146,7 +146,7 @@ const SubOntology = ({
             {" "}
             {subOntology.title}
           </Link>
-          <Tooltip title={"Edit"}>
+          {/* <Tooltip title={"Edit"}>
             <CreateIcon
               sx={{
                 cursor: "pointer",
@@ -161,7 +161,7 @@ const SubOntology = ({
               fontSize="small"
               onClick={makeSubOntologyEditable}
             />
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip title={"Delete"}>
             <DeleteIcon
               sx={{

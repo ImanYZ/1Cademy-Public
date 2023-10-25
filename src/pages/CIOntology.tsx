@@ -33,7 +33,24 @@ const CIOntology = () => {
 
   const [ontologies, setOntologies] = useState<IOntology[]>([]);
   // const [userOntology, setUserOntology] = useState<IUserOntology[]>([]);
-  const [openOntology, setOpenOntology] = useState<IOntology | null>(null);
+  const [openOntology, setOpenOntology] = useState<IOntology | null>({
+    deleted: false,
+    id: newId(db),
+    node: null,
+    title: "",
+    description: "",
+    comments: [],
+    tags: [],
+    notes: [],
+    contributors: [],
+    actors: [],
+    preconditions: [],
+    postconditions: [],
+    evaluations: [],
+    processes: [],
+    specializations: [],
+    editMode: true,
+  });
   const [ontologyPath, setOntologyPath] = useState<IOntologyPath[]>([]);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
 
@@ -62,7 +79,7 @@ const CIOntology = () => {
       setOntologyPath(getPath(dataChange?.ontologyPath || []));
       const lastOntology = dataChange?.ontologyPath.reverse()[0];
       const ontologyIdx = ontologies.findIndex(ontology => ontology.id === lastOntology);
-      setOpenOntology(ontologies[ontologyIdx]);
+      if (ontologies[ontologyIdx]) setOpenOntology(ontologies[ontologyIdx]);
     });
 
     return () => unsubscribeUser();
@@ -103,11 +120,12 @@ const CIOntology = () => {
         const _ontologies = [...ontologies];
         for (let change of docChanges) {
           const changeData: any = change.doc.data();
-          const previousIdx = _ontologies.findIndex(d => d.id === changeData.id);
+
+          const previousIdx = _ontologies.findIndex(d => d.id === change.doc.id);
           if (change.type === "removed" && previousIdx !== -1) {
             _ontologies.splice(previousIdx, 1);
           } else if (previousIdx !== -1) {
-            ontologies[previousIdx] = { id: change.doc.id, ...changeData };
+            _ontologies[previousIdx] = { id: change.doc.id, ...changeData };
           } else {
             _ontologies.push({
               id: change.doc.id,
@@ -126,9 +144,11 @@ const CIOntology = () => {
     try {
       if (!user) return;
       const ontologyIndex = ontologies.findIndex(ontology => ontology.id === path.id);
+
       if (ontologyIndex !== -1) {
         setOpenOntology(ontologies[ontologyIndex]);
       } else {
+        addNewOntology({ id: path.id, addpath: false });
         setOpenOntology({
           deleted: false,
           id: path.id,
@@ -173,10 +193,9 @@ const CIOntology = () => {
     await updateDoc(userDoc.ref, { ontologyPath });
   };
 
-  const addNewOntology = async () => {
+  const addNewOntology = async ({ id = newId(db), addpath = true }: { id?: string; addpath?: boolean }) => {
     try {
       const prevOntologies = [...ontologies];
-      const id = newId(db);
       let newOntology = {
         deleted: false,
         id,
@@ -199,24 +218,26 @@ const CIOntology = () => {
       prevOntologies.push(newOntology);
       setOpenOntology(newOntology);
       setOntologies(prevOntologies);
-      setOntologyPath([
-        {
-          id,
-          title: "",
-        },
-      ]);
       await setDoc(newOntologyRef, newOntology);
-      await updateUserDoc([id]);
+      if (addpath) {
+        setOntologyPath([
+          {
+            id,
+            title: "",
+          },
+        ]);
+        await updateUserDoc([id]);
+      }
     } catch (error) {
       console.error(error);
     }
   };
-  console.info({ ontologies });
+  console.info({ ontologies, ontologyPath });
 
-  const saveSubOntology = async (subOntology: ISubOntology, type: string) => {
+  const saveSubOntology = async (subOntology: ISubOntology, type: string, id: string) => {
     try {
       if (!openOntology) return;
-      const ontologyParentRef = doc(collection(db, "ontology"), openOntology?.id);
+      const ontologyParentRef = doc(collection(db, "ontology"), id);
       const ontologyParentDoc = await getDoc(ontologyParentRef);
       const ontologyParent: any = ontologyParentDoc.data();
       if (!ontologyParent) return;
@@ -229,30 +250,9 @@ const CIOntology = () => {
       } else {
         ontologyParent[type][idx].title = subOntology.title;
       }
-
-      let newOntology = {
-        deleted: false,
-        id: subOntology.id,
-        node: null,
-        title: subOntology.title,
-        description: "",
-        comments: [],
-        tags: [],
-        notes: [],
-        contributors: [],
-        actors: [],
-        preconditions: [],
-        postconditions: [],
-        evaluations: [],
-        processes: [],
-        specializations: [],
-        editMode: true,
-      };
       const newOntologyRef = doc(collection(db, "ontology"), subOntology.id);
       const newOntologyDoc = await getDoc(newOntologyRef);
-      if (!newOntologyDoc.exists()) {
-        await setDoc(newOntologyRef, newOntology);
-      } else {
+      if (newOntologyDoc.exists()) {
         await updateDoc(newOntologyRef, { title: subOntology.title });
       }
       // setOntologies((ontologies: IOntology[]) => {
@@ -263,7 +263,6 @@ const CIOntology = () => {
       //   }
       //   return _ontologies;
       // });
-      setOpenOntology({ ...ontologyParent });
 
       await updateDoc(ontologyParentRef, ontologyParent);
       // handleLinkNavigation({ id: subOntology.id, title: subOntology.title });
@@ -271,6 +270,7 @@ const CIOntology = () => {
       console.info(error);
     }
   };
+
   return (
     <Box>
       <AppHeaderMemoized
@@ -311,6 +311,8 @@ const CIOntology = () => {
             ontologyPath={ontologyPath}
             saveSubOntology={saveSubOntology}
             setSnackbarMessage={setSnackbarMessage}
+            updateUserDoc={updateUserDoc}
+            user={user}
           />
         )}
 
@@ -322,7 +324,7 @@ const CIOntology = () => {
               marginTop: "5px",
               color: theme => theme.palette.common.orange,
             }}
-            onClick={addNewOntology}
+            onClick={() => addNewOntology({})}
           >
             Add new
           </Button>
