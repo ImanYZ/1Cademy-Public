@@ -25,6 +25,7 @@ import { useAuth } from "@/context/AuthContext";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
+import Custom404 from "./404";
 
 type IOntologyPath = {
   id: string;
@@ -274,6 +275,9 @@ const CIOntology = () => {
     }
   };
 
+  if (!user?.claims.ontology) {
+    return <Custom404 />;
+  }
   return (
     <Box>
       <Box

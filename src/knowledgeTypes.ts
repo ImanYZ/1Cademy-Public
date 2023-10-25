@@ -427,6 +427,7 @@ export type User = {
   // instit?: string; //CHECK: I commented this because we have deInstit
   fieldOfInterest: string;
   role: UserRole;
+  claims: { [key: string]: boolean };
   livelinessBar?: LivelinessBarType;
   scaleThreshold?: number;
   ontologyPath?: string[];
