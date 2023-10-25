@@ -3,7 +3,10 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Link, TextField, Tooltip } from "@mui/material";
+import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { IOntology, ISubOntology } from "src/types/IOntology";
+
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 
 type ISubOntologyProps = {
   subOntology: ISubOntology;
@@ -32,6 +35,8 @@ const SubOntology = ({
   handleLinkNavigation,
   saveSubOntology,
 }: ISubOntologyProps) => {
+  const db = getFirestore();
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const handleEditSubOntologyChange = (e: any) => {
     const _openOntology: any = { ...openOntology };
     const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
@@ -74,17 +79,31 @@ const SubOntology = ({
   //     return _openOntology;
   //   });
   // };
-  const deleteSubOntologyEditable = () => {
-    console.info("deleteSubOntologyEditable");
-
-    setOpenOntology((openOntology: any) => {
-      const _openOntology: any = { ...openOntology };
-      const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
-      if (subOntologyIdx !== -1) {
-        _openOntology[type].splice(subOntologyIdx, 1);
+  const deleteSubOntologyEditable = async () => {
+    try {
+      console.info("deleteSubOntologyEditable");
+      if (await confirmIt("Are you sure you want to delete?")) {
+        const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+        if (ontologyDoc.exists()) {
+          const ontologyData = ontologyDoc.data();
+          const subOntologyIdx = ontologyData[type].findIndex((sub: any) => sub.id === subOntology.id);
+          if (subOntologyIdx !== -1) {
+            ontologyData[type].splice(subOntologyIdx, 1);
+          }
+          await updateDoc(ontologyDoc.ref, ontologyData);
+        }
+        setOpenOntology((openOntology: any) => {
+          const _openOntology: any = { ...openOntology };
+          const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
+          if (subOntologyIdx !== -1) {
+            _openOntology[type].splice(subOntologyIdx, 1);
+          }
+          return _openOntology;
+        });
       }
-      return _openOntology;
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -180,6 +199,7 @@ const SubOntology = ({
           </Tooltip>
         </Box>
       )}
+      {ConfirmDialog}
     </Box>
   );
 };

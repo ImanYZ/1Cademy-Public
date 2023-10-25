@@ -1,5 +1,7 @@
 export type ISubOntology = { title: string; id: string; category?: string; editMode?: boolean; new?: boolean };
 
+type IOntologyTypes = "activity" | "actor" | "processe" | "role" | "evaluation";
+
 export type IOntology = {
   deleted: boolean;
   id: string;
@@ -18,6 +20,7 @@ export type IOntology = {
   specializations: ISubOntology[];
   editMode: boolean;
   parents?: string[];
+  type: IOntologyTypes;
 };
 
 export type IUserOntology = {

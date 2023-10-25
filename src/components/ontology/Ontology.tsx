@@ -206,7 +206,13 @@ const Ontology = ({
       console.error(error);
     }
   };
-  const cancelNote = () => {};
+  const cancelNote = () => {
+    setOpenOntology((openOntology: any) => {
+      const _openOntology = { ...openOntology };
+      _openOntology.notes = _openOntology.notes.filter((note: any) => !note.editMode);
+      return _openOntology;
+    });
+  };
 
   const EditNote = (e: any, id: string) => {
     setOpenOntology((openOntology: any) => {
@@ -556,10 +562,6 @@ const Ontology = ({
                               md: "16px",
                             },
                             marginBottom: "5px",
-                            width: {
-                              xs: "100%",
-                              md: "50%",
-                            },
                             display: "block",
                           }}
                         />
@@ -579,6 +581,7 @@ const Ontology = ({
               color: theme => theme.palette.common.orange,
             }}
             onClick={addNote}
+            disabled={openOntology.notes.findIndex((note: any) => note.editMode) !== -1}
           >
             Add Note
           </Button>
