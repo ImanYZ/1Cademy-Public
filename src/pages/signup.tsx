@@ -194,6 +194,7 @@ const SignUpPage: NextPageWithLayout = () => {
       privacyPolicyAgreement: values.privacyPolicyAgreement,
       cookiesAgreement: values.cookiesAgreement,
       fieldOfInterest: values.fieldOfInterest,
+      claims: {},
       course: router.query?.course ? String(router.query?.course) : null,
     };
     mutateSignUp.mutate(user);
