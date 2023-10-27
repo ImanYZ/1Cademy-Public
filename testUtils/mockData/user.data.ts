@@ -10,4 +10,5 @@ export const registeredUser: User = {
   foundFrom: "internet",
   occupation: "developer",
   role: null,
+  claims: {},
 };

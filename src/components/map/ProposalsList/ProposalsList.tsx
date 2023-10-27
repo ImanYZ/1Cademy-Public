@@ -164,6 +164,7 @@ const SelectedProposalItem = ({
           flexDirection: "column",
           position: "relative",
           border: "2px solid #ff8a33",
+          cursor: "auto!important",
           ":hover": {
             boxShadow: theme =>
               theme.palette.mode === "dark"
