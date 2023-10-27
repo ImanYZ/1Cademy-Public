@@ -376,6 +376,11 @@ export const momentDateToSeconds = (moment: any) => {
   return 60 * 60 * moment.hours() + 60 * moment.minutes() + moment.seconds();
 };
 
+export const containsHTMLTags = (inputString: string) => {
+  const htmlTagsRegex = /<\/?[\w\s="/.'-]+>/;
+  return htmlTagsRegex.test(inputString);
+};
+
 type GenerateUserNodeInput = {
   nodeId: string;
   uname: string;

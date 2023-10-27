@@ -23,6 +23,7 @@ const ROUTES = {
   termsPolicy: "/policy/terms",
   studentDashboard: "/dashboards",
   tutorial: "/tutorial",
+  ciontology: "/CIOntology",
 };
 
 export default ROUTES;

@@ -1,7 +1,7 @@
 // import "./ProposalItem.css";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import { Box, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -59,7 +59,6 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
       elevation={3}
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${props.proposal.id}`}
-      onClick={isClickable ? openLinkedNodeClick(props.proposal) : undefined}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -69,9 +68,9 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
           theme.palette.mode === "light"
             ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
             : undefined,
+        cursor: "auto!important",
         background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
         ...(isClickable && {
-          cursor: "pointer",
           ":hover": {
             background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
           },
@@ -204,6 +203,13 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               </Box>
             </Tooltip>
           </Box>
+          <Button
+            sx={{ borderRadius: "20px" }}
+            variant="contained"
+            onClick={isClickable ? openLinkedNodeClick(props.proposal) : undefined}
+          >
+            Compare
+          </Button>
         </Box>
       </Box>
     </Paper>

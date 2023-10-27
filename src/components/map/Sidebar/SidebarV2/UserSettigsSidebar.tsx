@@ -534,7 +534,7 @@ const UserSettigsSidebar = ({
           await Post(`/changeDefaultTag/${nodeId}`);
           await updateNotebookTag(db, selectedNotebookId, { defaultTagId: nodeId, defaultTagName: nodeTitle });
           setIsLoading(false);
-          let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+          let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role, user.claims);
 
           if (!reputation) throw Error("Cant find Reputation");
           if (!userUpdated) throw Error("Cant find User");

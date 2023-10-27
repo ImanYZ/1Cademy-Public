@@ -52,7 +52,7 @@ export const getIdToken = async (): Promise<string | undefined> => {
   // axios.defaults.headers.common["Authorization"] = userToken;
 };
 
-export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) => {
+export const retrieveAuthenticatedUser = async (userId: string, role: UserRole, claims: { [key: string]: boolean }) => {
   let user: User | null = null;
   let reputationsData: Reputation | null = null;
   let theme: UserTheme = "Dark";
@@ -105,8 +105,10 @@ export const retrieveAuthenticatedUser = async (userId: string, role: UserRole) 
       occupation: userData.occupation,
       fieldOfInterest: userData.fieldOfInterest ?? "",
       role,
+      claims,
       livelinessBar: userData.livelinessBar,
       scaleThreshold: userData.scaleThreshold ?? 25,
+      ontologyPath: userData.ontologyPath,
     };
 
     theme = userData.theme;
