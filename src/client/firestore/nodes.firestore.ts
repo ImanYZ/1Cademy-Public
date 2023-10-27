@@ -1,4 +1,4 @@
-import { doc, Firestore, getDoc } from "firebase/firestore";
+import { collection, doc, Firestore, getDoc, getDocs, query, where } from "firebase/firestore";
 
 import { Node, NodeFireStore } from "../../nodeBookTypes";
 
@@ -11,7 +11,29 @@ export const getNode = async (db: Firestore, nodeId: string): Promise<Node | nul
 };
 
 export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<(Node | null)[]> => {
-  return await Promise.all(nodeIds.map(async cur => await getNode(db, cur)));
+  const chunkSize = 30;
+  const nodeChunks = [];
+
+  for (let i = 0; i < nodeIds.length; i += chunkSize) {
+    const chunk = nodeIds.slice(i, i + chunkSize);
+    nodeChunks.push(chunk);
+  }
+  const promises = nodeChunks.map(async chunk => {
+    const nodesQuery = query(collection(db, "nodes"), where("__name__", "in", chunk), where("deleted", "==", false));
+    const nodesDocs = await getDocs(nodesQuery);
+    const nodes: (Node | null)[] = [];
+    nodesDocs.forEach(doc => {
+      if (doc.exists()) {
+        nodes.push(doc.data() as Node);
+      } else {
+        nodes.push(null);
+      }
+    });
+
+    return nodes;
+  });
+  const results = await Promise.all(promises);
+  return results.reduce((acc, val) => acc.concat(val), []);
 };
 
 export const getRootQuestionDescendants = async (

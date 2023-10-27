@@ -33,10 +33,10 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
   );
 
   const loadUser = useCallback(
-    async (userId: string, role: UserRole) => {
+    async (userId: string, role: UserRole, claims: { [key: string]: boolean }) => {
       try {
         const { user, reputation, theme, background, view, showClusterOptions, showClusters } =
-          await retrieveAuthenticatedUser(userId, role);
+          await retrieveAuthenticatedUser(userId, role, claims);
         if (!user) {
           handleError({ error: "Cant find user" });
           return;
@@ -69,7 +69,7 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
         const res = await user.getIdTokenResult(true);
         const role: UserRole = res.claims["instructor"] ? "INSTRUCTOR" : res.claims["student"] ? "STUDENT" : null;
         //sign in
-        loadUser(user.uid, role);
+        loadUser(user.uid, role, res.claims);
       } else {
         //sign out
         dispatch({ type: "logoutSuccess" });

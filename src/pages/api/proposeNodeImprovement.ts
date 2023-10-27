@@ -237,10 +237,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
     }
 
-    if (title !== nodeData.title) {
+    if (title.trim() !== nodeData.title.trim()) {
       versionData.changedTitle = true;
     }
-    if (content !== nodeData.content) {
+    if (content.trim() !== nodeData.content.trim()) {
       versionData.changedContent = true;
     }
     if (nodeImage !== "" && nodeData.nodeImage === "") {

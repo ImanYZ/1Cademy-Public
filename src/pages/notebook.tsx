@@ -742,7 +742,7 @@ const Notebook = ({}: NotebookProps) => {
   // const [openTrends, setOpenTrends] = useState(false);
 
   // flag for whether media is full-screen
-  const [openMedia, setOpenMedia] = useState<string | boolean>(false);
+  const [openMedia, setOpenMedia] = useState<string>("");
 
   const [firstScrollToNode, setFirstScrollToNode] = useState(false);
 
@@ -859,7 +859,7 @@ const Notebook = ({}: NotebookProps) => {
             userNodesRef,
             where("node", "==", nodeId),
             where("user", "==", user.uname),
-            where("delete", "==", false),
+            where("deleted", "==", false),
             limit(1)
           );
           const userNodeDoc = await getDocs(q);
@@ -868,10 +868,10 @@ const Notebook = ({}: NotebookProps) => {
             // if exist documents update the first
             userNodeId = userNodeDoc.docs[0].id;
             const userNodeRef = doc(db, "userNodes", userNodeId);
-            const userNodeDataTmp = userNodeDoc.docs[0].data() as UserNodeFirestore;
+            const userNodeDataOld = userNodeDoc.docs[0].data() as UserNodeFirestore;
 
             userNodeData = {
-              ...userNodeDataTmp,
+              ...userNodeDataOld,
               ...openWithDefaultValues,
             };
             const selectedNotebookIdx = (userNodeData.notebooks ?? []).findIndex(c => c === selectedNotebookId);
@@ -911,10 +911,6 @@ const Notebook = ({}: NotebookProps) => {
               ? batch.set(doc(userNodeRef, preloadedUserNodeId), userNodeData)
               : batch.set(doc(userNodeRef), userNodeData);
           }
-          batch.update(nodeRef, {
-            viewers: thisNode.viewers + 1,
-            updatedAt: Timestamp.fromDate(new Date()),
-          });
           const userNodeLogRef = collection(db, "userNodesLog");
 
           const userNodeLogData = {
@@ -2026,7 +2022,7 @@ const Notebook = ({}: NotebookProps) => {
         try {
           for (let descendant of descendants) {
             const thisNode = graph.nodes[descendant];
-            const { nodeRef, userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
+            const { userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
             const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
             if (notebookIdx < 0) {
               console.error("'notebooks' property has invalid values");
@@ -2057,10 +2053,6 @@ const Notebook = ({}: NotebookProps) => {
               ...userNodeData,
               createdAt: Timestamp.fromDate(new Date()),
             };
-            const changeNode: any = {
-              viewers: (thisNode.viewers || 0) - 1,
-              updatedAt: Timestamp.fromDate(new Date()),
-            };
             // INFO: this was commented because is not used
             // if (userNodeData.open && "openHeight" in thisNode) {
             //   changeNode.height = thisNode.openHeight;
@@ -2069,8 +2061,6 @@ const Notebook = ({}: NotebookProps) => {
             //   changeNode.closedHeight = thisNode.closedHeight;
             //   userNodeLogData.closedHeight = thisNode.closedHeight;
             // }
-            batch.update(nodeRef, changeNode);
-
             const userNodeLogRef = collection(db, "userNodesLog");
             batch.set(doc(userNodeLogRef), userNodeLogData);
           }
@@ -2204,7 +2194,7 @@ const Notebook = ({}: NotebookProps) => {
         const parentNode = getFirstParent(nodeId);
 
         const thisNode = graph.nodes[nodeId];
-        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+        const { userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
 
         // flagged closing node as visible = false in parents
         for (const parent of thisNode.parents) {
@@ -2251,10 +2241,6 @@ const Notebook = ({}: NotebookProps) => {
             createdAt: Timestamp.fromDate(new Date()),
           };
 
-          const changeNode: any = {
-            viewers: thisNode.viewers - 1,
-            updatedAt: Timestamp.fromDate(new Date()),
-          };
           // INFO: this is not used
           // if (userNodeData.open && "openHeight" in thisNode) {
           //   changeNode.height = thisNode.openHeight;
@@ -2263,8 +2249,6 @@ const Notebook = ({}: NotebookProps) => {
           //   changeNode.closedHeight = thisNode.closedHeight;
           //   userNodeLogData.closedHeight = thisNode.closedHeight;
           // }
-
-          batch.update(nodeRef, changeNode);
           const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
@@ -2407,10 +2391,6 @@ const Notebook = ({}: NotebookProps) => {
                 userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
               }
 
-              batch.update(nodeRef, {
-                viewers: thisNode.viewers + 1,
-                updatedAt: Timestamp.fromDate(new Date()),
-              });
               const userNodeLogRef = collection(db, "userNodesLog");
               const userNodeLogData = {
                 ...userNodeData,
@@ -2535,10 +2515,6 @@ const Notebook = ({}: NotebookProps) => {
                 userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
               }
 
-              batch.update(nodeRef, {
-                viewers: thisNode.viewers + 1,
-                updatedAt: Timestamp.fromDate(new Date()),
-              });
               const userNodeLogRef = collection(db, "userNodesLog");
               const userNodeLogData = {
                 ...userNodeData,
@@ -2645,11 +2621,6 @@ const Notebook = ({}: NotebookProps) => {
             userNodeData = generateUserNode({ nodeId, uname: user.uname, notebookId });
             userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
           }
-
-          batchArray[batchFlags.batchIndex].update(nodeRef, {
-            viewers: thisNode.viewers + 1,
-            updatedAt: Timestamp.fromDate(new Date()),
-          });
           batchFlags = updateBatchIndexes(batchFlags);
           const userNodeLogRef = collection(db, "userNodesLog");
           const userNodeLogData = {
@@ -2683,10 +2654,8 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         // lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
 
-        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-        const changeNode: any = {
-          updatedAt: Timestamp.fromDate(new Date()),
-        };
+        const { userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
         // INFO: this is commented because is not used
         // if (thisNode.open && "openHeight" in thisNode) {
         //   changeNode.height = thisNode.openHeight;
@@ -2699,8 +2668,6 @@ const Notebook = ({}: NotebookProps) => {
           console.error("notebook property has invalid values");
           return { nodes: oldNodes, edges };
         }
-
-        updateDoc(nodeRef, changeNode);
 
         updateDoc(userNodeRef, {
           // open: !thisNode.open,
@@ -2872,21 +2839,8 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         notebookRef.current.selectedNode = nodeId;
 
-        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-        let studiedNum = 0;
-        if ("studied" in thisNode) {
-          studiedNum = thisNode.studied;
-        }
-        const changeNode: any = {
-          studied: studiedNum + (thisNode.isStudied ? -1 : 1),
-          updatedAt: Timestamp.fromDate(new Date()),
-        };
-        if (thisNode.open && "openHeight" in thisNode) {
-          changeNode.height = thisNode.openHeight;
-        } else if ("closedHeight" in thisNode) {
-          changeNode.closedHeight = thisNode.closedHeight;
-        }
-        updateDoc(nodeRef, changeNode);
+        const { userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+
         updateDoc(userNodeRef, {
           changed: thisNode.isStudied ? thisNode.changed : false,
           isStudied: !thisNode.isStudied,
@@ -2956,18 +2910,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
         notebookRef.current.selectedNode = nodeId;
 
-        const { nodeRef, userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
-        const bookmarks = thisNode.bookmarks || 0;
-        const changeNode: any = {
-          bookmarks: bookmarks + ("bookmarked" in thisNode && thisNode.bookmarked ? -1 : 1),
-          updatedAt: Timestamp.fromDate(new Date()),
-        };
-        if (thisNode.open && "openHeight" in thisNode) {
-          changeNode.height = thisNode.openHeight;
-        } else if ("closedHeight" in thisNode) {
-          changeNode.closedHeight = thisNode.closedHeight;
-        }
-        updateDoc(nodeRef, changeNode);
+        const { userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
         updateDoc(userNodeRef, {
           bookmarked: "bookmarked" in thisNode ? !thisNode.bookmarked : true,
           updatedAt: Timestamp.fromDate(new Date()),
@@ -3105,8 +3048,9 @@ const Notebook = ({}: NotebookProps) => {
         }
         if (willRemoveNode) {
           if (node?.children.length > 0) {
-            window.alert(
-              "To be able to delete this node, you should first delete its children or move them under other parent node."
+            confirmIt(
+              "To be able to delete this node, you should first delete its children or move them under other parent node.",
+              false
             );
             deleteOK = false;
           } else {
@@ -3309,7 +3253,7 @@ const Notebook = ({}: NotebookProps) => {
     nodeBookDispatch({ type: "setSelectionType", payload: null });
     setSelectedUser(null);
     // nodeBookDispatch({ type: "setOpenToolbar", payload: false });
-    setOpenMedia(false);
+    setOpenMedia("");
     setSelectedProposalId("");
     if (nodeBookState.selectedNode && g.current.hasNode(nodeBookState.selectedNode)) {
       scrollToNode(nodeBookState.selectedNode);
@@ -3542,7 +3486,7 @@ const Notebook = ({}: NotebookProps) => {
         // setOpenSearch(false);
         // setOpenRecentNodes(false);
         // setOpenTrends(false);
-        setOpenMedia(false);
+        setOpenMedia("");
         updatedLinksRef.current = getInitialUpdateLinks();
         setOpenSidebar(null);
       } else {
@@ -3564,11 +3508,22 @@ const Notebook = ({}: NotebookProps) => {
 
       let postData: any = {};
       try {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        const currentNode = graph.nodes[selectedNodeId];
         notebookRef.current.chosenNode = null;
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         let referencesOK: any = true;
+        if (
+          currentNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
+          graph.nodes[selectedNodeId].references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+        }
+        if (!referencesOK) return;
+
         const {
           courseExist,
           isInstructor,
@@ -3579,21 +3534,9 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: notebookRef.current.selectedNode,
           }
         );
-        const selectedNodeId = notebookRef.current.selectedNode!;
-        if (
-          (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-            graph.nodes[selectedNodeId].nodeType === "Relation" ||
-            graph.nodes[selectedNodeId].nodeType === "Question" ||
-            graph.nodes[selectedNodeId].nodeType === "News") &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
-        }
 
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
-            if (!referencesOK) return graph;
-
             gtmEvent("Propose", {
               customType: "improvement",
             });
@@ -3652,7 +3595,7 @@ const Notebook = ({}: NotebookProps) => {
             if (isTheSame) {
               onFail();
               setTimeout(() => {
-                window.alert("You've not changed anything yet!");
+                confirmIt("You've not changed anything yet!", false);
               });
               return graph;
             }
@@ -3940,21 +3883,24 @@ const Notebook = ({}: NotebookProps) => {
           courseExist: boolean;
           instantApprove: boolean;
         };
-        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
-          "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: firstChildId }
-        );
         const newNode = graph.nodes[newNodeId];
         let referencesOK: any = true;
+
         if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
+          newNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
           referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
         }
+        if (!referencesOK) {
+          return;
+        }
+
+        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
+          "/instructor/course/checkInstantApprovalForProposal",
+          { nodeId: firstChildId }
+        );
 
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
@@ -3974,13 +3920,9 @@ const Notebook = ({}: NotebookProps) => {
             return graph;
           }
 
-          if (!referencesOK) {
-            return graph;
-          }
-
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              window.alert("Please add relevant tag(s) to your proposed node.");
+              confirmIt("Please add relevant tag(s) to your proposed node.", false);
             });
             return graph;
           }
@@ -4125,6 +4067,19 @@ const Notebook = ({}: NotebookProps) => {
         const firstParentId = graph.nodes[newNodeId].parents[0].node;
         if (!firstParentId) throw Error("This node has not parent");
         const tagIds = graph.nodes[firstParentId].tagIds ?? [];
+        const newNode = graph.nodes[newNodeId];
+        let referencesOK: any = true;
+        if (
+          newNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+        }
+        if (!referencesOK) {
+          return;
+        }
+
         const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
@@ -4132,17 +4087,7 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: firstParentId,
           }
         );
-        const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
-        if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
-          newNode.references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
-        }
+
         setGraph(graph => {
           // const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
@@ -4160,13 +4105,11 @@ const Notebook = ({}: NotebookProps) => {
             return graph;
           }
 
-          if (!referencesOK) {
-            return graph;
-          }
-
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              window.alert("Please add relevant tag(s) to your proposed node.");
+              setTimeout(() => {
+                confirmIt("Please add relevant tag(s) to your proposed node.", false);
+              });
             });
             return graph;
           }
@@ -7679,7 +7622,7 @@ const Notebook = ({}: NotebookProps) => {
                   wrongNode={wrongNode}
                   uploadNodeImage={uploadNodeImage}
                   removeImage={removeImage}
-                  setOpenMedia={(imgUrl: string | boolean) => {
+                  setOpenMedia={(imgUrl: string) => {
                     setOpenMedia(imgUrl);
                   }}
                   changeNodeHight={changeNodeHight}
@@ -7745,33 +7688,34 @@ const Notebook = ({}: NotebookProps) => {
               <Suspense fallback={<div></div>}>
                 <Modal
                   open={Boolean(openMedia)}
-                  onClose={() => setOpenMedia(false)}
+                  onClose={() => setOpenMedia("")}
                   aria-labelledby="modal-modal-title"
                   aria-describedby="modal-modal-description"
                 >
                   <>
                     <CloseIcon
                       sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
-                      onClick={() => setOpenMedia(false)}
+                      onClick={() => setOpenMedia("")}
                     />
                     <MapInteractionCSS>
-                      {/* TODO: change open Media variable to string to not validate */}
-                      {typeof openMedia === "string" && (
-                        <Paper
-                          sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "100vh",
-                            width: "100vw",
-                            background: "transparent",
-                          }}
-                        >
-                          {/* TODO: change to Next Image */}
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={openMedia} alt="Node image" className="responsive-img" />
-                        </Paper>
-                      )}
+                      <Paper
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100vh",
+                          width: "100vw",
+                          background: "transparent",
+                        }}
+                      >
+                        <Image
+                          src={openMedia}
+                          alt="Node image"
+                          className="responsive-img"
+                          layout="fill"
+                          objectFit="contain"
+                        />
+                      </Paper>
                     </MapInteractionCSS>
                   </>
                 </Modal>
