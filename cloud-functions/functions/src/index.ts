@@ -12,6 +12,7 @@ const { updateInstitutions } = require("./updateInstitutions");
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
+import { updatesNodeViewers } from "./actions/updatesNodeViewers";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -153,6 +154,40 @@ export const onNodeDeleted = functions.firestore.document("/nodes/{id}").onUpdat
       console.log("node deleted", nodeId);
       await nodeDeletedUpdates({ nodeId, nodeData: updatedData });
     }
+  } catch (error) {
+    console.log("error onNodeDeleted:", error);
+  }
+});
+
+export const onCloseOpenNode = functions.firestore.document("/userNodes/{id}").onUpdate(async change => {
+  try {
+    const updatedData = change.after.data();
+    const previousData = change.before.data();
+    const nodeId = updatedData.node;
+    let viewers = updatedData.notebooks.length - previousData.notebooks.length;
+    let bookmarkedNum = (updatedData.bookmarked ? 1 : 0) - (previousData.bookmarked ? 1 : 0);
+    let isStudiedNum = (updatedData.isStudied ? 1 : 0) - (previousData.isStudied ? 1 : 0);
+    console.log("onCloseOpenNode", nodeId, updatedData.notebooks - previousData.notebooks);
+    await updatesNodeViewers({
+      nodeId,
+      viewers,
+      bookmarkedNum,
+      isStudiedNum,
+    });
+  } catch (error) {
+    console.log("error onNodeDeleted:", error);
+  }
+});
+
+export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onCreate(async change => {
+  try {
+    const data = change.data();
+    const nodeId = data.node;
+    console.log("onCloseOpenNode", nodeId);
+    await updatesNodeViewers({
+      nodeId,
+      viewers: 1,
+    });
   } catch (error) {
     console.log("error onNodeDeleted:", error);
   }

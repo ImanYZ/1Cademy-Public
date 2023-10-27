@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
 
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -80,15 +81,11 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
       <Box>
         <Box>
           {props.showTitle && (
-            <Typography
-              sx={{
-                fontSize: "16px",
-                fontWeight: "500",
-                lineHeight: "24px",
-              }}
-            >
-              {props.proposal.title}
-            </Typography>
+            <MarkdownRender
+              text={props.proposal.title}
+              customClass={"custom-react-markdown"}
+              sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+            />
           )}
           {/* <p>Proposal Summary:</p> */}
           <Box
