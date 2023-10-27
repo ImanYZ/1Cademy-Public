@@ -1283,7 +1283,7 @@ const Notebook = ({}: NotebookProps) => {
         await Post(`/changeDefaultTag/${defaultTagId}`);
         // await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
 
-        let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+        let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role, user.claims);
         if (!reputation) throw Error("Cant find Reputation");
         if (!userUpdated) throw Error("Cant find User");
 
