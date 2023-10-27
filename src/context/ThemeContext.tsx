@@ -2,7 +2,8 @@ import { uuidv4 } from "@firebase/util";
 import { createTheme } from "@mui/material/styles";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
-import { getDatabase, onDisconnect, onValue, ref, serverTimestamp, set } from "firebase/database";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDatabase, goOffline, goOnline, onDisconnect, onValue, ref, serverTimestamp, set } from "firebase/database";
 import React, { FC, ReactNode, useEffect, useMemo } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
@@ -17,15 +18,16 @@ type Props = {
 };
 const ThemeProvider: FC<Props> = ({ children }) => {
   const [{ user, settings }] = useAuth();
-  // const [themeMode, setThemeMode] = useState<AppTheme>("dark");
+  const auth = getAuth();
+  const db = getDatabase();
   useEffect(() => {
     // Fetch the current user's ID from Firebase Authentication.
     if (user) {
+      goOnline(db);
       const sessionId = uuidv4();
       var uname = user?.uname;
       // Create a reference to this user's specific status node.
       // This is where we will store data about being online/offline.
-      const db = getDatabase();
       let userStatusDatabaseRef = ref(db, "/status/" + uname);
       //var userStatusFirestoreRef = doc(firestoreDb, "/status/" + uname);
       // We'll create two constants which we will write to
@@ -55,6 +57,12 @@ const ThemeProvider: FC<Props> = ({ children }) => {
           .then(() => {
             set(userStatusDatabaseRef, isOnlineForDatabase);
           });
+      });
+
+      onAuthStateChanged(auth, user => {
+        if (!user) {
+          goOffline(db);
+        }
       });
     }
   }, [user]);
