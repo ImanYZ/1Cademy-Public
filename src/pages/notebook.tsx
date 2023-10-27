@@ -855,6 +855,9 @@ const Notebook = ({}: NotebookProps) => {
             batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
           }
           const userNodesRef = collection(db, "userNodes");
+          console.log(nodeId, "nodeId-handler");
+          console.log(user.uname, "user.uname-handler");
+          console.log(nodeId, "nodeId-handler");
           const q = query(
             userNodesRef,
             where("node", "==", nodeId),
@@ -1891,6 +1894,8 @@ const Notebook = ({}: NotebookProps) => {
       if (notebookRef.current.choosingNode.id === nodeId) return;
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
+      console.log(nodeId, title, "nodeid-title");
+      console.log("node-handler");
       if (notebookRef.current.choosingNode.id === "Tag") return;
       openNodeHandler(nodeId, { open: true }, false);
       await detectHtmlElements({ ids: [nodeId] });
