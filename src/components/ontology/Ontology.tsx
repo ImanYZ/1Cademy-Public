@@ -10,6 +10,7 @@ import { ISubOntology } from "src/types/IOntology";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import SubOntology from "./SubOntology";
+import SubPlainText from "./SubPlainText";
 
 type IOntologyProps = {
   openOntology: any;
@@ -52,27 +53,21 @@ const Ontology = ({
   //   palette: { mode },
   // } = useTheme();
 
-  const AddSubOntology = ({
-    title,
-    type,
-  }: {
-    title: "Actor" | "Pre-Condition" | "Post-condition" | "Evaluation" | "Processe" | "Specialization";
-    type: "actors" | "preconditions" | "postconditions" | "evaluations" | "processes" | "specializations";
-  }) => {
+  const AddPlainText = ({ type, disabled }: { type: string; disabled: boolean }) => {
     const addSubOntology = async () => {
-      const id = newId(db);
-      handleLinkNavigation({ id, title: "" });
-      await saveSubOntology({ id, title: "" }, type, openOntology.id);
-      // setOpenOntology((openOntology: IOntology) => {
-      //   const _openOntology = { ...openOntology };
-      //   _openOntology[type].push({
-      //     title: "",
-      //     id: newId(db),
-      //     editMode: true,
-      //     new: true,
-      //   });
-      //   return _openOntology;
-      // });
+      // const id = newId(db);
+      // handleLinkNavigation({ id, title: "" });
+      // await saveSubOntology({ id, title: "" }, type, openOntology.id);
+      setOpenOntology((openOntology: any) => {
+        const _openOntology = { ...openOntology };
+        _openOntology.plainText[type].push({
+          title: "",
+          id: newId(db),
+          editMode: true,
+          new: true,
+        });
+        return _openOntology;
+      });
     };
     return (
       <Button
@@ -82,9 +77,30 @@ const Ontology = ({
           color: theme => theme.palette.common.orange,
         }}
         onClick={addSubOntology}
-        disabled={openOntology.title.trim() === ""}
+        disabled={disabled}
       >
-        New {title}
+        New {capitalizeFirstLetter(type)}
+      </Button>
+    );
+  };
+
+  const AddSubOntology = ({ type, disabled }: { type: string; disabled: boolean }) => {
+    const addSubOntology = async () => {
+      const id = newId(db);
+      // handleLinkNavigation({ id, title: "" });
+      await saveSubOntology({ id, title: "" }, type, openOntology.id);
+    };
+    return (
+      <Button
+        startIcon={<ArrowForwardIosIcon />}
+        variant="outlined"
+        sx={{
+          color: theme => theme.palette.common.orange,
+        }}
+        onClick={addSubOntology}
+        disabled={disabled}
+      >
+        New {capitalizeFirstLetter(type)}
       </Button>
     );
   };
@@ -105,10 +121,12 @@ const Ontology = ({
   };
 
   const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
-    for (let type of ["actors", "preconditions", "postconditions", "evaluations", "processes", "specializations"]) {
-      for (let subOnto of parentData[type]) {
-        if (subOnto.id === id) {
-          subOnto.title = newTitle;
+    for (let type of ["Actor", "Process", "Specializations", "Specializations", "Roles"]) {
+      if ((parentData.subOntologies[type] || []).length > 0) {
+        for (let subOnto of parentData.subOntologies[type]) {
+          if (subOnto.id === id) {
+            subOnto.title = newTitle;
+          }
         }
       }
     }
@@ -119,9 +137,6 @@ const Ontology = ({
       const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
       const newOntologyDoc = await getDoc(ontologyRef);
       if (newOntologyDoc.exists()) {
-        await updateDoc(ontologyRef, {
-          title: openOntology.title,
-        });
         const pathIdx = ontologyPath.findIndex((p: any) => p.id === openOntology.id);
         if (pathIdx - 1 !== -1) {
           const parentId = ontologyPath[pathIdx - 1].id;
@@ -131,13 +146,8 @@ const Ontology = ({
           editTitleSubOntology({ parentData, newTitle: openOntology.title, id: openOntology.id });
           await updateDoc(parentRef, parentData);
         }
-        setOntologyPath((ontologyPath: any) => {
-          const _path = [...ontologyPath];
-          const pathIdx = _path.findIndex(p => p.id === openOntology.id);
-          if (pathIdx !== -1) {
-            _path[pathIdx].title = openOntology.title;
-          }
-          return _path;
+        await updateDoc(ontologyRef, {
+          title: openOntology.title,
         });
       } else {
         await setDoc(ontologyRef, {
@@ -224,7 +234,16 @@ const Ontology = ({
       return _openOntology;
     });
   };
-
+  const capitalizeFirstLetter = (word: string) => {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  };
+  const savePlainText = () => {
+    try {
+      console.info("savePlainText");
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <Box
       sx={{
@@ -239,23 +258,24 @@ const Ontology = ({
           multiline
           value={openOntology.title}
           onChange={handleEditTitle}
+          disabled={openOntology.locked}
           InputProps={{
             style: { fontSize: "36px" },
             startAdornment: (
               <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {/* {isFocused && ( */}
-                <Tooltip title="Save">
-                  <SaveIcon
-                    sx={{
-                      color: "#757575",
-                      ":hover": {
-                        color: theme => theme.palette.common.orange,
-                      },
-                    }}
-                    onClick={SaveOntologyTitle}
-                  />
-                </Tooltip>
-                {/* )} */}
+                {!openOntology.locked && (
+                  <Tooltip title="Save">
+                    <SaveIcon
+                      sx={{
+                        color: "#757575",
+                        ":hover": {
+                          color: theme => theme.palette.common.orange,
+                        },
+                      }}
+                      onClick={SaveOntologyTitle}
+                    />
+                  </Tooltip>
+                )}
               </Box>
             ),
             endAdornment: (
@@ -344,169 +364,78 @@ const Ontology = ({
                      Evaluations: –
                      Process: –
                      Specializations: */}
-          <Box sx={{ display: "grid", mt: "5px" }}>
-            {openOntology.actors.length > 0 && (
-              <Box>
-                <Typography sx={{ fontSize: "19px" }}>Actors:</Typography>
-                <ul>
-                  {openOntology.actors.map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type="actors"
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Box>
-            )}
-          </Box>
-          <AddSubOntology title="Actor" type="actors" />
-          <Box sx={{ display: "grid", mt: "5px" }}>
-            {openOntology.preconditions.length > 0 && (
-              <Box>
-                <Typography sx={{ fontSize: "19px" }}>Pre-Conditions:</Typography>
-                <ul>
-                  {openOntology.preconditions.map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type="preconditions"
-                        />
-                      </li>
-                    );
-                  })}{" "}
-                </ul>{" "}
-              </Box>
-            )}
-          </Box>
-          <AddSubOntology title="Pre-Condition" type="preconditions" />
-          <Box sx={{ display: "grid", mt: "5px" }}>
-            {openOntology.postconditions.length > 0 && (
-              <Box>
-                <Typography sx={{ fontSize: "19px" }}>Post-Conditions:</Typography>
-                <ul>
-                  {openOntology.postconditions.map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type="postconditions"
-                        />
-                      </li>
-                    );
-                  })}{" "}
-                </ul>{" "}
-              </Box>
-            )}
-          </Box>
-          <AddSubOntology title="Post-condition" type="postconditions" />
-          <Box sx={{ display: "grid", mt: "5px" }}>
-            {openOntology.processes.length > 0 && (
-              <Box>
-                <Typography sx={{ fontSize: "19px" }}>Processes:</Typography>
-                <ul>
-                  {openOntology.processes.map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type="processes"
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>{" "}
-              </Box>
-            )}
-          </Box>
-          <AddSubOntology title="Processe" type="processes" />
-          <Box sx={{ display: "grid", mt: "5px" }}>
-            {openOntology.evaluations.length > 0 && (
-              <Box>
-                <Typography sx={{ fontSize: "19px" }}>Evaluations:</Typography>
-                <ul>
-                  {openOntology.evaluations.map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type="evaluations"
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>{" "}
-              </Box>
-            )}
-          </Box>{" "}
-          <AddSubOntology title="Evaluation" type="evaluations" />
-          <Box sx={{ display: "grid", mt: "5px" }}>
-            {openOntology.specializations.length > 0 && (
-              <Box>
-                <Typography sx={{ fontSize: "19px" }}>Specializations:</Typography>
-                <ul>
-                  {openOntology.specializations.map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type="specializations"
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>{" "}
-              </Box>
-            )}
-          </Box>
-          <AddSubOntology title="Specialization" type="specializations" />
         </Box>
+
+        {Object.keys(openOntology.subOntologies).map(type => (
+          <Box key={type}>
+            <Box sx={{ display: "grid", mt: "5px" }}>
+              {(openOntology?.subOntologies[type] || []).length > 0 && (
+                <Box>
+                  <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
+                  <ul>
+                    {(openOntology?.subOntologies[type] || []).map((subOntology: ISubOntology) => {
+                      return (
+                        <li key={subOntology.id}>
+                          <SubOntology
+                            setSnackbarMessage={setSnackbarMessage}
+                            saveSubOntology={saveSubOntology}
+                            handleLinkNavigation={handleLinkNavigation}
+                            openOntology={openOntology}
+                            setOpenOntology={setOpenOntology}
+                            sx={{ mt: "15px" }}
+                            key={openOntology.id}
+                            subOntology={subOntology}
+                            type={type}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Box>
+              )}
+            </Box>
+            <AddSubOntology type={type} disabled={openOntology.title.trim() === ""} />
+          </Box>
+        ))}
+
+        {Object.keys(openOntology.plainText).map(type => (
+          <Box key={type}>
+            <Box sx={{ display: "grid", mt: "5px" }}>
+              {(openOntology.plainText[type] || []).length > 0 && (
+                <Box>
+                  <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
+                  <ul>
+                    {openOntology.plainText[type].map((plainText: { id: string; title: string }) => {
+                      return (
+                        <li key={plainText.id}>
+                          <SubPlainText
+                            setSnackbarMessage={setSnackbarMessage}
+                            savePlainText={savePlainText}
+                            openOntology={openOntology}
+                            setOpenOntology={setOpenOntology}
+                            sx={{ mt: "15px" }}
+                            key={openOntology.id}
+                            subOntology={plainText}
+                            type={type}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Box>
+              )}
+            </Box>
+            <AddPlainText
+              type={type}
+              disabled={
+                openOntology.plainText[type].findIndex((note: any) => note.editMode) !== -1 ||
+                openOntology.title.trim() === ""
+              }
+            />
+          </Box>
+        ))}
+        {/* ["preconditions", "postconditions", "evaluation-dimensions", "abilities"] */}
+
         <Box sx={{ mt: "55px" }}>
           {openOntology.notes.length > 0 && (
             <Box>

@@ -2,8 +2,9 @@ import CancelIcon from "@mui/icons-material/Cancel";
 // import CreateIcon from "@mui/icons-material/Create";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
-import { Box, Link, TextField, Tooltip } from "@mui/material";
-import { collection, deleteDoc, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { Box, TextField, Tooltip, Typography } from "@mui/material";
+import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { useCallback } from "react";
 import { IOntology, ISubOntology } from "src/types/IOntology";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
@@ -14,51 +15,35 @@ type ISubOntologyProps = {
   sx: any;
   type: string;
   setOpenOntology: (openOntology: any) => void;
-  handleLinkNavigation: any;
-  saveSubOntology: any;
+  savePlainText: any;
   setSnackbarMessage: (message: any) => void;
 };
 
-const SubOntology = ({
-  subOntology,
-  sx,
-  type,
-  setOpenOntology,
-  openOntology,
-  handleLinkNavigation,
-  saveSubOntology,
-}: ISubOntologyProps) => {
+const SubPlainText = ({ subOntology, sx, type, setOpenOntology, openOntology }: ISubOntologyProps) => {
   const db = getFirestore();
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
-  const handleEditSubOntologyChange = (e: any) => {
+
+  const handleEditPlainText = (e: any) => {
     const _openOntology: any = { ...openOntology };
-    const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
+    const subOntologyIdx = _openOntology.plainText[type].findIndex((sub: any) => sub.id === subOntology.id);
     if (subOntologyIdx !== -1) {
-      _openOntology[type][subOntologyIdx].title = e.target.value;
+      _openOntology.plainText[type][subOntologyIdx].title = e.target.value;
       setOpenOntology(_openOntology);
     }
   };
 
-  const cancelSubOntology = () => {
+  const cancelPlainText = () => {
     setOpenOntology((openOntology: any) => {
       const _openOntology: any = { ...openOntology };
-      const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
+      const subOntologyIdx = _openOntology.plainText[type].findIndex((sub: any) => sub.id === subOntology.id);
       if (subOntologyIdx !== -1) {
-        _openOntology[type][subOntologyIdx].editMode = false;
+        _openOntology.plainText[type][subOntologyIdx].editMode = false;
       }
-      if (subOntologyIdx !== -1 && _openOntology[type][subOntologyIdx].new) {
-        _openOntology[type].splice(subOntologyIdx, 1);
+      if (subOntologyIdx !== -1 && _openOntology.plainText[type][subOntologyIdx].new) {
+        _openOntology.plainText[type].splice(subOntologyIdx, 1);
       }
       return _openOntology;
     });
-  };
-
-  const linkNavigation = () => {
-    handleLinkNavigation({ id: subOntology.id, title: subOntology.title });
-  };
-
-  const handleSaveSubOntology = () => {
-    saveSubOntology(subOntology, type);
   };
 
   // const makeSubOntologyEditable = () => {
@@ -72,48 +57,59 @@ const SubOntology = ({
   //     return _openOntology;
   //   });
   // };
-  const deleteSubOntologyEditable = async () => {
+  const deletePlainText = async () => {
     try {
       console.info("deleteSubOntologyEditable");
       if (await confirmIt("Are you sure you want to delete?")) {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
           const ontologyData = ontologyDoc.data();
-          const subOntologyIdx = ontologyData.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
-          if (subOntologyIdx !== -1) {
-            ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
-          }
-          const subOntologyDoc = await getDoc(doc(collection(db, "ontology"), subOntology.id));
-          if (subOntologyDoc.exists()) {
-            await deleteDoc(subOntologyDoc.ref);
-          }
 
+          const subOntologyIdx = ontologyData.plainText[type].findIndex((sub: any) => sub.id === subOntology.id);
+          if (subOntologyIdx !== -1) {
+            ontologyData.plainText[type].splice(subOntologyIdx, 1);
+          }
           await updateDoc(ontologyDoc.ref, ontologyData);
         }
-        setOpenOntology((openOntology: any) => {
-          const _openOntology: any = { ...openOntology };
-          const subOntologyIdx = _openOntology.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
-          if (subOntologyIdx !== -1) {
-            _openOntology.subOntologies[type].splice(subOntologyIdx, 1);
-          }
-          return _openOntology;
-        });
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleSavePlainText = useCallback(async () => {
+    try {
+      if (!openOntology.id) return;
+      const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
+      const ontologyDoc = await getDoc(ontologyRef);
+      if (ontologyDoc.exists()) {
+        const ontologydata = ontologyDoc.data();
+        const subOntologyIdx = ontologydata.plainText[type].findIndex((sub: any) => sub.id === subOntology.id);
+        if (subOntologyIdx === -1) {
+          ontologydata.plainText[type].push({
+            id: subOntology.id,
+            title: subOntology.title,
+          });
+        } else {
+          ontologydata.plainText[type][subOntologyIdx].title = subOntology.title;
+        }
+        await updateDoc(ontologyDoc.ref, ontologydata);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, [openOntology.id, db, type, subOntology.id, subOntology.title]);
+
   return (
     <Box key={subOntology.id} sx={{ ...sx }}>
-      {false ? (
+      {subOntology.editMode ? (
         <TextField
           placeholder={``}
           variant="standard"
           fullWidth
           value={subOntology.title}
           multiline
-          onChange={handleEditSubOntologyChange}
+          onChange={handleEditPlainText}
           InputProps={{
             endAdornment: (
               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
@@ -125,7 +121,7 @@ const SubOntology = ({
                         color: theme => theme.palette.common.orange,
                       },
                     }}
-                    onClick={handleSaveSubOntology}
+                    onClick={handleSavePlainText}
                   />
                 </Tooltip>
                 <Tooltip title={"Cancel"}>
@@ -137,7 +133,7 @@ const SubOntology = ({
                         color: theme => theme.palette.common.orange,
                       },
                     }}
-                    onClick={cancelSubOntology}
+                    onClick={cancelPlainText}
                   />
                 </Tooltip>
               </Box>
@@ -159,10 +155,8 @@ const SubOntology = ({
         />
       ) : (
         <Box key={subOntology.id} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-          <Link underline="hover" onClick={linkNavigation} sx={{ cursor: "pointer", color: "white" }}>
-            {" "}
-            {subOntology.title}
-          </Link>
+          <Typography>{subOntology.title}</Typography>
+
           {/* <Tooltip title={"Edit"}>
             <CreateIcon
               sx={{
@@ -192,7 +186,7 @@ const SubOntology = ({
                 },
               }}
               fontSize="small"
-              onClick={deleteSubOntologyEditable}
+              onClick={deletePlainText}
             />
           </Tooltip>
         </Box>
@@ -202,4 +196,4 @@ const SubOntology = ({
   );
 };
 
-export default SubOntology;
+export default SubPlainText;
