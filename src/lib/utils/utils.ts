@@ -91,8 +91,8 @@ export const SortedByTimeOptions: TimeWindowOption[] = [
   TimeWindowOption.ThisYear,
 ];
 
-export const getNodePageURLTitle = (title: string | undefined, id: string, type: string) => {
-  const resTitleSlug = type === "title" ? generateAlias(title || "") : title || "";
+export const getNodePageURLTitle = (title: string | undefined, id: string, type?: string) => {
+  const resTitleSlug = type === "slug" ? title || "" : generateAlias(title || "");
   if (resTitleSlug.length === 0) {
     return id;
   }
@@ -102,11 +102,11 @@ export const getNodePageURLTitle = (title: string | undefined, id: string, type:
   return resTitleSlug;
 };
 
-export const getNodePageUrl = (title: string, id: string, type: string) => {
+export const getNodePageUrl = (title: string, id: string, type?: string) => {
   return `${ROUTES.node}/${getNodePageURLTitle(title, id, type)}/${id}`;
 };
 
-export const getNodePageWithDomain = (title: string, id: string, type: string = "title") => {
+export const getNodePageWithDomain = (title: string, id: string, type?: string) => {
   const _ONECADEMY_DOMAIN =
     ONECADEMY_DOMAIN[ONECADEMY_DOMAIN.length - 1] === "/"
       ? ONECADEMY_DOMAIN.substring(0, ONECADEMY_DOMAIN.length - 1)
