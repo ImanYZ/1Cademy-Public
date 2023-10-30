@@ -25,6 +25,7 @@ import {
   signalAllUserNodesChanges,
   updateReputation,
 } from "../../utils";
+import { generateAlias } from "@/lib/utils/utils";
 
 export type IProposeChildNodePayload = {
   data: {
@@ -235,6 +236,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         comments: 0,
         content: req.body.data.content,
         nodeImage: req.body.data.nodeImage,
+        nodeSlug: generateAlias(req.body.data.title),
         nodeVideo: req.body.data.nodeVideo,
         nodeAudio: req.body.data.nodeAudio,
         corrects: 1,

@@ -38,24 +38,24 @@ const storage = new Storage({
 });
 const bucket = storage.bucket(process.env.STATIC_STORAGE_BUCKET);
 
-function generateAlias(name) {
-  let alias = String(name)
-    .toLowerCase()
-    .replace(/[^a-z- ]/g, "")
-    .trim()
-    .replace(/ /g, "-")
-    .replace(/[-]+/g, "-")
-    .replace(/^-/, "")
-    .replace(/-$/, "")
-    .split("-")
-    .splice(0, 20)
-    .join("-");
-  if (!alias.length) return "-";
-  if (alias.length > 100) {
-    return alias.substring(0, 100);
-  }
-  return alias;
-}
+// function generateAlias(name) {
+//   let alias = String(name)
+//     .toLowerCase()
+//     .replace(/[^a-z- ]/g, "")
+//     .trim()
+//     .replace(/ /g, "-")
+//     .replace(/[-]+/g, "-")
+//     .replace(/^-/, "")
+//     .replace(/-$/, "")
+//     .split("-")
+//     .splice(0, 20)
+//     .join("-");
+//   if (!alias.length) return "-";
+//   if (alias.length > 100) {
+//     return alias.substring(0, 100);
+//   }
+//   return alias;
+// }
 
 async function uploadToBucket(path, content) {
   await bucket.file(path).save(content);
@@ -107,7 +107,7 @@ async function main() {
   let nodes = [];
   const nodeData = lastNodeDoc.data();
   nodes.push({
-    url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${lastNodeDoc.id}`,
+    url: `${process.env.APP_URL}/node/${nodeData.nodeSlug}/${lastNodeDoc.id}`,
     priority: nodeData.isTag ? 1 : 0.7,
     updated_at: nodeData.updatedAt.toDate().toISOString(),
   });
@@ -128,7 +128,7 @@ async function main() {
         continue;
       }
       nodes.push({
-        url: `${process.env.APP_URL}/node/${generateAlias(nodeData.title)}/${node.id}`,
+        url: `${process.env.APP_URL}/node/${nodeData.nodeSlug}/${node.id}`,
         priority: nodeData.isTag ? 1 : 0.7,
         updated_at: nodeData.updatedAt.toDate().toISOString(),
       });

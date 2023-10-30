@@ -17,6 +17,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   const {
     id,
     title,
+    nodeSlug,
     parents = [],
     references = [],
     content,
@@ -37,7 +38,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
       content + " Keywords: " + title + " " + keywords + (nodeImage ? " \nImage: " + nodeImage : "")
     ),
     "@id": id,
-    url: `${getNodePageWithDomain(title || "", id)}`,
+    url: `${getNodePageWithDomain(nodeSlug || "", id, "slug")}`,
     nodeType: nodeType,
     author: {
       "@type": "Organization",
@@ -69,7 +70,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let parent of parents) {
     jsonObj["prerequisites"].push({
       "@type": "parent",
-      link: `${getNodePageWithDomain(parent.title || "", parent.node)}`,
+      link: `${getNodePageWithDomain(parent.nodeSlug || "", parent.node, "slug")}`,
       title: "1Cademy - " + escapeBreaksQuotes(parent.title),
     });
   }
@@ -77,7 +78,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let child of children) {
     jsonObj["followUps"].push({
       "@type": "child",
-      link: `${getNodePageWithDomain(child.title || "", child.node)}`,
+      link: `${getNodePageWithDomain(child.nodeSlug || "", child.node, "slug")}`,
       title: "1Cademy - " + escapeBreaksQuotes(child.title),
     });
   }
@@ -85,7 +86,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let tag of tags) {
     jsonObj["tags"].push({
       "@type": "tag",
-      link: `${getNodePageWithDomain(tag.title || "", tag.node)}`,
+      link: `${getNodePageWithDomain(tag.nodeSlug || "", tag.node, "slug")}`,
       title: "1Cademy - " + escapeBreaksQuotes(tag.title),
     });
   }
@@ -93,7 +94,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   for (let reference of references) {
     jsonObj["references"].push({
       "@type": "reference",
-      link: `${getNodePageWithDomain(reference.title || "", reference.node)}`,
+      link: `${getNodePageWithDomain(reference.nodeSlug || "", reference.node, "slug")}`,
       title: "1Cademy - " + escapeBreaksQuotes(reference.title),
       label: reference.label,
     });
@@ -109,7 +110,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     setCurrentUrl(window.location.href);
   }, [setCurrentUrl]);
 
-  const nodeUrl = getNodePageWithDomain(title || "", id);
+  const nodeUrl = getNodePageWithDomain(nodeSlug || "", id, "slug");
   const hasAltCanonical = currentUrl && nodeUrl !== currentUrl;
 
   return (

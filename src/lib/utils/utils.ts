@@ -91,8 +91,8 @@ export const SortedByTimeOptions: TimeWindowOption[] = [
   TimeWindowOption.ThisYear,
 ];
 
-export const getNodePageURLTitle = (title: string | undefined, id: string) => {
-  const resTitleSlug = generateAlias(title || "");
+export const getNodePageURLTitle = (title: string | undefined, id: string, type: string) => {
+  const resTitleSlug = type === "title" ? generateAlias(title || "") : title || "";
   if (resTitleSlug.length === 0) {
     return id;
   }
@@ -102,16 +102,16 @@ export const getNodePageURLTitle = (title: string | undefined, id: string) => {
   return resTitleSlug;
 };
 
-export const getNodePageUrl = (title: string, id: string) => {
-  return `${ROUTES.node}/${getNodePageURLTitle(title, id)}/${id}`;
+export const getNodePageUrl = (title: string, id: string, type: string) => {
+  return `${ROUTES.node}/${getNodePageURLTitle(title, id, type)}/${id}`;
 };
 
-export const getNodePageWithDomain = (title: string, id: string) => {
+export const getNodePageWithDomain = (title: string, id: string, type: string = "title") => {
   const _ONECADEMY_DOMAIN =
     ONECADEMY_DOMAIN[ONECADEMY_DOMAIN.length - 1] === "/"
       ? ONECADEMY_DOMAIN.substring(0, ONECADEMY_DOMAIN.length - 1)
       : ONECADEMY_DOMAIN;
-  let NODE_URL = getNodePageUrl(title, id);
+  let NODE_URL = getNodePageUrl(title, id, type);
   if (NODE_URL[0] === "/") {
     NODE_URL = NODE_URL.substring(1, NODE_URL.length);
   }
