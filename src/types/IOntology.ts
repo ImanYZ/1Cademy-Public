@@ -37,12 +37,12 @@ export type IActivity = {
   plainText: {
     Preconditions: string[];
     Postconditions: string[];
-    "Evaluation Dimensions": string[];
   };
   subOntologies: {
     Actor: ISubOntology[];
     Process: ISubOntology[];
     Specializations: ISubOntology[];
+    "Evaluation Dimensions": ISubOntology[];
   };
   notes: [];
   ontologyType: string;
@@ -86,7 +86,7 @@ export type IEvaluation = {
   plainText: {
     "Measurement units": string[];
     "Direction of desirability": string[];
-    "Criteria for acceptability:": string[];
+    "Criteria for acceptability": string[];
   };
   subOntologies: {
     Specializations: ISubOntology[];

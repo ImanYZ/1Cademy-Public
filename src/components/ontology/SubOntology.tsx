@@ -3,7 +3,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Link, TextField, Tooltip } from "@mui/material";
-import { collection, deleteDoc, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { IOntology, ISubOntology } from "src/types/IOntology";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
@@ -72,6 +72,17 @@ const SubOntology = ({
   //     return _openOntology;
   //   });
   // };
+
+  const removeSubOntology = ({ ontologyData, id }: any) => {
+    for (let type of ["Actor", "Process", "Roles", "Evaluation Dimensions"]) {
+      if ((ontologyData.subOntologies[type] || []).length > 0) {
+        const subOntologyIdx = ontologyData.subOntologies[type].findIndex((sub: any) => sub.id === id);
+        if (subOntologyIdx !== -1) {
+          ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
+        }
+      }
+    }
+  };
   const deleteSubOntologyEditable = async () => {
     try {
       console.info("deleteSubOntologyEditable");
@@ -84,8 +95,19 @@ const SubOntology = ({
             ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
           }
           const subOntologyDoc = await getDoc(doc(collection(db, "ontology"), subOntology.id));
+
           if (subOntologyDoc.exists()) {
-            await deleteDoc(subOntologyDoc.ref);
+            const subOntologyData = subOntologyDoc.data();
+            const parents = subOntologyData.parents;
+            for (let parent of parents) {
+              const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
+              if (ontologyDoc.exists()) {
+                const ontologyData = ontologyDoc.data();
+                removeSubOntology({ ontologyData, id: subOntology.id });
+                await updateDoc(ontologyDoc.ref, ontologyData);
+              }
+            }
+            // await deleteDoc(subOntologyDoc.ref);
           }
 
           await updateDoc(ontologyDoc.ref, ontologyData);

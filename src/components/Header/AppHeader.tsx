@@ -220,9 +220,10 @@ const AppHeader = forwardRef(
                     alt="logo"
                     sx={{
                       cursor: "pointer",
-                      width: "500px",
-                      height: { xs: "40px", sm: "64px" },
-                      borderRadius: 0, // Set borderRadius to 0 to make it rectangular
+                      width: "340px",
+                      height: "auto",
+                      borderRadius: 0,
+                      pb: "13px",
                     }}
                     onClick={() => {}}
                   />

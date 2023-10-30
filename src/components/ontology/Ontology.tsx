@@ -1,7 +1,23 @@
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import CancelIcon from "@mui/icons-material/Cancel";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ControlPointIcon from "@mui/icons-material/ControlPoint";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import SaveIcon from "@mui/icons-material/Save";
-import { Button, TextField, Tooltip, Typography } from "@mui/material";
+import { TreeItem, TreeView } from "@mui/lab";
+import {
+  Button,
+  Checkbox,
+  DialogActions,
+  DialogContent,
+  FormControlLabel,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import Dialog from "@mui/material/Dialog";
+import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
 import React, { useCallback, useState } from "react";
@@ -22,23 +38,32 @@ type IOntologyProps = {
   setSnackbarMessage: (message: string) => void;
   updateUserDoc: (ids: string[]) => void;
   user: any;
+  mainSpecializations: any;
+  ontologies: any;
 };
 
 const Ontology = ({
   openOntology,
   setOpenOntology,
   handleLinkNavigation,
-  ontologyPath,
-  setOntologyPath,
   saveSubOntology,
   setSnackbarMessage,
   updateUserDoc,
   user,
+  mainSpecializations,
+  ontologies,
 }: IOntologyProps) => {
   // const [newTitle, setNewTitle] = useState<string>("");
   // const [description, setDescription] = useState<string>("");
 
   const [isFocused, setIsFocused] = useState(false);
+  const [open, setOpen] = useState(false);
+  const handleClose = () => {
+    setCheckedSpecializations([]);
+    setOpen(false);
+  };
+  const [type, setType] = useState("");
+  const [checkedSpecializations, setCheckedSpecializations] = useState<any>([]);
 
   const handleFocus = () => {
     // if (updatingTitle) return;
@@ -84,24 +109,40 @@ const Ontology = ({
     );
   };
 
+  const getCategoryTitle = (type: string) => {
+    if (type === "Actor") {
+      return "WHO: Actors";
+    } else if (type === "Process") {
+      return "HOW: Processes";
+    } else if (type === "Evaluation Dimensions") {
+      return "WHY: Evaluation";
+    } /*  else if (type === "Evaluation Dimensions") {
+      return "WHAT: Activities";
+    } */
+    return "";
+  };
+  const addSubOntology = async (type: string) => {
+    const id = newId(db);
+    // handleLinkNavigation({ id, title: "" });
+    await saveSubOntology({ id, title: "" }, type, openOntology.id);
+  };
   const AddSubOntology = ({ type, disabled }: { type: string; disabled: boolean }) => {
-    const addSubOntology = async () => {
-      const id = newId(db);
-      // handleLinkNavigation({ id, title: "" });
-      await saveSubOntology({ id, title: "" }, type, openOntology.id);
-    };
     return (
-      <Button
-        startIcon={<ArrowForwardIosIcon />}
-        variant="outlined"
-        sx={{
-          color: theme => theme.palette.common.orange,
-        }}
-        onClick={addSubOntology}
-        disabled={disabled}
-      >
-        New {capitalizeFirstLetter(type)}
-      </Button>
+      <Box>
+        {!getCategoryTitle(type) && (
+          <Button
+            startIcon={<ArrowForwardIosIcon />}
+            variant="outlined"
+            sx={{
+              color: theme => theme.palette.common.orange,
+            }}
+            onClick={() => addSubOntology(type)}
+            disabled={disabled}
+          >
+            New {capitalizeFirstLetter(type)}
+          </Button>
+        )}
+      </Box>
     );
   };
 
@@ -121,7 +162,7 @@ const Ontology = ({
   };
 
   const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
-    for (let type of ["Actor", "Process", "Specializations", "Specializations", "Roles"]) {
+    for (let type of ["Actor", "Process", "Specializations", "Specializations", "Roles", "Evaluation Dimensions"]) {
       if ((parentData.subOntologies[type] || []).length > 0) {
         for (let subOnto of parentData.subOntologies[type]) {
           if (subOnto.id === id) {
@@ -137,9 +178,7 @@ const Ontology = ({
       const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
       const newOntologyDoc = await getDoc(ontologyRef);
       if (newOntologyDoc.exists()) {
-        const pathIdx = ontologyPath.findIndex((p: any) => p.id === openOntology.id);
-        if (pathIdx - 1 !== -1) {
-          const parentId = ontologyPath[pathIdx - 1].id;
+        for (let parentId of openOntology.parents) {
           const parentRef = doc(collection(db, "ontology"), parentId);
           const parentDoc = await getDoc(parentRef);
           const parentData = parentDoc.data();
@@ -153,15 +192,8 @@ const Ontology = ({
         await setDoc(ontologyRef, {
           ...openOntology,
         });
-        setOntologyPath([
-          {
-            id: openOntology.id,
-            title: openOntology.title,
-          },
-        ]);
-        await updateUserDoc([openOntology.id]);
+        updateUserDoc([openOntology.id]);
       }
-
       setSnackbarMessage("Updated Successufly");
     } catch (error) {
       console.error(error);
@@ -244,12 +276,101 @@ const Ontology = ({
       console.error(error);
     }
   };
+
+  const checkSpecialization = (checkedId: string) => {
+    setCheckedSpecializations((oldChecked: string[]) => {
+      let _oldChecked = [...oldChecked];
+      if (_oldChecked.includes(checkedId)) {
+        _oldChecked = _oldChecked.filter(cheked => cheked !== checkedId);
+      } else {
+        _oldChecked.push(checkedId);
+      }
+      return _oldChecked;
+    });
+  };
+
+  const TreeViewSimplified = ({ mainSpecializations }: any) => {
+    return (
+      <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+        {Object.keys(mainSpecializations).map(category => (
+          <TreeItem
+            key={mainSpecializations[category].id}
+            nodeId={mainSpecializations[category].id}
+            sx={{ mt: "5px" }}
+            label={
+              <FormControlLabel
+                value={mainSpecializations[category].id}
+                control={
+                  <Checkbox
+                    checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
+                    onChange={() => checkSpecialization(mainSpecializations[category].id)}
+                    name={mainSpecializations[category].id}
+                  />
+                }
+                label={category}
+              />
+            }
+          >
+            {Object.keys(mainSpecializations[category].specializations).length > 0 && (
+              <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+            )}
+          </TreeItem>
+        ))}
+      </TreeView>
+    );
+  };
+  const showList = (type: string) => {
+    setOpen(true);
+    setType(type);
+    const specializations = openOntology.subOntologies[type].map((onto: any) => onto.id);
+    setCheckedSpecializations(specializations);
+  };
+
+  const handleSave = async () => {
+    try {
+      const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+      if (!ontologyDoc.exists()) return;
+      const ontologyData = ontologyDoc.data();
+      const newSubOntologies = [];
+      for (let checkd of checkedSpecializations) {
+        const findOntology = ontologies.find((ontology: any) => ontology.id === checkd);
+        newSubOntologies.push({
+          id: checkd,
+          title: findOntology.title,
+        });
+      }
+      ontologyData.subOntologies[type] = newSubOntologies;
+      await updateDoc(ontologyDoc.ref, ontologyData);
+      handleClose();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box
       sx={{
         padding: "40px 40px 40px 40px",
       }}
     >
+      <Dialog onClose={handleClose} open={open}>
+        <DialogContent>
+          <Box sx={{ height: "auto", width: "500px" }}>
+            <TreeViewSimplified
+              mainSpecializations={mainSpecializations[getCategoryTitle(type)]?.specializations || {}}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <TextField
           placeholder={`Title`}
@@ -369,9 +490,19 @@ const Ontology = ({
         {Object.keys(openOntology.subOntologies).map(type => (
           <Box key={type}>
             <Box sx={{ display: "grid", mt: "5px" }}>
-              {(openOntology?.subOntologies[type] || []).length > 0 && (
+              {((openOntology?.subOntologies[type] || []).length > 0 || getCategoryTitle(type)) && (
                 <Box>
-                  <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
+                    {type !== "Specializations" && (
+                      <Tooltip title={"Add New"}>
+                        <IconButton>
+                          <ControlPointIcon onClick={() => addSubOntology(type)} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+
                   <ul>
                     {(openOntology?.subOntologies[type] || []).map((subOntology: ISubOntology) => {
                       return (
@@ -394,7 +525,18 @@ const Ontology = ({
                 </Box>
               )}
             </Box>
-            <AddSubOntology type={type} disabled={openOntology.title.trim() === ""} />
+            {type !== "Specializations" ? (
+              Object.keys(mainSpecializations[getCategoryTitle(type)]?.specializations || {}).length > 0 && (
+                <Tooltip title={"Select"}>
+                  <IconButton onClick={() => showList(type)}>
+                    <KeyboardArrowDownIcon />
+                  </IconButton>
+                </Tooltip>
+              )
+            ) : (
+              <AddSubOntology type={type} disabled={!openOntology.title.trim()} />
+            )}
+            {/* <hr style={{ color: "#A5A5A5", width: "50%", marginTop: "0px", position: "absolute" }} /> */}
           </Box>
         ))}
 
