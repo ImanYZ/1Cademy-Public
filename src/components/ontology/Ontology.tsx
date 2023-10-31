@@ -129,6 +129,7 @@ const Ontology = ({
       subOntologyType = "Evaluation";
     }
     const newOntology = INITIAL_VALUES[subOntologyType];
+    newOntology.parents = [openOntology.id];
     newOntology.title = "New " + subOntologyType;
     if (idx === -1) {
       ontologyParent.subOntologies[type].push({

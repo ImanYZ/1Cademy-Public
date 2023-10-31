@@ -1,7 +1,7 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Box, Link } from "@mui/material";
+import { Box, Button, Link, Typography } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import {
   collection,
@@ -155,19 +155,20 @@ const CIOntology = () => {
     }
     return __mainSpecializations;
   };
-
   useEffect(() => {
-    if (!user) return;
     const mainOntologies = ontologies.filter((ontology: any) =>
       ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(ontology.title)
     );
     let __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
-    // console.log({ __mainSpecializations });
     __mainSpecializations = addMissingCategories({ __mainSpecializations });
-
     /* ------------------  */
     setMainSpecializations(__mainSpecializations);
+  }, [ontologies]);
+
+  useEffect(() => {
+    if (!user) return;
     if (!ontologies.length) return;
+
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
     const unsubscribeUser = onSnapshot(userQuery, snapshot => {
       const docChange = snapshot.docChanges()[0];
@@ -426,15 +427,14 @@ const CIOntology = () => {
     return newOntology;
   };
   const openMainCategory = useCallback(
-    async (category: string) => {
+    async (category: string, path: string[]) => {
       if (!user) return;
       const ontologyIdx = ontologies.findIndex((onto: any) => onto.title === category);
+      let _path = [...path];
       let newId = "";
-      let title = "";
       if (ontologyIdx !== -1) {
         setOpenOntology(ontologies[ontologyIdx]);
         newId = ontologies[ontologyIdx].id;
-        title = ontologies[ontologyIdx].title;
       } else {
         const newOntology = getMainCategory(category);
         setOpenOntology(newOntology);
@@ -446,10 +446,9 @@ const CIOntology = () => {
           deleted: false,
         });
         newId = ontologyRef.id;
-        title = newOntology?.title || "";
+        _path.push(newId);
       }
-      setOntologyPath([{ id: newId, title }]);
-      await updateUserDoc([newId]);
+      await updateUserDoc([..._path]);
     },
     [ontologies, user]
   );
@@ -479,22 +478,26 @@ const CIOntology = () => {
       <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
         {Object.keys(mainSpecializations).map(category => (
           <TreeItem
-            onClick={e => {
-              if (category !== openOntology?.title) openMainCategory(category);
-              e.stopPropagation();
-            }}
             key={mainSpecializations[category].id}
             nodeId={mainSpecializations[category].id}
             label={
-              <span
-              // style={{
-              //   fontSize: ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(category)
-              //     ? "30px"
-              //     : "15px",
-              // }}
-              >
-                {category}
-              </span>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography>{category}</Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    openMainCategory(category, mainSpecializations[category]?.path || []);
+                  }}
+                  sx={{
+                    ml: "5px",
+                    fontSize: "14px",
+                    border: "none",
+                    background: "transparent",
+                  }}
+                >
+                  Open
+                </Button>
+              </Box>
             }
             sx={{ mt: "5px" }}
           >
@@ -563,17 +566,18 @@ const CIOntology = () => {
           overflow: "auto",
         }}
       >
-        <Breadcrumbs sx={{ ml: "40px" }}>
-          {ontologyPath.map(path => (
-            <Link
-              underline="hover"
-              key={path.id}
-              onClick={() => handleLinkNavigation(path, "")}
-              sx={{ cursor: "pointer" }}
-            >
-              {path.title}
-            </Link>
-          ))}
+        <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
+          {ontologyPath.length > 1 &&
+            ontologyPath.map(path => (
+              <Link
+                underline="hover"
+                key={path.id}
+                onClick={() => handleLinkNavigation(path, "")}
+                sx={{ cursor: "pointer" }}
+              >
+                {path.title}
+              </Link>
+            ))}
         </Breadcrumbs>
         {openOntology && (
           <Ontology

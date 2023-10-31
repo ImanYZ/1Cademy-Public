@@ -21,7 +21,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
   };
 
   const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
-    for (let type of ["Actor", "Process", "Specializations", "Specializations", "Roles", "Evaluation Dimensions"]) {
+    for (let type of ["Actor", "Process", "Specializations", "Roles", "Evaluation Dimensions"]) {
       if ((parentData.subOntologies[type] || []).length > 0) {
         for (let subOnto of parentData.subOntologies[type]) {
           if (subOnto.id === id) {
@@ -40,7 +40,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
         const ontologyData = ontologyDoc.data();
 
         if (type === "title") {
-          for (let parentId of openOntology.parents) {
+          for (let parentId of openOntology?.parents || []) {
             const parentRef = doc(collection(db, "ontology"), parentId);
             const parentDoc = await getDoc(parentRef);
             const parentData = parentDoc.data();
@@ -96,17 +96,19 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
           InputProps={{
             endAdornment: (
               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
-                <Tooltip title={"Save"}>
-                  <SaveIcon
-                    sx={{
-                      color: "#757575",
-                      ":hover": {
-                        color: theme => theme.palette.common.orange,
-                      },
-                    }}
-                    onClick={editSaveText}
-                  />
-                </Tooltip>{" "}
+                {type === "title" && (
+                  <Tooltip title={"Save"}>
+                    <SaveIcon
+                      sx={{
+                        color: "#757575",
+                        ":hover": {
+                          color: theme => theme.palette.common.orange,
+                        },
+                      }}
+                      onClick={editSaveText}
+                    />
+                  </Tooltip>
+                )}
               </Box>
             ),
           }}
@@ -117,10 +119,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
               md: "16px",
             },
             marginBottom: "5px",
-            width: {
-              xs: "100%",
-              md: "50%",
-            },
+            width: "100%",
             display: "block",
           }}
         />
