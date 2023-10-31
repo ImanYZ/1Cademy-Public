@@ -53,6 +53,7 @@ export type LinkedKnowledgeNode = {
   label?: string;
   node: string;
   title?: string;
+  nodeSlug?: string;
   content?: string;
   nodeImage?: string;
   nodeType: NodeType;
@@ -118,6 +119,7 @@ export type NodeFireStore = {
   isTag?: boolean;
   maxVersionRating?: number;
   nodeImage?: string;
+  nodeSlug?: string;
   nodeType: NodeType;
   parents?: { node?: string; label?: string; title?: string }[];
   referenceIds?: string[];

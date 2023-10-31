@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { INodeVersion } from "src/types/INodeVersion";
 
 import { Editor } from "@/components/Editor";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import useConfirmationDialog from "@/hooks/useConfirmDialog";
 
@@ -82,23 +83,25 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
           if (props.openProposal === proposal.id) {
             // this will display selected proposal
             return (
-              <SelectedProposalItem
-                key={proposal.id}
-                deleteProposalClick={deleteProposalClick}
-                isDeleting={isDeleting}
-                proposal={proposal}
-                proposalIdx={proposalIdx}
-                proposalSummaries={proposalSummaries}
-                rateProposalClick={rateProposalClick}
-                selectProposal={props.selectProposal}
-                ratingProposale={ratingProposale}
-                username={props.username}
-              />
+              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", mt: "5px" }}>
+                <SelectedProposalItem
+                  key={proposal.id}
+                  deleteProposalClick={deleteProposalClick}
+                  isDeleting={isDeleting}
+                  proposal={proposal}
+                  proposalIdx={proposalIdx}
+                  proposalSummaries={proposalSummaries}
+                  rateProposalClick={rateProposalClick}
+                  selectProposal={props.selectProposal}
+                  ratingProposale={ratingProposale}
+                  username={props.username}
+                />
+              </Box>
             );
           } else {
             // THIS Show pending proposal and approved proposals
             return (
-              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", gap: "4px", mt: "5px" }}>
+              <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", mt: "5px" }}>
                 <ProposalItem
                   key={proposal.id}
                   proposal={proposal}
@@ -161,6 +164,7 @@ const SelectedProposalItem = ({
           flexDirection: "column",
           position: "relative",
           border: "2px solid #ff8a33",
+          cursor: "auto!important",
           ":hover": {
             boxShadow: theme =>
               theme.palette.mode === "dark"
@@ -172,15 +176,11 @@ const SelectedProposalItem = ({
       >
         <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
           <Box className="title Time" sx={{ fontSize: "12px" }}>
-            <Typography
-              sx={{
-                fontSize: "16px",
-                fontWeight: "500",
-                lineHeight: "24px",
-              }}
-            >
-              {proposal.title}
-            </Typography>
+            <MarkdownRender
+              text={proposal.title}
+              customClass={"custom-react-markdown"}
+              sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+            />
           </Box>
           <Box
             sx={{
@@ -207,9 +207,7 @@ const SelectedProposalItem = ({
               <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
             )}
           </Box>
-          <Box className="ProposalBody">
-            <Editor label="" readOnly value={proposal.proposal} setValue={() => {}}></Editor>
-          </Box>
+          {proposal.proposal.trim() && <Typography sx={{ mb: "5px" }}>Explanation: {proposal.proposal}</Typography>}
         </Box>
         <Box
           sx={{

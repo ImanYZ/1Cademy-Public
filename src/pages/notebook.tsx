@@ -855,6 +855,9 @@ const Notebook = ({}: NotebookProps) => {
             batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
           }
           const userNodesRef = collection(db, "userNodes");
+          console.log(nodeId, "nodeId-handler");
+          console.log(user.uname, "user.uname-handler");
+          console.log(nodeId, "nodeId-handler");
           const q = query(
             userNodesRef,
             where("node", "==", nodeId),
@@ -1283,7 +1286,7 @@ const Notebook = ({}: NotebookProps) => {
         await Post(`/changeDefaultTag/${defaultTagId}`);
         // await updateNotebookTag(db, selectedNotebookId, { defaultTagId: defaultTagId, defaultTagName });
 
-        let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role);
+        let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role, user.claims);
         if (!reputation) throw Error("Cant find Reputation");
         if (!userUpdated) throw Error("Cant find User");
 
@@ -1891,6 +1894,8 @@ const Notebook = ({}: NotebookProps) => {
       if (notebookRef.current.choosingNode.id === nodeId) return;
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
+      console.log(nodeId, title, "nodeid-title");
+      console.log("node-handler");
       if (notebookRef.current.choosingNode.id === "Tag") return;
       openNodeHandler(nodeId, { open: true }, false);
       await detectHtmlElements({ ids: [nodeId] });
@@ -3048,8 +3053,9 @@ const Notebook = ({}: NotebookProps) => {
         }
         if (willRemoveNode) {
           if (node?.children.length > 0) {
-            window.alert(
-              "To be able to delete this node, you should first delete its children or move them under other parent node."
+            confirmIt(
+              "To be able to delete this node, you should first delete its children or move them under other parent node.",
+              false
             );
             deleteOK = false;
           } else {
@@ -3507,11 +3513,22 @@ const Notebook = ({}: NotebookProps) => {
 
       let postData: any = {};
       try {
+        const selectedNodeId = notebookRef.current.selectedNode!;
+        const currentNode = graph.nodes[selectedNodeId];
         notebookRef.current.chosenNode = null;
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         let referencesOK: any = true;
+        if (
+          currentNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
+          graph.nodes[selectedNodeId].references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+        }
+        if (!referencesOK) return;
+
         const {
           courseExist,
           isInstructor,
@@ -3522,21 +3539,9 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: notebookRef.current.selectedNode,
           }
         );
-        const selectedNodeId = notebookRef.current.selectedNode!;
-        if (
-          (graph.nodes[selectedNodeId].nodeType === "Concept" ||
-            graph.nodes[selectedNodeId].nodeType === "Relation" ||
-            graph.nodes[selectedNodeId].nodeType === "Question" ||
-            graph.nodes[selectedNodeId].nodeType === "News") &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
-        }
 
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
-            if (!referencesOK) return graph;
-
             gtmEvent("Propose", {
               customType: "improvement",
             });
@@ -3595,7 +3600,7 @@ const Notebook = ({}: NotebookProps) => {
             if (isTheSame) {
               onFail();
               setTimeout(() => {
-                window.alert("You've not changed anything yet!");
+                confirmIt("You've not changed anything yet!", false);
               });
               return graph;
             }
@@ -3883,21 +3888,24 @@ const Notebook = ({}: NotebookProps) => {
           courseExist: boolean;
           instantApprove: boolean;
         };
-        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
-          "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: firstChildId }
-        );
         const newNode = graph.nodes[newNodeId];
         let referencesOK: any = true;
+
         if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
+          newNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
           referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
         }
+        if (!referencesOK) {
+          return;
+        }
+
+        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
+          "/instructor/course/checkInstantApprovalForProposal",
+          { nodeId: firstChildId }
+        );
 
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
@@ -3917,13 +3925,9 @@ const Notebook = ({}: NotebookProps) => {
             return graph;
           }
 
-          if (!referencesOK) {
-            return graph;
-          }
-
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              window.alert("Please add relevant tag(s) to your proposed node.");
+              confirmIt("Please add relevant tag(s) to your proposed node.", false);
             });
             return graph;
           }
@@ -4068,6 +4072,19 @@ const Notebook = ({}: NotebookProps) => {
         const firstParentId = graph.nodes[newNodeId].parents[0].node;
         if (!firstParentId) throw Error("This node has not parent");
         const tagIds = graph.nodes[firstParentId].tagIds ?? [];
+        const newNode = graph.nodes[newNodeId];
+        let referencesOK: any = true;
+        if (
+          newNode?.nodeType &&
+          ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
+          newNode.references.length === 0
+        ) {
+          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+        }
+        if (!referencesOK) {
+          return;
+        }
+
         const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
@@ -4075,17 +4092,7 @@ const Notebook = ({}: NotebookProps) => {
             nodeId: firstParentId,
           }
         );
-        const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
-        if (
-          (newNode.nodeType === "Concept" ||
-            newNode.nodeType === "Relation" ||
-            newNode.nodeType === "Question" ||
-            newNode.nodeType === "News") &&
-          newNode.references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
-        }
+
         setGraph(graph => {
           // const updatedNodeIds: string[] = [newNodeId];
           const newNode = graph.nodes[newNodeId];
@@ -4103,13 +4110,11 @@ const Notebook = ({}: NotebookProps) => {
             return graph;
           }
 
-          if (!referencesOK) {
-            return graph;
-          }
-
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              window.alert("Please add relevant tag(s) to your proposed node.");
+              setTimeout(() => {
+                confirmIt("Please add relevant tag(s) to your proposed node.", false);
+              });
             });
             return graph;
           }

@@ -2,66 +2,66 @@ export const proposalSummariesGenerator = (proposal: any) => {
   const proposalSummaries: string[] = [];
   if (proposal.newChild) {
     proposalSummaries.push(
-      "- Proposed new child node" +
+      "- Proposes new child node" +
         ("childType" in proposal && proposal.childType ? " of type " + proposal.childType + "." : ".")
     );
   }
   if (proposal.addedChoices) {
-    proposalSummaries.push("- Added choices.");
+    proposalSummaries.push("- Adds choices.");
   }
   if (proposal.deletedChoices) {
-    proposalSummaries.push("- Deleted choices.");
+    proposalSummaries.push("- Deletes choices.");
   }
   if (proposal.changedChoices) {
-    proposalSummaries.push("- Changed choices.");
+    proposalSummaries.push("- Changes choices.");
   }
   if (proposal.changedTitle) {
-    proposalSummaries.push("- Changed title.");
+    proposalSummaries.push("- Changes title.");
   }
   if (proposal.changedContent) {
-    proposalSummaries.push("- Changed content.");
+    proposalSummaries.push("- Changes content.");
   }
   if (proposal.addedImage) {
-    proposalSummaries.push("- Added image.");
+    proposalSummaries.push("- Adds image.");
   }
   if (proposal.deletedImage) {
-    proposalSummaries.push("- Deleted image.");
+    proposalSummaries.push("- Deletes image.");
   }
   if (proposal.changedImage) {
-    proposalSummaries.push("- Changed image.");
+    proposalSummaries.push("- Changes image.");
   }
   if (proposal.addedReferences) {
-    proposalSummaries.push("- Added references.");
+    proposalSummaries.push("- Adds references.");
   }
   if (proposal.deletedReferences) {
-    proposalSummaries.push("- Deleted references.");
+    proposalSummaries.push("- Deletes references.");
   }
   if (proposal.changedReferences) {
-    proposalSummaries.push("- Changed references.");
+    proposalSummaries.push("- Changes references.");
   }
   if (proposal.addedTags) {
-    proposalSummaries.push("- Added tags.");
+    proposalSummaries.push("- Adds tags.");
   }
   if (proposal.deletedTags) {
-    proposalSummaries.push("- Deleted tags.");
+    proposalSummaries.push("- Deletes tags.");
   }
   if (proposal.changedTags) {
-    proposalSummaries.push("- Changed tags.");
+    proposalSummaries.push("- Changes tags.");
   }
   if (proposal.addedParents) {
-    proposalSummaries.push("- Added Parents.");
+    proposalSummaries.push("- Adds Parents.");
   }
   if (proposal.addedChildren) {
-    proposalSummaries.push("- Added Children.");
+    proposalSummaries.push("- Adds Children.");
   }
   if (proposal.removedParents) {
-    proposalSummaries.push("- Deleted Parents.");
+    proposalSummaries.push("- Deletes Parents.");
   }
   if (proposal.removedChildren) {
-    proposalSummaries.push("- Deleted Children.");
+    proposalSummaries.push("- Deletes Children.");
   }
   if (proposal.changedNodeType) {
-    proposalSummaries.push("- Changed Node Type.");
+    proposalSummaries.push("- Changes Node Type.");
   }
   return proposalSummaries;
 };
