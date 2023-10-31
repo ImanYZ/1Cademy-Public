@@ -118,6 +118,7 @@ const getFullNodeTag = async (nodeData: NodeFireStore) => {
     convertedTags.push({
       node: tag.node,
       title: tagData.title,
+      nodeSlug: tagData.nodeSlug,
       content: tagData.content,
       nodeImage: tagData.nodeImage,
       nodeType: tagData.nodeType,
@@ -146,6 +147,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     childrenConverted.push({
       node: child.node as string,
       title: childData.title,
+      nodeSlug: childData.nodeSlug as string,
       content: childData.content,
       nodeImage: childData.nodeImage,
       nodeType: childData.nodeType,
@@ -162,6 +164,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     parentsConverted.push({
       node: parent.node as string,
       title: parentData.title,
+      nodeSlug: parentData.nodeSlug as string,
       content: parentData.content,
       nodeImage: parentData.nodeImage,
       nodeType: parentData.nodeType,
@@ -176,6 +179,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
       siblingsConverted.push({
         node: children.node as string,
         title: childrenData.title,
+        nodeSlug: childrenData.nodeSlug as string,
         content: childrenData.content,
         nodeImage: childrenData.nodeImage,
         nodeType: childrenData.nodeType,
@@ -197,6 +201,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
       label: reference.label,
       node: reference.node,
       title: referenceData.title,
+      nodeSlug: referenceData.nodeSlug as string,
       content: referenceData.content,
       nodeImage: referenceData.nodeImage,
       nodeType: referenceData.nodeType,

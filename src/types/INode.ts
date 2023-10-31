@@ -23,6 +23,7 @@ export type INode = {
   };
   title: string;
   nodeImage?: string;
+  nodeSlug?: string;
   nodeVideo?: string;
   nodeAudio?: string;
   comments: number;
