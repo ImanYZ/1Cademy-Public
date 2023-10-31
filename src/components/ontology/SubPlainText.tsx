@@ -1,59 +1,90 @@
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, TextField, Tooltip, Typography } from "@mui/material";
-// import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { useState } from "react";
-import { IOntology } from "src/types/IOntology";
 
 import MarkdownRender from "../Markdown/MarkdownRender";
 
 type ISubOntologyProps = {
-  openOntology: IOntology;
+  openOntology: any;
+  setOpenOntology: any;
   type: string;
   setSnackbarMessage: (message: any) => void;
   text: string;
 };
-const SubPlainText = ({ text, type }: ISubOntologyProps) => {
-  // const db = getFirestore();
+const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntologyProps) => {
+  const db = getFirestore();
   const [editMode, setEditMode] = useState(false);
 
-  // const handleSavePlainText = useCallback(async () => {
-  //   try {
-  //     if (!openOntology.id) return;
-  //     const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
-  //     const ontologyDoc = await getDoc(ontologyRef);
-  //     if (ontologyDoc.exists()) {
-  //       const ontologydata = ontologyDoc.data();
-  //       const subOntologyIdx = ontologydata.plainText[type].findIndex((sub: any) => sub.id === subOntology.id);
-  //       if (subOntologyIdx === -1) {
-  //         ontologydata.plainText[type].push({
-  //           id: subOntology.id,
-  //           title: subOntology.title,
-  //         });
-  //       } else {
-  //         ontologydata.plainText[type][subOntologyIdx].title = subOntology.title;
-  //       }
-  //       await updateDoc(ontologyDoc.ref, ontologydata);
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }, [openOntology.id, db, type, subOntology.id, subOntology.title]);
   const capitalizeFirstLetter = (word: string) => {
     return word.charAt(0).toUpperCase() + word.slice(1);
   };
-  const editSaveText = () => {
-    setEditMode(edit => !edit);
+
+  const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
+    for (let type of ["Actor", "Process", "Specializations", "Specializations", "Roles", "Evaluation Dimensions"]) {
+      if ((parentData.subOntologies[type] || []).length > 0) {
+        for (let subOnto of parentData.subOntologies[type]) {
+          if (subOnto.id === id) {
+            subOnto.title = newTitle;
+          }
+        }
+      }
+    }
   };
+
+  const editSaveText = async () => {
+    setEditMode(edit => !edit);
+    if (editMode) {
+      const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+      if (ontologyDoc.exists()) {
+        const ontologyData = ontologyDoc.data();
+
+        if (type === "title") {
+          for (let parentId of openOntology.parents) {
+            const parentRef = doc(collection(db, "ontology"), parentId);
+            const parentDoc = await getDoc(parentRef);
+            const parentData = parentDoc.data();
+            editTitleSubOntology({ parentData, newTitle: openOntology.title, id: openOntology.id });
+            await updateDoc(parentRef, parentData);
+          }
+        }
+        if (["description", "title"].includes(type)) {
+          ontologyData[type] = openOntology[type];
+        } else {
+          ontologyData.plainText[type] = openOntology.plainText[type];
+        }
+
+        await updateDoc(ontologyDoc.ref, ontologyData);
+      }
+    }
+  };
+
+  const handleEditText = (e: any) => {
+    setOpenOntology((openOntology: any) => {
+      const _openOntology = { ...openOntology };
+      if (["description", "title"].includes(type)) {
+        _openOntology[type] = e.target.value;
+      } else {
+        _openOntology.plainText[type] = e.target.value;
+      }
+
+      return _openOntology;
+    });
+  };
+
   return (
     <Box>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
-        <Tooltip title={"Select"}>
-          <Button onClick={editSaveText} sx={{ ml: "5px" }}>
-            {editMode ? "Save" : "Edit"}
-          </Button>
-        </Tooltip>
-      </Box>
+      {type !== "title" && (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
+          <Tooltip title={editMode ? "Save" : "Edit"}>
+            <Button onClick={editSaveText} sx={{ ml: "5px" }}>
+              {editMode ? "Save" : "Edit"}
+            </Button>
+          </Tooltip>
+        </Box>
+      )}
+
       {editMode ? (
         <TextField
           placeholder={`... `}
@@ -61,7 +92,7 @@ const SubPlainText = ({ text, type }: ISubOntologyProps) => {
           fullWidth
           value={text}
           multiline
-          onChange={() => {}}
+          onChange={handleEditText}
           InputProps={{
             endAdornment: (
               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
@@ -73,7 +104,7 @@ const SubPlainText = ({ text, type }: ISubOntologyProps) => {
                         color: theme => theme.palette.common.orange,
                       },
                     }}
-                    onClick={() => {}}
+                    onClick={editSaveText}
                   />
                 </Tooltip>{" "}
               </Box>
@@ -95,7 +126,14 @@ const SubPlainText = ({ text, type }: ISubOntologyProps) => {
         />
       ) : (
         <Box style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-          <MarkdownRender text={text} />
+          <MarkdownRender text={text} sx={{ fontSize: type === "title" ? "50px" : "" }} />
+          {type === "title" && !openOntology.locked && (
+            <Tooltip title={editMode ? "Save" : "Edit"}>
+              <Button onClick={editSaveText} sx={{ ml: "5px" }}>
+                {editMode ? "Save" : "Edit"}
+              </Button>
+            </Tooltip>
+          )}
         </Box>
       )}
     </Box>

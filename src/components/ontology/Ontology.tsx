@@ -1,21 +1,11 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SaveIcon from "@mui/icons-material/Save";
 import { TreeItem, TreeView } from "@mui/lab";
-import {
-  Button,
-  Checkbox,
-  DialogActions,
-  DialogContent,
-  FormControlLabel,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Button, Checkbox, DialogActions, DialogContent, FormControlLabel, Tooltip, Typography } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { ISubOntology } from "src/types/IOntology";
 
 import SubOntology from "./SubOntology";
@@ -53,7 +43,6 @@ const Ontology = ({
   // const [newTitle, setNewTitle] = useState<string>("");
   // const [description, setDescription] = useState<string>("");
 
-  const [isFocused, setIsFocused] = useState(false);
   const [open, setOpen] = useState(false);
   const handleClose = () => {
     setCheckedSpecializations([]);
@@ -61,14 +50,6 @@ const Ontology = ({
   };
   const [type, setType] = useState("");
   const [checkedSpecializations, setCheckedSpecializations] = useState<any>([]);
-
-  const handleFocus = () => {
-    // if (updatingTitle) return;
-    setIsFocused(true);
-  };
-  const handleBlur = () => {
-    setIsFocused(false);
-  };
 
   const db = getFirestore();
   // const {
@@ -87,98 +68,6 @@ const Ontology = ({
     } */
     return "";
   };
-
-  // const addSubOntology = async (type: string) => {
-  //   const id = newId(db);
-  //   // handleLinkNavigation({ id, title: "" });
-  //   await saveSubOntology({ id, title: "" }, type, openOntology.id);
-  // };
-  // const AddSubOntology = ({ type, disabled }: { type: string; disabled: boolean }) => {
-  //   return (
-  //     <Box>
-  //       {!getCategoryTitle(type) && (
-  //         <Button
-  //           startIcon={<ArrowForwardIosIcon />}
-  //           variant="outlined"
-  //           sx={{
-  //             color: theme => theme.palette.common.orange,
-  //           }}
-  //           onClick={() => addSubOntology(type)}
-  //           disabled={disabled}
-  //         >
-  //           New {capitalizeFirstLetter(type)}
-  //         </Button>
-  //       )}
-  //     </Box>
-  //   );
-  // };
-
-  const handleEditTitle = (e: any) => {
-    setOpenOntology((open: any) => {
-      const _open = { ...open };
-      _open.title = e.target.value;
-      return _open;
-    });
-  };
-  const handleEditDescription = (e: any) => {
-    setOpenOntology((open: any) => {
-      const _open = { ...open };
-      _open.description = e.target.value;
-      return _open;
-    });
-  };
-
-  const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
-    for (let type of ["Actor", "Process", "Specializations", "Specializations", "Roles", "Evaluation Dimensions"]) {
-      if ((parentData.subOntologies[type] || []).length > 0) {
-        for (let subOnto of parentData.subOntologies[type]) {
-          if (subOnto.id === id) {
-            subOnto.title = newTitle;
-          }
-        }
-      }
-    }
-  };
-
-  const SaveOntologyTitle = useCallback(async () => {
-    try {
-      const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
-      const newOntologyDoc = await getDoc(ontologyRef);
-      if (newOntologyDoc.exists()) {
-        for (let parentId of openOntology.parents) {
-          const parentRef = doc(collection(db, "ontology"), parentId);
-          const parentDoc = await getDoc(parentRef);
-          const parentData = parentDoc.data();
-          editTitleSubOntology({ parentData, newTitle: openOntology.title, id: openOntology.id });
-          await updateDoc(parentRef, parentData);
-        }
-        await updateDoc(ontologyRef, {
-          title: openOntology.title,
-        });
-      } else {
-        await setDoc(ontologyRef, {
-          ...openOntology,
-        });
-        updateUserDoc([openOntology.id]);
-      }
-      setSnackbarMessage("Updated Successufly");
-    } catch (error) {
-      console.error(error);
-    }
-  }, [db, openOntology]);
-
-  const SaveOntologyDescription = useCallback(async () => {
-    try {
-      console.info(openOntology.id, isFocused);
-      const ontologyRef = doc(collection(db, "ontology"), openOntology.id);
-      await updateDoc(ontologyRef, {
-        description: openOntology.description,
-      });
-      setSnackbarMessage("Updated Successufly");
-    } catch (error) {
-      console.error(error);
-    }
-  }, [db, openOntology, setOpenOntology]);
 
   const capitalizeFirstLetter = (word: string) => {
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -210,7 +99,7 @@ const Ontology = ({
       newOntology.title = `${ontologyData.title} copy`;
       newOntology.description = "";
       newOntology.subOntologies.Specializations = [];
-
+      delete newOntology.locked;
       ontologyData.subOntologies.Specializations.push({
         id: newOntologyRef.id,
         title: `${ontologyData.title} copy`,
@@ -341,7 +230,13 @@ const Ontology = ({
           </Box>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
-          <Button>Add new {type}</Button>
+          <Button
+            onClick={() => {
+              handleCloning(mainSpecializations[getCategoryTitle(type)]);
+            }}
+          >
+            Add new {type}
+          </Button>
           <Button onClick={handleSave} color="primary">
             Save
           </Button>
@@ -352,103 +247,19 @@ const Ontology = ({
       </Dialog>
 
       <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <TextField
-          placeholder={`Title`}
-          variant="standard"
-          fullWidth
-          multiline
-          value={openOntology.title}
-          onChange={handleEditTitle}
-          disabled={openOntology.locked}
-          InputProps={{
-            style: { fontSize: "36px" },
-            startAdornment: (
-              <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {!openOntology.locked && (
-                  <Tooltip title="Save">
-                    <SaveIcon
-                      sx={{
-                        color: "#757575",
-                        ":hover": {
-                          color: theme => theme.palette.common.orange,
-                        },
-                      }}
-                      onClick={SaveOntologyTitle}
-                    />
-                  </Tooltip>
-                )}
-              </Box>
-            ),
-            endAdornment: (
-              <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {/* <Tooltip title="Cancel">
-                  <CancelIcon
-                    sx={{
-                      marginLeft: "10px",
-                      color: "#757575",
-                      ":hover": {
-                        color: theme => theme.palette.common.orange,
-                      },
-                    }}
-                    onClick={cancelTitleChanges}
-                  />
-                </Tooltip> */}
-              </Box>
-            ),
-            disableUnderline: true,
-          }}
-          sx={{}}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+        <SubPlainText
+          text={openOntology.title}
+          openOntology={openOntology}
+          type={"title"}
+          setSnackbarMessage={setSnackbarMessage}
+          setOpenOntology={setOpenOntology}
         />
-        <TextField
-          placeholder={`Description`}
-          variant="standard"
-          fullWidth
-          multiline
-          value={openOntology.description}
-          onChange={handleEditDescription}
-          InputProps={{
-            style: { fontSize: "15px" },
-            startAdornment: (
-              <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {/* {isFocused && ( */}
-                <Tooltip title="Save">
-                  <SaveIcon
-                    sx={{
-                      color: "#757575",
-                      ":hover": {
-                        color: theme => theme.palette.common.orange,
-                      },
-                    }}
-                    onClick={SaveOntologyDescription}
-                  />
-                </Tooltip>
-                {/* )} */}
-              </Box>
-            ),
-            endAdornment: (
-              <Box style={{ marginRight: "8px", cursor: "pointer" }}>
-                {/* {description !== openOntology.description && (
-                  <Tooltip title="Cancel">
-                    <CancelIcon
-                      sx={{
-                        marginLeft: "10px",
-                        color: "#757575",
-                        ":hover": {
-                          color: theme => theme.palette.common.orange,
-                        },
-                      }}
-                      onClick={cancelDescriptionChanges}
-                    />
-                  </Tooltip>
-                )} */}
-              </Box>
-            ),
-            disableUnderline: true,
-          }}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+        <SubPlainText
+          text={openOntology.description}
+          openOntology={openOntology}
+          type={"description"}
+          setSnackbarMessage={setSnackbarMessage}
+          setOpenOntology={setOpenOntology}
         />
       </Box>
       <hr style={{ color: "#A5A5A5" }} />
@@ -501,7 +312,6 @@ const Ontology = ({
                 </ul>
               </Box>
             </Box>
-            {/* <hr style={{ color: "#A5A5A5", width: "50%", marginTop: "0px", position: "absolute" }} /> */}
           </Box>
         ))}
         {Object.keys(openOntology.plainText).map(type => (
@@ -511,6 +321,7 @@ const Ontology = ({
               openOntology={openOntology}
               type={type}
               setSnackbarMessage={setSnackbarMessage}
+              setOpenOntology={setOpenOntology}
             />
           </Box>
         ))}
