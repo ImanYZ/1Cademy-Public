@@ -125,7 +125,7 @@ const CIOntology = () => {
     return ontologyPath;
   };
 
-  const getSpecializationsTree = ({ mainOntologies }: any) => {
+  const getSpecializationsTree = ({ mainOntologies, path }: any) => {
     const _mainSpecializations: any = {};
     for (let ontlogy of mainOntologies) {
       const specializations = ontologies.filter((onto: any) => {
@@ -134,7 +134,8 @@ const CIOntology = () => {
       });
       _mainSpecializations[ontlogy.title] = {
         id: ontlogy.id,
-        specializations: getSpecializationsTree({ mainOntologies: specializations }),
+        path: [...path, ontlogy.id],
+        specializations: getSpecializationsTree({ mainOntologies: specializations, path: [...path, ontlogy.id] }),
       };
     }
     return _mainSpecializations;
@@ -145,7 +146,7 @@ const CIOntology = () => {
     const mainOntologies = ontologies.filter((ontology: any) =>
       ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(ontology.title)
     );
-    const __mainSpecializations = getSpecializationsTree({ mainOntologies });
+    const __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
     setMainSpecializations(__mainSpecializations);
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
     const unsubscribeUser = onSnapshot(userQuery, snapshot => {
@@ -402,7 +403,7 @@ const CIOntology = () => {
   };
   const openMainCategory = useCallback(
     async (category: string) => {
-      if (!user || category === openOntology?.title) return;
+      if (!user) return;
       const ontologyIdx = ontologies.findIndex((onto: any) => onto.title === category);
       let newId = "";
       let title = "";
@@ -455,12 +456,22 @@ const CIOntology = () => {
         {Object.keys(mainSpecializations).map(category => (
           <TreeItem
             onClick={e => {
-              openMainCategory(category);
+              if (category !== openOntology?.title) openMainCategory(category);
               e.stopPropagation();
             }}
             key={mainSpecializations[category].id}
             nodeId={mainSpecializations[category].id}
-            label={<span style={{ fontSize: "30px" }}>{category}</span>}
+            label={
+              <span
+              // style={{
+              //   fontSize: ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(category)
+              //     ? "30px"
+              //     : "15px",
+              // }}
+              >
+                {category}
+              </span>
+            }
             sx={{ mt: "5px" }}
           >
             {Object.keys(mainSpecializations[category].specializations).length > 0 && (

@@ -289,6 +289,39 @@ const Ontology = ({
     });
   };
 
+  const cloneOntology = async (ontologyId: string) => {
+    try {
+      const ontologyDoc = await getDoc(doc(collection(db, "ontology"), ontologyId));
+      if (!ontologyDoc.exists()) return;
+      const ontologyData = ontologyDoc.data();
+      const newOntologyRef = doc(collection(db, "ontology"));
+      const newOntology: any = {
+        ...ontologyDoc.data(),
+      };
+      newOntology.id = newOntologyRef.id;
+      newOntology.parents = [ontologyDoc.id];
+      newOntology.title = `${ontologyData.title} copy`;
+      newOntology.description = "";
+      newOntology.subOntologies.Specializations = [];
+
+      ontologyData.subOntologies.Specializations.push({
+        id: newOntologyRef.id,
+        title: `${ontologyData.title} copy`,
+      });
+      await updateDoc(ontologyDoc.ref, ontologyData);
+      await setDoc(newOntologyRef, newOntology);
+      return newOntologyRef.id;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCloning = async (ontology: any) => {
+    const newCloneId = await cloneOntology(ontology.id);
+    updateUserDoc([...ontology.path, newCloneId]);
+    handleClose();
+  };
+
   const TreeViewSimplified = ({ mainSpecializations }: any) => {
     return (
       <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
@@ -298,17 +331,22 @@ const Ontology = ({
             nodeId={mainSpecializations[category].id}
             sx={{ mt: "5px" }}
             label={
-              <FormControlLabel
-                value={mainSpecializations[category].id}
-                control={
-                  <Checkbox
-                    checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
-                    onChange={() => checkSpecialization(mainSpecializations[category].id)}
-                    name={mainSpecializations[category].id}
-                  />
-                }
-                label={category}
-              />
+              <Box>
+                <FormControlLabel
+                  value={mainSpecializations[category].id}
+                  control={
+                    <Checkbox
+                      checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
+                      onChange={() => checkSpecialization(mainSpecializations[category].id)}
+                      name={mainSpecializations[category].id}
+                    />
+                  }
+                  label={category}
+                />
+                <Button variant="outlined" onClick={() => handleCloning(mainSpecializations[category])}>
+                  Clone {category}
+                </Button>
+              </Box>
             }
           >
             {Object.keys(mainSpecializations[category].specializations).length > 0 && (
@@ -362,6 +400,7 @@ const Ontology = ({
           </Box>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
+          <Button>Add new {type}</Button>
           <Button onClick={handleSave} color="primary">
             Save
           </Button>
