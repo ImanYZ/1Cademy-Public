@@ -35,8 +35,9 @@ export type IActivity = {
   title: string;
   description: string;
   plainText: {
-    Preconditions: string[];
-    Postconditions: string[];
+    Preconditions: string;
+    Postconditions: string;
+    notes: string;
   };
   subOntologies: {
     Actor: ISubOntology[];
@@ -44,7 +45,6 @@ export type IActivity = {
     Specializations: ISubOntology[];
     "Evaluation Dimensions": ISubOntology[];
   };
-  notes: [];
   ontologyType: string;
   locked: boolean;
 };
@@ -54,12 +54,13 @@ export type IActor = {
   description: string;
   Type: string;
   plainText: {
-    Abilities: string[];
+    Abilities: string;
+    notes: string;
   };
   subOntologies: {
     Specializations: ISubOntology[];
   };
-  notes: [];
+
   ontologyType: string;
   locked: boolean;
 };
@@ -69,12 +70,13 @@ export type IProcesse = {
   description: string;
   Type: string;
   plainText: {
-    Subactivities: string[];
-    Dependencies: string[];
-    "Performance prediction models": string[];
+    Subactivities: string;
+    Dependencies: string;
+    "Performance prediction models": string;
+    notes: string;
   };
   subOntologies: { Roles: ISubOntology[]; Specializations: ISubOntology[] };
-  notes: [];
+
   ontologyType: string;
   locked: boolean;
 };
@@ -84,14 +86,14 @@ export type IEvaluation = {
   description: string;
   type: string;
   plainText: {
-    "Measurement units": string[];
-    "Direction of desirability": string[];
-    "Criteria for acceptability": string[];
+    "Measurement units": string;
+    "Direction of desirability": string;
+    "Criteria for acceptability": string;
+    notes: string;
   };
   subOntologies: {
     Specializations: ISubOntology[];
   };
-  notes: [];
   ontologyType: string;
   locked: boolean;
 };

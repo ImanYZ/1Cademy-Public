@@ -24,6 +24,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
 import { useAuth } from "@/context/AuthContext";
+import { newId } from "@/lib/utils/newFirestoreId";
 
 import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import Custom404 from "./404";
@@ -37,8 +38,9 @@ const INITIAL_VALUES: any = {
     title: "",
     description: "",
     plainText: {
-      Preconditions: [],
-      Postconditions: [],
+      notes: "",
+      Preconditions: "",
+      Postconditions: "",
     },
     subOntologies: {
       Actor: [],
@@ -47,48 +49,47 @@ const INITIAL_VALUES: any = {
       "Evaluation Dimensions": [],
     },
     ontologyType: "Activity",
-    notes: [],
   },
   Actor: {
     title: "",
     description: "",
     Type: "",
     plainText: {
-      Abilities: [],
+      notes: "",
+      Abilities: "",
     },
     subOntologies: {
       Specializations: [],
     },
     ontologyType: "Actor",
-    notes: [],
   },
   Process: {
     title: "",
     description: "",
     Type: "",
     plainText: {
-      Subactivities: [],
-      Dependencies: [],
-      "Performance prediction models": [],
+      notes: "",
+      Subactivities: "",
+      Dependencies: "",
+      "Performance prediction models": "",
     },
     subOntologies: { Roles: [], Specializations: [] },
     ontologyType: "Process",
-    notes: [],
   },
   Evaluation: {
     title: "",
     description: "",
     type: "",
     plainText: {
-      "Measurement units": [],
-      "Direction of desirability": [],
-      "Criteria for acceptability:": [],
+      notes: "",
+      "Measurement units": "",
+      "Direction of desirability": "",
+      "Criteria for acceptability:": "",
     },
     subOntologies: {
       Specializations: [],
     },
     ontologyType: "Evaluation",
-    notes: [],
   },
 };
 
@@ -140,14 +141,33 @@ const CIOntology = () => {
     }
     return _mainSpecializations;
   };
+  const addMissingCategories = ({ __mainSpecializations }: any) => {
+    for (let category of ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"]) {
+      if (!__mainSpecializations.hasOwnProperty(category)) {
+        __mainSpecializations = {
+          [category]: {
+            id: newId(db),
+            specializations: {},
+          },
+          ...__mainSpecializations,
+        };
+      }
+    }
+    return __mainSpecializations;
+  };
 
   useEffect(() => {
-    if (!user || !ontologies.length) return;
+    if (!user) return;
     const mainOntologies = ontologies.filter((ontology: any) =>
       ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(ontology.title)
     );
-    const __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
+    let __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
+    // console.log({ __mainSpecializations });
+    __mainSpecializations = addMissingCategories({ __mainSpecializations });
+
+    /* ------------------  */
     setMainSpecializations(__mainSpecializations);
+    if (!ontologies.length) return;
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
     const unsubscribeUser = onSnapshot(userQuery, snapshot => {
       const docChange = snapshot.docChanges()[0];
@@ -338,8 +358,9 @@ const CIOntology = () => {
         title: "WHAT: Activities",
         description: "",
         plainText: {
-          Preconditions: [],
-          Postconditions: [],
+          notes: "",
+          Preconditions: "",
+          Postconditions: "",
         },
         subOntologies: {
           Actor: [],
@@ -348,7 +369,7 @@ const CIOntology = () => {
           "Evaluation Dimensions": [],
         },
         ontologyType: "Activity",
-        notes: [],
+
         locked: true,
       };
     } else if (category === "WHO: Actors") {
@@ -357,12 +378,13 @@ const CIOntology = () => {
         Type: "",
         description: "",
         plainText: {
-          Abilities: [],
+          notes: "",
+          Abilities: "",
         },
         subOntologies: {
           Specializations: [],
         },
-        notes: [],
+
         ontologyType: "Actor",
         locked: true,
       };
@@ -372,13 +394,14 @@ const CIOntology = () => {
         description: "",
         Type: "",
         plainText: {
-          Subactivities: [],
-          Dependencies: [],
-          "Performance prediction models": [],
+          notes: "",
+          Subactivities: "",
+          Dependencies: "",
+          "Performance prediction models": "",
         },
         subOntologies: { Roles: [], Specializations: [] },
         ontologyType: "Process",
-        notes: [],
+
         locked: true,
       };
     } else if (category === "WHY: Evaluation") {
@@ -387,15 +410,16 @@ const CIOntology = () => {
         description: "",
         type: "",
         plainText: {
-          "Measurement units": [],
-          "Direction of desirability": [],
-          "Criteria for acceptability": [],
+          notes: "",
+          "Measurement units": "",
+          "Direction of desirability": "",
+          "Criteria for acceptability": "",
         },
         subOntologies: {
           Specializations: [],
         },
         ontologyType: "Evaluation",
-        notes: [],
+
         locked: true,
       };
     }
