@@ -25,6 +25,7 @@ import React, { forwardRef, useEffect, useState } from "react";
 import useThemeChange from "@/hooks/useThemeChange";
 import { orange900, orangeDark } from "@/pages/home";
 
+import MITLOGO from "../../../public/CCI-logo.gif";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
 import { useAuth } from "../../context/AuthContext";
@@ -203,13 +204,28 @@ const AppHeader = forwardRef(
             }}
           >
             <Stack direction={"row"} alignItems="center" spacing={"16px"}>
-              {!mitpage && (
+              {!mitpage ? (
                 <Tooltip title="1Cademy's Landing Page">
                   <Avatar
                     src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
                     alt="logo"
                     sx={{ cursor: "pointer", width: { xs: "149px", sm: "60px" }, height: { xs: "40px", sm: "64px" } }}
                     onClick={() => router.push(ROUTES.home)}
+                  />
+                </Tooltip>
+              ) : (
+                <Tooltip title="">
+                  <Avatar
+                    src={MITLOGO.src}
+                    alt="logo"
+                    sx={{
+                      cursor: "pointer",
+                      width: "340px",
+                      height: "auto",
+                      borderRadius: 0,
+                      pb: "13px",
+                    }}
+                    onClick={() => {}}
                   />
                 </Tooltip>
               )}
@@ -259,20 +275,22 @@ const AppHeader = forwardRef(
 
             {/* Navbar Right Options */}
             <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              <Box
-                sx={{
-                  width: "100%",
-                  maxWidth: "240px",
-                  display: {
-                    xs: isAuthenticated ? "block" : "none",
-                    sm: "block",
-                    md: isAuthenticated ? "block" : "none",
-                    lg: "block",
-                  },
-                }}
-              >
-                <AppHeaderSearchBar />
-              </Box>
+              {!mitpage && (
+                <Box
+                  sx={{
+                    width: "100%",
+                    maxWidth: "240px",
+                    display: {
+                      xs: isAuthenticated ? "block" : "none",
+                      sm: "block",
+                      md: isAuthenticated ? "block" : "none",
+                      lg: "block",
+                    },
+                  }}
+                >
+                  <AppHeaderSearchBar />
+                </Box>
+              )}
 
               <Tooltip title="Open Searcher">
                 <IconButton

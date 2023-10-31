@@ -12,14 +12,7 @@ type ISubOntologyProps = {
   subOntology: ISubOntology;
   openOntology: IOntology;
   sx: any;
-  type:
-    | "contributors"
-    | "actors"
-    | "preconditions"
-    | "postconditions"
-    | "evaluations"
-    | "processes"
-    | "specializations";
+  type: string;
   setOpenOntology: (openOntology: any) => void;
   handleLinkNavigation: any;
   saveSubOntology: any;
@@ -79,6 +72,17 @@ const SubOntology = ({
   //     return _openOntology;
   //   });
   // };
+
+  const removeSubOntology = ({ ontologyData, id }: any) => {
+    for (let type of ["Actor", "Process", "Roles", "Evaluation Dimensions"]) {
+      if ((ontologyData.subOntologies[type] || []).length > 0) {
+        const subOntologyIdx = ontologyData.subOntologies[type].findIndex((sub: any) => sub.id === id);
+        if (subOntologyIdx !== -1) {
+          ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
+        }
+      }
+    }
+  };
   const deleteSubOntologyEditable = async () => {
     try {
       console.info("deleteSubOntologyEditable");
@@ -86,19 +90,33 @@ const SubOntology = ({
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
           const ontologyData = ontologyDoc.data();
-          const subOntologyIdx = ontologyData[type].findIndex((sub: any) => sub.id === subOntology.id);
+          const subOntologyIdx = ontologyData.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
           if (subOntologyIdx !== -1) {
-            ontologyData[type].splice(subOntologyIdx, 1);
+            ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
           }
           const subOntologyDoc = await getDoc(doc(collection(db, "ontology"), subOntology.id));
-          await updateDoc(subOntologyDoc.ref, { deleted: true });
+
+          if (subOntologyDoc.exists()) {
+            const subOntologyData = subOntologyDoc.data();
+            const parents = subOntologyData?.parents || [];
+            for (let parent of parents) {
+              const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
+              if (ontologyDoc.exists()) {
+                const ontologyData = ontologyDoc.data();
+                removeSubOntology({ ontologyData, id: subOntology.id });
+                await updateDoc(ontologyDoc.ref, ontologyData);
+              }
+            }
+            // await deleteDoc(subOntologyDoc.ref);
+          }
+
           await updateDoc(ontologyDoc.ref, ontologyData);
         }
         setOpenOntology((openOntology: any) => {
           const _openOntology: any = { ...openOntology };
-          const subOntologyIdx = _openOntology[type].findIndex((sub: any) => sub.id === subOntology.id);
+          const subOntologyIdx = _openOntology.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
           if (subOntologyIdx !== -1) {
-            _openOntology[type].splice(subOntologyIdx, 1);
+            _openOntology.subOntologies[type].splice(subOntologyIdx, 1);
           }
           return _openOntology;
         });
