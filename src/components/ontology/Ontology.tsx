@@ -5,7 +5,7 @@ import { Button, Checkbox, DialogActions, DialogContent, FormControlLabel, Toolt
 import Dialog from "@mui/material/Dialog";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ISubOntology } from "src/types/IOntology";
 
 import SubOntology from "./SubOntology";
@@ -159,41 +159,53 @@ const Ontology = ({
     handleClose();
   };
 
-  const TreeViewSimplified = ({ mainSpecializations }: any) => {
-    return (
-      <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
-        {Object.keys(mainSpecializations).map(category => (
-          <TreeItem
-            key={mainSpecializations[category].id}
-            nodeId={mainSpecializations[category].id}
-            sx={{ mt: "5px" }}
-            label={
-              <Box>
-                <FormControlLabel
-                  value={mainSpecializations[category].id}
-                  control={
-                    <Checkbox
-                      checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
-                      onChange={() => checkSpecialization(mainSpecializations[category].id)}
-                      name={mainSpecializations[category].id}
-                    />
-                  }
-                  label={category}
-                />
-                <Button variant="outlined" onClick={() => handleCloning(mainSpecializations[category])}>
-                  New {category} Specialization
-                </Button>
-              </Box>
-            }
-          >
-            {Object.keys(mainSpecializations[category].specializations).length > 0 && (
-              <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
-            )}
-          </TreeItem>
-        ))}
-      </TreeView>
-    );
-  };
+  const TreeViewSimplified = useCallback(
+    ({ mainSpecializations }: any) => {
+      return (
+        <TreeView
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+          sx={{
+            "& .Mui-selected": {
+              backgroundColor: "transparent", // Remove the background color
+            },
+          }}
+          defaultExpanded={[]}
+        >
+          {Object.keys(mainSpecializations).map(category => (
+            <TreeItem
+              key={mainSpecializations[category].id}
+              nodeId={mainSpecializations[category].id}
+              sx={{ mt: "5px" }}
+              label={
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FormControlLabel
+                    value={mainSpecializations[category].id}
+                    control={
+                      <Checkbox
+                        checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
+                        onChange={() => checkSpecialization(mainSpecializations[category].id)}
+                        name={mainSpecializations[category].id}
+                      />
+                    }
+                    label={category}
+                  />
+                  <Button variant="outlined" onClick={() => handleCloning(mainSpecializations[category])}>
+                    New {category} Specialization
+                  </Button>
+                </Box>
+              }
+            >
+              {Object.keys(mainSpecializations[category].specializations).length > 0 && (
+                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+              )}
+            </TreeItem>
+          ))}
+        </TreeView>
+      );
+    },
+    [mainSpecializations, checkedSpecializations]
+  );
 
   const handleSave = async () => {
     try {

@@ -453,8 +453,9 @@ const CIOntology = () => {
     [ontologies, user]
   );
 
-  const TreeViewSimplified = ({ mainSpecializations }: any) => {
-    /* 
+  const TreeViewSimplified = useCallback(
+    ({ mainSpecializations }: any) => {
+      /* 
   mainSpecializations is an object like: 
   {
     ["TITLE"]:{
@@ -474,41 +475,52 @@ const CIOntology = () => {
     }
   }
    */
-    return (
-      <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
-        {Object.keys(mainSpecializations).map(category => (
-          <TreeItem
-            key={mainSpecializations[category].id}
-            nodeId={mainSpecializations[category].id}
-            label={
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Typography>{category}</Typography>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    openMainCategory(category, mainSpecializations[category]?.path || []);
-                  }}
-                  sx={{
-                    ml: "5px",
-                    fontSize: "14px",
-                    border: "none",
-                    background: "transparent",
-                  }}
-                >
-                  Open
-                </Button>
-              </Box>
-            }
-            sx={{ mt: "5px" }}
-          >
-            {Object.keys(mainSpecializations[category].specializations).length > 0 && (
-              <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
-            )}
-          </TreeItem>
-        ))}
-      </TreeView>
-    );
-  };
+      return (
+        <TreeView
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+          defaultExpanded={[]}
+          sx={{
+            "& .Mui-selected": {
+              backgroundColor: "transparent", // Remove the background color
+            },
+          }}
+        >
+          {Object.keys(mainSpecializations).map(category => (
+            <TreeItem
+              key={mainSpecializations[category].id}
+              nodeId={mainSpecializations[category].id}
+              label={
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography>{category}</Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      openMainCategory(category, mainSpecializations[category]?.path || []);
+                    }}
+                    sx={{
+                      ml: "5px",
+                      fontSize: "14px",
+                      border: "none",
+                      background: "transparent",
+                    }}
+                  >
+                    Open
+                  </Button>
+                </Box>
+              }
+              sx={{ mt: "5px" }}
+            >
+              {Object.keys(mainSpecializations[category].specializations).length > 0 && (
+                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+              )}
+            </TreeItem>
+          ))}
+        </TreeView>
+      );
+    },
+    [mainSpecializations]
+  );
 
   if (!user?.claims.ontology) {
     return <Custom404 />;
