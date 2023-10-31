@@ -33,7 +33,7 @@ type IOntologyPath = {
   title: string;
 };
 const INITIAL_VALUES: any = {
-  Actvity: {
+  Activity: {
     title: "",
     description: "",
     plainText: {
@@ -564,6 +564,8 @@ const CIOntology = () => {
             user={user}
             mainSpecializations={mainSpecializations}
             ontologies={ontologies}
+            addNewOntology={addNewOntology}
+            INITIAL_VALUES={INITIAL_VALUES}
           />
         )}
       </Box>

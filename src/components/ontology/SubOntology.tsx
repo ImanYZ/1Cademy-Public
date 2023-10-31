@@ -98,7 +98,7 @@ const SubOntology = ({
 
           if (subOntologyDoc.exists()) {
             const subOntologyData = subOntologyDoc.data();
-            const parents = subOntologyData.parents;
+            const parents = subOntologyData?.parents || [];
             for (let parent of parents) {
               const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
               if (ontologyDoc.exists()) {
