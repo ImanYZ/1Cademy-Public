@@ -17,6 +17,8 @@ type ISubOntologyProps = {
   saveSubOntology: any;
   setSnackbarMessage: (message: any) => void;
   category: string;
+  ontologyPath: any;
+  updateUserDoc: any;
 };
 
 const SubOntology = ({
@@ -27,6 +29,8 @@ const SubOntology = ({
   openOntology,
   saveSubOntology,
   category,
+  ontologyPath,
+  updateUserDoc,
 }: ISubOntologyProps) => {
   const db = getFirestore();
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
@@ -53,7 +57,8 @@ const SubOntology = ({
     });
   };
 
-  const linkNavigation = () => {
+  const linkNavigation = async () => {
+    await updateUserDoc([...ontologyPath.map((p: { id: string; title: string }) => p.id), subOntology.id]);
     // handleLinkNavigation({ id: subOntology.id, title: subOntology.title });
   };
 

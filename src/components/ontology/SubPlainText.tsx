@@ -93,7 +93,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
           multiline
           onChange={handleEditText}
           InputProps={{
-            style: { fontSize: type === "title" ? "50px" : "" },
+            style: { fontSize: type === "title" ? "30px" : "" },
             endAdornment: (
               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
                 {type === "title" && (
@@ -119,7 +119,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
         />
       ) : (
         <Box style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-          <MarkdownRender text={text} sx={{ fontSize: type === "title" ? "50px" : "" }} />
+          <MarkdownRender text={text} sx={{ fontSize: type === "title" ? "30px" : "" }} />
           {type === "title" && !openOntology.locked && (
             <Tooltip title={editMode ? "Save" : "Edit"}>
               <Button onClick={editSaveText} sx={{ ml: "5px" }}>

@@ -1,7 +1,7 @@
 export type ISubOntology = { title: string; id: string; category?: string; editMode?: boolean; new?: boolean };
 
 export type ISubOntologyCategory = {
-  [category: string]: { ontolgies: ISubOntology[] };
+  [category: string]: { ontologies: ISubOntology[] };
 };
 
 export type IOntologyTypes =

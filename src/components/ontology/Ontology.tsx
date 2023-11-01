@@ -113,9 +113,9 @@ const Ontology = ({
       newOntology.parents = [ontologyDoc.id];
       newOntology.title = `${ontologyData.title} copy`;
       newOntology.description = "";
-      newOntology.subOntologies.Specializations = [];
+      newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
-      ontologyData.subOntologies.Specializations.push({
+      ontologyData.subOntologies.Specializations["main"].ontologies.push({
         id: newOntologyRef.id,
         title: `${ontologyData.title} copy`,
       });
@@ -416,6 +416,8 @@ const Ontology = ({
                                   subOntology={subOntology}
                                   type={type}
                                   category={category}
+                                  ontologyPath={ontologyPath}
+                                  updateUserDoc={updateUserDoc}
                                 />
                               </li>
                             );
@@ -438,6 +440,8 @@ const Ontology = ({
                           subOntology={subOntology}
                           type={type}
                           category={"main"}
+                          ontologyPath={ontologyPath}
+                          updateUserDoc={updateUserDoc}
                         />
                       </li>
                     );

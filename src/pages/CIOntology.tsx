@@ -537,6 +537,14 @@ const CIOntology = () => {
 
   return (
     <Box>
+      <AppHeaderMemoized
+        ref={headerRef}
+        page="ONE_CADEMY"
+        mitpage={true}
+        sections={[]}
+        selectedSectionId={""}
+        onSwitchSection={() => {}}
+      />
       <Box
         sx={{
           width: "100vw",
@@ -546,32 +554,22 @@ const CIOntology = () => {
           zIndex: -2,
           backgroundColor: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+          overflow: "hidden",
         }}
       />
+
       <Box
         sx={{
-          position: "absolute",
-          left: "0",
-          top: "70px",
-          width: "400px",
-          height: "590vh",
-          backgroundColor: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-          p: "20px",
+          height: "100vh",
+          width: "30%",
           overflow: "auto",
         }}
       >
-        <TreeViewSimplified mainSpecializations={mainSpecializations} />
+        <Box sx={{ pb: "190px" }}>
+          <TreeViewSimplified mainSpecializations={mainSpecializations} />
+        </Box>
       </Box>
 
-      <AppHeaderMemoized
-        ref={headerRef}
-        page="ONE_CADEMY"
-        mitpage={true}
-        sections={[]}
-        selectedSectionId={""}
-        onSwitchSection={() => {}}
-      />
       <Box
         sx={{
           position: "absolute",
@@ -595,7 +593,7 @@ const CIOntology = () => {
                 onClick={() => handleLinkNavigation(path, "")}
                 sx={{ cursor: "pointer" }}
               >
-                {path.title}
+                {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
               </Link>
             ))}
         </Breadcrumbs>
