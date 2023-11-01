@@ -157,6 +157,10 @@ const CIOntology = () => {
     const mainOntologies = ontologies.filter((ontology: any) =>
       ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(ontology.title)
     );
+    mainOntologies.sort((a: any, b: any) => {
+      const order = ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"];
+      return order.indexOf(a.title) - order.indexOf(b.title);
+    });
     let __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
     __mainSpecializations = addMissingCategories({ __mainSpecializations });
     /* ------------------  */
