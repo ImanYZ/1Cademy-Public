@@ -1,5 +1,7 @@
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { Box, Button, Link } from "@mui/material";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { TreeItem, TreeView } from "@mui/lab";
+import { Box, Button, Link, Typography } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import {
   collection,
@@ -14,8 +16,8 @@ import {
   where,
 } from "firebase/firestore";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { IOntology, ISubOntology } from "src/types/IOntology";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IActivity, IActor, IEvaluation, IOntology, IProcesse, ISubOntology } from "src/types/IOntology";
 
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
@@ -31,39 +33,89 @@ type IOntologyPath = {
   id: string;
   title: string;
 };
-const CIOntology = () => {
-  const db = getFirestore();
-  const [{ user }] = useAuth();
-
-  const [ontologies, setOntologies] = useState<IOntology[]>([]);
-  // const [userOntology, setUserOntology] = useState<IUserOntology[]>([]);
-  const [openOntology, setOpenOntology] = useState<IOntology | null>({
-    deleted: false,
-    id: newId(db),
-    node: null,
+const INITIAL_VALUES: any = {
+  Activity: {
     title: "",
     description: "",
-    comments: [],
-    tags: [],
-    notes: [],
-    contributors: [],
-    actors: [],
-    preconditions: [],
-    postconditions: [],
-    evaluations: [],
-    processes: [],
-    specializations: [],
-    editMode: true,
-  });
+    plainText: {
+      notes: "",
+      Preconditions: "",
+      Postconditions: "",
+    },
+    subOntologies: {
+      Actor: [],
+      Process: [],
+      Specializations: [],
+      "Evaluation Dimensions": [],
+    },
+    ontologyType: "Activity",
+  },
+  Actor: {
+    title: "",
+    description: "",
+    Type: "",
+    plainText: {
+      notes: "",
+      Abilities: "",
+    },
+    subOntologies: {
+      Specializations: [],
+    },
+    ontologyType: "Actor",
+  },
+  Process: {
+    title: "",
+    description: "",
+    Type: "",
+    plainText: {
+      notes: "",
+      Subactivities: "",
+      Dependencies: "",
+      "Performance prediction models": "",
+    },
+    subOntologies: { Roles: [], Specializations: [] },
+    ontologyType: "Process",
+  },
+  Evaluation: {
+    title: "",
+    description: "",
+    type: "",
+    plainText: {
+      notes: "",
+      "Measurement units": "",
+      "Direction of desirability": "",
+      "Criteria for acceptability:": "",
+    },
+    subOntologies: {
+      Specializations: [],
+    },
+    ontologyType: "Evaluation",
+  },
+};
+
+const CIOntology = () => {
+  const db = getFirestore();
+  // const MAIN_CATEGORIES = [
+  //   { title: "WHAT: Activities", id: newId(db) },
+  //   { title: "WHO: Actors", id: newId(db) },
+  //   { title: "HOW: Processes", id: newId(db) },
+  //   { title: "WHY: Evaluation", id: newId(db) },
+  // ];
+  const [{ user }] = useAuth();
+
+  const [ontologies, setOntologies] = useState<any>([]);
+  // const [userOntology, setUserOntology] = useState<IUserOntology[]>([]);
+  const [openOntology, setOpenOntology] = useState<any>(null);
   const [ontologyPath, setOntologyPath] = useState<IOntologyPath[]>([]);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
+  const [mainSpecializations, setMainSpecializations] = useState<any>({});
 
   const headerRef = useRef<HTMLHeadElement | null>(null);
 
   const getPath = (newPath: string[]) => {
     const ontologyPath = [];
     for (let path of newPath) {
-      const ontologyIdx = ontologies.findIndex(onto => onto.id === path);
+      const ontologyIdx = ontologies.findIndex((onto: any) => onto.id === path);
       if (ontologyIdx !== -1) {
         ontologyPath.push({
           id: path,
@@ -74,15 +126,56 @@ const CIOntology = () => {
     return ontologyPath;
   };
 
+  const getSpecializationsTree = ({ mainOntologies, path }: any) => {
+    const _mainSpecializations: any = {};
+    for (let ontlogy of mainOntologies) {
+      const specializations = ontologies.filter((onto: any) => {
+        const findIdx = (ontlogy?.subOntologies?.Specializations || []).findIndex((o: any) => o.id === onto.id);
+        return findIdx !== -1;
+      });
+      _mainSpecializations[ontlogy.title] = {
+        id: ontlogy.id,
+        path: [...path, ontlogy.id],
+        specializations: getSpecializationsTree({ mainOntologies: specializations, path: [...path, ontlogy.id] }),
+      };
+    }
+    return _mainSpecializations;
+  };
+  const addMissingCategories = ({ __mainSpecializations }: any) => {
+    for (let category of ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"]) {
+      if (!__mainSpecializations.hasOwnProperty(category)) {
+        __mainSpecializations = {
+          [category]: {
+            id: newId(db),
+            specializations: {},
+          },
+          ...__mainSpecializations,
+        };
+      }
+    }
+    return __mainSpecializations;
+  };
   useEffect(() => {
-    if (!user || !ontologies.length) return;
+    const mainOntologies = ontologies.filter((ontology: any) =>
+      ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(ontology.title)
+    );
+    let __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
+    __mainSpecializations = addMissingCategories({ __mainSpecializations });
+    /* ------------------  */
+    setMainSpecializations(__mainSpecializations);
+  }, [ontologies]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!ontologies.length) return;
+
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
     const unsubscribeUser = onSnapshot(userQuery, snapshot => {
       const docChange = snapshot.docChanges()[0];
       const dataChange = docChange.doc.data();
       setOntologyPath(getPath(dataChange?.ontologyPath || []));
       const lastOntology = dataChange?.ontologyPath.reverse()[0];
-      const ontologyIdx = ontologies.findIndex(ontology => ontology.id === lastOntology);
+      const ontologyIdx = ontologies.findIndex((ontology: any) => ontology.id === lastOntology);
       if (ontologies[ontologyIdx]) setOpenOntology(ontologies[ontologyIdx]);
     });
 
@@ -137,58 +230,54 @@ const CIOntology = () => {
             });
           }
         }
-        console.info({ _ontologies });
         return _ontologies;
       });
     });
     return () => unsubscribeOntology();
   }, [db]);
 
-  const handleLinkNavigation = async (path: { id: string; title: string }) => {
-    try {
-      if (!user) return;
-      const ontologyIndex = ontologies.findIndex(ontology => ontology.id === path.id);
-
-      if (ontologyIndex !== -1) {
-        setOpenOntology(ontologies[ontologyIndex]);
-      } else {
-        addNewOntology({ id: path.id, addpath: false });
-        setOpenOntology({
-          deleted: false,
-          id: path.id,
-          node: null,
-          title: path.title,
-          description: "",
-          comments: [],
-          tags: [],
-          notes: [],
-          contributors: [],
-          actors: [],
-          preconditions: [],
-          postconditions: [],
-          evaluations: [],
-          processes: [],
-          specializations: [],
-          editMode: true,
-        });
-      }
-      let _ontologyPath = [...ontologyPath];
-      const pathIdx = _ontologyPath.findIndex((p: any) => p.id === path.id);
-      if (pathIdx !== -1) {
-        _ontologyPath = _ontologyPath.slice(0, pathIdx + 1);
-      } else {
-        _ontologyPath.push(path);
-      }
-
-      setOntologyPath(_ontologyPath);
-      const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
-      const userDocs = await getDocs(userQuery);
-      const userDoc = userDocs.docs[0];
-      await updateDoc(userDoc.ref, { ontologyPath: _ontologyPath.map(onto => onto.id) });
-    } catch (error) {
-      console.error(error);
+  const getParent = (type: string) => {
+    if (type === "Evaluation") {
+      return mainSpecializations["WHY: Evaluation"].id;
+    } else if (type === "Actor") {
+      return mainSpecializations["WHO: Actors"].id;
+    } else if (type === "Process") {
+      return mainSpecializations["HOW: Processes"].id;
     }
   };
+
+  const handleLinkNavigation = useCallback(
+    async (path: { id: string; title: string }, type: string) => {
+      try {
+        if (!user) return;
+        const ontologyIndex = ontologies.findIndex((ontology: any) => ontology.id === path.id);
+
+        if (ontologyIndex !== -1) {
+          setOpenOntology(ontologies[ontologyIndex]);
+        } else {
+          const parent = getParent(INITIAL_VALUES[type].ontologyType);
+          const parentSet: any = new Set([openOntology.id, parent]);
+          const parents = [...parentSet];
+          const newOntology = INITIAL_VALUES[type];
+          addNewOntology({ id: path.id, newOntology: { parents, ...newOntology } });
+          setOpenOntology({ id: path.id, ...newOntology, parents });
+        }
+        let _ontologyPath = [...ontologyPath];
+        const pathIdx = _ontologyPath.findIndex((p: any) => p.id === path.id);
+        if (pathIdx !== -1) {
+          _ontologyPath = _ontologyPath.slice(0, pathIdx + 1);
+        } else {
+          _ontologyPath.push(path);
+        }
+
+        await updateUserDoc([..._ontologyPath.map(onto => onto.id)]);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [ontologies, ontologyPath]
+  );
+
   const updateUserDoc = async (ontologyPath: string[]) => {
     if (!user) return;
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
@@ -197,46 +286,35 @@ const CIOntology = () => {
     await updateDoc(userDoc.ref, { ontologyPath });
   };
 
-  const addNewOntology = async ({ id = newId(db), addpath = true }: { id?: string; addpath?: boolean }) => {
-    try {
-      const prevOntologies = [...ontologies];
-      let newOntology = {
-        deleted: false,
-        id,
-        node: null,
-        title: "",
-        description: "",
-        comments: [],
-        tags: [],
-        notes: [],
-        contributors: [],
-        actors: [],
-        preconditions: [],
-        postconditions: [],
-        evaluations: [],
-        processes: [],
-        specializations: [],
-        editMode: true,
-      };
-      const newOntologyRef = doc(collection(db, "ontology"), id);
-      prevOntologies.push(newOntology);
-      setOpenOntology(newOntology);
-      setOntologies(prevOntologies);
-      await setDoc(newOntologyRef, newOntology);
-      if (addpath) {
-        setOntologyPath([
-          {
-            id,
-            title: "",
-          },
-        ]);
-        await updateUserDoc([id]);
+  const addNewOntology = useCallback(
+    async ({ id, newOntology }: { id: string; newOntology: any }) => {
+      try {
+        const newOntologyRef = doc(collection(db, "ontology"), id);
+        await setDoc(newOntologyRef, { ...newOntology, deleted: false });
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
+    },
+    [ontologies]
+  );
+
+  const addSubOntologyToParent = async (type: string, id: string) => {
+    const parentId = getParent(type);
+    if (parentId) {
+      const parent: any = ontologies.find((ontology: any) => ontology.id === parentId);
+      const ontologyRef = doc(collection(db, "ontology"), parentId);
+      const specializations = parent.subOntologies.Specializations;
+      const specializationIdx = parent.subOntologies.Specializations.findIndex((spcial: any) => spcial.id === id);
+      if (specializationIdx === -1) {
+        specializations.push({
+          id,
+          title: "",
+        });
+      }
+      parent.subOntologies.Specializations = specializations;
+      await updateDoc(ontologyRef, parent);
     }
   };
-  console.info({ ontologies, ontologyPath });
 
   const saveSubOntology = async (subOntology: ISubOntology, type: string, id: string) => {
     try {
@@ -245,9 +323,9 @@ const CIOntology = () => {
       const ontologyParentDoc = await getDoc(ontologyParentRef);
       const ontologyParent: any = ontologyParentDoc.data();
       if (!ontologyParent) return;
-      const idx = ontologyParent[type].findIndex((sub: ISubOntology) => sub.id === subOntology.id);
+      const idx = ontologyParent.subOntologies[type].findIndex((sub: ISubOntology) => sub.id === subOntology.id);
       if (idx === -1) {
-        ontologyParent[type].push({
+        ontologyParent.subOntologies[type].push({
           title: subOntology.title,
           id: subOntology.id,
         });
@@ -259,27 +337,212 @@ const CIOntology = () => {
       if (newOntologyDoc.exists()) {
         await updateDoc(newOntologyRef, { title: subOntology.title });
       }
-      // setOntologies((ontologies: IOntology[]) => {
-      //   const _ontologies = [...ontologies];
-      //   const ontologyIdx = _ontologies.findIndex(onto => onto.id === openOntology?.id);
-      //   if (ontologyIdx !== -1) {
-      //     _ontologies[ontologyIdx] = ontologyParent;
-      //   }
-      //   return _ontologies;
-      // });
-
       await updateDoc(ontologyParentRef, ontologyParent);
-      // handleLinkNavigation({ id: subOntology.id, title: subOntology.title });
+      let subOntologyType = type;
+      if (type === "Specializations") {
+        subOntologyType = ontologyParent.ontologyType;
+      }
+      if (type === "Evaluation Dimensions") {
+        subOntologyType = "Evaluation";
+      }
+      handleLinkNavigation({ id: subOntology.id, title: subOntology.title }, subOntologyType);
+      await addSubOntologyToParent(subOntologyType, subOntology.id);
     } catch (error) {
-      console.info(error);
+      console.error(error);
     }
   };
+
+  const getMainCategory = (category: string) => {
+    let newOntology: IActivity | IActor | IProcesse | IEvaluation | null = null;
+    if (category === "WHAT: Activities") {
+      newOntology = {
+        title: "WHAT: Activities",
+        description: "",
+        plainText: {
+          notes: "",
+          Preconditions: "",
+          Postconditions: "",
+        },
+        subOntologies: {
+          Actor: [],
+          Process: [],
+          Specializations: [],
+          "Evaluation Dimensions": [],
+        },
+        ontologyType: "Activity",
+
+        locked: true,
+      };
+    } else if (category === "WHO: Actors") {
+      newOntology = {
+        title: "WHO: Actors",
+        Type: "",
+        description: "",
+        plainText: {
+          notes: "",
+          Abilities: "",
+        },
+        subOntologies: {
+          Specializations: [],
+        },
+
+        ontologyType: "Actor",
+        locked: true,
+      };
+    } else if (category === "HOW: Processes") {
+      newOntology = {
+        title: "HOW: Processes",
+        description: "",
+        Type: "",
+        plainText: {
+          notes: "",
+          Subactivities: "",
+          Dependencies: "",
+          "Performance prediction models": "",
+        },
+        subOntologies: { Roles: [], Specializations: [] },
+        ontologyType: "Process",
+
+        locked: true,
+      };
+    } else if (category === "WHY: Evaluation") {
+      newOntology = {
+        title: "WHY: Evaluation",
+        description: "",
+        type: "",
+        plainText: {
+          notes: "",
+          "Measurement units": "",
+          "Direction of desirability": "",
+          "Criteria for acceptability": "",
+        },
+        subOntologies: {
+          Specializations: [],
+        },
+        ontologyType: "Evaluation",
+
+        locked: true,
+      };
+    }
+    return newOntology;
+  };
+  const openMainCategory = useCallback(
+    async (category: string, path: string[]) => {
+      if (!user) return;
+      const ontologyIdx = ontologies.findIndex((onto: any) => onto.title === category);
+      let _path = [...path];
+      let newId = "";
+      if (ontologyIdx !== -1) {
+        setOpenOntology(ontologies[ontologyIdx]);
+        newId = ontologies[ontologyIdx].id;
+      } else {
+        const newOntology = getMainCategory(category);
+        setOpenOntology(newOntology);
+        const ontologyRef = doc(collection(db, "ontology"));
+        await setDoc(ontologyRef, {
+          ...newOntology,
+          createdAt: new Date(),
+          createdBy: user.uname,
+          deleted: false,
+        });
+        newId = ontologyRef.id;
+        _path.push(newId);
+      }
+      await updateUserDoc([..._path]);
+    },
+    [ontologies, user]
+  );
+
+  const TreeViewSimplified = useCallback(
+    ({ mainSpecializations }: any) => {
+      /* 
+  mainSpecializations is an object like: 
+  {
+    ["TITLE"]:{
+        id:"id",
+        specializations:
+          {
+            ["TITLE1"]:{
+               id:"id1",
+               specializations:[]
+            },
+            ["TITLE2"]:{
+               id:"id2",
+               specializations:[]
+            }
+          }
+        
+    }
+  }
+   */
+      return (
+        <TreeView
+          defaultCollapseIcon={<ExpandMoreIcon />}
+          defaultExpandIcon={<ChevronRightIcon />}
+          defaultExpanded={[]}
+          sx={{
+            "& .Mui-selected": {
+              backgroundColor: "transparent", // Remove the background color
+            },
+          }}
+        >
+          {Object.keys(mainSpecializations).map(category => (
+            <TreeItem
+              key={mainSpecializations[category].id}
+              nodeId={mainSpecializations[category].id}
+              label={
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography>{category}</Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      openMainCategory(category, mainSpecializations[category]?.path || []);
+                    }}
+                    sx={{
+                      ml: "5px",
+                      fontSize: "14px",
+                      border: "none",
+                      background: "transparent",
+                    }}
+                  >
+                    Open
+                  </Button>
+                </Box>
+              }
+              sx={{ mt: "5px" }}
+            >
+              {Object.keys(mainSpecializations[category].specializations).length > 0 && (
+                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+              )}
+            </TreeItem>
+          ))}
+        </TreeView>
+      );
+    },
+    [mainSpecializations]
+  );
 
   if (!user?.claims.ontology) {
     return <Custom404 />;
   }
+
   return (
     <Box>
+      <Box
+        sx={{
+          position: "absolute",
+          left: "0",
+          top: "70px",
+          width: "400px",
+          height: "590vh",
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+          p: "20px",
+          overflow: "auto",
+        }}
+      >
+        <TreeViewSimplified mainSpecializations={mainSpecializations} />
+      </Box>
       <Box
         data-testid="auth-layout"
         sx={{
@@ -304,7 +567,7 @@ const CIOntology = () => {
       <Box
         sx={{
           position: "absolute",
-          left: "50%" /* Set the left position to 50% */,
+          left: "50%",
           transform: "translateX(-50%)",
           top: "70px",
           right: "0px",
@@ -315,12 +578,18 @@ const CIOntology = () => {
           overflow: "auto",
         }}
       >
-        <Breadcrumbs sx={{ ml: "40px" }}>
-          {ontologyPath.map(path => (
-            <Link underline="hover" key={path.id} onClick={() => handleLinkNavigation(path)} sx={{ cursor: "pointer" }}>
-              {path.title}
-            </Link>
-          ))}
+        <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
+          {ontologyPath.length > 1 &&
+            ontologyPath.map(path => (
+              <Link
+                underline="hover"
+                key={path.id}
+                onClick={() => handleLinkNavigation(path, "")}
+                sx={{ cursor: "pointer" }}
+              >
+                {path.title}
+              </Link>
+            ))}
         </Breadcrumbs>
         {openOntology && (
           <Ontology
@@ -333,21 +602,11 @@ const CIOntology = () => {
             setSnackbarMessage={setSnackbarMessage}
             updateUserDoc={updateUserDoc}
             user={user}
+            mainSpecializations={mainSpecializations}
+            ontologies={ontologies}
+            addNewOntology={addNewOntology}
+            INITIAL_VALUES={INITIAL_VALUES}
           />
-        )}
-
-        {!openOntology && (
-          <Button
-            startIcon={<ArrowForwardIosIcon />}
-            variant="outlined"
-            sx={{
-              marginTop: "5px",
-              color: theme => theme.palette.common.orange,
-            }}
-            onClick={() => addNewOntology({})}
-          >
-            Add new
-          </Button>
         )}
       </Box>
       <SneakMessage newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />

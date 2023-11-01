@@ -1,6 +1,14 @@
 export type ISubOntology = { title: string; id: string; category?: string; editMode?: boolean; new?: boolean };
 
-type IOntologyTypes = "activity" | "actor" | "processe" | "role" | "evaluation";
+export type IOntologyTypes =
+  | "activity"
+  | "actor"
+  | "processe"
+  | "role"
+  | "evaluation"
+  | "role"
+  | "incentive"
+  | "reward";
 
 export type IOntology = {
   deleted: boolean;
@@ -21,6 +29,73 @@ export type IOntology = {
   editMode: boolean;
   parents?: string[];
   type?: IOntologyTypes;
+};
+
+export type IActivity = {
+  title: string;
+  description: string;
+  plainText: {
+    Preconditions: string;
+    Postconditions: string;
+    notes: string;
+  };
+  subOntologies: {
+    Actor: ISubOntology[];
+    Process: ISubOntology[];
+    Specializations: ISubOntology[];
+    "Evaluation Dimensions": ISubOntology[];
+  };
+  ontologyType: string;
+  locked: boolean;
+};
+
+export type IActor = {
+  title: string;
+  description: string;
+  Type: string;
+  plainText: {
+    Abilities: string;
+    notes: string;
+  };
+  subOntologies: {
+    Specializations: ISubOntology[];
+  };
+
+  ontologyType: string;
+  locked: boolean;
+};
+
+export type IProcesse = {
+  title: string;
+  description: string;
+  Type: string;
+  plainText: {
+    Subactivities: string;
+    Dependencies: string;
+    "Performance prediction models": string;
+    notes: string;
+  };
+  subOntologies: { Roles: ISubOntology[]; Specializations: ISubOntology[] };
+
+  ontologyType: string;
+  locked: boolean;
+};
+
+export type IEvaluation = {
+  title: string;
+  description: string;
+  type: string;
+  plainText: {
+    "Measurement units": string;
+    "Direction of desirability": string;
+    "Criteria for acceptability": string;
+    notes: string;
+  };
+  subOntologies: {
+    Specializations: ISubOntology[];
+  };
+  ontologyType: string;
+  locked: boolean;
 };
 
 export type IUserOntology = {
