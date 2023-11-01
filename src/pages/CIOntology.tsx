@@ -15,7 +15,6 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IActivity, IActor, IEvaluation, IOntology, IProcesse, ISubOntology } from "src/types/IOntology";
 
@@ -26,7 +25,6 @@ import SneakMessage from "@/components/ontology/SneakMessage";
 import { useAuth } from "@/context/AuthContext";
 import { newId } from "@/lib/utils/newFirestoreId";
 
-import darkModeLibraryImage from "../../public/darkModeLibraryBackground.jpg";
 import Custom404 from "./404";
 
 type IOntologyPath = {
@@ -530,6 +528,17 @@ const CIOntology = () => {
     <Box>
       <Box
         sx={{
+          width: "100vw",
+          height: "100vh",
+          position: "fixed",
+          filter: "brightness(1.95)",
+          zIndex: -2,
+          backgroundColor: theme =>
+            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+        }}
+      />
+      <Box
+        sx={{
           position: "absolute",
           left: "0",
           top: "70px",
@@ -542,18 +551,6 @@ const CIOntology = () => {
         }}
       >
         <TreeViewSimplified mainSpecializations={mainSpecializations} />
-      </Box>
-      <Box
-        data-testid="auth-layout"
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          position: "fixed",
-          filter: "brightness(1.95)",
-          zIndex: -2,
-        }}
-      >
-        <Image alt="Library" src={darkModeLibraryImage} layout="fill" objectFit="cover" priority />
       </Box>
 
       <AppHeaderMemoized
