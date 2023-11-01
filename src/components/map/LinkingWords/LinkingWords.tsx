@@ -141,7 +141,7 @@ const LinkingWords = ({
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
-      notebookRef.current.choosingNode = { id: props.identifier, type: linkType };
+      notebookRef.current.choosingNode = { id: props.identifier, type: linkType, impact: "node" };
       notebookRef.current.selectedNode = props.identifier;
       notebookRef.current.chosenNode = null;
       nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });

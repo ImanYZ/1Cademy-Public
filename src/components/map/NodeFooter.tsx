@@ -1766,7 +1766,7 @@ const NodeFooter = ({
               backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
               mt: "5px",
               display:
-                (choosingNode?.type === "Tag" && !isTag) ||
+                (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
                 (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
                   ? "none"
                   : "block",
@@ -1774,7 +1774,7 @@ const NodeFooter = ({
           >
             {choosingNode?.type === "Reference"
               ? "Cite It"
-              : choosingNode?.type === "Tag" && isTag
+              : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
               ? "Tag it"
               : choosingNode?.type === "Child"
               ? "Link it"

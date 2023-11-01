@@ -1850,6 +1850,7 @@ const Notebook = ({}: NotebookProps) => {
           [chosingNodeId]: choosingNodeCopy,
           [chosenNodeId]: chosenNodeObj,
         };
+
         setTimeout(() => {
           setNodeUpdates({
             nodeIds: updatedNodeIds,
@@ -3551,7 +3552,6 @@ const Notebook = ({}: NotebookProps) => {
             gtmEvent("Reputation", {
               value: 1,
             });
-
             const newNode = { ...graph.nodes[selectedNodeId] };
             if (newNode.children.length > 0) {
               const newChildren = [];
@@ -3730,7 +3730,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_IMPROVEMENT", user: user.uname, data: errorData });
       }
     },
-    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user]
+    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user, graph.nodes]
   );
 
   const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
@@ -7306,6 +7306,7 @@ const Notebook = ({}: NotebookProps) => {
                 }}
                 onChangeChosenNode={onChangeChosenNode}
                 preLoadNodes={onPreLoadNodes}
+                notebookRef={notebookRef}
               />
               <ParentsSidebarMemoized
                 title={
