@@ -89,6 +89,17 @@ const INITIAL_VALUES: any = {
     },
     ontologyType: "Evaluation",
   },
+  Role: {
+    title: "",
+    description: "",
+    type: "",
+    // TO-DO : add Incentives: –
+    subOntologies: { Actor: {}, Specializations: {} },
+    plainText: {
+      "Capabilities required": "",
+    },
+    ontologyType: "Role",
+  },
 };
 
 const CIOntology = () => {
