@@ -3,7 +3,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Link, TextField, Tooltip } from "@mui/material";
-import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { IOntology, ISubOntology } from "src/types/IOntology";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
@@ -14,9 +14,9 @@ type ISubOntologyProps = {
   sx: any;
   type: string;
   setOpenOntology: (openOntology: any) => void;
-  handleLinkNavigation: any;
   saveSubOntology: any;
   setSnackbarMessage: (message: any) => void;
+  category: string;
 };
 
 const SubOntology = ({
@@ -25,8 +25,8 @@ const SubOntology = ({
   type,
   setOpenOntology,
   openOntology,
-  handleLinkNavigation,
   saveSubOntology,
+  category,
 }: ISubOntologyProps) => {
   const db = getFirestore();
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
@@ -54,7 +54,7 @@ const SubOntology = ({
   };
 
   const linkNavigation = () => {
-    handleLinkNavigation({ id: subOntology.id, title: subOntology.title });
+    // handleLinkNavigation({ id: subOntology.id, title: subOntology.title });
   };
 
   const handleSaveSubOntology = () => {
@@ -75,10 +75,14 @@ const SubOntology = ({
 
   const removeSubOntology = ({ ontologyData, id }: any) => {
     for (let type of ["Actor", "Process", "Roles", "Evaluation Dimensions"]) {
-      if ((ontologyData.subOntologies[type] || []).length > 0) {
-        const subOntologyIdx = ontologyData.subOntologies[type].findIndex((sub: any) => sub.id === id);
-        if (subOntologyIdx !== -1) {
-          ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
+      for (let category in ontologyData.subOntologies[type] || {}) {
+        if ((ontologyData.subOntologies[type][category].ontologies || []).length > 0) {
+          const subOntologyIdx = ontologyData.subOntologies[type][category].ontologies.findIndex(
+            (sub: any) => sub.id === id
+          );
+          if (subOntologyIdx !== -1) {
+            ontologyData.subOntologies[type][category].ontologies.splice(subOntologyIdx, 1);
+          }
         }
       }
     }
@@ -90,9 +94,11 @@ const SubOntology = ({
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
           const ontologyData = ontologyDoc.data();
-          const subOntologyIdx = ontologyData.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
+          const subOntologyIdx = (ontologyData?.subOntologies[type][category]?.ontologies || []).findIndex(
+            (sub: any) => sub.id === subOntology.id
+          );
           if (subOntologyIdx !== -1) {
-            ontologyData.subOntologies[type].splice(subOntologyIdx, 1);
+            ontologyData.subOntologies[type][category].ontologies.splice(subOntologyIdx, 1);
           }
           const subOntologyDoc = await getDoc(doc(collection(db, "ontology"), subOntology.id));
 
@@ -107,19 +113,19 @@ const SubOntology = ({
                 await updateDoc(ontologyDoc.ref, ontologyData);
               }
             }
-            // await deleteDoc(subOntologyDoc.ref);
+            await deleteDoc(subOntologyDoc.ref);
           }
 
           await updateDoc(ontologyDoc.ref, ontologyData);
         }
-        setOpenOntology((openOntology: any) => {
-          const _openOntology: any = { ...openOntology };
-          const subOntologyIdx = _openOntology.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
-          if (subOntologyIdx !== -1) {
-            _openOntology.subOntologies[type].splice(subOntologyIdx, 1);
-          }
-          return _openOntology;
-        });
+        // setOpenOntology((openOntology: any) => {
+        //   const _openOntology: any = { ...openOntology };
+        //   const subOntologyIdx = _openOntology.subOntologies[type].findIndex((sub: any) => sub.id === subOntology.id);
+        //   if (subOntologyIdx !== -1) {
+        //     _openOntology.subOntologies[type].splice(subOntologyIdx, 1);
+        //   }
+        //   return _openOntology;
+        // });
       }
     } catch (error) {
       console.error(error);

@@ -1,5 +1,9 @@
 export type ISubOntology = { title: string; id: string; category?: string; editMode?: boolean; new?: boolean };
 
+export type ISubOntologyCategory = {
+  [category: string]: { ontolgies: ISubOntology[] };
+};
+
 export type IOntologyTypes =
   | "activity"
   | "actor"
@@ -40,10 +44,10 @@ export type IActivity = {
     notes: string;
   };
   subOntologies: {
-    Actor: ISubOntology[];
-    Process: ISubOntology[];
-    Specializations: ISubOntology[];
-    "Evaluation Dimensions": ISubOntology[];
+    Actor: ISubOntologyCategory;
+    Process: ISubOntologyCategory;
+    Specializations: ISubOntologyCategory;
+    "Evaluation Dimensions": ISubOntologyCategory;
   };
   ontologyType: string;
   locked: boolean;
@@ -58,7 +62,7 @@ export type IActor = {
     notes: string;
   };
   subOntologies: {
-    Specializations: ISubOntology[];
+    Specializations: ISubOntologyCategory;
   };
 
   ontologyType: string;
@@ -75,8 +79,7 @@ export type IProcesse = {
     "Performance prediction models": string;
     notes: string;
   };
-  subOntologies: { Roles: ISubOntology[]; Specializations: ISubOntology[] };
-
+  subOntologies: { Roles: ISubOntologyCategory; Specializations: ISubOntologyCategory };
   ontologyType: string;
   locked: boolean;
 };
@@ -92,7 +95,7 @@ export type IEvaluation = {
     notes: string;
   };
   subOntologies: {
-    Specializations: ISubOntology[];
+    Specializations: ISubOntologyCategory;
   };
   ontologyType: string;
   locked: boolean;

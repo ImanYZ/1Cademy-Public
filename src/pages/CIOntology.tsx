@@ -41,10 +41,10 @@ const INITIAL_VALUES: any = {
       Postconditions: "",
     },
     subOntologies: {
-      Actor: [],
-      Process: [],
-      Specializations: [],
-      "Evaluation Dimensions": [],
+      Actor: {},
+      Process: {},
+      Specializations: {},
+      "Evaluation Dimensions": {},
     },
     ontologyType: "Activity",
   },
@@ -57,7 +57,7 @@ const INITIAL_VALUES: any = {
       Abilities: "",
     },
     subOntologies: {
-      Specializations: [],
+      Specializations: {},
     },
     ontologyType: "Actor",
   },
@@ -71,7 +71,7 @@ const INITIAL_VALUES: any = {
       Dependencies: "",
       "Performance prediction models": "",
     },
-    subOntologies: { Roles: [], Specializations: [] },
+    subOntologies: { Roles: {}, Specializations: {} },
     ontologyType: "Process",
   },
   Evaluation: {
@@ -85,7 +85,7 @@ const INITIAL_VALUES: any = {
       "Criteria for acceptability:": "",
     },
     subOntologies: {
-      Specializations: [],
+      Specializations: {},
     },
     ontologyType: "Evaluation",
   },
@@ -127,10 +127,17 @@ const CIOntology = () => {
   const getSpecializationsTree = ({ mainOntologies, path }: any) => {
     const _mainSpecializations: any = {};
     for (let ontlogy of mainOntologies) {
-      const specializations = ontologies.filter((onto: any) => {
-        const findIdx = (ontlogy?.subOntologies?.Specializations || []).findIndex((o: any) => o.id === onto.id);
-        return findIdx !== -1;
-      });
+      let specializations: any = [];
+      for (let category of Object.keys(ontlogy?.subOntologies?.Specializations)) {
+        const _specializations = ontologies.filter((onto: any) => {
+          const findIdx = (ontlogy?.subOntologies?.Specializations[category]?.ontologies || []).findIndex(
+            (o: any) => o.id === onto.id
+          );
+          return findIdx !== -1;
+        });
+        specializations = [...specializations, ..._specializations];
+      }
+
       _mainSpecializations[ontlogy.title] = {
         id: ontlogy.id,
         path: [...path, ontlogy.id],
@@ -366,10 +373,10 @@ const CIOntology = () => {
           Postconditions: "",
         },
         subOntologies: {
-          Actor: [],
-          Process: [],
-          Specializations: [],
-          "Evaluation Dimensions": [],
+          Actor: {},
+          Process: {},
+          Specializations: {},
+          "Evaluation Dimensions": {},
         },
         ontologyType: "Activity",
 
@@ -385,7 +392,7 @@ const CIOntology = () => {
           Abilities: "",
         },
         subOntologies: {
-          Specializations: [],
+          Specializations: {},
         },
 
         ontologyType: "Actor",
@@ -402,7 +409,7 @@ const CIOntology = () => {
           Dependencies: "",
           "Performance prediction models": "",
         },
-        subOntologies: { Roles: [], Specializations: [] },
+        subOntologies: { Roles: {}, Specializations: {} },
         ontologyType: "Process",
 
         locked: true,
@@ -419,7 +426,7 @@ const CIOntology = () => {
           "Criteria for acceptability": "",
         },
         subOntologies: {
-          Specializations: [],
+          Specializations: {},
         },
         ontologyType: "Evaluation",
 

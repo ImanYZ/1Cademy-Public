@@ -1,4 +1,3 @@
-import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, TextField, Tooltip, Typography } from "@mui/material";
 import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { useState } from "react";
@@ -99,15 +98,9 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
                 {type === "title" && (
                   <Tooltip title={"Save"}>
-                    <SaveIcon
-                      sx={{
-                        color: "#757575",
-                        ":hover": {
-                          color: theme => theme.palette.common.orange,
-                        },
-                      }}
-                      onClick={editSaveText}
-                    />
+                    <Button onClick={editSaveText} sx={{ ml: "5px" }}>
+                      {editMode ? "Save" : "Edit"}
+                    </Button>
                   </Tooltip>
                 )}
               </Box>
