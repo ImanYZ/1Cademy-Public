@@ -1,7 +1,16 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Button, Checkbox, DialogActions, DialogContent, FormControlLabel, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  DialogActions,
+  DialogContent,
+  FormControlLabel,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
@@ -30,7 +39,6 @@ type IOntologyProps = {
 const Ontology = ({
   openOntology,
   setOpenOntology,
-  handleLinkNavigation,
   saveSubOntology,
   setSnackbarMessage,
   updateUserDoc,
@@ -47,8 +55,17 @@ const Ontology = ({
   const handleClose = () => {
     setCheckedSpecializations([]);
     setOpen(false);
+    setSelectedCategory("");
   };
+  const [openAddCategory, setOpenAddCategory] = useState(false);
+  const handleCloseAddCategory = () => {
+    setType("");
+    setNewCategory("");
+    setOpenAddCategory(false);
+  };
+  const [newCategory, setNewCategory] = useState("");
   const [type, setType] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [checkedSpecializations, setCheckedSpecializations] = useState<any>([]);
 
   const db = getFirestore();
@@ -63,8 +80,9 @@ const Ontology = ({
       return "HOW: Processes";
     } else if (type === "Evaluation Dimensions") {
       return "WHY: Evaluation";
-    } /*  else if (type === "Evaluation Dimensions") {
-      return "WHAT: Activities";
+    }
+    /*  else if (type === "Roles") {
+      return true;
     } */
     return "";
   };
@@ -98,9 +116,9 @@ const Ontology = ({
       newOntology.parents = [ontologyDoc.id];
       newOntology.title = `${ontologyData.title} copy`;
       newOntology.description = "";
-      newOntology.subOntologies.Specializations = [];
+      newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
-      ontologyData.subOntologies.Specializations.push({
+      ontologyData.subOntologies.Specializations["main"].ontologies.push({
         id: newOntologyRef.id,
         title: `${ontologyData.title} copy`,
       });
@@ -112,14 +130,12 @@ const Ontology = ({
     }
   };
 
-  const addNewSpecialisation = async (type: string) => {
+  const addNewSpecialisation = async (type: string, category: string) => {
     const ontologyParentRef = doc(collection(db, "ontology"), openOntology.id);
     const ontologyParentDoc = await getDoc(ontologyParentRef);
     const ontologyParent: any = ontologyParentDoc.data();
     if (!ontologyParent) return;
     const newOntologyRef = doc(collection(db, "ontology"));
-
-    const idx = ontologyParent.subOntologies[type].findIndex((sub: ISubOntology) => sub.id === newOntologyRef.id);
 
     let subOntologyType = type;
     if (type === "Specializations") {
@@ -128,28 +144,39 @@ const Ontology = ({
     if (type === "Evaluation Dimensions") {
       subOntologyType = "Evaluation";
     }
+    if (type === "Roles") {
+      subOntologyType = "Role";
+    }
     const newOntology = INITIAL_VALUES[subOntologyType];
     newOntology.parents = [openOntology.id];
     newOntology.title = "New " + subOntologyType;
-    if (idx === -1) {
-      ontologyParent.subOntologies[type].push({
-        title: "New " + subOntologyType,
-        id: newOntologyRef.id,
-      });
+    if (!ontologyParent.subOntologies[type].hasOwnProperty(category)) {
+      ontologyParent.subOntologies[type] = {
+        ...ontologyParent.subOntologies[type],
+        [category]: {
+          ontologies: [],
+        },
+      };
     }
+    ontologyParent.subOntologies[type][category].ontologies.push({
+      title: "New " + subOntologyType,
+      id: newOntologyRef.id,
+    });
+
     await addNewOntology({ id: newOntologyRef.id, newOntology });
     await updateDoc(ontologyParentRef, ontologyParent);
     updateUserDoc([...ontologyPath.map((path: any) => path.id), newOntologyRef.id]);
   };
 
-  const showList = async (type: string) => {
-    if (getCategoryTitle(type)) {
+  const showList = async (type: string, category: string, showModel: boolean) => {
+    if (getCategoryTitle(type) || showModel) {
       setOpen(true);
       setType(type);
-      const specializations = openOntology.subOntologies[type].map((onto: any) => onto.id);
+      setSelectedCategory(category);
+      const specializations = openOntology.subOntologies[type][category].ontologies.map((onto: any) => onto.id);
       setCheckedSpecializations(specializations);
     } else {
-      await addNewSpecialisation(type);
+      await addNewSpecialisation(type, category);
     }
   };
 
@@ -160,7 +187,7 @@ const Ontology = ({
   };
 
   const TreeViewSimplified = useCallback(
-    ({ mainSpecializations }: any) => {
+    ({ mainSpecializations, clone }: any) => {
       return (
         <TreeView
           defaultCollapseIcon={<ExpandMoreIcon />}
@@ -190,9 +217,11 @@ const Ontology = ({
                     }
                     label={category}
                   />
-                  <Button variant="outlined" onClick={() => handleCloning(mainSpecializations[category])}>
-                    New {category} Specialization
-                  </Button>
+                  {clone && (
+                    <Button variant="outlined" onClick={() => handleCloning(mainSpecializations[category])}>
+                      New {category} Specialization
+                    </Button>
+                  )}
                 </Box>
               }
             >
@@ -212,19 +241,76 @@ const Ontology = ({
       const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
       if (!ontologyDoc.exists()) return;
       const ontologyData = ontologyDoc.data();
-      const newSubOntologies = [];
+      const newSubOntologies =
+        type === "Specializations" ? [...ontologyData.subOntologies[type][selectedCategory].ontologies] : [];
+
       for (let checkd of checkedSpecializations) {
         const findOntology = ontologies.find((ontology: any) => ontology.id === checkd);
-        newSubOntologies.push({
-          id: checkd,
-          title: findOntology.title,
-        });
+        const indexFound = newSubOntologies.findIndex(onto => onto.id === checkd);
+        if (indexFound === -1) {
+          newSubOntologies.push({
+            id: checkd,
+            title: findOntology.title,
+          });
+        }
       }
-      ontologyData.subOntologies[type] = newSubOntologies;
+      if (type === "Specializations") {
+        ontologyData.subOntologies[type]["main"].ontologies = ontologyData.subOntologies[type][
+          "main"
+        ].ontologies.filter((ontology: any) => newSubOntologies.findIndex(o => o.id === ontology.id) === -1);
+      }
+      ontologyData.subOntologies[type][selectedCategory].ontologies = newSubOntologies;
       await updateDoc(ontologyDoc.ref, ontologyData);
       handleClose();
     } catch (error) {
       console.error(error);
+    }
+  };
+  const addCatgory = useCallback(async () => {
+    try {
+      if (!newCategory) return;
+      const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+      if (ontologyDoc.exists()) {
+        const ontologyData = ontologyDoc.data();
+        if (!ontologyData?.subOntologies[type]?.hasOwnProperty(newCategory)) {
+          ontologyData.subOntologies[type] = {
+            ...(ontologyData?.subOntologies[type] || {}),
+            [newCategory]: {
+              ontologies: [],
+            },
+          };
+        }
+
+        await updateDoc(ontologyDoc.ref, ontologyData);
+        handleCloseAddCategory();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, [newCategory]);
+
+  const getCurrentSpecializations = () => {
+    const _mainSpecializations: any = {};
+    const _specializations = ontologies.filter((onto: any) => {
+      const findIdx = (openOntology?.subOntologies?.Specializations["main"]?.ontologies || []).findIndex(
+        (o: any) => o.id === onto.id
+      );
+      return findIdx !== -1;
+    });
+
+    for (let specialization of _specializations) {
+      _mainSpecializations[specialization.title] = { id: specialization.id, path: [], specializations: {} };
+    }
+
+    return _mainSpecializations;
+  };
+
+  const handleNewSpec = async () => {
+    if (type === "Specializations") {
+      await addNewSpecialisation(type, selectedCategory);
+      handleClose();
+    } else {
+      handleCloning(mainSpecializations[getCategoryTitle(type)]);
     }
   };
 
@@ -238,22 +324,54 @@ const Ontology = ({
         <DialogContent>
           <Box sx={{ height: "auto", width: "500px" }}>
             <TreeViewSimplified
-              mainSpecializations={mainSpecializations[getCategoryTitle(type)]?.specializations || {}}
+              mainSpecializations={
+                type === "Specializations"
+                  ? getCurrentSpecializations()
+                  : mainSpecializations[getCategoryTitle(type)]?.specializations || {}
+              }
+              clone={type !== "Specializations"}
             />
           </Box>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
-          <Button
-            onClick={() => {
-              handleCloning(mainSpecializations[getCategoryTitle(type)]);
-            }}
-          >
-            Add new {type}
-          </Button>
+          <Button onClick={handleNewSpec}>Add new {type}</Button>
           <Button onClick={handleSave} color="primary">
             Save
           </Button>
           <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog onClose={handleCloseAddCategory} open={openAddCategory}>
+        <DialogContent>
+          <Box sx={{ height: "auto", width: "500px" }}>
+            <TextField
+              placeholder={`Add Category`}
+              variant="standard"
+              fullWidth
+              value={newCategory}
+              multiline
+              onChange={(e: any) => setNewCategory(e.target.value)}
+              sx={{
+                fontWeight: 400,
+                fontSize: {
+                  xs: "14px",
+                  md: "16px",
+                },
+                marginBottom: "5px",
+                width: "100%",
+                display: "block",
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center" }}>
+          <Button onClick={addCatgory} color="primary">
+            Add
+          </Button>
+          <Button onClick={handleCloseAddCategory} color="primary">
             Cancel
           </Button>
         </DialogActions>
@@ -297,27 +415,89 @@ const Ontology = ({
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
                   <Tooltip title={"Select"}>
-                    <Button onClick={() => showList(type)} sx={{ ml: "5px" }}>
+                    <Button onClick={() => showList(type, "main", false)} sx={{ ml: "5px" }}>
                       {" "}
                       {getCategoryTitle(type) ? "Select" : "Add"} {type}{" "}
                     </Button>
                   </Tooltip>
+                  {type === "Specializations" && (
+                    <Button
+                      onClick={() => {
+                        setOpenAddCategory(true);
+                        setType(type);
+                      }}
+                      sx={{ ml: "5px" }}
+                    >
+                      Add Category
+                    </Button>
+                  )}
                 </Box>
-
                 <ul>
-                  {(openOntology?.subOntologies[type] || []).map((subOntology: ISubOntology) => {
+                  {Object.keys(openOntology?.subOntologies[type])
+                    .filter(c => c !== "main")
+                    .map((category: any) => {
+                      const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
+                      return (
+                        <Box key={category} /* sx={{ ml: "15px" }} */>
+                          <li key={category}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
+                              <Button
+                                onClick={() =>
+                                  showList(
+                                    type,
+                                    category,
+                                    openOntology?.subOntologies[type]["main"]?.ontologies.length > 0
+                                  )
+                                }
+                                sx={{ ml: "5px" }}
+                              >
+                                {" "}
+                                {getCategoryTitle(type) ? "Select" : "Add"} {type}{" "}
+                              </Button>
+                            </Box>
+                          </li>
+                          <ul>
+                            {subOntologies.map((subOntology: ISubOntology) => {
+                              return (
+                                <li key={subOntology.id}>
+                                  <SubOntology
+                                    setSnackbarMessage={setSnackbarMessage}
+                                    saveSubOntology={saveSubOntology}
+                                    openOntology={openOntology}
+                                    setOpenOntology={setOpenOntology}
+                                    sx={{ mt: "15px" }}
+                                    key={openOntology.id}
+                                    subOntology={subOntology}
+                                    type={type}
+                                    category={category}
+                                    ontologyPath={ontologyPath}
+                                    updateUserDoc={updateUserDoc}
+                                  />
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </Box>
+                      );
+                    })}
+                </ul>
+                <ul>
+                  {(openOntology?.subOntologies[type]["main"]?.ontologies || []).map((subOntology: ISubOntology) => {
                     return (
                       <li key={subOntology.id}>
                         <SubOntology
                           setSnackbarMessage={setSnackbarMessage}
                           saveSubOntology={saveSubOntology}
-                          handleLinkNavigation={handleLinkNavigation}
                           openOntology={openOntology}
                           setOpenOntology={setOpenOntology}
                           sx={{ mt: "15px" }}
                           key={openOntology.id}
                           subOntology={subOntology}
                           type={type}
+                          category={"main"}
+                          ontologyPath={ontologyPath}
+                          updateUserDoc={updateUserDoc}
                         />
                       </li>
                     );
