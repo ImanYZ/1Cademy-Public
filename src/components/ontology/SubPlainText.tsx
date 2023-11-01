@@ -94,6 +94,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
           multiline
           onChange={handleEditText}
           InputProps={{
+            style: { fontSize: type === "title" ? "50px" : "" },
             endAdornment: (
               <Box style={{ marginRight: "18px", cursor: "pointer", display: "flex" }}>
                 {type === "title" && (
