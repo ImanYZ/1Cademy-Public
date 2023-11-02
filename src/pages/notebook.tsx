@@ -3537,7 +3537,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         await referenceConfirmation();
-        let referencesOK: any = notebookRef.current.referencesOK;
+        let referencesOK = notebookRef.current.referencesOK;
         if (!referencesOK) return;
 
         const {
