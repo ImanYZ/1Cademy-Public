@@ -198,7 +198,7 @@ const AppHeader = forwardRef(
             spacing={{ xs: "2px", sm: "8px", md: "16px" }}
             sx={{
               px: { xs: "16px", sm: "32px" },
-              maxWidth: "1280px",
+              maxWidth: mitpage ? "100%" : "1280px",
               margin: "auto",
               height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
             }}
@@ -214,20 +214,18 @@ const AppHeader = forwardRef(
                   />
                 </Tooltip>
               ) : (
-                <Tooltip title="">
-                  <Avatar
-                    src={MITLOGO.src}
-                    alt="logo"
-                    sx={{
-                      cursor: "pointer",
-                      width: "340px",
-                      height: "auto",
-                      borderRadius: 0,
-                      pb: "13px",
-                    }}
-                    onClick={() => {}}
-                  />
-                </Tooltip>
+                <Avatar
+                  src={MITLOGO.src}
+                  alt="logo"
+                  sx={{
+                    cursor: "pointer",
+                    width: "240px",
+                    height: "auto",
+                    borderRadius: 0,
+                    // mb: "50px",
+                  }}
+                  onClick={() => {}}
+                />
               )}
 
               <Stack
