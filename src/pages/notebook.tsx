@@ -312,7 +312,6 @@ const Notebook = ({}: NotebookProps) => {
     lastOperation: "CancelProposals",
     contributorsNodeId: null,
     showContributors: false,
-    referencesOK: true,
   });
 
   // scale and translation of the viewport over the map for the map interactions module
@@ -3521,7 +3520,7 @@ const Notebook = ({}: NotebookProps) => {
     ) {
       referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
     }
-    notebookRef.current.referencesOK = referencesOK;
+    return referencesOK;
   }, [db, graph.nodes]);
 
   const saveProposedImprovement = useCallback(
@@ -3536,8 +3535,8 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        await referenceConfirmation();
-        let referencesOK = notebookRef.current.referencesOK;
+
+        let referencesOK = await referenceConfirmation();
         if (!referencesOK) return;
 
         const {

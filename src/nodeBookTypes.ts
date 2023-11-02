@@ -87,7 +87,6 @@ export type TNodeBookState = {
   lastOperation: LastOperation;
   contributorsNodeId: any;
   showContributors: any;
-  referencesOK: boolean;
 };
 
 export type SetSNodeAction = {
