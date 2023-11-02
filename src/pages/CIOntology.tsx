@@ -591,6 +591,7 @@ const CIOntology = () => {
                 theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
               p: "20px",
               overflow: "auto",
+              height: "100vh",
             }}
           >
             <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>

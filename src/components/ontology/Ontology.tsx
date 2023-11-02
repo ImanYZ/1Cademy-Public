@@ -324,6 +324,7 @@ const Ontology = ({
     <Box
       sx={{
         padding: "40px 40px 40px 40px",
+        mb: "90px",
       }}
     >
       <Dialog onClose={handleClose} open={open}>
