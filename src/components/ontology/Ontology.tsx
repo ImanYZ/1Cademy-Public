@@ -73,20 +73,6 @@ const Ontology = ({
   //   palette: { mode },
   // } = useTheme();
 
-  const getCategoryTitle = (type: string) => {
-    if (type === "Actor") {
-      return "WHO: Actors";
-    } else if (type === "Process") {
-      return "HOW: Processes";
-    } else if (type === "Evaluation Dimensions") {
-      return "WHY: Evaluation";
-    }
-    /*  else if (type === "Roles") {
-      return true;
-    } */
-    return "";
-  };
-
   const capitalizeFirstLetter = (word: string) => {
     return word.charAt(0).toUpperCase() + word.slice(1);
   };
@@ -147,9 +133,6 @@ const Ontology = ({
     if (type === "Specializations") {
       subOntologyType = ontologyParent.ontologyType;
     }
-    if (type === "Evaluation Dimensions") {
-      subOntologyType = "Evaluation";
-    }
     if (type === "Roles") {
       subOntologyType = "Role";
     }
@@ -175,7 +158,7 @@ const Ontology = ({
   };
 
   const showList = async (type: string, category: string, showModel: boolean) => {
-    if (getCategoryTitle(type) || showModel) {
+    if (type !== "Specializations" || showModel) {
       setOpen(true);
       setType(type);
       setSelectedCategory(category);
@@ -316,10 +299,10 @@ const Ontology = ({
       await addNewSpecialisation(type, selectedCategory);
       handleClose();
     } else {
-      handleCloning(mainSpecializations[getCategoryTitle(type)]);
+      await handleCloning(mainSpecializations[type]);
+      handleClose();
     }
   };
-
   return (
     <Box
       sx={{
@@ -334,7 +317,7 @@ const Ontology = ({
               mainSpecializations={
                 type === "Specializations"
                   ? getCurrentSpecializations()
-                  : mainSpecializations[getCategoryTitle(type)]?.specializations || {}
+                  : mainSpecializations[type]?.specializations || {}
               }
               clone={type !== "Specializations"}
             />
@@ -424,7 +407,7 @@ const Ontology = ({
                   <Tooltip title={"Select"}>
                     <Button onClick={() => showList(type, "main", false)} sx={{ ml: "5px" }}>
                       {" "}
-                      {getCategoryTitle(type) ? "Select" : "Add"} {type}{" "}
+                      {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                     </Button>
                   </Tooltip>
                   {type === "Specializations" && (
@@ -460,7 +443,7 @@ const Ontology = ({
                                 sx={{ ml: "5px" }}
                               >
                                 {" "}
-                                {getCategoryTitle(type) ? "Select" : "Add"} {type}{" "}
+                                {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                               </Button>
                             </Box>
                           </li>

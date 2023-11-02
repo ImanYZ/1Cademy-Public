@@ -35,9 +35,14 @@ export type IOntology = {
   type?: IOntologyTypes;
 };
 
-export type IActivity = {
+export type IOntologyCommon = {
   title: string;
   description: string;
+  ontologyType: string;
+  locked?: boolean;
+};
+
+export type IActivity = IOntologyCommon & {
   plainText: {
     Preconditions: string;
     Postconditions: string;
@@ -47,48 +52,35 @@ export type IActivity = {
     Actor: ISubOntologyCategory;
     Process: ISubOntologyCategory;
     Specializations: ISubOntologyCategory;
-    "Evaluation Dimensions": ISubOntologyCategory;
+    "Evaluation Dimension": ISubOntologyCategory;
   };
-  ontologyType: string;
-  locked: boolean;
 };
 
-export type IActor = {
-  title: string;
-  description: string;
-  Type: string;
+export type IActor = IOntologyCommon & {
   plainText: {
+    "Type of actor": string;
     Abilities: string;
     notes: string;
   };
   subOntologies: {
     Specializations: ISubOntologyCategory;
   };
-
-  ontologyType: string;
-  locked: boolean;
 };
 
-export type IProcesse = {
-  title: string;
-  description: string;
-  Type: string;
+export type IProcesse = IOntologyCommon & {
   plainText: {
+    "Type of Process": string;
     Subactivities: string;
     Dependencies: string;
     "Performance prediction models": string;
     notes: string;
   };
-  subOntologies: { Roles: ISubOntologyCategory; Specializations: ISubOntologyCategory };
-  ontologyType: string;
-  locked: boolean;
+  subOntologies: { Role: ISubOntologyCategory; Specializations: ISubOntologyCategory };
 };
 
-export type IEvaluation = {
-  title: string;
-  description: string;
-  type: string;
+export type IEvaluation = IOntologyCommon & {
   plainText: {
+    "Evaluation type": string;
     "Measurement units": string;
     "Direction of desirability": string;
     "Criteria for acceptability": string;
@@ -97,10 +89,44 @@ export type IEvaluation = {
   subOntologies: {
     Specializations: ISubOntologyCategory;
   };
-  ontologyType: string;
-  locked: boolean;
 };
 
+export type IRole = IOntologyCommon & {
+  plainText: {
+    "Role type": string;
+    Units: string;
+    "Capabilities required": string;
+    notes: string;
+  };
+  subOntologies: {
+    Specializations: ISubOntologyCategory;
+    Incentive: ISubOntologyCategory;
+    Actor: ISubOntologyCategory;
+  };
+};
+
+export type IIncentive = IOntologyCommon & {
+  plainText: {
+    "Reward function": string;
+    "Capabilities required": string;
+    notes: string;
+  };
+  subOntologies: {
+    "Evaluation Dimension": ISubOntologyCategory;
+    Specializations: ISubOntologyCategory;
+    Reward: ISubOntologyCategory;
+  };
+};
+
+export type IReward = IOntologyCommon & {
+  plainText: {
+    "Reward type": string;
+    Units: string;
+  };
+  subOntologies: {
+    Specializations: ISubOntologyCategory;
+  };
+};
 export type IUserOntology = {
   id: string;
   uname: string;
