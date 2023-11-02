@@ -1,16 +1,7 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
-import {
-  Button,
-  Checkbox,
-  DialogActions,
-  DialogContent,
-  FormControlLabel,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Button, Checkbox, DialogActions, DialogContent, TextField, Tooltip, Typography } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import { Box } from "@mui/system";
 import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
@@ -185,7 +176,7 @@ const Ontology = ({
           defaultExpandIcon={<ChevronRightIcon />}
           sx={{
             "& .Mui-selected": {
-              backgroundColor: "transparent", // Remove the background color
+              backgroundColor: "transparent",
             },
           }}
           defaultExpanded={[]}
@@ -197,27 +188,33 @@ const Ontology = ({
               sx={{ mt: "5px" }}
               label={
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel
-                    value={mainSpecializations[category].id}
-                    control={
-                      <Checkbox
-                        checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
-                        onChange={() => checkSpecialization(mainSpecializations[category].id)}
-                        name={mainSpecializations[category].id}
-                      />
-                    }
-                    label={category}
+                  <Checkbox
+                    checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
+                    onChange={e => {
+                      e.stopPropagation();
+                      checkSpecialization(mainSpecializations[category].id);
+                    }}
+                    name={mainSpecializations[category].id}
+                    sx={{}}
                   />
+                  <Typography>
+                    {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
+                  </Typography>
                   {clone && (
-                    <Button variant="outlined" onClick={() => handleCloning(mainSpecializations[category])}>
-                      New {category} Specialization
+                    <Button
+                      variant="outlined"
+                      sx={{ ml: "9px" }}
+                      onClick={() => handleCloning(mainSpecializations[category])}
+                    >
+                      New {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}{" "}
+                      Specialization
                     </Button>
                   )}
                 </Box>
               }
             >
               {Object.keys(mainSpecializations[category].specializations).length > 0 && (
-                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} clone={clone} />
               )}
             </TreeItem>
           ))}
