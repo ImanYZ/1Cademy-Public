@@ -20,7 +20,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
   };
 
   const editTitleSubOntology = ({ parentData, newTitle, id }: any) => {
-    for (let type of ["Actor", "Process", "Specializations", "Roles", "Evaluation Dimensions"]) {
+    for (let type in parentData.subOntologies) {
       for (let category in parentData.subOntologies[type] || {}) {
         if ((parentData.subOntologies[type][category].ontologies || []).length > 0) {
           const subOntologyIdx = parentData.subOntologies[type][category].ontologies.findIndex(
