@@ -118,10 +118,18 @@ const Ontology = ({
       newOntology.description = "";
       newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
-      ontologyData.subOntologies.Specializations["main"].ontologies.push({
-        id: newOntologyRef.id,
-        title: `${ontologyData.title} copy`,
-      });
+      console.log(ontologyData);
+      ontologyData.subOntologies.Specializations = {
+        ["main"]: {
+          ontologies: [
+            {
+              id: newOntologyRef.id,
+              title: `${ontologyData.title} copy`,
+            },
+          ],
+        },
+      };
+      console.log(ontologyData);
       await updateDoc(ontologyDoc.ref, ontologyData);
       await setDoc(newOntologyRef, newOntology);
       return newOntologyRef.id;
