@@ -24,7 +24,7 @@ export const getNodes = async (db: Firestore, nodeIds: string[]): Promise<(Node 
     const nodes: (Node | null)[] = [];
     nodesDocs.forEach(doc => {
       if (doc.exists()) {
-        nodes.push(doc.data() as Node);
+        nodes.push({ ...doc.data(), id: doc.id } as Node);
       } else {
         nodes.push(null);
       }
