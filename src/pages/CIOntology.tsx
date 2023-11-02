@@ -1,7 +1,7 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Box, Button, Link, Typography } from "@mui/material";
+import { Box, Button, Grid, Link, Typography } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import {
   collection,
@@ -512,7 +512,9 @@ const CIOntology = () => {
               nodeId={mainSpecializations[category].id}
               label={
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography>{category}</Typography>
+                  <Typography>
+                    {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
+                  </Typography>
                   <Button
                     variant="outlined"
                     onClick={() => {
@@ -569,63 +571,62 @@ const CIOntology = () => {
         }}
       />
 
-      <Box
-        sx={{
-          height: "100vh",
-          width: "30%",
-          overflow: "auto",
-        }}
-      >
-        <Box sx={{ pb: "190px" }}>
-          <TreeViewSimplified mainSpecializations={mainSpecializations} />
-        </Box>
-      </Box>
+      <Grid container>
+        <Grid item xs={2.5}>
+          <Box
+            sx={{
+              height: "100vh",
+              overflow: "auto",
+            }}
+          >
+            <Box sx={{ pb: "190px" }}>
+              <TreeViewSimplified mainSpecializations={mainSpecializations} />
+            </Box>
+          </Box>
+        </Grid>
+        <Grid item xs={6.5}>
+          <Box
+            sx={{
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+              p: "20px",
+              overflow: "auto",
+            }}
+          >
+            <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
+              {ontologyPath.length > 1 &&
+                ontologyPath.map(path => (
+                  <Link
+                    underline="hover"
+                    key={path.id}
+                    onClick={() => handleLinkNavigation(path, "")}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
+                  </Link>
+                ))}
+            </Breadcrumbs>
+            {openOntology && (
+              <Ontology
+                openOntology={openOntology}
+                setOpenOntology={setOpenOntology}
+                handleLinkNavigation={handleLinkNavigation}
+                setOntologyPath={setOntologyPath}
+                ontologyPath={ontologyPath}
+                saveSubOntology={saveSubOntology}
+                setSnackbarMessage={setSnackbarMessage}
+                updateUserDoc={updateUserDoc}
+                user={user}
+                mainSpecializations={mainSpecializations}
+                ontologies={ontologies}
+                addNewOntology={addNewOntology}
+                INITIAL_VALUES={INITIAL_VALUES}
+              />
+            )}
+          </Box>
+        </Grid>
+      </Grid>
 
-      <Box
-        sx={{
-          position: "absolute",
-          left: "50%",
-          transform: "translateX(-50%)",
-          top: "70px",
-          right: "0px",
-          bottom: "0px",
-          backgroundColor: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-          p: "20px",
-          overflow: "auto",
-        }}
-      >
-        <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
-          {ontologyPath.length > 1 &&
-            ontologyPath.map(path => (
-              <Link
-                underline="hover"
-                key={path.id}
-                onClick={() => handleLinkNavigation(path, "")}
-                sx={{ cursor: "pointer" }}
-              >
-                {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
-              </Link>
-            ))}
-        </Breadcrumbs>
-        {openOntology && (
-          <Ontology
-            openOntology={openOntology}
-            setOpenOntology={setOpenOntology}
-            handleLinkNavigation={handleLinkNavigation}
-            setOntologyPath={setOntologyPath}
-            ontologyPath={ontologyPath}
-            saveSubOntology={saveSubOntology}
-            setSnackbarMessage={setSnackbarMessage}
-            updateUserDoc={updateUserDoc}
-            user={user}
-            mainSpecializations={mainSpecializations}
-            ontologies={ontologies}
-            addNewOntology={addNewOntology}
-            INITIAL_VALUES={INITIAL_VALUES}
-          />
-        )}
-      </Box>
       <SneakMessage newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />
     </Box>
   );
