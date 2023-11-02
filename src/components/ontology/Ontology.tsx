@@ -8,6 +8,8 @@ import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "fireba
 import React, { useCallback, useState } from "react";
 import { ISubOntology } from "src/types/IOntology";
 
+import useConfirmDialog from "@/hooks/useConfirmDialog";
+
 import SubOntology from "./SubOntology";
 import SubPlainText from "./SubPlainText";
 
@@ -60,6 +62,8 @@ const Ontology = ({
   const [selectedCategory, setSelectedCategory] = useState("");
   const [checkedSpecializations, setCheckedSpecializations] = useState<any>([]);
   const [editCategory, setEditCategory] = useState<any>(null);
+
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
   const db = getFirestore();
   // const {
@@ -319,6 +323,21 @@ const Ontology = ({
     });
   };
 
+  const deleteCategory = async (type: string, category: string) => {
+    if (await confirmIt("Are you sure you want to delete this Category?")) {
+      const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+      if (ontologyDoc.exists()) {
+        const ontologyData = ontologyDoc.data();
+        ontologyData.subOntologies[type]["main"] = {
+          ...(ontologyData.subOntologies[type]["main"] || {}),
+          ...ontologyData.subOntologies[type][category],
+        };
+        delete ontologyData.subOntologies[type][category];
+        await updateDoc(ontologyDoc.ref, ontologyData);
+      }
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -465,6 +484,10 @@ const Ontology = ({
                                 {" "}
                                 Edit
                               </Button>
+                              <Button onClick={() => deleteCategory(type, category)} sx={{ ml: "5px" }}>
+                                {" "}
+                                Delete
+                              </Button>
                             </Box>
                           </li>
                           <ul>
@@ -529,6 +552,7 @@ const Ontology = ({
           </Box>
         ))}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };
