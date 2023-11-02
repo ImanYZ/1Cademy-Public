@@ -162,8 +162,10 @@ const Ontology = ({
       setOpen(true);
       setType(type);
       setSelectedCategory(category);
-      const specializations = openOntology.subOntologies[type][category].ontologies.map((onto: any) => onto.id);
-      setCheckedSpecializations(specializations);
+      const specializations = (openOntology.subOntologies[type][category]?.ontologies || []).map(
+        (onto: any) => onto.id
+      );
+      setCheckedSpecializations(specializations || []);
     } else {
       await addNewSpecialisation(type, category);
     }
