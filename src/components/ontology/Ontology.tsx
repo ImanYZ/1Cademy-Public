@@ -53,11 +53,13 @@ const Ontology = ({
     setType("");
     setNewCategory("");
     setOpenAddCategory(false);
+    setEditCategory(null);
   };
   const [newCategory, setNewCategory] = useState("");
   const [type, setType] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [checkedSpecializations, setCheckedSpecializations] = useState<any>([]);
+  const [editCategory, setEditCategory] = useState<any>(null);
 
   const db = getFirestore();
   // const {
@@ -260,13 +262,19 @@ const Ontology = ({
       const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
       if (ontologyDoc.exists()) {
         const ontologyData = ontologyDoc.data();
-        if (!ontologyData?.subOntologies[type]?.hasOwnProperty(newCategory)) {
-          ontologyData.subOntologies[type] = {
-            ...(ontologyData?.subOntologies[type] || {}),
-            [newCategory]: {
-              ontologies: [],
-            },
-          };
+        if (editCategory) {
+          ontologyData.subOntologies[editCategory.type][newCategory] =
+            ontologyData.subOntologies[editCategory.type][editCategory.category];
+          delete ontologyData.subOntologies[editCategory.type][editCategory.category];
+        } else {
+          if (!ontologyData?.subOntologies[type]?.hasOwnProperty(newCategory)) {
+            ontologyData.subOntologies[type] = {
+              ...(ontologyData?.subOntologies[type] || {}),
+              [newCategory]: {
+                ontologies: [],
+              },
+            };
+          }
         }
 
         await updateDoc(ontologyDoc.ref, ontologyData);
@@ -302,6 +310,15 @@ const Ontology = ({
       handleClose();
     }
   };
+  const handleEditCategory = (type: string, category: string) => {
+    setNewCategory(category);
+    setOpenAddCategory(true);
+    setEditCategory({
+      type,
+      category,
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -358,7 +375,7 @@ const Ontology = ({
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
           <Button onClick={addCatgory} color="primary">
-            Add
+            {editCategory ? "Save" : "Add"}
           </Button>
           <Button onClick={handleCloseAddCategory} color="primary">
             Cancel
@@ -443,6 +460,10 @@ const Ontology = ({
                               >
                                 {" "}
                                 {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
+                              </Button>
+                              <Button onClick={() => handleEditCategory(type, category)} sx={{ ml: "5px" }}>
+                                {" "}
+                                Edit
                               </Button>
                             </Box>
                           </li>
