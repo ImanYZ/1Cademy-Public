@@ -4,11 +4,11 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
+import { FullNodeData, SortDirection, SortValues, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -34,9 +34,10 @@ type TagsSidebarProps = {
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
   preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  notebookRef?: MutableRefObject<TNodeBookState>;
 };
 
-const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes }: TagsSidebarProps) => {
+const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes, notebookRef }: TagsSidebarProps) => {
   const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -334,7 +335,6 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
       timeFilter,
     ]
   );
-
   const sidebarContentMemo = useMemo(
     () => (
       <Stack spacing={"8px"} sx={{ p: "16px" }}>
@@ -344,7 +344,7 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
             onClick={() => {
               onChangeChosenNode({ nodeId: cur.id, title: cur.title });
             }}
-            linkMessage={cur.isTag ? "Tag it" : ""}
+            linkMessage={cur.isTag || notebookRef?.current?.choosingNode?.impact === "node" ? "Tag it" : ""}
             {...cur}
           />
         ))}

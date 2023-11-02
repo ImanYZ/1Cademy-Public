@@ -19,7 +19,7 @@
     {
       "files": ["*.tsx"],
       "rules": {
-        "no-console": ["error", { "allow": ["info", "warn", "error", "log"] }]
+        "no-console": ["error", { "allow": ["info", "warn", "error"] }]
       }
     }
   ]
