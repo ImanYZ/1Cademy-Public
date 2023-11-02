@@ -3507,21 +3507,23 @@ const Notebook = ({}: NotebookProps) => {
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
   );
 
-  const referenceConfirmation: any = useCallback(async () => {
-    let referencesOK: any = true;
+  const referenceConfirmation: any = useCallback(
+    async (selectedNodeId: string) => {
+      let referencesOK: any = true;
 
-    const selectedNodeId = notebookRef.current.selectedNode!;
-    let currentNode = graph.nodes[selectedNodeId];
+      let currentNode = graph.nodes[selectedNodeId];
 
-    if (
-      currentNode?.nodeType &&
-      ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
-      currentNode.references.length === 0
-    ) {
-      referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
-    }
-    return referencesOK;
-  }, [db, graph.nodes]);
+      if (
+        currentNode?.nodeType &&
+        ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
+        currentNode.references.length === 0
+      ) {
+        referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+      }
+      return referencesOK;
+    },
+    [graph.nodes]
+  );
 
   const saveProposedImprovement = useCallback(
     async (summary: string, reason: string, onFail: () => void) => {
@@ -3536,7 +3538,7 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
 
-        let referencesOK = await referenceConfirmation();
+        let referencesOK = await referenceConfirmation(selectedNodeId);
         if (!referencesOK) return;
 
         const {
