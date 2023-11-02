@@ -312,6 +312,7 @@ const Notebook = ({}: NotebookProps) => {
     lastOperation: "CancelProposals",
     contributorsNodeId: null,
     showContributors: false,
+    referencesOK: true,
   });
 
   // scale and translation of the viewport over the map for the map interactions module
@@ -3507,6 +3508,22 @@ const Notebook = ({}: NotebookProps) => {
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
   );
 
+  const referenceConfirmation: any = useCallback(async () => {
+    let referencesOK: any = true;
+
+    const selectedNodeId = notebookRef.current.selectedNode!;
+    let currentNode = graph.nodes[selectedNodeId];
+
+    if (
+      currentNode?.nodeType &&
+      ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
+      currentNode.references.length === 0
+    ) {
+      referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+    }
+    notebookRef.current.referencesOK = referencesOK;
+  }, [db, graph.nodes]);
+
   const saveProposedImprovement = useCallback(
     async (summary: string, reason: string, onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
@@ -3515,19 +3532,12 @@ const Notebook = ({}: NotebookProps) => {
       let postData: any = {};
       try {
         const selectedNodeId = notebookRef.current.selectedNode!;
-        const currentNode = graph.nodes[selectedNodeId];
         notebookRef.current.chosenNode = null;
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        let referencesOK: any = true;
-        if (
-          currentNode?.nodeType &&
-          ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
-        }
+        await referenceConfirmation();
+        let referencesOK: any = notebookRef.current.referencesOK;
         if (!referencesOK) return;
 
         const {
@@ -3730,7 +3740,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_IMPROVEMENT", user: user.uname, data: errorData });
       }
     },
-    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user, graph.nodes]
+    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user, referenceConfirmation]
   );
 
   const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
