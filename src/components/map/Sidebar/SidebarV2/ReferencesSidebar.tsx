@@ -313,7 +313,6 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
       timeFilter,
     ]
   );
-
   const sidebarContentMemo = useMemo(
     () => (
       <Stack spacing={"8px"} sx={{ p: "16px" }}>
