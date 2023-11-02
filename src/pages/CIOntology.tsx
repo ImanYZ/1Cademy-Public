@@ -1,7 +1,7 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Box, Button, Link, Typography } from "@mui/material";
+import { Box, Button, Grid, Link, Typography } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import {
   collection,
@@ -41,10 +41,10 @@ const INITIAL_VALUES: any = {
       Postconditions: "",
     },
     subOntologies: {
-      Actor: [],
-      Process: [],
-      Specializations: [],
-      "Evaluation Dimensions": [],
+      Actor: {},
+      Process: {},
+      Specializations: {},
+      "Evaluation Dimensions": {},
     },
     ontologyType: "Activity",
   },
@@ -57,7 +57,7 @@ const INITIAL_VALUES: any = {
       Abilities: "",
     },
     subOntologies: {
-      Specializations: [],
+      Specializations: {},
     },
     ontologyType: "Actor",
   },
@@ -71,7 +71,7 @@ const INITIAL_VALUES: any = {
       Dependencies: "",
       "Performance prediction models": "",
     },
-    subOntologies: { Roles: [], Specializations: [] },
+    subOntologies: { Roles: {}, Specializations: {} },
     ontologyType: "Process",
   },
   Evaluation: {
@@ -85,9 +85,20 @@ const INITIAL_VALUES: any = {
       "Criteria for acceptability:": "",
     },
     subOntologies: {
-      Specializations: [],
+      Specializations: {},
     },
     ontologyType: "Evaluation",
+  },
+  Role: {
+    title: "",
+    description: "",
+    type: "",
+    // TO-DO : add Incentives: –
+    subOntologies: { Actor: {}, Specializations: {} },
+    plainText: {
+      "Capabilities required": "",
+    },
+    ontologyType: "Role",
   },
 };
 
@@ -127,10 +138,17 @@ const CIOntology = () => {
   const getSpecializationsTree = ({ mainOntologies, path }: any) => {
     const _mainSpecializations: any = {};
     for (let ontlogy of mainOntologies) {
-      const specializations = ontologies.filter((onto: any) => {
-        const findIdx = (ontlogy?.subOntologies?.Specializations || []).findIndex((o: any) => o.id === onto.id);
-        return findIdx !== -1;
-      });
+      let specializations: any = [];
+      for (let category of Object.keys(ontlogy?.subOntologies?.Specializations)) {
+        const _specializations = ontologies.filter((onto: any) => {
+          const findIdx = (ontlogy?.subOntologies?.Specializations[category]?.ontologies || []).findIndex(
+            (o: any) => o.id === onto.id
+          );
+          return findIdx !== -1;
+        });
+        specializations = [...specializations, ..._specializations];
+      }
+
       _mainSpecializations[ontlogy.title] = {
         id: ontlogy.id,
         path: [...path, ontlogy.id],
@@ -366,10 +384,10 @@ const CIOntology = () => {
           Postconditions: "",
         },
         subOntologies: {
-          Actor: [],
-          Process: [],
-          Specializations: [],
-          "Evaluation Dimensions": [],
+          Actor: {},
+          Process: {},
+          Specializations: {},
+          "Evaluation Dimensions": {},
         },
         ontologyType: "Activity",
 
@@ -385,7 +403,7 @@ const CIOntology = () => {
           Abilities: "",
         },
         subOntologies: {
-          Specializations: [],
+          Specializations: {},
         },
 
         ontologyType: "Actor",
@@ -402,7 +420,7 @@ const CIOntology = () => {
           Dependencies: "",
           "Performance prediction models": "",
         },
-        subOntologies: { Roles: [], Specializations: [] },
+        subOntologies: { Roles: {}, Specializations: {} },
         ontologyType: "Process",
 
         locked: true,
@@ -419,7 +437,7 @@ const CIOntology = () => {
           "Criteria for acceptability": "",
         },
         subOntologies: {
-          Specializations: [],
+          Specializations: {},
         },
         ontologyType: "Evaluation",
 
@@ -494,7 +512,9 @@ const CIOntology = () => {
               nodeId={mainSpecializations[category].id}
               label={
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography>{category}</Typography>
+                  <Typography>
+                    {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
+                  </Typography>
                   <Button
                     variant="outlined"
                     onClick={() => {
@@ -530,33 +550,6 @@ const CIOntology = () => {
 
   return (
     <Box>
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          position: "fixed",
-          filter: "brightness(1.95)",
-          zIndex: -2,
-          backgroundColor: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-        }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          left: "0",
-          top: "70px",
-          width: "400px",
-          height: "590vh",
-          backgroundColor: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-          p: "20px",
-          overflow: "auto",
-        }}
-      >
-        <TreeViewSimplified mainSpecializations={mainSpecializations} />
-      </Box>
-
       <AppHeaderMemoized
         ref={headerRef}
         page="ONE_CADEMY"
@@ -567,49 +560,74 @@ const CIOntology = () => {
       />
       <Box
         sx={{
-          position: "absolute",
-          left: "50%",
-          transform: "translateX(-50%)",
-          top: "70px",
-          right: "0px",
-          bottom: "0px",
+          width: "100vw",
+          height: "100vh",
+          position: "fixed",
+          filter: "brightness(1.95)",
+          zIndex: -2,
           backgroundColor: theme =>
             theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
-          p: "20px",
-          overflow: "auto",
+          overflow: "hidden",
         }}
-      >
-        <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
-          {ontologyPath.length > 1 &&
-            ontologyPath.map(path => (
-              <Link
-                underline="hover"
-                key={path.id}
-                onClick={() => handleLinkNavigation(path, "")}
-                sx={{ cursor: "pointer" }}
-              >
-                {path.title}
-              </Link>
-            ))}
-        </Breadcrumbs>
-        {openOntology && (
-          <Ontology
-            openOntology={openOntology}
-            setOpenOntology={setOpenOntology}
-            handleLinkNavigation={handleLinkNavigation}
-            setOntologyPath={setOntologyPath}
-            ontologyPath={ontologyPath}
-            saveSubOntology={saveSubOntology}
-            setSnackbarMessage={setSnackbarMessage}
-            updateUserDoc={updateUserDoc}
-            user={user}
-            mainSpecializations={mainSpecializations}
-            ontologies={ontologies}
-            addNewOntology={addNewOntology}
-            INITIAL_VALUES={INITIAL_VALUES}
-          />
-        )}
-      </Box>
+      />
+
+      <Grid container>
+        <Grid item xs={2.5}>
+          <Box
+            sx={{
+              height: "100vh",
+              overflow: "auto",
+            }}
+          >
+            <Box sx={{ pb: "190px" }}>
+              <TreeViewSimplified mainSpecializations={mainSpecializations} />
+            </Box>
+          </Box>
+        </Grid>
+        <Grid item xs={6.5}>
+          <Box
+            sx={{
+              backgroundColor: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
+              p: "20px",
+              overflow: "auto",
+              height: "100vh",
+            }}
+          >
+            <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
+              {ontologyPath.length > 1 &&
+                ontologyPath.map(path => (
+                  <Link
+                    underline="hover"
+                    key={path.id}
+                    onClick={() => handleLinkNavigation(path, "")}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
+                  </Link>
+                ))}
+            </Breadcrumbs>
+            {openOntology && (
+              <Ontology
+                openOntology={openOntology}
+                setOpenOntology={setOpenOntology}
+                handleLinkNavigation={handleLinkNavigation}
+                setOntologyPath={setOntologyPath}
+                ontologyPath={ontologyPath}
+                saveSubOntology={saveSubOntology}
+                setSnackbarMessage={setSnackbarMessage}
+                updateUserDoc={updateUserDoc}
+                user={user}
+                mainSpecializations={mainSpecializations}
+                ontologies={ontologies}
+                addNewOntology={addNewOntology}
+                INITIAL_VALUES={INITIAL_VALUES}
+              />
+            )}
+          </Box>
+        </Grid>
+      </Grid>
+
       <SneakMessage newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />
     </Box>
   );
