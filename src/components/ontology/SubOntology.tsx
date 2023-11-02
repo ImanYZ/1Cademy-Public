@@ -35,7 +35,7 @@ const SubOntology = ({
   };
 
   const removeSubOntology = ({ ontologyData, id }: any) => {
-    for (let type of ["Actor", "Process", "Roles", "Evaluation Dimensions"]) {
+    for (type in ontologyData.subOntologies) {
       for (let category in ontologyData.subOntologies[type] || {}) {
         if ((ontologyData.subOntologies[type][category].ontologies || []).length > 0) {
           const subOntologyIdx = ontologyData.subOntologies[type][category].ontologies.findIndex(
