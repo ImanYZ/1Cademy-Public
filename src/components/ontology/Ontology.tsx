@@ -118,7 +118,6 @@ const Ontology = ({
       newOntology.description = "";
       newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
-      console.log(ontologyData);
       ontologyData.subOntologies.Specializations = {
         ["main"]: {
           ontologies: [
@@ -129,7 +128,6 @@ const Ontology = ({
           ],
         },
       };
-      console.log(ontologyData);
       await updateDoc(ontologyDoc.ref, ontologyData);
       await setDoc(newOntologyRef, newOntology);
       return newOntologyRef.id;
