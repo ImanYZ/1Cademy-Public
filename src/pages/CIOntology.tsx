@@ -16,14 +16,23 @@ import {
   where,
 } from "firebase/firestore";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IActivity, IActor, IEvaluation, IOntology, IProcesse, ISubOntology } from "src/types/IOntology";
+import {
+  IActivity,
+  IActor,
+  IEvaluation,
+  IIncentive,
+  IOntology,
+  IProcesse,
+  IReward,
+  IRole,
+  ISubOntology,
+} from "src/types/IOntology";
 
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
 import { useAuth } from "@/context/AuthContext";
-import { newId } from "@/lib/utils/newFirestoreId";
 
 import Custom404 from "./404";
 
@@ -31,7 +40,7 @@ type IOntologyPath = {
   id: string;
   title: string;
 };
-const INITIAL_VALUES: any = {
+const INITIAL_VALUES: { [key: string]: IActivity | IActor | IProcesse | IEvaluation | IRole | IIncentive | IReward } = {
   Activity: {
     title: "",
     description: "",
@@ -44,15 +53,15 @@ const INITIAL_VALUES: any = {
       Actor: {},
       Process: {},
       Specializations: {},
-      "Evaluation Dimensions": {},
+      "Evaluation Dimension": {},
     },
     ontologyType: "Activity",
   },
   Actor: {
     title: "",
     description: "",
-    Type: "",
     plainText: {
+      "Type of actor": "",
       notes: "",
       Abilities: "",
     },
@@ -64,41 +73,63 @@ const INITIAL_VALUES: any = {
   Process: {
     title: "",
     description: "",
-    Type: "",
     plainText: {
+      "Type of Process": "",
       notes: "",
       Subactivities: "",
       Dependencies: "",
       "Performance prediction models": "",
     },
-    subOntologies: { Roles: {}, Specializations: {} },
+    subOntologies: { Role: {}, Specializations: {} },
     ontologyType: "Process",
   },
-  Evaluation: {
+  "Evaluation Dimension": {
     title: "",
     description: "",
-    type: "",
     plainText: {
+      "Evaluation type": "",
       notes: "",
       "Measurement units": "",
       "Direction of desirability": "",
-      "Criteria for acceptability:": "",
+      "Criteria for acceptability": "",
     },
     subOntologies: {
       Specializations: {},
     },
-    ontologyType: "Evaluation",
+    ontologyType: "Evaluation Dimension",
   },
   Role: {
     title: "",
     description: "",
-    type: "",
-    // TO-DO : add Incentives: –
-    subOntologies: { Actor: {}, Specializations: {} },
+    subOntologies: { Actor: {}, Specializations: {}, Incentive: {} },
     plainText: {
+      "Role type": "",
+      Units: "",
       "Capabilities required": "",
+      notes: "",
     },
     ontologyType: "Role",
+  },
+  Reward: {
+    title: "",
+    description: "",
+    subOntologies: { Specializations: {} },
+    plainText: {
+      Units: "",
+      "Reward type": "",
+    },
+    ontologyType: "Reward",
+  },
+  Incentive: {
+    title: "",
+    description: "",
+    subOntologies: { Specializations: {}, "Evaluation Dimension": {}, Reward: {} },
+    plainText: {
+      "Reward function": "",
+      "Capabilities required": "",
+      notes: "",
+    },
+    ontologyType: "Incentive",
   },
 };
 
@@ -118,6 +149,8 @@ const CIOntology = () => {
   const [ontologyPath, setOntologyPath] = useState<IOntologyPath[]>([]);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [mainSpecializations, setMainSpecializations] = useState<any>({});
+
+  // const [classes, setClasses] = useState([]);
 
   const headerRef = useRef<HTMLHeadElement | null>(null);
 
@@ -140,15 +173,13 @@ const CIOntology = () => {
     for (let ontlogy of mainOntologies) {
       let specializations: any = [];
       for (let category of Object.keys(ontlogy?.subOntologies?.Specializations)) {
-        const _specializations = ontologies.filter((onto: any) => {
-          const findIdx = (ontlogy?.subOntologies?.Specializations[category]?.ontologies || []).findIndex(
-            (o: any) => o.id === onto.id
-          );
-          return findIdx !== -1;
-        });
+        const _specializations =
+          ontologies.filter((onto: any) => {
+            const arrayOntologies = ontlogy?.subOntologies?.Specializations[category]?.ontologies.map((o: any) => o.id);
+            return arrayOntologies.includes(onto.id);
+          }) || [];
         specializations = [...specializations, ..._specializations];
       }
-
       _mainSpecializations[ontlogy.title] = {
         id: ontlogy.id,
         path: [...path, ontlogy.id],
@@ -157,30 +188,28 @@ const CIOntology = () => {
     }
     return _mainSpecializations;
   };
-  const addMissingCategories = ({ __mainSpecializations }: any) => {
-    for (let category of ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"]) {
-      if (!__mainSpecializations.hasOwnProperty(category)) {
-        __mainSpecializations = {
-          [category]: {
-            id: newId(db),
-            specializations: {},
-          },
-          ...__mainSpecializations,
-        };
-      }
-    }
-    return __mainSpecializations;
-  };
+  // const addMissingCategories = ({ __mainSpecializations }: any) => {
+  //   for (let category of ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"]) {
+  //     if (!__mainSpecializations.hasOwnProperty(category)) {
+  //       __mainSpecializations = {
+  //         [category]: {
+  //           id: newId(db),
+  //           specializations: {},
+  //         },
+  //         ...__mainSpecializations,
+  //       };
+  //     }
+  //   }
+  //   return __mainSpecializations;
+  // };
   useEffect(() => {
-    const mainOntologies = ontologies.filter((ontology: any) =>
-      ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(ontology.title)
-    );
+    const mainOntologies = ontologies.filter((ontology: any) => ontology.category);
     mainOntologies.sort((a: any, b: any) => {
       const order = ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"];
       return order.indexOf(a.title) - order.indexOf(b.title);
     });
     let __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
-    __mainSpecializations = addMissingCategories({ __mainSpecializations });
+    // __mainSpecializations = addMissingCategories({ __mainSpecializations });
     /* ------------------  */
     setMainSpecializations(__mainSpecializations);
   }, [ontologies]);
@@ -270,6 +299,13 @@ const CIOntology = () => {
     async (path: { id: string; title: string }, type: string) => {
       try {
         if (!user) return;
+        if (
+          ontologies
+            .filter((ontology: any) => ontology.category)
+            .map((o: any) => o.title)
+            .includes(path.title)
+        )
+          return;
         const ontologyIndex = ontologies.findIndex((ontology: any) => ontology.id === path.id);
 
         if (ontologyIndex !== -1) {
@@ -372,106 +408,28 @@ const CIOntology = () => {
     }
   };
 
-  const getMainCategory = (category: string) => {
-    let newOntology: IActivity | IActor | IProcesse | IEvaluation | null = null;
-    if (category === "WHAT: Activities") {
-      newOntology = {
-        title: "WHAT: Activities",
-        description: "",
-        plainText: {
-          notes: "",
-          Preconditions: "",
-          Postconditions: "",
-        },
-        subOntologies: {
-          Actor: {},
-          Process: {},
-          Specializations: {},
-          "Evaluation Dimensions": {},
-        },
-        ontologyType: "Activity",
-
-        locked: true,
-      };
-    } else if (category === "WHO: Actors") {
-      newOntology = {
-        title: "WHO: Actors",
-        Type: "",
-        description: "",
-        plainText: {
-          notes: "",
-          Abilities: "",
-        },
-        subOntologies: {
-          Specializations: {},
-        },
-
-        ontologyType: "Actor",
-        locked: true,
-      };
-    } else if (category === "HOW: Processes") {
-      newOntology = {
-        title: "HOW: Processes",
-        description: "",
-        Type: "",
-        plainText: {
-          notes: "",
-          Subactivities: "",
-          Dependencies: "",
-          "Performance prediction models": "",
-        },
-        subOntologies: { Roles: {}, Specializations: {} },
-        ontologyType: "Process",
-
-        locked: true,
-      };
-    } else if (category === "WHY: Evaluation") {
-      newOntology = {
-        title: "WHY: Evaluation",
-        description: "",
-        type: "",
-        plainText: {
-          notes: "",
-          "Measurement units": "",
-          "Direction of desirability": "",
-          "Criteria for acceptability": "",
-        },
-        subOntologies: {
-          Specializations: {},
-        },
-        ontologyType: "Evaluation",
-
-        locked: true,
-      };
-    }
-    return newOntology;
-  };
   const openMainCategory = useCallback(
     async (category: string, path: string[]) => {
       if (!user) return;
       const ontologyIdx = ontologies.findIndex((onto: any) => onto.title === category);
       let _path = [...path];
-      let newId = "";
       if (ontologyIdx !== -1) {
         setOpenOntology(ontologies[ontologyIdx]);
-        newId = ontologies[ontologyIdx].id;
-      } else {
-        const newOntology = getMainCategory(category);
-        setOpenOntology(newOntology);
-        const ontologyRef = doc(collection(db, "ontology"));
-        await setDoc(ontologyRef, {
-          ...newOntology,
-          createdAt: new Date(),
-          createdBy: user.uname,
-          deleted: false,
-        });
-        newId = ontologyRef.id;
-        _path.push(newId);
       }
       await updateUserDoc([..._path]);
     },
     [ontologies, user]
   );
+  const getClasses = (mainSpecializations: any) => {
+    let _mainSpecializations = {};
+    for (let category in mainSpecializations) {
+      _mainSpecializations = {
+        ..._mainSpecializations,
+        ...mainSpecializations[category].specializations,
+      };
+    }
+    return _mainSpecializations;
+  };
 
   const TreeViewSimplified = useCallback(
     ({ mainSpecializations }: any) => {
@@ -515,20 +473,22 @@ const CIOntology = () => {
                   <Typography>
                     {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
                   </Typography>
-                  <Button
-                    variant="outlined"
-                    onClick={() => {
-                      openMainCategory(category, mainSpecializations[category]?.path || []);
-                    }}
-                    sx={{
-                      ml: "5px",
-                      fontSize: "14px",
-                      border: "none",
-                      background: "transparent",
-                    }}
-                  >
-                    Open
-                  </Button>
+                  {!["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(category) && (
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        openMainCategory(category, mainSpecializations[category]?.path || []);
+                      }}
+                      sx={{
+                        ml: "5px",
+                        fontSize: "14px",
+                        border: "none",
+                        background: "transparent",
+                      }}
+                    >
+                      Open
+                    </Button>
+                  )}
                 </Box>
               }
               sx={{ mt: "5px" }}
@@ -618,7 +578,7 @@ const CIOntology = () => {
                 setSnackbarMessage={setSnackbarMessage}
                 updateUserDoc={updateUserDoc}
                 user={user}
-                mainSpecializations={mainSpecializations}
+                mainSpecializations={getClasses(mainSpecializations)}
                 ontologies={ontologies}
                 addNewOntology={addNewOntology}
                 INITIAL_VALUES={INITIAL_VALUES}
