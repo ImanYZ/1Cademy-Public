@@ -1850,6 +1850,7 @@ const Notebook = ({}: NotebookProps) => {
           [chosingNodeId]: choosingNodeCopy,
           [chosenNodeId]: chosenNodeObj,
         };
+
         setTimeout(() => {
           setNodeUpdates({
             nodeIds: updatedNodeIds,
@@ -3506,6 +3507,24 @@ const Notebook = ({}: NotebookProps) => {
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
   );
 
+  const referenceConfirmation: any = useCallback(
+    async (selectedNodeId: string) => {
+      let referencesOK: any = true;
+
+      let currentNode = graph.nodes[selectedNodeId];
+
+      if (
+        currentNode?.nodeType &&
+        ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
+        currentNode.references.length === 0
+      ) {
+        referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+      }
+      return referencesOK;
+    },
+    [graph.nodes]
+  );
+
   const saveProposedImprovement = useCallback(
     async (summary: string, reason: string, onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
@@ -3514,19 +3533,12 @@ const Notebook = ({}: NotebookProps) => {
       let postData: any = {};
       try {
         const selectedNodeId = notebookRef.current.selectedNode!;
-        const currentNode = graph.nodes[selectedNodeId];
         notebookRef.current.chosenNode = null;
         notebookRef.current.choosingNode = null;
         nodeBookDispatch({ type: "setChosenNode", payload: null });
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
-        let referencesOK: any = true;
-        if (
-          currentNode?.nodeType &&
-          ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
-          graph.nodes[selectedNodeId].references.length === 0
-        ) {
-          referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
-        }
+
+        let referencesOK = await referenceConfirmation(selectedNodeId);
         if (!referencesOK) return;
 
         const {
@@ -3551,7 +3563,6 @@ const Notebook = ({}: NotebookProps) => {
             gtmEvent("Reputation", {
               value: 1,
             });
-
             const newNode = { ...graph.nodes[selectedNodeId] };
             if (newNode.children.length > 0) {
               const newChildren = [];
@@ -3730,7 +3741,7 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_IMPROVEMENT", user: user.uname, data: errorData });
       }
     },
-    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user]
+    [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user, referenceConfirmation]
   );
 
   const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
@@ -7306,6 +7317,7 @@ const Notebook = ({}: NotebookProps) => {
                 }}
                 onChangeChosenNode={onChangeChosenNode}
                 preLoadNodes={onPreLoadNodes}
+                notebookRef={notebookRef}
               />
               <ParentsSidebarMemoized
                 title={

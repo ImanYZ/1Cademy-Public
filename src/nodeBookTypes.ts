@@ -13,6 +13,7 @@ export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | "Improveme
 export type ChoosingNode = {
   id: string;
   type: ChoosingType;
+  impact?: string;
 };
 
 export type ChosenNode = {
