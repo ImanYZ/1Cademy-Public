@@ -329,8 +329,10 @@ const Ontology = ({
       if (ontologyDoc.exists()) {
         const ontologyData = ontologyDoc.data();
         ontologyData.subOntologies[type]["main"] = {
-          ...(ontologyData.subOntologies[type]["main"] || {}),
-          ...ontologyData.subOntologies[type][category],
+          ontologies: [
+            ...(ontologyData.subOntologies[type]["main"]?.ontologies || []),
+            ...ontologyData.subOntologies[type][category].ontologies,
+          ],
         };
         delete ontologyData.subOntologies[type][category];
         await updateDoc(ontologyDoc.ref, ontologyData);
@@ -445,7 +447,7 @@ const Ontology = ({
                       {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                     </Button>
                   </Tooltip>
-                  {type === "Specializations" && (
+                  {["Specializations", "Role", "Actor"].includes(type) && (
                     <Button
                       onClick={() => {
                         setOpenAddCategory(true);

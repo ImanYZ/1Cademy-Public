@@ -66,15 +66,20 @@ const SubOntology = ({
           if (subOntologyDoc.exists()) {
             const subOntologyData = subOntologyDoc.data();
             const parents = subOntologyData?.parents || [];
-            for (let parent of parents) {
-              const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
-              if (ontologyDoc.exists()) {
-                const ontologyData = ontologyDoc.data();
-                removeSubOntology({ ontologyData, id: subOntology.id });
-                await updateDoc(ontologyDoc.ref, ontologyData);
+            if (type === "Specializations") {
+              for (let parent of parents) {
+                const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
+                if (ontologyDoc.exists()) {
+                  const ontologyData = ontologyDoc.data();
+                  removeSubOntology({ ontologyData, id: subOntology.id, subtype: type });
+                  await updateDoc(ontologyDoc.ref, ontologyData);
+                }
               }
             }
-            await updateDoc(ontologyDoc.ref, { deleted: true });
+
+            if (type === "Specializations") {
+              await updateDoc(ontologyDoc.ref, { deleted: true });
+            }
           }
 
           await updateDoc(ontologyDoc.ref, ontologyData);
