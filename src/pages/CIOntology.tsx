@@ -22,6 +22,7 @@ import {
   IActivity,
   IActor,
   IEvaluation,
+  IGroup,
   IIncentive,
   IOntology,
   IProcesse,
