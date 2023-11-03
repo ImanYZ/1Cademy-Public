@@ -101,7 +101,15 @@ const SubOntology = ({
   return (
     <Box key={subOntology.id} sx={{ ...sx }}>
       <Box key={subOntology.id} style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
-        <Link underline="hover" onClick={linkNavigation} sx={{ cursor: "pointer", color: "white" }}>
+        <Link
+          underline="hover"
+          onClick={linkNavigation}
+          sx={{
+            cursor: "pointer",
+            color: theme =>
+              theme.palette.mode === "dark" ? theme.palette.common.gray50 : theme.palette.common.notebookMainBlack,
+          }}
+        >
           {" "}
           {subOntology.title}
         </Link>
