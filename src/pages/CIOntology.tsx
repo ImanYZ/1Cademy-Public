@@ -430,7 +430,6 @@ const CIOntology = () => {
     }
     return _mainSpecializations;
   };
-
   const TreeViewSimplified = useCallback(
     ({ mainSpecializations }: any) => {
       /* 
