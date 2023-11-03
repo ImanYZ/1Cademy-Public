@@ -329,8 +329,10 @@ const Ontology = ({
       if (ontologyDoc.exists()) {
         const ontologyData = ontologyDoc.data();
         ontologyData.subOntologies[type]["main"] = {
-          ...(ontologyData.subOntologies[type]["main"] || {}),
-          ...ontologyData.subOntologies[type][category],
+          ontologies: [
+            ...(ontologyData.subOntologies[type]["main"]?.ontologies || []),
+            ...ontologyData.subOntologies[type][category].ontologies,
+          ],
         };
         delete ontologyData.subOntologies[type][category];
         await updateDoc(ontologyDoc.ref, ontologyData);
