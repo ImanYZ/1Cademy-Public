@@ -156,6 +156,7 @@ const CIOntology = () => {
   const [mainSpecializations, setMainSpecializations] = useState<any>({});
   const [editOntology, setEditOntology] = useState<any>(null);
   const [newComment, setNewComment] = useState("");
+  const [updateComment, setUpdateComment] = useState("");
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [editingComment, setEditingComment] = useState("");
 
@@ -549,6 +550,7 @@ const CIOntology = () => {
     try {
       if (editingComment === commentId) {
         setEditingComment("");
+        setUpdateComment("");
         return;
       }
       if (await confirmIt("Are you sure you want to delete the comment?")) {
@@ -569,14 +571,14 @@ const CIOntology = () => {
         const ontologyData = ontologyDoc.data();
         let comments = ontologyData?.comments || [];
         const commentIdx = comments.findIndex((c: any) => c.id == comment.id);
-        comments[commentIdx].content = newComment;
+        comments[commentIdx].content = updateComment;
         await updateDoc(ontologyDoc.ref, { comments });
-        setEditingComment("");
+        setUpdateComment("");
         setNewComment("");
         return;
       }
       setEditingComment(comment.id);
-      setNewComment(comment.content);
+      setUpdateComment(comment.content);
     } catch (error) {
       console.error(error);
     }
@@ -693,9 +695,9 @@ const CIOntology = () => {
                       variant="outlined"
                       multiline
                       fullWidth
-                      value={newComment}
+                      value={updateComment}
                       onChange={(e: any) => {
-                        setNewComment(e.target.value);
+                        setUpdateComment(e.target.value);
                       }}
                       autoFocus
                     />
