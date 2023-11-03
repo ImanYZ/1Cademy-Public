@@ -31,6 +31,36 @@ type IOntologyProps = {
   setEditOntology: any;
 };
 
+const ORDER_SUBONTOLOGIES: any = {
+  Activity: ["Actor", "Preconditions", "Postconditions", "Evaluation Dimension", "Process", "Specializations", "Notes"],
+  Actor: ["Type of actor", "Abilities", "Specializations", "Notes"],
+  Process: [
+    "Type of Process",
+    "Role",
+    "Subactivities",
+    "Dependencies",
+    "Performance prediction models",
+    "Specializations ",
+    "Notes",
+  ],
+  Role: ["Role type", "Actor", "Incentive", "Capabilities required", "Specializations"],
+  "Evaluation Dimension": [
+    "Evaluation type",
+    "Measurement units",
+    "Direction of desirability",
+    "Criteria for acceptability",
+    "Specializations",
+  ],
+  Incentive: [
+    "Evaluation type",
+    "Measurement units",
+    "Direction of desirability",
+    "Criteria for acceptability",
+    "Specializations",
+  ],
+  Reward: ["Evaluation dimension:", "Reward", "Reward function", "Specializations"],
+};
+
 const Ontology = ({
   openOntology,
   setOpenOntology,
@@ -442,131 +472,124 @@ const Ontology = ({
             paddingLeft: "10px",
           }}
         >
-          {/* Actors: -
-                     Preconditions: –
-                     Postconditions: –
-                     Evaluations: –
-                     Process: –
-                     Specializations: */}
-        </Box>
-        {Object.keys(openOntology.subOntologies).map(type => (
-          <Box key={type}>
-            <Box sx={{ display: "grid", mt: "5px" }}>
-              <Box>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
-                  <Tooltip title={"Select"}>
-                    <Button onClick={() => showList(type, "main", false)} sx={{ ml: "5px" }}>
-                      {" "}
-                      {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
-                    </Button>
-                  </Tooltip>
-                  {["Specializations", "Role", "Actor"].includes(type) && (
-                    <Button
-                      onClick={() => {
-                        setOpenAddCategory(true);
-                        setType(type);
-                      }}
-                      sx={{ ml: "5px" }}
-                    >
-                      Add Category
-                    </Button>
-                  )}
-                </Box>
-                <ul>
-                  {Object.keys(openOntology?.subOntologies[type])
-                    .filter(c => c !== "main")
-                    .map((category: any) => {
-                      const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
+          {ORDER_SUBONTOLOGIES[openOntology?.ontologyType].map((type: string) =>
+            Object.keys(openOntology.subOntologies).includes(type) ? (
+              <Box key={type} sx={{ display: "grid", mt: "5px" }}>
+                <Box>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
+                    <Tooltip title={"Select"}>
+                      <Button onClick={() => showList(type, "main", false)} sx={{ ml: "5px" }}>
+                        {" "}
+                        {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
+                      </Button>
+                    </Tooltip>
+                    {["Specializations", "Role", "Actor"].includes(type) && (
+                      <Button
+                        onClick={() => {
+                          setOpenAddCategory(true);
+                          setType(type);
+                        }}
+                        sx={{ ml: "5px" }}
+                      >
+                        Add Category
+                      </Button>
+                    )}
+                  </Box>
+                  <ul>
+                    {Object.keys(openOntology?.subOntologies[type])
+                      .filter(c => c !== "main")
+                      .map((category: any) => {
+                        const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
+                        return (
+                          <Box key={category} /* sx={{ ml: "15px" }} */>
+                            <li key={category}>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
+                                <Button
+                                  onClick={() =>
+                                    showList(
+                                      type,
+                                      category,
+                                      openOntology?.subOntologies[type]["main"]?.ontologies.length > 0
+                                    )
+                                  }
+                                  sx={{ ml: "5px" }}
+                                >
+                                  {" "}
+                                  {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
+                                </Button>
+                                <Button onClick={() => handleEditCategory(type, category)} sx={{ ml: "5px" }}>
+                                  {" "}
+                                  Edit
+                                </Button>
+                                <Button onClick={() => deleteCategory(type, category)} sx={{ ml: "5px" }}>
+                                  {" "}
+                                  Delete
+                                </Button>
+                              </Box>
+                            </li>
+                            <ul>
+                              {subOntologies.map((subOntology: ISubOntology) => {
+                                return (
+                                  <li key={subOntology.id}>
+                                    <SubOntology
+                                      setSnackbarMessage={setSnackbarMessage}
+                                      saveSubOntology={saveSubOntology}
+                                      openOntology={openOntology}
+                                      setOpenOntology={setOpenOntology}
+                                      sx={{ mt: "15px" }}
+                                      key={openOntology.id}
+                                      subOntology={subOntology}
+                                      type={type}
+                                      category={category}
+                                      ontologyPath={ontologyPath}
+                                      updateUserDoc={updateUserDoc}
+                                    />
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </Box>
+                        );
+                      })}
+                  </ul>
+                  <ul>
+                    {(openOntology?.subOntologies[type]["main"]?.ontologies || []).map((subOntology: ISubOntology) => {
                       return (
-                        <Box key={category} /* sx={{ ml: "15px" }} */>
-                          <li key={category}>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
-                              <Button
-                                onClick={() =>
-                                  showList(
-                                    type,
-                                    category,
-                                    openOntology?.subOntologies[type]["main"]?.ontologies.length > 0
-                                  )
-                                }
-                                sx={{ ml: "5px" }}
-                              >
-                                {" "}
-                                {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
-                              </Button>
-                              <Button onClick={() => handleEditCategory(type, category)} sx={{ ml: "5px" }}>
-                                {" "}
-                                Edit
-                              </Button>
-                              <Button onClick={() => deleteCategory(type, category)} sx={{ ml: "5px" }}>
-                                {" "}
-                                Delete
-                              </Button>
-                            </Box>
-                          </li>
-                          <ul>
-                            {subOntologies.map((subOntology: ISubOntology) => {
-                              return (
-                                <li key={subOntology.id}>
-                                  <SubOntology
-                                    setSnackbarMessage={setSnackbarMessage}
-                                    saveSubOntology={saveSubOntology}
-                                    openOntology={openOntology}
-                                    setOpenOntology={setOpenOntology}
-                                    sx={{ mt: "15px" }}
-                                    key={openOntology.id}
-                                    subOntology={subOntology}
-                                    type={type}
-                                    category={category}
-                                    ontologyPath={ontologyPath}
-                                    updateUserDoc={updateUserDoc}
-                                  />
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </Box>
+                        <li key={subOntology.id}>
+                          <SubOntology
+                            setSnackbarMessage={setSnackbarMessage}
+                            saveSubOntology={saveSubOntology}
+                            openOntology={openOntology}
+                            setOpenOntology={setOpenOntology}
+                            sx={{ mt: "15px" }}
+                            key={openOntology.id}
+                            subOntology={subOntology}
+                            type={type}
+                            category={"main"}
+                            ontologyPath={ontologyPath}
+                            updateUserDoc={updateUserDoc}
+                          />
+                        </li>
                       );
                     })}
-                </ul>
-                <ul>
-                  {(openOntology?.subOntologies[type]["main"]?.ontologies || []).map((subOntology: ISubOntology) => {
-                    return (
-                      <li key={subOntology.id}>
-                        <SubOntology
-                          setSnackbarMessage={setSnackbarMessage}
-                          saveSubOntology={saveSubOntology}
-                          openOntology={openOntology}
-                          setOpenOntology={setOpenOntology}
-                          sx={{ mt: "15px" }}
-                          key={openOntology.id}
-                          subOntology={subOntology}
-                          type={type}
-                          category={"main"}
-                          ontologyPath={ontologyPath}
-                          updateUserDoc={updateUserDoc}
-                        />
-                      </li>
-                    );
-                  })}
-                </ul>
+                  </ul>
+                </Box>
               </Box>
-            </Box>
-          </Box>
-        ))}
-        {Object.keys(openOntology.plainText).map(type => (
-          <Box key={type}>
-            <SubPlainText
-              text={openOntology.plainText[type]}
-              openOntology={openOntology}
-              type={type}
-              setSnackbarMessage={setSnackbarMessage}
-              setOpenOntology={setOpenOntology}
-            />
-          </Box>
-        ))}
+            ) : (
+              <Box key={type}>
+                <SubPlainText
+                  text={openOntology.plainText[type]}
+                  openOntology={openOntology}
+                  type={type}
+                  setSnackbarMessage={setSnackbarMessage}
+                  setOpenOntology={setOpenOntology}
+                />
+              </Box>
+            )
+          )}
+        </Box>
       </Box>
       {ConfirmDialog}
     </Box>
