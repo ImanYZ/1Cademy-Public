@@ -89,7 +89,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
 
       {editMode ? (
         <TextField
-          placeholder={`... `}
+          placeholder={type}
           variant="standard"
           fullWidth
           value={text}
