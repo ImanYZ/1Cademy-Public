@@ -704,7 +704,7 @@ const CIOntology = () => {
         </Grid>
 
         <Grid item xs={3}>
-          <Box sx={{ padding: "8px", height: "85vh", overflow: "auto" }}>
+          <Box sx={{ padding: "8px", height: "80vh", overflow: "auto" }}>
             {orderComments().map((comment: any) => (
               <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "18px" }}>
                 <Box sx={{ mb: "15px", display: "flex", alignItems: "center" }}>
@@ -756,7 +756,7 @@ const CIOntology = () => {
             {!editingComment && (
               <Paper sx={{}} elevation={3}>
                 <TextField
-                  sx={{ position: "fixed", bottom: 0, padding: "8px", width: "500px" }}
+                  sx={{ position: "fixed", bottom: 0, padding: "8px", width: "400px" }}
                   variant="outlined"
                   multiline
                   placeholder="Add a Comment..."
