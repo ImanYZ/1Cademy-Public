@@ -45,7 +45,7 @@ const SubPlainText = ({
   };
 
   useEffect(() => {
-    if (type === "title") {
+    if (type === "title" && editOntology) {
       setEditMode(editOntology === openOntology.id);
     }
   }, [editOntology, openOntology]);
