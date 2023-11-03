@@ -127,6 +127,19 @@ export type IReward = IOntologyCommon & {
     Specializations: ISubOntologyCategory;
   };
 };
+export type IGroup = IOntologyCommon & {
+  plainText: {
+    "Type of actor": string;
+    Abilities: string;
+    "Type of individuals in group": string;
+    "Number of individuals in group": string;
+    notes: string;
+  };
+  subOntologies: {
+    Specializations: ISubOntologyCategory;
+    "List of individuals in group": ISubOntologyCategory;
+  };
+};
 export type IUserOntology = {
   id: string;
   uname: string;

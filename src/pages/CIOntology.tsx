@@ -45,7 +45,9 @@ type IOntologyPath = {
   id: string;
   title: string;
 };
-const INITIAL_VALUES: { [key: string]: IActivity | IActor | IProcesse | IEvaluation | IRole | IIncentive | IReward } = {
+const INITIAL_VALUES: {
+  [key: string]: IActivity | IActor | IProcesse | IEvaluation | IRole | IIncentive | IReward | IGroup;
+} = {
   Activity: {
     title: "",
     description: "",
@@ -135,6 +137,20 @@ const INITIAL_VALUES: { [key: string]: IActivity | IActor | IProcesse | IEvaluat
       notes: "",
     },
     ontologyType: "Incentive",
+  },
+  Group: {
+    plainText: {
+      "Type of actor": "",
+      Abilities: "",
+      "List of individuals in group": "",
+      "Number of individuals in group": "",
+      notes: "",
+    },
+    subOntologies: {
+      Specializations: {},
+      Individual: {},
+    },
+    ontologyType: "Group",
   },
 };
 
@@ -431,14 +447,19 @@ const CIOntology = () => {
     },
     [ontologies, user]
   );
+
   const getClasses = (mainSpecializations: any) => {
-    let _mainSpecializations = {};
+    let _mainSpecializations: any = {};
     for (let category in mainSpecializations) {
       _mainSpecializations = {
         ..._mainSpecializations,
         ...mainSpecializations[category].specializations,
       };
     }
+    _mainSpecializations = {
+      ..._mainSpecializations,
+      ..._mainSpecializations["Actor"].specializations,
+    };
     return _mainSpecializations;
   };
   const TreeViewSimplified = useCallback(
