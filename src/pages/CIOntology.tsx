@@ -140,6 +140,8 @@ const INITIAL_VALUES: {
     ontologyType: "Incentive",
   },
   Group: {
+    title: "",
+    description: "",
     plainText: {
       "Type of actor": "",
       Abilities: "",

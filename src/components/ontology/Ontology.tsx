@@ -57,9 +57,9 @@ const ORDER_SUBONTOLOGIES: any = {
   Group: [
     "Type of actor",
     "Abilities",
-    "Type of individuals in group",
-    "Number of individuals in group",
     "Individual",
+    "Number of individuals in group",
+    "List of individuals in group",
     "Specializations",
     "Notes",
   ],
