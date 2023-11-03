@@ -135,7 +135,7 @@ const Ontology = ({
     }
     const newOntology = INITIAL_VALUES[subOntologyType];
     newOntology.parents = [openOntology.id];
-    newOntology.title = "New " + subOntologyType;
+    newOntology.title = "New " + (subOntologyType === "Process" ? ontologyParent.title : subOntologyType);
     if (!ontologyParent.subOntologies[type].hasOwnProperty(category)) {
       ontologyParent.subOntologies[type] = {
         ...ontologyParent.subOntologies[type],
@@ -145,7 +145,7 @@ const Ontology = ({
       };
     }
     ontologyParent.subOntologies[type][category].ontologies.push({
-      title: "New " + subOntologyType,
+      title: "New " + (subOntologyType === "Process" ? ontologyParent.title : subOntologyType),
       id: newOntologyRef.id,
     });
 
@@ -255,7 +255,7 @@ const Ontology = ({
       }
 
       ontologyData.subOntologies[type] = {
-        ...ontologyData.subOntologies[type],
+        ...(ontologyData.subOntologies[type] || {}),
         [selectedCategory]: {
           ontologies: newSubOntologies,
         },
