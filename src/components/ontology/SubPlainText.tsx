@@ -70,7 +70,7 @@ const SubPlainText = ({
         if (["description", "title"].includes(type)) {
           ontologyData[type] = openOntology[type];
         } else {
-          ontologyData.plainText[type] = openOntology.plainText[type];
+          ontologyData.plainText[type] = openOntology.plainText[type] || "";
         }
 
         await updateDoc(ontologyDoc.ref, ontologyData);
