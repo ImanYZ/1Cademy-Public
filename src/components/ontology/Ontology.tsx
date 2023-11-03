@@ -100,6 +100,9 @@ const Ontology = ({
   // } = useTheme();
 
   const capitalizeFirstLetter = (word: string) => {
+    if (word === "Role") {
+      return "Roles";
+    }
     return word.charAt(0).toUpperCase() + word.slice(1);
   };
 
