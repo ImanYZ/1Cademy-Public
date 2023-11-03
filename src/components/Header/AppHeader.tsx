@@ -25,9 +25,10 @@ import React, { forwardRef, useEffect, useState } from "react";
 import useThemeChange from "@/hooks/useThemeChange";
 import { orange900, orangeDark } from "@/pages/home";
 
-import MITLOGO from "../../../public/CCI-logo.gif";
+import mitLogo from "../../../public/CCI-logo.gif";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
+import mitLogoDark from "../../../public/MIT-Logo-Dark.png";
 import { useAuth } from "../../context/AuthContext";
 import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
 import { Post } from "../../lib/mapApi";
@@ -178,6 +179,7 @@ const AppHeader = forwardRef(
         )}
       </Menu>
     );
+
     return (
       <>
         <Box
@@ -215,7 +217,7 @@ const AppHeader = forwardRef(
                 </Tooltip>
               ) : (
                 <Avatar
-                  src={MITLOGO.src}
+                  src={theme.palette.mode === "dark" ? mitLogoDark.src : mitLogo.src}
                   alt="logo"
                   sx={{
                     cursor: "pointer",
