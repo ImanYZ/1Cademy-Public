@@ -54,6 +54,15 @@ const ORDER_SUBONTOLOGIES: any = {
   ],
   Incentive: ["Evaluation Dimension", "Reward", "Reward function", "Specializations", "Notes"],
   Reward: ["Reward type", "Units", "Specializations", "Notes"],
+  Group: [
+    "Type of actor",
+    "Abilities",
+    "Individual",
+    "Number of individuals in group",
+    "List of individuals in group",
+    "Specializations",
+    "Notes",
+  ],
 };
 
 const Ontology = ({
@@ -100,6 +109,12 @@ const Ontology = ({
   // } = useTheme();
 
   const capitalizeFirstLetter = (word: string) => {
+    if (word === "Role") {
+      return "Roles";
+    }
+    if (word === "Individual") {
+      return "Type of individuals in group";
+    }
     return word.charAt(0).toUpperCase() + word.slice(1);
   };
 
