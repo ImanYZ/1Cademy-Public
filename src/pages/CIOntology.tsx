@@ -149,6 +149,7 @@ const CIOntology = () => {
   const [ontologyPath, setOntologyPath] = useState<IOntologyPath[]>([]);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [mainSpecializations, setMainSpecializations] = useState<any>({});
+  const [editOntology, setEditOntology] = useState<any>(null);
 
   // const [classes, setClasses] = useState([]);
 
@@ -347,6 +348,7 @@ const CIOntology = () => {
       try {
         const newOntologyRef = doc(collection(db, "ontology"), id);
         await setDoc(newOntologyRef, { ...newOntology, deleted: false });
+        setEditOntology(id);
       } catch (error) {
         console.error(error);
       }
@@ -592,6 +594,8 @@ const CIOntology = () => {
                 ontologies={ontologies}
                 addNewOntology={addNewOntology}
                 INITIAL_VALUES={INITIAL_VALUES}
+                editOntology={editOntology}
+                setEditOntology={setEditOntology}
               />
             )}
           </Box>

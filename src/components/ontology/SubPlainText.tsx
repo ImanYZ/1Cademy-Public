@@ -1,6 +1,6 @@
 import { Box, Button, TextField, Tooltip, Typography } from "@mui/material";
 import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import MarkdownRender from "../Markdown/MarkdownRender";
 
@@ -10,10 +10,20 @@ type ISubOntologyProps = {
   type: string;
   setSnackbarMessage: (message: any) => void;
   text: string;
+  editOntology?: any;
+  setEditOntology?: any;
 };
-const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntologyProps) => {
+const SubPlainText = ({
+  text,
+  type,
+  openOntology,
+  setOpenOntology,
+  editOntology = null,
+  setEditOntology,
+}: ISubOntologyProps) => {
   const db = getFirestore();
   const [editMode, setEditMode] = useState(false);
+  const textFieldRef = useRef<any>(null);
 
   const capitalizeFirstLetter = (word: string) => {
     return word.charAt(0).toUpperCase() + word.slice(1);
@@ -34,6 +44,12 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
     }
   };
 
+  useEffect(() => {
+    if (type === "title") {
+      setEditMode(editOntology === openOntology.id);
+    }
+  }, [editOntology, openOntology]);
+
   const editSaveText = async () => {
     setEditMode(edit => !edit);
     if (editMode) {
@@ -42,6 +58,7 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
         const ontologyData = ontologyDoc.data();
 
         if (type === "title") {
+          setEditOntology(null);
           for (let parentId of openOntology?.parents || []) {
             const parentRef = doc(collection(db, "ontology"), parentId);
             const parentDoc = await getDoc(parentRef);
@@ -72,6 +89,11 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
 
       return _openOntology;
     });
+  };
+  const handleFocus = (event: any) => {
+    if (type === "title" && editOntology === openOntology.id) {
+      event.target.select();
+    }
   };
 
   return (
@@ -119,6 +141,10 @@ const SubPlainText = ({ text, type, openOntology, setOpenOntology }: ISubOntolog
             width: "100%",
             display: "block",
           }}
+          focused={editMode}
+          autoFocus
+          inputRef={textFieldRef}
+          onFocus={handleFocus}
         />
       ) : (
         <Box style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>

@@ -27,6 +27,8 @@ type IOntologyProps = {
   ontologies: any;
   addNewOntology: any;
   INITIAL_VALUES: any;
+  editOntology: any;
+  setEditOntology: any;
 };
 
 const Ontology = ({
@@ -40,6 +42,8 @@ const Ontology = ({
   addNewOntology,
   INITIAL_VALUES,
   ontologyPath,
+  editOntology,
+  setEditOntology,
 }: IOntologyProps) => {
   // const [newTitle, setNewTitle] = useState<string>("");
   // const [description, setDescription] = useState<string>("");
@@ -418,6 +422,8 @@ const Ontology = ({
           type={"title"}
           setSnackbarMessage={setSnackbarMessage}
           setOpenOntology={setOpenOntology}
+          editOntology={editOntology}
+          setEditOntology={setEditOntology}
         />
         <SubPlainText
           text={openOntology.description}
