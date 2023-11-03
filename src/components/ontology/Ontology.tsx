@@ -447,7 +447,7 @@ const Ontology = ({
                       {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                     </Button>
                   </Tooltip>
-                  {type === "Specializations" && (
+                  {["Specializations", "Role", "Actor"].includes(type) && (
                     <Button
                       onClick={() => {
                         setOpenAddCategory(true);
