@@ -253,7 +253,14 @@ const Ontology = ({
           "main"
         ].ontologies.filter((ontology: any) => newSubOntologies.findIndex(o => o.id === ontology.id) === -1);
       }
-      ontologyData.subOntologies[type][selectedCategory].ontologies = newSubOntologies;
+
+      ontologyData.subOntologies[type] = {
+        ...ontologyData.subOntologies[type],
+        [selectedCategory]: {
+          ontologies: newSubOntologies,
+        },
+      };
+
       await updateDoc(ontologyDoc.ref, ontologyData);
       handleClose();
     } catch (error) {
