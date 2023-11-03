@@ -40,7 +40,7 @@ const ORDER_SUBONTOLOGIES: any = {
     "Subactivities",
     "Dependencies",
     "Performance prediction models",
-    "Specializations ",
+    "Specializations",
     "Notes",
   ],
   Role: ["Role type", "Actor", "Incentive", "Capabilities required", "Specializations"],
