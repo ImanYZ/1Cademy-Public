@@ -255,7 +255,7 @@ const Ontology = ({
       }
 
       ontologyData.subOntologies[type] = {
-        ...ontologyData.subOntologies[type],
+        ...(ontologyData.subOntologies[type] || {}),
         [selectedCategory]: {
           ontologies: newSubOntologies,
         },

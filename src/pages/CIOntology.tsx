@@ -509,7 +509,7 @@ const CIOntology = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
       <AppHeaderMemoized
         ref={headerRef}
         page="ONE_CADEMY"
@@ -535,6 +535,7 @@ const CIOntology = () => {
         <Grid item xs={2.5}>
           <Box
             sx={{
+              mt: "30px",
               height: "100vh",
               overflow: "auto",
             }}
@@ -551,22 +552,32 @@ const CIOntology = () => {
                 theme.palette.mode === "dark" ? theme.palette.common.notebookMainBlack : theme.palette.common.gray50,
               p: "20px",
               overflow: "auto",
-              height: "100vh",
+              height: "94vh",
             }}
           >
-            <Breadcrumbs sx={{ ml: "40px", position: "sticky" }}>
-              {ontologyPath.length > 1 &&
-                ontologyPath.map(path => (
-                  <Link
-                    underline="hover"
-                    key={path.id}
-                    onClick={() => handleLinkNavigation(path, "")}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
-                  </Link>
-                ))}
-            </Breadcrumbs>
+            <Box
+              sx={{
+                mt: "30px",
+                ml: "40px",
+                height: "50px", // Adjust the height as needed
+                overflow: "auto",
+              }}
+            >
+              <Breadcrumbs>
+                {ontologyPath.length > 1 &&
+                  ontologyPath.map(path => (
+                    <Link
+                      underline="hover"
+                      key={path.id}
+                      onClick={() => handleLinkNavigation(path, "")}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
+                    </Link>
+                  ))}
+              </Breadcrumbs>
+            </Box>
+
             {openOntology && (
               <Ontology
                 openOntology={openOntology}
