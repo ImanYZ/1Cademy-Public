@@ -52,15 +52,8 @@ const ORDER_SUBONTOLOGIES: any = {
     "Specializations",
     "Notes",
   ],
-  Incentive: [
-    "Evaluation type",
-    "Measurement units",
-    "Direction of desirability",
-    "Criteria for acceptability",
-    "Specializations",
-    "Notes",
-  ],
-  Reward: ["Evaluation dimension:", "Reward", "Reward function", "Specializations", "Notes"],
+  Incentive: ["Evaluation Dimension", "Reward", "Reward function", "Specializations", "Notes"],
+  Reward: ["Reward type", "Units", "Specializations", "Notes"],
 };
 
 const Ontology = ({
