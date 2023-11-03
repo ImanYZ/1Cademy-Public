@@ -1,7 +1,8 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SendIcon from "@mui/icons-material/Send";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Box, Button, Grid, Link, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, IconButton, Link, Paper, TextField, Tooltip, Typography } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import {
   collection,
@@ -15,6 +16,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import moment from "moment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   IActivity,
@@ -30,9 +32,12 @@ import {
 
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
 import { useAuth } from "@/context/AuthContext";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { newId } from "@/lib/utils/newFirestoreId";
 
 import Custom404 from "./404";
 
@@ -150,6 +155,9 @@ const CIOntology = () => {
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   const [mainSpecializations, setMainSpecializations] = useState<any>({});
   const [editOntology, setEditOntology] = useState<any>(null);
+  const [newComment, setNewComment] = useState("");
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
+  const [editingComment, setEditingComment] = useState("");
 
   // const [classes, setClasses] = useState([]);
 
@@ -504,7 +512,75 @@ const CIOntology = () => {
     },
     [mainSpecializations]
   );
+  const handleSendComment = async () => {
+    try {
+      if (!user) return;
+      const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+      const ontologyData = ontologyDoc.data();
+      const comments = ontologyData?.comments || [];
+      comments.push({
+        id: newId(db),
+        content: newComment,
+        sender: (user.fName || "") + " " + user.lName,
+        senderImage: user.imageUrl,
+        senderUname: user.uname,
+        createdAt: new Date(),
+      });
+      await updateDoc(ontologyDoc.ref, { comments });
+      setNewComment("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  function formatFirestoreTimestampWithMoment(timestamp: any) {
+    const firestoreTimestamp = timestamp.toDate();
+    const now = moment();
+    const momentTimestamp = moment(firestoreTimestamp);
+    const hoursAgo = now.diff(momentTimestamp, "hours");
 
+    if (hoursAgo < 1) {
+      return momentTimestamp.format("h:mm A") + " Today";
+    } else {
+      return momentTimestamp.format("h:mm A MMM D, YYYY");
+    }
+  }
+
+  const deleteComment = async (commentId: string) => {
+    try {
+      if (editingComment === commentId) {
+        setEditingComment("");
+        return;
+      }
+      if (await confirmIt("Are you sure you want to delete the comment?")) {
+        const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+        const ontologyData = ontologyDoc.data();
+        let comments = ontologyData?.comments || [];
+        comments = comments.filter((c: any) => c.id !== commentId);
+        await updateDoc(ontologyDoc.ref, { comments });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const editComment = async (comment: any) => {
+    try {
+      if (comment.id === editingComment) {
+        const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+        const ontologyData = ontologyDoc.data();
+        let comments = ontologyData?.comments || [];
+        const commentIdx = comments.findIndex((c: any) => c.id == comment.id);
+        comments[commentIdx].content = newComment;
+        await updateDoc(ontologyDoc.ref, { comments });
+        setEditingComment("");
+        setNewComment("");
+        return;
+      }
+      setEditingComment(comment.id);
+      setNewComment(comment.content);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   if (!user?.claims.ontology) {
     return <Custom404 />;
   }
@@ -556,28 +632,19 @@ const CIOntology = () => {
               height: "94vh",
             }}
           >
-            <Box
-              sx={{
-                mt: "30px",
-                ml: "40px",
-                height: "50px", // Adjust the height as needed
-                overflow: "auto",
-              }}
-            >
-              <Breadcrumbs>
-                {ontologyPath.length > 1 &&
-                  ontologyPath.map(path => (
-                    <Link
-                      underline="hover"
-                      key={path.id}
-                      onClick={() => handleLinkNavigation(path, "")}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
-                    </Link>
-                  ))}
-              </Breadcrumbs>
-            </Box>
+            <Breadcrumbs>
+              {ontologyPath.length > 1 &&
+                ontologyPath.map(path => (
+                  <Link
+                    underline="hover"
+                    key={path.id}
+                    onClick={() => handleLinkNavigation(path, "")}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
+                  </Link>
+                ))}
+            </Breadcrumbs>
 
             {openOntology && (
               <Ontology
@@ -600,8 +667,84 @@ const CIOntology = () => {
             )}
           </Box>
         </Grid>
-      </Grid>
 
+        <Grid item xs={2}>
+          <Box sx={{ padding: "8px" }}>
+            {(openOntology?.comments || []).map((comment: any) => (
+              <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "8px" }}>
+                <Box sx={{ mb: "15px", display: "flex", alignItems: "center" }}>
+                  <Avatar src={comment.senderImage} />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      ml: "5px",
+                    }}
+                  >
+                    <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
+                    <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+                      {formatFirestoreTimestampWithMoment(comment.createdAt)}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ pl: "5px" }}>
+                  {comment.id === editingComment ? (
+                    <TextField
+                      variant="outlined"
+                      multiline
+                      fullWidth
+                      value={newComment}
+                      onChange={(e: any) => {
+                        setNewComment(e.target.value);
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    <MarkdownRender text={comment.content} />
+                  )}
+                </Box>
+
+                {comment.senderUname === user.uname && (
+                  <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "9px" }}>
+                    <Button onClick={() => editComment(comment)}>
+                      {comment.id === editingComment ? "Save" : "Edit"}
+                    </Button>
+                    <Button onClick={() => deleteComment(comment.id)}>
+                      {" "}
+                      {comment.id === editingComment ? "Cancel" : "Delete"}
+                    </Button>
+                  </Box>
+                )}
+              </Paper>
+            ))}
+
+            {!editingComment && (
+              <TextField
+                sx={{ position: "fixed", bottom: 0, padding: "8px" }}
+                variant="outlined"
+                multiline
+                // fullWidth
+                placeholder="Add a Comment..."
+                value={newComment}
+                onChange={(e: any) => {
+                  setNewComment(e.target.value);
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <Tooltip title={"Share"}>
+                      <IconButton color="primary" onClick={handleSendComment} edge="end">
+                        <SendIcon />
+                      </IconButton>
+                    </Tooltip>
+                  ),
+                }}
+                autoFocus
+              />
+            )}
+          </Box>{" "}
+        </Grid>
+      </Grid>
+      {ConfirmDialog}
       <SneakMessage newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />
     </Box>
   );
