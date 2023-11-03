@@ -402,6 +402,7 @@ const Ontology = ({
                 width: "100%",
                 display: "block",
               }}
+              autoFocus
             />
           </Box>
         </DialogContent>
