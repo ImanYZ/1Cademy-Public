@@ -18,7 +18,6 @@ import {
 } from "firebase/firestore";
 import React, { useCallback, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { ISubOntology } from "src/types/IOntology";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 
@@ -597,12 +596,11 @@ const Ontology = ({
                   </Box>
                   <DragDropContext onDragEnd={(e: any) => handleSorting(e, type)}>
                     <ul>
-                      {Object.keys(openOntology?.subOntologies[type])
-                        .filter(c => c !== "main")
-                        .map((category: any) => {
-                          const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
-                          return (
-                            <Box key={category} id={category} /* sx={{ ml: "15px" }} */>
+                      {Object.keys(openOntology?.subOntologies[type]).map((category: any) => {
+                        const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
+                        return (
+                          <Box key={category} id={category} /* sx={{ ml: "15px" }} */>
+                            {category !== "main" && (
                               <li key={category}>
                                 <Box sx={{ display: "flex", alignItems: "center" }}>
                                   <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
@@ -629,68 +627,48 @@ const Ontology = ({
                                   </Button>
                                 </Box>
                               </li>
+                            )}
 
-                              <ul>
-                                <Droppable droppableId={category} type="CATEGORY">
-                                  {(provided: any) => (
-                                    <Box {...provided.droppableProps} ref={provided.innerRef}>
-                                      {subOntologies.map((subOntology: any, index: any) => {
-                                        return (
-                                          <Draggable key={subOntology.id} draggableId={subOntology.id} index={index}>
-                                            {(provided: any) => (
-                                              <li
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                              >
-                                                <SubOntology
-                                                  setSnackbarMessage={setSnackbarMessage}
-                                                  saveSubOntology={saveSubOntology}
-                                                  openOntology={openOntology}
-                                                  setOpenOntology={setOpenOntology}
-                                                  sx={{ mt: "15px" }}
-                                                  key={openOntology.id}
-                                                  subOntology={subOntology}
-                                                  type={type}
-                                                  category={category}
-                                                  ontologyPath={ontologyPath}
-                                                  updateUserDoc={updateUserDoc}
-                                                />
-                                              </li>
-                                            )}
-                                          </Draggable>
-                                        );
-                                      })}
-                                    </Box>
-                                  )}
-                                </Droppable>
-                              </ul>
-                            </Box>
-                          );
-                        })}
+                            <ul>
+                              <Droppable droppableId={category} type="CATEGORY">
+                                {(provided: any) => (
+                                  <Box {...provided.droppableProps} ref={provided.innerRef}>
+                                    {subOntologies.map((subOntology: any, index: any) => {
+                                      return (
+                                        <Draggable key={subOntology.id} draggableId={subOntology.id} index={index}>
+                                          {(provided: any) => (
+                                            <li
+                                              ref={provided.innerRef}
+                                              {...provided.draggableProps}
+                                              {...provided.dragHandleProps}
+                                            >
+                                              <SubOntology
+                                                setSnackbarMessage={setSnackbarMessage}
+                                                saveSubOntology={saveSubOntology}
+                                                openOntology={openOntology}
+                                                setOpenOntology={setOpenOntology}
+                                                sx={{ mt: "15px" }}
+                                                key={openOntology.id}
+                                                subOntology={subOntology}
+                                                type={type}
+                                                category={category}
+                                                ontologyPath={ontologyPath}
+                                                updateUserDoc={updateUserDoc}
+                                              />
+                                            </li>
+                                          )}
+                                        </Draggable>
+                                      );
+                                    })}
+                                  </Box>
+                                )}
+                              </Droppable>
+                            </ul>
+                          </Box>
+                        );
+                      })}
                     </ul>
                   </DragDropContext>
-                  <ul>
-                    {(openOntology?.subOntologies[type]["main"]?.ontologies || []).map((subOntology: ISubOntology) => {
-                      return (
-                        <li key={subOntology.id}>
-                          <SubOntology
-                            setSnackbarMessage={setSnackbarMessage}
-                            saveSubOntology={saveSubOntology}
-                            openOntology={openOntology}
-                            setOpenOntology={setOpenOntology}
-                            sx={{ mt: "15px" }}
-                            key={openOntology.id}
-                            subOntology={subOntology}
-                            type={type}
-                            category={"main"}
-                            ontologyPath={ontologyPath}
-                            updateUserDoc={updateUserDoc}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
                 </Box>
               </Box>
             ) : (
