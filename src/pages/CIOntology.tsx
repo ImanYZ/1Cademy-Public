@@ -201,21 +201,42 @@ const CIOntology = () => {
   const getSpecializationsTree = ({ mainOntologies, path }: any) => {
     const _mainSpecializations: any = {};
     for (let ontlogy of mainOntologies) {
-      let specializations: any = [];
       for (let category of Object.keys(ontlogy?.subOntologies?.Specializations)) {
-        const _specializations =
+        const specializations =
           ontologies.filter((onto: any) => {
             const arrayOntologies = ontlogy?.subOntologies?.Specializations[category]?.ontologies.map((o: any) => o.id);
             return arrayOntologies.includes(onto.id);
           }) || [];
-        specializations = [...specializations, ..._specializations];
+        if (category === "main") {
+          _mainSpecializations[ontlogy.title] = {
+            id: ontlogy.id,
+            path: [...path, ontlogy.id],
+            isCategory: !!ontlogy.category,
+            specializations: {
+              ...(_mainSpecializations[ontlogy.title]?.specializations || {}),
+              ...getSpecializationsTree({ mainOntologies: specializations, path: [...path, ontlogy.id] }),
+            },
+          };
+        } else {
+          _mainSpecializations[ontlogy.title] = {
+            id: ontlogy.id,
+            path: [...path, ontlogy.id],
+            specializations: {
+              ...(_mainSpecializations[ontlogy.title]?.specializations || {}),
+              [category]: {
+                isCategory: true,
+                id: newId(db),
+                specializations: getSpecializationsTree({
+                  mainOntologies: specializations,
+                  path: [...path, ontlogy.id],
+                }),
+              },
+            },
+          };
+        }
       }
-      _mainSpecializations[ontlogy.title] = {
-        id: ontlogy.id,
-        path: [...path, ontlogy.id],
-        specializations: getSpecializationsTree({ mainOntologies: specializations, path: [...path, ontlogy.id] }),
-      };
     }
+
     return _mainSpecializations;
   };
   // const addMissingCategories = ({ __mainSpecializations }: any) => {
@@ -540,14 +561,16 @@ const CIOntology = () => {
         >
           {Object.keys(mainSpecializations).map(category => (
             <TreeItem
-              key={mainSpecializations[category].id}
-              nodeId={mainSpecializations[category].id}
+              key={mainSpecializations[category]?.id || category}
+              nodeId={mainSpecializations[category]?.id || category}
               label={
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography>
-                    {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
+                    {!mainSpecializations[category].isCategory
+                      ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
+                      : category}
                   </Typography>
-                  {!["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"].includes(category) && (
+                  {!mainSpecializations[category].isCategory && (
                     <Button
                       variant="outlined"
                       onClick={() => {

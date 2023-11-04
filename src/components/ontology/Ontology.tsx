@@ -251,20 +251,22 @@ const Ontology = ({
               nodeId={mainSpecializations[category].id}
               sx={{ mt: "5px" }}
               label={
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Checkbox
-                    checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
-                    onChange={e => {
-                      e.stopPropagation();
-                      checkSpecialization(mainSpecializations[category].id);
-                    }}
-                    name={mainSpecializations[category].id}
-                    sx={{}}
-                  />
+                <Box sx={{ display: "flex", alignItems: "center", height: "50px" }}>
+                  {!mainSpecializations[category].isCategory && (
+                    <Checkbox
+                      checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
+                      onChange={e => {
+                        e.stopPropagation();
+                        checkSpecialization(mainSpecializations[category].id);
+                      }}
+                      name={mainSpecializations[category].id}
+                      sx={{}}
+                    />
+                  )}
                   <Typography>
                     {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
                   </Typography>
-                  {clone && (
+                  {clone && !mainSpecializations[category].isCategory && (
                     <Button
                       variant="outlined"
                       sx={{ ml: "9px" }}
