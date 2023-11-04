@@ -234,6 +234,10 @@ const Ontology = ({
 
   const TreeViewSimplified = useCallback(
     ({ mainSpecializations, clone }: any) => {
+      const expanded = [];
+      for (let category of Object.keys(mainSpecializations)) {
+        expanded.push(mainSpecializations[category].id);
+      }
       return (
         <TreeView
           defaultCollapseIcon={<ExpandMoreIcon />}
@@ -243,7 +247,7 @@ const Ontology = ({
               backgroundColor: "transparent",
             },
           }}
-          defaultExpanded={[]}
+          defaultExpanded={[...expanded]}
         >
           {Object.keys(mainSpecializations).map(category => (
             <TreeItem
@@ -251,7 +255,7 @@ const Ontology = ({
               nodeId={mainSpecializations[category]?.id || category}
               sx={{ mt: "5px" }}
               label={
-                <Box sx={{ display: "flex", alignItems: "center", height: "50px" }}>
+                <Box sx={{ display: "flex", alignItems: "center", height: "auto", minHeight: "50px", mt: "5px" }}>
                   {!mainSpecializations[category].isCategory && (
                     <Checkbox
                       checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
@@ -260,7 +264,6 @@ const Ontology = ({
                         checkSpecialization(mainSpecializations[category].id);
                       }}
                       name={mainSpecializations[category].id}
-                      sx={{}}
                     />
                   )}
                   <Typography>
@@ -269,7 +272,7 @@ const Ontology = ({
                   {clone && !mainSpecializations[category].isCategory && (
                     <Button
                       variant="outlined"
-                      sx={{ ml: "9px" }}
+                      sx={{ m: "9px" }}
                       onClick={() => handleCloning(mainSpecializations[category])}
                     >
                       New {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}{" "}

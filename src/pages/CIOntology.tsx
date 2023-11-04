@@ -570,7 +570,7 @@ const CIOntology = () => {
               nodeId={mainSpecializations[category]?.id || category}
               label={
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography>
+                  <Typography sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}>
                     {!mainSpecializations[category].isCategory
                       ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
                       : category}
