@@ -739,7 +739,7 @@ const CIOntology = () => {
 
         <Grid item xs={3}>
           <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Box sx={{ padding: "8px", height: "80vh", overflow: "auto" }}>
+            <Box sx={{ padding: "8px", height: "92vh", overflow: "auto" }}>
               {orderComments().map((comment: any) => (
                 <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "18px" }}>
                   <Box sx={{ mb: "15px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -789,33 +789,33 @@ const CIOntology = () => {
                   </Box>
                 </Paper>
               ))}
+              <Paper elevation={3} sx={{ mt: "15px" }}>
+                <TextField
+                  variant="outlined"
+                  multiline
+                  fullWidth
+                  placeholder="Add a Comment..."
+                  value={newComment}
+                  onChange={(e: any) => {
+                    setNewComment(e.target.value);
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <Tooltip title={"Share"}>
+                        <IconButton color="primary" onClick={handleSendComment} edge="end">
+                          <SendIcon />
+                        </IconButton>
+                      </Tooltip>
+                    ),
+                  }}
+                  autoFocus
+                  sx={{
+                    p: "8px",
+                    mt: "5px",
+                  }}
+                />
+              </Paper>
             </Box>{" "}
-            <Box>
-              {!editingComment && (
-                <Paper sx={{ height: "auto", minHeight: "100px", ml: "8px", mr: "8px" }} elevation={5}>
-                  <TextField
-                    sx={{ position: "fixed", bottom: 0, p: "8px", pb: "18px", width: "420px" }}
-                    variant="outlined"
-                    multiline
-                    placeholder="Add a Comment..."
-                    value={newComment}
-                    onChange={(e: any) => {
-                      setNewComment(e.target.value);
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title={"Share"}>
-                          <IconButton color="primary" onClick={handleSendComment} edge="end">
-                            <SendIcon />
-                          </IconButton>
-                        </Tooltip>
-                      ),
-                    }}
-                    autoFocus
-                  />
-                </Paper>
-              )}
-            </Box>
           </Box>
         </Grid>
       </Grid>
