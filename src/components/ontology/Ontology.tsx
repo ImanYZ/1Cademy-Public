@@ -452,7 +452,7 @@ const Ontology = ({
         const sourceCategory = source.droppableId; // The source category
         const destinationCategory = destination.droppableId; // The destination category
 
-        if (sourceCategory && destinationCategory) {
+        if (sourceCategory && destinationCategory && sourceCategory !== destinationCategory) {
           const ontlogyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
           if (ontlogyDoc.exists()) {
             const ontlogyData = ontlogyDoc.data();
