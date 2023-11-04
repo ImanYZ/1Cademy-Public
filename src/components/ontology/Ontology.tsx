@@ -4,7 +4,18 @@ import { TreeItem, TreeView } from "@mui/lab";
 import { Button, Checkbox, DialogActions, DialogContent, TextField, Tooltip, Typography } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import { Box } from "@mui/system";
-import { collection, doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useCallback, useState } from "react";
 import { ISubOntology } from "src/types/IOntology";
 
@@ -29,6 +40,7 @@ type IOntologyProps = {
   INITIAL_VALUES: any;
   editOntology: any;
   setEditOntology: any;
+  lockedOntology: any;
 };
 
 const ORDER_SUBONTOLOGIES: any = {
@@ -78,6 +90,8 @@ const Ontology = ({
   ontologyPath,
   editOntology,
   setEditOntology,
+  lockedOntology,
+  user,
 }: IOntologyProps) => {
   // const [newTitle, setNewTitle] = useState<string>("");
   // const [description, setDescription] = useState<string>("");
@@ -391,6 +405,37 @@ const Ontology = ({
     }
   };
 
+  const addLock = async (ontology: string, field: string, type: string) => {
+    try {
+      if (!user) return;
+      if (type == "add") {
+        const newLock = {
+          uname: user?.uname,
+          ontology,
+          field,
+          deleted: false,
+          createdAt: new Date(),
+        };
+        const ontologyDocref = doc(collection(db, "ontologyLock"));
+        await setDoc(ontologyDocref, newLock);
+      } else {
+        const locksDocs = await getDocs(
+          query(
+            collection(db, "ontologyLock"),
+            where("field", "==", field),
+            where("ontology", "==", ontology),
+            where("uname", "==", user?.uname)
+          )
+        );
+        for (let lockDoc of locksDocs.docs) {
+          await deleteDoc(lockDoc.ref);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -458,6 +503,9 @@ const Ontology = ({
 
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <SubPlainText
+          user={user}
+          lockedOntology={lockedOntology[openOntology.id] || {}}
+          addLock={addLock}
           text={openOntology.title}
           openOntology={openOntology}
           type={"title"}
@@ -467,6 +515,9 @@ const Ontology = ({
           setEditOntology={setEditOntology}
         />
         <SubPlainText
+          user={user}
+          lockedOntology={lockedOntology[openOntology.id] || {}}
+          addLock={addLock}
           text={openOntology.description}
           openOntology={openOntology}
           type={"description"}
@@ -590,6 +641,9 @@ const Ontology = ({
             ) : (
               <Box key={type}>
                 <SubPlainText
+                  user={user}
+                  lockedOntology={lockedOntology[openOntology.id] || {}}
+                  addLock={addLock}
                   text={openOntology.plainText[type]}
                   openOntology={openOntology}
                   type={type}

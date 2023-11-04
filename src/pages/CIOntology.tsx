@@ -178,6 +178,7 @@ const CIOntology = () => {
   const [updateComment, setUpdateComment] = useState("");
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [editingComment, setEditingComment] = useState("");
+  const [lockedOntology, setLockedOntology] = useState<any>({});
 
   // const [classes, setClasses] = useState([]);
 
@@ -252,7 +253,7 @@ const CIOntology = () => {
       const docChange = snapshot.docChanges()[0];
       const dataChange = docChange.doc.data();
       setOntologyPath(getPath(dataChange?.ontologyPath || []));
-      const lastOntology = dataChange?.ontologyPath.reverse()[0];
+      const lastOntology = dataChange?.ontologyPath?.reverse()[0] || "";
       const ontologyIdx = ontologies.findIndex((ontology: any) => ontology.id === lastOntology);
       if (ontologies[ontologyIdx]) setOpenOntology(ontologies[ontologyIdx]);
     });
@@ -285,6 +286,37 @@ const CIOntology = () => {
   //   });
   //   return () => unsubscribeOntology();
   // }, [user, db]);
+
+  useEffect(() => {
+    if (!user) return;
+    const ontologyQuery = query(collection(db, "ontologyLock"), where("deleted", "==", false));
+    const unsubscribeOntology = onSnapshot(ontologyQuery, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setLockedOntology((lockedOntologies: any) => {
+        let _lockedOntologies = { ...lockedOntologies };
+        for (let change of docChanges) {
+          const changeData: any = change.doc.data();
+
+          if (change.type === "removed" && _lockedOntologies.hasOwnProperty(changeData.ontology)) {
+            delete _lockedOntologies[changeData.ontology][changeData.field];
+          } else if (change.type === "added") {
+            _lockedOntologies = {
+              ..._lockedOntologies,
+              [changeData.ontology]: {
+                ..._lockedOntologies[changeData.ontology],
+                [changeData.field]: {
+                  id: change.doc.id,
+                  ...changeData,
+                },
+              },
+            };
+          }
+        }
+        return _lockedOntologies;
+      });
+    });
+    return () => unsubscribeOntology();
+  }, [user, db]);
 
   useEffect(() => {
     const ontologyQuery = query(collection(db, "ontology"), where("deleted", "==", false));
@@ -455,7 +487,7 @@ const CIOntology = () => {
     return (openOntology?.comments || []).sort((a: any, b: any) => {
       const timestampA: any = a.createdAt.toDate();
       const timestampB: any = b.createdAt.toDate();
-      return timestampB - timestampA;
+      return timestampA - timestampB;
     });
   };
 
@@ -604,9 +636,9 @@ const CIOntology = () => {
         let comments = ontologyData?.comments || [];
         const commentIdx = comments.findIndex((c: any) => c.id == comment.id);
         comments[commentIdx].content = updateComment;
+        setEditingComment("");
         await updateDoc(ontologyDoc.ref, { comments });
         setUpdateComment("");
-        setEditingComment("");
         setNewComment("");
         return;
       }
@@ -616,6 +648,7 @@ const CIOntology = () => {
       console.error(error);
     }
   };
+
   if (!user?.claims.ontology) {
     return <Custom404 />;
   }
@@ -698,86 +731,92 @@ const CIOntology = () => {
                 INITIAL_VALUES={INITIAL_VALUES}
                 editOntology={editOntology}
                 setEditOntology={setEditOntology}
+                lockedOntology={lockedOntology}
               />
             )}
           </Box>
         </Grid>
 
         <Grid item xs={3}>
-          <Box sx={{ padding: "8px", height: "80vh", overflow: "auto" }}>
-            {orderComments().map((comment: any) => (
-              <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "18px" }}>
-                <Box sx={{ mb: "15px", display: "flex", alignItems: "center" }}>
-                  <Avatar src={comment.senderImage} />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      ml: "5px",
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Box sx={{ padding: "8px", height: "80vh", overflow: "auto" }}>
+              {orderComments().map((comment: any) => (
+                <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "18px" }}>
+                  <Box sx={{ mb: "15px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Avatar src={comment.senderImage} />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          ml: "5px",
+                        }}
+                      >
+                        <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
+                        <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+                          {formatFirestoreTimestampWithMoment(comment.createdAt)}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {comment.senderUname === user.uname && (
+                      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Button onClick={() => editComment(comment)}>
+                          {comment.id === editingComment ? "Save" : "Edit"}
+                        </Button>
+                        <Button onClick={() => deleteComment(comment.id)}>
+                          {" "}
+                          {comment.id === editingComment ? "Cancel" : "Delete"}
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
+                  <Box sx={{ pl: "5px" }}>
+                    {comment.id === editingComment ? (
+                      <TextField
+                        variant="outlined"
+                        multiline
+                        fullWidth
+                        value={updateComment}
+                        onChange={(e: any) => {
+                          setUpdateComment(e.target.value);
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <MarkdownRender text={comment.content} />
+                    )}
+                  </Box>
+                </Paper>
+              ))}
+            </Box>{" "}
+            <Box>
+              {!editingComment && (
+                <Paper sx={{ height: "auto", minHeight: "100px", ml: "8px", mr: "8px" }} elevation={5}>
+                  <TextField
+                    sx={{ position: "fixed", bottom: 0, p: "8px", pb: "18px", width: "420px" }}
+                    variant="outlined"
+                    multiline
+                    placeholder="Add a Comment..."
+                    value={newComment}
+                    onChange={(e: any) => {
+                      setNewComment(e.target.value);
                     }}
-                  >
-                    <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
-                    <Typography sx={{ ml: "4px", fontSize: "12px" }}>
-                      {formatFirestoreTimestampWithMoment(comment.createdAt)}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ pl: "5px" }}>
-                  {comment.id === editingComment ? (
-                    <TextField
-                      variant="outlined"
-                      multiline
-                      fullWidth
-                      value={updateComment}
-                      onChange={(e: any) => {
-                        setUpdateComment(e.target.value);
-                      }}
-                      autoFocus
-                    />
-                  ) : (
-                    <MarkdownRender text={comment.content} />
-                  )}
-                </Box>
-
-                {comment.senderUname === user.uname && (
-                  <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "9px" }}>
-                    <Button onClick={() => editComment(comment)}>
-                      {comment.id === editingComment ? "Save" : "Edit"}
-                    </Button>
-                    <Button onClick={() => deleteComment(comment.id)}>
-                      {" "}
-                      {comment.id === editingComment ? "Cancel" : "Delete"}
-                    </Button>
-                  </Box>
-                )}
-              </Paper>
-            ))}
-
-            {!editingComment && (
-              <Paper sx={{}} elevation={3}>
-                <TextField
-                  sx={{ position: "fixed", bottom: 0, padding: "8px", width: "400px" }}
-                  variant="outlined"
-                  multiline
-                  placeholder="Add a Comment..."
-                  value={newComment}
-                  onChange={(e: any) => {
-                    setNewComment(e.target.value);
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <Tooltip title={"Share"}>
-                        <IconButton color="primary" onClick={handleSendComment} edge="end">
-                          <SendIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ),
-                  }}
-                  autoFocus
-                />
-              </Paper>
-            )}
-          </Box>{" "}
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title={"Share"}>
+                          <IconButton color="primary" onClick={handleSendComment} edge="end">
+                            <SendIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ),
+                    }}
+                    autoFocus
+                  />
+                </Paper>
+              )}
+            </Box>
+          </Box>
         </Grid>
       </Grid>
       {ConfirmDialog}
