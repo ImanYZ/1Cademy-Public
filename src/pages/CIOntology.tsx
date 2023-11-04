@@ -197,16 +197,22 @@ const CIOntology = () => {
     }
     return ontologyPath;
   };
-
   const getSpecializationsTree = ({ mainOntologies, path }: any) => {
-    const _mainSpecializations: any = {};
+    let _mainSpecializations: any = {};
     for (let ontlogy of mainOntologies) {
-      for (let category of Object.keys(ontlogy?.subOntologies?.Specializations)) {
+      _mainSpecializations[ontlogy.title] = {
+        id: ontlogy.id,
+        path: [...path, ontlogy.id],
+        isCategory: !!ontlogy.category,
+        specializations: {},
+      };
+      for (let category in ontlogy?.subOntologies?.Specializations) {
         const specializations =
           ontologies.filter((onto: any) => {
             const arrayOntologies = ontlogy?.subOntologies?.Specializations[category]?.ontologies.map((o: any) => o.id);
             return arrayOntologies.includes(onto.id);
           }) || [];
+
         if (category === "main") {
           _mainSpecializations[ontlogy.title] = {
             id: ontlogy.id,
@@ -236,7 +242,6 @@ const CIOntology = () => {
         }
       }
     }
-
     return _mainSpecializations;
   };
   // const addMissingCategories = ({ __mainSpecializations }: any) => {
@@ -522,7 +527,7 @@ const CIOntology = () => {
     }
     _mainSpecializations = {
       ..._mainSpecializations,
-      ..._mainSpecializations["Actor"].specializations,
+      ...(_mainSpecializations["Actor"]?.specializations || {}),
     };
     return _mainSpecializations;
   };

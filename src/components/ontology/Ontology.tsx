@@ -155,7 +155,7 @@ const Ontology = ({
       };
       newOntology.id = newOntologyRef.id;
       newOntology.parents = [ontologyDoc.id];
-      newOntology.title = `${ontologyData.title} copy`;
+      newOntology.title = `New ${ontologyData.title}`;
       newOntology.description = "";
       newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
@@ -164,7 +164,7 @@ const Ontology = ({
           ontologies: [
             {
               id: newOntologyRef.id,
-              title: `${ontologyData.title} copy`,
+              title: `New ${ontologyData.title}`,
             },
           ],
         },
@@ -247,8 +247,8 @@ const Ontology = ({
         >
           {Object.keys(mainSpecializations).map(category => (
             <TreeItem
-              key={mainSpecializations[category].id}
-              nodeId={mainSpecializations[category].id}
+              key={mainSpecializations[category]?.id || category}
+              nodeId={mainSpecializations[category]?.id || category}
               sx={{ mt: "5px" }}
               label={
                 <Box sx={{ display: "flex", alignItems: "center", height: "50px" }}>
