@@ -155,7 +155,7 @@ const Ontology = ({
       };
       newOntology.id = newOntologyRef.id;
       newOntology.parents = [ontologyDoc.id];
-      newOntology.title = `${ontologyData.title} copy`;
+      newOntology.title = `New ${ontologyData.title}`;
       newOntology.description = "";
       newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
@@ -164,7 +164,7 @@ const Ontology = ({
           ontologies: [
             {
               id: newOntologyRef.id,
-              title: `${ontologyData.title} copy`,
+              title: `New ${ontologyData.title}`,
             },
           ],
         },
@@ -234,6 +234,10 @@ const Ontology = ({
 
   const TreeViewSimplified = useCallback(
     ({ mainSpecializations, clone }: any) => {
+      const expanded = [];
+      for (let category of Object.keys(mainSpecializations)) {
+        expanded.push(mainSpecializations[category].id);
+      }
       return (
         <TreeView
           defaultCollapseIcon={<ExpandMoreIcon />}
@@ -243,31 +247,32 @@ const Ontology = ({
               backgroundColor: "transparent",
             },
           }}
-          defaultExpanded={[]}
+          defaultExpanded={[...expanded]}
         >
           {Object.keys(mainSpecializations).map(category => (
             <TreeItem
-              key={mainSpecializations[category].id}
-              nodeId={mainSpecializations[category].id}
+              key={mainSpecializations[category]?.id || category}
+              nodeId={mainSpecializations[category]?.id || category}
               sx={{ mt: "5px" }}
               label={
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Checkbox
-                    checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
-                    onChange={e => {
-                      e.stopPropagation();
-                      checkSpecialization(mainSpecializations[category].id);
-                    }}
-                    name={mainSpecializations[category].id}
-                    sx={{}}
-                  />
+                <Box sx={{ display: "flex", alignItems: "center", height: "auto", minHeight: "50px", mt: "5px" }}>
+                  {!mainSpecializations[category].isCategory && (
+                    <Checkbox
+                      checked={checkedSpecializations.includes(mainSpecializations[category]?.id)}
+                      onChange={e => {
+                        e.stopPropagation();
+                        checkSpecialization(mainSpecializations[category].id);
+                      }}
+                      name={mainSpecializations[category].id}
+                    />
+                  )}
                   <Typography>
                     {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}
                   </Typography>
-                  {clone && (
+                  {clone && !mainSpecializations[category].isCategory && (
                     <Button
                       variant="outlined"
-                      sx={{ ml: "9px" }}
+                      sx={{ m: "9px" }}
                       onClick={() => handleCloning(mainSpecializations[category])}
                     >
                       New {category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")}{" "}
