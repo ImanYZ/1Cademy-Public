@@ -487,7 +487,7 @@ const CIOntology = () => {
     return (openOntology?.comments || []).sort((a: any, b: any) => {
       const timestampA: any = a.createdAt.toDate();
       const timestampB: any = b.createdAt.toDate();
-      return timestampB - timestampA;
+      return timestampA - timestampB;
     });
   };
 
@@ -636,9 +636,9 @@ const CIOntology = () => {
         let comments = ontologyData?.comments || [];
         const commentIdx = comments.findIndex((c: any) => c.id == comment.id);
         comments[commentIdx].content = updateComment;
+        setEditingComment("");
         await updateDoc(ontologyDoc.ref, { comments });
         setUpdateComment("");
-        setEditingComment("");
         setNewComment("");
         return;
       }
@@ -741,20 +741,34 @@ const CIOntology = () => {
           <Box sx={{ padding: "8px", height: "80vh", overflow: "auto" }}>
             {orderComments().map((comment: any) => (
               <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "18px" }}>
-                <Box sx={{ mb: "15px", display: "flex", alignItems: "center" }}>
-                  <Avatar src={comment.senderImage} />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      ml: "5px",
-                    }}
-                  >
-                    <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
-                    <Typography sx={{ ml: "4px", fontSize: "12px" }}>
-                      {formatFirestoreTimestampWithMoment(comment.createdAt)}
-                    </Typography>
+                <Box sx={{ mb: "15px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Avatar src={comment.senderImage} />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        ml: "5px",
+                      }}
+                    >
+                      <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
+                      <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+                        {formatFirestoreTimestampWithMoment(comment.createdAt)}
+                      </Typography>
+                    </Box>
                   </Box>
+
+                  {comment.senderUname === user.uname && (
+                    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                      <Button onClick={() => editComment(comment)}>
+                        {comment.id === editingComment ? "Save" : "Edit"}
+                      </Button>
+                      <Button onClick={() => deleteComment(comment.id)}>
+                        {" "}
+                        {comment.id === editingComment ? "Cancel" : "Delete"}
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
                 <Box sx={{ pl: "5px" }}>
                   {comment.id === editingComment ? (
@@ -772,18 +786,6 @@ const CIOntology = () => {
                     <MarkdownRender text={comment.content} />
                   )}
                 </Box>
-
-                {comment.senderUname === user.uname && (
-                  <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "9px" }}>
-                    <Button onClick={() => editComment(comment)}>
-                      {comment.id === editingComment ? "Save" : "Edit"}
-                    </Button>
-                    <Button onClick={() => deleteComment(comment.id)}>
-                      {" "}
-                      {comment.id === editingComment ? "Cancel" : "Delete"}
-                    </Button>
-                  </Box>
-                )}
               </Paper>
             ))}
 
