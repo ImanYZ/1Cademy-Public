@@ -178,6 +178,7 @@ const CIOntology = () => {
   const [updateComment, setUpdateComment] = useState("");
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [editingComment, setEditingComment] = useState("");
+  const [lockedOntology, setLockedOntology] = useState<any>({});
 
   // const [classes, setClasses] = useState([]);
 
@@ -252,7 +253,7 @@ const CIOntology = () => {
       const docChange = snapshot.docChanges()[0];
       const dataChange = docChange.doc.data();
       setOntologyPath(getPath(dataChange?.ontologyPath || []));
-      const lastOntology = dataChange?.ontologyPath.reverse()[0];
+      const lastOntology = dataChange?.ontologyPath?.reverse()[0] || "";
       const ontologyIdx = ontologies.findIndex((ontology: any) => ontology.id === lastOntology);
       if (ontologies[ontologyIdx]) setOpenOntology(ontologies[ontologyIdx]);
     });
@@ -285,6 +286,37 @@ const CIOntology = () => {
   //   });
   //   return () => unsubscribeOntology();
   // }, [user, db]);
+
+  useEffect(() => {
+    if (!user) return;
+    const ontologyQuery = query(collection(db, "ontologyLock"), where("deleted", "==", false));
+    const unsubscribeOntology = onSnapshot(ontologyQuery, snapshot => {
+      const docChanges = snapshot.docChanges();
+      setLockedOntology((lockedOntologies: any) => {
+        let _lockedOntologies = { ...lockedOntologies };
+        for (let change of docChanges) {
+          const changeData: any = change.doc.data();
+
+          if (change.type === "removed" && _lockedOntologies.hasOwnProperty(changeData.ontology)) {
+            delete _lockedOntologies[changeData.ontology][changeData.field];
+          } else if (change.type === "added") {
+            _lockedOntologies = {
+              ..._lockedOntologies,
+              [changeData.ontology]: {
+                ..._lockedOntologies[changeData.ontology],
+                [changeData.field]: {
+                  id: change.doc.id,
+                  ...changeData,
+                },
+              },
+            };
+          }
+        }
+        return _lockedOntologies;
+      });
+    });
+    return () => unsubscribeOntology();
+  }, [user, db]);
 
   useEffect(() => {
     const ontologyQuery = query(collection(db, "ontology"), where("deleted", "==", false));
@@ -616,6 +648,7 @@ const CIOntology = () => {
       console.error(error);
     }
   };
+
   if (!user?.claims.ontology) {
     return <Custom404 />;
   }
@@ -698,6 +731,7 @@ const CIOntology = () => {
                 INITIAL_VALUES={INITIAL_VALUES}
                 editOntology={editOntology}
                 setEditOntology={setEditOntology}
+                lockedOntology={lockedOntology}
               />
             )}
           </Box>

@@ -1,3 +1,4 @@
+import LockIcon from "@mui/icons-material/Lock";
 import { Box, Button, TextField, Tooltip, Typography } from "@mui/material";
 import { collection, doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +13,9 @@ type ISubOntologyProps = {
   text: string;
   editOntology?: any;
   setEditOntology?: any;
+  lockedOntology?: any;
+  addLock: any;
+  user: any;
 };
 const SubPlainText = ({
   text,
@@ -20,6 +24,9 @@ const SubPlainText = ({
   setOpenOntology,
   editOntology = null,
   setEditOntology,
+  lockedOntology,
+  addLock,
+  user,
 }: ISubOntologyProps) => {
   const db = getFirestore();
   const [editMode, setEditMode] = useState(false);
@@ -72,9 +79,11 @@ const SubPlainText = ({
         } else {
           ontologyData.plainText[type] = openOntology.plainText[type] || "";
         }
-
         await updateDoc(ontologyDoc.ref, ontologyData);
+        await addLock(openOntology.id, type, "remove");
       }
+    } else {
+      await addLock(openOntology.id, type, "add");
     }
   };
 
@@ -101,14 +110,19 @@ const SubPlainText = ({
       {type !== "title" && (
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
-          <Tooltip title={editMode ? "Save" : "Edit"}>
-            <Button onClick={editSaveText} sx={{ ml: "5px" }}>
-              {editMode ? "Save" : "Edit"}
-            </Button>
-          </Tooltip>
+          {lockedOntology[type] && user.uname !== lockedOntology[type].uname ? (
+            <Tooltip title={"Locked"} sx={{ ml: "5px" }}>
+              <LockIcon />
+            </Tooltip>
+          ) : (
+            <Tooltip title={editMode ? "Save" : "Edit"}>
+              <Button onClick={editSaveText} sx={{ ml: "5px" }}>
+                {editMode ? "Save" : "Edit"}
+              </Button>
+            </Tooltip>
+          )}
         </Box>
       )}
-
       {editMode ? (
         <TextField
           placeholder={type}
@@ -150,11 +164,19 @@ const SubPlainText = ({
         <Box style={{ display: "flex", alignItems: "center", marginBottom: "15px" }}>
           <MarkdownRender text={text} sx={{ fontSize: type === "title" ? "30px" : "" }} />
           {type === "title" && !openOntology.locked && (
-            <Tooltip title={editMode ? "Save" : "Edit"}>
-              <Button onClick={editSaveText} sx={{ ml: "5px" }}>
-                {editMode ? "Save" : "Edit"}
-              </Button>
-            </Tooltip>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {lockedOntology[type] && user.uname !== lockedOntology[type].uname ? (
+                <Tooltip title={"Locked"} sx={{ ml: "5px" }}>
+                  <LockIcon />
+                </Tooltip>
+              ) : (
+                <Tooltip title={editMode ? "Save" : "Edit"}>
+                  <Button onClick={editSaveText} sx={{ ml: "5px" }}>
+                    {editMode ? "Save" : "Edit"}
+                  </Button>
+                </Tooltip>
+              )}
+            </Box>
           )}
         </Box>
       )}
