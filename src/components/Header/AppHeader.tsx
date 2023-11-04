@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
 
 import useThemeChange from "@/hooks/useThemeChange";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { orange900, orangeDark } from "@/pages/home";
 
 import mitLogo from "../../../public/CCI-logo.gif";
@@ -185,7 +186,7 @@ const AppHeader = forwardRef(
         <Box
           ref={ref}
           sx={{
-            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : "rgba(255, 255, 255, 0.85);"),
+            background: theme => (theme.palette.mode === "dark" ? "rgba(0,0,0,.72)" : DESIGN_SYSTEM_COLORS.gray200),
             backdropFilter: "saturate(180%) blur(10px)",
             position: "sticky",
             top: "0",
@@ -441,13 +442,15 @@ const AppHeader = forwardRef(
                 )}
               </Stack>
 
-              <IconButton
-                onClick={() => setOpenMenu(prev => !prev)}
-                sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
-                size="small"
-              >
-                {openMenu ? <CloseIcon /> : <MenuIcon />}
-              </IconButton>
+              {!mitpage && (
+                <IconButton
+                  onClick={() => setOpenMenu(prev => !prev)}
+                  sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}
+                  size="small"
+                >
+                  {openMenu ? <CloseIcon /> : <MenuIcon />}
+                </IconButton>
+              )}
             </Stack>
           </Stack>
           {emailExp && renderProfileMenuExp}
