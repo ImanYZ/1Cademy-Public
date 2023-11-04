@@ -767,10 +767,18 @@ const CIOntology = () => {
 
         <Grid item xs={3}>
           <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Box sx={{ padding: "8px", height: "92vh", overflow: "auto" }}>
+            <Box sx={{ padding: "10px", height: "92vh", overflow: "auto" }}>
               {orderComments().map((comment: any) => (
-                <Paper key={comment.id} elevation={3} sx={{ mt: "15px", padding: "18px" }}>
-                  <Box sx={{ mb: "15px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Paper key={comment.id} elevation={3} sx={{ mt: "15px" }}>
+                  <Box
+                    sx={{
+                      // mb: "15px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "18px",
+                    }}
+                  >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                       <Avatar src={comment.senderImage} />
                       <Box
@@ -799,20 +807,24 @@ const CIOntology = () => {
                       </Box>
                     )}
                   </Box>
-                  <Box sx={{ pl: "5px" }}>
+                  <Box>
                     {comment.id === editingComment ? (
-                      <TextField
-                        variant="outlined"
-                        multiline
-                        fullWidth
-                        value={updateComment}
-                        onChange={(e: any) => {
-                          setUpdateComment(e.target.value);
-                        }}
-                        autoFocus
-                      />
+                      <Box sx={{ pr: "8px", pl: "8px", pb: "18px" }}>
+                        <TextField
+                          variant="outlined"
+                          multiline
+                          fullWidth
+                          value={updateComment}
+                          onChange={(e: any) => {
+                            setUpdateComment(e.target.value);
+                          }}
+                          autoFocus
+                        />
+                      </Box>
                     ) : (
-                      <MarkdownRender text={comment.content} />
+                      <Box sx={{ p: "18px" }}>
+                        <MarkdownRender text={comment.content} />
+                      </Box>
                     )}
                   </Box>
                 </Paper>
