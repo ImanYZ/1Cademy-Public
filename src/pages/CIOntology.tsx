@@ -1,3 +1,4 @@
+import { Bar, Container, Section } from "@column-resizer/react";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
@@ -7,7 +8,6 @@ import {
   Avatar,
   Box,
   Button,
-  Grid,
   IconButton,
   Link,
   Paper,
@@ -777,9 +777,9 @@ const CIOntology = () => {
         }}
       />
 
-      <Grid container xs={12}>
+      <Container>
         {!isMobile && (
-          <Grid item xs={2.5}>
+          <Section minSize={40}>
             <Box
               sx={{
                 mt: "30px",
@@ -791,9 +791,10 @@ const CIOntology = () => {
                 <TreeViewSimplified mainSpecializations={mainSpecializations} />
               </Box>
             </Box>
-          </Grid>
+          </Section>
         )}
-        <Grid item xs={isMobile ? 12 : 6.5}>
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+        <Section minSize={700}>
           <Box
             sx={{
               backgroundColor: theme =>
@@ -837,9 +838,10 @@ const CIOntology = () => {
               />
             )}
           </Box>
-        </Grid>
+        </Section>
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
         {!isMobile && (
-          <Grid item xs={3}>
+          <Section minSize={50}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Search" {...a11yProps(1)} />
@@ -980,9 +982,9 @@ const CIOntology = () => {
                 </Box>
               </TabPanel> */}
             </Box>
-          </Grid>
+          </Section>
         )}
-      </Grid>
+      </Container>
       {ConfirmDialog}
       <SneakMessage newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />
     </Box>
