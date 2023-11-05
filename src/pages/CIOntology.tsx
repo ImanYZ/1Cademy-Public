@@ -1,5 +1,6 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SearchIcon from "@mui/icons-material/Search";
 import SendIcon from "@mui/icons-material/Send";
 import { TreeItem, TreeView } from "@mui/lab";
 import {
@@ -30,6 +31,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import Fuse from "fuse.js";
 import moment from "moment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -55,7 +57,7 @@ import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { newId } from "@/lib/utils/newFirestoreId";
 
-import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
+// import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
 import Custom404 from "./404";
 
 type IOntologyPath = {
@@ -181,6 +183,7 @@ const CIOntology = () => {
   //   { title: "HOW: Processes", id: newId(db) },
   //   { title: "WHY: Evaluation", id: newId(db) },
   // ];
+
   const [{ user }] = useAuth();
   const isMobile = useMediaQuery("(max-width:599px)");
 
@@ -197,9 +200,11 @@ const CIOntology = () => {
   const [editingComment, setEditingComment] = useState("");
   const [lockedOntology, setLockedOntology] = useState<any>({});
   const [value, setValue] = useState<number>(0);
+  const [searchValue, setSearchValue] = useState("");
   // const [markdownContent, setMarkdownContent] = useState("");
 
   // const [classes, setClasses] = useState([]);
+  const fuse = new Fuse(ontologies, { keys: ["title"] });
 
   const headerRef = useRef<HTMLHeadElement | null>(null);
 
@@ -584,6 +589,14 @@ const CIOntology = () => {
     };
     return _mainSpecializations;
   };
+
+  const searchWithFuse = (query: string): any => {
+    if (!query) {
+      return [];
+    }
+    return fuse.search(query).map(result => result.item);
+  };
+
   const TreeViewSimplified = useCallback(
     ({ mainSpecializations }: any) => {
       /* 
@@ -732,6 +745,10 @@ const CIOntology = () => {
   const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
   };
+  const openSearchOntology = (ontology: any) => {
+    setOpenOntology(ontology);
+    updateUserDoc([ontology.id]);
+  };
 
   if (!user?.claims.ontology) {
     return <Custom404 />;
@@ -787,17 +804,16 @@ const CIOntology = () => {
             }}
           >
             <Breadcrumbs>
-              {ontologyPath.length > 1 &&
-                ontologyPath.map(path => (
-                  <Link
-                    underline="hover"
-                    key={path.id}
-                    onClick={() => handleLinkNavigation(path, "")}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
-                  </Link>
-                ))}
+              {ontologyPath.map(path => (
+                <Link
+                  underline="hover"
+                  key={path.id}
+                  onClick={() => handleLinkNavigation(path, "")}
+                  sx={{ cursor: "pointer" }}
+                >
+                  {path.title.split(" ").splice(0, 3).join(" ") + (path.title.split(" ").length > 3 ? "..." : "")}
+                </Link>
+              ))}
             </Breadcrumbs>
 
             {openOntology && (
@@ -826,12 +842,46 @@ const CIOntology = () => {
           <Grid item xs={3}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                <Tab label="Search" {...a11yProps(1)} />
                 <Tab label="Comments" {...a11yProps(0)} />
-                <Tab label="Markdown Cheatsheet" {...a11yProps(1)} />
+                {/* <Tab label="Markdown Cheatsheet" {...a11yProps(2)} /> */}
               </Tabs>
             </Box>
             <Box sx={{ padding: "10px", height: "89vh", overflow: "auto", pb: "125px" }}>
               <TabPanel value={value} index={0}>
+                <Box sx={{ p: "18px" }}>
+                  <TextField
+                    variant="standard"
+                    placeholder="Search..."
+                    value={searchValue}
+                    onChange={e => setSearchValue(e.target.value)}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <IconButton sx={{ mr: "5px" }} color="primary" onClick={handleSendComment} edge="end">
+                          <SearchIcon />
+                        </IconButton>
+                      ),
+                    }}
+                    autoFocus
+                    sx={{
+                      p: "8px",
+                      mt: "5px",
+                    }}
+                  />
+                  <Box sx={{ p: "18px" }}>
+                    {searchWithFuse(searchValue).map((ontology: any) => (
+                      <Box key={ontology.id} sx={{ display: "flex", alignItems: "center", mt: "5px" }}>
+                        <Typography>{ontology.title}</Typography>
+                        <Button sx={{ ml: "5px" }} onClick={() => openSearchOntology(ontology)}>
+                          Open
+                        </Button>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </TabPanel>
+              <TabPanel value={value} index={1}>
                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <Box>
                     {orderComments().map((comment: any) => (
@@ -924,11 +974,11 @@ const CIOntology = () => {
                   </Box>{" "}
                 </Box>
               </TabPanel>
-              <TabPanel value={value} index={1}>
+              {/* <TabPanel value={value} index={2}>
                 <Box sx={{ p: "18px" }}>
                   <MarkdownRender text={markdownContent} />
                 </Box>
-              </TabPanel>
+              </TabPanel> */}
             </Box>
           </Grid>
         )}
