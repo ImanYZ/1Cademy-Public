@@ -10,3 +10,7 @@ declare module "slate" {
     Text: TextEditorOptions;
   }
 }
+declare module "*.md" {
+  const value: string;
+  export default value;
+}
