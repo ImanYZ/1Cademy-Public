@@ -1,7 +1,19 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Button, Checkbox, DialogActions, DialogContent, TextField, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  Checkbox,
+  DialogActions,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemIcon,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import { Box } from "@mui/system";
 import {
@@ -20,6 +32,7 @@ import React, { useCallback, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import SubOntology from "./SubOntology";
 import SubPlainText from "./SubPlainText";
@@ -594,7 +607,102 @@ const Ontology = ({
                       </Button>
                     )}
                   </Box>
-                  <DragDropContext onDragEnd={(e: any) => handleSorting(e, type)}>
+                  {["Role", "Specializations", "Actor"].includes(type) ? (
+                    <DragDropContext onDragEnd={(e: any) => handleSorting(e, type)}>
+                      <ul>
+                        {Object.keys(openOntology?.subOntologies[type])
+                          .sort((a, b) => {
+                            if (a === "main") return -1;
+                            if (b === "main") return 1;
+                            return a.localeCompare(b); // Alphabetical order for other keys
+                          })
+                          .map((category: any) => {
+                            const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
+                            return (
+                              <Box key={category} id={category} /* sx={{ ml: "15px" }} */>
+                                {category !== "main" && (
+                                  <li key={category}>
+                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                      <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
+                                      <Button
+                                        onClick={() =>
+                                          showList(
+                                            type,
+                                            category,
+                                            openOntology?.subOntologies[type]["main"]?.ontologies.length > 0
+                                          )
+                                        }
+                                        sx={{ ml: "5px" }}
+                                      >
+                                        {" "}
+                                        {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
+                                      </Button>
+                                      <Button onClick={() => handleEditCategory(type, category)} sx={{ ml: "5px" }}>
+                                        {" "}
+                                        Edit
+                                      </Button>
+                                      <Button onClick={() => deleteCategory(type, category)} sx={{ ml: "5px" }}>
+                                        {" "}
+                                        Delete
+                                      </Button>
+                                    </Box>
+                                  </li>
+                                )}
+
+                                <List>
+                                  <Droppable droppableId={category} type="CATEGORY">
+                                    {(provided: any, snapshot: any) => (
+                                      <Box
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        style={{
+                                          backgroundColor: snapshot.isDraggingOver ? DESIGN_SYSTEM_COLORS.gray250 : "",
+                                          minHeight: /* subOntologies.length > 0 ?  */ "25px" /*  : "" */,
+                                          userSelect: "none",
+                                        }}
+                                      >
+                                        {subOntologies.map((subOntology: any, index: any) => {
+                                          return (
+                                            <Draggable key={subOntology.id} draggableId={subOntology.id} index={index}>
+                                              {(provided: any) => (
+                                                <ListItem
+                                                  ref={provided.innerRef}
+                                                  {...provided.draggableProps}
+                                                  {...provided.dragHandleProps}
+                                                  sx={{ m: 0, p: 0 }}
+                                                >
+                                                  <ListItemIcon>
+                                                    <DragIndicatorIcon />
+                                                  </ListItemIcon>
+                                                  <SubOntology
+                                                    setSnackbarMessage={setSnackbarMessage}
+                                                    saveSubOntology={saveSubOntology}
+                                                    openOntology={openOntology}
+                                                    setOpenOntology={setOpenOntology}
+                                                    sx={{ mt: "15px" }}
+                                                    key={openOntology.id}
+                                                    subOntology={subOntology}
+                                                    type={type}
+                                                    category={category}
+                                                    ontologyPath={ontologyPath}
+                                                    updateUserDoc={updateUserDoc}
+                                                  />
+                                                </ListItem>
+                                              )}
+                                            </Draggable>
+                                          );
+                                        })}
+                                        {provided.placeholder}
+                                      </Box>
+                                    )}
+                                  </Droppable>
+                                </List>
+                              </Box>
+                            );
+                          })}
+                      </ul>
+                    </DragDropContext>
+                  ) : (
                     <ul>
                       {Object.keys(openOntology?.subOntologies[type]).map((category: any) => {
                         const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
@@ -630,45 +738,31 @@ const Ontology = ({
                             )}
 
                             <ul>
-                              <Droppable droppableId={category} type="CATEGORY">
-                                {(provided: any) => (
-                                  <Box {...provided.droppableProps} ref={provided.innerRef}>
-                                    {subOntologies.map((subOntology: any, index: any) => {
-                                      return (
-                                        <Draggable key={subOntology.id} draggableId={subOntology.id} index={index}>
-                                          {(provided: any) => (
-                                            <li
-                                              ref={provided.innerRef}
-                                              {...provided.draggableProps}
-                                              {...provided.dragHandleProps}
-                                            >
-                                              <SubOntology
-                                                setSnackbarMessage={setSnackbarMessage}
-                                                saveSubOntology={saveSubOntology}
-                                                openOntology={openOntology}
-                                                setOpenOntology={setOpenOntology}
-                                                sx={{ mt: "15px" }}
-                                                key={openOntology.id}
-                                                subOntology={subOntology}
-                                                type={type}
-                                                category={category}
-                                                ontologyPath={ontologyPath}
-                                                updateUserDoc={updateUserDoc}
-                                              />
-                                            </li>
-                                          )}
-                                        </Draggable>
-                                      );
-                                    })}
-                                  </Box>
-                                )}
-                              </Droppable>
+                              {subOntologies.map((subOntology: any) => {
+                                return (
+                                  <li key={subOntology.id}>
+                                    <SubOntology
+                                      setSnackbarMessage={setSnackbarMessage}
+                                      saveSubOntology={saveSubOntology}
+                                      openOntology={openOntology}
+                                      setOpenOntology={setOpenOntology}
+                                      sx={{ mt: "15px" }}
+                                      key={openOntology.id}
+                                      subOntology={subOntology}
+                                      type={type}
+                                      category={category}
+                                      ontologyPath={ontologyPath}
+                                      updateUserDoc={updateUserDoc}
+                                    />
+                                  </li>
+                                );
+                              })}
                             </ul>
                           </Box>
                         );
                       })}
                     </ul>
-                  </DragDropContext>
+                  )}
                 </Box>
               </Box>
             ) : (
