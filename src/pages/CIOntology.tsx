@@ -2,7 +2,19 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SendIcon from "@mui/icons-material/Send";
 import { TreeItem, TreeView } from "@mui/lab";
-import { Avatar, Box, Button, Grid, IconButton, Link, Paper, TextField, Tooltip, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Link,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import {
   collection,
@@ -166,6 +178,7 @@ const CIOntology = () => {
   //   { title: "WHY: Evaluation", id: newId(db) },
   // ];
   const [{ user }] = useAuth();
+  const isMobile = useMediaQuery("(max-width:599px)");
 
   const [ontologies, setOntologies] = useState<any>([]);
   // const [userOntology, setUserOntology] = useState<IUserOntology[]>([]);
@@ -270,6 +283,27 @@ const CIOntology = () => {
     setMainSpecializations(__mainSpecializations);
   }, [ontologies]);
 
+  const updateTheUrl = (path: IOntologyPath[]) => {
+    let newHash = "";
+    path.forEach((p: any) => (newHash = newHash + `#${p.id.trim()}`));
+    window.location.hash = newHash;
+  };
+
+  useEffect(() => {
+    const handleHashChange = async () => {
+      if (window.location.hash) {
+        setOntologyPath(getPath(window.location.hash.split("#") || []));
+        await updateUserDoc(window.location.hash.split("#"));
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+
+    handleHashChange();
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     if (!ontologies.length) return;
@@ -279,6 +313,7 @@ const CIOntology = () => {
       const docChange = snapshot.docChanges()[0];
       const dataChange = docChange.doc.data();
       setOntologyPath(getPath(dataChange?.ontologyPath || []));
+      updateTheUrl(getPath(dataChange?.ontologyPath || []));
       const lastOntology = dataChange?.ontologyPath?.reverse()[0] || "";
       const ontologyIdx = ontologies.findIndex((ontology: any) => ontology.id === lastOntology);
       if (ontologies[ontologyIdx]) setOpenOntology(ontologies[ontologyIdx]);
@@ -705,20 +740,22 @@ const CIOntology = () => {
       />
 
       <Grid container xs={12}>
-        <Grid item xs={2.5}>
-          <Box
-            sx={{
-              mt: "30px",
-              height: "100vh",
-              overflow: "auto",
-            }}
-          >
-            <Box sx={{ pb: "190px" }}>
-              <TreeViewSimplified mainSpecializations={mainSpecializations} />
+        {!isMobile && (
+          <Grid item xs={2.5}>
+            <Box
+              sx={{
+                mt: "30px",
+                height: "100vh",
+                overflow: "auto",
+              }}
+            >
+              <Box sx={{ pb: "190px" }}>
+                <TreeViewSimplified mainSpecializations={mainSpecializations} />
+              </Box>
             </Box>
-          </Box>
-        </Grid>
-        <Grid item xs={6.5}>
+          </Grid>
+        )}
+        <Grid item xs={isMobile ? 12 : 6.5}>
           <Box
             sx={{
               backgroundColor: theme =>
@@ -764,100 +801,101 @@ const CIOntology = () => {
             )}
           </Box>
         </Grid>
-
-        <Grid item xs={3}>
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Box sx={{ padding: "10px", height: "92vh", overflow: "auto" }}>
-              {orderComments().map((comment: any) => (
-                <Paper key={comment.id} elevation={3} sx={{ mt: "15px" }}>
-                  <Box
-                    sx={{
-                      // mb: "15px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "18px",
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Avatar src={comment.senderImage} />
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          ml: "5px",
-                        }}
-                      >
-                        <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
-                        <Typography sx={{ ml: "4px", fontSize: "12px" }}>
-                          {formatFirestoreTimestampWithMoment(comment.createdAt)}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    {comment.senderUname === user.uname && (
-                      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                        <Button onClick={() => editComment(comment)}>
-                          {comment.id === editingComment ? "Save" : "Edit"}
-                        </Button>
-                        <Button onClick={() => deleteComment(comment.id)}>
-                          {" "}
-                          {comment.id === editingComment ? "Cancel" : "Delete"}
-                        </Button>
-                      </Box>
-                    )}
-                  </Box>
-                  <Box>
-                    {comment.id === editingComment ? (
-                      <Box sx={{ pr: "8px", pl: "8px", pb: "18px" }}>
-                        <TextField
-                          variant="outlined"
-                          multiline
-                          fullWidth
-                          value={updateComment}
-                          onChange={(e: any) => {
-                            setUpdateComment(e.target.value);
+        {!isMobile && (
+          <Grid item xs={3}>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Box sx={{ padding: "10px", height: "92vh", overflow: "auto" }}>
+                {orderComments().map((comment: any) => (
+                  <Paper key={comment.id} elevation={3} sx={{ mt: "15px" }}>
+                    <Box
+                      sx={{
+                        // mb: "15px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "18px",
+                      }}
+                    >
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Avatar src={comment.senderImage} />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            ml: "5px",
                           }}
-                          autoFocus
-                        />
+                        >
+                          <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
+                          <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+                            {formatFirestoreTimestampWithMoment(comment.createdAt)}
+                          </Typography>
+                        </Box>
                       </Box>
-                    ) : (
-                      <Box sx={{ p: "18px" }}>
-                        <MarkdownRender text={comment.content} />
-                      </Box>
-                    )}
-                  </Box>
+
+                      {comment.senderUname === user.uname && (
+                        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                          <Button onClick={() => editComment(comment)}>
+                            {comment.id === editingComment ? "Save" : "Edit"}
+                          </Button>
+                          <Button onClick={() => deleteComment(comment.id)}>
+                            {" "}
+                            {comment.id === editingComment ? "Cancel" : "Delete"}
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                    <Box>
+                      {comment.id === editingComment ? (
+                        <Box sx={{ pr: "8px", pl: "8px", pb: "18px" }}>
+                          <TextField
+                            variant="outlined"
+                            multiline
+                            fullWidth
+                            value={updateComment}
+                            onChange={(e: any) => {
+                              setUpdateComment(e.target.value);
+                            }}
+                            autoFocus
+                          />
+                        </Box>
+                      ) : (
+                        <Box sx={{ p: "18px" }}>
+                          <MarkdownRender text={comment.content} />
+                        </Box>
+                      )}
+                    </Box>
+                  </Paper>
+                ))}
+                <Paper elevation={3} sx={{ mt: "15px" }}>
+                  <TextField
+                    variant="outlined"
+                    multiline
+                    fullWidth
+                    placeholder="Add a Comment..."
+                    value={newComment}
+                    onChange={(e: any) => {
+                      setNewComment(e.target.value);
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title={"Share"}>
+                          <IconButton color="primary" onClick={handleSendComment} edge="end">
+                            <SendIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ),
+                    }}
+                    autoFocus
+                    sx={{
+                      p: "8px",
+                      mt: "5px",
+                    }}
+                  />
                 </Paper>
-              ))}
-              <Paper elevation={3} sx={{ mt: "15px" }}>
-                <TextField
-                  variant="outlined"
-                  multiline
-                  fullWidth
-                  placeholder="Add a Comment..."
-                  value={newComment}
-                  onChange={(e: any) => {
-                    setNewComment(e.target.value);
-                  }}
-                  InputProps={{
-                    endAdornment: (
-                      <Tooltip title={"Share"}>
-                        <IconButton color="primary" onClick={handleSendComment} edge="end">
-                          <SendIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ),
-                  }}
-                  autoFocus
-                  sx={{
-                    p: "8px",
-                    mt: "5px",
-                  }}
-                />
-              </Paper>
-            </Box>{" "}
-          </Box>
-        </Grid>
+              </Box>{" "}
+            </Box>
+          </Grid>
+        )}
       </Grid>
       {ConfirmDialog}
       <SneakMessage newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />
