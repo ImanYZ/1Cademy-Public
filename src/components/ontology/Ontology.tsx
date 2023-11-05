@@ -54,6 +54,7 @@ type IOntologyProps = {
   editOntology: any;
   setEditOntology: any;
   lockedOntology: any;
+  recordLogs: any;
 };
 
 const ORDER_SUBONTOLOGIES: any = {
@@ -105,6 +106,7 @@ const Ontology = ({
   setEditOntology,
   lockedOntology,
   user,
+  recordLogs,
 }: IOntologyProps) => {
   // const [newTitle, setNewTitle] = useState<string>("");
   // const [description, setDescription] = useState<string>("");
@@ -366,6 +368,7 @@ const Ontology = ({
 
         await updateDoc(ontologyDoc.ref, ontologyData);
         handleCloseAddCategory();
+        await recordLogs("addCatgory", openOntology.id);
       }
     } catch (error) {
       console.error(error);
@@ -436,6 +439,7 @@ const Ontology = ({
         };
         const ontologyDocref = doc(collection(db, "ontologyLock"));
         await setDoc(ontologyDocref, newLock);
+        await recordLogs(`Trigered Edit ${field}`, ontology);
       } else {
         const locksDocs = await getDocs(
           query(
@@ -479,6 +483,7 @@ const Ontology = ({
             }
             ontlogyData.subOntologies[subType] = specializations;
             await updateDoc(ontlogyDoc.ref, ontlogyData);
+            await recordLogs("moved items from category", openOntology.id);
           }
         }
       }
@@ -553,6 +558,7 @@ const Ontology = ({
 
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <SubPlainText
+          recordLogs={recordLogs}
           user={user}
           lockedOntology={lockedOntology[openOntology.id] || {}}
           addLock={addLock}
@@ -565,6 +571,7 @@ const Ontology = ({
           setEditOntology={setEditOntology}
         />
         <SubPlainText
+          recordLogs={recordLogs}
           user={user}
           lockedOntology={lockedOntology[openOntology.id] || {}}
           addLock={addLock}
@@ -768,6 +775,7 @@ const Ontology = ({
             ) : (
               <Box key={type}>
                 <SubPlainText
+                  recordLogs={recordLogs}
                   user={user}
                   lockedOntology={lockedOntology[openOntology.id] || {}}
                   addLock={addLock}

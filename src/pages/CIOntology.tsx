@@ -10,6 +10,8 @@ import {
   Button,
   IconButton,
   Link,
+  List,
+  ListItem,
   Paper,
   Tab,
   Tabs,
@@ -55,6 +57,7 @@ import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 // import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
@@ -294,6 +297,16 @@ const CIOntology = () => {
   //     .catch(err => console.error(err));
   // });
 
+  const recordLogs = async (logType: string, ontology: string) => {
+    try {
+      if (!user) return;
+      const ontologyLogRef = doc(collection(db, "ontologyLog"));
+      await setDoc(ontologyLogRef, { type: logType, createdAt: new Date(), doer: user?.uname, ontology });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const mainOntologies = ontologies.filter((ontology: any) => ontology.category);
     mainOntologies.sort((a: any, b: any) => {
@@ -485,6 +498,9 @@ const CIOntology = () => {
     const userDocs = await getDocs(userQuery);
     const userDoc = userDocs.docs[0];
     await updateDoc(userDoc.ref, { ontologyPath });
+    if (ontologyPath.length > 0) {
+      await recordLogs("open ontology", ontologyPath[ontologyPath.length - 1]);
+    }
   };
 
   const addNewOntology = useCallback(
@@ -594,6 +610,7 @@ const CIOntology = () => {
     if (!query) {
       return [];
     }
+    recordLogs("Search", query);
     return fuse.search(query).map(result => result.item);
   };
 
@@ -777,9 +794,9 @@ const CIOntology = () => {
         }}
       />
 
-      <Container>
+      <Container style={{ height: "100%" }}>
         {!isMobile && (
-          <Section minSize={40}>
+          <Section minSize={0}>
             <Box
               sx={{
                 mt: "30px",
@@ -794,7 +811,7 @@ const CIOntology = () => {
           </Section>
         )}
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
-        <Section minSize={700}>
+        <Section minSize={!isMobile ? 1000 : 0}>
           <Box
             sx={{
               backgroundColor: theme =>
@@ -835,13 +852,14 @@ const CIOntology = () => {
                 editOntology={editOntology}
                 setEditOntology={setEditOntology}
                 lockedOntology={lockedOntology}
+                recordLogs={recordLogs}
               />
             )}
           </Box>
         </Section>
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
         {!isMobile && (
-          <Section minSize={50}>
+          <Section minSize={0}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Search" {...a11yProps(1)} />
@@ -851,7 +869,7 @@ const CIOntology = () => {
             </Box>
             <Box sx={{ padding: "10px", height: "89vh", overflow: "auto", pb: "125px" }}>
               <TabPanel value={value} index={0}>
-                <Box sx={{ p: "18px" }}>
+                <Box sx={{ pl: "10px" }}>
                   <TextField
                     variant="standard"
                     placeholder="Search..."
@@ -860,7 +878,7 @@ const CIOntology = () => {
                     fullWidth
                     InputProps={{
                       startAdornment: (
-                        <IconButton sx={{ mr: "5px" }} color="primary" onClick={handleSendComment} edge="end">
+                        <IconButton sx={{ mr: "5px", cursor: "auto" }} color="primary" edge="end">
                           <SearchIcon />
                         </IconButton>
                       ),
@@ -871,16 +889,32 @@ const CIOntology = () => {
                       mt: "5px",
                     }}
                   />
-                  <Box sx={{ p: "18px" }}>
+                  <List>
                     {searchWithFuse(searchValue).map((ontology: any) => (
-                      <Box key={ontology.id} sx={{ display: "flex", alignItems: "center", mt: "5px" }}>
+                      <ListItem
+                        key={ontology.id}
+                        onClick={() => openSearchOntology(ontology)}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          // backgroundColor: "blue", // Set the background color
+                          color: "white", // Set the text color
+                          cursor: "pointer", // Change the cursor on hover
+                          borderRadius: "4px", // Add some border radius for a button-like appearance
+                          padding: "8px", // Add some padding to space content inside
+                          transition: "background-color 0.3s", // Add a smooth transition
+                          "&:hover": {
+                            backgroundColor: DESIGN_SYSTEM_COLORS.gray200,
+                          },
+                        }}
+                      >
                         <Typography>{ontology.title}</Typography>
-                        <Button sx={{ ml: "5px" }} onClick={() => openSearchOntology(ontology)}>
+                        {/* <Button sx={{ ml: "5px" }} onClick={() => openSearchOntology(ontology)}>
                           Open
-                        </Button>
-                      </Box>
+                        </Button> */}
+                      </ListItem>
                     ))}
-                  </Box>
+                  </List>
                 </Box>
               </TabPanel>
               <TabPanel value={value} index={1}>
