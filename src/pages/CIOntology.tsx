@@ -10,6 +10,8 @@ import {
   IconButton,
   Link,
   Paper,
+  Tab,
+  Tabs,
   TextField,
   Tooltip,
   Typography,
@@ -42,6 +44,7 @@ import {
   IRole,
   ISubOntology,
 } from "src/types/IOntology";
+import { a11yProps, TabPanel } from "src/utils/TabPanel";
 
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
@@ -52,6 +55,7 @@ import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { newId } from "@/lib/utils/newFirestoreId";
 
+import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
 import Custom404 from "./404";
 
 type IOntologyPath = {
@@ -192,6 +196,8 @@ const CIOntology = () => {
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [editingComment, setEditingComment] = useState("");
   const [lockedOntology, setLockedOntology] = useState<any>({});
+  const [value, setValue] = useState<number>(0);
+  // const [markdownContent, setMarkdownContent] = useState("");
 
   // const [classes, setClasses] = useState([]);
 
@@ -271,6 +277,18 @@ const CIOntology = () => {
   //   }
   //   return __mainSpecializations;
   // };
+
+  // useEffect(() => {
+  //   import("../components/ontology/Markdown-Here-Cheatsheet.md")
+  //     .then(res => {
+  //       fetch(res.default)
+  //         .then(res => res.text())
+  //         .then(res => setMarkdownContent(res))
+  //         .catch(err => console.error(err));
+  //     })
+  //     .catch(err => console.error(err));
+  // });
+
   useEffect(() => {
     const mainOntologies = ontologies.filter((ontology: any) => ontology.category);
     mainOntologies.sort((a: any, b: any) => {
@@ -711,6 +729,9 @@ const CIOntology = () => {
       console.error(error);
     }
   };
+  const handleChange = (event: any, newValue: number) => {
+    setValue(newValue);
+  };
 
   if (!user?.claims.ontology) {
     return <Custom404 />;
@@ -803,96 +824,111 @@ const CIOntology = () => {
         </Grid>
         {!isMobile && (
           <Grid item xs={3}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Box sx={{ padding: "10px", height: "92vh", overflow: "auto" }}>
-                {orderComments().map((comment: any) => (
-                  <Paper key={comment.id} elevation={3} sx={{ mt: "15px" }}>
-                    <Box
-                      sx={{
-                        // mb: "15px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "18px",
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Avatar src={comment.senderImage} />
+            <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
+              <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                <Tab label="Comments" {...a11yProps(0)} />
+                <Tab label="Markdown Cheatsheet" {...a11yProps(1)} />
+              </Tabs>
+            </Box>
+            <Box sx={{ padding: "10px", height: "89vh", overflow: "auto", pb: "125px" }}>
+              <TabPanel value={value} index={0}>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Box>
+                    {orderComments().map((comment: any) => (
+                      <Paper key={comment.id} elevation={3} sx={{ mt: "15px" }}>
                         <Box
                           sx={{
+                            // mb: "15px",
                             display: "flex",
-                            flexDirection: "column",
-                            ml: "5px",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "18px",
                           }}
                         >
-                          <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
-                          <Typography sx={{ ml: "4px", fontSize: "12px" }}>
-                            {formatFirestoreTimestampWithMoment(comment.createdAt)}
-                          </Typography>
-                        </Box>
-                      </Box>
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Avatar src={comment.senderImage} />
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                ml: "5px",
+                              }}
+                            >
+                              <Typography sx={{ ml: "4px", fontSize: "14px" }}>{comment.sender}</Typography>
+                              <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+                                {formatFirestoreTimestampWithMoment(comment.createdAt)}
+                              </Typography>
+                            </Box>
+                          </Box>
 
-                      {comment.senderUname === user.uname && (
-                        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                          <Button onClick={() => editComment(comment)}>
-                            {comment.id === editingComment ? "Save" : "Edit"}
-                          </Button>
-                          <Button onClick={() => deleteComment(comment.id)}>
-                            {" "}
-                            {comment.id === editingComment ? "Cancel" : "Delete"}
-                          </Button>
+                          {comment.senderUname === user.uname && (
+                            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                              <Button onClick={() => editComment(comment)}>
+                                {comment.id === editingComment ? "Save" : "Edit"}
+                              </Button>
+                              <Button onClick={() => deleteComment(comment.id)}>
+                                {" "}
+                                {comment.id === editingComment ? "Cancel" : "Delete"}
+                              </Button>
+                            </Box>
+                          )}
                         </Box>
-                      )}
-                    </Box>
-                    <Box>
-                      {comment.id === editingComment ? (
-                        <Box sx={{ pr: "8px", pl: "8px", pb: "18px" }}>
-                          <TextField
-                            variant="outlined"
-                            multiline
-                            fullWidth
-                            value={updateComment}
-                            onChange={(e: any) => {
-                              setUpdateComment(e.target.value);
-                            }}
-                            autoFocus
-                          />
+                        <Box>
+                          {comment.id === editingComment ? (
+                            <Box sx={{ pr: "12px", pl: "12px", pb: "18px" }}>
+                              <TextField
+                                variant="outlined"
+                                multiline
+                                fullWidth
+                                value={updateComment}
+                                onChange={(e: any) => {
+                                  setUpdateComment(e.target.value);
+                                }}
+                                autoFocus
+                              />
+                            </Box>
+                          ) : (
+                            <Box sx={{ p: "18px" }}>
+                              <MarkdownRender text={comment.content} />
+                            </Box>
+                          )}
                         </Box>
-                      ) : (
-                        <Box sx={{ p: "18px" }}>
-                          <MarkdownRender text={comment.content} />
-                        </Box>
-                      )}
-                    </Box>
-                  </Paper>
-                ))}
-                <Paper elevation={3} sx={{ mt: "15px" }}>
-                  <TextField
-                    variant="outlined"
-                    multiline
-                    fullWidth
-                    placeholder="Add a Comment..."
-                    value={newComment}
-                    onChange={(e: any) => {
-                      setNewComment(e.target.value);
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title={"Share"}>
-                          <IconButton color="primary" onClick={handleSendComment} edge="end">
-                            <SendIcon />
-                          </IconButton>
-                        </Tooltip>
-                      ),
-                    }}
-                    autoFocus
-                    sx={{
-                      p: "8px",
-                      mt: "5px",
-                    }}
-                  />
-                </Paper>
-              </Box>{" "}
+                      </Paper>
+                    ))}
+                    <Paper elevation={3} sx={{ mt: "15px" }}>
+                      <TextField
+                        variant="outlined"
+                        multiline
+                        fullWidth
+                        placeholder="Add a Comment..."
+                        value={newComment}
+                        onChange={(e: any) => {
+                          setNewComment(e.target.value);
+                        }}
+                        InputProps={{
+                          endAdornment: (
+                            <Tooltip title={"Share"}>
+                              <IconButton color="primary" onClick={handleSendComment} edge="end">
+                                <SendIcon />
+                              </IconButton>
+                            </Tooltip>
+                          ),
+                        }}
+                        autoFocus
+                        sx={{
+                          p: "8px",
+                          mt: "5px",
+                        }}
+                      />
+                    </Paper>
+                  </Box>{" "}
+                </Box>
+              </TabPanel>
+              <TabPanel value={value} index={1}>
+                <Box sx={{ p: "18px" }}>
+                  <MarkdownRender text={markdownContent} />
+                </Box>
+              </TabPanel>
             </Box>
           </Grid>
         )}
