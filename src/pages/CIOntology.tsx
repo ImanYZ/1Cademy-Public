@@ -777,9 +777,9 @@ const CIOntology = () => {
         }}
       />
 
-      <Container>
+      <Container style={{ height: "100%" }}>
         {!isMobile && (
-          <Section minSize={40}>
+          <Section minSize={0}>
             <Box
               sx={{
                 mt: "30px",
@@ -794,7 +794,7 @@ const CIOntology = () => {
           </Section>
         )}
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
-        <Section minSize={700}>
+        <Section minSize={!isMobile ? 1200 : 0}>
           <Box
             sx={{
               backgroundColor: theme =>
@@ -841,7 +841,7 @@ const CIOntology = () => {
         </Section>
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
         {!isMobile && (
-          <Section minSize={50}>
+          <Section minSize={0}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Search" {...a11yProps(1)} />
