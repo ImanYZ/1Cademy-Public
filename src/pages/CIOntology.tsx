@@ -794,7 +794,7 @@ const CIOntology = () => {
           </Section>
         )}
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
-        <Section minSize={!isMobile ? 1200 : 0}>
+        <Section minSize={!isMobile ? 1000 : 0}>
           <Box
             sx={{
               backgroundColor: theme =>
