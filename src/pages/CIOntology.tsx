@@ -36,6 +36,7 @@ import {
 import Fuse from "fuse.js";
 import moment from "moment";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   IActivity,
   IActor,
@@ -1039,7 +1040,7 @@ const CIOntology = () => {
               </TabPanel>
               <TabPanel value={value} index={2}>
                 <Box sx={{ p: "18px" }}>
-                  <MarkdownRender text={markdownContent} />
+                  <ReactMarkdown>{markdownContent}</ReactMarkdown>
                 </Box>
               </TabPanel>
             </Box>
