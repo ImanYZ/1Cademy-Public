@@ -840,7 +840,7 @@ const CIOntology = () => {
           </Section>
         )}
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
-        <Section minSize={!isMobile ? 1000 : 0}>
+        <Section minSize={!isMobile ? 0 : 0}>
           <Box
             sx={{
               backgroundColor: theme =>
@@ -954,7 +954,8 @@ const CIOntology = () => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            padding: "18px",
+                            p: "18px",
+                            pb: "0px",
                           }}
                         >
                           <Box sx={{ display: "flex", alignItems: "center" }}>
