@@ -202,7 +202,7 @@ const CIOntology = () => {
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [editingComment, setEditingComment] = useState("");
   const [lockedOntology, setLockedOntology] = useState<any>({});
-  const [value, setValue] = useState<number>(0);
+  const [value, setValue] = useState<number>(1);
   const [searchValue, setSearchValue] = useState("");
   // const [markdownContent, setMarkdownContent] = useState("");
 
