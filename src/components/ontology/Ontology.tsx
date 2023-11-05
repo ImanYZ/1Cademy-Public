@@ -646,6 +646,10 @@ const Ontology = ({
                           })
                           .map((category: any) => {
                             const subOntologies = openOntology?.subOntologies[type][category]?.ontologies || [];
+                            const showGap =
+                              Object.keys(openOntology?.subOntologies[type]).filter(
+                                c => (openOntology?.subOntologies[type][c]?.ontologies || []).length > 0 && c !== "main"
+                              ).length > 0;
                             return (
                               <Box key={category} id={category} /* sx={{ ml: "15px" }} */>
                                 {category !== "main" && (
@@ -677,7 +681,7 @@ const Ontology = ({
                                   </li>
                                 )}
 
-                                {(subOntologies.length > 0 || category !== "main") && (
+                                {(subOntologies.length > 0 || showGap) && (
                                   <List>
                                     <Droppable droppableId={category} type="CATEGORY">
                                       {(provided: any, snapshot: any) => (
