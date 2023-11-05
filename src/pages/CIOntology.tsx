@@ -297,11 +297,11 @@ const CIOntology = () => {
   //     .catch(err => console.error(err));
   // });
 
-  const recordLogs = async (logType: string, ontology: string) => {
+  const recordLogs = async (logs: any) => {
     try {
       if (!user) return;
       const ontologyLogRef = doc(collection(db, "ontologyLog"));
-      await setDoc(ontologyLogRef, { type: logType, createdAt: new Date(), doer: user?.uname, ontology });
+      await setDoc(ontologyLogRef, { ...logs, createdAt: new Date(), doer: user?.uname });
     } catch (error) {
       console.error(error);
     }
@@ -499,7 +499,7 @@ const CIOntology = () => {
     const userDoc = userDocs.docs[0];
     await updateDoc(userDoc.ref, { ontologyPath });
     if (ontologyPath.length > 0) {
-      await recordLogs("open ontology", ontologyPath[ontologyPath.length - 1]);
+      await recordLogs({ action: "Opened a page", page: ontologyPath[ontologyPath.length - 1] });
     }
   };
 
@@ -508,6 +508,7 @@ const CIOntology = () => {
       try {
         const newOntologyRef = doc(collection(db, "ontology"), id);
         await setDoc(newOntologyRef, { ...newOntology, deleted: false });
+        await recordLogs({ action: "Created a field", feild: newOntology.ontologyType });
         setEditOntology(id);
       } catch (error) {
         console.error(error);
@@ -577,6 +578,10 @@ const CIOntology = () => {
       let _path = [...path];
       if (ontologyIdx !== -1) {
         setOpenOntology(ontologies[ontologyIdx]);
+        await recordLogs({
+          action: "Clicked tree-view",
+          itemClicked: ontologies[ontologyIdx].id,
+        });
       }
       await updateUserDoc([..._path]);
     },
@@ -610,7 +615,10 @@ const CIOntology = () => {
     if (!query) {
       return [];
     }
-    recordLogs("Search", query);
+    recordLogs({
+      action: "Searched",
+      query,
+    });
     return fuse.search(query).map(result => result.item);
   };
 
@@ -703,6 +711,11 @@ const CIOntology = () => {
         createdAt: new Date(),
       });
       await updateDoc(ontologyDoc.ref, { comments });
+      await recordLogs({
+        action: "Commented",
+        comment: newComment,
+        ontology: ontologyDoc.id,
+      });
       setNewComment("");
     } catch (error) {
       console.error(error);
@@ -732,8 +745,14 @@ const CIOntology = () => {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         const ontologyData = ontologyDoc.data();
         let comments = ontologyData?.comments || [];
+        const removedComment = comments.filter((c: any) => c.id === commentId);
         comments = comments.filter((c: any) => c.id !== commentId);
         await updateDoc(ontologyDoc.ref, { comments });
+        await recordLogs({
+          action: "Comment Deleted",
+          comment: removedComment,
+          ontology: openOntology.id,
+        });
       }
     } catch (error) {
       console.error(error);
@@ -746,9 +765,15 @@ const CIOntology = () => {
         const ontologyData = ontologyDoc.data();
         let comments = ontologyData?.comments || [];
         const commentIdx = comments.findIndex((c: any) => c.id == comment.id);
+        recordLogs({
+          action: "Comment Modified",
+          previousValue: comments[commentIdx].content,
+          newValue: updateComment,
+        });
         comments[commentIdx].content = updateComment;
         setEditingComment("");
         await updateDoc(ontologyDoc.ref, { comments });
+
         setUpdateComment("");
         setNewComment("");
         return;
@@ -765,6 +790,10 @@ const CIOntology = () => {
   const openSearchOntology = (ontology: any) => {
     setOpenOntology(ontology);
     updateUserDoc([ontology.id]);
+    recordLogs({
+      action: "Search result clicked",
+      clicked: ontology.id,
+    });
   };
 
   if (!user?.claims.ontology) {

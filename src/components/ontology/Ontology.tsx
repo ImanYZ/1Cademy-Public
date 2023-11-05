@@ -352,6 +352,13 @@ const Ontology = ({
       if (ontologyDoc.exists()) {
         const ontologyData = ontologyDoc.data();
         if (editCategory) {
+          await recordLogs({
+            action: "Edited a category",
+            previousValue: editCategory.category,
+            newValue: newCategory,
+            ontology: ontologyDoc.id,
+            feild: editCategory.type,
+          });
           ontologyData.subOntologies[editCategory.type][newCategory] =
             ontologyData.subOntologies[editCategory.type][editCategory.category];
           delete ontologyData.subOntologies[editCategory.type][editCategory.category];
@@ -364,11 +371,16 @@ const Ontology = ({
               },
             };
           }
+          await recordLogs({
+            action: "Created a category",
+            category: newCategory,
+            ontology: ontologyDoc.id,
+            feild: type,
+          });
         }
 
         await updateDoc(ontologyDoc.ref, ontologyData);
         handleCloseAddCategory();
-        await recordLogs("addCatgory", openOntology.id);
       }
     } catch (error) {
       console.error(error);
@@ -422,6 +434,11 @@ const Ontology = ({
         };
         delete ontologyData.subOntologies[type][category];
         await updateDoc(ontologyDoc.ref, ontologyData);
+        await recordLogs({
+          action: "Deleted a category",
+          category,
+          ontology: ontologyDoc.id,
+        });
       }
     }
   };
@@ -439,7 +456,6 @@ const Ontology = ({
         };
         const ontologyDocref = doc(collection(db, "ontologyLock"));
         await setDoc(ontologyDocref, newLock);
-        await recordLogs(`Trigered Edit ${field}`, ontology);
       } else {
         const locksDocs = await getDocs(
           query(
@@ -483,7 +499,12 @@ const Ontology = ({
             }
             ontlogyData.subOntologies[subType] = specializations;
             await updateDoc(ontlogyDoc.ref, ontlogyData);
-            await recordLogs("moved items from category", openOntology.id);
+            await recordLogs({
+              action: "Moved a field to a category",
+              feild: subType,
+              sourceCategory: sourceCategory === "main" ? "outside" : sourceCategory,
+              destinationCategory: destinationCategory === "main" ? "outside" : destinationCategory,
+            });
           }
         }
       }
@@ -682,6 +703,7 @@ const Ontology = ({
                                                     <DragIndicatorIcon />
                                                   </ListItemIcon>
                                                   <SubOntology
+                                                    recordLogs={recordLogs}
                                                     setSnackbarMessage={setSnackbarMessage}
                                                     saveSubOntology={saveSubOntology}
                                                     openOntology={openOntology}
@@ -749,6 +771,7 @@ const Ontology = ({
                                 return (
                                   <li key={subOntology.id}>
                                     <SubOntology
+                                      recordLogs={recordLogs}
                                       setSnackbarMessage={setSnackbarMessage}
                                       saveSubOntology={saveSubOntology}
                                       openOntology={openOntology}
