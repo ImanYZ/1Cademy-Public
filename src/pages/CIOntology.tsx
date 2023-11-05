@@ -57,7 +57,7 @@ import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { newId } from "@/lib/utils/newFirestoreId";
 
-import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
+// import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
 import Custom404 from "./404";
 
 type IOntologyPath = {
@@ -844,10 +844,43 @@ const CIOntology = () => {
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Search" {...a11yProps(1)} />
                 <Tab label="Comments" {...a11yProps(0)} />
-                <Tab label="Markdown Cheatsheet" {...a11yProps(2)} />
+                {/* <Tab label="Markdown Cheatsheet" {...a11yProps(2)} /> */}
               </Tabs>
             </Box>
             <Box sx={{ padding: "10px", height: "89vh", overflow: "auto", pb: "125px" }}>
+              <TabPanel value={value} index={0}>
+                <Box sx={{ p: "18px" }}>
+                  <TextField
+                    variant="standard"
+                    placeholder="Search..."
+                    value={searchValue}
+                    onChange={e => setSearchValue(e.target.value)}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <IconButton sx={{ mr: "5px" }} color="primary" onClick={handleSendComment} edge="end">
+                          <SearchIcon />
+                        </IconButton>
+                      ),
+                    }}
+                    autoFocus
+                    sx={{
+                      p: "8px",
+                      mt: "5px",
+                    }}
+                  />
+                  <Box sx={{ p: "18px" }}>
+                    {searchWithFuse(searchValue).map((ontology: any) => (
+                      <Box key={ontology.id} sx={{ display: "flex", alignItems: "center", mt: "5px" }}>
+                        <Typography>{ontology.title}</Typography>
+                        <Button sx={{ ml: "5px" }} onClick={() => openSearchOntology(ontology)}>
+                          Open
+                        </Button>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </TabPanel>
               <TabPanel value={value} index={1}>
                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                   <Box>
@@ -941,44 +974,11 @@ const CIOntology = () => {
                   </Box>{" "}
                 </Box>
               </TabPanel>
-              <TabPanel value={value} index={2}>
+              {/* <TabPanel value={value} index={2}>
                 <Box sx={{ p: "18px" }}>
                   <MarkdownRender text={markdownContent} />
                 </Box>
-              </TabPanel>
-              <TabPanel value={value} index={0}>
-                <Box sx={{ p: "18px" }}>
-                  <TextField
-                    variant="standard"
-                    placeholder="Search..."
-                    value={searchValue}
-                    onChange={e => setSearchValue(e.target.value)}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <IconButton sx={{ mr: "5px" }} color="primary" onClick={handleSendComment} edge="end">
-                          <SearchIcon />
-                        </IconButton>
-                      ),
-                    }}
-                    autoFocus
-                    sx={{
-                      p: "8px",
-                      mt: "5px",
-                    }}
-                  />
-                  <Box sx={{ p: "18px" }}>
-                    {searchWithFuse(searchValue).map((ontology: any) => (
-                      <Box key={ontology.id} sx={{ display: "flex", alignItems: "center", mt: "5px" }}>
-                        <Typography>{ontology.title}</Typography>
-                        <Button sx={{ ml: "5px" }} onClick={() => openSearchOntology(ontology)}>
-                          Open
-                        </Button>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              </TabPanel>
+              </TabPanel> */}
             </Box>
           </Grid>
         )}
