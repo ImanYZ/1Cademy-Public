@@ -76,14 +76,25 @@ const SubPlainText = ({
             await updateDoc(parentRef, parentData);
           }
         }
+        let previousValue = "";
+        let newValue = "";
         if (["description", "title"].includes(type)) {
+          previousValue = ontologyData[type];
+          newValue = openOntology[type];
           ontologyData[type] = openOntology[type];
         } else {
+          previousValue = ontologyData.plainText[type];
+          newValue = openOntology.plainText[type];
           ontologyData.plainText[type] = openOntology.plainText[type] || "";
         }
         await updateDoc(ontologyDoc.ref, ontologyData);
         await addLock(openOntology.id, type, "remove");
-        await recordLogs(`Edited ${type}`, openOntology.id);
+        await recordLogs({
+          action: "Edited a field",
+          field: type,
+          previousValue,
+          newValue,
+        });
       }
     } else {
       await addLock(openOntology.id, type, "add");
