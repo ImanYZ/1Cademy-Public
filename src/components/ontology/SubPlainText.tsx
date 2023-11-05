@@ -16,6 +16,7 @@ type ISubOntologyProps = {
   lockedOntology?: any;
   addLock: any;
   user: any;
+  recordLogs: any;
 };
 const SubPlainText = ({
   text,
@@ -27,6 +28,7 @@ const SubPlainText = ({
   lockedOntology,
   addLock,
   user,
+  recordLogs,
 }: ISubOntologyProps) => {
   const db = getFirestore();
   const [editMode, setEditMode] = useState(false);
@@ -81,6 +83,7 @@ const SubPlainText = ({
         }
         await updateDoc(ontologyDoc.ref, ontologyData);
         await addLock(openOntology.id, type, "remove");
+        await recordLogs(`Edited ${type}`, openOntology.id);
       }
     } else {
       await addLock(openOntology.id, type, "add");
