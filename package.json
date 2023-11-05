@@ -28,6 +28,7 @@
   "author": "Iman YeckehZaare",
   "license": "Apache-2.0",
   "dependencies": {
+    "@column-resizer/react": "^1.1.0",
     "@emotion/cache": "11.9.3",
     "@emotion/react": "11.9.3",
     "@emotion/server": "11.4.0",
