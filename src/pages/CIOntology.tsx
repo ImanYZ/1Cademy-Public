@@ -60,7 +60,7 @@ import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
-// import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
+import markdownContent from "../components/ontology/Markdown-Here-Cheatsheet.md";
 import Custom404 from "./404";
 
 type IOntologyPath = {
@@ -840,7 +840,7 @@ const CIOntology = () => {
           </Section>
         )}
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
-        <Section minSize={!isMobile ? 1000 : 0}>
+        <Section minSize={!isMobile ? 0 : 0}>
           <Box
             sx={{
               backgroundColor: theme =>
@@ -893,7 +893,7 @@ const CIOntology = () => {
               <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Search" {...a11yProps(1)} />
                 <Tab label="Comments" {...a11yProps(0)} />
-                {/* <Tab label="Markdown Cheatsheet" {...a11yProps(2)} /> */}
+                <Tab label="Markdown Cheatsheet" {...a11yProps(2)} />
               </Tabs>
             </Box>
             <Box sx={{ padding: "10px", height: "89vh", overflow: "auto", pb: "125px" }}>
@@ -938,9 +938,6 @@ const CIOntology = () => {
                         }}
                       >
                         <Typography>{ontology.title}</Typography>
-                        {/* <Button sx={{ ml: "5px" }} onClick={() => openSearchOntology(ontology)}>
-                          Open
-                        </Button> */}
                       </ListItem>
                     ))}
                   </List>
@@ -957,7 +954,8 @@ const CIOntology = () => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            padding: "18px",
+                            p: "18px",
+                            pb: "0px",
                           }}
                         >
                           <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -1039,11 +1037,11 @@ const CIOntology = () => {
                   </Box>{" "}
                 </Box>
               </TabPanel>
-              {/* <TabPanel value={value} index={2}>
+              <TabPanel value={value} index={2}>
                 <Box sx={{ p: "18px" }}>
                   <MarkdownRender text={markdownContent} />
                 </Box>
-              </TabPanel> */}
+              </TabPanel>
             </Box>
           </Section>
         )}
