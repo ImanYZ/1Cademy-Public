@@ -15,6 +15,7 @@ type ISubOntologyProps = {
   category: string;
   ontologyPath: any;
   updateUserDoc: any;
+  recordLogs: any;
 };
 
 const SubOntology = ({
@@ -25,6 +26,7 @@ const SubOntology = ({
   category,
   ontologyPath,
   updateUserDoc,
+  recordLogs,
 }: ISubOntologyProps) => {
   const db = getFirestore();
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
@@ -80,6 +82,11 @@ const SubOntology = ({
             if (type === "Specializations") {
               await updateDoc(ontologyDoc.ref, { deleted: true });
             }
+            await recordLogs({
+              action: "Deleted a field",
+              field: subOntologyData.title,
+              ontology: ontologyDoc.id,
+            });
           }
 
           await updateDoc(ontologyDoc.ref, ontologyData);
