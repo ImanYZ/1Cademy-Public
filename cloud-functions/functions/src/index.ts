@@ -97,6 +97,7 @@ export const clearInactiveSessions = functions.pubsub.schedule("*/30 * * * *").o
       }
       batch.update(db.collection("status").doc(statusDoc.id), {
         sessions,
+        state: Object.keys(sessions).length ? "online" : "offline",
       });
     }
     await batch.commit();
