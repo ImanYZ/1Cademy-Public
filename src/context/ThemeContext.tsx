@@ -49,7 +49,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
       const infRef = ref(db, ".info/connected");
       onValue(infRef, snapshot => {
         if (snapshot.val() == false) {
-          set(userStatusDatabaseRef, isOnlineForDatabase);
+          set(userStatusDatabaseRef, isOfflineForDatabase);
           return;
         }
         onDisconnect(userStatusDatabaseRef)
