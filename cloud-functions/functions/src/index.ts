@@ -26,26 +26,26 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   // corresponding Firestore document.
   const userStatusFirestoreRef = firestore.doc(`status/${context.params.uname}`);
   const userStatusDoc = await userStatusFirestoreRef.get();
-  const sessionIds: any = [];
+  let sessions: {
+    [sessionId: string]: Timestamp;
+  } = {};
 
   if (userStatusDoc.exists) {
     const userStatusData = userStatusDoc.data();
-    if (Array.isArray(userStatusData?.sessionIds)) {
-      sessionIds.push(...userStatusData!.sessionIds);
-    }
+    sessions = userStatusData?.sessions || {};
   }
 
   if (eventStatus.sessionId) {
-    const sessIdx = sessionIds.indexOf(eventStatus.sessionId);
-    if (eventStatus?.state === "online" && sessIdx === -1) {
-      sessionIds.push(eventStatus.sessionId);
-    } else if (eventStatus?.state === "offline" && sessIdx !== -1) {
-      sessionIds.splice(sessIdx, 1);
+    const sessionId = eventStatus.sessionId;
+    if (eventStatus?.state === "online" && !sessions[sessionId]) {
+      sessions[sessionId] = Timestamp.now();
+    } else if (eventStatus?.state === "offline" && sessions[sessionId]) {
+      delete sessions[sessionId];
     }
   }
 
   let state = "online";
-  if (eventStatus.state === "offline" && !sessionIds.length) {
+  if (eventStatus.state === "offline" && !Object.keys(sessions).length) {
     state = "offline";
   }
 
@@ -70,7 +70,7 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   return userStatusFirestoreRef.set({
     user: eventStatus.user,
     last_changed: eventStatus.last_changed,
-    sessionIds,
+    sessions,
     state,
   });
 });
