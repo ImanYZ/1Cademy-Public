@@ -4861,12 +4861,12 @@ const Notebook = ({}: NotebookProps) => {
           verisonType: INodeType;
           versionId: string;
         };
-
         const checkInstantApproval: CheckInstantApproval = {
           nodeId: nodeBookState.selectedNode,
           verisonType: selectedNodeType,
           versionId: proposalId,
         };
+
         const {
           courseExist,
           instantApprove,
@@ -4876,7 +4876,7 @@ const Notebook = ({}: NotebookProps) => {
           checkInstantApproval
         );
         let willBeApproved: boolean = false;
-        if (courseExist || isInstructor) {
+        if (voteType === "Correct" && (courseExist || isInstructor)) {
           willBeApproved = instantApprove;
         } else {
           willBeApproved = isVersionApproved({
@@ -4908,7 +4908,7 @@ const Notebook = ({}: NotebookProps) => {
             if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
               const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
               if (previewNode) {
-                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: true };
+                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: false };
               }
               if (tempNodes.has(newNodeId)) {
                 tempNodes.delete(newNodeId);
