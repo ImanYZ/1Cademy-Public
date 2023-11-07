@@ -21,6 +21,13 @@ const ThemeProvider: FC<Props> = ({ children }) => {
   const auth = getAuth();
   const db = getDatabase();
   useEffect(() => {
+    const unsubscribeRefs: {
+      auth: () => void;
+      activityTimer: NodeJS.Timer | null;
+    } = {
+      auth: () => {},
+      activityTimer: null,
+    };
     // Fetch the current user's ID from Firebase Authentication.
     if (user) {
       goOnline(db);
@@ -28,7 +35,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
       var uname = user?.uname;
       // Create a reference to this user's specific status node.
       // This is where we will store data about being online/offline.
-      let userStatusDatabaseRef = ref(db, "/status/" + uname);
+      const userStatusDatabaseRef = ref(db, "/status/" + uname);
       //var userStatusFirestoreRef = doc(firestoreDb, "/status/" + uname);
       // We'll create two constants which we will write to
       // the Realtime database when this device is offline
@@ -59,12 +66,21 @@ const ThemeProvider: FC<Props> = ({ children }) => {
           });
       });
 
-      onAuthStateChanged(auth, user => {
+      unsubscribeRefs.auth = onAuthStateChanged(auth, user => {
         if (!user) {
           goOffline(db);
         }
       });
+
+      unsubscribeRefs.activityTimer = setInterval(async () => {
+        set(userStatusDatabaseRef, isOnlineForDatabase);
+      }, 120 * 1000);
     }
+
+    return () => {
+      unsubscribeRefs.auth();
+      unsubscribeRefs.activityTimer && clearInterval(unsubscribeRefs.activityTimer);
+    };
   }, [user]);
 
   const getMUIModeTheme = (theme?: UserTheme) => {
