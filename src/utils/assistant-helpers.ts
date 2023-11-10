@@ -284,7 +284,10 @@ export const sendMessageToGPT4V2 = async (
   return response.data;
 };
 
-export const sendGPTPrompt = async (model: "gpt-3.5-turbo" | "gpt-4", messages: ChatCompletionRequestMessage[]) => {
+export const sendGPTPrompt = async (
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview" | "gpt-4-0613",
+  messages: ChatCompletionRequestMessage[]
+) => {
   const config = new Configuration({
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_API_ORG_ID,
@@ -1130,7 +1133,8 @@ export const generateQuestionNode = async (
 
 export const generateFlashcard = async (
   passages: string[],
-  context: ChatCompletionRequestMessage[]
+  context: ChatCompletionRequestMessage[],
+  model: "gpt-4-1106-preview" | "gpt-4-0613"
 ): Promise<{
   Stem: string;
   Choices: {
@@ -1162,10 +1166,10 @@ export const generateFlashcard = async (
     role: "user",
   });
 
-  const gptResponse = await sendGPTPrompt("gpt-4", context);
+  const gptResponse = await sendGPTPrompt(model, context);
 
   const response: string = gptResponse?.choices?.[0]?.message?.content || "";
-  console.log(response);
+
   if (gptResponse?.choices?.[0]) {
     context.push({
       content: gptResponse?.choices?.[0]?.message?.content!,
