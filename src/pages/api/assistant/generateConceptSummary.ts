@@ -10,7 +10,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const payload = req.body as IAssistantConetentSummary;
     const paragraphs = payload.paragraphs || [];
-    const model = payload.model;
+    const model = payload.model || "gpt-4-1106-preview";
     const concepts: any = await generateFlashcard(paragraphs, [], model);
     return res.status(200).json({
       concepts,
