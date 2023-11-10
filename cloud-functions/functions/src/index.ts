@@ -1,6 +1,8 @@
 import * as admin from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
+import * as lodash from "lodash";
+import * as moment from "moment";
 
 admin.initializeApp();
 
@@ -13,6 +15,7 @@ import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
+import { db } from "./admin";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -26,26 +29,26 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   // corresponding Firestore document.
   const userStatusFirestoreRef = firestore.doc(`status/${context.params.uname}`);
   const userStatusDoc = await userStatusFirestoreRef.get();
-  const sessionIds: any = [];
+  let sessions: {
+    [sessionId: string]: Timestamp;
+  } = {};
 
   if (userStatusDoc.exists) {
     const userStatusData = userStatusDoc.data();
-    if (Array.isArray(userStatusData?.sessionIds)) {
-      sessionIds.push(...userStatusData!.sessionIds);
-    }
+    sessions = userStatusData?.sessions || {};
   }
 
   if (eventStatus.sessionId) {
-    const sessIdx = sessionIds.indexOf(eventStatus.sessionId);
-    if (eventStatus?.state === "online" && sessIdx === -1) {
-      sessionIds.push(eventStatus.sessionId);
-    } else if (eventStatus?.state === "offline" && sessIdx !== -1) {
-      sessionIds.splice(sessIdx, 1);
+    const sessionId = eventStatus.sessionId;
+    if (eventStatus?.state === "online" && !sessions[sessionId]) {
+      sessions[sessionId] = Timestamp.now();
+    } else if (eventStatus?.state === "offline" && sessions[sessionId]) {
+      delete sessions[sessionId];
     }
   }
 
   let state = "online";
-  if (eventStatus.state === "offline" && !sessionIds.length) {
+  if (eventStatus.state === "offline" && !Object.keys(sessions).length) {
     state = "offline";
   }
 
@@ -70,9 +73,35 @@ export const onUserStatusChanged = functions.database.ref("/status/{uname}").onU
   return userStatusFirestoreRef.set({
     user: eventStatus.user,
     last_changed: eventStatus.last_changed,
-    sessionIds,
+    sessions,
     state,
   });
+});
+
+// Following cloud function will clear inactive sessions
+// from status collection
+export const clearInactiveSessions = functions.pubsub.schedule("*/30 * * * *").onRun(async () => {
+  const statusSnapshot = await db.collection("status").get();
+  const chunks = lodash.chunk(statusSnapshot.docs, 500);
+  for (const statusList of chunks) {
+    const batch = db.batch();
+    for (const statusDoc of statusList) {
+      const statusData = statusDoc.data();
+      const sessions = statusData.sessions || {};
+      for (const sessionId of Object.keys(sessions)) {
+        const lastActivity = moment(sessions[sessionId].toDate()).add(30, "minutes");
+        // if last activity is greater than 30 mints than remove that session
+        if (lastActivity.isBefore()) {
+          delete sessions[sessionId];
+        }
+      }
+      batch.update(db.collection("status").doc(statusDoc.id), {
+        sessions,
+        state: Object.keys(sessions).length ? "online" : "offline",
+      });
+    }
+    await batch.commit();
+  }
 });
 
 export const onActionTrackCreated = functions.firestore.document("/actionTracks/{id}").onCreate(async change => {

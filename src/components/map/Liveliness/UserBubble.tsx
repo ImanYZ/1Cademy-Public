@@ -53,8 +53,10 @@ export const UserBubble = ({
             </Box>
           )}
           <Box component={"p"} sx={{ my: 0 }}>
-            {userInteraction.count.toFixed(2)}{" "}
-            {variant === "absoluteReputations" || variant === "relativeReputations" ? "Points" : "Interactions"}
+            {variant === "absoluteReputations" || variant === "relativeReputations"
+              ? userInteraction.count.toFixed(2)
+              : userInteraction.count}{" "}
+            {variant === "absoluteReputations" || variant === "relativeReputations" ? "Point" : "Interaction"}
             {userInteraction.count > 1 ? "s" : ""}
           </Box>
         </Box>
