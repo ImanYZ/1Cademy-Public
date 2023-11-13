@@ -37,7 +37,7 @@ const SubOntology = ({
   };
 
   const removeSubOntology = ({ ontologyData, id }: any) => {
-    for (type in ontologyData.subOntologies) {
+    for (let type in ontologyData.subOntologies) {
       for (let category in ontologyData.subOntologies[type] || {}) {
         if ((ontologyData.subOntologies[type][category].ontologies || []).length > 0) {
           const subOntologyIdx = ontologyData.subOntologies[type][category].ontologies.findIndex(
@@ -52,7 +52,6 @@ const SubOntology = ({
   };
   const deleteSubOntologyEditable = async () => {
     try {
-      console.info("deleteSubOntologyEditable");
       if (await confirmIt("Are you sure you want to delete?")) {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
