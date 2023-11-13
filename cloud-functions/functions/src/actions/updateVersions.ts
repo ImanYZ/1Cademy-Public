@@ -14,8 +14,8 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
   // using some boolean fields to be added to the version.
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
+    if (versionData.newChild) continue;
     [
-      "newChild",
       "addedChoices",
       "deletedChoices",
       "changedChoices",
