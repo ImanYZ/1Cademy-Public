@@ -543,16 +543,17 @@ const Ontology = ({
       if (await confirmIt("Are you sure you want to delete?")) {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
-          const subOntologyData = ontologyDoc.data();
-          const parents = subOntologyData?.parents || [];
+          const ontologyData = ontologyDoc.data();
+          const parents = ontologyData?.parents || [];
           for (let parent of parents) {
-            const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
-            if (ontologyDoc.exists()) {
-              const ontologyData = ontologyDoc.data();
+            const parentDoc = await getDoc(doc(collection(db, "ontology"), parent));
+            if (parentDoc.exists()) {
+              const ontologyData = parentDoc.data();
               removeSubOntology({ ontologyData, id: ontologyDoc.id });
-              await updateDoc(ontologyDoc.ref, ontologyData);
+              await updateDoc(parentDoc.ref, ontologyData);
             }
           }
+          updateUserDoc([...ontologyPath.slice(0, -1).map((path: any) => path.id)]);
           await updateDoc(ontologyDoc.ref, { deleted: true });
           await recordLogs({
             action: "Deleted Ontology",
