@@ -660,28 +660,18 @@ const CIOntology = () => {
               key={mainSpecializations[category]?.id || category}
               nodeId={mainSpecializations[category]?.id || category}
               label={
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}>
+                <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
+                  <Typography
+                    sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}
+                    onClick={() => {
+                      if (!mainSpecializations[category].isCategory)
+                        openMainCategory(category, mainSpecializations[category]?.path || []);
+                    }}
+                  >
                     {!mainSpecializations[category].isCategory
                       ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
                       : category}
                   </Typography>
-                  {!mainSpecializations[category].isCategory && (
-                    <Button
-                      variant="outlined"
-                      onClick={() => {
-                        openMainCategory(category, mainSpecializations[category]?.path || []);
-                      }}
-                      sx={{
-                        ml: "5px",
-                        fontSize: "14px",
-                        border: "none",
-                        background: "transparent",
-                      }}
-                    >
-                      Open
-                    </Button>
-                  )}
                 </Box>
               }
               sx={{ mt: "5px" }}
