@@ -24,6 +24,12 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
       "addedImage",
       "deletedImage",
       "changedImage",
+      "addedVideo",
+      "deletedVideo",
+      "changedVideo",
+      "addedAudio",
+      "deletedAudio",
+      "changedAudio",
       "addedReferences",
       "deletedReferences",
       "changedReferences",
@@ -34,7 +40,6 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
       "addedChildren",
       "removedParents",
       "removedChildren",
-      "changedNodeType",
     ].forEach(change => delete versionData[change]);
 
     const parentCompare = compareLinks({ oldLinks: nodeData.parents, newLinks: versionData.parents });
