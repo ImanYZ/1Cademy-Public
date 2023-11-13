@@ -207,6 +207,16 @@ const Ontology = ({
       subOntologyType = "Role";
     }
     const newOntology = INITIAL_VALUES[subOntologyType];
+
+    if (type === "Specializations") {
+      for (let subOntologyType in newOntology.subOntologies) {
+        for (let category of Object.keys(ontologyParent["subOntologies"][subOntologyType])) {
+          newOntology.subOntologies[subOntologyType][category] = {
+            ontologies: [],
+          };
+        }
+      }
+    }
     newOntology.parents = [openOntology.id];
     newOntology.title = "New " + (subOntologyType === "Process" ? ontologyParent.title : subOntologyType);
     if (!ontologyParent.subOntologies[type].hasOwnProperty(category)) {
@@ -512,6 +522,48 @@ const Ontology = ({
       console.error(error);
     }
   };
+
+  const removeSubOntology = ({ ontologyData, id }: any) => {
+    for (let type in ontologyData.subOntologies) {
+      for (let category in ontologyData.subOntologies[type] || {}) {
+        if ((ontologyData.subOntologies[type][category].ontologies || []).length > 0) {
+          const subOntologyIdx = ontologyData.subOntologies[type][category].ontologies.findIndex(
+            (sub: any) => sub.id === id
+          );
+          if (subOntologyIdx !== -1) {
+            ontologyData.subOntologies[type][category].ontologies.splice(subOntologyIdx, 1);
+          }
+        }
+      }
+    }
+  };
+  const deleteSubOntologyEditable = async () => {
+    try {
+      console.info("deleteSubOntologyEditable");
+      if (await confirmIt("Are you sure you want to delete?")) {
+        const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
+        if (ontologyDoc.exists()) {
+          const subOntologyData = ontologyDoc.data();
+          const parents = subOntologyData?.parents || [];
+          for (let parent of parents) {
+            const ontologyDoc = await getDoc(doc(collection(db, "ontology"), parent));
+            if (ontologyDoc.exists()) {
+              const ontologyData = ontologyDoc.data();
+              removeSubOntology({ ontologyData, id: ontologyDoc.id });
+              await updateDoc(ontologyDoc.ref, ontologyData);
+            }
+          }
+          await updateDoc(ontologyDoc.ref, { deleted: true });
+          await recordLogs({
+            action: "Deleted Ontology",
+            ontology: ontologyDoc.id,
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <Box
       sx={{
@@ -590,6 +642,7 @@ const Ontology = ({
           setOpenOntology={setOpenOntology}
           editOntology={editOntology}
           setEditOntology={setEditOntology}
+          deleteSubOntologyEditable={deleteSubOntologyEditable}
         />
         <SubPlainText
           recordLogs={recordLogs}
@@ -617,7 +670,7 @@ const Ontology = ({
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
-                    <Tooltip title={"Select"}>
+                    <Tooltip title={""}>
                       <Button onClick={() => showList(type, "main", false)} sx={{ ml: "5px" }}>
                         {" "}
                         {type !== "Specializations" ? "Select" : "Add"} {type}{" "}

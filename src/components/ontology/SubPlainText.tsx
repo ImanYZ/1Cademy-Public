@@ -17,6 +17,7 @@ type ISubOntologyProps = {
   addLock: any;
   user: any;
   recordLogs: any;
+  deleteSubOntologyEditable?: any;
 };
 const SubPlainText = ({
   text,
@@ -29,6 +30,7 @@ const SubPlainText = ({
   addLock,
   user,
   recordLogs,
+  deleteSubOntologyEditable = () => {},
 }: ISubOntologyProps) => {
   const db = getFirestore();
   const [editMode, setEditMode] = useState(false);
@@ -190,6 +192,11 @@ const SubPlainText = ({
                   </Button>
                 </Tooltip>
               )}
+              <Tooltip title={"Delete Ontology"} sx={{ ml: "5px" }}>
+                <Button onClick={deleteSubOntologyEditable} sx={{ ml: "5px" }}>
+                  Delete
+                </Button>
+              </Tooltip>
             </Box>
           )}
         </Box>
