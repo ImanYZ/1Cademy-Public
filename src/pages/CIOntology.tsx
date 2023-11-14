@@ -852,6 +852,9 @@ const CIOntology = () => {
               sx={{
                 height: "100vh",
                 overflow: "auto",
+                overflowY: "auto",
+                overflowX: "auto",
+                width: "1600px",
               }}
             >
               <Box sx={{ pb: "190px" }}>
