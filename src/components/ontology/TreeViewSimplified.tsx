@@ -33,13 +33,17 @@ const TreeViewSimplified = ({ mainSpecializations, openMainCategory }: any) => {
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
       defaultExpanded={expandedNodes}
+      disabledItemsFocusable={false}
+      defaultEndIcon={<div style={{ width: 24 }} />}
+      multiSelect
+      sx={{ flexGrow: 1 }}
     >
       {Object.keys(mainSpecializations).map(category => (
         <TreeItem
           key={mainSpecializations[category]?.id || category}
           nodeId={mainSpecializations[category]?.id || category}
           label={
-            <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", height: "30px", p: "17px", pl: "0px", mt: "5px" }}>
               <Typography
                 sx={{
                   fontWeight: mainSpecializations[category].isCategory ? "bold" : "",
@@ -55,6 +59,14 @@ const TreeViewSimplified = ({ mainSpecializations, openMainCategory }: any) => {
               </Typography>
             </Box>
           }
+          sx={{
+            borderRadius: "8px",
+            border: "1px solid #ccc", // Add a border between TreeItems
+            backgroundColor: "transparent",
+            mt: "8px",
+            mb: "8px",
+            mr: "7px",
+          }}
         >
           {Object.keys(mainSpecializations[category].specializations).length > 0 && (
             <TreeViewSimplified

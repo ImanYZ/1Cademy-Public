@@ -79,7 +79,7 @@ const SubOntology = ({
             }
 
             if (type === "Specializations") {
-              await updateDoc(ontologyDoc.ref, { deleted: true });
+              await updateDoc(subOntologyDoc.ref, { deleted: true });
             }
             await recordLogs({
               action: "Deleted a field",
