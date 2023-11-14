@@ -884,7 +884,7 @@ const CIOntology = () => {
               height: "94vh",
             }}
           >
-            <Breadcrumbs>
+            <Breadcrumbs sx={{ ml: "40px" }}>
               {ontologyPath.map(path => (
                 <Link
                   underline="hover"
