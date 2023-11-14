@@ -61,7 +61,7 @@ const TreeViewSimplified = ({ mainSpecializations, openMainCategory }: any) => {
           }
           sx={{
             borderRadius: "8px",
-            border: "1px solid #ccc", // Add a border between TreeItems
+            // border: "1px solid #ccc",
             backgroundColor: "transparent",
             mt: "8px",
             mb: "8px",
