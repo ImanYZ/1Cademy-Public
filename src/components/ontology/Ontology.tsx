@@ -100,7 +100,7 @@ const Ontology = ({
   mainSpecializations,
   ontologies,
   addNewOntology,
-  INITIAL_VALUES,
+  // INITIAL_VALUES,
   ontologyPath,
   editOntology,
   setEditOntology,
@@ -171,12 +171,12 @@ const Ontology = ({
       newOntology.id = newOntologyRef.id;
       newOntology.parents = [ontologyDoc.id];
       newOntology.title = `New ${ontologyData.title}`;
-      newOntology.description = "";
       newOntology.subOntologies.Specializations = {};
       delete newOntology.locked;
       ontologyData.subOntologies.Specializations = {
         ["main"]: {
           ontologies: [
+            ...(ontologyData.subOntologies?.Specializations["main"]?.ontologies || []),
             {
               id: newOntologyRef.id,
               title: `New ${ontologyData.title}`,
@@ -193,52 +193,43 @@ const Ontology = ({
   };
 
   const addNewSpecialisation = async (type: string, category: string) => {
-    const ontologyParentRef = doc(collection(db, "ontology"), openOntology.id);
-    const ontologyParentDoc = await getDoc(ontologyParentRef);
-    const ontologyParent: any = ontologyParentDoc.data();
-    if (!ontologyParent) return;
-    const newOntologyRef = doc(collection(db, "ontology"));
+    try {
+      const ontologyParentRef = doc(collection(db, "ontology"), openOntology.id);
+      const ontologyParentDoc = await getDoc(ontologyParentRef);
+      const ontologyParent: any = ontologyParentDoc.data();
+      if (!ontologyParentDoc.exists()) return;
+      const newOntologyRef = doc(collection(db, "ontology"));
 
-    let subOntologyType = type;
-    if (type === "Specializations") {
-      subOntologyType = ontologyParent.ontologyType;
-    }
-    if (type === "Roles") {
-      subOntologyType = "Role";
-    }
-    const newOntology = INITIAL_VALUES[subOntologyType];
+      const newOntology = { ...ontologyParentDoc.data() };
+      newOntology.subOntologies.Specializations = {};
+      delete newOntology.locked;
+      delete newOntology.cat;
+      newOntology.parents = [openOntology.id];
+      newOntology.title = `New ${ontologyParent.title}`;
+      newOntology.id = newOntologyRef.id;
 
-    if (type === "Specializations") {
-      for (let subOntologyType in newOntology.subOntologies) {
-        for (let category of Object.keys(ontologyParent["subOntologies"][subOntologyType])) {
-          newOntology.subOntologies[subOntologyType][category] = {
+      if (!ontologyParent.subOntologies[type].hasOwnProperty(category)) {
+        ontologyParent.subOntologies[type] = {
+          ...ontologyParent.subOntologies[type],
+          [category]: {
             ontologies: [],
-          };
-        }
+          },
+        };
       }
+      ontologyParent.subOntologies[type][category].ontologies.push({
+        title: `New ${ontologyParent.title}`,
+        id: newOntologyRef.id,
+      });
+      updateUserDoc([...ontologyPath.map((path: any) => path.id), newOntologyRef.id]);
+      await addNewOntology({ id: newOntologyRef.id, newOntology });
+      await updateDoc(ontologyParentRef, ontologyParent);
+    } catch (error) {
+      console.error(error);
     }
-    newOntology.parents = [openOntology.id];
-    newOntology.title = "New " + (subOntologyType === "Process" ? ontologyParent.title : subOntologyType);
-    if (!ontologyParent.subOntologies[type].hasOwnProperty(category)) {
-      ontologyParent.subOntologies[type] = {
-        ...ontologyParent.subOntologies[type],
-        [category]: {
-          ontologies: [],
-        },
-      };
-    }
-    ontologyParent.subOntologies[type][category].ontologies.push({
-      title: "New " + (subOntologyType === "Process" ? ontologyParent.title : subOntologyType),
-      id: newOntologyRef.id,
-    });
-
-    await addNewOntology({ id: newOntologyRef.id, newOntology });
-    await updateDoc(ontologyParentRef, ontologyParent);
-    updateUserDoc([...ontologyPath.map((path: any) => path.id), newOntologyRef.id]);
   };
 
-  const showList = async (type: string, category: string, showModel: boolean) => {
-    if (type !== "Specializations" || showModel) {
+  const showList = async (type: string, category: string) => {
+    if (type !== "Specializations") {
       setOpen(true);
       setType(type);
       setSelectedCategory(category);
@@ -672,7 +663,7 @@ const Ontology = ({
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Typography sx={{ fontSize: "19px" }}>{capitalizeFirstLetter(type)}:</Typography>
                     <Tooltip title={""}>
-                      <Button onClick={() => showList(type, "main", false)} sx={{ ml: "5px" }}>
+                      <Button onClick={() => showList(type, "main")} sx={{ ml: "5px" }}>
                         {" "}
                         {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                       </Button>
@@ -710,16 +701,7 @@ const Ontology = ({
                                   <li key={category}>
                                     <Box sx={{ display: "flex", alignItems: "center" }}>
                                       <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
-                                      <Button
-                                        onClick={() =>
-                                          showList(
-                                            type,
-                                            category,
-                                            openOntology?.subOntologies[type]["main"]?.ontologies.length > 0
-                                          )
-                                        }
-                                        sx={{ ml: "5px" }}
-                                      >
+                                      <Button onClick={() => showList(type, category)} sx={{ ml: "5px" }}>
                                         {" "}
                                         {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                                       </Button>
@@ -807,16 +789,7 @@ const Ontology = ({
                               <li key={category}>
                                 <Box sx={{ display: "flex", alignItems: "center" }}>
                                   <Typography sx={{ fontWeight: "bold" }}>{category}</Typography> :{" "}
-                                  <Button
-                                    onClick={() =>
-                                      showList(
-                                        type,
-                                        category,
-                                        openOntology?.subOntologies[type]["main"]?.ontologies.length > 0
-                                      )
-                                    }
-                                    sx={{ ml: "5px" }}
-                                  >
+                                  <Button onClick={() => showList(type, category)} sx={{ ml: "5px" }}>
                                     {" "}
                                     {type !== "Specializations" ? "Select" : "Add"} {type}{" "}
                                   </Button>
