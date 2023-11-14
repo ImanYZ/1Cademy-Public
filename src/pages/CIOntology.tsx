@@ -619,7 +619,10 @@ const CIOntology = () => {
       action: "Searched",
       query,
     });
-    return fuse.search(query).map(result => result.item);
+    return fuse
+      .search(query)
+      .map(result => result.item)
+      .filter((item: any) => !item.deleted);
   };
 
   // const TreeViewSimplified = ({ mainSpecializations }: any) => {
