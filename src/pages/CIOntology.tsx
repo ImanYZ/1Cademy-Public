@@ -809,7 +809,7 @@ const CIOntology = () => {
       });
       const mainOntologies = ontologies.filter((ontology: any) => ontology.category);
       let eachOntologyPath = findOntologyPath({ mainOntologies, path: [], eachOntologyPath: {} });
-      updateUserDoc([...(eachOntologyPath[ontology.id] || [])]);
+      updateUserDoc([...(eachOntologyPath[ontology.id] || [ontology.id])]);
     } catch (error) {
       console.error(error);
     }
