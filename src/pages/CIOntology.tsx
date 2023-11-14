@@ -1,9 +1,6 @@
 import { Bar, Container, Section } from "@column-resizer/react";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
 import SendIcon from "@mui/icons-material/Send";
-import { TreeItem, TreeView } from "@mui/lab";
 import {
   Avatar,
   Box,
@@ -55,6 +52,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
+import TreeViewSimplified from "@/components/ontology/TreeViewSimplified";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -494,6 +492,7 @@ const CIOntology = () => {
 
   const updateUserDoc = async (ontologyPath: string[]) => {
     if (!user) return;
+    // ontologyPath = ontologyPath.filter((path: string) => !!path.trim());
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
     const userDocs = await getDocs(userQuery);
     const userDoc = userDocs.docs[0];
@@ -622,70 +621,67 @@ const CIOntology = () => {
     return fuse.search(query).map(result => result.item);
   };
 
-  const TreeViewSimplified = useCallback(
-    ({ mainSpecializations }: any) => {
-      /* 
-  mainSpecializations is an object like: 
-  {
-    ["TITLE"]:{
-        id:"id",
-        specializations:
-          {
-            ["TITLE1"]:{
-               id:"id1",
-               specializations:[]
-            },
-            ["TITLE2"]:{
-               id:"id2",
-               specializations:[]
-            }
-          }
-        
-    }
-  }
-   */
-      return (
-        <TreeView
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          defaultExpanded={[]}
-          sx={{
-            "& .Mui-selected": {
-              backgroundColor: "transparent", // Remove the background color
-            },
-          }}
-        >
-          {Object.keys(mainSpecializations).map(category => (
-            <TreeItem
-              key={mainSpecializations[category]?.id || category}
-              nodeId={mainSpecializations[category]?.id || category}
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
-                  <Typography
-                    sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}
-                    onClick={() => {
-                      if (!mainSpecializations[category].isCategory)
-                        openMainCategory(category, mainSpecializations[category]?.path || []);
-                    }}
-                  >
-                    {!mainSpecializations[category].isCategory
-                      ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
-                      : category}
-                  </Typography>
-                </Box>
-              }
-              sx={{ mt: "5px" }}
-            >
-              {Object.keys(mainSpecializations[category].specializations).length > 0 && (
-                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
-              )}
-            </TreeItem>
-          ))}
-        </TreeView>
-      );
-    },
-    [mainSpecializations]
-  );
+  // const TreeViewSimplified = ({ mainSpecializations }: any) => {
+  //   /*
+  // mainSpecializations is an object like:
+  // {
+  //   ["TITLE"]:{
+  //       id:"id",
+  //       specializations:
+  //         {
+  //           ["TITLE1"]:{
+  //              id:"id1",
+  //              specializations:[]
+  //           },
+  //           ["TITLE2"]:{
+  //              id:"id2",
+  //              specializations:[]
+  //           }
+  //         }
+
+  //   }
+  // }
+  //  */
+  //   return (
+  //     <TreeView
+  //       defaultCollapseIcon={<ExpandMoreIcon />}
+  //       defaultExpandIcon={<ChevronRightIcon />}
+  //       // defaultExpanded={[]}
+  //       sx={{
+  //         "& .Mui-selected": {
+  //           backgroundColor: "transparent", // Remove the background color
+  //         },
+  //       }}
+  //     >
+  //       {Object.keys(mainSpecializations).map(category => (
+  //         <TreeItem
+  //           key={mainSpecializations[category]?.id || category}
+  //           nodeId={mainSpecializations[category]?.id || category}
+  //           label={
+  //             <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
+  //               <Typography
+  //                 sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}
+  //                 onClick={() => {
+  //                   if (!mainSpecializations[category].isCategory)
+  //                     openMainCategory(category, mainSpecializations[category]?.path || []);
+  //                 }}
+  //               >
+  //                 {!mainSpecializations[category].isCategory
+  //                   ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
+  //                   : category}
+  //               </Typography>
+  //             </Box>
+  //           }
+  //           sx={{ mt: "5px" }}
+  //         >
+  //           {Object.keys(mainSpecializations[category].specializations).length > 0 && (
+  //             <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+  //           )}
+  //         </TreeItem>
+  //       ))}
+  //     </TreeView>
+  //   );
+  // };
   const handleSendComment = async () => {
     try {
       if (!user) return;
@@ -824,7 +820,7 @@ const CIOntology = () => {
               }}
             >
               <Box sx={{ pb: "190px" }}>
-                <TreeViewSimplified mainSpecializations={mainSpecializations} />
+                <TreeViewSimplified mainSpecializations={mainSpecializations} openMainCategory={openMainCategory} />
               </Box>
             </Box>
           </Section>
