@@ -656,7 +656,7 @@ const Ontology = ({
             paddingLeft: "10px",
           }}
         >
-          {ORDER_SUBONTOLOGIES[openOntology?.ontologyType].map((type: string) =>
+          {(ORDER_SUBONTOLOGIES[openOntology?.ontologyType] || []).map((type: string) =>
             Object.keys(openOntology.subOntologies).includes(type) ? (
               <Box key={type} sx={{ display: "grid", mt: "5px" }}>
                 <Box>
