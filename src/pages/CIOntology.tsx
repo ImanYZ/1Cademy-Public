@@ -852,6 +852,9 @@ const CIOntology = () => {
               sx={{
                 height: "100vh",
                 overflow: "auto",
+                overflowY: "auto",
+                overflowX: "auto",
+                width: "1600px",
               }}
             >
               <Box sx={{ pb: "190px" }}>
@@ -881,7 +884,7 @@ const CIOntology = () => {
               height: "94vh",
             }}
           >
-            <Breadcrumbs>
+            <Breadcrumbs sx={{ ml: "40px" }}>
               {ontologyPath.map(path => (
                 <Link
                   underline="hover"
@@ -917,8 +920,17 @@ const CIOntology = () => {
             )}
           </Box>
         </Section>
-        {/* <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} /> */}
-        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize", position: "relative" }}>
+          <SettingsEthernetIcon
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              color: "white",
+            }}
+          />
+        </Bar>
 
         {!isMobile && (
           <Section minSize={0} defaultSize={400}>
@@ -964,6 +976,8 @@ const CIOntology = () => {
                           borderRadius: "4px",
                           padding: "8px",
                           transition: "background-color 0.3s",
+                          border: "1px solid #ccc",
+                          mt: "5px",
                           "&:hover": {
                             backgroundColor: theme =>
                               theme.palette.mode === "dark"
