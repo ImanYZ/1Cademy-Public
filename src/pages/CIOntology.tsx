@@ -920,8 +920,17 @@ const CIOntology = () => {
             )}
           </Box>
         </Section>
-        {/* <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} /> */}
-        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize", position: "relative" }}>
+          <SettingsEthernetIcon
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              color: "white",
+            }}
+          />
+        </Bar>
 
         {!isMobile && (
           <Section minSize={0} defaultSize={400}>
