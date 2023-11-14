@@ -1,6 +1,7 @@
 import { Bar, Container, Section } from "@column-resizer/react";
 import SearchIcon from "@mui/icons-material/Search";
 import SendIcon from "@mui/icons-material/Send";
+import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import {
   Avatar,
   Box,
@@ -618,7 +619,10 @@ const CIOntology = () => {
       action: "Searched",
       query,
     });
-    return fuse.search(query).map(result => result.item);
+    return fuse
+      .search(query)
+      .map(result => result.item)
+      .filter((item: any) => !item.deleted);
   };
 
   // const TreeViewSimplified = ({ mainSpecializations }: any) => {
@@ -773,13 +777,45 @@ const CIOntology = () => {
   const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
   };
+  const findOntologyPath = useCallback(
+    ({ mainOntologies, path, eachOntologyPath }: any) => {
+      for (let ontlogy of mainOntologies) {
+        eachOntologyPath[ontlogy.id] = [...path, ontlogy.id];
+
+        for (let category in ontlogy?.subOntologies?.Specializations) {
+          const specializations =
+            ontologies.filter((onto: any) => {
+              const arrayOntologies = ontlogy?.subOntologies?.Specializations[category]?.ontologies.map(
+                (o: any) => o.id
+              );
+              return arrayOntologies.includes(onto.id);
+            }) || [];
+          eachOntologyPath = findOntologyPath({
+            mainOntologies: specializations,
+            path: [...path, ontlogy.id],
+            eachOntologyPath,
+          });
+        }
+      }
+
+      return eachOntologyPath;
+    },
+    [ontologies]
+  );
+
   const openSearchOntology = (ontology: any) => {
-    setOpenOntology(ontology);
-    updateUserDoc([ontology.id]);
-    recordLogs({
-      action: "Search result clicked",
-      clicked: ontology.id,
-    });
+    try {
+      setOpenOntology(ontology);
+      recordLogs({
+        action: "Search result clicked",
+        clicked: ontology.id,
+      });
+      const mainOntologies = ontologies.filter((ontology: any) => ontology.category);
+      let eachOntologyPath = findOntologyPath({ mainOntologies, path: [], eachOntologyPath: {} });
+      updateUserDoc([...(eachOntologyPath[ontology.id] || [ontology.id])]);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (!user?.claims.ontology) {
@@ -814,7 +850,6 @@ const CIOntology = () => {
           <Section minSize={0} defaultSize={350}>
             <Box
               sx={{
-                mt: "30px",
                 height: "100vh",
                 overflow: "auto",
               }}
@@ -825,7 +860,17 @@ const CIOntology = () => {
             </Box>
           </Section>
         )}
-        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize", position: "relative" }}>
+          <SettingsEthernetIcon
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              color: "white",
+            }}
+          />
+        </Bar>
         <Section minSize={0}>
           <Box
             sx={{
@@ -872,7 +917,9 @@ const CIOntology = () => {
             )}
           </Box>
         </Section>
+        {/* <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} /> */}
         <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+
         {!isMobile && (
           <Section minSize={0} defaultSize={400}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
@@ -912,14 +959,16 @@ const CIOntology = () => {
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          // backgroundColor: "blue", // Set the background color
-                          color: "white", // Set the text color
-                          cursor: "pointer", // Change the cursor on hover
-                          borderRadius: "4px", // Add some border radius for a button-like appearance
-                          padding: "8px", // Add some padding to space content inside
-                          transition: "background-color 0.3s", // Add a smooth transition
+                          color: "white",
+                          cursor: "pointer",
+                          borderRadius: "4px",
+                          padding: "8px",
+                          transition: "background-color 0.3s",
                           "&:hover": {
-                            backgroundColor: DESIGN_SYSTEM_COLORS.gray200,
+                            backgroundColor: theme =>
+                              theme.palette.mode === "dark"
+                                ? DESIGN_SYSTEM_COLORS.notebookG450
+                                : DESIGN_SYSTEM_COLORS.gray200,
                           },
                         }}
                       >
