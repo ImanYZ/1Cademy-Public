@@ -976,7 +976,7 @@ const CIOntology = () => {
                           borderRadius: "4px",
                           padding: "8px",
                           transition: "background-color 0.3s",
-                          border: "1px solid #ccc",
+                          // border: "1px solid #ccc",
                           mt: "5px",
                           "&:hover": {
                             backgroundColor: theme =>
