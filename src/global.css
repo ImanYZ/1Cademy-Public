@@ -698,6 +698,11 @@
   width: 10px;
 }
 
+.messages-room::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  display: none;
+}
+
 #Sidebar::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 4px;

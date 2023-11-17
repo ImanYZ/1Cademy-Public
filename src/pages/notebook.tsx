@@ -64,6 +64,7 @@ import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsChildrenSidebar";
@@ -219,6 +220,7 @@ export type OpenLeftSidebar =
   | "PROPOSALS"
   | "USER_SETTINGS"
   | "CITATIONS"
+  | "CHAT"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -7190,6 +7192,17 @@ const Notebook = ({}: NotebookProps) => {
                 openLinkedNode={openLinkedNode}
                 username={user.uname}
                 open={openSidebar === "BOOKMARKS_SIDEBAR"}
+                onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
+                innerHeight={innerHeight}
+                innerWidth={windowWith}
+                bookmark={bookmark}
+              />
+              <MemoizedChatSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "CHAT"}
                 onClose={() => setOpenSidebar(null)}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}

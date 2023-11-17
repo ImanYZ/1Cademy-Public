@@ -654,6 +654,19 @@ export const ToolbarSidebar = ({
               rightFloatingOption={<CustomSmallBadge value={pendingProposalsNum} />}
             />
 
+            <SidebarButton
+              id="toolbar-pending-proposal-button"
+              iconSrc={EditIcon}
+              onClick={() => {
+                onOpenSidebar("CHAT", "chat");
+                setIsMenuOpen(false);
+              }}
+              text="Chat"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={<CustomBadge value={pendingProposalsNum} />}
+              rightFloatingOption={<CustomSmallBadge value={pendingProposalsNum} />}
+            />
+
             {/* dashboard */}
             {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
               <SidebarButton
