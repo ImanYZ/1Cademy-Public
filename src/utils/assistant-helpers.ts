@@ -5,7 +5,7 @@ import {
   typesenseDocumentExists,
 } from "@/lib/typesense/typesense.config";
 import { google } from "googleapis";
-import { Configuration, OpenAIApi, ChatCompletionRequestMessage, CreateChatCompletionResponse } from "openai";
+import OpenAI from "openai";
 import { TypesenseAssistantResponseSchema, TypesenseNodesSchema } from "src/knowledgeTypes";
 import {
   FlashcardResponse,
@@ -233,75 +233,75 @@ export const typesenseReferenceNodeSearch = async (query: string): Promise<strin
 };
 
 export const sendMessageToGPT4 = async (
-  message: ChatCompletionRequestMessage,
+  message: any,
   conversation: IAssistantConversation,
   request?: string
-): Promise<CreateChatCompletionResponse> => {
-  const config = new Configuration({
+): Promise<any> => {
+  const config = {
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_API_ORG_ID,
-  });
+  };
 
-  const openai = new OpenAIApi(config);
+  const openai = new OpenAI(config);
   const messages = conversation.messages;
   messages.push({
     gptMessage: message,
     request,
   });
 
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     messages: messages.filter(message => message.gptMessage).map(message => message.gptMessage!),
     model: "gpt-4",
     temperature: 0,
   });
 
-  return response.data;
+  return response.choices[0].message.content;
 };
 
 export const sendMessageToGPT4V2 = async (
-  message: ChatCompletionRequestMessage,
+  message: any,
   conversation: IAssistantConversation,
   request?: string
-): Promise<CreateChatCompletionResponse> => {
-  const config = new Configuration({
+): Promise<any> => {
+  const config = {
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_API_ORG_ID,
-  });
+  };
 
-  const openai = new OpenAIApi(config);
+  const openai = new OpenAI(config);
   const messages = conversation.messages;
   messages.push({
     gptMessage: message,
     request,
   });
 
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     messages: [message],
     model: "gpt-4",
     temperature: 0,
   });
 
-  return response.data;
+  return response.choices[0].message.content;
 };
 
 export const sendGPTPrompt = async (
   model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview" | "gpt-4-0613",
-  messages: ChatCompletionRequestMessage[]
+  messages: any[]
 ) => {
-  const config = new Configuration({
+  const config = {
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_API_ORG_ID,
-  });
+  };
 
-  const openai = new OpenAIApi(config);
+  const openai = new OpenAI(config);
 
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     messages,
     model,
     temperature: 0,
   });
 
-  return response.data;
+  return response.choices[0].message.content;
 };
 
 export const getGPT4Queries = async (conversation: IAssistantConversation, bookText: string): Promise<string[]> => {
@@ -535,7 +535,7 @@ export const getNodeResultFromCommands = async (
 };
 
 export const processRecursiveCommands = async (
-  message: ChatCompletionRequestMessage,
+  message: any,
   conversationData: IAssistantConversation,
   tagId: string,
   uname: string,
@@ -965,7 +965,7 @@ export const generateNotebookTitleGpt4 = async (message: string) => {
   const defaultTitle = "Conversation " + moment().format("YYYY-MM-DD HH:mm:ss");
 
   let notebookTitle = gpt4Response.choices?.[0]?.message?.content || defaultTitle;
-  const notebook_parts = notebookTitle.split("\n").filter(line => line.replace(/[^a-zA-Z0-9]+/g, "").trim());
+  const notebook_parts = notebookTitle.split("\n").filter((line: any) => line.replace(/[^a-zA-Z0-9]+/g, "").trim());
   notebookTitle = notebook_parts.pop() || defaultTitle;
   if (
     notebookTitle[0] === '"' ||
@@ -990,7 +990,7 @@ export const getPassageTopicGpt4 = async (passage: string) => {
       content: prompt,
     },
   ]);
-  let topic: any = response?.choices?.[0]?.message?.content || "";
+  let topic: any = response || "";
   topic = topic.trim().split("");
   if (topic.length && topic[topic.length - 1] === ":") {
     topic.pop();
@@ -1048,7 +1048,7 @@ export const getFlashcardsFromPassage = async (passage: string): Promise<Flashca
       content: prompt,
     },
   ]);
-  let content: string = response?.choices?.[0]?.message?.content || "";
+  let content: string = response || "";
   const flashCardResponse: FlashcardResponse = parseJSONArrayFromResponse(content);
   return flashCardResponse;
 };
@@ -1071,13 +1071,13 @@ export const combineContents = async (passages: string[]): Promise<string> => {
       content: prompt,
     },
   ]);
-  return response?.choices?.[0]?.message?.content || "";
+  return response || "";
 };
 
 export const generateQuestionNode = async (
   nodeTitle: string,
   nodeContent: string,
-  context: ChatCompletionRequestMessage[]
+  context: any[]
 ): Promise<{
   Stem: string;
   Choices: {
@@ -1106,10 +1106,10 @@ export const generateQuestionNode = async (
 
   const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
 
-  const response: string = gptResponse?.choices?.[0]?.message?.content || "";
-  if (gptResponse?.choices?.[0]) {
+  const response: string = gptResponse || "";
+  if (gptResponse) {
     context.push({
-      content: gptResponse?.choices?.[0]?.message?.content!,
+      content: gptResponse,
       role: "assistant",
     });
   }
@@ -1133,7 +1133,7 @@ export const generateQuestionNode = async (
 
 export const generateFlashcard = async (
   passages: string[],
-  context: ChatCompletionRequestMessage[],
+  context: any[],
   model: "gpt-4-1106-preview" | "gpt-4-0613"
 ): Promise<{
   Stem: string;
@@ -1168,11 +1168,11 @@ export const generateFlashcard = async (
 
   const gptResponse = await sendGPTPrompt(model, context);
 
-  const response: string = gptResponse?.choices?.[0]?.message?.content || "";
+  const response: string = gptResponse || "";
 
-  if (gptResponse?.choices?.[0]) {
+  if (gptResponse) {
     context.push({
-      content: gptResponse?.choices?.[0]?.message?.content!,
+      content: gptResponse,
       role: "assistant",
     });
   }
