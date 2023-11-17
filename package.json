@@ -63,7 +63,7 @@
     "next": "12.2.2",
     "next-connect": "^0.13.0",
     "notistack": "^2.0.5",
-    "openai": "^3.2.1",
+    "openai": "^4.19.0",
     "raw-loader": "^4.0.2",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
