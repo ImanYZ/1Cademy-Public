@@ -15,8 +15,6 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  Tab,
-  Tabs,
   Typography,
   useMediaQuery,
   useTheme,
@@ -97,7 +95,7 @@ const SearcherSidebar = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>("DESCENDING");
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [search, setSearch] = useState<string>(nodeBookState.searchQuery);
-  const [value, setValue] = React.useState(0);
+  const [value] = React.useState(0);
   // const [notebooks, setNoteBooks] = useState<any>({
   //   data: [],
   //   lastPageLoaded: 0,
@@ -348,11 +346,11 @@ const SearcherSidebar = ({
     showTagSelector,
   ]);
 
-  const a11yProps = (index: number) => {
-    return {
-      "aria-controls": `simple-tabpanel-${index}`,
-    };
-  };
+  // const a11yProps = (index: number) => {
+  //   return {
+  //     "aria-controls": `simple-tabpanel-${index}`,
+  //   };
+  // };
   const handleChange = useCallback(
     (event: any) => {
       let val = event.target.value;
@@ -496,9 +494,9 @@ const SearcherSidebar = ({
     setShowTagSelector(false);
   }, [nodeBookDispatch]);
 
-  const handleTabValueChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  // const handleTabValueChange = (event: React.SyntheticEvent, newValue: number) => {
+  //   setValue(newValue);
+  // };
 
   const results = useMemo(() => {
     if (value === 0) {
@@ -892,19 +890,19 @@ const SearcherSidebar = ({
             width: "100%",
           }}
         >
-          <Tabs value={value} onChange={handleTabValueChange} aria-label={"Search Sidebar Tabs"} variant="fullWidth">
-            {[{ title: "Nodes" }, /* { title: "Notebooks" }, */ { title: "Proposals" }].map(
-              (tabItem: any, idx: number) => (
-                <Tab
-                  key={tabItem.title}
-                  id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
-                  label={tabItem.title}
-                  {...a11yProps(idx)}
-                  sx={{ py: "20px" }}
-                />
-              )
-            )}
-          </Tabs>
+          {/* <Tabs value={value} onChange={handleTabValueChange} aria-label={"Search Sidebar Tabs"} variant="fullWidth">
+            // {[{ title: "Nodes" }, { title: "Proposals" }].map(
+              // (tabItem: any, idx: number) => (
+              //   <Tab
+              //     key={tabItem.title}
+              //     id={`bookmarks-tab-${tabItem.title.toLowerCase()}`}
+              //     label={tabItem.title}
+              //     {...a11yProps(idx)}
+              //     sx={{ py: "20px" }}
+              //   />
+              // )
+            //</Box>)}
+          </Tabs> */}
         </Box>
       </Box>
     );

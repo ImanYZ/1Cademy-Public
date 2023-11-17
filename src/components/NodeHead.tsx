@@ -18,6 +18,7 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
     id,
     title,
     nodeSlug,
+    nodeSlugs,
     parents = [],
     references = [],
     content,
@@ -112,10 +113,17 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
 
   const nodeUrl = getNodePageWithDomain(nodeSlug || "", id, "slug");
   const hasAltCanonical = currentUrl && nodeUrl !== currentUrl;
-
   return (
     <Head>
-      <link rel="canonical" href={`${nodeUrl}`} key="canonical" />
+      {nodeSlugs && nodeSlugs.length > 0 ? (
+        nodeSlugs.map((slug: string) => {
+          const nodeUrl = getNodePageWithDomain(slug || "", id, "slug");
+          return <link rel="canonical" href={`${nodeUrl}`} key="canonical" />;
+        })
+      ) : (
+        <link rel="canonical" href={`${nodeUrl}`} key="canonical" />
+      )}
+
       {hasAltCanonical ? <link rel="canonical" href={`${currentUrl}`} key="canonical-alt" /> : <></>}
       <meta name="topic" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
       <meta name="subject" content={`1Cademy - ${escapeBreaksQuotes(title)}`} />
