@@ -1,10 +1,10 @@
-import { ChatCompletionRequestMessage } from "openai";
+// import { ChatCompletionRequestMessage } from "openai";
 import { sendGPTPrompt } from "./assistant-helpers";
 
 export const generateQuestionNode = async (
   nodeTitle: string,
   nodeContent: string,
-  context: ChatCompletionRequestMessage[]
+  context: any[]
 ): Promise<{
   Stem: string;
   Choices: {
@@ -33,10 +33,10 @@ export const generateQuestionNode = async (
 
   const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
 
-  const response: string = gptResponse?.choices?.[0]?.message?.content || "";
-  if (gptResponse?.choices?.[0]) {
+  const response: string = gptResponse || "";
+  if (gptResponse) {
     context.push({
-      content: gptResponse?.choices?.[0]?.message?.content!,
+      content: gptResponse!,
       role: "assistant",
     });
   }
