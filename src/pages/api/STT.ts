@@ -21,7 +21,7 @@ export async function uploadToCloudStorage(sourceBuffer: any) {
   const destination = bucket.file(`SpeechToText/${new Date().toString()}.mp3`);
 
   await destination.save(sourceBuffer);
-
+  await destination.makePublic();
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination.name}`;
   return publicUrl;
 }
