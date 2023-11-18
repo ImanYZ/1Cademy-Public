@@ -195,6 +195,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     return res.status(200).send({
       messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
       audioUrl,
+      messageId,
     });
   } catch (error) {
     console.error(error);
