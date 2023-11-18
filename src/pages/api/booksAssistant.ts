@@ -41,7 +41,6 @@ const uploadPdf = async (bookUrl: string, bookId: string) => {
     file_id: file.id,
     title,
   });
-  await openai.beta.assistants.del(assistantTitleId);
   return file.id;
 };
 
@@ -126,13 +125,23 @@ const getAssistantID = async () => {
 };
 
 const getAssistantGenerateTitle = async () => {
-  const newAssistant = await openai.beta.assistants.create({
-    instructions: `The user attaches a document. Write a title for the attached document as a JSON object with only one key, called "title"`,
-    name: "Title Generator",
-    tools: [{ type: "retrieval" }, { type: "code_interpreter" }],
-    model: "gpt-4-1106-preview",
+  const myAssistants = await openai.beta.assistants.list({
+    order: "desc",
   });
-  return newAssistant.id;
+
+  const previousAssistant = myAssistants.data.find((assit: any) => assit.name === "Title Generator")?.id;
+
+  if (previousAssistant) {
+    return previousAssistant.id;
+  } else {
+    const newAssistant = await openai.beta.assistants.create({
+      instructions: `The user attaches a document. Write a title for the attached document as a JSON object with only one key, called "title"`,
+      name: "Title Generator",
+      tools: [{ type: "retrieval" }, { type: "code_interpreter" }],
+      model: "gpt-4-1106-preview",
+    });
+    return newAssistant.id;
+  }
 };
 const getThread = async (bookId: string) => {
   const bookDoc = await db.collection("books").doc(bookId).get();
