@@ -81,10 +81,11 @@ const UploadButtonCademy = (props: any) => {
               color: props.disabled ? "black" : "white",
               border: "none",
               backgroundColor: props.disabled ? DESIGN_SYSTEM_COLORS.gray200 : orangeDark,
+              width: "100%",
             }}
             disabled={props.disabled}
           >
-            {isUploading ? percentUploaded + "% " : "Upload "}
+            {isUploading ? percentUploaded + "% " : "Upload Document"}
           </LoadingButton>
         </Tooltip>
       </label>

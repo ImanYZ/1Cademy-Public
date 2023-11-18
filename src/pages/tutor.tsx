@@ -2,6 +2,8 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MicIcon from "@mui/icons-material/Mic";
 import SendIcon from "@mui/icons-material/Send";
 import SettingsVoiceIcon from "@mui/icons-material/SettingsVoice";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import {
   Avatar,
   Box,
@@ -17,7 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
@@ -41,9 +43,12 @@ const Tutor = () => {
   const [showPDF, setShowPDF] = useState(false);
   const [uploadError, setUploadError] = useState<any>(false);
   const [isRecording, setRecording] = useState<boolean>(false);
+  const [loadingAudio, setLoadingAudio] = useState(false);
   const mediaRecorderRef = useRef<any>(null);
   const audioChunksRef = useRef<any>([]);
   const messagesContainerRef = useRef<any>(null);
+  const [playingAudio, setPlayingAudio] = useState(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const storage = getStorage();
 
@@ -93,29 +98,35 @@ const Tutor = () => {
     }
   };
 
-  const handleSendMessage = async (book: string, asAudio: boolean) => {
+  const handleSendMessage = async (book: string, asAudio: boolean, newMessage: string) => {
     try {
-      setWaitingForResponse(true);
+      setMessages((_messages: any) => {
+        _messages.push({
+          role: "user",
+          created_at: Timestamp.fromDate(new Date()),
+          content: [{ type: "text", text: { value: newMessage } }],
+        });
+        return _messages;
+      });
       setNewMessage("");
       scroll();
-      const response: any = await Post("/booksAssistant", {
+      setWaitingForResponse(true);
+
+      const { messages, audioUrl }: any = await Post("/booksAssistant", {
         bookId: book,
         message: newMessage,
         asAudio,
       });
-      setMessages(response.messages);
+      setMessages(messages);
+      scroll();
       setWaitingForResponse(false);
+
       if (asAudio) {
-        const _buffer = Buffer.from(response.buffer.data, "base64");
-        const audioBlob = new Blob([_buffer], { type: "audio/mp3" });
-        const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.play();
+        setPlayingAudio(messages.reverse()[0].id);
       }
-    } catch (error) {
-      console.error(error);
-      setWaitingForResponse(false);
-    }
+    } catch (error: any) {}
   };
   const saveBook = async (bookUrl: string) => {
     try {
@@ -125,22 +136,37 @@ const Tutor = () => {
         bookUrl,
         uname: user?.uname,
         createdAt: new Date(),
+        title: "THE CONSTITUTION of the United States",
       });
+      setBookUrl(bookUrl);
       setBookId(newBookRef.id);
       setMessages([]);
-      handleSendMessage(newBookRef.id, false);
+      handleSendMessage(newBookRef.id, false, newMessage);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const createDefaultBook = async () => {
+    try {
+      await saveBook(
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464"
+      );
+      setShowPDF(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
     const ontologyQuery = query(collection(db, "books"), where("uname", "==", user?.uname));
     const unsubscribeOntology = onSnapshot(ontologyQuery, snapshot => {
       const docChanges = snapshot.docChanges();
-
+      if (docChanges.length <= 0) {
+        createDefaultBook();
+      }
       setThreads((books: any) => {
         const _books = [...books];
+
         for (let change of docChanges) {
           const changeData: any = change.doc.data();
           if (changeData.threadId && (changeData?.title || "").trim()) {
@@ -164,6 +190,7 @@ const Tutor = () => {
   }, [db]);
 
   const handleSelectThread = async (thread: any) => {
+    if (!thread) return;
     setMessages([]);
     setBookUrl(thread.bookUrl);
     setBookId(thread.id);
@@ -174,14 +201,17 @@ const Tutor = () => {
     setWaitingForResponse(false);
   };
 
+  useEffect(() => {
+    if (!bookId) {
+      handleSelectThread(threads[0]);
+    }
+  }, [threads]);
+
   const convertTimestampToDate = (timestamp: number) => {
-    // Convert seconds to milliseconds by multiplying by 1000
     const timestampInMillis = timestamp * 1000;
 
-    // Create a Moment.js object from the timestamp
     const momentTimestamp = moment(timestampInMillis);
 
-    // Format the date as needed
     const formattedDate = momentTimestamp.format("h:mm:ss A MMM D, YYYY");
 
     return formattedDate;
@@ -207,7 +237,7 @@ const Tutor = () => {
             audioChunksRef.current = [];
             const response: { transctiption: string } = await Post("/transcribeSpeech", { audioUrl });
             setNewMessage(response.transctiption);
-            handleSendMessage(bookId, true);
+            handleSendMessage(bookId, true, response.transctiption);
           }
         };
 
@@ -238,6 +268,54 @@ const Tutor = () => {
     }
   };
 
+  const playAudio = async (message: any) => {
+    try {
+      setPlayingAudio(message.id);
+      setLoadingAudio(true);
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      let existAudioUrl = "";
+      const thread = threads.find((t: any) => t.id === bookId);
+      if ((thread?.messages || {}).hasOwnProperty(message.id)) {
+        existAudioUrl = thread.messages[message.id].audioUrl;
+      }
+      if (!existAudioUrl) {
+        const { audioUrl }: any = await Post("/STT", {
+          message,
+          bookId,
+        });
+        existAudioUrl = audioUrl;
+      }
+      audioRef.current = new Audio(existAudioUrl);
+      audioRef.current.play();
+      setLoadingAudio(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const stopAudio = () => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setPlayingAudio(null);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleKeyPress = (event: any) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSendMessage(bookId, false, newMessage);
+    }
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      setNewMessage(prevMessage => prevMessage + "\n");
+    }
+  };
+
   return (
     <Box>
       <Box
@@ -261,6 +339,7 @@ const Tutor = () => {
           height: "110vh",
           overflow: "auto",
         }}
+        ref={messagesContainerRef}
       >
         <Box
           sx={{
@@ -272,7 +351,7 @@ const Tutor = () => {
             p: 2,
           }}
         >
-          <Box sx={{ mr: "5px", width: "100%" }}>
+          <Box sx={{ mr: "5px", width: "80%" }}>
             <Button
               id="demo-customized-button"
               aria-controls={open ? "demo-customized-menu" : undefined}
@@ -329,9 +408,9 @@ const Tutor = () => {
             <Alert severity="warning">{uploadError}</Alert>
           </Box>
         )}
-        <Box sx={{ mb: 150 }}>
+        <Box sx={{ mb: 150, p: 3 }}>
           <Stack spacing={2} padding={2}>
-            <Box style={{ overflowY: "auto" }} ref={messagesContainerRef}>
+            <Box style={{ overflowY: "auto" }}>
               {messages
                 .filter((m: any) => !m?.content[0]?.text?.value.startsWith("Hi, I'm"))
                 .map((m: any) => {
@@ -348,9 +427,29 @@ const Tutor = () => {
                               ml: "5px",
                             }}
                           >
-                            <Typography sx={{ ml: "4px", fontSize: "14px", fontFamily: "bold" }}>
-                              {m.role === "user" ? user?.fName + " " + user?.lName : "GPT"}
-                            </Typography>
+                            <Box sx={{ display: "flex", flexDirection: "inline" }}>
+                              <Typography sx={{ ml: "4px", fontSize: "14px", fontFamily: "bold" }}>
+                                {m.role === "user" ? user?.fName + " " + user?.lName : "GPT-4-Turbo"}
+                              </Typography>
+                              {m.role !== "user" &&
+                                (playingAudio === m.id ? (
+                                  loadingAudio ? (
+                                    <Box>
+                                      <LinearProgress sx={{ width: "20px", mt: "9px", ml: "15px" }} />
+                                    </Box>
+                                  ) : (
+                                    <VolumeOffIcon sx={{ ml: "5px", cursor: "pointer" }} onClick={stopAudio} />
+                                  )
+                                ) : (
+                                  <VolumeUpIcon
+                                    sx={{ ml: "5px", cursor: "pointer" }}
+                                    onClick={() => {
+                                      playAudio(m);
+                                    }}
+                                  />
+                                ))}
+                            </Box>
+
                             <Typography sx={{ ml: "4px", fontSize: "12px" }}>
                               {convertTimestampToDate(m.created_at)}
                             </Typography>
@@ -408,13 +507,14 @@ const Tutor = () => {
               value={newMessage}
               disabled={waitingForResponse || !bookUrl}
               onChange={e => setNewMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
               InputProps={{
                 endAdornment: (
-                  <Tooltip title={"Send"}>
+                  <Tooltip title={waitingForResponse ? "Stop" : "Send"}>
                     <IconButton
                       color="primary"
                       disabled={waitingForResponse || !bookUrl || !newMessage}
-                      onClick={() => handleSendMessage(bookId, false)}
+                      onClick={() => handleSendMessage(bookId, false, newMessage)}
                       edge="end"
                     >
                       <SendIcon />
@@ -436,17 +536,23 @@ const Tutor = () => {
               )}
             </IconButton>
           </Box>
+        </Box>
+
+        <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
+        <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
+          {" "}
           {bookUrl && (
-            <Button
-              onClick={() => {
-                setShowPDF(prev => !prev);
-              }}
-              sx={{ mt: "9px" }}
-            >
-              {showPDF ? "Hide Book" : "Show Book"}
-            </Button>
+            <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
+              <Button
+                onClick={() => {
+                  setShowPDF(prev => !prev);
+                }}
+                sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
+              >
+                {showPDF ? "Hide Book" : "Show Book"}
+              </Button>
+            </Tooltip>
           )}
-          <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
         </Box>
       </Paper>
     </Box>
