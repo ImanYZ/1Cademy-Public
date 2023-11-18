@@ -50,7 +50,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const input = message.content[0].text.value;
     const mp3 = await openai.audio.speech.create({
-      model: "tts-1",
+      model: "tts-1-hd",
       voice: "alloy",
       input,
     });

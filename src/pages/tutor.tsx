@@ -309,7 +309,9 @@ const Tutor = () => {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   };
-
+  const handleAudioEnded = () => {
+    setPlayingAudio(null);
+  };
   const playAudio = async (message: any) => {
     try {
       setPlayingAudio(message.id);
@@ -330,8 +332,10 @@ const Tutor = () => {
         existAudioUrl = audioUrl;
       }
       audioRef.current = new Audio(existAudioUrl);
-      audioRef.current.play();
+      audioRef.current.addEventListener("ended", handleAudioEnded);
       setLoadingAudio(false);
+      audioRef.current.play();
+      // setPlayingAudio(null);
     } catch (error) {
       console.error(error);
     }
