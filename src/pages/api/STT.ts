@@ -1,4 +1,4 @@
-import { admin, db } from "@/lib/firestoreServer/admin";
+import { db } from "@/lib/firestoreServer/admin";
 const { Storage } = require("@google-cloud/storage");
 
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -11,11 +11,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   //   OPENAI_API_ORG_ID: process.env.OPENAI_API_KEY,
 });
-const bucket = admin.storage();
 
 export async function uploadToCloudStorage(sourceBuffer: any) {
   const storage = new Storage();
-  const bucketName = "onecademy-dev.appspot.com";
+  const bucketName = process.env.ONECADEMYCRED_STORAGE_BUCKET;
 
   const bucket = storage.bucket(bucketName);
 
