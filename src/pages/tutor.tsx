@@ -141,6 +141,8 @@ const Tutor = () => {
         setPlayingAudio(messageId);
       }
     } catch (error: any) {
+      confirmIt("There appears to be an issue with sending the request to GPT. Please try again.", false);
+      console.error(error);
       setWaitingForResponse(false);
     }
   };
@@ -266,8 +268,8 @@ const Tutor = () => {
                 false
               );
             }
-            setWatingWhisper(false);
           }
+          setWatingWhisper(false);
         };
 
         mediaRecorderRef.current.start();
@@ -275,6 +277,7 @@ const Tutor = () => {
       })
       .catch(error => {
         console.error("Error accessing microphone:", error);
+        setWatingWhisper(false);
         confirmIt("I didn't catch what you said; please ensure that you've granted microphone permissions.", false);
       });
   };
