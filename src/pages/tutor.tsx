@@ -19,7 +19,17 @@ import {
   Typography,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
@@ -29,6 +39,7 @@ import UploadButtonCademy from "@/components/community/UploadButtonCademy";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useAuth } from "@/context/AuthContext";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 
 const GPT_AVATAR =
@@ -49,6 +60,9 @@ const Tutor = () => {
   const messagesContainerRef = useRef<any>(null);
   const [playingAudio, setPlayingAudio] = useState(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [watingWhisper, setWatingWhisper] = useState(false);
+
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
   const storage = getStorage();
 
@@ -103,7 +117,7 @@ const Tutor = () => {
       setMessages((_messages: any) => {
         _messages.push({
           role: "user",
-          created_at: Timestamp.fromDate(new Date()),
+          created_at: Timestamp.fromDate(new Date()).seconds,
           content: [{ type: "text", text: { value: newMessage } }],
         });
         return _messages;
@@ -112,7 +126,7 @@ const Tutor = () => {
       scroll();
       setWaitingForResponse(true);
 
-      const { messages, audioUrl }: any = await Post("/booksAssistant", {
+      const { messages, audioUrl, messageId }: any = await Post("/booksAssistant", {
         bookId: book,
         message: newMessage,
         asAudio,
@@ -122,11 +136,13 @@ const Tutor = () => {
       setWaitingForResponse(false);
 
       if (asAudio) {
-        const audio = new Audio(audioUrl);
-        audio.play();
-        setPlayingAudio(messages.reverse()[0].id);
+        audioRef.current = new Audio(audioUrl);
+        audioRef.current.play();
+        setPlayingAudio(messageId);
       }
-    } catch (error: any) {}
+    } catch (error: any) {
+      setWaitingForResponse(false);
+    }
   };
   const saveBook = async (bookUrl: string) => {
     try {
@@ -137,6 +153,7 @@ const Tutor = () => {
         uname: user?.uname,
         createdAt: new Date(),
         title: "THE CONSTITUTION of the United States",
+        deleted: false,
       });
       setBookUrl(bookUrl);
       setBookId(newBookRef.id);
@@ -158,7 +175,11 @@ const Tutor = () => {
     }
   };
   useEffect(() => {
-    const ontologyQuery = query(collection(db, "books"), where("uname", "==", user?.uname));
+    const ontologyQuery = query(
+      collection(db, "books"),
+      where("uname", "==", user?.uname),
+      where("deleted", "==", false)
+    );
     const unsubscribeOntology = onSnapshot(ontologyQuery, snapshot => {
       const docChanges = snapshot.docChanges();
       if (docChanges.length <= 0) {
@@ -236,8 +257,16 @@ const Tutor = () => {
             setRecording(false);
             audioChunksRef.current = [];
             const response: { transctiption: string } = await Post("/transcribeSpeech", { audioUrl });
-            setNewMessage(response.transctiption);
-            handleSendMessage(bookId, true, response.transctiption);
+            if (response.transctiption.trim()) {
+              setNewMessage(response.transctiption);
+              handleSendMessage(bookId, true, response.transctiption);
+            } else {
+              confirmIt(
+                "I didn't catch what you said; please ensure that you've granted microphone permissions.",
+                false
+              );
+            }
+            setWatingWhisper(false);
           }
         };
 
@@ -246,6 +275,7 @@ const Tutor = () => {
       })
       .catch(error => {
         console.error("Error accessing microphone:", error);
+        confirmIt("I didn't catch what you said; please ensure that you've granted microphone permissions.", false);
       });
   };
 
@@ -261,6 +291,7 @@ const Tutor = () => {
 
   const handleMouseUp = () => {
     stopRecording();
+    setWatingWhisper(true);
   };
   const scroll = () => {
     if (messagesContainerRef.current) {
@@ -316,6 +347,25 @@ const Tutor = () => {
     }
   };
 
+  const deleteBook = async () => {
+    try {
+      if (await confirmIt("Are you sure you want to delete this Book?")) {
+        const bookRef = doc(collection(db, "books"), bookId);
+        const remainThreads = threads.filter((t: any) => t.id !== bookId);
+        if (remainThreads.length) {
+          handleSelectThread(remainThreads[0]);
+        } else {
+          setMessages([]);
+        }
+        await updateDoc(bookRef, {
+          deleted: true,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box>
       <Box
@@ -351,42 +401,52 @@ const Tutor = () => {
             p: 2,
           }}
         >
-          <Box sx={{ mr: "5px", width: "80%" }}>
-            <Button
-              id="demo-customized-button"
-              aria-controls={open ? "demo-customized-menu" : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
-              variant="outlined"
-              disableElevation
-              onClick={handleClick}
-              fullWidth
-              endIcon={<KeyboardArrowDownIcon />}
-            >
-              {threads.find((thread: any) => thread?.id === bookId)?.title || ""}
-            </Button>
-            <Menu
-              id="demo-customized-menu"
-              MenuListProps={{
-                "aria-labelledby": "demo-customized-button",
-              }}
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-              //   PaperProps={{
-              //     style: {
-              //       width: "100%",
-              //       maxWidth: "none",
-              //     },
-              //   }}
-            >
-              {threads.map((thread: any) => (
-                <MenuItem key={thread.id} onClick={() => handleSelectThread(thread)} disableRipple>
-                  {thread.title}
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+          {" "}
+          {threads.length > 0 && (
+            <Box sx={{ mr: "5px", width: "70%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Button sx={{ mr: "5px" }} onClick={deleteBook}>
+                {"Delete"}
+              </Button>
+              <Box sx={{ mr: "5px", width: "100%" }}>
+                <Button
+                  id="demo-customized-button"
+                  aria-controls={open ? "demo-customized-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? "true" : undefined}
+                  variant="outlined"
+                  disableElevation
+                  onClick={handleClick}
+                  fullWidth
+                  endIcon={<KeyboardArrowDownIcon />}
+                >
+                  {threads.find((thread: any) => thread?.id === bookId)?.title || ""}
+                </Button>
+                <Box sx={{ maxWidth: "400px" }}>
+                  <Menu
+                    id="demo-customized-menu"
+                    MenuListProps={{
+                      "aria-labelledby": "demo-customized-button",
+                    }}
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    // PaperProps={{
+                    //   style: {
+                    //     width: "90%",
+                    //     maxWidth: "none",
+                    //   },
+                    // }}
+                  >
+                    {threads.map((thread: any) => (
+                      <MenuItem key={thread.id} onClick={() => handleSelectThread(thread)} disableRipple>
+                        {thread.title}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+              </Box>
+            </Box>
+          )}
           <Box>
             <UploadButtonCademy
               name="Book"
@@ -466,7 +526,7 @@ const Tutor = () => {
               {waitingForResponse && (
                 <Box key={"loading"} sx={{ mb: "15px", p: 5 }}>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Avatar src={GPT_AVATAR} />
+                    <Avatar src={watingWhisper ? user?.imageUrl : GPT_AVATAR} />
                     <Box
                       sx={{
                         display: "flex",
@@ -474,7 +534,9 @@ const Tutor = () => {
                         ml: "5px",
                       }}
                     >
-                      <Typography sx={{ ml: "4px", fontSize: "14px" }}>{"GPT"}</Typography>
+                      <Typography sx={{ ml: "4px", fontSize: "14px" }}>
+                        {watingWhisper ? user?.fName + " " + user?.lName : "GPT-4-Turbo"}
+                      </Typography>
                       <LinearProgress sx={{ width: "150px", mt: "2px" }} />
                     </Box>
                   </Box>
@@ -524,17 +586,21 @@ const Tutor = () => {
               }}
               sx={{ mr: "5px" }}
             />
-            <IconButton
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              disabled={waitingForResponse || !bookUrl}
-            >
-              {isRecording ? (
-                <SettingsVoiceIcon sx={{ fontSize: "40px", color: "orange" }} />
-              ) : (
-                <MicIcon sx={{ fontSize: "35px" }} />
-              )}
-            </IconButton>
+            {watingWhisper ? (
+              <LinearProgress sx={{ width: "50px", mt: "2px" }} />
+            ) : (
+              <IconButton
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                disabled={waitingForResponse || !bookUrl}
+              >
+                {isRecording ? (
+                  <SettingsVoiceIcon sx={{ fontSize: "40px", color: "orange" }} />
+                ) : (
+                  <MicIcon sx={{ fontSize: "35px" }} />
+                )}
+              </IconButton>
+            )}
           </Box>
         </Box>
 
@@ -555,6 +621,7 @@ const Tutor = () => {
           )}
         </Box>
       </Paper>
+      {ConfirmDialog}
     </Box>
   );
 };
