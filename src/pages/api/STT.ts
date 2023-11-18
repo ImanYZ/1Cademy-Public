@@ -14,7 +14,7 @@ const openai = new OpenAI({
 
 export async function uploadToCloudStorage(sourceBuffer: any) {
   const storage = new Storage();
-  const bucketName = process.env.ONECADEMYCRED_STORAGE_BUCKET;
+  const bucketName = process.env.VISUALEXP_STORAGE_BUCKET;
 
   const bucket = storage.bucket(bucketName);
 
