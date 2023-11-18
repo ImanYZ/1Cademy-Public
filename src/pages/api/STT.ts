@@ -14,14 +14,14 @@ const openai = new OpenAI({
 
 export async function uploadToCloudStorage(sourceBuffer: any) {
   const storage = new Storage();
-  const bucketName = process.env.ONECADEMYCRED_STORAGE_BUCKET;
+  const bucketName = process.env.VISUALEXP_STORAGE_BUCKET;
 
   const bucket = storage.bucket(bucketName);
 
   const destination = bucket.file(`SpeechToText/${new Date().toString()}.mp3`);
 
   await destination.save(sourceBuffer);
-
+  await destination.makePublic();
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination.name}`;
   return publicUrl;
 }

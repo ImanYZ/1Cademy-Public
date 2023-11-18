@@ -41,6 +41,7 @@ import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
+import { isValidHttpUrl } from "@/lib/utils/utils";
 
 const GPT_AVATAR =
   "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FujkG0olNv2hYlAgs1c17ANHoGiN2%2FSat%2C%2006%20May%202023%2011%3A00%3A14%20GMT_430x1300.png?alt=media&token=f3515019-e022-422b-b4f3-aa6aba9f7b25";
@@ -81,7 +82,14 @@ const Tutor = () => {
 
   const uploadAudio = async (audioBlob: any) => {
     try {
-      const filesFolder = "SpeechToText/";
+      let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+      if (isValidHttpUrl(bucket)) {
+        const { hostname } = new URL(bucket);
+        bucket = hostname;
+      }
+      const rootURL = "https://storage.googleapis.com/" + bucket + "/";
+      const filesFolder = rootURL + "SpeechToText/";
+
       let fileName = new Date().toString() + ".wav";
       const storageRef = ref(storage, filesFolder + fileName);
       const task = uploadBytesResumable(storageRef, audioBlob);
