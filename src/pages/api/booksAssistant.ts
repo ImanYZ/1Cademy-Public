@@ -1,6 +1,8 @@
 import { db } from "@/lib/firestoreServer/admin";
+import { csvParse } from "d3";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
+import { saveMessageSTT, uploadToCloudStorage } from "./STT";
 const OpenAI = require("openai");
 
 // Create a OpenAI connection
@@ -26,15 +28,13 @@ const uploadPdf = async (bookUrl: string, bookId: string) => {
 
   //get response
   const newThread = await openai.beta.threads.create();
-  console.log(newThread);
   await openai.beta.threads.messages.create(newThread.id, {
     role: "user",
     file_ids: [file.id],
     content: "The document is attached.",
   });
-  const response = await fetchCompelation(newThread.id, assistantTitleId);
-  console.log(response);
-  const title = JSON.parse(getJSON(response)).title;
+  const { responseText } = await fetchCompelation(newThread.id, assistantTitleId);
+  const title = JSON.parse(getJSON(responseText)).title;
 
   const bookRef = db.collection("books").doc(bookId);
   await bookRef.update({
@@ -63,7 +63,7 @@ const fetchCompelation = async (threadId: string, assistant_id: string) => {
     .filter((message: any) => message.run_id === run.id && message.role === "assistant")
     .pop();
 
-  return lastMessageForRun.content[0].text.value;
+  return { responseText: lastMessageForRun.content[0].text.value, messageId: lastMessageForRun.id };
 };
 
 const getAssistantID = async () => {
@@ -152,24 +152,21 @@ const createThread = async (bookId: string) => {
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { bookId, message, asAudio } = req.body;
+    const { bookId, message } = req.body;
     const data = req.body.data;
     const firstname = data.user.userData.fName;
     let newMessage = message;
-    console.log({ bookId });
 
     const documentData: any = await getThread(bookId);
 
     const assistantId = await getAssistantID();
 
     let pdfId = documentData.file_id;
-    console.log(documentData.bookUrl, pdfId);
     if (!pdfId) {
       pdfId = await uploadPdf(documentData.bookUrl, bookId);
     }
     let threadId = documentData.threadId;
 
-    console.log({ pdfId });
     if (!threadId) {
       threadId = await createThread(bookId);
       newMessage = `Hi, I'm ${firstname}. Teach me everything in the attached file.`;
@@ -181,29 +178,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       content: newMessage,
     });
     //get response
-    const responseText = await fetchCompelation(threadId, assistantId);
+    const { responseText, messageId } = await fetchCompelation(threadId, assistantId);
 
     const threadMessages = await openai.beta.threads.messages.list(threadId);
 
     await openai.beta.assistants.del(assistantId);
 
-    if (asAudio) {
-      const mp3 = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: "alloy",
-        input: responseText,
-      });
-      const buffer = Buffer.from(await mp3.arrayBuffer());
-
-      return res.status(200).send({
-        messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
-        buffer,
-      });
-    } else {
-      return res.status(200).send({
-        messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
-      });
-    }
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "alloy",
+      input: responseText,
+    });
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    const audioUrl = await uploadToCloudStorage(buffer);
+    await saveMessageSTT(bookId, messageId, audioUrl);
+    return res.status(200).send({
+      messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
+      audioUrl,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).send({
