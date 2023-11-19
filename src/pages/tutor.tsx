@@ -154,7 +154,7 @@ const Tutor = () => {
       setWaitingForResponse(false);
     }
   };
-  const saveBook = async (bookUrl: string) => {
+  const saveBook = async (bookUrl: string, defaultBook?: boolean) => {
     try {
       if (!bookUrl) return;
       const newBookRef = doc(collection(db, "books"));
@@ -164,6 +164,7 @@ const Tutor = () => {
         createdAt: new Date(),
         title: "THE CONSTITUTION of the United States",
         deleted: false,
+        default: !!defaultBook,
       });
       setBookUrl(bookUrl);
       setBookId(newBookRef.id);
@@ -177,7 +178,8 @@ const Tutor = () => {
   const createDefaultBook = async () => {
     try {
       await saveBook(
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464"
+        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464",
+        true
       );
       setShowPDF(true);
     } catch (error) {
@@ -381,6 +383,11 @@ const Tutor = () => {
     }
   };
 
+  const removeExtraCharacters = (text: string) => {
+    text = text.replaceAll("【27†source】", "");
+    return text;
+  };
+
   return (
     <Box>
       <Box
@@ -419,9 +426,11 @@ const Tutor = () => {
           {" "}
           {threads.length > 0 && (
             <Box sx={{ mr: "5px", width: "70%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
-                {"Delete"}
-              </Button>
+              {!threads.find((thread: any) => thread?.id === bookId)?.default && (
+                <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
+                  {"Delete"}
+                </Button>
+              )}
               <Box sx={{ mr: "5px", width: "100%" }}>
                 {!threads.find((thread: any) => thread?.id === bookId)?.title && waitingForResponse ? (
                   <LinearProgress />
@@ -539,7 +548,11 @@ const Tutor = () => {
                         </Box>
                         <Typography sx={{ mt: "9px" }}>
                           {" "}
-                          <MarkdownRender text={(m?.content || []).length > 0 ? m?.content[0]?.text?.value : ""} />
+                          <MarkdownRender
+                            text={
+                              (m?.content || []).length > 0 ? removeExtraCharacters(m?.content[0]?.text?.value) : ""
+                            }
+                          />
                         </Typography>
                       </Box>
                     )
