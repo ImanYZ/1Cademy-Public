@@ -1,13 +1,6 @@
 import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
-const OpenAI = require("openai");
-
-// Create a OpenAI connection
-const secretKey = process.env.OPENAI_API_KEY;
-const openai = new OpenAI({
-  apiKey: secretKey,
-  //   OPENAI_API_ORG_ID: process.env.OPENAI_API_KEY,
-});
+import { openai } from "./openAI/helpers";
 
 const getThread = async (bookId: string) => {
   const bookDoc = await db.collection("books").doc(bookId).get();

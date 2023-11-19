@@ -85,7 +85,7 @@ const UploadButtonCademy = (props: any) => {
             }}
             disabled={props.disabled}
           >
-            {isUploading ? percentUploaded + "% " : "Upload Document"}
+            {isUploading ? percentUploaded + "% " : "Upload New PDF"}
           </LoadingButton>
         </Tooltip>
       </label>
