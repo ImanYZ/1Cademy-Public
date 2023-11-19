@@ -513,7 +513,10 @@ const Tutor = () => {
                                       <LinearProgress sx={{ width: "20px", mt: "9px", ml: "15px" }} />
                                     </Box>
                                   ) : (
-                                    <VolumeOffIcon sx={{ ml: "5px", cursor: "pointer" }} onClick={stopAudio} />
+                                    <VolumeOffIcon
+                                      sx={{ ml: "5px", cursor: "pointer", color: "orange" }}
+                                      onClick={stopAudio}
+                                    />
                                   )
                                 ) : (
                                   <VolumeUpIcon
