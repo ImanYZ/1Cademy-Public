@@ -419,23 +419,27 @@ const Tutor = () => {
           {" "}
           {threads.length > 0 && (
             <Box sx={{ mr: "5px", width: "70%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Button sx={{ mr: "5px" }} onClick={deleteBook}>
+              <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
                 {"Delete"}
               </Button>
               <Box sx={{ mr: "5px", width: "100%" }}>
-                <Button
-                  id="demo-customized-button"
-                  aria-controls={open ? "demo-customized-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                  variant="outlined"
-                  disableElevation
-                  onClick={handleClick}
-                  fullWidth
-                  endIcon={<KeyboardArrowDownIcon />}
-                >
-                  {threads.find((thread: any) => thread?.id === bookId)?.title || ""}
-                </Button>
+                {!threads.find((thread: any) => thread?.id === bookId)?.title && waitingForResponse ? (
+                  <LinearProgress />
+                ) : (
+                  <Button
+                    id="demo-customized-button"
+                    aria-controls={open ? "demo-customized-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? "true" : undefined}
+                    variant="outlined"
+                    disableElevation
+                    onClick={handleClick}
+                    fullWidth
+                    endIcon={<KeyboardArrowDownIcon />}
+                  >
+                    {threads.find((thread: any) => thread?.id === bookId)?.title || ""}
+                  </Button>
+                )}
                 <Box sx={{ maxWidth: "400px" }}>
                   <Menu
                     id="demo-customized-menu"
