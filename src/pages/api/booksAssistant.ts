@@ -3,14 +3,8 @@ import { csvParse } from "d3";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { saveMessageSTT, uploadToCloudStorage } from "./STT";
-const OpenAI = require("openai");
-
-// Create a OpenAI connection
-const secretKey = process.env.OPENAI_API_KEY;
-const openai = new OpenAI({
-  apiKey: secretKey,
-  //   OPENAI_API_ORG_ID: process.env.OPENAI_API_KEY,
-});
+import { openai } from "./openAI/helpers";
+import moment from "moment";
 
 const getJSON = (text: string) => {
   const start = text.indexOf("{");
@@ -20,23 +14,26 @@ const getJSON = (text: string) => {
 };
 
 const uploadPdf = async (bookUrl: string, bookId: string) => {
+  const bookRef = db.collection("books").doc(bookId);
+  const bookDoc = await bookRef.get();
+  const bookData: any = bookDoc.data();
   const file = await openai.files.create({
     file: await fetch(bookUrl),
     purpose: "assistants",
   });
-  const assistantTitleId = await getAssistantGenerateTitle();
-
-  //get response
-  const newThread = await openai.beta.threads.create();
-  await openai.beta.threads.messages.create(newThread.id, {
-    role: "user",
-    file_ids: [file.id],
-    content: "The document is attached.",
-  });
-  const { responseText } = await fetchCompelation(newThread.id, assistantTitleId);
-  const title = JSON.parse(getJSON(responseText)).title;
-
-  const bookRef = db.collection("books").doc(bookId);
+  let title = bookData.title;
+  if (!title) {
+    const assistantTitleId = await getAssistantGenerateTitle();
+    //get response
+    const newThread = await openai.beta.threads.create();
+    await openai.beta.threads.messages.create(newThread.id, {
+      role: "user",
+      file_ids: [file.id],
+      content: "The document is attached.",
+    });
+    const { responseText } = await fetchCompelation(newThread.id, assistantTitleId);
+    title = JSON.parse(getJSON(responseText)).title;
+  }
   await bookRef.update({
     file_id: file.id,
     title,
@@ -159,9 +156,24 @@ const createThread = async (bookId: string) => {
 
   return newThread.id;
 };
+const getFile = async (fileId: string) => {
+  try {
+    const file = await openai.files.retrieve(fileId);
+    return file;
+  } catch (error) {
+    return false;
+  }
+};
+
+const sendMessageTime = () => {
+  const currentDateTime = moment();
+  const estDateTime = currentDateTime.utcOffset(-5);
+  const formattedDateTime = estDateTime.format("h:mma [EST] on MM/DD/YYYY");
+  return `\nThis message is sent at ${formattedDateTime}`;
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { bookId, message } = req.body;
+    const { bookId, message, audioType } = req.body;
     const data = req.body.data;
     const firstname = data.user.userData.fName;
     let newMessage = message;
@@ -171,7 +183,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const assistantId = await getAssistantID();
 
     let pdfId = documentData.file_id;
-    if (!pdfId) {
+    if (!pdfId || !getFile(pdfId)) {
       pdfId = await uploadPdf(documentData.bookUrl, bookId);
     }
     let threadId = documentData.threadId;
@@ -184,7 +196,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
       file_ids: [pdfId],
-      content: newMessage,
+      content: newMessage + sendMessageTime(),
     });
     //get response
     const { responseText, messageId } = await fetchCompelation(threadId, assistantId);
@@ -193,12 +205,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const mp3 = await openai.audio.speech.create({
       model: "tts-1",
-      voice: "alloy",
+      voice: audioType,
       input: responseText,
     });
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const audioUrl = await uploadToCloudStorage(buffer);
-    await saveMessageSTT(bookId, messageId, audioUrl);
+    await saveMessageSTT(bookId, messageId, audioUrl, audioType);
     return res.status(200).send({
       messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
       audioUrl,

@@ -51,6 +51,8 @@ const Tutor = () => {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElAudioType, setAnchorElAudioType] = useState(null);
+  const [audioType, setAudioType] = useState("alloy");
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
   const [uploadError, setUploadError] = useState<any>(false);
@@ -70,10 +72,18 @@ const Tutor = () => {
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const handleAudioType = (event: any) => {
+    setAnchorElAudioType(event.currentTarget);
+  };
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const handleClosAudio = () => {
+    setAnchorElAudioType(null);
+  };
   const open = Boolean(anchorEl);
+  const openAudioType = Boolean(anchorElAudioType);
   const [bookId, setBookId] = useState("");
 
   const [{ user }] = useAuth();
@@ -138,6 +148,7 @@ const Tutor = () => {
         bookId: book,
         message: newMessage,
         asAudio,
+        audioType,
       });
       setMessages(messages);
       scroll();
@@ -162,9 +173,10 @@ const Tutor = () => {
         bookUrl,
         uname: user?.uname,
         createdAt: new Date(),
-        title: "THE CONSTITUTION of the United States",
+        title: !!defaultBook ? "THE CONSTITUTION of the United States" : "",
         deleted: false,
         default: !!defaultBook,
+        file_id: !!defaultBook ? "file-pxDzdQt0omIiWcWfD82S6gBw" : "",
       });
       setBookUrl(bookUrl);
       setBookId(newBookRef.id);
@@ -324,12 +336,13 @@ const Tutor = () => {
       let existAudioUrl = "";
       const thread = threads.find((t: any) => t.id === bookId);
       if ((thread?.messages || {}).hasOwnProperty(message.id)) {
-        existAudioUrl = thread.messages[message.id].audioUrl;
+        existAudioUrl = thread.messages[message.id][audioType];
       }
       if (!existAudioUrl) {
         const { audioUrl }: any = await Post("/STT", {
           message,
           bookId,
+          audioType,
         });
         existAudioUrl = audioUrl;
       }
@@ -377,15 +390,24 @@ const Tutor = () => {
         await updateDoc(bookRef, {
           deleted: true,
         });
+        await Post("/deleteAssistantFile", {
+          bookId,
+        });
       }
     } catch (error) {
       console.error(error);
+      ù;
     }
   };
 
   const removeExtraCharacters = (text: string) => {
     text = text.replaceAll("【27†source】", "");
+    text = text.replace(/This message is sent at\s\d{1,2}:\d{2}[ap]m\s\w{3}\son\s\d{1,2}\/\d{1,2}\/\d{4}/i, "");
     return text;
+  };
+  const handleSelectAudio = (voiceType: string) => {
+    setAudioType(voiceType);
+    handleClosAudio();
   };
 
   return (
@@ -444,34 +466,40 @@ const Tutor = () => {
                     disableElevation
                     onClick={handleClick}
                     fullWidth
-                    endIcon={<KeyboardArrowDownIcon />}
+                    endIcon={
+                      threads.filter((thread: any) => thread?.id !== bookId).length > 0 && <KeyboardArrowDownIcon />
+                    }
                   >
                     {threads.find((thread: any) => thread?.id === bookId)?.title || ""}
                   </Button>
                 )}
-                <Box sx={{ maxWidth: "400px" }}>
-                  <Menu
-                    id="demo-customized-menu"
-                    MenuListProps={{
-                      "aria-labelledby": "demo-customized-button",
-                    }}
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    // PaperProps={{
-                    //   style: {
-                    //     width: "90%",
-                    //     maxWidth: "none",
-                    //   },
-                    // }}
-                  >
-                    {threads.map((thread: any) => (
-                      <MenuItem key={thread.id} onClick={() => handleSelectThread(thread)} disableRipple>
-                        {thread.title}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </Box>
+                {threads.filter((thread: any) => thread?.id !== bookId).length > 0 && (
+                  <Box sx={{ maxWidth: "400px" }}>
+                    <Menu
+                      id="demo-customized-menu"
+                      MenuListProps={{
+                        "aria-labelledby": "demo-customized-button",
+                      }}
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleClose}
+                      // PaperProps={{
+                      //   style: {
+                      //     width: "90%",
+                      //     maxWidth: "none",
+                      //   },
+                      // }}
+                    >
+                      {threads
+                        .filter((thread: any) => thread?.id !== bookId)
+                        .map((thread: any) => (
+                          <MenuItem key={thread.id} onClick={() => handleSelectThread(thread)} disableRipple>
+                            {thread.title}
+                          </MenuItem>
+                        ))}
+                    </Menu>
+                  </Box>
+                )}
               </Box>
             </Box>
           )}
@@ -634,6 +662,42 @@ const Tutor = () => {
                 </IconButton>
               </Tooltip>
             )}
+            <Box>
+              <Button
+                id="demo-customized-button"
+                aria-controls={openAudioType ? "demo-customized-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={openAudioType ? "true" : undefined}
+                variant="outlined"
+                disableElevation
+                onClick={handleAudioType}
+                fullWidth
+                endIcon={<KeyboardArrowDownIcon />}
+              >
+                {audioType}
+              </Button>
+              <Menu
+                id="demo-customized-menu"
+                MenuListProps={{
+                  "aria-labelledby": "demo-customized-button",
+                }}
+                anchorEl={anchorElAudioType}
+                open={openAudioType}
+                onClose={handleClosAudio}
+                // PaperProps={{
+                //   style: {
+                //     width: "90%",
+                //     maxWidth: "none",
+                //   },
+                // }}
+              >
+                {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
+                  <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
+                    {voiceType}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
           </Box>
         </Box>
 
