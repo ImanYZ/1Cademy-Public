@@ -163,7 +163,7 @@ const Tutor = () => {
         bookUrl,
         uname: user?.uname,
         createdAt: new Date(),
-        title: !!defaultBook ? "THE CONSTITUTION of the United States" : "",
+        title: !!defaultBook ? "The Constitution of the United States" : "",
         deleted: false,
         default: !!defaultBook,
         file_id: !!defaultBook ? "file-pxDzdQt0omIiWcWfD82S6gBw" : "",
