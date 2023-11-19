@@ -1,7 +1,7 @@
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MicIcon from "@mui/icons-material/Mic";
 import SendIcon from "@mui/icons-material/Send";
-import SettingsVoiceIcon from "@mui/icons-material/SettingsVoice";
+import StopCircleIcon from "@mui/icons-material/StopCircle";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import {
@@ -295,15 +295,15 @@ const Tutor = () => {
       mediaRecorderRef.current.stop();
     }
   };
-
-  const handleMouseDown = () => {
-    startRecording();
+  const handleRecoding = () => {
+    if (isRecording) {
+      stopRecording();
+      setWatingWhisper(true);
+    } else {
+      startRecording();
+    }
   };
 
-  const handleMouseUp = () => {
-    stopRecording();
-    setWatingWhisper(true);
-  };
   const scroll = () => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
@@ -604,17 +604,15 @@ const Tutor = () => {
             {watingWhisper ? (
               <LinearProgress sx={{ width: "50px", mt: "2px" }} />
             ) : (
-              <IconButton
-                onMouseDown={handleMouseDown}
-                onMouseUp={handleMouseUp}
-                disabled={waitingForResponse || !bookUrl}
-              >
-                {isRecording ? (
-                  <SettingsVoiceIcon sx={{ fontSize: "40px", color: "orange" }} />
-                ) : (
-                  <MicIcon sx={{ fontSize: "35px" }} />
-                )}
-              </IconButton>
+              <Tooltip title={isRecording ? "Stop" : "Start"}>
+                <IconButton disabled={waitingForResponse || !bookUrl} onClick={handleRecoding}>
+                  {isRecording ? (
+                    <StopCircleIcon sx={{ fontSize: "40px", color: "orange" }} />
+                  ) : (
+                    <MicIcon sx={{ fontSize: "35px" }} />
+                  )}
+                </IconButton>
+              </Tooltip>
             )}
           </Box>
         </Box>
