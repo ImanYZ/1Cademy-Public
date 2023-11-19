@@ -132,7 +132,7 @@ const getAssistantGenerateTitle = async () => {
   const previousAssistant = myAssistants.data.find((assit: any) => assit.name === "Title Generator")?.id;
 
   if (previousAssistant) {
-    return previousAssistant.id;
+    return previousAssistant;
   } else {
     const newAssistant = await openai.beta.assistants.create({
       instructions: `The user attaches a document. Write a title for the attached document as a JSON object with only one key, called "title"`,
@@ -190,8 +190,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { responseText, messageId } = await fetchCompelation(threadId, assistantId);
 
     const threadMessages = await openai.beta.threads.messages.list(threadId);
-
-    await openai.beta.assistants.del(assistantId);
 
     const mp3 = await openai.audio.speech.create({
       model: "tts-1",
