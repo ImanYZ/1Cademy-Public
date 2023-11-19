@@ -27,14 +27,13 @@ import { useEffect, useRef, useState } from "react";
 import PDFView from "@/components/community/PDFView";
 import UploadButtonCademy from "@/components/community/UploadButtonCademy";
 import withAuthUser from "@/components/hoc/withAuthUser";
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
-const GPT_AVATAR =
-  "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FujkG0olNv2hYlAgs1c17ANHoGiN2%2FSat%2C%2006%20May%202023%2011%3A00%3A14%20GMT_430x1300.png?alt=media&token=f3515019-e022-422b-b4f3-aa6aba9f7b25";
 const Tutor = () => {
   const [bookUrl, setBookUrl] = useState("");
   const [threads, setThreads] = useState<any>([]);
@@ -520,7 +519,27 @@ const Tutor = () => {
                     m?.content[0]?.text?.value && (
                       <Box key={m.id} sx={{ mb: "15px", p: 5 }}>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <Avatar src={m.role === "user" ? user?.imageUrl : GPT_AVATAR} />
+                          {m.role === "user" ? (
+                            <Avatar src={user?.imageUrl} />
+                          ) : (
+                            <Box
+                              sx={{
+                                width: "50px",
+                                height: "50px",
+                                mb: { xs: "64px", sm: "32px" },
+                                display: "flex",
+                                alignItems: "center",
+                                pt: "25px",
+                              }}
+                            >
+                              <RiveComponentMemoized
+                                src="rive-voice-assistant/idle.riv"
+                                artboard="New Artboard"
+                                animations={["Timeline 1"]}
+                                autoplay={true}
+                              />
+                            </Box>
+                          )}
                           <Box
                             sx={{
                               display: "flex",
@@ -528,9 +547,9 @@ const Tutor = () => {
                               ml: "5px",
                             }}
                           >
-                            <Box sx={{ display: "flex", flexDirection: "inline" }}>
-                              <Typography sx={{ ml: "4px", fontSize: "14px", fontFamily: "bold" }}>
-                                {m.role === "user" ? user?.fName + " " + user?.lName : "GPT-4-Turbo"}
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Typography sx={{ ml: "4px", fontSize: "19px", fontFamily: "bold" }}>
+                                {m.role === "user" ? user?.fName + " " + user?.lName : "1Tutor"}
                               </Typography>
                               {m.role !== "user" &&
                                 (playingAudio === m.id ? (
@@ -574,7 +593,23 @@ const Tutor = () => {
               {waitingForResponse && (
                 <Box key={"loading"} sx={{ mb: "15px", p: 5 }}>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Avatar src={watingWhisper ? user?.imageUrl : GPT_AVATAR} />
+                    <Box
+                      sx={{
+                        width: "50px",
+                        height: "50px",
+                        mb: { xs: "64px", sm: "32px" },
+                        display: "flex",
+                        alignItems: "center",
+                        pt: "25px",
+                      }}
+                    >
+                      <RiveComponentMemoized
+                        src="rive-voice-assistant/idle.riv"
+                        artboard="New Artboard"
+                        animations={["Timeline 1"]}
+                        autoplay={true}
+                      />
+                    </Box>
                     <Box
                       sx={{
                         display: "flex",
@@ -582,8 +617,8 @@ const Tutor = () => {
                         ml: "5px",
                       }}
                     >
-                      <Typography sx={{ ml: "4px", fontSize: "14px" }}>
-                        {watingWhisper ? user?.fName + " " + user?.lName : "GPT-4-Turbo"}
+                      <Typography sx={{ ml: "4px", fontSize: "19px" }}>
+                        {watingWhisper ? user?.fName + " " + user?.lName : "1Tutor"}
                       </Typography>
                       <LinearProgress sx={{ width: "150px", mt: "2px" }} />
                     </Box>
@@ -685,7 +720,6 @@ const Tutor = () => {
             </Box>
           </Box>
         </Box>
-
         <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
         <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
           {" "}
