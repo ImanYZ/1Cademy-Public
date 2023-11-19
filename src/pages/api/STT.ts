@@ -5,6 +5,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { openai } from "./openAI/helpers";
+import { saveLogs } from "./booksAssistant";
 // import {app} from ""
 
 export async function uploadToCloudStorage(sourceBuffer: any) {
@@ -20,7 +21,13 @@ export async function uploadToCloudStorage(sourceBuffer: any) {
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination.name}`;
   return publicUrl;
 }
-export const saveMessageSTT = async (bookId: string, messageId: string, audioUrl: string, audioType: string) => {
+export const saveMessageSTT = async (
+  bookId: string,
+  messageId: string,
+  audioUrl: string,
+  audioType: string,
+  username: string
+) => {
   try {
     const bookDoc = await db.collection("books").doc(bookId).get();
     if (bookDoc.exists) {
@@ -28,11 +35,19 @@ export const saveMessageSTT = async (bookId: string, messageId: string, audioUrl
       bookData.messages = {
         ...(bookData.messages || {}),
         [messageId]: {
-          ...(bookData.messages[messageId] || { createdAt: new Date() }),
+          ...((bookData?.messages || {})[messageId] || { createdAt: new Date() }),
           [audioType]: audioUrl,
           updatedAt: new Date(),
         },
       };
+      await saveLogs({
+        doer: username,
+        action: "Asked For Audio",
+        audioType,
+        bookUrl: bookData.bookUrl,
+        bookId: bookId,
+        reponse: audioUrl,
+      });
       await bookDoc.ref.update(bookData);
     }
   } catch (error) {
@@ -43,6 +58,7 @@ export const saveMessageSTT = async (bookId: string, messageId: string, audioUrl
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { message, bookId, audioType } = req.body;
+    const data = req.body.data;
     if (!audioType) {
       throw new Error("Audio type is not specified");
     }
@@ -58,7 +74,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const audioUrl = await uploadToCloudStorage(buffer);
-    await saveMessageSTT(bookId, message.id, audioUrl, audioType);
+    await saveMessageSTT(bookId, message.id, audioUrl, audioType, data.user.userData.uname);
     return res.status(200).send({
       audioUrl,
     });

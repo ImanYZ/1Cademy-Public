@@ -171,6 +171,16 @@ const sendMessageTime = () => {
   const formattedDateTime = estDateTime.format("h:mma [EST] on MM/DD/YYYY");
   return `\nThis message is sent at ${formattedDateTime}`;
 };
+
+export const saveLogs = async (logs: any) => {
+  try {
+    const newLogRef = db.collection("tutorLogs").doc();
+    await newLogRef.set({
+      ...logs,
+      createdAt: new Date(),
+    });
+  } catch (error) {}
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { bookId, message, audioType } = req.body;
@@ -192,11 +202,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       threadId = await createThread(bookId);
       newMessage = `Hi, I'm ${firstname}. Teach me everything in the attached file.`;
     }
+    newMessage = newMessage + sendMessageTime();
     //create thread
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
       file_ids: [pdfId],
-      content: newMessage + sendMessageTime(),
+      content: newMessage,
     });
     //get response
     const { responseText, messageId } = await fetchCompelation(threadId, assistantId);
@@ -210,7 +221,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const audioUrl = await uploadToCloudStorage(buffer);
-    await saveMessageSTT(bookId, messageId, audioUrl, audioType);
+    await saveMessageSTT(bookId, messageId, audioUrl, audioType, data.user.userData.uname);
+
+    await saveLogs({
+      doer: data.user.userData.uname,
+      action: "Asked Assistant",
+      bookUrl: documentData.bookUrl,
+      bookId: bookId,
+      message: newMessage,
+      reponse: responseText,
+    });
     return res.status(200).send({
       messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
       audioUrl,
