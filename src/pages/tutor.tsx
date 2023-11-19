@@ -19,17 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import {
-  collection,
-  doc,
-  getFirestore,
-  onSnapshot,
-  query,
-  setDoc,
-  Timestamp,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
@@ -380,23 +370,18 @@ const Tutor = () => {
   const deleteBook = async () => {
     try {
       if (await confirmIt("Are you sure you want to delete this Book?")) {
-        const bookRef = doc(collection(db, "books"), bookId);
         const remainThreads = threads.filter((t: any) => t.id !== bookId);
         if (remainThreads.length) {
           handleSelectThread(remainThreads[0]);
         } else {
           setMessages([]);
         }
-        await updateDoc(bookRef, {
-          deleted: true,
-        });
         await Post("/deleteAssistantFile", {
           bookId,
         });
       }
     } catch (error) {
       console.error(error);
-      ù;
     }
   };
 
