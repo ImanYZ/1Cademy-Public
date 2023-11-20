@@ -667,7 +667,7 @@ const Tutor = () => {
                             text={
                               (m?.content || []).length > 0
                                 ? removeExtraCharacters(
-                                    m.role === "useer"
+                                    m.role === "user"
                                       ? m?.content[0]?.text?.value
                                       : getJSON(m?.content[0]?.text?.value).message
                                   )
