@@ -11,9 +11,7 @@ const PDFView = ({ fileUrl, width = "700px", height }: any) => {
         width: width,
       }}
     >
-      <object data={fileUrl} type="application/pdf" width="100%" height="100%">
-        <iframe src={"https://docs.google.com/viewer?url=" + fileUrl + "&embedded=true"}></iframe>
-      </object>
+      <embed src={fileUrl} type="application/pdf" width="100%" height="100%" />
     </Paper>
   ) : (
     <div></div>
