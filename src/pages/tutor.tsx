@@ -17,6 +17,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
@@ -26,6 +27,7 @@ import { useEffect, useRef, useState } from "react";
 
 import PDFView from "@/components/community/PDFView";
 import UploadButtonCademy from "@/components/community/UploadButtonCademy";
+import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -54,6 +56,7 @@ const Tutor = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [watingWhisper, setWatingWhisper] = useState(false);
 
+  const isMobile = useMediaQuery("(max-width:599px)");
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
   const storage = getStorage();
@@ -119,6 +122,29 @@ const Tutor = () => {
     }
   };
 
+  const getEmotions = (emotion: string) => {
+    if (emotion === "happy" || emotion === "very happy") {
+      return "idle.riv";
+    } else if (emotion === "blinking") {
+      return "idle.riv";
+    } else if (emotion === "clapping") {
+      return "happy.riv";
+    } else if (emotion === "happy drumming") {
+      return "idle.riv";
+    } else if (emotion === "celebrating daily goal achievement") {
+      return "idle.riv";
+    } else if (emotion === "sad" || emotion === "unhappy") {
+      return "sad.riv";
+    }
+    return "idle.riv";
+  };
+  const capitalizeFirstLetter = (word: string) => {
+    if (typeof word !== "string" || word.length === 0) {
+      return "";
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  };
+
   const handleSendMessage = async (book: string, asAudio: boolean, newMessage: string) => {
     try {
       setMessages((_messages: any) => {
@@ -182,7 +208,6 @@ const Tutor = () => {
         "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464",
         true
       );
-      setShowPDF(true);
     } catch (error) {
       console.error(error);
     }
@@ -387,15 +412,37 @@ const Tutor = () => {
   const removeExtraCharacters = (text: string) => {
     text = text.replaceAll("【27†source】", "");
     text = text.replace(/This message is sent at\s\d{1,2}:\d{2}[ap]m\s\w{3}\son\s\d{1,2}\/\d{1,2}\/\d{4}/i, "");
-    return text;
+    return capitalizeFirstLetter(text);
   };
   const handleSelectAudio = (voiceType: string) => {
     setAudioType(voiceType);
     handleClosAudio();
   };
 
+  const getJSON = (text: string) => {
+    try {
+      const start = text.indexOf("{");
+      const end = text.lastIndexOf("}");
+      const jsonArrayString = text.slice(start, end + 1);
+
+      return JSON.parse(jsonArrayString);
+    } catch (error) {
+      return {
+        message: text,
+        emotion: null,
+      };
+    }
+  };
+
   return (
     <Box>
+      <AppHeaderMemoized
+        page="ONE_CADEMY"
+        tutorPage={true}
+        sections={[]}
+        selectedSectionId={""}
+        onSwitchSection={() => {}}
+      />
       <Box
         sx={{
           width: "100vw",
@@ -425,14 +472,22 @@ const Tutor = () => {
             alignItems: "center",
             justifyContent: "center",
             pt: "15px",
-            mb: "15px",
-            p: 2,
+            mt: 5,
+            m: isMobile ? 5 : "",
           }}
         >
           {" "}
           {threads.length > 0 && (
-            <Box sx={{ mr: "5px", width: "70%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {!threads.find((thread: any) => thread?.id === bookId)?.default && (
+            <Box
+              sx={{
+                mr: "5px",
+                width: isMobile ? "90%" : "70%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {!threads.find((thread: any) => thread?.id === bookId)?.default && !isMobile && (
                 <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
                   {"Delete"}
                 </Button>
@@ -488,27 +543,55 @@ const Tutor = () => {
             </Box>
           )}
           <Box>
-            <UploadButtonCademy
-              name="Book"
-              mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
-              typeErrorMessage="We only accept a file with PDF format. Please upload another file."
-              sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
-              maxSize={10}
-              storageFolder="books/"
-              setFileUrl={setBookUrl}
-              fullname={user?.uname || ""}
-              saveBook={saveBook}
-              setUploadError={setUploadError}
-              disabled={waitingForResponse}
-            />
+            {!isMobile && (
+              <Box>
+                <UploadButtonCademy
+                  name="Book"
+                  mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
+                  typeErrorMessage="We only accept a file with PDF format. Please upload another file."
+                  sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
+                  maxSize={10}
+                  storageFolder="books/"
+                  setFileUrl={setBookUrl}
+                  fullname={user?.uname || ""}
+                  saveBook={saveBook}
+                  setUploadError={setUploadError}
+                  disabled={waitingForResponse}
+                />
+              </Box>
+            )}
           </Box>
         </Box>
+        {isMobile && (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {!threads.find((thread: any) => thread?.id === bookId)?.default && (
+              <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
+                {"Delete"}
+              </Button>
+            )}
+            <Box>
+              <UploadButtonCademy
+                name="Book"
+                mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
+                typeErrorMessage="We only accept a file with PDF format. Please upload another file."
+                sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
+                maxSize={10}
+                storageFolder="books/"
+                setFileUrl={setBookUrl}
+                fullname={user?.uname || ""}
+                saveBook={saveBook}
+                setUploadError={setUploadError}
+                disabled={waitingForResponse}
+              />
+            </Box>
+          </Box>
+        )}
         {uploadError && (
           <Box sx={{ m: 1 }}>
             <Alert severity="warning">{uploadError}</Alert>
           </Box>
         )}
-        <Box sx={{ mb: 150, p: 3 }}>
+        <Box sx={{ mb: 150, p: 3, pt: 2 }}>
           <Stack spacing={2} padding={2}>
             <Box style={{ overflowY: "auto" }}>
               {messages
@@ -517,15 +600,15 @@ const Tutor = () => {
                   return (
                     (m?.content || []).length > 0 &&
                     m?.content[0]?.text?.value && (
-                      <Box key={m.id} sx={{ mb: "15px", p: 5 }}>
+                      <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           {m.role === "user" ? (
                             <Avatar src={user?.imageUrl} />
                           ) : (
                             <Box
                               sx={{
-                                width: "50px",
-                                height: "50px",
+                                width: "60px",
+                                height: "60px",
                                 mb: { xs: "64px", sm: "32px" },
                                 display: "flex",
                                 alignItems: "center",
@@ -533,7 +616,7 @@ const Tutor = () => {
                               }}
                             >
                               <RiveComponentMemoized
-                                src="rive-voice-assistant/idle.riv"
+                                src={`rive-voice-assistant/${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
                                 artboard="New Artboard"
                                 animations={["Timeline 1"]}
                                 autoplay={true}
@@ -578,11 +661,17 @@ const Tutor = () => {
                             </Typography>
                           </Box>
                         </Box>
-                        <Typography sx={{ mt: "9px" }}>
+                        <Typography sx={{ mt: m.role === "user" ? "9px" : "" }}>
                           {" "}
                           <MarkdownRender
                             text={
-                              (m?.content || []).length > 0 ? removeExtraCharacters(m?.content[0]?.text?.value) : ""
+                              (m?.content || []).length > 0
+                                ? removeExtraCharacters(
+                                    m.role === "user"
+                                      ? m?.content[0]?.text?.value
+                                      : getJSON(m?.content[0]?.text?.value).message
+                                  )
+                                : ""
                             }
                           />
                         </Typography>
@@ -591,7 +680,7 @@ const Tutor = () => {
                   );
                 })}
               {waitingForResponse && (
-                <Box key={"loading"} sx={{ mb: "15px", p: 5 }}>
+                <Box key={"loading"} sx={{ mb: "15px", pl: 5 }}>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Box
                       sx={{
@@ -682,60 +771,68 @@ const Tutor = () => {
                 </IconButton>
               </Tooltip>
             )}
-            <Box>
-              <Button
-                id="demo-customized-button"
-                aria-controls={openAudioType ? "demo-customized-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={openAudioType ? "true" : undefined}
-                variant="outlined"
-                disableElevation
-                onClick={handleAudioType}
-                fullWidth
-                endIcon={<KeyboardArrowDownIcon />}
-              >
-                {audioType}
-              </Button>
-              <Menu
-                id="demo-customized-menu"
-                MenuListProps={{
-                  "aria-labelledby": "demo-customized-button",
-                }}
-                anchorEl={anchorElAudioType}
-                open={openAudioType}
-                onClose={handleClosAudio}
-                // PaperProps={{
-                //   style: {
-                //     width: "90%",
-                //     maxWidth: "none",
-                //   },
-                // }}
-              >
-                {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
-                  <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
-                    {voiceType}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
           </Box>
         </Box>
-        <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
-        <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
-          {" "}
-          {bookUrl && (
-            <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
-              <Button
-                onClick={() => {
-                  setShowPDF(prev => !prev);
-                }}
-                sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
-              >
-                {showPDF ? "Hide Book" : "Show Book"}
-              </Button>
-            </Tooltip>
-          )}
+        <Box
+          sx={{
+            display: "flex",
+            width: "150px",
+            marginLeft: "auto",
+            mt: "15px",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typography sx={{ mr: "15px" }}>Narrator:</Typography>
+          <Button
+            id="demo-customized-button"
+            aria-controls={openAudioType ? "demo-customized-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={openAudioType ? "true" : undefined}
+            variant="outlined"
+            disableElevation
+            onClick={handleAudioType}
+            fullWidth
+            endIcon={<KeyboardArrowDownIcon />}
+          >
+            {capitalizeFirstLetter(audioType)}
+          </Button>
+          <Menu
+            id="demo-customized-menu"
+            MenuListProps={{
+              "aria-labelledby": "demo-customized-button",
+            }}
+            anchorEl={anchorElAudioType}
+            open={openAudioType}
+            onClose={handleClosAudio}
+          >
+            {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
+              <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
+                {capitalizeFirstLetter(voiceType)}
+              </MenuItem>
+            ))}
+          </Menu>
         </Box>
+        {!isMobile && (
+          <Box>
+            <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
+            <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
+              {" "}
+              {bookUrl && (
+                <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
+                  <Button
+                    onClick={() => {
+                      setShowPDF(prev => !prev);
+                    }}
+                    sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
+                  >
+                    {showPDF ? "Hide Book" : "Show Book"}
+                  </Button>
+                </Tooltip>
+              )}
+            </Box>
+          </Box>
+        )}
       </Paper>
       {ConfirmDialog}
     </Box>
