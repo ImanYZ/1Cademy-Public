@@ -96,7 +96,7 @@ const Tutor = () => {
     } else if (emotion === "sad" || emotion === "unhappy") {
       return "rive-voice-assistant/sad.riv";
     }
-    return "rive-voice-assistant/happy.riv";
+    return "rive-voice-assistant/idle.riv";
   };
 
   const uploadAudio = async (audioBlob: any) => {
@@ -616,7 +616,7 @@ const Tutor = () => {
                               pt: "25px",
                             }}
                           >
-                            {playingAudio === m.id ? (
+                            {playingAudio === m.id && !loadingAudio ? (
                               <RiveComponentMemoized
                                 key={`talking-${m.id}`}
                                 src={"rive-voice-assistant/talking.riv"}
