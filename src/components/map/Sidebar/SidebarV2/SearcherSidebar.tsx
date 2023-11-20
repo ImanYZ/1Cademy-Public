@@ -807,7 +807,7 @@ const SearcherSidebar = ({
                 alignItems={"center"}
                 sx={{
                   mt: "13px",
-                  mb: "16px",
+                  mb: "13px",
                 }}
               >
                 <RecentNodesList
@@ -883,14 +883,14 @@ const SearcherSidebar = ({
             />
           )}
         </Box>
-        <Box
+        {/* <Box
           sx={{
             borderBottom: 1,
             borderColor: theme => (theme.palette.mode === "dark" ? "black" : "divider"),
             width: "100%",
           }}
-        >
-          {/* <Tabs value={value} onChange={handleTabValueChange} aria-label={"Search Sidebar Tabs"} variant="fullWidth">
+        > */}
+        {/* <Tabs value={value} onChange={handleTabValueChange} aria-label={"Search Sidebar Tabs"} variant="fullWidth">
             // {[{ title: "Nodes" }, { title: "Proposals" }].map(
               // (tabItem: any, idx: number) => (
               //   <Tab
@@ -903,7 +903,7 @@ const SearcherSidebar = ({
               // )
             //</Box>)}
           </Tabs> */}
-        </Box>
+        {/* </Box> */}
       </Box>
     );
   }, [

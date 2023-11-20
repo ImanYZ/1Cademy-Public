@@ -116,9 +116,9 @@ export const NodeHead = ({ node, keywords, updatedStr, createdStr }: NodeHeadPro
   return (
     <Head>
       {nodeSlugs && nodeSlugs.length > 0 ? (
-        nodeSlugs.map((slug: string) => {
+        nodeSlugs.map((slug: string, idx: number) => {
           const nodeUrl = getNodePageWithDomain(slug || "", id, "slug");
-          return <link rel="canonical" href={`${nodeUrl}`} key="canonical" />;
+          return <link rel="canonical" href={`${nodeUrl}`} key={"canonical-" + idx} />;
         })
       ) : (
         <link rel="canonical" href={`${nodeUrl}`} key="canonical" />
