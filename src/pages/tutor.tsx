@@ -84,19 +84,19 @@ const Tutor = () => {
 
   const getEmotions = (emotion: string) => {
     if (emotion === "happy" || emotion === "very happy") {
-      return "idle.riv";
+      return "rive-voice-assistant/idle.riv";
     } else if (emotion === "blinking") {
-      return "idle.riv";
+      return "rive-voice-assistant/idle.riv";
     } else if (emotion === "clapping") {
-      return "happy.riv";
+      return "rive-voice-assistant/happy.riv";
     } else if (emotion === "happy drumming") {
-      return "idle.riv";
+      return "rive-voice-assistant/happy.riv";
     } else if (emotion === "celebrating daily goal achievement") {
-      return "idle.riv";
+      return "rive/positive-reinforcement.riv";
     } else if (emotion === "sad" || emotion === "unhappy") {
-      return "sad.riv";
+      return "rive-voice-assistant/sad.riv";
     }
-    return "idle.riv";
+    return "rive-voice-assistant/happy.riv";
   };
 
   const uploadAudio = async (audioBlob: any) => {
@@ -593,7 +593,7 @@ const Tutor = () => {
           </Box>
         )}
 
-        <Stack spacing={2} padding={2} sx={{ overflow: "auto", height: "100%", p: 3, mb: showPDF ? 150 : "" }}>
+        <Stack spacing={2} padding={2} sx={{ p: 3, mb: showPDF ? 200 : 150 }}>
           <Box style={{ overflowY: "auto" }}>
             {messages
               .filter((m: any) => !m?.content[0]?.text?.value.startsWith("Hi, I'm"))
@@ -616,12 +616,23 @@ const Tutor = () => {
                               pt: "25px",
                             }}
                           >
-                            <RiveComponentMemoized
-                              src={`rive-voice-assistant/${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
-                              artboard="New Artboard"
-                              animations={["Timeline 1"]}
-                              autoplay={true}
-                            />
+                            {playingAudio === m.id ? (
+                              <RiveComponentMemoized
+                                key={`talking-${m.id}`}
+                                src={"rive-voice-assistant/talking.riv"}
+                                artboard="New Artboard"
+                                animations={["Timeline 1"]}
+                                autoplay={true}
+                              />
+                            ) : (
+                              <RiveComponentMemoized
+                                key={`emotion-${m.id}`}
+                                src={`${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
+                                artboard="New Artboard"
+                                animations={["Timeline 1"]}
+                                autoplay={true}
+                              />
+                            )}
                           </Box>
                         )}
                         <Box
@@ -731,6 +742,24 @@ const Tutor = () => {
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", position: "sticky", zIndex: 3 }}>
+          {isRecording && (
+            <Box
+              sx={{
+                width: "50px",
+                height: "50px",
+                mb: { xs: "64px", sm: "32px" },
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <RiveComponentMemoized
+                src="rive-voice-assistant/listening.riv"
+                artboard="New Artboard"
+                animations={["Timeline 1"]}
+                autoplay={true}
+              />
+            </Box>
+          )}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <TextField
               id="message-input"
