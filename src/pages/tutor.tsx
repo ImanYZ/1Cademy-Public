@@ -82,6 +82,23 @@ const Tutor = () => {
 
   const db = getFirestore();
 
+  const getEmotions = (emotion: string) => {
+    if (emotion === "happy" || emotion === "very happy") {
+      return "rive-voice-assistant/idle.riv";
+    } else if (emotion === "blinking") {
+      return "rive-voice-assistant/idle.riv";
+    } else if (emotion === "clapping") {
+      return "rive-voice-assistant/happy.riv";
+    } else if (emotion === "happy drumming") {
+      return "rive-voice-assistant/happy.riv";
+    } else if (emotion === "celebrating daily goal achievement") {
+      return "rive/positive-reinforcement.riv";
+    } else if (emotion === "sad" || emotion === "unhappy") {
+      return "rive-voice-assistant/sad.riv";
+    }
+    return "rive-voice-assistant/happy.riv";
+  };
+
   const uploadAudio = async (audioBlob: any) => {
     try {
       let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
@@ -122,22 +139,6 @@ const Tutor = () => {
     }
   };
 
-  const getEmotions = (emotion: string) => {
-    if (emotion === "happy" || emotion === "very happy") {
-      return "idle.riv";
-    } else if (emotion === "blinking") {
-      return "idle.riv";
-    } else if (emotion === "clapping") {
-      return "happy.riv";
-    } else if (emotion === "happy drumming") {
-      return "idle.riv";
-    } else if (emotion === "celebrating daily goal achievement") {
-      return "idle.riv";
-    } else if (emotion === "sad" || emotion === "unhappy") {
-      return "sad.riv";
-    }
-    return "idle.riv";
-  };
   const capitalizeFirstLetter = (word: string) => {
     if (typeof word !== "string" || word.length === 0) {
       return "";
@@ -591,132 +592,142 @@ const Tutor = () => {
             <Alert severity="warning">{uploadError}</Alert>
           </Box>
         )}
-        <Box sx={{ mb: 150, p: 3, pt: 2 }}>
-          <Stack spacing={2} padding={2}>
-            <Box style={{ overflowY: "auto" }}>
-              {messages
-                .filter((m: any) => !m?.content[0]?.text?.value.startsWith("Hi, I'm"))
-                .map((m: any) => {
-                  return (
-                    (m?.content || []).length > 0 &&
-                    m?.content[0]?.text?.value && (
-                      <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          {m.role === "user" ? (
-                            <Avatar src={user?.imageUrl} />
-                          ) : (
-                            <Box
-                              sx={{
-                                width: "60px",
-                                height: "60px",
-                                mb: { xs: "64px", sm: "32px" },
-                                display: "flex",
-                                alignItems: "center",
-                                pt: "25px",
-                              }}
-                            >
+
+        <Stack spacing={2} padding={2} sx={{ p: 3, mb: showPDF ? 200 : 150 }}>
+          <Box style={{ overflowY: "auto" }}>
+            {messages
+              .filter((m: any) => !m?.content[0]?.text?.value.startsWith("Hi, I'm"))
+              .map((m: any) => {
+                return (
+                  (m?.content || []).length > 0 &&
+                  m?.content[0]?.text?.value && (
+                    <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {m.role === "user" ? (
+                          <Avatar src={user?.imageUrl} />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: "60px",
+                              height: "60px",
+                              mb: { xs: "64px", sm: "32px" },
+                              display: "flex",
+                              alignItems: "center",
+                              pt: "25px",
+                            }}
+                          >
+                            {playingAudio === m.id ? (
                               <RiveComponentMemoized
-                                src={`rive-voice-assistant/${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
+                                key={`talking-${m.id}`}
+                                src={"rive-voice-assistant/talking.riv"}
                                 artboard="New Artboard"
                                 animations={["Timeline 1"]}
                                 autoplay={true}
                               />
-                            </Box>
-                          )}
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              ml: "5px",
-                            }}
-                          >
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Typography sx={{ ml: "4px", fontSize: "19px", fontFamily: "bold" }}>
-                                {m.role === "user" ? user?.fName + " " + user?.lName : "1Tutor"}
-                              </Typography>
-                              {m.role !== "user" &&
-                                (playingAudio === m.id ? (
-                                  loadingAudio ? (
-                                    <Box>
-                                      <LinearProgress sx={{ width: "20px", mt: "9px", ml: "15px" }} />
-                                    </Box>
-                                  ) : (
-                                    <VolumeOffIcon
-                                      sx={{ ml: "5px", cursor: "pointer", color: "orange" }}
-                                      onClick={stopAudio}
-                                    />
-                                  )
-                                ) : (
-                                  <VolumeUpIcon
-                                    sx={{ ml: "5px", cursor: "pointer" }}
-                                    onClick={() => {
-                                      playAudio(m);
-                                    }}
-                                  />
-                                ))}
-                            </Box>
-
-                            <Typography sx={{ ml: "4px", fontSize: "12px" }}>
-                              {convertTimestampToDate(m.created_at)}
-                            </Typography>
+                            ) : (
+                              <RiveComponentMemoized
+                                key={`emotion-${m.id}`}
+                                src={`${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
+                                artboard="New Artboard"
+                                animations={["Timeline 1"]}
+                                autoplay={true}
+                              />
+                            )}
                           </Box>
+                        )}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            ml: "5px",
+                          }}
+                        >
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Typography sx={{ ml: "4px", fontSize: "19px", fontFamily: "bold" }}>
+                              {m.role === "user" ? user?.fName + " " + user?.lName : "1Tutor"}
+                            </Typography>
+                            {m.role !== "user" &&
+                              (playingAudio === m.id ? (
+                                loadingAudio ? (
+                                  <Box>
+                                    <LinearProgress sx={{ width: "20px", mt: "9px", ml: "15px" }} />
+                                  </Box>
+                                ) : (
+                                  <VolumeOffIcon
+                                    sx={{ ml: "5px", cursor: "pointer", color: "orange" }}
+                                    onClick={stopAudio}
+                                  />
+                                )
+                              ) : (
+                                <VolumeUpIcon
+                                  sx={{ ml: "5px", cursor: "pointer" }}
+                                  onClick={() => {
+                                    playAudio(m);
+                                  }}
+                                />
+                              ))}
+                          </Box>
+
+                          <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+                            {convertTimestampToDate(m.created_at)}
+                          </Typography>
                         </Box>
-                        <Typography sx={{ mt: m.role === "user" ? "9px" : "" }}>
-                          {" "}
-                          <MarkdownRender
-                            text={
-                              (m?.content || []).length > 0
-                                ? removeExtraCharacters(
-                                    m.role === "user"
-                                      ? m?.content[0]?.text?.value
-                                      : getJSON(m?.content[0]?.text?.value).message
-                                  )
-                                : ""
-                            }
-                          />
-                        </Typography>
                       </Box>
-                    )
-                  );
-                })}
-              {waitingForResponse && (
-                <Box key={"loading"} sx={{ mb: "15px", pl: 5 }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Box
-                      sx={{
-                        width: "50px",
-                        height: "50px",
-                        mb: { xs: "64px", sm: "32px" },
-                        display: "flex",
-                        alignItems: "center",
-                        pt: "25px",
-                      }}
-                    >
-                      <RiveComponentMemoized
-                        src="rive-voice-assistant/idle.riv"
-                        artboard="New Artboard"
-                        animations={["Timeline 1"]}
-                        autoplay={true}
-                      />
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        ml: "5px",
-                      }}
-                    >
-                      <Typography sx={{ ml: "4px", fontSize: "19px" }}>
-                        {watingWhisper ? user?.fName + " " + user?.lName : "1Tutor"}
+                      <Typography sx={{ mt: m.role === "user" ? "9px" : "" }}>
+                        {" "}
+                        <MarkdownRender
+                          text={
+                            (m?.content || []).length > 0
+                              ? removeExtraCharacters(
+                                  m.role === "user"
+                                    ? m?.content[0]?.text?.value
+                                    : getJSON(m?.content[0]?.text?.value).message
+                                )
+                              : ""
+                          }
+                        />
                       </Typography>
-                      <LinearProgress sx={{ width: "150px", mt: "2px" }} />
                     </Box>
+                  )
+                );
+              })}
+            {waitingForResponse && (
+              <Box key={"loading"} sx={{ mb: "15px", pl: 5 }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      width: "50px",
+                      height: "50px",
+                      mb: { xs: "64px", sm: "32px" },
+                      display: "flex",
+                      alignItems: "center",
+                      pt: "25px",
+                    }}
+                  >
+                    <RiveComponentMemoized
+                      src="rive-voice-assistant/idle.riv"
+                      artboard="New Artboard"
+                      animations={["Timeline 1"]}
+                      autoplay={true}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      ml: "5px",
+                    }}
+                  >
+                    <Typography sx={{ ml: "4px", fontSize: "19px" }}>
+                      {watingWhisper ? user?.fName + " " + user?.lName : "1Tutor"}
+                    </Typography>
+                    <LinearProgress sx={{ width: "150px", mt: "2px" }} />
                   </Box>
                 </Box>
-              )}
-            </Box>
-          </Stack>
-        </Box>
+              </Box>
+            )}
+          </Box>
+        </Stack>
       </Paper>
 
       <Paper
@@ -731,6 +742,24 @@ const Tutor = () => {
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", position: "sticky", zIndex: 3 }}>
+          {isRecording && (
+            <Box
+              sx={{
+                width: "50px",
+                height: "50px",
+                mb: { xs: "64px", sm: "32px" },
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <RiveComponentMemoized
+                src="rive-voice-assistant/listening.riv"
+                artboard="New Artboard"
+                animations={["Timeline 1"]}
+                autoplay={true}
+              />
+            </Box>
+          )}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <TextField
               id="message-input"
@@ -815,7 +844,7 @@ const Tutor = () => {
         </Box>
         {!isMobile && (
           <Box>
-            <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
+            <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="400px" width="100%" />}</Box>
             <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
               {" "}
               {bookUrl && (
