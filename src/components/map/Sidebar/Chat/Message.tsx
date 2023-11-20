@@ -9,8 +9,8 @@ import React, { useEffect, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-import { MessageLeft } from "./Message/MessageLeft";
-import { MessageRight } from "./Message/MessageRight";
+import { MessageLeft } from "./Room/MessageLeft";
+import { MessageRight } from "./Room/MessageRight";
 
 dayjs.extend(relativeTime);
 

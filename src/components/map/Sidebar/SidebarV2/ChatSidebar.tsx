@@ -7,7 +7,8 @@ import { buildFullNodes, getNodesPromises } from "../../../../lib/utils/nodesSyn
 import { FullNodeData, FullNodesData, UserNodeChanges, UserNodeFirestore } from "../../../../nodeBookTypes";
 import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/Direct";
-import { Message } from "../Chat/Message";
+import { NewsCard } from "../Chat/Room/NewsCard";
+//import { Message } from "../Chat/Message";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 type ChatSidebarProps = {
@@ -128,7 +129,16 @@ export const ChatSidebar = ({ open, onClose, username, sidebarWidth, innerHeight
       contentSignalState={contentSignalState}
       SidebarContent={
         <Box sx={{ p: "2px 16px" }}>
-          {value === 0 && <Message />}
+          {value === 0 && (
+            <NewsCard
+              tag="1cademy"
+              image="https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31"
+              text={
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+              }
+              heading="Card Test Heading"
+            />
+          )}
           {value === 1 && <ChannelsList />}
           {value === 2 && <DirectMessagesList />}
         </Box>
