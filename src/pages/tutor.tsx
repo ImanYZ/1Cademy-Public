@@ -745,8 +745,8 @@ const Tutor = () => {
           {isRecording && (
             <Box
               sx={{
-                width: "50px",
-                height: "50px",
+                width: "90px",
+                height: "90px",
                 mb: { xs: "64px", sm: "32px" },
                 display: "flex",
                 alignItems: "center",
