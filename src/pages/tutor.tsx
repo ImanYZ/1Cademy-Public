@@ -172,6 +172,7 @@ const Tutor = () => {
 
       if (asAudio) {
         audioRef.current = new Audio(audioUrl);
+        audioRef.current.addEventListener("ended", handleAudioEnded);
         audioRef.current.play();
         setPlayingAudio(messageId);
       }
