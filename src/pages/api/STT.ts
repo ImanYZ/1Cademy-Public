@@ -4,7 +4,7 @@ const { Storage } = require("@google-cloud/storage");
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
-import { openai } from "./openAI/helpers";
+import { getJSON, openai } from "./openAI/helpers";
 import { saveLogs } from "./booksAssistant";
 // import {app} from ""
 
@@ -66,7 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       throw new Error("Book not specified");
     }
 
-    const input = message.content[0].text.value;
+    const input = getJSON(message.content[0].text.value).message;
     const mp3 = await openai.audio.speech.create({
       model: "tts-1-hd",
       voice: audioType,

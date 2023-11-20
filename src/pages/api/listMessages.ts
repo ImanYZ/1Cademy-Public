@@ -13,7 +13,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const documentData: any = await getThread(bookId);
     const threadMessages = await openai.beta.threads.messages.list(documentData.threadId);
 
-    console.log(threadMessages.data);
     return res.status(200).send({
       messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
     });

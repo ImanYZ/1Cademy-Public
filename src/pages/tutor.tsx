@@ -19,13 +19,14 @@ import {
   Typography,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
+import { collection, doc, getFirestore, onSnapshot, query, setDoc, where } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 
 import PDFView from "@/components/community/PDFView";
 import UploadButtonCademy from "@/components/community/UploadButtonCademy";
+import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -119,16 +120,39 @@ const Tutor = () => {
     }
   };
 
+  const getEmotions = (emotion: string) => {
+    if (emotion === "happy" || emotion === "very happy") {
+      return "idle.riv";
+    } else if (emotion === "blinking") {
+      return "idle.riv";
+    } else if (emotion === "clapping") {
+      return "happy.riv";
+    } else if (emotion === "happy drumming") {
+      return "idle.riv";
+    } else if (emotion === "celebrating daily goal achievement") {
+      return "idle.riv";
+    } else if (emotion === "sad" || emotion === "unhappy") {
+      return "sad.riv";
+    }
+    return "idle.riv";
+  };
+  const capitalizeFirstLetter = (word: string) => {
+    if (typeof word !== "string" || word.length === 0) {
+      return "";
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  };
+
   const handleSendMessage = async (book: string, asAudio: boolean, newMessage: string) => {
     try {
-      setMessages((_messages: any) => {
-        _messages.push({
-          role: "user",
-          created_at: Timestamp.fromDate(new Date()).seconds,
-          content: [{ type: "text", text: { value: newMessage } }],
-        });
-        return _messages;
-      });
+      // setMessages((_messages: any) => {
+      //   _messages.push({
+      //     role: "user",
+      //     created_at: Timestamp.fromDate(new Date()).seconds,
+      //     content: [{ type: "text", text: { value: `newMessage:${newMessage}` } }],
+      //   });
+      //   return _messages;
+      // });
       setNewMessage("");
       scroll();
       setWaitingForResponse(true);
@@ -387,15 +411,30 @@ const Tutor = () => {
   const removeExtraCharacters = (text: string) => {
     text = text.replaceAll("【27†source】", "");
     text = text.replace(/This message is sent at\s\d{1,2}:\d{2}[ap]m\s\w{3}\son\s\d{1,2}\/\d{1,2}\/\d{4}/i, "");
-    return text;
+    return capitalizeFirstLetter(text);
   };
   const handleSelectAudio = (voiceType: string) => {
     setAudioType(voiceType);
     handleClosAudio();
   };
 
+  const getJSON = (text: string) => {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    const jsonArrayString = text.slice(start, end + 1);
+
+    return JSON.parse(jsonArrayString);
+  };
+
   return (
     <Box>
+      <AppHeaderMemoized
+        page="ONE_CADEMY"
+        tutorPage={false}
+        sections={[]}
+        selectedSectionId={""}
+        onSwitchSection={() => {}}
+      />
       <Box
         sx={{
           width: "100vw",
@@ -425,8 +464,7 @@ const Tutor = () => {
             alignItems: "center",
             justifyContent: "center",
             pt: "15px",
-            mb: "15px",
-            p: 2,
+            mt: 5,
           }}
         >
           {" "}
@@ -508,7 +546,7 @@ const Tutor = () => {
             <Alert severity="warning">{uploadError}</Alert>
           </Box>
         )}
-        <Box sx={{ mb: 150, p: 3 }}>
+        <Box sx={{ mb: 150, p: 3, pt: 2 }}>
           <Stack spacing={2} padding={2}>
             <Box style={{ overflowY: "auto" }}>
               {messages
@@ -517,15 +555,15 @@ const Tutor = () => {
                   return (
                     (m?.content || []).length > 0 &&
                     m?.content[0]?.text?.value && (
-                      <Box key={m.id} sx={{ mb: "15px", p: 5 }}>
+                      <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           {m.role === "user" ? (
                             <Avatar src={user?.imageUrl} />
                           ) : (
                             <Box
                               sx={{
-                                width: "50px",
-                                height: "50px",
+                                width: "60px",
+                                height: "60px",
                                 mb: { xs: "64px", sm: "32px" },
                                 display: "flex",
                                 alignItems: "center",
@@ -533,7 +571,7 @@ const Tutor = () => {
                               }}
                             >
                               <RiveComponentMemoized
-                                src="rive-voice-assistant/idle.riv"
+                                src={`rive-voice-assistant/${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
                                 artboard="New Artboard"
                                 animations={["Timeline 1"]}
                                 autoplay={true}
@@ -578,11 +616,17 @@ const Tutor = () => {
                             </Typography>
                           </Box>
                         </Box>
-                        <Typography sx={{ mt: "9px" }}>
+                        <Typography sx={{ mt: m.role === "user" ? "9px" : "" }}>
                           {" "}
                           <MarkdownRender
                             text={
-                              (m?.content || []).length > 0 ? removeExtraCharacters(m?.content[0]?.text?.value) : ""
+                              (m?.content || []).length > 0
+                                ? removeExtraCharacters(
+                                    m.role === "user"
+                                      ? m?.content[0]?.text?.value
+                                      : getJSON(m?.content[0]?.text?.value).message
+                                  )
+                                : ""
                             }
                           />
                         </Typography>
@@ -682,43 +726,47 @@ const Tutor = () => {
                 </IconButton>
               </Tooltip>
             )}
-            <Box>
-              <Button
-                id="demo-customized-button"
-                aria-controls={openAudioType ? "demo-customized-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={openAudioType ? "true" : undefined}
-                variant="outlined"
-                disableElevation
-                onClick={handleAudioType}
-                fullWidth
-                endIcon={<KeyboardArrowDownIcon />}
-              >
-                {audioType}
-              </Button>
-              <Menu
-                id="demo-customized-menu"
-                MenuListProps={{
-                  "aria-labelledby": "demo-customized-button",
-                }}
-                anchorEl={anchorElAudioType}
-                open={openAudioType}
-                onClose={handleClosAudio}
-                // PaperProps={{
-                //   style: {
-                //     width: "90%",
-                //     maxWidth: "none",
-                //   },
-                // }}
-              >
-                {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
-                  <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
-                    {voiceType}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
           </Box>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            width: "150px",
+            marginLeft: "auto",
+            mt: "15px",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typography sx={{ mr: "15px" }}>Narrator:</Typography>
+          <Button
+            id="demo-customized-button"
+            aria-controls={openAudioType ? "demo-customized-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={openAudioType ? "true" : undefined}
+            variant="outlined"
+            disableElevation
+            onClick={handleAudioType}
+            fullWidth
+            endIcon={<KeyboardArrowDownIcon />}
+          >
+            {capitalizeFirstLetter(audioType)}
+          </Button>
+          <Menu
+            id="demo-customized-menu"
+            MenuListProps={{
+              "aria-labelledby": "demo-customized-button",
+            }}
+            anchorEl={anchorElAudioType}
+            open={openAudioType}
+            onClose={handleClosAudio}
+          >
+            {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
+              <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
+                {capitalizeFirstLetter(voiceType)}
+              </MenuItem>
+            ))}
+          </Menu>
         </Box>
         <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
         <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
