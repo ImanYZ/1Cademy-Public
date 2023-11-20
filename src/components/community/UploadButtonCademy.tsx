@@ -1,6 +1,6 @@
 import UploadIcon from "@mui/icons-material/Upload";
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Tooltip } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useState } from "react";
 
@@ -59,7 +59,7 @@ const UploadButtonCademy = (props: any) => {
   };
 
   return (
-    <>
+    <Box>
       <label htmlFor={props.name + "File"}>
         {!props.disabled && (
           <input
@@ -89,7 +89,7 @@ const UploadButtonCademy = (props: any) => {
           </LoadingButton>
         </Tooltip>
       </label>
-    </>
+    </Box>
   );
 };
 

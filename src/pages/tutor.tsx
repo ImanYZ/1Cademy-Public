@@ -17,9 +17,10 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
@@ -55,6 +56,7 @@ const Tutor = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [watingWhisper, setWatingWhisper] = useState(false);
 
+  const isMobile = useMediaQuery("(max-width:599px)");
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
   const storage = getStorage();
@@ -145,14 +147,14 @@ const Tutor = () => {
 
   const handleSendMessage = async (book: string, asAudio: boolean, newMessage: string) => {
     try {
-      // setMessages((_messages: any) => {
-      //   _messages.push({
-      //     role: "user",
-      //     created_at: Timestamp.fromDate(new Date()).seconds,
-      //     content: [{ type: "text", text: { value: `newMessage:${newMessage}` } }],
-      //   });
-      //   return _messages;
-      // });
+      setMessages((_messages: any) => {
+        _messages.push({
+          role: "user",
+          created_at: Timestamp.fromDate(new Date()).seconds,
+          content: [{ type: "text", text: { value: newMessage } }],
+        });
+        return _messages;
+      });
       setNewMessage("");
       scroll();
       setWaitingForResponse(true);
@@ -206,7 +208,6 @@ const Tutor = () => {
         "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464",
         true
       );
-      setShowPDF(true);
     } catch (error) {
       console.error(error);
     }
@@ -419,18 +420,25 @@ const Tutor = () => {
   };
 
   const getJSON = (text: string) => {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    const jsonArrayString = text.slice(start, end + 1);
+    try {
+      const start = text.indexOf("{");
+      const end = text.lastIndexOf("}");
+      const jsonArrayString = text.slice(start, end + 1);
 
-    return JSON.parse(jsonArrayString);
+      return JSON.parse(jsonArrayString);
+    } catch (error) {
+      return {
+        message: text,
+        emotion: null,
+      };
+    }
   };
 
   return (
     <Box>
       <AppHeaderMemoized
         page="ONE_CADEMY"
-        tutorPage={false}
+        tutorPage={true}
         sections={[]}
         selectedSectionId={""}
         onSwitchSection={() => {}}
@@ -465,12 +473,21 @@ const Tutor = () => {
             justifyContent: "center",
             pt: "15px",
             mt: 5,
+            m: isMobile ? 5 : "",
           }}
         >
           {" "}
           {threads.length > 0 && (
-            <Box sx={{ mr: "5px", width: "70%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {!threads.find((thread: any) => thread?.id === bookId)?.default && (
+            <Box
+              sx={{
+                mr: "5px",
+                width: isMobile ? "90%" : "70%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {!threads.find((thread: any) => thread?.id === bookId)?.default && !isMobile && (
                 <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
                   {"Delete"}
                 </Button>
@@ -526,21 +543,49 @@ const Tutor = () => {
             </Box>
           )}
           <Box>
-            <UploadButtonCademy
-              name="Book"
-              mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
-              typeErrorMessage="We only accept a file with PDF format. Please upload another file."
-              sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
-              maxSize={10}
-              storageFolder="books/"
-              setFileUrl={setBookUrl}
-              fullname={user?.uname || ""}
-              saveBook={saveBook}
-              setUploadError={setUploadError}
-              disabled={waitingForResponse}
-            />
+            {!isMobile && (
+              <Box>
+                <UploadButtonCademy
+                  name="Book"
+                  mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
+                  typeErrorMessage="We only accept a file with PDF format. Please upload another file."
+                  sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
+                  maxSize={10}
+                  storageFolder="books/"
+                  setFileUrl={setBookUrl}
+                  fullname={user?.uname || ""}
+                  saveBook={saveBook}
+                  setUploadError={setUploadError}
+                  disabled={waitingForResponse}
+                />
+              </Box>
+            )}
           </Box>
         </Box>
+        {isMobile && (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {!threads.find((thread: any) => thread?.id === bookId)?.default && (
+              <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
+                {"Delete"}
+              </Button>
+            )}
+            <Box>
+              <UploadButtonCademy
+                name="Book"
+                mimeTypes={["application/pdf"]} // Alternatively "image/png, image/gif, image/jpeg"
+                typeErrorMessage="We only accept a file with PDF format. Please upload another file."
+                sizeErrorMessage="We only accept file sizes less than 10MB. Please upload another file."
+                maxSize={10}
+                storageFolder="books/"
+                setFileUrl={setBookUrl}
+                fullname={user?.uname || ""}
+                saveBook={saveBook}
+                setUploadError={setUploadError}
+                disabled={waitingForResponse}
+              />
+            </Box>
+          </Box>
+        )}
         {uploadError && (
           <Box sx={{ m: 1 }}>
             <Alert severity="warning">{uploadError}</Alert>
@@ -622,7 +667,7 @@ const Tutor = () => {
                             text={
                               (m?.content || []).length > 0
                                 ? removeExtraCharacters(
-                                    m.role === "user"
+                                    m.role === "useer"
                                       ? m?.content[0]?.text?.value
                                       : getJSON(m?.content[0]?.text?.value).message
                                   )
@@ -635,7 +680,7 @@ const Tutor = () => {
                   );
                 })}
               {waitingForResponse && (
-                <Box key={"loading"} sx={{ mb: "15px", p: 5 }}>
+                <Box key={"loading"} sx={{ mb: "15px", pl: 5 }}>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Box
                       sx={{
@@ -768,22 +813,26 @@ const Tutor = () => {
             ))}
           </Menu>
         </Box>
-        <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
-        <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
-          {" "}
-          {bookUrl && (
-            <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
-              <Button
-                onClick={() => {
-                  setShowPDF(prev => !prev);
-                }}
-                sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
-              >
-                {showPDF ? "Hide Book" : "Show Book"}
-              </Button>
-            </Tooltip>
-          )}
-        </Box>
+        {!isMobile && (
+          <Box>
+            <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="500px" width="100%" />}</Box>
+            <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
+              {" "}
+              {bookUrl && (
+                <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
+                  <Button
+                    onClick={() => {
+                      setShowPDF(prev => !prev);
+                    }}
+                    sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
+                  >
+                    {showPDF ? "Hide Book" : "Show Book"}
+                  </Button>
+                </Tooltip>
+              )}
+            </Box>
+          </Box>
+        )}
       </Paper>
       {ConfirmDialog}
     </Box>

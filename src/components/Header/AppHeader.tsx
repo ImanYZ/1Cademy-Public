@@ -277,7 +277,7 @@ const AppHeader = forwardRef(
 
             {/* Navbar Right Options */}
             <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              {!mitpage && !!tutorPage && (
+              {!mitpage && !tutorPage && (
                 <Box
                   sx={{
                     width: "100%",
@@ -443,7 +443,7 @@ const AppHeader = forwardRef(
                 )}
               </Stack>
 
-              {!mitpage && (
+              {!mitpage && !tutorPage && (
                 <IconButton
                   onClick={() => setOpenMenu(prev => !prev)}
                   sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}

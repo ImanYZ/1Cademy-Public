@@ -11,10 +11,16 @@ export const openai = new OpenAI({
 });
 
 export const getJSON = (text: string) => {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  const jsonArrayString = text.slice(start, end + 1);
-  return JSON.parse(jsonArrayString);
+  try {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    const jsonArrayString = text.slice(start, end + 1);
+    return JSON.parse(jsonArrayString);
+  } catch (error) {
+    return {
+      message: text,
+    };
+  }
 };
 export const getAssistantTutorID = async () => {
   const myAssistants = await openai.beta.assistants.list({
@@ -97,7 +103,7 @@ export const fetchCompelation = async (threadId: string, assistant_id: string) =
   const lastMessageForRun = messages.data
     .filter((message: any) => message.run_id === run.id && message.role === "assistant")
     .pop();
-
+  console.log("lastMessageForRun.content[0].text.value", lastMessageForRun.content[0].text.value);
   return {
     response: getJSON(lastMessageForRun.content[0].text.value),
     messageId: lastMessageForRun.id,
