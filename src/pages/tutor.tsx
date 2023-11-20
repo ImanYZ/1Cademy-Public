@@ -52,7 +52,7 @@ const Tutor = () => {
   const mediaRecorderRef = useRef<any>(null);
   const audioChunksRef = useRef<any>([]);
   const messagesContainerRef = useRef<any>(null);
-  const [playingAudio, setPlayingAudio] = useState(null);
+  const [playingAudio, setPlayingAudio] = useState<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [watingWhisper, setWatingWhisper] = useState(false);
 
@@ -608,8 +608,8 @@ const Tutor = () => {
                         ) : (
                           <Box
                             sx={{
-                              width: "60px",
-                              height: "60px",
+                              width: playingAudio === m.id && !loadingAudio ? "85px" : "60px",
+                              height: playingAudio === m.id && !loadingAudio ? "85px" : "60px",
                               mb: { xs: "64px", sm: "32px" },
                               display: "flex",
                               alignItems: "center",
@@ -696,8 +696,8 @@ const Tutor = () => {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Box
                     sx={{
-                      width: "50px",
-                      height: "50px",
+                      width: "130px",
+                      height: "130px",
                       mb: { xs: "64px", sm: "32px" },
                       display: "flex",
                       alignItems: "center",
@@ -705,13 +705,13 @@ const Tutor = () => {
                     }}
                   >
                     <RiveComponentMemoized
-                      src="rive-voice-assistant/idle.riv"
+                      src="rive-assistant/thinking.riv"
                       artboard="New Artboard"
                       animations={["Timeline 1"]}
                       autoplay={true}
                     />
                   </Box>
-                  <Box
+                  {/* <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
@@ -722,7 +722,7 @@ const Tutor = () => {
                       {watingWhisper ? user?.fName + " " + user?.lName : "1Tutor"}
                     </Typography>
                     <LinearProgress sx={{ width: "150px", mt: "2px" }} />
-                  </Box>
+                  </Box> */}
                 </Box>
               </Box>
             )}
