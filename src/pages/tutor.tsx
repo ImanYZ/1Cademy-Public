@@ -13,6 +13,7 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Popover,
   Stack,
   TextField,
   Tooltip,
@@ -26,6 +27,7 @@ import moment from "moment";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import Animations from "@/components/assistant/Animations";
 import SearchMessage from "@/components/assistant/SearchMessage";
 import PDFView from "@/components/community/PDFView";
 import UploadButtonCademy from "@/components/community/UploadButtonCademy";
@@ -116,23 +118,6 @@ const Tutor = () => {
 
   const db = getFirestore();
 
-  const getEmotions = (emotion: string) => {
-    if (emotion === "happy" || emotion === "very happy") {
-      return "rive-voice-assistant/idle.riv";
-    } else if (emotion === "blinking") {
-      return "rive-voice-assistant/idle.riv";
-    } else if (emotion === "clapping") {
-      return "rive-voice-assistant/happy.riv";
-    } else if (emotion === "happy drumming") {
-      return "rive-voice-assistant/happy.riv";
-    } else if (emotion === "celebrating daily goal achievement") {
-      return "rive-voice-assistant/happy.riv";
-    } else if (emotion === "sad" || emotion === "unhappy") {
-      return "rive-voice-assistant/sad.riv";
-    }
-    return "rive-voice-assistant/happy.riv";
-  };
-
   const uploadAudio = async (audioBlob: any) => {
     try {
       let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
@@ -196,13 +181,17 @@ const Tutor = () => {
 
       setWaitingForResponse(true);
 
-      const { messages, audioUrl, messageId }: any = await Post("/booksAssistant", {
-        bookId: book,
-        message: newMessage,
-        asAudio,
-        audioType,
-        reaction: selectedEmoji.title,
-      });
+      const { messages, audioUrl, messageId }: any = await Post(
+        "/booksAssistant",
+        {
+          bookId: book,
+          message: newMessage,
+          asAudio,
+          audioType,
+          reaction: selectedEmoji.title,
+        },
+        false
+      );
       messages.shift();
       setMessages(messages);
       scroll();
@@ -335,7 +324,7 @@ const Tutor = () => {
           if (audioUrl) {
             setRecording(false);
             audioChunksRef.current = [];
-            const response: { transctiption: string } = await Post("/transcribeSpeech", { audioUrl });
+            const response: { transctiption: string } = await Post("/transcribeSpeech", { audioUrl }, false);
             if (response.transctiption.trim()) {
               setNewMessage(response.transctiption);
               handleSendMessage(bookId, true, response.transctiption);
@@ -394,11 +383,15 @@ const Tutor = () => {
         existAudioUrl = thread.messages[message.id][audioType];
       }
       if (!existAudioUrl) {
-        const { audioUrl }: any = await Post("/STT", {
-          message,
-          bookId,
-          audioType,
-        });
+        const { audioUrl }: any = await Post(
+          "/STT",
+          {
+            message,
+            bookId,
+            audioType,
+          },
+          false
+        );
         existAudioUrl = audioUrl;
       }
       audioRef.current = new Audio(existAudioUrl);
@@ -681,13 +674,7 @@ const Tutor = () => {
                               autoplay={true}
                             />
                           ) : (
-                            <RiveComponentMemoized
-                              key={`emotion-${m.id}`}
-                              src={`${getEmotions(getJSON(m?.content[0]?.text?.value).emotion)}`}
-                              artboard="New Artboard"
-                              animations={["Timeline 1"]}
-                              autoplay={true}
-                            />
+                            <Animations emotion={getJSON(m?.content[0]?.text?.value).emotion} />
                           )}
                         </Box>
                       )}
@@ -824,51 +811,53 @@ const Tutor = () => {
               onKeyDown={handleKeyPress}
               InputProps={{
                 endAdornment: (
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        width: "70px",
-                        marginLeft: "auto",
-                        justifyContent: "center",
-                        alignItems: "center",
+                  <Box
+                    sx={{
+                      display: "flex",
+                      width: "70px",
+                      marginLeft: "auto",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      alignSelf: "flex-end",
+                    }}
+                  >
+                    {" "}
+                    <Image
+                      src={selectedEmoji.emoji.src}
+                      alt={selectedEmoji.title}
+                      width="30px"
+                      height="30px"
+                      style={{ cursor: "pointer" }}
+                      onClick={handleEmojiSelector}
+                    />
+                    <Popover
+                      id={"id"}
+                      open={openEmojiSelector}
+                      anchorEl={anchorElEmoji}
+                      onClose={handleCloseEmojy}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "center",
+                      }}
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "center",
                       }}
                     >
-                      <Image
-                        src={selectedEmoji.emoji.src}
-                        alt="Grinning Face with Big Eyes"
-                        width="30px"
-                        height="30px"
-                        onClick={handleEmojiSelector}
-                        style={{ cursor: "pointer" }}
-                      />
-                      <Menu
-                        id="demo-customized-menu"
-                        MenuListProps={{
-                          "aria-labelledby": "demo-customized-button",
-                        }}
-                        anchorEl={anchorElEmoji}
-                        open={openEmojiSelector}
-                        onClose={handleCloseEmojy}
-                        PaperProps={{
-                          style: {
-                            width: "60px",
-                            maxWidth: "none",
-                          },
-                        }}
-                      >
-                        {reactions.map((reaction: any) => (
-                          <MenuItem key={reaction.id} onClick={() => handleSelectedEmoji(reaction)} disableRipple>
-                            <Image
-                              src={reaction.emoji.src}
-                              alt="Grinning Face with Big Eyes"
-                              width="40px"
-                              height="40px"
-                            />
-                          </MenuItem>
+                      <Box>
+                        {reactions.map(reaction => (
+                          <Image
+                            key={reaction.id}
+                            src={reaction.emoji.src}
+                            alt={reaction.title}
+                            width="40px"
+                            height="40px"
+                            onClick={() => handleSelectedEmoji(reaction)}
+                            style={{ marginRight: "5px", cursor: "pointer" }}
+                          />
                         ))}
-                      </Menu>
-                    </Box>
+                      </Box>
+                    </Popover>
                     <Tooltip title={waitingForResponse ? "Stop" : "Send"}>
                       <IconButton
                         color="primary"
@@ -924,7 +913,6 @@ const Tutor = () => {
             {capitalizeFirstLetter(audioType)}
           </Button>
           <Menu
-            id="demo-customized-menu"
             MenuListProps={{
               "aria-labelledby": "demo-customized-button",
             }}
@@ -939,7 +927,6 @@ const Tutor = () => {
             ))}
           </Menu>
         </Box>
-
         <Box>
           <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="400px" width="100%" />}</Box>
           <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>

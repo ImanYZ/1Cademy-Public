@@ -22,7 +22,7 @@ export const postImageWithToken = async (mapUrl: string, postData: any = {}): Pr
 /**
  * will call endpoint in this way: http://localhost:3000/api/{mapUrl}
  */
-export const Post = async <R>(mapUrl: string, postData: any = {}): Promise<R> => {
+export const Post = async <R>(mapUrl: string, postData: any = {}, callAgain: boolean = true): Promise<R> => {
   try {
     const token = await getIdToken();
     const response = await API.post(
@@ -33,12 +33,16 @@ export const Post = async <R>(mapUrl: string, postData: any = {}): Promise<R> =>
     return response.data;
   } catch (error) {
     const token = await getIdToken();
-    const response = await API.post(
-      `/api${mapUrl}`,
-      { ...postData },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    return response.data;
+    if (callAgain) {
+      const response = await API.post(
+        `/api${mapUrl}`,
+        { ...postData },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response.data;
+    } else {
+      throw error;
+    }
   }
 };
 
