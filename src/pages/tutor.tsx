@@ -13,6 +13,7 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Popover,
   Stack,
   TextField,
   Tooltip,
@@ -820,54 +821,43 @@ const Tutor = () => {
                       alignSelf: "flex-end",
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        width: "70px",
-                        marginLeft: "auto",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        position: "relative",
+                    {" "}
+                    <Image
+                      src={selectedEmoji.emoji.src}
+                      alt={selectedEmoji.title}
+                      width="30px"
+                      height="30px"
+                      style={{ cursor: "pointer" }}
+                      onClick={handleEmojiSelector}
+                    />
+                    <Popover
+                      id={"id"}
+                      open={openEmojiSelector}
+                      anchorEl={anchorElEmoji}
+                      onClose={handleCloseEmojy}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "center",
+                      }}
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "center",
                       }}
                     >
-                      <Menu
-                        anchorEl={anchorElEmoji}
-                        open={openEmojiSelector}
-                        onClose={handleCloseEmojy}
-                        anchorOrigin={{
-                          vertical: "bottom",
-                          horizontal: "center",
-                        }}
-                        transformOrigin={{
-                          vertical: "top",
-                          horizontal: "center",
-                        }}
-                        PaperProps={{
-                          style: {
-                            width: "60px",
-                            maxWidth: "none",
-                            marginBottom: "50px",
-                            position: "absolute",
-                          },
-                        }}
-                        // getContentAnchorEl={null}
-                      >
-                        {reactions.map((reaction: any) => (
-                          <MenuItem key={reaction.id} onClick={() => handleSelectedEmoji(reaction)} disableRipple>
-                            <Image src={reaction.emoji.src} alt={reaction.title} width="40px" height="40px" />
-                          </MenuItem>
+                      <Box>
+                        {reactions.map(reaction => (
+                          <Image
+                            key={reaction.id}
+                            src={reaction.emoji.src}
+                            alt={reaction.title}
+                            width="40px"
+                            height="40px"
+                            onClick={() => handleSelectedEmoji(reaction)}
+                            style={{ marginRight: "5px", cursor: "pointer" }}
+                          />
                         ))}
-                      </Menu>
-
-                      <Image
-                        src={selectedEmoji.emoji.src}
-                        alt={selectedEmoji.title}
-                        width="30px"
-                        height="30px"
-                        style={{ cursor: "pointer" }}
-                        onClick={handleEmojiSelector}
-                      />
-                    </Box>
+                      </Box>
+                    </Popover>
                     <Tooltip title={waitingForResponse ? "Stop" : "Send"}>
                       <IconButton
                         color="primary"
