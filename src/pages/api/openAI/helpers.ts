@@ -17,9 +17,17 @@ export const getJSON = (text: string) => {
     const jsonArrayString = text.slice(start, end + 1);
     return JSON.parse(jsonArrayString);
   } catch (error) {
-    return {
-      message: text,
-    };
+    const pattern = /"message": "(.*?)",.*?"emotion": "(.*?)"/s;
+    const match = pattern.exec(text);
+    if (match) {
+      return {
+        message: match[1],
+      };
+    } else {
+      return {
+        message: text,
+      };
+    }
   }
 };
 export const getAssistantTutorID = async () => {

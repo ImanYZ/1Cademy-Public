@@ -58,7 +58,7 @@ export const saveLogs = async (logs: any) => {
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { bookId, message, audioType } = req.body;
+    const { bookId, message, audioType, reaction } = req.body;
     const data = req.body.data;
     const firstname = data.user.userData.fName;
     let newMessage = message;
@@ -77,7 +77,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       threadId = await createThread(bookId);
       newMessage = `Hi, I'm ${firstname}. Teach me everything in the attached file.`;
     }
-    newMessage = newMessage + sendMessageTime();
+    newMessage = newMessage + sendMessageTime() + `\nThe user reacted with ${reaction}`;
     //create thread
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
@@ -105,6 +105,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       bookId: bookId,
       message: newMessage,
       reponse: response?.message || "",
+      reaction,
     });
     return res.status(200).send({
       messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
