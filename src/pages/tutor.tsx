@@ -48,6 +48,7 @@ import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import AngryFace from "../../public/static/emojis/angryface.png";
@@ -121,6 +122,8 @@ const Tutor = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [watingWhisper, setWatingWhisper] = useState(false);
 
+  const [selectedThread, setSelectedThread] = useState<any>(null);
+
   const isMobile = useMediaQuery("(max-width:599px)");
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
@@ -155,6 +158,16 @@ const Tutor = () => {
 
   const db = getFirestore();
 
+  const getReaction = (m: any): any => {
+    let reactionTitle = (selectedThread.messagesReaction || {})[m.id]?.reaction || "";
+    if (!reactionTitle) {
+      reactionTitle = m.reaction;
+    }
+    if (!reactionTitle) return null;
+
+    const reaction = reactions.find((r: any) => r.title === reactionTitle);
+    return reaction;
+  };
   const uploadAudio = async (audioBlob: any) => {
     try {
       let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
@@ -209,6 +222,7 @@ const Tutor = () => {
           role: "user",
           created_at: Timestamp.fromDate(new Date()).seconds,
           content: [{ type: "text", text: { value: newMessage } }],
+          reaction: selectedEmoji.title,
         });
         return _messages;
       });
@@ -240,7 +254,7 @@ const Tutor = () => {
         setPlayingAudio(messageId);
       }
     } catch (error: any) {
-      confirmIt("There appears to be an issue with sending the request to GPT. Please try again.", false);
+      confirmIt("There appears to be an issue with sending the request to 1Tutor. Please try again.", false);
       console.error(error);
       setWaitingForResponse(false);
     }
@@ -332,6 +346,7 @@ const Tutor = () => {
     setMessages([]);
     setBookUrl(thread.bookUrl);
     setBookId(thread.id);
+    setSelectedThread(thread);
     handleClose();
     if (thread.threadId) {
       setWaitingForResponse(true);
@@ -490,6 +505,7 @@ const Tutor = () => {
         await Post("/deleteAssistantFile", {
           bookId,
         });
+        if (defaultBook) handleSelectThread(threads.find((t: any) => t.id === bookId));
       }
     } catch (error) {
       console.error(error);
@@ -498,9 +514,11 @@ const Tutor = () => {
 
   const removeExtraCharacters = (text: string) => {
     text = text.replaceAll("【27†source】", "");
+    const pattern = `Hi, I'm ${user?.fName}. Teach me everything in the attached file.`;
     let index = text.indexOf("This message is sent at");
     if (index !== -1) text = text.substring(0, index);
-    return capitalizeFirstLetter(text);
+    text = text.replace(pattern, "");
+    return capitalizeFirstLetter(text?.trim() || "");
   };
   const handleSelectAudio = (voiceType: string) => {
     setAudioType(voiceType);
@@ -539,6 +557,11 @@ const Tutor = () => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    setSelectedThread(threads.find((t: any) => t.id === bookId));
+  }, [threads, bookId]);
+
   return (
     <Box>
       <AppHeaderMemoized
@@ -595,14 +618,14 @@ const Tutor = () => {
               {!isMobile && (
                 <Button
                   sx={{ mr: "5px" }}
-                  onClick={() => deleteBook(threads.find((thread: any) => thread?.id === bookId)?.default)}
+                  onClick={() => deleteBook(selectedThread?.default)}
                   disabled={waitingForResponse}
                 >
                   {"Delete"}
                 </Button>
               )}
               <Box sx={{ mr: "5px", width: "100%" }}>
-                {!threads.find((thread: any) => thread?.id === bookId)?.title && waitingForResponse ? (
+                {!selectedThread?.title && waitingForResponse ? (
                   <LinearProgress />
                 ) : (
                   <Button
@@ -674,7 +697,7 @@ const Tutor = () => {
             {
               <Button
                 sx={{ mr: "5px" }}
-                onClick={() => deleteBook(threads.find((thread: any) => thread?.id === bookId)?.default)}
+                onClick={() => deleteBook(selectedThread?.default)}
                 disabled={waitingForResponse}
               >
                 {"Delete"}
@@ -703,12 +726,15 @@ const Tutor = () => {
           </Box>
         )}
 
-        <Stack spacing={2} padding={2} sx={{ p: 3, mb: showPDF ? 200 : 150 }}>
+        <Stack spacing={2} padding={2} sx={{ p: 3, mb: showPDF ? 200 : 150, mt: "15px" }}>
           <Box style={{ overflowY: "auto" }}>
             {messages.map((m: any) => {
               return (
                 (m?.content || []).length > 0 &&
-                m?.content[0]?.text?.value && (
+                m?.content[0]?.text?.value &&
+                removeExtraCharacters(
+                  m.role === "user" ? m?.content[0]?.text?.value : getJSON(m?.content[0]?.text?.value).message
+                ) && (
                   <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                       {m.role === "user" ? (
@@ -748,6 +774,18 @@ const Tutor = () => {
                           <Typography sx={{ ml: "4px", fontSize: "19px", fontFamily: "bold" }}>
                             {m.role === "user" ? user?.fName + " " + user?.lName : "1Tutor"}
                           </Typography>
+                          {getReaction(m) && (
+                            <Box sx={{ ml: "8px" }}>
+                              <Image
+                                key={getReaction(m).id}
+                                src={getReaction(m).emoji.src}
+                                alt={getReaction(m).title}
+                                width="30px"
+                                height="30px"
+                                style={{ marginRight: "5px", cursor: "pointer" }}
+                              />
+                            </Box>
+                          )}
                           {m.role !== "user" &&
                             (playingAudio === m.id ? (
                               loadingAudio ? (
@@ -775,6 +813,7 @@ const Tutor = () => {
                         </Typography>
                       </Box>
                     </Box>
+
                     <Typography sx={{ mt: m.role === "user" ? "9px" : "" }}>
                       {" "}
                       <MarkdownRender
@@ -903,7 +942,7 @@ const Tutor = () => {
                         horizontal: "center",
                       }}
                     >
-                      <Box>
+                      <Box sx={{ p: "5px", backgroundColor: DESIGN_SYSTEM_COLORS.notebookG450, pb: 0 }}>
                         {reactions.map(reaction => (
                           <Image
                             key={reaction.id}
@@ -988,21 +1027,29 @@ const Tutor = () => {
         </Box>
         <Box>
           <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="400px" width="100%" />}</Box>
-          <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
-            {" "}
-            {bookUrl && (
-              <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
-                <Button
-                  onClick={() => {
-                    setShowPDF(prev => !prev);
-                  }}
-                  sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
-                >
-                  {showPDF ? "Hide Book" : "Show Book"}
-                </Button>
-              </Tooltip>
-            )}
-          </Box>
+          {isMobile ? (
+            <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
+              <a href={bookUrl} download target="_blank" rel="noopener noreferrer">
+                <Button>View Book</Button>
+              </a>{" "}
+            </Box>
+          ) : (
+            <Box sx={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
+              {" "}
+              {bookUrl && (
+                <Tooltip title={showPDF ? "Hide Book" : "Show Book"}>
+                  <Button
+                    onClick={() => {
+                      setShowPDF(prev => !prev);
+                    }}
+                    sx={{ mt: "9px", justifyContent: "center", display: "flex" }}
+                  >
+                    {showPDF ? "Hide Book" : "View Book"}
+                  </Button>
+                </Tooltip>
+              )}
+            </Box>
+          )}
         </Box>
       </Paper>
       {ConfirmDialog}

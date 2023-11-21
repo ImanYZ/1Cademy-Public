@@ -56,6 +56,28 @@ export const saveLogs = async (logs: any) => {
     });
   } catch (error) {}
 };
+const savReaction = async (bookId: string, messageId: string, reaction: string, username: string) => {
+  const bookDoc = await db.collection("books").doc(bookId).get();
+  if (bookDoc.exists) {
+    const bookData: any = bookDoc.data();
+    bookData.messagesReaction = {
+      ...(bookData.messagesReaction || {}),
+      [messageId]: {
+        ...((bookData?.messagesReaction || {})[messageId] || { createdAt: new Date() }),
+        reaction,
+        updatedAt: new Date(),
+      },
+    };
+    await saveLogs({
+      doer: username,
+      action: "reaction message",
+      bookUrl: bookData.bookUrl,
+      bookId: bookId,
+      reaction,
+    });
+    await bookDoc.ref.update(bookData);
+  }
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { bookId, message, audioType, reaction } = req.body;
@@ -75,9 +97,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     if (!threadId) {
       threadId = await createThread(bookId);
-      newMessage = `Hi, I'm ${firstname}. Teach me everything in the attached file.`;
+      newMessage = message + `Hi, I'm ${firstname}. Teach me everything in the attached file.`;
     }
-    newMessage = newMessage + sendMessageTime() + `\nThe user reacted with ${reaction}`;
+    newMessage = newMessage + sendMessageTime() + `\n[The user reacted with ${reaction}]`;
     //create thread
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
@@ -97,6 +119,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const audioUrl = await uploadToCloudStorage(buffer);
     await saveMessageSTT(bookId, messageId, audioUrl, audioType, data.user.userData.uname);
+    const lastUserMessage = threadMessages.data[1];
+    if (lastUserMessage.id) {
+      await savReaction(bookId, lastUserMessage.id, reaction, data.user.userData.uname);
+    }
 
     await saveLogs({
       doer: data.user.userData.uname,
