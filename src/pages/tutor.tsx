@@ -23,6 +23,7 @@ import Alert from "@mui/material/Alert";
 import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import SearchMessage from "@/components/assistant/SearchMessage";
@@ -37,6 +38,28 @@ import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
+import AngryFace from "../../public/static/emojis/angryface.png";
+import GrinningfaceWithBigEyes from "../../public/static/emojis/grinningfacewithbigeyes.png";
+import Pensive from "../../public/static/emojis/pensive.png";
+import PleadingFace from "../../public/static/emojis/pleadingface.png";
+import Smile from "../../public/static/emojis/smile.png";
+import SmileeEyes from "../../public/static/emojis/smileeyes.png";
+import Speechless from "../../public/static/emojis/speechless.png";
+
+const reactions = [
+  {
+    title: "Grinning face with big eyes",
+    id: "grinningfacewithbigeye",
+    emoji: GrinningfaceWithBigEyes,
+  },
+  { title: "Smile eyes", id: "smileeyes", emoji: SmileeEyes },
+  { title: "Smile", emoji: Smile },
+  { title: "Speechless", emoji: Speechless },
+  { title: "Pensive", emoji: Pensive },
+  { title: "Pleading face", emoji: PleadingFace },
+  { title: "Angry face", emoji: AngryFace },
+];
+
 const Tutor = () => {
   const [bookUrl, setBookUrl] = useState("");
   const [threads, setThreads] = useState<any>([]);
@@ -44,6 +67,8 @@ const Tutor = () => {
   const [messages, setMessages] = useState<any>([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAudioType, setAnchorElAudioType] = useState(null);
+  const [anchorElEmoji, setAnchorElEmoji] = useState(null);
+  const [selectedEmoji, setSelectedEmoji] = useState({ title: "Speechless", emoji: Speechless });
   const [audioType, setAudioType] = useState("alloy");
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
@@ -69,14 +94,22 @@ const Tutor = () => {
   const handleAudioType = (event: any) => {
     setAnchorElAudioType(event.currentTarget);
   };
+
+  const handleEmojiSelector = (event: any) => {
+    setAnchorElEmoji(event.currentTarget);
+  };
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleClosAudio = () => {
+  const handleCloseAudio = () => {
     setAnchorElAudioType(null);
+  };
+  const handleCloseEmojy = () => {
+    setAnchorElEmoji(null);
   };
   const open = Boolean(anchorEl);
   const openAudioType = Boolean(anchorElAudioType);
+  const openEmojiSelector = Boolean(anchorElEmoji);
   const [bookId, setBookId] = useState("");
 
   const [{ user }] = useAuth();
@@ -93,11 +126,11 @@ const Tutor = () => {
     } else if (emotion === "happy drumming") {
       return "rive-voice-assistant/happy.riv";
     } else if (emotion === "celebrating daily goal achievement") {
-      return "rive/positive-reinforcement.riv";
+      return "rive-voice-assistant/happy.riv";
     } else if (emotion === "sad" || emotion === "unhappy") {
       return "rive-voice-assistant/sad.riv";
     }
-    return "rive-voice-assistant/idle.riv";
+    return "rive-voice-assistant/happy.riv";
   };
 
   const uploadAudio = async (audioBlob: any) => {
@@ -168,6 +201,7 @@ const Tutor = () => {
         message: newMessage,
         asAudio,
         audioType,
+        reaction: selectedEmoji.title,
       });
       messages.shift();
       setMessages(messages);
@@ -418,12 +452,13 @@ const Tutor = () => {
 
   const removeExtraCharacters = (text: string) => {
     text = text.replaceAll("【27†source】", "");
-    text = text.replace(/This message is sent at\s\d{1,2}:\d{2}[ap]m\s\w{3}\son\s\d{1,2}\/\d{1,2}\/\d{4}/i, "");
+    let index = text.indexOf("This message is sent at");
+    if (index !== -1) text = text.substring(0, index);
     return capitalizeFirstLetter(text);
   };
   const handleSelectAudio = (voiceType: string) => {
     setAudioType(voiceType);
-    handleClosAudio();
+    handleCloseAudio();
   };
 
   const getJSON = (text: string) => {
@@ -434,13 +469,30 @@ const Tutor = () => {
 
       return JSON.parse(jsonArrayString);
     } catch (error) {
-      return {
-        message: text,
-        emotion: null,
-      };
+      const pattern = /"message": "(.*?)",.*?"emotion": "(.*?)"/s;
+      const match = pattern.exec(text);
+      if (match) {
+        return {
+          message: match[1],
+          emotion: match[2],
+        };
+      } else {
+        return {
+          message: text,
+          emotion: null,
+        };
+      }
     }
   };
 
+  const handleSelectedEmoji = async (reaction: any) => {
+    try {
+      handleCloseEmojy();
+      setSelectedEmoji(reaction);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <Box>
       <AppHeaderMemoized
@@ -772,16 +824,62 @@ const Tutor = () => {
               onKeyDown={handleKeyPress}
               InputProps={{
                 endAdornment: (
-                  <Tooltip title={waitingForResponse ? "Stop" : "Send"}>
-                    <IconButton
-                      color="primary"
-                      disabled={waitingForResponse || !bookUrl || !newMessage}
-                      onClick={() => handleSendMessage(bookId, false, newMessage)}
-                      edge="end"
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        width: "70px",
+                        marginLeft: "auto",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
                     >
-                      <SendIcon />
-                    </IconButton>
-                  </Tooltip>
+                      <Image
+                        src={selectedEmoji.emoji.src}
+                        alt="Grinning Face with Big Eyes"
+                        width="30px"
+                        height="30px"
+                        onClick={handleEmojiSelector}
+                        style={{ cursor: "pointer" }}
+                      />
+                      <Menu
+                        id="demo-customized-menu"
+                        MenuListProps={{
+                          "aria-labelledby": "demo-customized-button",
+                        }}
+                        anchorEl={anchorElEmoji}
+                        open={openEmojiSelector}
+                        onClose={handleCloseEmojy}
+                        PaperProps={{
+                          style: {
+                            width: "60px",
+                            maxWidth: "none",
+                          },
+                        }}
+                      >
+                        {reactions.map((reaction: any) => (
+                          <MenuItem key={reaction.id} onClick={() => handleSelectedEmoji(reaction)} disableRipple>
+                            <Image
+                              src={reaction.emoji.src}
+                              alt="Grinning Face with Big Eyes"
+                              width="40px"
+                              height="40px"
+                            />
+                          </MenuItem>
+                        ))}
+                      </Menu>
+                    </Box>
+                    <Tooltip title={waitingForResponse ? "Stop" : "Send"}>
+                      <IconButton
+                        color="primary"
+                        disabled={waitingForResponse || !bookUrl || !newMessage}
+                        onClick={() => handleSendMessage(bookId, false, newMessage)}
+                        edge="end"
+                      >
+                        <SendIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 ),
               }}
               sx={{ mr: "5px" }}
@@ -832,7 +930,7 @@ const Tutor = () => {
             }}
             anchorEl={anchorElAudioType}
             open={openAudioType}
-            onClose={handleClosAudio}
+            onClose={handleCloseAudio}
           >
             {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
               <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
