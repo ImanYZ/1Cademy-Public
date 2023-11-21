@@ -942,7 +942,16 @@ const Tutor = () => {
                         horizontal: "center",
                       }}
                     >
-                      <Box sx={{ p: "5px", backgroundColor: DESIGN_SYSTEM_COLORS.notebookG450, pb: 0 }}>
+                      <Box
+                        sx={{
+                          p: "5px",
+                          backgroundColor: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG500
+                              : DESIGN_SYSTEM_COLORS.gray200,
+                          pb: 0,
+                        }}
+                      >
                         {reactions.map(reaction => (
                           <Image
                             key={reaction.id}
