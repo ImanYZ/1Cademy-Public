@@ -21,7 +21,17 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Alert from "@mui/material/Alert";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import moment from "moment";
 import Image from "next/image";
@@ -60,6 +70,33 @@ const reactions = [
   { title: "Pensive", emoji: Pensive },
   { title: "Pleading face", emoji: PleadingFace },
   { title: "Angry face", emoji: AngryFace },
+];
+
+const DEFAULT_BOOKS = [
+  {
+    title: "Learn English Now - EnglishConnect Intermediate Pathway L Version",
+    file_id: "file-jAPJ79LDzWlkXCD4oqPJ3rjN",
+    bookUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2FMon%20Nov%2020%202023%2017%3A31%3A40%20GMT-0500%20(Eastern%20Standard%20Time).pdf?alt=media&token=5bf07bdf-ad4d-4c8a-ba7d-ddf8282fc304",
+  },
+  {
+    title: "Basic Algebra by Anthony W. Knapp",
+    file_id: "file-HtewTxSjfxSFxDq5jI8BjlTx",
+    bookUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2FMon%20Nov%2020%202023%2016%3A21%3A00%20GMT-0500%20(Eastern%20Standard%20Time).pdf?alt=media&token=dc88bcdf-e5d8-44e3-893a-cd74ed031b98",
+  },
+  {
+    title: "Python Basics: A Practical Introduction to Python 3",
+    file_id: "file-ypmciBUjC8BLwVBgWaRjfO7h",
+    bookUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2FMon%20Nov%2020%202023%2016%3A12%3A18%20GMT-0500%20(Eastern%20Standard%20Time).pdf?alt=media&token=1816efee-768f-49e2-b962-7998bbfbac9f",
+  },
+  {
+    title: "Constitution of the United States",
+    file_id: "file-pxDzdQt0omIiWcWfD82S6gBw",
+    bookUrl:
+      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464",
+  },
 ];
 
 const Tutor = () => {
@@ -192,7 +229,6 @@ const Tutor = () => {
         },
         false
       );
-      messages.shift();
       setMessages(messages);
       scroll();
       setWaitingForResponse(false);
@@ -231,12 +267,29 @@ const Tutor = () => {
     }
   };
 
-  const createDefaultBook = async () => {
+  useEffect(() => {
+    createDefaultBooks();
+  }, []);
+
+  const createDefaultBooks = async () => {
     try {
-      await saveBook(
-        "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/books%2Fconstitution.pdf?alt=media&token=3b9da61d-49dc-4ac1-ba6b-5568db36c464",
-        true
-      );
+      for (let book of DEFAULT_BOOKS) {
+        const bookDocs = await getDocs(
+          query(collection(db, "books"), where("file_id", "==", book.file_id), where("uname", "==", user?.uname))
+        );
+        if (!bookDocs.docs.length) {
+          const newBookRef = doc(collection(db, "books"));
+          await setDoc(newBookRef, {
+            bookUrl: book.bookUrl,
+            uname: user?.uname,
+            createdAt: new Date(),
+            title: book.title,
+            deleted: false,
+            default: true,
+            file_id: book.file_id,
+          });
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -249,15 +302,12 @@ const Tutor = () => {
     );
     const unsubscribeOntology = onSnapshot(ontologyQuery, snapshot => {
       const docChanges = snapshot.docChanges();
-      if (docChanges.length <= 0) {
-        createDefaultBook();
-      }
       setThreads((books: any) => {
         const _books = [...books];
 
         for (let change of docChanges) {
           const changeData: any = change.doc.data();
-          if (changeData.threadId && (changeData?.title || "").trim()) {
+          if ((changeData.threadId || changeData.default) && (changeData?.title || "").trim()) {
             const previousIdx = _books.findIndex(d => d.id === change.doc.id);
             if (change.type === "removed" && previousIdx !== -1) {
               _books.splice(previousIdx, 1);
@@ -283,11 +333,12 @@ const Tutor = () => {
     setBookUrl(thread.bookUrl);
     setBookId(thread.id);
     handleClose();
-    setWaitingForResponse(true);
-    const { messages }: any = await Post("/listMessages", { bookId: thread.id });
-    messages.shift();
-    setMessages(messages);
-    setWaitingForResponse(false);
+    if (thread.threadId) {
+      setWaitingForResponse(true);
+      const { messages }: any = await Post("/listMessages", { bookId: thread.id });
+      setMessages(messages);
+      setWaitingForResponse(false);
+    }
   };
 
   useEffect(() => {
@@ -425,14 +476,16 @@ const Tutor = () => {
     }
   };
 
-  const deleteBook = async () => {
+  const deleteBook = async (defaultBook: boolean) => {
     try {
-      if (await confirmIt("Are you sure you want to delete this Book?")) {
+      if (await confirmIt(`Are you sure you want to delete this ${defaultBook ? "Conversation" : "Book"} ?`)) {
         const remainThreads = threads.filter((t: any) => t.id !== bookId);
-        if (remainThreads.length) {
-          handleSelectThread(remainThreads[0]);
-        } else {
-          setMessages([]);
+        if (!defaultBook) {
+          if (remainThreads.length) {
+            handleSelectThread(remainThreads[0]);
+          } else {
+            setMessages([]);
+          }
         }
         await Post("/deleteAssistantFile", {
           bookId,
@@ -539,8 +592,12 @@ const Tutor = () => {
                 justifyContent: "center",
               }}
             >
-              {!threads.find((thread: any) => thread?.id === bookId)?.default && !isMobile && (
-                <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
+              {!isMobile && (
+                <Button
+                  sx={{ mr: "5px" }}
+                  onClick={() => deleteBook(threads.find((thread: any) => thread?.id === bookId)?.default)}
+                  disabled={waitingForResponse}
+                >
                   {"Delete"}
                 </Button>
               )}
@@ -564,7 +621,7 @@ const Tutor = () => {
                     {threads.find((thread: any) => thread?.id === bookId)?.title || ""}
                   </Button>
                 )}
-                {threads.filter((thread: any) => thread?.id !== bookId).length > 0 && (
+                {threads.length > 0 && (
                   <Box sx={{ maxWidth: "400px" }}>
                     <Menu
                       id="demo-customized-menu"
@@ -581,13 +638,11 @@ const Tutor = () => {
                       //   },
                       // }}
                     >
-                      {threads
-                        .filter((thread: any) => thread?.id !== bookId)
-                        .map((thread: any) => (
-                          <MenuItem key={thread.id} onClick={() => handleSelectThread(thread)} disableRipple>
-                            {thread.title}
-                          </MenuItem>
-                        ))}
+                      {threads.map((thread: any) => (
+                        <MenuItem key={thread.id} onClick={() => handleSelectThread(thread)} disableRipple>
+                          {thread.title}
+                        </MenuItem>
+                      ))}
                     </Menu>
                   </Box>
                 )}
@@ -616,11 +671,15 @@ const Tutor = () => {
         </Box>
         {isMobile && (
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {!threads.find((thread: any) => thread?.id === bookId)?.default && (
-              <Button sx={{ mr: "5px" }} onClick={deleteBook} disabled={waitingForResponse}>
+            {
+              <Button
+                sx={{ mr: "5px" }}
+                onClick={() => deleteBook(threads.find((thread: any) => thread?.id === bookId)?.default)}
+                disabled={waitingForResponse}
+              >
                 {"Delete"}
               </Button>
-            )}
+            }
             <Box>
               <UploadButtonCademy
                 name="Book"
