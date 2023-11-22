@@ -214,7 +214,6 @@ const Tutor = () => {
     }
     return word.charAt(0).toUpperCase() + word.slice(1);
   };
-
   const handleSendMessage = async (book: string, asAudio: boolean, newMessage: string) => {
     try {
       setMessages((_messages: any) => {
@@ -533,17 +532,24 @@ const Tutor = () => {
 
       return JSON.parse(jsonArrayString);
     } catch (error) {
-      const pattern = /"message": "(.*?)",.*?"emotion": "(.*?)"/s;
-      const match = pattern.exec(text);
-      if (match) {
+      const messagePattern = /"message": "(.*?)"/s;
+      const emotionPattern = /"emotion": "(.*?)"/s;
+      const citationsPattern = /"citations": "(.*?)"/s;
+
+      const messageMatch = messagePattern.exec(text);
+      const emotionMatch = emotionPattern.exec(text);
+      const citationspMatch = citationsPattern.exec(text);
+      if (messageMatch) {
         return {
-          message: match[1],
-          emotion: match[2],
+          message: messageMatch[1],
+          emotion: emotionMatch ? emotionMatch[1] : "",
+          citations: citationspMatch ? citationspMatch[1] : "",
         };
       } else {
         return {
           message: text,
           emotion: null,
+          citations: [],
         };
       }
     }
@@ -819,11 +825,10 @@ const Tutor = () => {
                       <MarkdownRender
                         text={
                           (m?.content || []).length > 0
-                            ? removeExtraCharacters(
-                                m.role === "user"
-                                  ? m?.content[0]?.text?.value
-                                  : getJSON(m?.content[0]?.text?.value).message
-                              )
+                            ? removeExtraCharacters(getJSON(m?.content[0]?.text?.value).message) +
+                              ((getJSON(m?.content[0]?.text?.value)?.citations || []).length > 0
+                                ? `\n\n Citations: ${[getJSON(m?.content[0]?.text?.value).citations].join(", ")}`
+                                : "")
                             : ""
                         }
                       />

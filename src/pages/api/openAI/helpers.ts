@@ -10,22 +10,32 @@ export const openai = new OpenAI({
   //   OPENAI_API_ORG_ID: process.env.OPENAI_API_KEY,
 });
 
-export const getJSON = (text: string) => {
+const getJSON = (text: string) => {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
     const jsonArrayString = text.slice(start, end + 1);
+
     return JSON.parse(jsonArrayString);
   } catch (error) {
-    const pattern = /"message": "(.*?)",.*?"emotion": "(.*?)"/s;
-    const match = pattern.exec(text);
-    if (match) {
+    const messagePattern = /"message": "(.*?)"/s;
+    const emotionPattern = /"emotion": "(.*?)"/s;
+    const citationsPattern = /"citations": "(.*?)"/s;
+
+    const messageMatch = messagePattern.exec(text);
+    const emotionMatch = emotionPattern.exec(text);
+    const citationspMatch = citationsPattern.exec(text);
+    if (messageMatch) {
       return {
-        message: match[1],
+        message: messageMatch[1],
+        emotion: emotionMatch ? emotionMatch[1] : "",
+        citations: citationspMatch ? citationspMatch[1] : "",
       };
     } else {
       return {
         message: text,
+        emotion: null,
+        citations: [],
       };
     }
   }
