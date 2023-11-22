@@ -29,7 +29,7 @@ export const getJSON = (text: string) => {
       return {
         message: messageMatch[1],
         emotion: emotionMatch ? emotionMatch[1] : "",
-        citations: citationspMatch ? citationspMatch[1] : "",
+        citations: citationspMatch ? citationspMatch[1] : [],
       };
     } else {
       return {
