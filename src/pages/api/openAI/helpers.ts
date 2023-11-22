@@ -10,7 +10,7 @@ export const openai = new OpenAI({
   //   OPENAI_API_ORG_ID: process.env.OPENAI_API_KEY,
 });
 
-const getJSON = (text: string) => {
+export const getJSON = (text: string) => {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
