@@ -540,10 +540,17 @@ const Tutor = () => {
       const emotionMatch = emotionPattern.exec(text);
       const citationspMatch = citationsPattern.exec(text);
       if (messageMatch) {
+        let citations = [];
+        if (citationspMatch) {
+          try {
+            citations = JSON.parse(citationspMatch[1]) ? JSON.parse(citationspMatch[1]) : [];
+          } catch (error) {}
+        }
+
         return {
           message: messageMatch[1],
           emotion: emotionMatch ? emotionMatch[1] : "",
-          citations: citationspMatch ? citationspMatch[1] : "",
+          citations: citations,
         };
       } else {
         return {
