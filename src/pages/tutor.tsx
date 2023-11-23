@@ -500,11 +500,12 @@ const Tutor = () => {
           } else {
             setMessages([]);
           }
+        } else {
+          setMessages([]);
         }
         await Post("/deleteAssistantFile", {
           bookId,
         });
-        if (defaultBook) handleSelectThread(threads.find((t: any) => t.id === bookId));
       }
     } catch (error) {
       console.error(error);
@@ -560,6 +561,10 @@ const Tutor = () => {
         };
       }
     }
+  };
+
+  const getTextMessage = (m: any) => {
+    return m?.content.filter((c: any) => c.type === "text")[0];
   };
 
   const handleSelectedEmoji = async (reaction: any) => {
@@ -744,9 +749,11 @@ const Tutor = () => {
             {messages.map((m: any) => {
               return (
                 (m?.content || []).length > 0 &&
-                m?.content[0]?.text?.value &&
+                getTextMessage(m)?.text?.value &&
                 removeExtraCharacters(
-                  m.role === "user" ? m?.content[0]?.text?.value : getJSON(m?.content[0]?.text?.value).message
+                  m.role === "user"
+                    ? getTextMessage(m)?.text?.value
+                    : getJSON(getTextMessage(m)?.text?.value)?.message || ""
                 ) && (
                   <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -772,7 +779,7 @@ const Tutor = () => {
                               autoplay={true}
                             />
                           ) : (
-                            <Animations emotion={getJSON(m?.content[0]?.text?.value).emotion} />
+                            <Animations emotion={getJSON(getTextMessage(m)?.text?.value).emotion} />
                           )}
                         </Box>
                       )}
@@ -832,9 +839,9 @@ const Tutor = () => {
                       <MarkdownRender
                         text={
                           (m?.content || []).length > 0
-                            ? removeExtraCharacters(getJSON(m?.content[0]?.text?.value).message) +
-                              ((getJSON(m?.content[0]?.text?.value)?.citations || []).length > 0
-                                ? `\n\n Citations: ${[getJSON(m?.content[0]?.text?.value).citations].join(", ")}`
+                            ? removeExtraCharacters(getJSON(getTextMessage(m)?.text?.value).message) +
+                              ((getJSON(getTextMessage(m)?.text?.value)?.citations || []).length > 0
+                                ? `\n\n Citations: ${[getJSON(getTextMessage(m)?.text.value).citations].join(", ")}`
                                 : "")
                             : ""
                         }

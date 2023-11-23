@@ -103,6 +103,9 @@ export const getAssistantTutorID = async () => {
     return newAssistant.id;
   }
 };
+const getTextMessage = (m: any) => {
+  return m?.content.filter((c: any) => c.type === "text")[0];
+};
 
 export const fetchCompelation = async (threadId: string, assistant_id: string) => {
   const run = await openai.beta.threads.runs.create(threadId, {
@@ -123,7 +126,7 @@ export const fetchCompelation = async (threadId: string, assistant_id: string) =
     .pop();
   console.log("lastMessageForRun.content[0].text.value", lastMessageForRun.content[0].text.value);
   return {
-    response: getJSON(lastMessageForRun.content[0].text.value),
+    response: getJSON(getTextMessage(lastMessageForRun).text.value),
     messageId: lastMessageForRun.id,
   };
 };
