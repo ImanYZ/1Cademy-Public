@@ -98,7 +98,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       threadId = await createThread(bookId);
       newMessage = message + `Hi, I'm ${firstname}. Teach me everything in the attached file.`;
     }
-    newMessage = newMessage + sendMessageTime() + reaction ? `\n[The user reacted with ${reaction}]` : "";
+    newMessage = newMessage + sendMessageTime() + (reaction !== null ? `\n[The user reacted with ${reaction}]` : "");
     //create thread
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
