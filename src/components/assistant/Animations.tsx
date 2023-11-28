@@ -21,6 +21,7 @@ export const Animations = ({ emotion }: { emotion: string }) => {
     artboard: "New Artboard",
     autoplay: true,
   });
+
   const sadTrigger: any = useStateMachineInput(rive, STATE_MACHINE_NAME, SAD_TRIGGER);
   const happyTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, HAPPY_TRIGGER);
   const danceTrigger = useStateMachineInput(rive, STATE_MACHINE_NAME, DANCE_TRIGGER);
@@ -33,69 +34,50 @@ export const Animations = ({ emotion }: { emotion: string }) => {
   const handOverHead = useStateMachineInput(rive, STATE_MACHINE_NAME, TRIGGER_COMPLANING);
 
   useEffect(() => {
-    if (emotion === "sad" && complainingAngrilyTrigger) {
-      setInterval(() => {
-        complainingAngrilyTrigger.fire();
-      }, 1000);
-    }
-  }, [complainingAngrilyTrigger, emotion]);
+    const playInLoop = () => {
+      if (emotion === "sad") {
+        complainingAngrilyTrigger?.fire();
+      }
+      if (emotion === "unhappy") {
+        angryTrigger?.fire();
+      }
+      if (emotion === "partying") {
+        danceTrigger?.fire();
+      }
+      if (emotion === "clapping") {
+        happyTrigger?.fire();
+      }
+      if (emotion === "Knock Knock") {
+        nocking2Trigger?.fire();
+      }
+      if (emotion === "crying") {
+        sadTrigger?.fire();
+      }
+      if (emotion === "handOverHead") {
+        handOverHead?.fire();
+      }
+      if (emotion === "wating") {
+        nocking1Trigger?.fire();
+      }
+    };
+    playInLoop();
+    const intervalId = setInterval(playInLoop, 1000);
+    return () => clearInterval(intervalId);
+  }, [
+    angryTrigger,
+    complainingAngrilyTrigger,
+    danceTrigger,
+    emotion,
+    handOverHead,
+    happyTrigger,
+    nocking1Trigger,
+    nocking2Trigger,
+    sadTrigger,
+  ]);
 
-  useEffect(() => {
-    if (emotion === "unhappy" && angryTrigger) {
-      setInterval(() => {
-        angryTrigger.fire();
-      }, 1000);
-    }
-  }, [angryTrigger, emotion]);
+  // The rest of your component code...
 
-  useEffect(() => {
-    if (emotion === "partying" && danceTrigger) {
-      setInterval(() => {
-        danceTrigger.fire();
-      }, 1000);
-    }
-  }, [danceTrigger, emotion]);
-
-  useEffect(() => {
-    if (emotion === "clapping" && happyTrigger) {
-      setInterval(() => {
-        happyTrigger.fire();
-      }, 1000);
-    }
-  }, [happyTrigger, emotion]);
-
-  useEffect(() => {
-    if (emotion === "Knock Knock" && nocking2Trigger) {
-      setInterval(() => {
-        nocking2Trigger.fire();
-      }, 1000);
-    }
-  }, [nocking2Trigger, emotion]);
-
-  useEffect(() => {
-    if (emotion === "crying" && sadTrigger) {
-      setInterval(() => {
-        sadTrigger.fire();
-      }, 1000);
-    }
-  }, [sadTrigger, emotion]);
-
-  useEffect(() => {
-    if (emotion === "handOverHead" && handOverHead) {
-      setInterval(() => {
-        handOverHead.fire();
-      }, 1000);
-    }
-  }, [handOverHead, emotion]);
-
-  /* ========= */
-  useEffect(() => {
-    if (emotion === "wating" && nocking1Trigger) {
-      setInterval(() => {
-        nocking1Trigger.fire();
-      }, 1000);
-    }
-  }, [nocking1Trigger, emotion]);
+  useEffect(() => {}, [emotion, complainingAngrilyTrigger, rive]);
 
   return (
     <Box
