@@ -108,7 +108,7 @@ const Tutor = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAudioType, setAnchorElAudioType] = useState(null);
   const [anchorElEmoji, setAnchorElEmoji] = useState(null);
-  const [selectedEmoji, setSelectedEmoji] = useState({ title: "Speechless", emoji: Speechless });
+  const [selectedEmoji, setSelectedEmoji] = useState<any>(null);
   const [audioType, setAudioType] = useState("alloy");
   const [waitingForResponse, setWaitingForResponse] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
@@ -221,7 +221,7 @@ const Tutor = () => {
           role: "user",
           created_at: Timestamp.fromDate(new Date()).seconds,
           content: [{ type: "text", text: { value: newMessage } }],
-          reaction: selectedEmoji.title,
+          reaction: selectedEmoji ? selectedEmoji.title : "",
         });
         return _messages;
       });
@@ -230,6 +230,7 @@ const Tutor = () => {
       scroll();
 
       setWaitingForResponse(true);
+      setSelectedEmoji(null);
 
       const { messages, audioUrl, messageId }: any = await Post(
         "/booksAssistant",
@@ -238,7 +239,7 @@ const Tutor = () => {
           message: newMessage,
           asAudio,
           audioType,
-          reaction: selectedEmoji.title,
+          reaction: selectedEmoji ? selectedEmoji.title : null,
         },
         false
       );
@@ -349,6 +350,7 @@ const Tutor = () => {
     handleClose();
     if (thread.threadId) {
       setWaitingForResponse(true);
+      setSelectedEmoji(null);
       const { messages }: any = await Post("/listMessages", { bookId: thread.id });
       setMessages(messages);
       setWaitingForResponse(false);
@@ -500,11 +502,12 @@ const Tutor = () => {
           } else {
             setMessages([]);
           }
+        } else {
+          setMessages([]);
         }
         await Post("/deleteAssistantFile", {
           bookId,
         });
-        if (defaultBook) handleSelectThread(threads.find((t: any) => t.id === bookId));
       }
     } catch (error) {
       console.error(error);
@@ -560,6 +563,10 @@ const Tutor = () => {
         };
       }
     }
+  };
+
+  const getTextMessage = (m: any) => {
+    return m?.content.filter((c: any) => c.type === "text")[0];
   };
 
   const handleSelectedEmoji = async (reaction: any) => {
@@ -744,9 +751,11 @@ const Tutor = () => {
             {messages.map((m: any) => {
               return (
                 (m?.content || []).length > 0 &&
-                m?.content[0]?.text?.value &&
+                getTextMessage(m)?.text?.value &&
                 removeExtraCharacters(
-                  m.role === "user" ? m?.content[0]?.text?.value : getJSON(m?.content[0]?.text?.value).message
+                  m.role === "user"
+                    ? getTextMessage(m)?.text?.value
+                    : getJSON(getTextMessage(m)?.text?.value)?.message || ""
                 ) && (
                   <Box key={m.id} sx={{ mb: "15px", p: 5, pt: 0 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -772,7 +781,7 @@ const Tutor = () => {
                               autoplay={true}
                             />
                           ) : (
-                            <Animations emotion={getJSON(m?.content[0]?.text?.value).emotion} />
+                            <Animations emotion={getJSON(getTextMessage(m)?.text?.value).emotion} />
                           )}
                         </Box>
                       )}
@@ -832,9 +841,9 @@ const Tutor = () => {
                       <MarkdownRender
                         text={
                           (m?.content || []).length > 0
-                            ? removeExtraCharacters(getJSON(m?.content[0]?.text?.value).message) +
-                              ((getJSON(m?.content[0]?.text?.value)?.citations || []).length > 0
-                                ? `\n\n Citations: ${[getJSON(m?.content[0]?.text?.value).citations].join(", ")}`
+                            ? removeExtraCharacters(getJSON(getTextMessage(m)?.text?.value).message) +
+                              ((getJSON(getTextMessage(m)?.text?.value)?.citations || []).length > 0
+                                ? `\n\n Citations: ${[getJSON(getTextMessage(m)?.text.value).citations].join(", ")}`
                                 : "")
                             : ""
                         }
@@ -890,7 +899,7 @@ const Tutor = () => {
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", position: "sticky", zIndex: 3 }}>
-          {isRecording && (
+          {isRecording ? (
             <Box
               sx={{
                 width: "90px",
@@ -906,6 +915,47 @@ const Tutor = () => {
                 animations={["Timeline 1"]}
                 autoplay={true}
               />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                width: "150px",
+                marginRight: "auto",
+                mb: "15px",
+                ml: "5px",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typography sx={{ mr: "15px" }}>Narrator:</Typography>
+              <Button
+                id="demo-customized-button"
+                aria-controls={openAudioType ? "demo-customized-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={openAudioType ? "true" : undefined}
+                variant="outlined"
+                disableElevation
+                onClick={handleAudioType}
+                fullWidth
+                endIcon={<KeyboardArrowDownIcon />}
+              >
+                {capitalizeFirstLetter(audioType)}
+              </Button>
+              <Menu
+                MenuListProps={{
+                  "aria-labelledby": "demo-customized-button",
+                }}
+                anchorEl={anchorElAudioType}
+                open={openAudioType}
+                onClose={handleCloseAudio}
+              >
+                {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
+                  <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
+                    {capitalizeFirstLetter(voiceType)}
+                  </MenuItem>
+                ))}
+              </Menu>
             </Box>
           )}
           <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -933,11 +983,11 @@ const Tutor = () => {
                   >
                     {" "}
                     <Image
-                      src={selectedEmoji.emoji.src}
-                      alt={selectedEmoji.title}
+                      src={selectedEmoji ? selectedEmoji.emoji.src : Speechless.src}
+                      alt={selectedEmoji ? selectedEmoji.title : "Speechless"}
                       width="30px"
                       height="30px"
-                      style={{ cursor: "pointer" }}
+                      style={{ cursor: "pointer", opacity: !selectedEmoji ? 0.5 : "" }}
                       onClick={handleEmojiSelector}
                     />
                     <Popover
@@ -1006,45 +1056,6 @@ const Tutor = () => {
               </Tooltip>
             )}
           </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            width: "150px",
-            marginLeft: "auto",
-            mt: "15px",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Typography sx={{ mr: "15px" }}>Narrator:</Typography>
-          <Button
-            id="demo-customized-button"
-            aria-controls={openAudioType ? "demo-customized-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={openAudioType ? "true" : undefined}
-            variant="outlined"
-            disableElevation
-            onClick={handleAudioType}
-            fullWidth
-            endIcon={<KeyboardArrowDownIcon />}
-          >
-            {capitalizeFirstLetter(audioType)}
-          </Button>
-          <Menu
-            MenuListProps={{
-              "aria-labelledby": "demo-customized-button",
-            }}
-            anchorEl={anchorElAudioType}
-            open={openAudioType}
-            onClose={handleCloseAudio}
-          >
-            {["alloy", "echo", "fable", "onyx", "nova", "shimmer"].map((voiceType: string) => (
-              <MenuItem key={voiceType} onClick={() => handleSelectAudio(voiceType)} disableRipple>
-                {capitalizeFirstLetter(voiceType)}
-              </MenuItem>
-            ))}
-          </Menu>
         </Box>
         <Box>
           <Box sx={{ width: "100%" }}>{showPDF && <PDFView fileUrl={bookUrl} height="400px" width="100%" />}</Box>
