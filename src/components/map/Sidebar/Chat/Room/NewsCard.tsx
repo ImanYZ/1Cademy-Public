@@ -10,17 +10,31 @@ type NewsCardProps = {
   heading: string;
   tag: string;
   image?: string;
-  text: any;
+  text: string;
 };
 export const NewsCard = ({ tag, image, heading, text }: NewsCardProps) => {
   return (
     <Box
       sx={{
-        p: "12px",
+        p: "0px 12px 12px 12px",
+        mb: "40px",
         background: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
       }}
     >
+      <Box sx={{ display: "flex", justifyContent: "end" }}>
+        <Typography
+          sx={{
+            color: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
+            position: "relative",
+            bottom: "25px",
+            left: "11px",
+          }}
+        >
+          2:00 pm
+        </Typography>
+      </Box>
       {image && (
         <NextImage width={"500px"} height={"300px"} style={{ borderRadius: "8px" }} src={image} alt="news image" />
       )}

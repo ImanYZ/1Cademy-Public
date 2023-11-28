@@ -1,23 +1,62 @@
-import { Paper, Typography } from "@mui/material";
+import CreateIcon from "@mui/icons-material/Create";
+import SearchIcon from "@mui/icons-material/Search";
+import { IconButton, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useEffect, useState } from "react";
 
-dayjs.extend(relativeTime);
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-export const DirectMessagesList = () => {
-  const [newses, setNewses] = useState<any>([]);
+dayjs.extend(relativeTime);
+type DirectMessageProps = {
+  openRoom: any;
+};
+export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
+  const [chatList, setChatList] = useState<any>([]);
   useEffect(() => {
-    setNewses([
+    setChatList([
       { title: "Phoneix Baker", tag: "1cademy", totalMessages: 100, createdAt: "11:34 am" },
       { title: "Phoneix Baker", tag: "Design Science", totalMessages: 100, createdAt: "11:34 am" },
     ]);
   }, []);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      {newses.map((news: any, idx: number) => (
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
+        <TextField
+          sx={{
+            width: "80%",
+          }}
+          placeholder="Search"
+          id="outlined-basic"
+          variant="outlined"
+          InputProps={{
+            inputProps: {
+              style: {
+                padding: "9.5px 14px",
+              },
+            },
+            startAdornment: <SearchIcon />,
+          }}
+        />
+        <IconButton
+          sx={{
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+            borderRadius: "8px",
+            border: theme =>
+              `solid 1px ${
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
+              }`,
+          }}
+        >
+          <CreateIcon color="primary" />
+        </IconButton>
+      </Box>
+      {chatList.map((list: any, idx: number) => (
         <Paper
+          onClick={() => openRoom("direct")}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -40,71 +79,90 @@ export const DirectMessagesList = () => {
             },
           }}
         >
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "10px",
               }}
             >
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
+                  width: `${50}px`,
+                  height: `${50}px`,
+                  cursor: "pointer",
+                  transition: "all 0.2s 0s ease",
+                  background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+                  borderRadius: "50%",
+                  // transform: `translate(-50%, ${verticalPosition}px)`,
+                  "& > .user-image": {
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    width: "50px",
+                    height: "50px",
+                  },
+                  "@keyframes slidein": {
+                    from: {
+                      transform: "translateY(0%)",
+                    },
+                    to: {
+                      transform: "translateY(100%)",
+                    },
+                  },
                 }}
               >
-                <Box
-                  sx={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "200px",
-                    background: "linear-gradient(to right, #FDC830, #F37335)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  PB
+                <Box className="user-image">
+                  <OptimizedAvatar2
+                    alt={"Haroon Waheed"}
+                    imageUrl={
+                      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31"
+                    }
+                    size={50}
+                    sx={{ border: "none" }}
+                  />
+                </Box>
+                <Box sx={{ background: "#12B76A", left: "35px" }} className="UserStatusOnlineIcon" />
+              </Box>
+              <Box>
+                <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: "500",
+                      lineHeight: "24px",
+                    }}
+                  >
+                    {list.title}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG200
+                          : theme.palette.common.gray500,
+                    }}
+                  >
+                    {/* {dayjs(new Date()).format("h:mm A")} */}
+                    {list.createdAt}
+                  </Typography>
                 </Box>
                 <Typography
                   sx={{
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    lineHeight: "24px",
+                    fontSize: "12px",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
                   }}
                 >
-                  {news.title}
+                  {/* {dayjs(new Date()).format("h:mm A")} */}
+                  {list.tag}
                 </Typography>
-              </Box>
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  color: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
-                }}
-              >
-                {/* {dayjs(new Date()).format("h:mm A")} */}
-                {news.createdAt}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                marginTop: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Box
-                sx={{
-                  fontSize: "12px",
-                  marginLeft: "5px",
-                  color: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
-                }}
-              >
-                {news.tag}
               </Box>
             </Box>
           </Box>

@@ -1,8 +1,11 @@
 import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type MessageRightProps = {
   message: any;
+  reactionsMap: { [key: string]: string[] };
 };
 export const MessageRight = ({ message }: MessageRightProps) => {
   return (
@@ -30,7 +33,8 @@ export const MessageRight = ({ message }: MessageRightProps) => {
             fontWeight: "400",
             lineHeight: "24px",
             p: "10px 14px",
-            background: "#55402B",
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookO900 : DESIGN_SYSTEM_COLORS.orange100,
           }}
         >
           {message.message}

@@ -9,8 +9,10 @@ import TagIcon from "../../../../../../public/tag.svg";
 import { CustomBadge } from "../../../CustomBudge";
 
 dayjs.extend(relativeTime);
-
-export const NewsList = () => {
+type NewsListProps = {
+  openRoom: any;
+};
+export const NewsList = ({ openRoom }: NewsListProps) => {
   const [newses, setNewses] = useState<any>([]);
   useEffect(() => {
     setNewses([
@@ -22,6 +24,7 @@ export const NewsList = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       {newses.map((news: any, idx: number) => (
         <Paper
+          onClick={() => openRoom("news")}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -102,7 +105,9 @@ export const NewsList = () => {
               <CustomBadge
                 value={news.totalMessages}
                 sx={{
-                  p: "6px 8px",
+                  height: "20px",
+                  p: "6px",
+                  fontSize: "13px",
                 }}
               />
             </Box>

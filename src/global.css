@@ -698,6 +698,17 @@
   width: 10px;
 }
 
+#chat-users-tag::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 3px;
+  background: transparent;
+}
+
+#chat-users-tag::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
 .messages-room::-webkit-scrollbar {
   /* CHECK: I add this to hide scroll and have functionality */
   display: none;
@@ -2896,4 +2907,9 @@ right: 5px; */
 
 .input.validatedInput .MuiFormHelperText-root {
   color: #f44336;
+}
+
+.highlight-letter {
+  font-weight: bold;
+  background-color: yellow;
 }

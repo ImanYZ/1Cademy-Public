@@ -1,4 +1,5 @@
 import { Theme } from "@emotion/react";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
@@ -24,6 +25,7 @@ type SidebarWrapperProps = {
   disabled?: boolean;
   sx?: SxProps<Theme>;
   sxContentWrapper?: SxProps<Theme>;
+  moveBack?: any;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -46,6 +48,7 @@ export const SidebarWrapper = ({
   disabled,
   sx,
   sxContentWrapper,
+  moveBack = null,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -97,17 +100,24 @@ export const SidebarWrapper = ({
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
               <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px" }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
-                <Typography
-                  component={"h2"}
-                  sx={{
-                    fontSize: { xs: "24px", sm: "40px" },
-                    fontWeight: "700",
-                    lineHeight: "29.05px",
-                    marginBottom: headerImage ? "50px" : undefined,
-                  }}
-                >
-                  {title}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  {moveBack && (
+                    <IconButton onClick={() => moveBack()}>
+                      <ArrowBackIosIcon />
+                    </IconButton>
+                  )}
+                  <Typography
+                    component={"h2"}
+                    sx={{
+                      fontSize: { xs: "24px", sm: "40px" },
+                      fontWeight: "700",
+                      lineHeight: "29.05px",
+                      marginBottom: headerImage ? "50px" : undefined,
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                </Box>
               </Box>
             ) : (
               <Box

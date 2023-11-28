@@ -1,12 +1,18 @@
-import { Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { Button, IconButton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type MessageLeftProps = {
   message: any;
+  reactionsMap: { [key: string]: string[] };
+  setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
+  toggleEmojiPicker: (event: any, messageId?: string) => void;
+  toggleReaction: (messageId: string, emoji: string) => void;
 };
-export const MessageLeft = ({ message }: MessageLeftProps) => {
+export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleReaction }: MessageLeftProps) => {
   return (
     <Box
       sx={{
@@ -34,16 +40,6 @@ export const MessageLeft = ({ message }: MessageLeftProps) => {
             overflow: "hidden",
             width: "50px",
             height: "50px",
-          },
-          "&.GainedPoint": {
-            "& > .user-image": {
-              boxShadow: "1px 1px 13px 4px rgba(21, 255, 0, 1)",
-            },
-          },
-          "&.LostPoint": {
-            "& > .user-image": {
-              boxShadow: "1px 1px 13px 4px rgba(255, 0, 0, 1)",
-            },
           },
           "@keyframes slidein": {
             from: {
@@ -78,17 +74,49 @@ export const MessageLeft = ({ message }: MessageLeftProps) => {
           {message.sender}
         </Typography>
 
-        <Typography
+        <Box
           sx={{
+            position: "relative",
             fontSize: "16px",
             fontWeight: "400",
             lineHeight: "24px",
             p: "10px 14px",
-            background: "#242425",
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
           }}
         >
-          {message.message}
-        </Typography>
+          <Typography
+            sx={{
+              fontSize: "16px",
+              fontWeight: "400",
+              lineHeight: "24px",
+            }}
+          >
+            {message.message}
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
+            {reactionsMap[message.id]?.map(emoji => (
+              <Button
+                sx={{
+                  minWidth: "0",
+                  padding: "0px 10px",
+                  borderRadius: "12px",
+                  background: DESIGN_SYSTEM_COLORS.notebookG500,
+                }}
+                key={emoji}
+                onClick={() => {
+                  toggleReaction(message.id, emoji);
+                }}
+              >
+                {emoji} 1
+              </Button>
+            ))}
+
+            <IconButton onClick={(e: any) => toggleEmojiPicker(e, message.id)}>
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

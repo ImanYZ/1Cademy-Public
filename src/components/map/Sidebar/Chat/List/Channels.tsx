@@ -5,23 +5,27 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
 import React, { useEffect, useState } from "react";
 
+import { CustomBadge } from "@/components/map/CustomBudge";
+
 import TagIcon from "../../../../../../public/tag.svg";
-import { CustomBadge } from "../../../CustomBudge";
 
 dayjs.extend(relativeTime);
-
-export const ChannelsList = () => {
-  const [newses, setNewses] = useState<any>([]);
+type ChannelListProps = {
+  openRoom: any;
+};
+export const ChannelsList = ({ openRoom }: ChannelListProps) => {
+  const [channels, setChannels] = useState<any>([]);
   useEffect(() => {
-    setNewses([
+    setChannels([
       { title: "Public", tag: "1cademy", totalMessages: 100, createdAt: "11:34 am" },
       { title: "My Community", tag: "Design Science", totalMessages: 100, createdAt: "11:34 am" },
     ]);
   }, []);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      {newses.map((news: any, idx: number) => (
+      {channels.map((channel: any, idx: number) => (
         <Paper
+          onClick={() => openRoom("channel")}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -44,87 +48,94 @@ export const ChannelsList = () => {
             },
           }}
         >
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
             <Box
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
-                <Box
-                  sx={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "200px",
-                    background: "linear-gradient(to right, #FDC830, #F37335)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  P
-                </Box>
-                <Typography
-                  sx={{
-                    fontSize: "16px",
-                    fontWeight: "500",
-                    lineHeight: "24px",
-                  }}
-                >
-                  {news.title}
-                </Typography>
-              </Box>
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  color: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
-                }}
-              >
-                {/* {dayjs(new Date()).format("h:mm A")} */}
-                {news.createdAt}
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                marginTop: "10px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                gap: "10px",
               }}
             >
               <Box
                 sx={{
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "200px",
+                  background: "linear-gradient(to right, #FDC830, #F37335)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                  justifyContent: "center",
                 }}
               >
-                <NextImage width={"20px"} src={TagIcon} alt="tag icon" />
+                P
+              </Box>
+              <Box>
+                <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: "500",
+                      lineHeight: "24px",
+                    }}
+                  >
+                    {channel.title}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      color: theme =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.notebookG200
+                          : theme.palette.common.gray500,
+                    }}
+                  >
+                    {/* {dayjs(new Date()).format("h:mm A")} */}
+                    {channel.createdAt}
+                  </Typography>
+                </Box>
                 <Box
                   sx={{
-                    fontSize: "12px",
-                    marginLeft: "5px",
-                    color: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                   }}
                 >
-                  {news.tag}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <NextImage width={"20px"} src={TagIcon} alt="tag icon" />
+                    <Box
+                      sx={{
+                        fontSize: "12px",
+                        marginLeft: "5px",
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG200
+                            : theme.palette.common.gray500,
+                      }}
+                    >
+                      {channel.tag}
+                    </Box>
+                  </Box>
+                  <CustomBadge
+                    value={channel.totalMessages}
+                    sx={{
+                      height: "20px",
+                      p: "6px",
+                      fontSize: "13px",
+                    }}
+                  />
                 </Box>
               </Box>
-              <CustomBadge
-                value={news.totalMessages}
-                sx={{
-                  p: "6px 8px",
-                }}
-              />
             </Box>
           </Box>
         </Paper>
