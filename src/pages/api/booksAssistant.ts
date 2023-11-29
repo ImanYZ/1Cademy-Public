@@ -11,6 +11,7 @@ import {
   openai,
   sendMessageTime,
 } from "./openAI/helpers";
+import { detach } from "src/utils/helpers";
 
 const uploadPdf = async (bookUrl: string, bookId: string) => {
   const bookRef = db.collection("books").doc(bookId);
@@ -77,9 +78,22 @@ const savReaction = async (bookId: string, messageId: string, reaction: string, 
     await bookDoc.ref.update(bookData);
   }
 };
+
+const generateAudio = async (bookId: string, messageId: string, audioType: string, uname: string, message: string) => {
+  console.log("generateAudio");
+  const mp3 = await openai.audio.speech.create({
+    model: "tts-1-hd",
+    voice: audioType,
+    input: message || "",
+  });
+  const buffer = Buffer.from(await mp3.arrayBuffer());
+  const audioUrl = await uploadToCloudStorage(buffer);
+  await saveMessageSTT(bookId, messageId, audioUrl, audioType, uname);
+  return audioUrl;
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { bookId, message, audioType, reaction } = req.body;
+    const { bookId, message, audioType, reaction, asAudio } = req.body;
     const data = req.body.data;
     const firstname = data.user.userData.fName;
     let newMessage = message;
@@ -109,29 +123,32 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { response, messageId } = await fetchCompelation(threadId, assistantId);
 
     const threadMessages = await openai.beta.threads.messages.list(threadId);
-
-    const mp3 = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: audioType,
-      input: response?.message || "",
-    });
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-    const audioUrl = await uploadToCloudStorage(buffer);
-    await saveMessageSTT(bookId, messageId, audioUrl, audioType, data.user.userData.uname);
-    const lastUserMessage = threadMessages.data[1];
-    if (lastUserMessage.id) {
-      await savReaction(bookId, lastUserMessage.id, reaction, data.user.userData.uname);
+    let audioUrl = "";
+    if (asAudio) {
+      audioUrl = await generateAudio(bookId, messageId, audioType, data.user.userData.uname, response?.message || "");
     }
 
-    await saveLogs({
-      doer: data.user.userData.uname,
-      action: "Asked Assistant",
-      bookUrl: documentData.bookUrl,
-      bookId: bookId,
-      message: newMessage,
-      reponse: response?.message || "",
-      reaction,
+    await detach(async () => {
+      if (!asAudio) {
+        await generateAudio(bookId, messageId, audioType, data.user.userData.uname, response?.message || "");
+      }
+
+      const lastUserMessage = threadMessages.data[1];
+
+      if (lastUserMessage.id) {
+        await savReaction(bookId, lastUserMessage.id, reaction, data.user.userData.uname);
+      }
+      await saveLogs({
+        doer: data.user.userData.uname,
+        action: "Asked Assistant",
+        bookUrl: documentData.bookUrl,
+        bookId: bookId,
+        message: newMessage,
+        reponse: response?.message || "",
+        reaction,
+      });
     });
+
     return res.status(200).send({
       messages: threadMessages.data.sort((a: any, b: any) => a.created_at - b.created_at),
       audioUrl,
