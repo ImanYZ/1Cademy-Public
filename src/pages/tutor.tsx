@@ -159,7 +159,7 @@ const Tutor = () => {
   const db = getFirestore();
 
   const getReaction = (m: any): any => {
-    let reactionTitle = (selectedThread.messagesReaction || {})[m.id]?.reaction || "";
+    let reactionTitle = (selectedThread?.messagesReaction || {})[m.id]?.reaction || "";
     if (!reactionTitle) {
       reactionTitle = m.reaction;
     }
@@ -340,6 +340,16 @@ const Tutor = () => {
     });
     return () => unsubscribeOntology();
   }, [db]);
+
+  useEffect(() => {
+    const getMessages = async () => {
+      const { messages }: any = await Post("/listMessages", { bookId: selectedThread.id });
+      if (messages.length > 0) {
+        setMessages(messages);
+      }
+    };
+    if (selectedThread) getMessages();
+  }, [selectedThread]);
 
   const handleSelectThread = async (thread: any) => {
     if (!thread) return;
@@ -583,7 +593,7 @@ const Tutor = () => {
   }, [threads, bookId]);
 
   const getImage = (messageId: string) => {
-    return selectedThread.messages[messageId]?.image || null;
+    return (selectedThread?.messages || {})[messageId]?.image || null;
   };
 
   return (
@@ -853,12 +863,12 @@ const Tutor = () => {
                         }
                       />
                       {getImage(m.id) && (
-                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: "5px" }}>
+                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: "19px" }}>
                           <Image
                             src={getImage(m.id)}
                             alt={m.id}
-                            width="900px"
-                            height="600px"
+                            width="600px"
+                            height="400px"
                             style={{ borderRadius: "10px" }}
                           />
                         </Box>
