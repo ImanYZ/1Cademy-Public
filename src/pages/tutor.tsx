@@ -343,12 +343,20 @@ const Tutor = () => {
 
   useEffect(() => {
     const getMessages = async () => {
-      const { messages }: any = await Post("/listMessages", { bookId: selectedThread.id });
-      if (messages.length > 0) {
-        setMessages(messages);
+      if (!selectedThread.id) {
+        const { messages }: any = await Post("/listMessages", { bookId: selectedThread.id });
+        if (messages.length > 0) {
+          setMessages(messages);
+        }
       }
     };
-    if (selectedThread) getMessages();
+    const updateHashURL = () => {
+      window.location.hash = `#${selectedThread.id}`;
+    };
+    if (selectedThread) {
+      getMessages();
+      updateHashURL();
+    }
   }, [selectedThread]);
 
   const handleSelectThread = async (thread: any) => {
@@ -368,8 +376,14 @@ const Tutor = () => {
   };
 
   useEffect(() => {
+    const hashId = window.location.hash.split("#")[1];
     if (!bookId) {
-      handleSelectThread(threads[0]);
+      const defaultThread = threads.find((t: any) => t.id === hashId);
+      if (defaultThread) {
+        handleSelectThread(defaultThread);
+      } else {
+        handleSelectThread(threads[0]);
+      }
     }
   }, [threads]);
 
