@@ -21,6 +21,21 @@ export async function uploadToCloudStorage(sourceBuffer: any) {
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination.name}`;
   return publicUrl;
 }
+
+export async function uploadFileToStorage(sourceBuffer: any, folder: string, filename: string) {
+  const storage = new Storage();
+  const bucketName = process.env.VISUALEXP_STORAGE_BUCKET;
+
+  const bucket = storage.bucket(bucketName);
+
+  const destination = bucket.file(`${folder}/${filename}`);
+
+  await destination.save(sourceBuffer);
+  await destination.makePublic();
+  const publicUrl = `https://storage.googleapis.com/${bucketName}/${destination.name}`;
+  return publicUrl;
+}
+
 export const saveMessageSTT = async (
   bookId: string,
   messageId: string,

@@ -582,6 +582,10 @@ const Tutor = () => {
     setSelectedThread(threads.find((t: any) => t.id === bookId));
   }, [threads, bookId]);
 
+  const getImage = (messageId: string) => {
+    return selectedThread.messages[messageId]?.image || null;
+  };
+
   return (
     <Box>
       <AppHeaderMemoized
@@ -848,18 +852,29 @@ const Tutor = () => {
                             : ""
                         }
                       />
+                      {getImage(m.id) && (
+                        <Box display="flex" justifyContent="center" alignItems="center" sx={{ mt: "5px" }}>
+                          <Image
+                            src={getImage(m.id)}
+                            alt={m.id}
+                            width="900px"
+                            height="600px"
+                            style={{ borderRadius: "10px" }}
+                          />
+                        </Box>
+                      )}
                     </Typography>
                   </Box>
                 )
               );
             })}
             {waitingForResponse && (
-              <Box key={"loading"} sx={{ mb: "15px", pl: 5 }}>
+              <Box key={"loading"} sx={{ mb: "15px", pl: 4 }}>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Box
                     sx={{
-                      width: "130px",
-                      height: "130px",
+                      width: "120px",
+                      height: "120px",
                       mb: { xs: "64px", sm: "32px" },
                       display: "flex",
                       alignItems: "center",

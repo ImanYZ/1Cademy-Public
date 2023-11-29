@@ -82,7 +82,7 @@ const savReaction = async (bookId: string, messageId: string, reaction: string, 
 const generateAudio = async (bookId: string, messageId: string, audioType: string, uname: string, message: string) => {
   console.log("generateAudio");
   const mp3 = await openai.audio.speech.create({
-    model: "tts-1",
+    model: "tts-1-hd",
     voice: audioType,
     input: message || "",
   });

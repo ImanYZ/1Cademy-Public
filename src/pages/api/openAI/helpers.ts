@@ -1,5 +1,6 @@
 import { db } from "@/lib/firestoreServer/admin";
 import moment from "moment";
+import { uploadFileToStorage } from "../STT";
 
 const OpenAI = require("openai");
 
@@ -106,6 +107,37 @@ export const getAssistantTutorID = async () => {
 const getTextMessage = (m: any) => {
   return m?.content.filter((c: any) => c.type === "text")[0];
 };
+const saveImage = async (imageUrl: string, threadId: string, messageId: string) => {
+  const threadsDocs = await db.collection("books").where("threadId", "==", threadId).get();
+  const threadDoc = threadsDocs.docs[0];
+  const threadData = threadDoc.data();
+  if (!threadData.hasOwnProperty("messages")) {
+    threadData.messages = {};
+  }
+  if (!threadData.messages.hasOwnProperty(messageId)) {
+    threadData.messages[messageId] = {};
+  }
+  threadData.messages[messageId].image = imageUrl;
+
+  await threadDoc.ref.update(threadData);
+};
+
+export const saveMessageImage = async (m: any, threadId: string) => {
+  const file = m?.content.filter((c: any) => c.type === "image_file")[0] || null;
+  if (file) {
+    const file_id = file["image_file"]["file_id"];
+    const response = await fetch(`https://api.openai.com/v1/files/${file_id}/content`, {
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+      },
+    }).then(res => res.blob());
+
+    const buffer = await response.arrayBuffer();
+    const imageUrl = await uploadFileToStorage(Buffer.from(buffer), "open-ai-images", `${file_id}.png`);
+    await saveImage(imageUrl, threadId, m.id);
+  }
+  return null;
+};
 
 export const fetchCompelation = async (threadId: string, assistant_id: string) => {
   const run = await openai.beta.threads.runs.create(threadId, {
@@ -124,7 +156,8 @@ export const fetchCompelation = async (threadId: string, assistant_id: string) =
   const lastMessageForRun = messages.data
     .filter((message: any) => message.run_id === run.id && message.role === "assistant")
     .pop();
-  console.log("lastMessageForRun.content[0].text.value", lastMessageForRun.content[0].text.value);
+  console.log("message text", getTextMessage(lastMessageForRun).text.value);
+  await saveMessageImage(lastMessageForRun, threadId);
   return {
     response: getJSON(getTextMessage(lastMessageForRun).text.value),
     messageId: lastMessageForRun.id,
