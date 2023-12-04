@@ -47,10 +47,17 @@ const useDialog = () => {
             margin="dense"
             id="prompt-input"
             type="text"
-            fullWidth
             value={inputValue}
+            placeholder="Full name"
             onChange={handleInputChange}
-            sx={{ mt: 3 }}
+            fullWidth
+            sx={{
+              mt: 3,
+              mx: "auto",
+              display: "block",
+              textAlign: "center",
+              width: "60%",
+            }}
           />
         )}
       </DialogContent>
