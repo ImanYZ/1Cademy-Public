@@ -83,19 +83,22 @@ const SignInPage: NextPageWithLayout = () => {
           helperText={formik.errors.password}
           fullWidth
         />
-        <NextLink href={ROUTES.forgotpassword} passHref>
-          <Button sx={{ my: "32px" }}>Forgot Password?</Button>
-        </NextLink>
-        <LoadingButton
-          aria-label="submit"
-          loading={isLoading}
-          disabled={formik.isSubmitting}
-          type="submit"
-          variant="contained"
-          fullWidth
-        >
-          LOG IN
-        </LoadingButton>
+        <Box sx={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", my: "32px" }}>
+          <LoadingButton
+            aria-label="submit"
+            loading={isLoading}
+            disabled={formik.isSubmitting}
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ borderRadius: "26px", width: "90px" }}
+          >
+            LOG IN
+          </LoadingButton>
+          <NextLink href={ROUTES.forgotpassword} passHref>
+            <Button sx={{ my: "20px" }}>Forgot Password?</Button>
+          </NextLink>
+        </Box>
       </form>
     </Box>
   );

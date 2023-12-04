@@ -1,15 +1,18 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, TextField } from "@mui/material";
 import React, { useCallback, useState } from "react";
 
-const useConfirmationDialog = () => {
+const useDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [confirmationMessage, setConfirmationMessage] = useState("");
-  const [confirmation, setConfirmation] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [isPrompt, setIsPrompt] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const resolveRef = React.useRef<any>(null);
+  const [confirmation, setConfirmation] = useState(false);
 
-  const confirmIt = useCallback((message: string, confirmation = true) => {
-    setConfirmationMessage(message);
+  const showDialog = useCallback((message: string, prompt = false, confirmation = false) => {
+    setDialogMessage(message);
     setIsOpen(true);
+    setIsPrompt(prompt);
     setConfirmation(confirmation);
 
     return new Promise(resolve => {
@@ -17,34 +20,60 @@ const useConfirmationDialog = () => {
     });
   }, []);
 
-  const closeDialog = useCallback((confirmed: any) => {
-    setIsOpen(false);
-    setConfirmationMessage("");
+  const closeDialog = useCallback(
+    (confirmed: any) => {
+      setIsOpen(false);
+      setDialogMessage("");
+      setInputValue("");
 
-    if (resolveRef.current) {
-      resolveRef.current(confirmed);
-    }
-  }, []);
+      if (resolveRef.current) {
+        resolveRef.current(isPrompt ? inputValue : confirmed);
+      }
+    },
+    [isPrompt, inputValue]
+  );
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
 
   const ConfirmDialog = (
     <Dialog open={isOpen} onClose={() => closeDialog(false)}>
       <DialogContent>
-        <DialogContentText>{confirmationMessage}</DialogContentText>
+        <DialogContentText>{dialogMessage}</DialogContentText>
+        {isPrompt && (
+          <TextField
+            autoFocus
+            margin="dense"
+            id="prompt-input"
+            type="text"
+            fullWidth
+            value={inputValue}
+            onChange={handleInputChange}
+            sx={{ mt: 3 }}
+          />
+        )}
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center" }}>
         <Button onClick={() => closeDialog(true)} color="primary">
-          {confirmation ? "YES" : "OK"}
+          {isPrompt || !confirmation ? "OK" : "Yes"}
         </Button>
-        {confirmation && (
+        {!isPrompt && confirmation && (
           <Button onClick={() => closeDialog(false)} color="primary">
-            No
+            Cancel
           </Button>
         )}
       </DialogActions>
     </Dialog>
   );
 
-  return { confirmIt, ConfirmDialog };
+  const promptIt = useCallback((message: string) => showDialog(message, true), [showDialog]);
+  const confirmIt = useCallback(
+    (message: string, confirmation = true) => showDialog(message, false, confirmation),
+    [showDialog]
+  );
+
+  return { promptIt, confirmIt, ConfirmDialog };
 };
 
-export default useConfirmationDialog;
+export default useDialog;

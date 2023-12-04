@@ -49,7 +49,7 @@ const PercentageLoader = ({ size, strokeWidth = 4, ...props }: PercentageLoaderP
           justifyContent: "center",
           alignItems: "center",
           color: "white",
-          fontSize: "22px",
+          fontSize: "15px",
           textShadow: "0 0 .125em black",
         }}
       >
