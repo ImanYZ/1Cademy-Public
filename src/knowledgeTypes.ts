@@ -120,6 +120,7 @@ export type NodeFireStore = {
   maxVersionRating?: number;
   nodeImage?: string;
   nodeSlug?: string;
+  nodeSlugs?: string[];
   nodeType: NodeType;
   parents?: { node?: string; label?: string; title?: string }[];
   referenceIds?: string[];

@@ -14,8 +14,8 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
   // using some boolean fields to be added to the version.
   for (let versionDoc of versionsDocs.docs) {
     const versionData = versionDoc.data();
+    if (versionData.newChild) continue;
     [
-      "newChild",
       "addedChoices",
       "deletedChoices",
       "changedChoices",
@@ -24,6 +24,12 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
       "addedImage",
       "deletedImage",
       "changedImage",
+      "addedVideo",
+      "deletedVideo",
+      "changedVideo",
+      "addedAudio",
+      "deletedAudio",
+      "changedAudio",
       "addedReferences",
       "deletedReferences",
       "changedReferences",
@@ -34,7 +40,6 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
       "addedChildren",
       "removedParents",
       "removedChildren",
-      "changedNodeType",
     ].forEach(change => delete versionData[change]);
 
     const parentCompare = compareLinks({ oldLinks: nodeData.parents, newLinks: versionData.parents });

@@ -24,13 +24,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<string[]>) {
         if (numRequests++ > 3) {
           break;
         }
-        const completion = await sendGPTPrompt("gpt-4", [
+        const response = await sendGPTPrompt("gpt-4", [
           {
             content: prompt,
             role: "user",
           },
         ]);
-        gptResponse = completion?.choices?.[0]?.message?.content || "";
+        gptResponse = response || "";
       } catch (error) {
         gptResponse = "";
       }

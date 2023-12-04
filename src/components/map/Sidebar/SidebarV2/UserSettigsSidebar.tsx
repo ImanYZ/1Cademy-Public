@@ -27,6 +27,7 @@ import {
   Tabs,
   TextField,
   Theme,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -516,7 +517,7 @@ const UserSettigsSidebar = ({
     const setDefaultTag = async () => {
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         if (notebookOwner !== user.uname)
-          return alert("You cannot modify this tag. Please ask the notebook's owner for permission.");
+          return confirmIt("You cannot modify this tag. Please ask the notebook's owner for permission.", false);
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
@@ -1070,17 +1071,21 @@ const UserSettigsSidebar = ({
             <TabPanel value={settingsValue} index={0}>
               <ArrowBackButton text={ACCOUNT_OPTIONS[0].type} backwardsHandler={handleSettingsValue} />
               <Box component={"section"} p={"24px 20px"}>
-                <ProfileAvatar
-                  id="user-settings-picture"
-                  userId={user.userId}
-                  userImage={user.imageUrl}
-                  setUserImage={setUserImage}
-                  name={user?.fName ?? ""}
-                  lastName={user?.lName ?? ""}
-                />
-                <Typography textAlign={"center"} sx={{ mt: "10px" }}>
-                  {user.imageUrl ? "Change Photo" : "Add Photo"}
-                </Typography>
+                <Tooltip
+                  title={user.imageUrl && !user.imageUrl.includes("no-img.png") ? "Change Photo" : "Add Photo"}
+                  placement="top"
+                >
+                  <Box>
+                    <ProfileAvatar
+                      id="user-settings-picture"
+                      userId={user.userId}
+                      userImage={user.imageUrl}
+                      setUserImage={setUserImage}
+                      name={user?.fName ?? ""}
+                      lastName={user?.lName ?? ""}
+                    />
+                  </Box>
+                </Tooltip>
               </Box>
               <Box mx="20px">
                 <Box sx={{ display: "flex", gap: "12px" }}>

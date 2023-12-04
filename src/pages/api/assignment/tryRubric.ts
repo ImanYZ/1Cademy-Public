@@ -72,7 +72,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             role: "user",
           },
         ]);
-        gptResponse = completion?.choices?.[0]?.message?.content || "";
+        gptResponse = completion || "";
       } catch (error) {
         gptResponse = "";
       }
