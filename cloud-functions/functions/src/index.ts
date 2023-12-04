@@ -10,11 +10,13 @@ import { signalFlashcardChanges } from "./helpers";
 
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
+const { deleteOntologyLock } = require("./actions/deleteOntologyLock");
 
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
+
 import { db } from "./admin";
 
 // Since this code will be running in the Cloud Functions environment
@@ -233,3 +235,9 @@ exports.updateInstitutions = functions
   .pubsub.schedule("every 25 hours")
   .timeZone("America/Detroit")
   .onRun(updateInstitutions);
+
+exports.deleteOntologyLock = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("0 * * * *")
+  .timeZone("America/Detroit")
+  .onRun(deleteOntologyLock);

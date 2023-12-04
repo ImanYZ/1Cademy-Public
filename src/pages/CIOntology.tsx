@@ -1,9 +1,7 @@
 import { Bar, Container, Section } from "@column-resizer/react";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
 import SendIcon from "@mui/icons-material/Send";
-import { TreeItem, TreeView } from "@mui/lab";
+import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import {
   Avatar,
   Box,
@@ -55,6 +53,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import Ontology from "@/components/ontology/Ontology";
 import SneakMessage from "@/components/ontology/SneakMessage";
+import TreeViewSimplified from "@/components/ontology/TreeViewSimplified";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -494,6 +493,7 @@ const CIOntology = () => {
 
   const updateUserDoc = async (ontologyPath: string[]) => {
     if (!user) return;
+    // ontologyPath = ontologyPath.filter((path: string) => !!path.trim());
     const userQuery = query(collection(db, "users"), where("userId", "==", user.userId));
     const userDocs = await getDocs(userQuery);
     const userDoc = userDocs.docs[0];
@@ -619,73 +619,73 @@ const CIOntology = () => {
       action: "Searched",
       query,
     });
-    return fuse.search(query).map(result => result.item);
+    return fuse
+      .search(query)
+      .map(result => result.item)
+      .filter((item: any) => !item.deleted);
   };
 
-  const TreeViewSimplified = useCallback(
-    ({ mainSpecializations }: any) => {
-      /* 
-  mainSpecializations is an object like: 
-  {
-    ["TITLE"]:{
-        id:"id",
-        specializations:
-          {
-            ["TITLE1"]:{
-               id:"id1",
-               specializations:[]
-            },
-            ["TITLE2"]:{
-               id:"id2",
-               specializations:[]
-            }
-          }
-        
-    }
-  }
-   */
-      return (
-        <TreeView
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          defaultExpanded={[]}
-          sx={{
-            "& .Mui-selected": {
-              backgroundColor: "transparent", // Remove the background color
-            },
-          }}
-        >
-          {Object.keys(mainSpecializations).map(category => (
-            <TreeItem
-              key={mainSpecializations[category]?.id || category}
-              nodeId={mainSpecializations[category]?.id || category}
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
-                  <Typography
-                    sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}
-                    onClick={() => {
-                      if (!mainSpecializations[category].isCategory)
-                        openMainCategory(category, mainSpecializations[category]?.path || []);
-                    }}
-                  >
-                    {!mainSpecializations[category].isCategory
-                      ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
-                      : category}
-                  </Typography>
-                </Box>
-              }
-              sx={{ mt: "5px" }}
-            >
-              {Object.keys(mainSpecializations[category].specializations).length > 0 && (
-                <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
-              )}
-            </TreeItem>
-          ))}
-        </TreeView>
-      );
-    },
-    [mainSpecializations]
-  );
+  // const TreeViewSimplified = ({ mainSpecializations }: any) => {
+  //   /*
+  // mainSpecializations is an object like:
+  // {
+  //   ["TITLE"]:{
+  //       id:"id",
+  //       specializations:
+  //         {
+  //           ["TITLE1"]:{
+  //              id:"id1",
+  //              specializations:[]
+  //           },
+  //           ["TITLE2"]:{
+  //              id:"id2",
+  //              specializations:[]
+  //           }
+  //         }
+
+  //   }
+  // }
+  //  */
+  //   return (
+  //     <TreeView
+  //       defaultCollapseIcon={<ExpandMoreIcon />}
+  //       defaultExpandIcon={<ChevronRightIcon />}
+  //       // defaultExpanded={[]}
+  //       sx={{
+  //         "& .Mui-selected": {
+  //           backgroundColor: "transparent", // Remove the background color
+  //         },
+  //       }}
+  //     >
+  //       {Object.keys(mainSpecializations).map(category => (
+  //         <TreeItem
+  //           key={mainSpecializations[category]?.id || category}
+  //           nodeId={mainSpecializations[category]?.id || category}
+  //           label={
+  //             <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
+  //               <Typography
+  //                 sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}
+  //                 onClick={() => {
+  //                   if (!mainSpecializations[category].isCategory)
+  //                     openMainCategory(category, mainSpecializations[category]?.path || []);
+  //                 }}
+  //               >
+  //                 {!mainSpecializations[category].isCategory
+  //                   ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
+  //                   : category}
+  //               </Typography>
+  //             </Box>
+  //           }
+  //           sx={{ mt: "5px" }}
+  //         >
+  //           {Object.keys(mainSpecializations[category].specializations).length > 0 && (
+  //             <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
+  //           )}
+  //         </TreeItem>
+  //       ))}
+  //     </TreeView>
+  //   );
+  // };
   const handleSendComment = async () => {
     try {
       if (!user) return;
@@ -777,13 +777,45 @@ const CIOntology = () => {
   const handleChange = (event: any, newValue: number) => {
     setValue(newValue);
   };
+  const findOntologyPath = useCallback(
+    ({ mainOntologies, path, eachOntologyPath }: any) => {
+      for (let ontlogy of mainOntologies) {
+        eachOntologyPath[ontlogy.id] = [...path, ontlogy.id];
+
+        for (let category in ontlogy?.subOntologies?.Specializations) {
+          const specializations =
+            ontologies.filter((onto: any) => {
+              const arrayOntologies = ontlogy?.subOntologies?.Specializations[category]?.ontologies.map(
+                (o: any) => o.id
+              );
+              return arrayOntologies.includes(onto.id);
+            }) || [];
+          eachOntologyPath = findOntologyPath({
+            mainOntologies: specializations,
+            path: [...path, ontlogy.id],
+            eachOntologyPath,
+          });
+        }
+      }
+
+      return eachOntologyPath;
+    },
+    [ontologies]
+  );
+
   const openSearchOntology = (ontology: any) => {
-    setOpenOntology(ontology);
-    updateUserDoc([ontology.id]);
-    recordLogs({
-      action: "Search result clicked",
-      clicked: ontology.id,
-    });
+    try {
+      setOpenOntology(ontology);
+      recordLogs({
+        action: "Search result clicked",
+        clicked: ontology.id,
+      });
+      const mainOntologies = ontologies.filter((ontology: any) => ontology.category);
+      let eachOntologyPath = findOntologyPath({ mainOntologies, path: [], eachOntologyPath: {} });
+      updateUserDoc([...(eachOntologyPath[ontology.id] || [ontology.id])]);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (!user?.claims.ontology) {
@@ -818,18 +850,30 @@ const CIOntology = () => {
           <Section minSize={0} defaultSize={350}>
             <Box
               sx={{
-                mt: "30px",
                 height: "100vh",
                 overflow: "auto",
+                overflowY: "auto",
+                overflowX: "auto",
+                width: "1600px",
               }}
             >
               <Box sx={{ pb: "190px" }}>
-                <TreeViewSimplified mainSpecializations={mainSpecializations} />
+                <TreeViewSimplified mainSpecializations={mainSpecializations} openMainCategory={openMainCategory} />
               </Box>
             </Box>
           </Section>
         )}
-        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize", position: "relative" }}>
+          <SettingsEthernetIcon
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              color: "white",
+            }}
+          />
+        </Bar>
         <Section minSize={0}>
           <Box
             sx={{
@@ -840,7 +884,7 @@ const CIOntology = () => {
               height: "94vh",
             }}
           >
-            <Breadcrumbs>
+            <Breadcrumbs sx={{ ml: "40px" }}>
               {ontologyPath.map(path => (
                 <Link
                   underline="hover"
@@ -876,7 +920,18 @@ const CIOntology = () => {
             )}
           </Box>
         </Section>
-        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize" }} />
+        <Bar size={2} style={{ background: "currentColor", cursor: "col-resize", position: "relative" }}>
+          <SettingsEthernetIcon
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              color: "white",
+            }}
+          />
+        </Bar>
+
         {!isMobile && (
           <Section minSize={0} defaultSize={400}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", position: "sticky" }}>
@@ -916,14 +971,18 @@ const CIOntology = () => {
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          // backgroundColor: "blue", // Set the background color
-                          color: "white", // Set the text color
-                          cursor: "pointer", // Change the cursor on hover
-                          borderRadius: "4px", // Add some border radius for a button-like appearance
-                          padding: "8px", // Add some padding to space content inside
-                          transition: "background-color 0.3s", // Add a smooth transition
+                          color: "white",
+                          cursor: "pointer",
+                          borderRadius: "4px",
+                          padding: "8px",
+                          transition: "background-color 0.3s",
+                          // border: "1px solid #ccc",
+                          mt: "5px",
                           "&:hover": {
-                            backgroundColor: DESIGN_SYSTEM_COLORS.gray200,
+                            backgroundColor: theme =>
+                              theme.palette.mode === "dark"
+                                ? DESIGN_SYSTEM_COLORS.notebookG450
+                                : DESIGN_SYSTEM_COLORS.gray200,
                           },
                         }}
                       >

@@ -121,6 +121,10 @@ const SubPlainText = ({
     }
   };
 
+  const handleDeleteOntology = () => {
+    deleteSubOntologyEditable();
+  };
+
   return (
     <Box>
       {type !== "title" && (
@@ -193,7 +197,7 @@ const SubPlainText = ({
                 </Tooltip>
               )}
               <Tooltip title={"Delete Ontology"} sx={{ ml: "5px" }}>
-                <Button onClick={deleteSubOntologyEditable} sx={{ ml: "5px" }}>
+                <Button onClick={handleDeleteOntology} sx={{ ml: "5px" }}>
                   Delete
                 </Button>
               </Tooltip>

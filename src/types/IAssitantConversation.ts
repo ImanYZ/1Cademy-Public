@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
-import { ChatCompletionRequestMessage } from "openai";
 
+// import { ChatCompletionRequestMessage } from "openai";
 import { INodeType } from "./INodeType";
 
 export type IAssistantNode = {
@@ -22,7 +22,7 @@ export type IAssistantMessage = {
   id?: string;
   request?: string;
   is404?: boolean;
-  gptMessage?: ChatCompletionRequestMessage;
+  gptMessage?: any;
   actions?: {
     type: IAssitantRequestAction;
     title: string;

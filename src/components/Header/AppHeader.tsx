@@ -54,11 +54,12 @@ type AppHeaderProps = {
   selectedSectionId: string;
   onSwitchSection: (sectionId: string) => void;
   mitpage?: boolean;
+  tutorPage?: boolean;
   // preUrl?: string;
 };
 
 const AppHeader = forwardRef(
-  ({ page, sections, selectedSectionId, onSwitchSection, mitpage = false }: AppHeaderProps, ref) => {
+  ({ page, sections, selectedSectionId, onSwitchSection, mitpage = false, tutorPage = false }: AppHeaderProps, ref) => {
     const [openSearch, setOpenSearch] = useState(false);
     const [{ isAuthenticated, user }] = useAuth();
     const [emailExp, setEmailExp] = useState("");
@@ -276,7 +277,7 @@ const AppHeader = forwardRef(
 
             {/* Navbar Right Options */}
             <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              {!mitpage && (
+              {!mitpage && !tutorPage && (
                 <Box
                   sx={{
                     width: "100%",
@@ -442,7 +443,7 @@ const AppHeader = forwardRef(
                 )}
               </Stack>
 
-              {!mitpage && (
+              {!mitpage && !tutorPage && (
                 <IconButton
                   onClick={() => setOpenMenu(prev => !prev)}
                   sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}

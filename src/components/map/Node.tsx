@@ -622,15 +622,17 @@ const Node = ({
         setEditingModeNode(false);
 
         if (newParent) {
-          saveProposedParentNode(identifier, "", reason, () => setAbleToPropose(true));
+          await saveProposedParentNode(identifier, "", reason, () => setAbleToPropose(true));
+          setProposeLoading(false);
           return;
         }
 
         if (isNew) {
-          saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
+          await saveProposedChildNode(identifier, "", reason, () => setAbleToPropose(true));
           if (!firstParentId) return;
           notebookRef.current.selectedNode = firstParentId.node;
           nodeBookDispatch({ type: "setSelectedNode", payload: firstParentId.node });
+          setProposeLoading(false);
           return;
         }
 
