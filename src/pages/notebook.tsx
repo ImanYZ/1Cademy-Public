@@ -258,7 +258,7 @@ const Notebook = ({}: NotebookProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
-  const { confirmIt, ConfirmDialog } = useConfirmDialog();
+  const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
   const db = getFirestore();
   // const storage = getStorage();
   const theme = useTheme();
@@ -4702,7 +4702,7 @@ const Notebook = ({}: NotebookProps) => {
   // );
 
   const uploadNodeImage = useCallback(
-    (
+    async (
       event: any,
       nodeRef: any,
       nodeId: string,
@@ -4729,7 +4729,7 @@ const Notebook = ({}: NotebookProps) => {
         ) {
           confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", false);
         } else {
-          let userName = prompt(
+          let userName = await promptIt(
             "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
           );
           if (userName != `${user?.fName} ${user?.lName}`) {

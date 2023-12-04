@@ -113,7 +113,7 @@ const ProposalsSidebar = ({
       SidebarOptions={
         <Box
           sx={{
-            marginTop: "30px",
+            marginTop: "15px",
           }}
         >
           <Box
@@ -147,7 +147,6 @@ const ProposalsSidebar = ({
               py: "10px",
             }}
           >
-            <Typography>Show</Typography>
             <Select
               sx={{
                 marginLeft: "10px",
