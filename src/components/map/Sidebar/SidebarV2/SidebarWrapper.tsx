@@ -98,7 +98,7 @@ export const SidebarWrapper = ({
         <Box>
           <Box>
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
-              <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px" }}>
+              <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px", pb: 0 }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   {moveBack && (
