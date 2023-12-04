@@ -6,9 +6,10 @@ import { Button, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { EmojiClickData } from "emoji-picker-react";
+import dynamic from "next/dynamic";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Mention,MentionsInput } from "react-mentions";
+import { Mention, MentionsInput } from "react-mentions";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -18,6 +19,11 @@ import { NewsCard } from "./NewsCard";
 //import { MessageRight } from "./MessageRight";
 import { NodeLink } from "./NodeLink";
 import { UsersTag } from "./UsersTag";
+// Create a dynamically importable component
+const DynamicMemoEmojiPicker = dynamic(() => import("../Common/EmojiPicker"), {
+  loading: () => <p>Loading...</p>,
+  ssr: false,
+});
 
 dayjs.extend(relativeTime);
 type MessageProps = {
@@ -64,8 +70,9 @@ export const Message = ({ roomType, theme }: MessageProps) => {
       } else {
         setInputValue(prevValue => prevValue + emojiObject.emoji);
       }
+      setShowEmojiPicker(false);
     },
-    [showEmojiPicker, reactionsMap]
+    [reactionsMap]
   );
 
   const toggleEmojiPicker = (event: any, messageId?: string) => {
@@ -76,11 +83,13 @@ export const Message = ({ roomType, theme }: MessageProps) => {
       top: buttonRect.bottom + window.scrollY,
       left: buttonRect.left + window.scrollX,
     };
-
-    newPosition.left = Math.min(newPosition.left, (parentDivRect?.right || 0) - window.scrollX - 350);
-
-    newPosition.top = Math.min(newPosition.top, (parentDivRect?.bottom || 0) - window.scrollY - 450) - 75;
-
+    const left = newPosition.left;
+    const top = newPosition.top;
+    newPosition.left = Math.min(left, (parentDivRect?.right || 0) - window.scrollX - 350);
+    newPosition.top = Math.min(top, (parentDivRect?.bottom || 0) - window.scrollY - 400);
+    if (top >= newPosition.top) {
+      newPosition.top = newPosition.top - 120;
+    }
     setPosition(newPosition);
     setShowEmojiPicker(!showEmojiPicker);
   };
@@ -164,7 +173,7 @@ export const Message = ({ roomType, theme }: MessageProps) => {
     setMessages([
       ...messages,
       {
-        id: "132131313",
+        id: `${messages.length + 1}`,
         message: inputValue,
         sender: "You",
         createdAt: "11:34 am",
@@ -271,6 +280,9 @@ export const Message = ({ roomType, theme }: MessageProps) => {
               <Mention
                 trigger="@"
                 data={userList}
+                displayTransform={(id, display) => {
+                  return `@${display}`;
+                }}
                 renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
               />
             </MentionsInput>
@@ -307,7 +319,12 @@ export const Message = ({ roomType, theme }: MessageProps) => {
                       <CloseIcon />
                     </IconButton>
                   </Box>
-                  <EmojiPicker onEmojiClick={handleEmojiClick} lazyLoadEmojis={true} />
+                  <DynamicMemoEmojiPicker
+                    width="300px"
+                    height="400px"
+                    onEmojiClick={handleEmojiClick}
+                    lazyLoadEmojis={true}
+                  />
                 </Box>
               </Box>
               <Button

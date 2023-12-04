@@ -1,10 +1,13 @@
-import AddIcon from "@mui/icons-material/Add";
-import { Button, IconButton, Typography } from "@mui/material";
+import AddReactionIcon from "@mui/icons-material/AddReaction";
+import { IconButton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { Emoticons } from "../Common/Emoticons";
 type MessageLeftProps = {
   message: any;
   reactionsMap: { [key: string]: string[] };
@@ -17,24 +20,18 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
     <Box
       sx={{
         display: "flex",
-        alignItems: "center",
         gap: "10px",
       }}
     >
       <Box
-        //className={className}
         sx={{
+          marginTop: "45px",
           width: `${50}px`,
           height: `${50}px`,
           cursor: "pointer",
-          // display: "inline-block",
-          // position: "absolute",
-          // left: "0px",
-          // bottom: "0px",
           transition: "all 0.2s 0s ease",
           background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
           borderRadius: "50%",
-          // transform: `translate(-50%, ${verticalPosition}px)`,
           "& > .user-image": {
             borderRadius: "50%",
             overflow: "hidden",
@@ -92,29 +89,23 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
               lineHeight: "24px",
             }}
           >
-            {message.message}
+            <MarkdownRender text={message.message || ""} />
           </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
-            {reactionsMap[message.id]?.map(emoji => (
-              <Button
-                sx={{
-                  minWidth: "0",
-                  padding: "0px 10px",
-                  borderRadius: "12px",
-                  background: DESIGN_SYSTEM_COLORS.notebookG500,
-                }}
-                key={emoji}
-                onClick={() => {
-                  toggleReaction(message.id, emoji);
-                }}
-              >
-                {emoji} 1
-              </Button>
-            ))}
-
-            <IconButton onClick={(e: any) => toggleEmojiPicker(e, message.id)}>
-              <AddIcon />
+          {!reactionsMap[message.id]?.length && (
+            <IconButton
+              sx={{ position: "absolute", left: "0px" }}
+              onClick={(e: any) => toggleEmojiPicker(e, message.id)}
+            >
+              <AddReactionIcon color="secondary" />
             </IconButton>
+          )}
+          <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
+            <Emoticons
+              messageId={message.id}
+              reactionsMap={reactionsMap}
+              toggleEmojiPicker={toggleEmojiPicker}
+              toggleReaction={toggleReaction}
+            />
           </Box>
         </Box>
       </Box>
