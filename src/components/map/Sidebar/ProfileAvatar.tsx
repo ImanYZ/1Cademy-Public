@@ -1,12 +1,12 @@
+import { CameraAlt as CameraAltIcon } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
 import { Box } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import Image from "next/image";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
-import { getAvatarName } from "@/lib/utils/Map.utils";
 import { addSuffixToUrlGMT } from "@/lib/utils/string.utils";
 
 import { imageLoaded, isValidHttpUrl } from "../../../lib/utils/utils";
@@ -25,6 +25,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [imageUrlError, setImageUrlError] = useState<string | boolean>(false);
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
   const inputEl = useRef<HTMLInputElement>(null);
 
@@ -50,10 +51,10 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
 
         const image = event.target.files[0];
         if (!image || !image?.type) {
-          alert("Oops! Something went wrong with the image upload. Please try uploading a different image.");
+          confirmIt("Oops! Something went wrong with the image upload. Please try uploading a different image.", false);
           setImageUrlError("There is an error with the image, try to upload other one");
         } else if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
-          alert("We only accept JPG, JPEG, or PNG images. Please upload another image.");
+          confirmIt("We only accept JPG, JPEG, or PNG images. Please upload another image.", false);
           setImageUrlError("We only accept JPG, JPEG, or PNG images. Please upload another image.");
         } else if (image.size > 1024 * 1024) {
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
@@ -62,7 +63,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
             "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
           );
           if (fullName !== `${name} ${lastName}`) {
-            alert("Entered full name is not correct");
+            confirmIt("Entered full name is not correct", false);
             return;
           }
           setIsUploading(true);
@@ -166,22 +167,45 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
               },
             }}
           >
-            {getAvatarName(name, lastName)}
+            <CameraAltIcon />
+            {/* {getAvatarName(name, lastName)} */}
           </Avatar>
         ) : (
-          <>
-            <Image
-              width="90px"
-              height="90px"
-              src={userImage ?? ""}
+          <Box position="relative">
+            <Avatar
+              sx={{
+                width: 90,
+                height: 90,
+                ":hover": {
+                  boxShadow: "0 0 16px 0 #bebebe",
+                  cursor: "pointer",
+                },
+              }}
               alt="1Cademist Profile Picture"
-              objectFit="cover"
-              objectPosition="center center"
+              src={userImage ?? ""}
             />
-            {isUploading && <PercentageLoader percentage={percentageUploaded} size={90} />}
-          </>
+
+            <Box
+              position="absolute"
+              bottom={0}
+              right={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              sx={{
+                width: "100%",
+                height: "100%",
+                ":hover": {
+                  cursor: "pointer",
+                },
+              }}
+            >
+              {isUploading ? <PercentageLoader percentage={percentageUploaded} size={90} /> : <CameraAltIcon />}
+            </Box>
+          </Box>
         )}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };
