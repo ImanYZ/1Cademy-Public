@@ -4720,20 +4720,20 @@ const Notebook = ({}: NotebookProps) => {
         event.preventDefault();
         const image = event.target.files[0];
         if (!image && !image?.type) {
-          alert("Oops! Something went wrong with the image upload. Please try uploading a different image.");
+          confirmIt("Oops! Something went wrong with the image upload. Please try uploading a different image.", false);
         } else if (
           image.type !== "image/jpg" &&
           image.type !== "image/jpeg" &&
           image.type !== "image/gif" &&
           image.type !== "image/png"
         ) {
-          alert("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.");
+          confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", false);
         } else {
           let userName = prompt(
             "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
           );
           if (userName != `${user?.fName} ${user?.lName}`) {
-            alert("Entered full name is not correct");
+            confirmIt("Entered full name is not correct", false);
             return;
           }
           setIsSubmitting(true);
@@ -4762,8 +4762,9 @@ const Notebook = ({}: NotebookProps) => {
               console.error("Image Upload Error: ", err);
               setIsSubmitting(false);
               setIsUploading(false);
-              alert(
-                "There is an error with uploading your image. Please upload it again! If the problem persists, please try another image."
+              confirmIt(
+                "There is an error with uploading your image. Please upload it again! If the problem persists, please try another image.",
+                false
               );
             },
             async function complete() {
