@@ -25,7 +25,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
   const [isUploading, setIsUploading] = useState(false);
   const [percentageUploaded, setPercentageUploaded] = useState(0);
   const [imageUrlError, setImageUrlError] = useState<string | boolean>(false);
-  const { confirmIt, ConfirmDialog } = useConfirmDialog();
+  const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
 
   const inputEl = useRef<HTMLInputElement>(null);
 
@@ -59,7 +59,7 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
         } else if (image.size > 1024 * 1024) {
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
         } else {
-          let fullName = prompt(
+          let fullName = await promptIt(
             "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
           );
           if (fullName !== `${name} ${lastName}`) {
