@@ -1,10 +1,10 @@
 import AddReactionIcon from "@mui/icons-material/AddReaction";
-import { IconButton, Typography } from "@mui/material";
+import { Avatar, IconButton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import moment from "moment";
 import React, { useState } from "react";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
-import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
@@ -16,6 +16,7 @@ type MessageLeftProps = {
   toggleEmojiPicker: (event: any, messageId?: string) => void;
   toggleReaction: (messageId: string, emoji: string) => void;
   setReply: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
+  membersInfo: any;
 };
 export const MessageLeft = ({
   message,
@@ -23,6 +24,7 @@ export const MessageLeft = ({
   toggleEmojiPicker,
   toggleReaction,
   setReply,
+  membersInfo,
 }: MessageLeftProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -37,39 +39,13 @@ export const MessageLeft = ({
     <Box
       sx={{
         display: "flex",
-        gap: "10px",
+        gap: "5px",
       }}
     >
-      <Box
-        sx={{
-          marginTop: "45px",
-          width: `${40}px`,
-          height: `${40}px`,
-          cursor: "pointer",
-          transition: "all 0.2s 0s ease",
-          background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-          borderRadius: "50%",
-          "& > .user-image": {
-            borderRadius: "50%",
-            overflow: "hidden",
-            width: "40px",
-            height: "40px",
-          },
-          "@keyframes slidein": {
-            from: {
-              transform: "translateY(0%)",
-            },
-            to: {
-              transform: "translateY(100%)",
-            },
-          },
-        }}
-      >
-        <Box className="user-image">
-          <OptimizedAvatar2 alt={"Haroon Waheed"} imageUrl={message?.imageUrl} size={40} sx={{ border: "none" }} />
-        </Box>
-        <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
+      <Box sx={{ mt: "45px" }}>
+        <Avatar src={membersInfo[message.sender].imageUrl} />
       </Box>
+
       <Box sx={{ marginTop: "45px", width: "90%" }}>
         <Typography
           sx={{
@@ -78,9 +54,11 @@ export const MessageLeft = ({
             lineHeight: "24px",
           }}
         >
-          {message.sender}
+          {membersInfo[message.sender].fullname}
         </Typography>
-
+        <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+          {moment(message.createdAt.toDate().getTime()).format("h:mm:ss A MMM D, YYYY")}
+        </Typography>
         <Box
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

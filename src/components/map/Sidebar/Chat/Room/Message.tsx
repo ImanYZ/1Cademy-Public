@@ -7,9 +7,12 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { EmojiClickData } from "emoji-picker-react";
+import { collection, doc, getFirestore, setDoc } from "firebase/firestore";
 import dynamic from "next/dynamic";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
+import { IChannelMessage } from "src/chatTypes";
+import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -32,33 +35,20 @@ dayjs.extend(relativeTime);
 type MessageProps = {
   roomType: string;
   theme: UserTheme;
+  selectedChannel: any;
+  user: any;
 };
 
-const userList = [
-  {
-    id: 1,
-    display: "John Doe",
-    image: "https://img.freepik.com/free-photo/cardano-blockchain-platform_23-2150411956.jpg",
-  },
-  {
-    id: 2,
-    display: "Jane Smith",
-    image: "https://img.freepik.com/free-photo/cardano-blockchain-platform_23-2150411956.jpg",
-  },
-  {
-    id: 3,
-    display: "Alice Johnson",
-    image: "https://img.freepik.com/free-photo/cardano-blockchain-platform_23-2150411956.jpg",
-  },
-];
-
-export const Message = ({ roomType, theme }: MessageProps) => {
+export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps) => {
   const [messages, setMessages] = useState<any>([]);
   const [inputValue, setInputValue] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [reactionsMap, setReactionsMap] = useState<{ [key: string]: string[] }>({});
   const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [reply, setReply] = useState<{ id: string | null; message: string | null }>({ id: null, message: null });
+  const [channelUsers, setChannelUsers] = useState([]);
+  const db = getFirestore();
+
   const messageBoxRef = useRef<HTMLDivElement>(null);
   const messageRef = useRef<{
     messageId: string | null;
@@ -132,65 +122,72 @@ export const Message = ({ roomType, theme }: MessageProps) => {
     [showEmojiPicker, reactionsMap]
   );
 
-  useEffect(() => {
-    setMessages([
-      {
-        id: "1",
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "Haroon",
-        createdAt: "11:34 am",
-      },
-      {
-        id: "2",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "You",
-        createdAt: "11:34 am",
-      },
-      {
-        id: "3",
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "Haroon",
-        createdAt: "11:34 am",
-      },
-      {
-        id: "4",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "You",
-        createdAt: "11:34 am",
-      },
-      {
-        id: "5",
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "Haroon",
-        createdAt: "11:34 am",
-      },
-      {
-        id: "6",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "You",
-        createdAt: "11:34 am",
-      },
-    ]);
-  }, []);
+  const scroll = () => {
+    if (messageBoxRef.current && messages.length > 2) {
+      messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
+    }
+  };
 
   const sendMessage = useCallback(() => {
-    setMessages([
-      ...messages,
-      {
-        id: `${messages.length + 1}`,
+    try {
+      const channelRef = doc(db, "channelMessages", selectedChannel.id);
+      const messageRef = doc(collection(channelRef, "messages"));
+
+      setDoc(messageRef, {
+        pinned: false,
+        read_by: [],
+        edited: true,
         message: inputValue,
-        sender: "You",
-        createdAt: "11:34 am",
-      },
-    ]);
+        node: {},
+        createdAt: new Date(),
+        replies: [],
+        sender: user.uname,
+        mentions: [],
+        imageUrl: user.imageUrl,
+        editedAt: new Date(),
+        reactions: [],
+        channelId: selectedChannel.id,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
     setInputValue("");
   }, [inputValue, messages]);
+
+  useEffect(() => {
+    if (!selectedChannel) return;
+    const members: any = Object.values(selectedChannel.membersInfo).map((m: any) => {
+      m.display = m.fullname;
+      m.id = m.uname;
+      return m;
+    });
+    setChannelUsers(members);
+  }, [selectedChannel]);
+
+  useEffect(() => {
+    const onSynchronize = (changes: any) => {
+      setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
+      scroll();
+    };
+    const killSnapshot = getChannelMesasgesSnapshot(
+      db,
+      { channelId: selectedChannel.id /* , lastVisible: null */ },
+      onSynchronize
+    );
+    return () => killSnapshot();
+  }, [selectedChannel, db]);
+
+  const handleKeyPress = (event: any) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      sendMessage();
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setInputValue(prevMessage => prevMessage + "\n");
+    }
+  };
 
   return (
     <Box ref={messageBoxRef} sx={{ display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}>
@@ -205,7 +202,7 @@ export const Message = ({ roomType, theme }: MessageProps) => {
             height: "100%",
             overflow: "auto",
             borderBottom: "solid 1px grey",
-            pb: "10px",
+            pb: "5px",
             paddingTop: roomType === "news" ? "20px" : undefined,
           }}
         >
@@ -215,7 +212,7 @@ export const Message = ({ roomType, theme }: MessageProps) => {
               {roomType === "news" && (
                 <NewsCard
                   tag="1cademy"
-                  image="https://img.freepik.com/free-photo/cardano-blockchain-platform_23-2150411956.jpg"
+                  image={message.imageUrl}
                   text={
                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
                   }
@@ -230,6 +227,7 @@ export const Message = ({ roomType, theme }: MessageProps) => {
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   setReply={setReply}
+                  membersInfo={selectedChannel.membersInfo}
                 />
               )}
             </Box>
@@ -302,10 +300,11 @@ export const Message = ({ roomType, theme }: MessageProps) => {
                 value={inputValue}
                 singleLine={false}
                 onChange={(e: any) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyPress}
               >
                 <Mention
                   trigger="@"
-                  data={userList}
+                  data={channelUsers}
                   displayTransform={(id, display) => {
                     return `@${display}`;
                   }}
@@ -388,4 +387,23 @@ export const Message = ({ roomType, theme }: MessageProps) => {
       </Box>
     </Box>
   );
+};
+
+const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
+  const docType = messageChange.type;
+  const curData = messageChange.data as IChannelMessage & { id: string };
+
+  const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
+  if (docType === "added" && messageIdx === -1) {
+    prevMessages.push(curData);
+  }
+  if (docType === "modified" && messageIdx !== -1) {
+    prevMessages[messageIdx] = curData;
+  }
+
+  if (curData.deleted && messageIdx !== -1) {
+    prevMessages.splice(messageIdx);
+  }
+  prevMessages.sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
+  return prevMessages;
 };

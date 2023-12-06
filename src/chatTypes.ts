@@ -59,8 +59,9 @@ export type IChannelMessage = {
   pinned?: boolean;
   edited?: boolean;
   editedAt?: Timestamp;
-  createdAt?: Timestamp;
+  createdAt: Timestamp;
   updatedAt?: Timestamp;
+  deleted: boolean;
 };
 
 export type IAnnouncement = {
@@ -79,6 +80,8 @@ export type IChannels = {
   members: string[];
   membersInfo: MembersInfo;
   createdAt: Timestamp;
+  updatedAt: Timestamp;
+  tag: string;
 };
 
 export type IChatNotification = {

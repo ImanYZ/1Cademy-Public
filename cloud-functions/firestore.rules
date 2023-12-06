@@ -468,5 +468,30 @@ service cloud.firestore {
     match /{documents=**} {
       allow read, write: if false;
     }
+    match /channels/{channelId} {
+      allow read, write: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name in resource.data.members;
+    }
+    match /channelMessages/{channelId} {
+      allow read, write: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members;
+
+      match /messages/{messageId} {
+         allow create: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name == request.resource.data.sender 
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members
+         allow write : if request.auth != null 
+                    && request.auth.token != null 
+                    && request.auth.token.name == resource.data.sender
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members;
+         allow read: if request.auth != null 
+                    && request.auth.token != null
+                    && exists(/databases/$(database)/documents/channels/$(channelId)) 
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members;           
+         }
+   }
   }
 }

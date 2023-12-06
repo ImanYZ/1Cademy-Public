@@ -2,6 +2,8 @@ import { Box, Tab, Tabs } from "@mui/material";
 import React, { useMemo, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { useAuth } from "@/context/AuthContext";
+
 import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/Direct";
 import { NewsList } from "../Chat/List/News";
@@ -24,21 +26,23 @@ type ChatSidebarProps = {
 
 export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWidth, theme }: ChatSidebarProps) => {
   const [value, setValue] = React.useState(0);
+  const [{ user }] = useAuth();
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("false");
+  const [selectedChannel, setSelectedChannel] = useState("");
 
   const a11yProps = (index: number) => {
     return {
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-
-  const openRoom = (type: string) => {
+  const openRoom = (type: string, channel: any) => {
     setOpenChatRoom(true);
     setRoomType(type);
+    setSelectedChannel(channel);
   };
   const moveBack = () => {
     setOpenChatRoom(false);
@@ -50,7 +54,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
 
   return (
     <SidebarWrapper
-      title="1Cademy Chat"
+      title={"1Cademy Chat"}
       open={open}
       onClose={onClose}
       width={sidebarWidth}
@@ -61,11 +65,11 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
       }}
       showScrollUpButton={false}
       contentSignalState={contentSignalState}
-      moveBack={moveBack}
+      moveBack={selectedChannel ? moveBack : null}
       SidebarContent={
         <Box sx={{ borderTop: "solid 1px ", marginTop: "20px" }}>
           {openChatRoom ? (
-            <Message roomType={roomType} theme={theme} />
+            <Message roomType={roomType} theme={theme} selectedChannel={selectedChannel} user={user} />
           ) : (
             <Box>
               <Box

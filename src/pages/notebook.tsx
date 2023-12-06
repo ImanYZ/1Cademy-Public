@@ -1046,17 +1046,17 @@ const Notebook = ({}: NotebookProps) => {
       window.location.hash = "no-back-button";
     };
 
-    window.onbeforeunload = function (e) {
-      e = e || window.event;
+    // window.onbeforeunload = function (e) {
+    //   e = e || window.event;
 
-      // For IE and Firefox prior to version 4
-      if (e) {
-        e.returnValue = "Do you want to close 1Cademy?";
-      }
+    //   // For IE and Firefox prior to version 4
+    //   if (e) {
+    //     e.returnValue = "Do you want to close 1Cademy?";
+    //   }
 
-      // For Safari
-      return "Do you want to close 1Cademy?";
-    };
+    //   // For Safari
+    //   return "Do you want to close 1Cademy?";
+    // };
 
     // movement through map using keyboard arrow keys
     document.addEventListener("keydown", event => {

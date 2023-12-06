@@ -1,7 +1,7 @@
 import { Theme } from "@emotion/react";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
+import HomeIcon from "@mui/icons-material/Home";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
@@ -103,7 +103,7 @@ export const SidebarWrapper = ({
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   {moveBack && (
                     <IconButton onClick={() => moveBack()}>
-                      <ArrowBackIosIcon />
+                      <HomeIcon />
                     </IconButton>
                   )}
                   <Typography

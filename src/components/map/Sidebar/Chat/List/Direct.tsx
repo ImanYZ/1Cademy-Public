@@ -1,12 +1,15 @@
 import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
-import { IconButton, Paper, TextField, Typography } from "@mui/material";
+import { Avatar, IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { getFirestore } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import { IChannels } from "src/chatTypes";
+import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 
-import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 dayjs.extend(relativeTime);
@@ -14,13 +17,49 @@ type DirectMessageProps = {
   openRoom: any;
 };
 export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
-  const [chatList, setChatList] = useState<any>([]);
+  const db = getFirestore();
+  const [{ user }] = useAuth();
+
+  const [channels, setChannels] = useState<IChannels[]>([]);
+
   useEffect(() => {
-    setChatList([
-      { title: "Phoneix Baker", tag: "1cademy", totalMessages: 100, createdAt: "11:34 am" },
-      { title: "Phoneix Baker", tag: "Design Science", totalMessages: 100, createdAt: "11:34 am" },
-    ]);
-  }, []);
+    if (!user) return;
+    const onSynchronize = (changes: channelsChange[]) => {
+      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+    };
+    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  const generateChannelName = (members: any) => {
+    const name = ["You, "];
+    let more = 0;
+    for (let mId in members) {
+      if (name.length > 3) {
+        more++;
+      }
+      if (mId !== user?.uname) name.push(members[mId].fullname + ", ");
+    }
+    if (more > 2) {
+      name.push(`...`);
+    }
+    return name.join("");
+  };
+  const OverlappingAvatars = ({ members }: any) => {
+    return (
+      <Stack direction="row" spacing={-10} alignItems="center">
+        {members.map((member: any, index: number) => (
+          <Avatar
+            key={index}
+            alt={member.fullname}
+            src={member.imageUrl}
+            sx={{ width: 40, height: 40, border: "2px solid #fff" }}
+          />
+        ))}
+      </Stack>
+    );
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
@@ -54,9 +93,9 @@ export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
           <CreateIcon color="primary" />
         </IconButton>
       </Box>
-      {chatList.map((list: any, idx: number) => (
+      {channels.map((channel: IChannels, idx: number) => (
         <Paper
-          onClick={() => openRoom("direct")}
+          onClick={() => openRoom("direct", channel)}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -92,53 +131,19 @@ export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
                 gap: "10px",
               }}
             >
-              <Box
-                sx={{
-                  width: `${50}px`,
-                  height: `${50}px`,
-                  cursor: "pointer",
-                  transition: "all 0.2s 0s ease",
-                  background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-                  borderRadius: "50%",
-                  // transform: `translate(-50%, ${verticalPosition}px)`,
-                  "& > .user-image": {
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    width: "50px",
-                    height: "50px",
-                  },
-                  "@keyframes slidein": {
-                    from: {
-                      transform: "translateY(0%)",
-                    },
-                    to: {
-                      transform: "translateY(100%)",
-                    },
-                  },
-                }}
-              >
-                <Box className="user-image">
-                  <OptimizedAvatar2
-                    alt={"Haroon Waheed"}
-                    imageUrl={
-                      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31"
-                    }
-                    size={50}
-                    sx={{ border: "none" }}
-                  />
-                </Box>
-                <Box sx={{ background: "#12B76A", left: "35px" }} className="UserStatusOnlineIcon" />
+              <Box sx={{ mr: "7px" }}>
+                <OverlappingAvatars members={Object.values(channel.membersInfo)} />
               </Box>
               <Box>
                 <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Typography
                     sx={{
-                      fontSize: "16px",
+                      fontSize: "13px",
                       fontWeight: "500",
                       lineHeight: "24px",
                     }}
                   >
-                    {list.title}
+                    {generateChannelName(channel.membersInfo)}
                   </Typography>
                   <Typography
                     sx={{
@@ -149,8 +154,7 @@ export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
                           : theme.palette.common.gray500,
                     }}
                   >
-                    {/* {dayjs(new Date()).format("h:mm A")} */}
-                    {list.createdAt}
+                    {dayjs(channel.updatedAt.toDate().getTime()).fromNow()}
                   </Typography>
                 </Box>
                 <Typography
@@ -160,8 +164,7 @@ export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
                       theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
                   }}
                 >
-                  {/* {dayjs(new Date()).format("h:mm A")} */}
-                  {list.tag}
+                  {channel?.tag}
                 </Typography>
               </Box>
             </Box>
@@ -170,4 +173,23 @@ export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
       ))}
     </Box>
   );
+};
+
+const synchronizationChannels = (prev: (IChannels & { id: string })[], change: any) => {
+  const docType = change.type;
+  const curData = change.data as IChannels & { id: string };
+
+  const prevIdx = prev.findIndex((m: IChannels & { id: string }) => m.id === curData.id);
+  if (docType === "added" && prevIdx === -1) {
+    prev.push(curData);
+  }
+  if (docType === "modified" && prevIdx !== -1) {
+    prev[prevIdx] = curData;
+  }
+
+  if (docType === "removed" && prevIdx !== -1) {
+    prev.splice(prevIdx);
+  }
+  prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+  return prev;
 };
