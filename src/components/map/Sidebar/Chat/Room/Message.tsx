@@ -190,7 +190,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   };
 
   return (
-    <Box ref={messageBoxRef} sx={{ display: "flex", flexDirection: "column", gap: "4px", p: "10px" }}>
+    <Box ref={messageBoxRef} sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
       <Box
         sx={{
           height: roomType !== "news" ? (reply.id ? "600px" : "666px") : "777px",
@@ -202,8 +202,8 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
             height: "100%",
             overflow: "auto",
             borderBottom: "solid 1px grey",
-            pb: "5px",
             paddingTop: roomType === "news" ? "20px" : undefined,
+            pt: 3,
           }}
         >
           {/* <Forward /> */}
@@ -234,7 +234,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
           ))}
         </Box>
         {roomType !== "news" && (
-          <>
+          <Box>
             {reply.id && (
               <Reply
                 close={() => {
@@ -382,7 +382,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
                 </Button>
               </Box>
             </Box>
-          </>
+          </Box>
         )}
       </Box>
     </Box>

@@ -39,13 +39,14 @@ export const MessageLeft = ({
       sx={{
         display: "flex",
         gap: "5px",
+        pb: 3,
       }}
     >
-      <Box sx={{ mt: "45px" }}>
+      <Box sx={{ pt: 1 }}>
         <Avatar src={membersInfo[message.sender].imageUrl} />
       </Box>
 
-      <Box sx={{ marginTop: "45px", width: "90%" }}>
+      <Box sx={{ width: "90%" }}>
         <Typography
           sx={{
             fontSize: "16px",
@@ -67,6 +68,7 @@ export const MessageLeft = ({
             fontWeight: "400",
             lineHeight: "24px",
             p: "10px 14px",
+            borderRadius: "9px",
             background: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
           }}
