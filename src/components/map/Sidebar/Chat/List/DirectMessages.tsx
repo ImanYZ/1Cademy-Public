@@ -4,10 +4,7 @@ import { Avatar, IconButton, Paper, Stack, TextField, Typography } from "@mui/ma
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
 import { IChannels } from "src/chatTypes";
-import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -15,21 +12,10 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
   openRoom: any;
+  channels: any;
 };
-export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
-  const db = getFirestore();
+export const DirectMessagesList = ({ openRoom, channels }: DirectMessageProps) => {
   const [{ user }] = useAuth();
-
-  const [channels, setChannels] = useState<IChannels[]>([]);
-
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
-    };
-    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
 
   const generateChannelName = (members: any) => {
     const name = ["You, "];
@@ -173,23 +159,4 @@ export const DirectMessagesList = ({ openRoom }: DirectMessageProps) => {
       ))}
     </Box>
   );
-};
-
-const synchronizationChannels = (prev: (IChannels & { id: string })[], change: any) => {
-  const docType = change.type;
-  const curData = change.data as IChannels & { id: string };
-
-  const prevIdx = prev.findIndex((m: IChannels & { id: string }) => m.id === curData.id);
-  if (docType === "added" && prevIdx === -1) {
-    prev.push(curData);
-  }
-  if (docType === "modified" && prevIdx !== -1) {
-    prev[prevIdx] = curData;
-  }
-
-  if (docType === "removed" && prevIdx !== -1) {
-    prev.splice(prevIdx);
-  }
-  prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
-  return prev;
 };

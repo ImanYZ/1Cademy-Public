@@ -1,5 +1,8 @@
 import { Box, Tab, Tabs } from "@mui/material";
-import React, { useMemo, useState } from "react";
+import { getFirestore } from "firebase/firestore";
+import React, { useEffect, useMemo, useState } from "react";
+import { IChannels } from "src/chatTypes";
+import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { useAuth } from "@/context/AuthContext";
@@ -33,6 +36,8 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("false");
   const [selectedChannel, setSelectedChannel] = useState("");
+  const [channels, setChannels] = useState<IChannels[]>([]);
+  const db = getFirestore();
 
   const a11yProps = (index: number) => {
     return {
@@ -46,15 +51,25 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   };
   const moveBack = () => {
     setOpenChatRoom(false);
+    setSelectedChannel("");
   };
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
   }, [openChatRoom, value, roomType]);
 
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelsChange[]) => {
+      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+    };
+    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
   return (
     <SidebarWrapper
-      title={"1Cademy Chat"}
+      title={""}
       open={open}
       onClose={onClose}
       width={sidebarWidth}
@@ -66,8 +81,9 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
       showScrollUpButton={false}
       contentSignalState={contentSignalState}
       moveBack={selectedChannel ? moveBack : null}
+      sidebarType={"chat"}
       SidebarContent={
-        <Box sx={{ borderTop: "solid 1px ", marginTop: "20px" }}>
+        <Box sx={{ borderTop: "solid 1px ", marginTop: openChatRoom ? "9px" : "22px" }}>
           {openChatRoom ? (
             <Message roomType={roomType} theme={theme} selectedChannel={selectedChannel} user={user} />
           ) : (
@@ -93,18 +109,12 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
               </Box>
               <Box sx={{ p: "2px 16px" }}>
                 {value === 0 && (
-                  // <NewsCard
-                  //   tag="1cademy"
-                  //   image="https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31"
-                  //   text={
-                  //     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                  //   }
-                  //   heading="Card Test Heading"
-                  // />
-                  <NewsList openRoom={openRoom} />
+                  <NewsList openRoom={openRoom} newsChannels={channels.filter((c: any) => c.channelType === "news")} />
                 )}
-                {value === 1 && <ChannelsList openRoom={openRoom} />}
-                {value === 2 && <DirectMessagesList openRoom={openRoom} />}
+                {value === 1 && (
+                  <ChannelsList openRoom={openRoom} channels={channels.filter((c: any) => c.channelType === "group")} />
+                )}
+                {value === 2 && <DirectMessagesList openRoom={openRoom} channels={channels} />}
               </Box>
             </Box>
           )}
@@ -115,3 +125,22 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
 };
 
 export const MemoizedChatSidebar = React.memo(ChatSidebar);
+
+const synchronizationChannels = (prev: (IChannels & { id: string })[], change: any) => {
+  const docType = change.type;
+  const curData = change.data as IChannels & { id: string };
+
+  const prevIdx = prev.findIndex((m: IChannels & { id: string }) => m.id === curData.id);
+  if (docType === "added" && prevIdx === -1) {
+    prev.push(curData);
+  }
+  if (docType === "modified" && prevIdx !== -1) {
+    prev[prevIdx] = curData;
+  }
+
+  if (docType === "removed" && prevIdx !== -1) {
+    prev.splice(prevIdx);
+  }
+  prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+  return prev;
+};

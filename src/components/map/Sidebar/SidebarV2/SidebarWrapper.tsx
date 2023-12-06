@@ -1,7 +1,7 @@
 import { Theme } from "@emotion/react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
-import HomeIcon from "@mui/icons-material/Home";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
@@ -26,6 +26,7 @@ type SidebarWrapperProps = {
   sx?: SxProps<Theme>;
   sxContentWrapper?: SxProps<Theme>;
   moveBack?: any;
+  sidebarType: string;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -49,6 +50,7 @@ export const SidebarWrapper = ({
   sx,
   sxContentWrapper,
   moveBack = null,
+  sidebarType = null,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -94,6 +96,20 @@ export const SidebarWrapper = ({
         },
       }}
     >
+      {sidebarType === "chat" && (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {moveBack && (
+            <Tooltip title={"Go Back"}>
+              <IconButton onClick={() => moveBack()} sx={{ mt: 2, ml: 2 }}>
+                <ArrowBackIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Typography variant="h6" sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0 }}>
+            1Cademy Chat
+          </Typography>
+        </Box>
+      )}
       {title && (
         <Box>
           <Box>
@@ -101,11 +117,6 @@ export const SidebarWrapper = ({
               <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px", pb: 0 }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
                 <Box sx={{ display: "flex", alignItems: "center" }}>
-                  {moveBack && (
-                    <IconButton onClick={() => moveBack()}>
-                      <HomeIcon />
-                    </IconButton>
-                  )}
                   <Typography
                     component={"h2"}
                     sx={{
@@ -143,7 +154,6 @@ export const SidebarWrapper = ({
           </Box>
         </Box>
       )}
-
       <Box>{SidebarOptions}</Box>
       <Box
         id={`${id}-content`}

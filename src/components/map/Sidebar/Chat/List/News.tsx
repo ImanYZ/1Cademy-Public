@@ -3,7 +3,7 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import TagIcon from "../../../../../../public/tag.svg";
 import { CustomBadge } from "../../../CustomBudge";
@@ -11,18 +11,12 @@ import { CustomBadge } from "../../../CustomBudge";
 dayjs.extend(relativeTime);
 type NewsListProps = {
   openRoom: any;
+  newsChannels: any;
 };
-export const NewsList = ({ openRoom }: NewsListProps) => {
-  const [newses, setNewses] = useState<any>([]);
-  useEffect(() => {
-    setNewses([
-      { title: "Public", tag: "1cademy", totalMessages: 100, createdAt: "11:34 am" },
-      { title: "My Community", tag: "Design Science", totalMessages: 100, createdAt: "11:34 am" },
-    ]);
-  }, []);
+export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      {newses.map((news: any, idx: number) => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "9px" }}>
+      {newsChannels.map((news: any, idx: number) => (
         <Paper
           onClick={() => openRoom("news")}
           key={idx}

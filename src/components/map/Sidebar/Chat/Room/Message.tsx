@@ -130,7 +130,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
 
   const sendMessage = useCallback(() => {
     try {
-      const channelRef = doc(db, "channelMessages", selectedChannel.id);
+      const channelRef = doc(db, "channelMessages", selectedChannel?.id);
       const messageRef = doc(collection(channelRef, "messages"));
 
       setDoc(messageRef, {
@@ -146,7 +146,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
         imageUrl: user.imageUrl,
         editedAt: new Date(),
         reactions: [],
-        channelId: selectedChannel.id,
+        channelId: selectedChannel?.id,
       });
     } catch (error) {
       console.error(error);

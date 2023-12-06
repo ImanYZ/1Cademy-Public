@@ -1,4 +1,4 @@
-import { collection, doc, Firestore, onSnapshot, query, Unsubscribe } from "firebase/firestore";
+import { collection, doc, Firestore, /* limit, */ onSnapshot, orderBy, query, Unsubscribe } from "firebase/firestore";
 import { IChannelMessage } from "src/chatTypes";
 import { SnapshotChangesTypes } from "src/types";
 
@@ -18,11 +18,9 @@ export const getChannelMesasgesSnapshot = (
   const { channelId } = data;
 
   const channelRef = doc(db, "channelMessages", channelId);
-  const actionTrackRef = collection(channelRef, "messages");
+  const messageRef = collection(channelRef, "messages");
 
-  // Todo: we use actionTracks24h because because that is removed automatically after 24h
-  let q = query(actionTrackRef);
-
+  let q = query(messageRef, orderBy("createdAt", "asc") /* , limit(10) */);
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 

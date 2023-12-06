@@ -1,5 +1,4 @@
-import AddReactionIcon from "@mui/icons-material/AddReaction";
-import { Avatar, IconButton, Typography } from "@mui/material";
+import { Avatar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
 import React, { useState } from "react";
@@ -82,14 +81,6 @@ export const MessageLeft = ({
             <MarkdownRender text={message.message || ""} />
           </Typography>
           {isHovered && <MessageButtons message={message} setReply={setReply} />}
-          {!reactionsMap[message.id]?.length && (
-            <IconButton
-              sx={{ position: "absolute", left: "0px" }}
-              onClick={(e: any) => toggleEmojiPicker(e, message.id)}
-            >
-              <AddReactionIcon color="secondary" />
-            </IconButton>
-          )}
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
             <Emoticons
               messageId={message.id}

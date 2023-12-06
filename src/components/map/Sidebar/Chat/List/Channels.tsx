@@ -3,7 +3,6 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import NextImage from "next/image";
-import React, { useEffect, useState } from "react";
 
 import { CustomBadge } from "@/components/map/CustomBudge";
 
@@ -12,17 +11,11 @@ import TagIcon from "../../../../../../public/tag.svg";
 dayjs.extend(relativeTime);
 type ChannelListProps = {
   openRoom: any;
+  channels: any;
 };
-export const ChannelsList = ({ openRoom }: ChannelListProps) => {
-  const [channels, setChannels] = useState<any>([]);
-  useEffect(() => {
-    setChannels([
-      { title: "Public", tag: "1cademy", totalMessages: 100, createdAt: "11:34 am" },
-      { title: "My Community", tag: "Design Science", totalMessages: 100, createdAt: "11:34 am" },
-    ]);
-  }, []);
+export const ChannelsList = ({ openRoom, channels }: ChannelListProps) => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
       {channels.map((channel: any, idx: number) => (
         <Paper
           onClick={() => openRoom("channel")}
@@ -40,7 +33,6 @@ export const ChannelsList = ({ openRoom }: ChannelListProps) => {
                 : "none",
             background: theme =>
               theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
-            marginBottom: "5px",
             cursor: "pointer",
             ":hover": {
               background: theme =>
