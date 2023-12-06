@@ -1,21 +1,38 @@
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import { IconButton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { useState } from "react";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
+import { MessageButtons } from "./MessageButtons";
 type MessageLeftProps = {
   message: any;
   reactionsMap: { [key: string]: string[] };
   setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
   toggleEmojiPicker: (event: any, messageId?: string) => void;
   toggleReaction: (messageId: string, emoji: string) => void;
+  setReply: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
 };
-export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleReaction }: MessageLeftProps) => {
+export const MessageLeft = ({
+  message,
+  reactionsMap,
+  toggleEmojiPicker,
+  toggleReaction,
+  setReply,
+}: MessageLeftProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
   return (
     <Box
       sx={{
@@ -26,8 +43,8 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
       <Box
         sx={{
           marginTop: "45px",
-          width: `${50}px`,
-          height: `${50}px`,
+          width: `${40}px`,
+          height: `${40}px`,
           cursor: "pointer",
           transition: "all 0.2s 0s ease",
           background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
@@ -35,8 +52,8 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
           "& > .user-image": {
             borderRadius: "50%",
             overflow: "hidden",
-            width: "50px",
-            height: "50px",
+            width: "40px",
+            height: "40px",
           },
           "@keyframes slidein": {
             from: {
@@ -49,14 +66,7 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
         }}
       >
         <Box className="user-image">
-          <OptimizedAvatar2
-            alt={"Haroon Waheed"}
-            imageUrl={
-              "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31"
-            }
-            size={50}
-            sx={{ border: "none" }}
-          />
+          <OptimizedAvatar2 alt={"Haroon Waheed"} imageUrl={message?.imageUrl} size={40} sx={{ border: "none" }} />
         </Box>
         <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
       </Box>
@@ -72,6 +82,8 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
         </Typography>
 
         <Box
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           sx={{
             position: "relative",
             fontSize: "16px",
@@ -91,6 +103,7 @@ export const MessageLeft = ({ message, reactionsMap, toggleEmojiPicker, toggleRe
           >
             <MarkdownRender text={message.message || ""} />
           </Typography>
+          {isHovered && <MessageButtons message={message} setReply={setReply} />}
           {!reactionsMap[message.id]?.length && (
             <IconButton
               sx={{ position: "absolute", left: "0px" }}
