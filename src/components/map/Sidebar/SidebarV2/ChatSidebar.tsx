@@ -5,7 +5,7 @@ import { UserTheme } from "src/knowledgeTypes";
 import { useAuth } from "@/context/AuthContext";
 
 import { ChannelsList } from "../Chat/List/Channels";
-import { DirectMessagesList } from "../Chat/List/Direct";
+import { DirectMessagesList } from "../Chat/List/DirectMessages";
 import { NewsList } from "../Chat/List/News";
 //import { NodeLink } from "../Chat/Room/NodeLink";
 import { Message } from "../Chat/Room/Message";
