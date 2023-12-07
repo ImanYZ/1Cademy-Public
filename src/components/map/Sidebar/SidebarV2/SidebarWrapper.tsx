@@ -26,7 +26,8 @@ type SidebarWrapperProps = {
   sx?: SxProps<Theme>;
   sxContentWrapper?: SxProps<Theme>;
   moveBack?: any;
-  sidebarType: string;
+  sidebarType: string | null;
+  selectedChannel: any;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -51,6 +52,7 @@ export const SidebarWrapper = ({
   sxContentWrapper,
   moveBack = null,
   sidebarType = null,
+  selectedChannel = null,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -106,7 +108,7 @@ export const SidebarWrapper = ({
             </Tooltip>
           )}
           <Typography variant="h6" sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0 }}>
-            1Cademy Chat
+            {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography>
         </Box>
       )}

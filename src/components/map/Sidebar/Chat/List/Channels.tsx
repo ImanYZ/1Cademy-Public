@@ -18,7 +18,7 @@ export const ChannelsList = ({ openRoom, channels }: ChannelListProps) => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
       {channels.map((channel: any, idx: number) => (
         <Paper
-          onClick={() => openRoom("channel")}
+          onClick={() => openRoom("channel", channel)}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -64,7 +64,11 @@ export const ChannelsList = ({ openRoom, channels }: ChannelListProps) => {
                   justifyContent: "center",
                 }}
               >
-                P
+                {channel.title
+                  .split(" ")
+                  .slice(0, 2)
+                  .map((word: string) => word[0])
+                  .join(" ")}
               </Box>
               <Box>
                 <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -86,8 +90,7 @@ export const ChannelsList = ({ openRoom, channels }: ChannelListProps) => {
                           : theme.palette.common.gray500,
                     }}
                   >
-                    {/* {dayjs(new Date()).format("h:mm A")} */}
-                    {channel.createdAt}
+                    {dayjs(channel.updatedAt.toDate().getTime()).fromNow()}
                   </Typography>
                 </Box>
                 <Box
@@ -118,14 +121,16 @@ export const ChannelsList = ({ openRoom, channels }: ChannelListProps) => {
                       {channel.tag}
                     </Box>
                   </Box>
-                  <CustomBadge
-                    value={channel.totalMessages}
-                    sx={{
-                      height: "20px",
-                      p: "6px",
-                      fontSize: "13px",
-                    }}
-                  />
+                  {false && (
+                    <CustomBadge
+                      value={channel.totalMessages}
+                      sx={{
+                        height: "20px",
+                        p: "6px",
+                        fontSize: "13px",
+                      }}
+                    />
+                  )}
                 </Box>
               </Box>
             </Box>

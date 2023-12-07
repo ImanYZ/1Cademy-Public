@@ -7,10 +7,12 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { EmojiClickData } from "emoji-picker-react";
-import { collection, doc, getFirestore, setDoc,Timestamp } from "firebase/firestore";
+import { collection, doc, getFirestore, setDoc } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
+import { IChannelMessage } from "src/chatTypes";
+import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 //import { IChannelMessage } from "src/chatTypes";
 //import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
@@ -47,6 +49,10 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   //const [reply, setReply] = useState<{ id: string | null; message: string | null }>({ id: null, message: null });
   const [channelUsers, setChannelUsers] = useState([]);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [loadMore, setLoadMore] = useState<boolean>(false);
+  const [messagesByDate, setMessagesByDate] = useState<any>({});
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const db = getFirestore();
 
   const messageBoxRef = useRef<HTMLDivElement>(null);
@@ -62,66 +68,9 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
     previousDate.setDate(currentDate.getDate() - 1);
     const _previosDate = new Date(currentDate);
     _previosDate.setDate(currentDate.getDate() - 3);
-    const messages = [
-      {
-        id: "1",
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        replies: [
-          {
-            id: "5",
-            message: "Hey Olivia, can you please review the latest node when you can?",
-            sender: "1man",
-            createdAt: Timestamp.fromDate(new Date()),
-          },
-          {
-            id: "6",
-            message: "Hey Olivia, can you please review the latest node when you can?",
-            sender: "Sam",
-            createdAt: Timestamp.fromDate(new Date()),
-          },
-        ],
-        sender: "Haroon",
-        createdAt: Timestamp.fromDate(new Date()),
-      },
-      {
-        id: "2",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "You",
-        createdAt: Timestamp.fromDate(new Date()),
-      },
-      {
-        id: "3",
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "Haroon",
-        createdAt: Timestamp.fromDate(previousDate),
-      },
-      {
-        id: "4",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "You",
-        createdAt: Timestamp.fromDate(previousDate),
-      },
-      {
-        id: "5",
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "Haroon",
-        createdAt: Timestamp.fromDate(_previosDate),
-      },
-      {
-        id: "6",
-        message: "Hey Olivia, can you please review the latest node when you can?",
-        sender: "You",
-        createdAt: Timestamp.fromDate(_previosDate),
-      },
-    ];
+
     const messagesObject: { [key: string]: any } = {};
-    messages.forEach(message => {
+    messages.forEach((message: any) => {
       const currentDate = new Date();
       const messageDate = message.createdAt.toDate();
       let formattedDate;
@@ -153,8 +102,8 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
 
       messagesObject[formattedDate].push(message);
     });
-    setMessages(messagesObject);
-  }, []);
+    setMessagesByDate(messagesObject);
+  }, [messages]);
 
   const handleEmojiClick = useCallback(
     (emojiObject: EmojiClickData) => {
@@ -228,12 +177,16 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   //   }
   // };
 
-  const sendMessage = useCallback(() => {
+  const sendMessage = useCallback(async () => {
     try {
-      const channelRef = doc(db, "channelMessages", selectedChannel?.id);
+      if (!inputValue.trim()) return;
+      let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+      if (roomType === "direct") {
+        channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+      }
       const messageRef = doc(collection(channelRef, "messages"));
 
-      setDoc(messageRef, {
+      await setDoc(messageRef, {
         pinned: false,
         read_by: [],
         edited: true,
@@ -248,6 +201,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
         reactions: [],
         channelId: selectedChannel?.id,
       });
+      scrollToBottom();
     } catch (error) {
       console.error(error);
     }
@@ -265,18 +219,27 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
     setChannelUsers(members);
   }, [selectedChannel]);
 
-  // useEffect(() => {
-  //   const onSynchronize = (changes: any) => {
-  //     setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
-  //     scroll();
-  //   };
-  //   const killSnapshot = getChannelMesasgesSnapshot(
-  //     db,
-  //     { channelId: selectedChannel.id /* , lastVisible: null */ },
-  //     onSynchronize
-  //   );
-  //   return () => killSnapshot();
-  // }, [selectedChannel, db]);
+  useEffect(() => {
+    setLastVisible(messages[0]?.doc || null);
+  }, [messages]);
+
+  useEffect(() => {
+    const onSynchronize = (changes: any) => {
+      setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
+      setTimeout(() => {
+        if (firstLoad) {
+          setFirstLoad(false);
+          scrollToBottom();
+        }
+      }, 500);
+    };
+    const killSnapshot = getChannelMesasgesSnapshot(
+      db,
+      { channelId: selectedChannel.id, lastVisible, roomType },
+      onSynchronize
+    );
+    return () => killSnapshot();
+  }, [selectedChannel, db, loadMore]);
 
   const handleKeyPress = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
@@ -288,15 +251,38 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
       setInputValue(prevMessage => prevMessage + "\n");
     }
   };
+  const scrollToBottom = () => {
+    const messageList: any = messageBoxRef.current;
+    if (messageList) {
+      // Scroll to the bottom of the message list
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    const messageList: any = messageBoxRef.current;
+    const handleScroll = () => {
+      if (messageList.scrollTop === 0) {
+        setLoadMore(l => !l);
+      }
+    };
+
+    messageList.addEventListener("scroll", handleScroll);
+
+    return () => {
+      messageList.removeEventListener("scroll", handleScroll);
+    };
+  }, [loadMore]);
 
   return (
-    <Box ref={messageBoxRef} sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
       <Box
         sx={{
           height: roomType !== "news" ? "725px" : "777px",
         }}
       >
         <Box
+          ref={messageBoxRef}
           className="messages-room"
           sx={{
             height: "100%",
@@ -306,25 +292,15 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
             pt: 3,
           }}
         >
-          {Object.keys(messages).map(message => {
+          {Object.keys(messagesByDate).map(date => {
             return (
               <>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Divider
-                    sx={{
-                      borderColor: "#f99346",
-                      width: "25%",
-                    }}
-                  />
-                  {message}
-                  <Divider
-                    sx={{
-                      borderColor: "#f99346",
-                      width: "25%",
-                    }}
-                  />
+                  <Divider sx={{ borderColor: "#f99346", width: "30%" }} />
+                  {date}
+                  <Divider sx={{ borderColor: "#f99346", width: "30%" }} />
                 </Box>
-                {messages[message].map((message: any) => (
+                {messagesByDate[date].map((message: any) => (
                   <Box key={message.id}>
                     {roomType === "news" && (
                       <NewsCard
@@ -463,6 +439,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
                     p: "10px",
                     borderRadius: "8px",
                   }}
+                  disabled={!inputValue.trim()}
                 >
                   <svg
                     width="18"
@@ -490,21 +467,21 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   );
 };
 
-// const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
-//   const docType = messageChange.type;
-//   const curData = messageChange.data as IChannelMessage & { id: string };
+const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
+  const docType = messageChange.type;
+  const curData = messageChange.data as IChannelMessage & { id: string };
 
-//   const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
-//   if (docType === "added" && messageIdx === -1) {
-//     prevMessages.push(curData);
-//   }
-//   if (docType === "modified" && messageIdx !== -1) {
-//     prevMessages[messageIdx] = curData;
-//   }
+  const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
+  if (docType === "added" && messageIdx === -1) {
+    prevMessages.push({ ...curData, doc: messageChange.doc });
+  }
+  if (docType === "modified" && messageIdx !== -1) {
+    prevMessages[messageIdx] = { ...curData, doc: messageChange.doc };
+  }
 
-//   if (curData.deleted && messageIdx !== -1) {
-//     prevMessages.splice(messageIdx);
-//   }
-//   prevMessages.sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
-//   return prevMessages;
-// };
+  if (curData.deleted && messageIdx !== -1) {
+    prevMessages.splice(messageIdx);
+  }
+  prevMessages.sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
+  return prevMessages;
+};

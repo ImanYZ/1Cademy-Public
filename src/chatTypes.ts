@@ -29,19 +29,20 @@ type MembersInfo = {
   [uname: string]: MemberInfo;
 };
 
-type UserInfo = {
-  uname: string;
-  imageUrl: string;
-  chooseUname: boolean;
-  fullname?: string;
-  role?: string;
-};
+// type UserInfo = {
+//   uname: string;
+//   imageUrl: string;
+//   chooseUname: boolean;
+//   fullname?: string;
+//   role?: string;
+// };
 
-type UsersInfo = {
-  [uname: string]: UserInfo;
-};
+// type UsersInfo = {
+//   [uname: string]: UserInfo;
+// };
 
 export type IChannelMessage = {
+  doc?: any;
   documentId?: string;
   channelId: string;
   quotedMessage?: QuotedMessage;
@@ -82,6 +83,7 @@ export type IChannels = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   tag: string;
+  channelType: "directMessage" | "group";
 };
 
 export type IChatNotification = {
@@ -97,9 +99,10 @@ export type IChatNotification = {
 export type IConversation = {
   id?: string;
   title: string;
-  users: string[];
-  usersInfo: UsersInfo;
+  members: string[];
+  membersInfo: MembersInfo;
   createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export type IConversationMessage = {

@@ -1,8 +1,9 @@
 import { Box, Tab, Tabs } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
-import { IChannels } from "src/chatTypes";
+import { IChannels, IConversation } from "src/chatTypes";
 import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
+import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { useAuth } from "@/context/AuthContext";
@@ -37,6 +38,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   const [roomType, setRoomType] = useState<string>("false");
   const [selectedChannel, setSelectedChannel] = useState("");
   const [channels, setChannels] = useState<IChannels[]>([]);
+  const [conversations, setConversations] = useState<IConversation[]>([]);
   const db = getFirestore();
 
   const a11yProps = (index: number) => {
@@ -49,6 +51,13 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     setRoomType(type);
     setSelectedChannel(channel);
   };
+
+  const openConversation = (type: string, channel: any) => {
+    setOpenChatRoom(true);
+    setRoomType(type);
+    setSelectedChannel(channel);
+  };
+
   const moveBack = () => {
     setOpenChatRoom(false);
     setSelectedChannel("");
@@ -67,6 +76,15 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     return () => killSnapshot();
   }, [db, user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: conversationChange[]) => {
+      setConversations((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+    };
+    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, []);
+
   return (
     <SidebarWrapper
       title={""}
@@ -81,6 +99,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
       showScrollUpButton={false}
       contentSignalState={contentSignalState}
       moveBack={selectedChannel ? moveBack : null}
+      selectedChannel={selectedChannel}
       sidebarType={"chat"}
       SidebarContent={
         <Box sx={{ borderTop: "solid 1px ", marginTop: openChatRoom ? "9px" : "22px" }}>
@@ -108,13 +127,9 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
                 </Tabs>
               </Box>
               <Box sx={{ p: "2px 16px" }}>
-                {value === 0 && (
-                  <NewsList openRoom={openRoom} newsChannels={channels.filter((c: any) => c.channelType === "news")} />
-                )}
-                {value === 1 && (
-                  <ChannelsList openRoom={openRoom} channels={channels.filter((c: any) => c.channelType === "group")} />
-                )}
-                {value === 2 && <DirectMessagesList openRoom={openRoom} channels={channels} />}
+                {value === 0 && <NewsList openRoom={openRoom} newsChannels={[]} />}
+                {value === 1 && <ChannelsList openRoom={openRoom} channels={channels} />}
+                {value === 2 && <DirectMessagesList openRoom={openConversation} conversations={conversations} />}
               </Box>
             </Box>
           )}
@@ -126,11 +141,11 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
 
 export const MemoizedChatSidebar = React.memo(ChatSidebar);
 
-const synchronizationChannels = (prev: (IChannels & { id: string })[], change: any) => {
+const synchronizationChannels = (prev: (any & { id: string })[], change: any) => {
   const docType = change.type;
-  const curData = change.data as IChannels & { id: string };
+  const curData = change.data as any & { id: string };
 
-  const prevIdx = prev.findIndex((m: IChannels & { id: string }) => m.id === curData.id);
+  const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
   if (docType === "added" && prevIdx === -1) {
     prev.push(curData);
   }

@@ -4,7 +4,7 @@ import { Avatar, IconButton, Paper, Stack, TextField, Typography } from "@mui/ma
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { IChannels } from "src/chatTypes";
+import { IConversation } from "src/chatTypes";
 
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -12,9 +12,9 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
   openRoom: any;
-  channels: any;
+  conversations: IConversation[];
 };
-export const DirectMessagesList = ({ openRoom, channels }: DirectMessageProps) => {
+export const DirectMessagesList = ({ openRoom, conversations }: DirectMessageProps) => {
   const [{ user }] = useAuth();
 
   const generateChannelName = (members: any) => {
@@ -79,9 +79,9 @@ export const DirectMessagesList = ({ openRoom, channels }: DirectMessageProps) =
           <CreateIcon color="primary" />
         </IconButton>
       </Box>
-      {channels.map((channel: IChannels, idx: number) => (
+      {conversations.map((conversation: IConversation, idx: number) => (
         <Paper
-          onClick={() => openRoom("direct", channel)}
+          onClick={() => openRoom("direct", conversation)}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -118,7 +118,7 @@ export const DirectMessagesList = ({ openRoom, channels }: DirectMessageProps) =
               }}
             >
               <Box sx={{ mr: "7px" }}>
-                <OverlappingAvatars members={Object.values(channel.membersInfo)} />
+                <OverlappingAvatars members={Object.values(conversation.membersInfo)} />
               </Box>
               <Box>
                 <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -129,7 +129,7 @@ export const DirectMessagesList = ({ openRoom, channels }: DirectMessageProps) =
                       lineHeight: "24px",
                     }}
                   >
-                    {generateChannelName(channel.membersInfo)}
+                    {generateChannelName(conversation.membersInfo)}
                   </Typography>
                   <Typography
                     sx={{
@@ -140,18 +140,9 @@ export const DirectMessagesList = ({ openRoom, channels }: DirectMessageProps) =
                           : theme.palette.common.gray500,
                     }}
                   >
-                    {dayjs(channel.updatedAt.toDate().getTime()).fromNow()}
+                    {dayjs(conversation.updatedAt.toDate().getTime()).fromNow()}
                   </Typography>
                 </Box>
-                <Typography
-                  sx={{
-                    fontSize: "12px",
-                    color: theme =>
-                      theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
-                  }}
-                >
-                  {channel?.tag}
-                </Typography>
               </Box>
             </Box>
           </Box>
