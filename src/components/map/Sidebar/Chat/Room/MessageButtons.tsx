@@ -10,7 +10,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type MessageButtonProps = {
   message: any;
   sx?: SxProps<Theme>;
-  setReply: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
+  setReply?: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
 };
 export const MessageButtons = ({ message, sx, setReply }: MessageButtonProps) => {
   return (
@@ -19,7 +19,8 @@ export const MessageButtons = ({ message, sx, setReply }: MessageButtonProps) =>
         display: "flex",
         alignItems: "center",
         position: "absolute",
-        background: DESIGN_SYSTEM_COLORS.notebookG700,
+        background: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
         top: "-46px",
         right: "20px",
         borderRadius: "8px",
@@ -27,9 +28,11 @@ export const MessageButtons = ({ message, sx, setReply }: MessageButtonProps) =>
         ...sx,
       }}
     >
-      <IconButton onClick={() => setReply({ id: message.id, message: message.message })}>
-        <ReplyIcon />
-      </IconButton>
+      {setReply && (
+        <IconButton onClick={() => setReply({ id: message.id, message: message.message })}>
+          <ReplyIcon />
+        </IconButton>
+      )}
       <IconButton>
         <AddReactionIcon color="secondary" />
       </IconButton>

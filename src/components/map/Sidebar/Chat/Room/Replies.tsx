@@ -1,0 +1,120 @@
+import { Typography } from "@mui/material";
+import { Box } from "@mui/system";
+import moment from "moment";
+import React from "react";
+
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { Emoticons } from "../Common/Emoticons";
+import { MessageButtons } from "./MessageButtons";
+// import { MessageButtons } from "./MessageButtons";
+type MessageLeftProps = {
+  reply: any;
+  reactionsMap: { [key: string]: string[] };
+  //   setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
+  toggleEmojiPicker: (event: any, messageId?: string) => void;
+  toggleReaction: (messageId: string, emoji: string) => void;
+  //   setReply: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
+};
+export const Replies = ({ reply, reactionsMap, toggleEmojiPicker, toggleReaction }: MessageLeftProps) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: "10px",
+        marginTop: "25px",
+      }}
+    >
+      <Box
+        sx={{
+          width: `${30}px`,
+          height: `${30}px`,
+          cursor: "pointer",
+          transition: "all 0.2s 0s ease",
+          background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+          borderRadius: "50%",
+          "& > .user-image": {
+            borderRadius: "50%",
+            overflow: "hidden",
+            width: "30px",
+            height: "30px",
+          },
+          "@keyframes slidein": {
+            from: {
+              transform: "translateY(0%)",
+            },
+            to: {
+              transform: "translateY(100%)",
+            },
+          },
+        }}
+      >
+        <Box className="user-image">
+          <OptimizedAvatar2 alt={"Haroon Waheed"} imageUrl={reply?.imageUrl} size={30} sx={{ border: "none" }} />
+        </Box>
+        <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
+      </Box>
+
+      <Box sx={{ width: "90%" }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography
+            sx={{
+              fontSize: "16px",
+              fontWeight: "500",
+              lineHeight: "24px",
+            }}
+          >
+            {reply.sender}
+          </Typography>
+          <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+            {moment(reply.createdAt.toDate().getTime()).format("MMM D, YYYY h:mm a")}
+          </Typography>
+        </Box>
+
+        <Box
+          className="reply-box"
+          sx={{
+            position: "relative",
+            fontSize: "16px",
+            fontWeight: "400",
+            lineHeight: "24px",
+            p: "10px 14px",
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: "16px",
+              fontWeight: "400",
+              lineHeight: "24px",
+            }}
+          >
+            <MarkdownRender text={reply.message || ""} />
+          </Typography>
+          <Box className="message-buttons" sx={{ display: "none" }}>
+            <MessageButtons message={reply} />
+          </Box>
+          {/* {!reactionsMap[reply.id]?.length && (
+                  <IconButton
+                    sx={{ position: "absolute", left: "0px" }}
+                    onClick={(e: any) => toggleEmojiPicker(e, reply.id)}
+                  >
+                    <AddReactionIcon color="secondary" />
+                  </IconButton>
+                )} */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
+            <Emoticons
+              messageId={reply.id}
+              reactionsMap={reactionsMap}
+              toggleEmojiPicker={toggleEmojiPicker}
+              toggleReaction={toggleReaction}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+};

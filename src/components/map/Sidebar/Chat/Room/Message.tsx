@@ -2,24 +2,24 @@ import AddIcon from "@mui/icons-material/Add";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
-import { Button, IconButton } from "@mui/material";
+import { Button, Divider, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { EmojiClickData } from "emoji-picker-react";
-import { collection, doc, getFirestore, setDoc } from "firebase/firestore";
+import { collection, doc, getFirestore, setDoc,Timestamp } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
-import { IChannelMessage } from "src/chatTypes";
-import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
+//import { IChannelMessage } from "src/chatTypes";
+//import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
-import { Reply } from "./Reply";
+//import { Reply } from "./Reply";
 // import { MessageRight } from "./MessageRight";
 // import { NodeLink } from "./NodeLink";
 import { UsersTag } from "./UsersTag";
@@ -45,7 +45,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const [reactionsMap, setReactionsMap] = useState<{ [key: string]: string[] }>({});
   const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const [reply, setReply] = useState<{ id: string | null; message: string | null }>({ id: null, message: null });
+  //const [reply, setReply] = useState<{ id: string | null; message: string | null }>({ id: null, message: null });
   const [channelUsers, setChannelUsers] = useState([]);
   const db = getFirestore();
 
@@ -55,6 +55,106 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   }>({
     messageId: null,
   });
+
+  useEffect(() => {
+    const currentDate = new Date();
+    const previousDate = new Date(currentDate);
+    previousDate.setDate(currentDate.getDate() - 1);
+    const _previosDate = new Date(currentDate);
+    _previosDate.setDate(currentDate.getDate() - 3);
+    const messages = [
+      {
+        id: "1",
+        imageUrl:
+          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
+        message: "Hey Olivia, can you please review the latest node when you can?",
+        replies: [
+          {
+            id: "5",
+            message: "Hey Olivia, can you please review the latest node when you can?",
+            sender: "1man",
+            createdAt: Timestamp.fromDate(new Date()),
+          },
+          {
+            id: "6",
+            message: "Hey Olivia, can you please review the latest node when you can?",
+            sender: "Sam",
+            createdAt: Timestamp.fromDate(new Date()),
+          },
+        ],
+        sender: "Haroon",
+        createdAt: Timestamp.fromDate(new Date()),
+      },
+      {
+        id: "2",
+        message: "Hey Olivia, can you please review the latest node when you can?",
+        sender: "You",
+        createdAt: Timestamp.fromDate(new Date()),
+      },
+      {
+        id: "3",
+        imageUrl:
+          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
+        message: "Hey Olivia, can you please review the latest node when you can?",
+        sender: "Haroon",
+        createdAt: Timestamp.fromDate(previousDate),
+      },
+      {
+        id: "4",
+        message: "Hey Olivia, can you please review the latest node when you can?",
+        sender: "You",
+        createdAt: Timestamp.fromDate(previousDate),
+      },
+      {
+        id: "5",
+        imageUrl:
+          "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
+        message: "Hey Olivia, can you please review the latest node when you can?",
+        sender: "Haroon",
+        createdAt: Timestamp.fromDate(_previosDate),
+      },
+      {
+        id: "6",
+        message: "Hey Olivia, can you please review the latest node when you can?",
+        sender: "You",
+        createdAt: Timestamp.fromDate(_previosDate),
+      },
+    ];
+    const messagesObject: { [key: string]: any } = {};
+    messages.forEach(message => {
+      const currentDate = new Date();
+      const messageDate = message.createdAt.toDate();
+      let formattedDate;
+      if (
+        messageDate.getDate() === currentDate.getDate() &&
+        messageDate.getMonth() === currentDate.getMonth() &&
+        messageDate.getFullYear() === currentDate.getFullYear()
+      ) {
+        formattedDate = "Today";
+      } else {
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1);
+
+        if (
+          messageDate.getDate() === yesterday.getDate() &&
+          messageDate.getMonth() === yesterday.getMonth() &&
+          messageDate.getFullYear() === yesterday.getFullYear()
+        ) {
+          formattedDate = "Yesterday";
+        } else {
+          const options: any = { weekday: "long", month: "long", day: "numeric" };
+          formattedDate = messageDate.toLocaleDateString("en-US", options);
+        }
+      }
+
+      if (!messagesObject[formattedDate]) {
+        messagesObject[formattedDate] = [];
+      }
+
+      messagesObject[formattedDate].push(message);
+    });
+    setMessages(messagesObject);
+  }, []);
 
   const handleEmojiClick = useCallback(
     (emojiObject: EmojiClickData) => {
@@ -122,11 +222,11 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
     [showEmojiPicker, reactionsMap]
   );
 
-  const scroll = () => {
-    if (messageBoxRef.current && messages.length > 2) {
-      messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
-    }
-  };
+  // const scroll = () => {
+  //   if (messageBoxRef.current && messages.length > 2) {
+  //     messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
+  //   }
+  // };
 
   const sendMessage = useCallback(() => {
     try {
@@ -165,18 +265,18 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
     setChannelUsers(members);
   }, [selectedChannel]);
 
-  useEffect(() => {
-    const onSynchronize = (changes: any) => {
-      setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
-      scroll();
-    };
-    const killSnapshot = getChannelMesasgesSnapshot(
-      db,
-      { channelId: selectedChannel.id /* , lastVisible: null */ },
-      onSynchronize
-    );
-    return () => killSnapshot();
-  }, [selectedChannel, db]);
+  // useEffect(() => {
+  //   const onSynchronize = (changes: any) => {
+  //     setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
+  //     scroll();
+  //   };
+  //   const killSnapshot = getChannelMesasgesSnapshot(
+  //     db,
+  //     { channelId: selectedChannel.id /* , lastVisible: null */ },
+  //     onSynchronize
+  //   );
+  //   return () => killSnapshot();
+  // }, [selectedChannel, db]);
 
   const handleKeyPress = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
@@ -193,7 +293,7 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
     <Box ref={messageBoxRef} sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
       <Box
         sx={{
-          height: roomType !== "news" ? (reply.id ? "600px" : "666px") : "777px",
+          height: roomType !== "news" ? "725px" : "777px",
         }}
       >
         <Box
@@ -206,51 +306,54 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
             pt: 3,
           }}
         >
-          {/* <Forward /> */}
-          {messages.map((message: any) => (
-            <Box key={message.id}>
-              {roomType === "news" && (
-                <NewsCard
-                  tag="1cademy"
-                  image={message.imageUrl}
-                  text={
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                  }
-                  heading="Card Test Heading"
-                />
-              )}
-              {roomType !== "news" && (
-                <MessageLeft
-                  message={message}
-                  reactionsMap={reactionsMap}
-                  setReactionsMap={setReactionsMap}
-                  toggleEmojiPicker={toggleEmojiPicker}
-                  toggleReaction={toggleReaction}
-                  setReply={setReply}
-                  membersInfo={selectedChannel.membersInfo}
-                />
-              )}
-            </Box>
-          ))}
+          {Object.keys(messages).map(message => {
+            return (
+              <>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Divider
+                    sx={{
+                      borderColor: "#f99346",
+                      width: "25%",
+                    }}
+                  />
+                  {message}
+                  <Divider
+                    sx={{
+                      borderColor: "#f99346",
+                      width: "25%",
+                    }}
+                  />
+                </Box>
+                {messages[message].map((message: any) => (
+                  <Box key={message.id}>
+                    {roomType === "news" && (
+                      <NewsCard
+                        tag="1cademy"
+                        image={message.imageUrl}
+                        text={
+                          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                        }
+                        heading="Card Test Heading"
+                      />
+                    )}
+                    {roomType !== "news" && (
+                      <MessageLeft
+                        message={message}
+                        reactionsMap={reactionsMap}
+                        setReactionsMap={setReactionsMap}
+                        toggleEmojiPicker={toggleEmojiPicker}
+                        toggleReaction={toggleReaction}
+                        membersInfo={selectedChannel.membersInfo}
+                      />
+                    )}
+                  </Box>
+                ))}
+              </>
+            );
+          })}
         </Box>
         {roomType !== "news" && (
           <Box>
-            {reply.id && (
-              <Reply
-                close={() => {
-                  setReply({ id: null, message: null });
-                }}
-                message={messages[0]}
-                sx={{
-                  marginTop: "12px",
-                  height: "50px",
-                  alignItems: "center",
-                  padding: "0px 15px",
-                  background: "transparent",
-                }}
-              />
-            )}
-
             <Box
               sx={{
                 marginTop: "12px",
@@ -271,7 +374,6 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
                     padding: "10px",
                     boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
                     border: "none",
-                    maxHeight: "50px",
                     overFlow: "hidden",
                   },
                   input: {
@@ -281,7 +383,6 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
                     width: "100%",
                     color: theme === "Dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.gray700,
                     padding: "8px",
-                    maxHeight: "50px",
                     overFlow: "auto",
                   },
                   suggestions: {
@@ -389,21 +490,21 @@ export const Message = ({ roomType, theme, selectedChannel, user }: MessageProps
   );
 };
 
-const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
-  const docType = messageChange.type;
-  const curData = messageChange.data as IChannelMessage & { id: string };
+// const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
+//   const docType = messageChange.type;
+//   const curData = messageChange.data as IChannelMessage & { id: string };
 
-  const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
-  if (docType === "added" && messageIdx === -1) {
-    prevMessages.push(curData);
-  }
-  if (docType === "modified" && messageIdx !== -1) {
-    prevMessages[messageIdx] = curData;
-  }
+//   const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
+//   if (docType === "added" && messageIdx === -1) {
+//     prevMessages.push(curData);
+//   }
+//   if (docType === "modified" && messageIdx !== -1) {
+//     prevMessages[messageIdx] = curData;
+//   }
 
-  if (curData.deleted && messageIdx !== -1) {
-    prevMessages.splice(messageIdx);
-  }
-  prevMessages.sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
-  return prevMessages;
-};
+//   if (curData.deleted && messageIdx !== -1) {
+//     prevMessages.splice(messageIdx);
+//   }
+//   prevMessages.sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
+//   return prevMessages;
+// };

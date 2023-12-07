@@ -2913,3 +2913,6 @@ right: 5px; */
   font-weight: bold;
   background-color: yellow;
 }
+.reply-box:hover > .message-buttons {
+  display: block;
+}
