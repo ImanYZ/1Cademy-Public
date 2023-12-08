@@ -10,9 +10,17 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type MessageButtonProps = {
   message: any;
   sx?: SxProps<Theme>;
-  setReply?: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
+  replyMessage?: (message: any) => void;
+  forwardMessage: (message: any) => void;
+  toggleEmojiPicker: (event: any, messageId?: string) => void;
 };
-export const MessageButtons = ({ message, sx, setReply }: MessageButtonProps) => {
+export const MessageButtons = ({
+  message,
+  sx,
+  replyMessage,
+  toggleEmojiPicker,
+  forwardMessage,
+}: MessageButtonProps) => {
   return (
     <Box
       sx={{
@@ -28,15 +36,15 @@ export const MessageButtons = ({ message, sx, setReply }: MessageButtonProps) =>
         ...sx,
       }}
     >
-      {setReply && (
-        <IconButton onClick={() => setReply({ id: message.id, message: message.message })}>
+      {replyMessage && (
+        <IconButton onClick={() => replyMessage(message)}>
           <ReplyIcon />
         </IconButton>
       )}
       <IconButton>
-        <AddReactionIcon color="secondary" />
+        <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message.id)} />
       </IconButton>
-      <IconButton>
+      <IconButton onClick={() => forwardMessage(message)}>
         <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
       </IconButton>
       <IconButton>

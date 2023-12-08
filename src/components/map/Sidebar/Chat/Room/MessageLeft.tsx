@@ -8,23 +8,29 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
+import { MessageInput } from "./MessageInput";
 import { Replies } from "./Replies";
 type MessageLeftProps = {
+  selectedMessage: any;
   message: any;
+  reply: boolean;
   reactionsMap: { [key: string]: string[] };
   setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
   toggleEmojiPicker: (event: any, messageId?: string) => void;
   toggleReaction: (messageId: string, emoji: string) => void;
-  setReply?: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
+  replyMessage: (message: any) => void;
+  forwardMessage: (message: any) => void;
   membersInfo: any;
 };
 export const MessageLeft = ({
   message,
+  reply,
   reactionsMap,
   toggleEmojiPicker,
   toggleReaction,
-
+  forwardMessage,
   membersInfo,
+  replyMessage,
 }: MessageLeftProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
@@ -41,7 +47,7 @@ export const MessageLeft = ({
       </Box>
 
       <Box sx={{ width: "90%" }}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Typography
             sx={{
               fontSize: "16px",
@@ -83,7 +89,12 @@ export const MessageLeft = ({
             </Button>
           )}
           <Box className="message-buttons" sx={{ display: "none" }}>
-            <MessageButtons message={message} />
+            <MessageButtons
+              message={message}
+              toggleEmojiPicker={toggleEmojiPicker}
+              replyMessage={replyMessage}
+              forwardMessage={forwardMessage}
+            />
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
             <Emoticons
@@ -108,8 +119,20 @@ export const MessageLeft = ({
                   reactionsMap={reactionsMap}
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
+                  forwardMessage={forwardMessage}
                 />
               ))}
+            {reply && (
+              <MessageInput
+                theme={"Dark"}
+                channelUsers={[]}
+                sendMessage={() => {}}
+                setInputValue={() => {}}
+                handleKeyPress={() => {}}
+                inputValue={""}
+                toggleEmojiPicker={toggleEmojiPicker}
+              />
+            )}
           </Box>
         )}
       </Box>

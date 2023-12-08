@@ -9,16 +9,20 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
-// import { MessageButtons } from "./MessageButtons";
 type MessageLeftProps = {
   reply: any;
   reactionsMap: { [key: string]: string[] };
-  //   setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
   toggleEmojiPicker: (event: any, messageId?: string) => void;
   toggleReaction: (messageId: string, emoji: string) => void;
-  //   setReply: React.Dispatch<React.SetStateAction<{ id: string | null; message: string | null }>>;
+  forwardMessage: (message: any) => void;
 };
-export const Replies = ({ reply, reactionsMap, toggleEmojiPicker, toggleReaction }: MessageLeftProps) => {
+export const Replies = ({
+  reply,
+  reactionsMap,
+  toggleEmojiPicker,
+  toggleReaction,
+  forwardMessage,
+}: MessageLeftProps) => {
   return (
     <Box
       sx={{
@@ -58,7 +62,7 @@ export const Replies = ({ reply, reactionsMap, toggleEmojiPicker, toggleReaction
       </Box>
 
       <Box sx={{ width: "90%" }}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Typography
             sx={{
               fontSize: "16px",
@@ -95,16 +99,9 @@ export const Replies = ({ reply, reactionsMap, toggleEmojiPicker, toggleReaction
             <MarkdownRender text={reply.message || ""} />
           </Typography>
           <Box className="message-buttons" sx={{ display: "none" }}>
-            <MessageButtons message={reply} />
+            <MessageButtons message={reply} toggleEmojiPicker={toggleEmojiPicker} forwardMessage={forwardMessage} />
           </Box>
-          {/* {!reactionsMap[reply.id]?.length && (
-                  <IconButton
-                    sx={{ position: "absolute", left: "0px" }}
-                    onClick={(e: any) => toggleEmojiPicker(e, reply.id)}
-                  >
-                    <AddReactionIcon color="secondary" />
-                  </IconButton>
-                )} */}
+
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
             <Emoticons
               messageId={reply.id}
