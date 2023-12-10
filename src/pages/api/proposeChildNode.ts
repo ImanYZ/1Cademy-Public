@@ -144,12 +144,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.body.data.nodeType === "Question") {
       newVersion.choices = req.body.data.choices;
     }
-    const { courseExist, instantApprove } = await shouldInstantApprovalForProposal(
+    const { courseExist, instantApprove, isInstructor } = await shouldInstantApprovalForProposal(
       nodeData?.tagIds || [],
       userData.uname
     );
     let parentNodeData = null;
-    if (courseExist) {
+    if (courseExist || isInstructor) {
       parentNodeData = instantApprove ? nodeData : null;
     } else {
       parentNodeData = await isVersionApproved({
