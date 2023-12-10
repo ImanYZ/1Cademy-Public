@@ -1767,35 +1767,6 @@ export const transferUserVersionsToNewNode = async ({
   return [batch, writeCounts];
 };
 
-type IVersionCreateUpdate = {
-  versionNodeId: string;
-  notebookId: string; // optional string
-  batch: any;
-  nodeId: string;
-  nodeData: any;
-  nodeRef: any;
-  nodeType: INodeType;
-  instantApprove: boolean;
-  courseExist: boolean;
-  isInstructor: boolean;
-  versionId: string;
-  versionData: any;
-  newVersion: any;
-  childType: INodeType | "";
-  voter: any;
-  correct: any;
-  wrong: any;
-  award: any;
-  addedParents: any;
-  addedChildren: any;
-  removedParents: any;
-  removedChildren: any;
-  currentTimestamp: any;
-  newUpdates: any;
-  writeCounts: any;
-  t: any;
-  tWriteOperations: any;
-};
 export const versionCreateUpdate = async ({
   versionNodeId,
   notebookId, // optional string
@@ -1826,7 +1797,7 @@ export const versionCreateUpdate = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: IVersionCreateUpdate) => {
+}: any) => {
   const {
     title,
     children,
@@ -2506,16 +2477,6 @@ export const versionCreateUpdate = async ({
   return [newBatch, writeCounts];
 };
 
-type IAddToPendingPropsNumsExcludingVoters = {
-  batch: any;
-  nodeType: INodeType;
-  versionId: string;
-  tagIds: string[];
-  value: any;
-  writeCounts: any;
-  t: any;
-  tWriteOperations: any;
-};
 export const addToPendingPropsNumsExcludingVoters = async ({
   batch,
   nodeType,
@@ -2525,7 +2486,7 @@ export const addToPendingPropsNumsExcludingVoters = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: IAddToPendingPropsNumsExcludingVoters) => {
+}: any) => {
   let newBatch = batch;
   const { userVersionsColl }: any = getTypedCollections({ nodeType: nodeType as INodeType });
   const userVersionsDocs = await convertToTGet(userVersionsColl.where("version", "==", versionId), t);
