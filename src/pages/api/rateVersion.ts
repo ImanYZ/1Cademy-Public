@@ -248,6 +248,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeType: nodeType,
         instantApprove: isApproved,
         courseExist,
+        isInstructor,
         versionId: req.body.versionId,
         versionData,
         newVersion: false,
