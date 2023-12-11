@@ -11,12 +11,12 @@ import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages
 import { UserTheme } from "src/knowledgeTypes";
 
 import { Forward } from "../List/Forward";
-//import { Reply } from "./Reply";
 // import { MessageRight } from "./MessageRight";
 // import { NodeLink } from "./NodeLink";
 import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
+import { Reply } from "./Reply";
 // import { DirectMessagesList } from "../List/Direct";
 // import { Forward } from "../List/Forward";
 
@@ -29,6 +29,8 @@ type MessageProps = {
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   toggleReaction: (messageId: IChannelMessage, emoji: string) => void;
   messageBoxRef: any;
+  setMessages: any;
+  messages: any;
 };
 
 export const Message = ({
@@ -39,18 +41,20 @@ export const Message = ({
   toggleEmojiPicker,
   toggleReaction,
   messageBoxRef,
+  setMessages,
+  messages,
 }: MessageProps) => {
-  const [messages, setMessages] = useState<any>([]);
   const [forward, setForward] = useState<boolean>(false);
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [inputValue, setInputValue] = useState<string>("");
-
-  const [reply, setReply] = useState<boolean>(false);
   const [channelUsers, setChannelUsers] = useState([]);
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [loadMore, setLoadMore] = useState<boolean>(false);
   const [messagesByDate, setMessagesByDate] = useState<any>({});
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
+  const [replyOnMessage, setReplyOnMessage] = useState<any>(null);
+  const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
+
   const db = getFirestore();
 
   useEffect(() => {
@@ -101,21 +105,51 @@ export const Message = ({
     setForward(true);
   };
 
-  const replyMessage = (message: any) => {
-    setSelectedMessage(message);
-    setReply(!reply);
-  };
-
   // const scroll = () => {
   //   if (messageBoxRef.current && messages.length > 2) {
   //     messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
   //   }
   // };
 
+  const sendReplyOnMessage = async (curMessage: IChannelMessage, inputMessage: string) => {
+    try {
+      let channelRef = doc(db, "channelMessages", curMessage?.channelId);
+      if (roomType === "direct") {
+        channelRef = doc(db, "conversationMessages", curMessage?.channelId);
+      }
+      const messageRef = doc(collection(channelRef, "messages"), curMessage.id);
+      setInputValue("");
+      setReplyOnMessage(null);
+      await updateDoc(messageRef, {
+        replies: arrayUnion({
+          messageId: curMessage.id,
+          pinned: false,
+          read_by: [],
+          edited: true,
+          message: inputMessage,
+          node: {},
+          createdAt: new Date(),
+          replies: [],
+          sender: user.uname,
+          mentions: [],
+          imageUrl: "",
+          editedAt: new Date(),
+          reactions: [],
+          channelId: selectedChannel?.id,
+        }),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const sendMessage = useCallback(
     async (isAnnouncement = false) => {
       try {
         if (!inputValue.trim()) return;
+        if (!!replyOnMessage) {
+          sendReplyOnMessage(replyOnMessage, inputValue);
+          return;
+        }
         setInputValue("");
         setLastVisible(null);
         let channelRef = doc(db, "channelMessages", selectedChannel?.id);
@@ -126,7 +160,7 @@ export const Message = ({
         const newMessage = {
           pinned: false,
           read_by: [],
-          edited: true,
+          edited: false,
           message: inputValue,
           node: {},
           createdAt: new Date(),
@@ -226,7 +260,19 @@ export const Message = ({
       });
     }, 10000);
   };
-
+  const saveMessageEdit = async (newMessage: string) => {
+    if (!editingMessage?.channelId) return;
+    let channelRef = doc(db, "channelMessages", editingMessage.channelId);
+    if (roomType === "direct") {
+      channelRef = doc(db, "conversationMessages", editingMessage.channelId);
+    }
+    const messageRef = doc(collection(channelRef, "messages"), editingMessage.id);
+    setEditingMessage(null);
+    await updateDoc(messageRef, {
+      message: newMessage,
+      edited: true,
+    });
+  };
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
       <Box
@@ -264,13 +310,18 @@ export const Message = ({
                           <MessageLeft
                             selectedMessage={selectedMessage}
                             message={message}
-                            reply={reply}
-                            handleTyping={handleTyping}
                             toggleEmojiPicker={toggleEmojiPicker}
                             toggleReaction={toggleReaction}
                             membersInfo={selectedChannel.membersInfo}
                             forwardMessage={forwardMessage}
-                            replyMessage={replyMessage}
+                            setReplyOnMessage={setReplyOnMessage}
+                            channelUsers={channelUsers}
+                            sendReplyOnMessage={sendReplyOnMessage}
+                            saveMessageEdit={saveMessageEdit}
+                            user={user}
+                            db={db}
+                            editingMessage={editingMessage}
+                            setEditingMessage={setEditingMessage}
                           />
                         )}
                       </Box>
@@ -283,6 +334,12 @@ export const Message = ({
         </Box>
         {roomType !== "news" && (
           <Box>
+            {replyOnMessage && (
+              <Reply
+                message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
+                close={() => setReplyOnMessage(null)}
+              />
+            )}
             <MessageInput
               theme={theme}
               channelUsers={channelUsers}

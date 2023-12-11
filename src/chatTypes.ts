@@ -45,6 +45,7 @@ export type IChannelMessage = {
   doc?: any;
   heading?: string;
   id?: string;
+  messageId: string; //this is is for the parent message
   channelId: string;
   quotedMessage?: QuotedMessage;
   message: string;
@@ -57,7 +58,7 @@ export type IChannelMessage = {
   read_by?: string[];
   reactions: Reaction[];
   mentions?: string[];
-  replies?: IChannelMessage[];
+  replies: IChannelMessage[];
   pinned?: boolean;
   edited?: boolean;
   editedAt?: Timestamp;

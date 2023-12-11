@@ -64,7 +64,7 @@ export const Replies = ({ reply, toggleEmojiPicker, toggleReaction, forwardMessa
               lineHeight: "24px",
             }}
           >
-            {reply.sender}
+            {reply.fullname}
           </Typography>
           <Typography sx={{ ml: "4px", fontSize: "12px" }}>
             {moment(reply.createdAt.toDate().getTime()).format("h:mm a")}
@@ -90,7 +90,12 @@ export const Replies = ({ reply, toggleEmojiPicker, toggleReaction, forwardMessa
           </Box>
 
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
-            <Emoticons message={reply} toggleEmojiPicker={toggleEmojiPicker} toggleReaction={toggleReaction} />
+            <Emoticons
+              message={reply}
+              reactionsMap={reply.reactions}
+              toggleEmojiPicker={toggleEmojiPicker}
+              toggleReaction={toggleReaction}
+            />
           </Box>
         </Box>
       </Box>

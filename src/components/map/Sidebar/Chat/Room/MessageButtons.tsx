@@ -14,6 +14,8 @@ type MessageButtonProps = {
   replyMessage?: (message: any) => void;
   forwardMessage: (message: any) => void;
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
+  setEditingMessage?: any;
+  setInputMessage?: any;
 };
 export const MessageButtons = ({
   message,
@@ -21,7 +23,17 @@ export const MessageButtons = ({
   replyMessage,
   toggleEmojiPicker,
   forwardMessage,
+  setEditingMessage,
+  setInputMessage,
 }: MessageButtonProps) => {
+  const handleForwardMessage = () => {
+    forwardMessage(message);
+  };
+
+  const handleEditMessage = () => {
+    setEditingMessage(message);
+    setInputMessage(message.message);
+  };
   return (
     <Box
       sx={{
@@ -38,17 +50,17 @@ export const MessageButtons = ({
       }}
     >
       {replyMessage && (
-        <IconButton onClick={() => replyMessage(message)}>
+        <IconButton onClick={replyMessage}>
           <ReplyIcon />
         </IconButton>
       )}
       <IconButton>
         <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
       </IconButton>
-      <IconButton onClick={() => forwardMessage(message)}>
+      <IconButton onClick={handleForwardMessage}>
         <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
       </IconButton>
-      <IconButton>
+      <IconButton onClick={handleEditMessage}>
         <EditIcon />
       </IconButton>
       <IconButton>

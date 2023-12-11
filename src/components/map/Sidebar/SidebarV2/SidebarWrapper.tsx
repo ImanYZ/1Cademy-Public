@@ -26,8 +26,8 @@ type SidebarWrapperProps = {
   sx?: SxProps<Theme>;
   sxContentWrapper?: SxProps<Theme>;
   moveBack?: any;
-  sidebarType: string | null;
-  selectedChannel: any;
+  sidebarType?: string | null;
+  selectedChannel?: any;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -62,8 +62,8 @@ export const SidebarWrapper = ({
   }, [sidebarContentRef]);
 
   const sidebarContent = useMemo(() => {
-    return <>{SidebarContent}</>;
-  }, [contentSignalState]);
+    return <Box>{SidebarContent}</Box>;
+  }, [contentSignalState, SidebarContent]);
 
   return (
     <Drawer

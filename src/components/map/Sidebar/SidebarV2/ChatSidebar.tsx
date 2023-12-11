@@ -56,6 +56,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   const [conversations, setConversations] = useState<IConversation[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const messageBoxRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<any>([]);
   const messageRef = useRef<{
     message: IChannelMessage | null;
   }>({
@@ -94,15 +95,15 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     }
     return doc(channelRef, "messages", messageId);
   };
-  const addReaction = async (messageId: string, emoji: string, channelId: string) => {
-    if (!channelId) return;
-    const mRef = getMessageRef(messageId, channelId);
+  const addReaction = async (message: IChannelMessage, emoji: string) => {
+    if (!message.id || !message.channelId || !user?.uname) return;
+    const mRef = getMessageRef(message.id, message.channelId);
     await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
   };
 
-  const removeReaction = async (messageId: string, emoji: string, channelId: string) => {
-    if (!channelId) return;
-    const mRef = getMessageRef(messageId, channelId);
+  const removeReaction = async (message: IChannelMessage, emoji: string) => {
+    if (!message.id || !message.channelId) return;
+    const mRef = getMessageRef(message.id, message.channelId);
     await updateDoc(mRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
   };
 
@@ -110,10 +111,11 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     if (!message?.id || !user?.uname || !message.channelId) return;
     const reactionIdx = message.reactions.findIndex(r => r.user === user?.uname && r.emoji === emoji);
     if (reactionIdx !== -1) {
-      removeReaction(message.id, emoji, message.channelId);
+      removeReaction(message, emoji);
     } else {
-      addReaction(message.id, emoji, message.channelId);
+      addReaction(message, emoji);
     }
+    setAnchorEl(null);
   };
   const openRoom = (type: string, channel: any) => {
     setOpenChatRoom(true);
@@ -134,7 +136,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [openChatRoom, value, roomType, showEmojiPicker]);
+  }, [openChatRoom, value, roomType, anchorEl, selectedChannel, channels, conversations, messages]);
 
   useEffect(() => {
     if (!user) return;
@@ -155,7 +157,6 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
   }, [db, user]);
-
   return (
     <SidebarWrapper
       title={""}
@@ -178,7 +179,6 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
             open={openPicker}
             anchorEl={anchorEl}
             onClose={handleCloseEmojiPicker}
-            elevation={1}
             anchorOrigin={{
               vertical: "top",
               horizontal: "left",
@@ -204,6 +204,8 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
               toggleEmojiPicker={toggleEmojiPicker}
               toggleReaction={toggleReaction}
               messageBoxRef={messageBoxRef}
+              setMessages={setMessages}
+              messages={messages}
             />
           ) : (
             <Box>

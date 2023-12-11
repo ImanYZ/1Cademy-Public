@@ -19,13 +19,14 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
       reactionsMap.reduce((acu: { [emoji: string]: string[] }, cur: Reaction) => {
         if (acu.hasOwnProperty(cur.emoji)) {
           acu[cur.emoji].push(cur.user);
-        } else {
+        } else if (cur.emoji) {
           acu[cur.emoji] = [cur.user];
         }
         return acu;
       }, {})
     );
   }, [reactionsMap]);
+  const handleAddReaction = (e: any) => toggleEmojiPicker(e, message);
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -49,8 +50,8 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
           {emoji} {reactions[emoji].length}
         </Button>
       ))}
-      {reactionsMap?.length > 0 && (
-        <IconButton onClick={(e: any) => toggleEmojiPicker(e, message)}>
+      {Object.keys(reactions)?.length > 0 && (
+        <IconButton onClick={handleAddReaction}>
           <AddReactionIcon color="secondary" />
         </IconButton>
       )}
