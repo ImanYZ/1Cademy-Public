@@ -165,6 +165,7 @@ export const NewsCard = ({
                   toggleReaction={toggleReaction}
                   forwardMessage={forwardMessage}
                   user={user}
+                  membersInfo={membersInfo}
                 />
               ))}
               <Box sx={{ ml: "37px" }}>
