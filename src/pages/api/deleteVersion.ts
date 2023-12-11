@@ -53,6 +53,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           tagIds: versionData.tagIds,
           value: -1,
           writeCounts,
+          t: null,
+          tWriteOperations: null,
         });
       }
     }

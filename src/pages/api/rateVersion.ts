@@ -127,7 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     let nodeData: INode,
       nodeRef,
       versionData: INodeVersion,
-      nodeType: string,
+      nodeType: INodeType,
       versionRef,
       correct: number,
       wrong: number,
@@ -156,7 +156,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const previouslyAccepted = versionData.accepted;
-      let childType = "childType" in versionData ? versionData.childType : false;
+      let childType: INodeType | "" = !!versionData.childType ? versionData.childType : "";
 
       for (let parent of versionData.parents) {
         if (nodeData.parents.findIndex((p: any) => p.node === parent.node) === -1) {
@@ -241,7 +241,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       //  if user already has an interaction with the version
       await versionCreateUpdate({
         versionNodeId: req.body.versionNodeId,
-        notebookId: payload.notebookId,
+        notebookId: payload.notebookId ? payload.notebookId : "",
         nodeId: req.body.nodeId,
         nodeData,
         nodeRef,
@@ -264,6 +264,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         currentTimestamp,
         newUpdates,
         writeCounts,
+        batch: null,
         t,
         tWriteOperations,
       });
@@ -354,11 +355,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         notificationData.aType = "Accept";
         // This was a pending proposal for a child/improvement that just got accepted. So, we need to decrement the number of pending proposals for all the members of this community.
         await addToPendingPropsNumsExcludingVoters({
-          nodeType: childType ? childType : nodeType,
+          nodeType: !!childType ? childType : nodeType,
           versionId: req.body.versionId,
           tagIds: versionData.tagIds,
           value: -1,
           writeCounts,
+          batch: null,
           t,
           tWriteOperations,
         });

@@ -916,7 +916,7 @@ const Node = ({
             <MarkdownRender
               text={titleCopy}
               sx={{
-                fontSize: "25px",
+                fontSize: "60px",
                 fontWeight: 500,
                 textAlign: "center",
                 textOverflow: "ellipsis",
