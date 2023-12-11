@@ -50,7 +50,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     setValue(newValue);
   };
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
-  const [roomType, setRoomType] = useState<string>("false");
+  const [roomType, setRoomType] = useState<string>("");
   const [selectedChannel, setSelectedChannel] = useState<IChannels | null>(null);
   const [channels, setChannels] = useState<IChannels[]>([]);
   const [conversations, setConversations] = useState<IConversation[]>([]);
@@ -63,6 +63,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     message: null,
   });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [forward, setForward] = useState<boolean>(false);
   const openPicker = Boolean(anchorEl);
   const db = getFirestore();
 
@@ -92,6 +93,8 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     let channelRef = doc(db, "channelMessages", channelId);
     if (roomType === "direct") {
       channelRef = doc(db, "conversationMessages", channelId);
+    } else if (roomType === "news") {
+      channelRef = doc(db, "announcementsMessages", channelId);
     }
     return doc(channelRef, "messages", messageId);
   };
@@ -121,6 +124,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     setOpenChatRoom(true);
     setRoomType(type);
     setSelectedChannel(channel);
+    setMessages([]);
   };
 
   const openConversation = (type: string, channel: any) => {
@@ -130,8 +134,12 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   };
 
   const moveBack = () => {
-    setOpenChatRoom(false);
-    setSelectedChannel(null);
+    if (forward) {
+      setForward(!forward);
+    } else {
+      setOpenChatRoom(false);
+      setSelectedChannel(null);
+    }
   };
 
   const contentSignalState = useMemo(() => {
@@ -206,6 +214,8 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
               messageBoxRef={messageBoxRef}
               setMessages={setMessages}
               messages={messages}
+              setForward={setForward}
+              forward={forward}
             />
           ) : (
             <Box>

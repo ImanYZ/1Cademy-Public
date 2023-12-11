@@ -74,6 +74,7 @@ export const MessageLeft = ({
   const handleEditMessage = () => {
     saveMessageEdit(inputMessage);
   };
+
   return (
     <Box
       sx={{
@@ -95,7 +96,7 @@ export const MessageLeft = ({
               lineHeight: "24px",
             }}
           >
-            {membersInfo[message.sender]?.fullname || "Haroon Waheed"}
+            {membersInfo[message.sender]?.fullname}
           </Typography>
           <Typography sx={{ fontSize: "12px" }}>
             {moment(message.createdAt.toDate().getTime()).format("h:mm a")}

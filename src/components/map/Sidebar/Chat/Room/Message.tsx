@@ -31,6 +31,8 @@ type MessageProps = {
   messageBoxRef: any;
   setMessages: any;
   messages: any;
+  setForward: (forward: boolean) => void;
+  forward: boolean;
 };
 
 export const Message = ({
@@ -43,8 +45,9 @@ export const Message = ({
   messageBoxRef,
   setMessages,
   messages,
+  setForward,
+  forward,
 }: MessageProps) => {
-  const [forward, setForward] = useState<boolean>(false);
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [inputValue, setInputValue] = useState<string>("");
   const [channelUsers, setChannelUsers] = useState([]);
@@ -142,49 +145,41 @@ export const Message = ({
       console.error(error);
     }
   };
-  const sendMessage = useCallback(
-    async (isAnnouncement = false) => {
-      try {
-        if (!inputValue.trim()) return;
-        if (!!replyOnMessage) {
-          sendReplyOnMessage(replyOnMessage, inputValue);
-          return;
-        }
-        setInputValue("");
-        setLastVisible(null);
-        let channelRef = doc(db, "channelMessages", selectedChannel?.id);
-        if (roomType === "direct") {
-          channelRef = doc(db, "conversationMessages", selectedChannel?.id);
-        }
-        const messageRef = doc(collection(channelRef, "messages"));
-        const newMessage = {
-          pinned: false,
-          read_by: [],
-          edited: false,
-          message: inputValue,
-          node: {},
-          createdAt: new Date(),
-          replies: [],
-          sender: user.uname,
-          mentions: [],
-          imageUrl: "",
-          editedAt: new Date(),
-          reactions: [],
-          channelId: selectedChannel?.id,
-        };
-        await setDoc(messageRef, newMessage);
-        if (isAnnouncement) {
-          let announcementRef = doc(db, "announcementsMessages", selectedChannel?.id);
-          const messageRef = doc(collection(announcementRef, "messages"));
-          await setDoc(messageRef, newMessage);
-        }
-        scrollToBottom();
-      } catch (error) {
-        console.error(error);
+  const sendMessage = useCallback(async () => {
+    try {
+      if (!inputValue.trim()) return;
+      if (!!replyOnMessage) {
+        sendReplyOnMessage(replyOnMessage, inputValue);
+        return;
       }
-    },
-    [inputValue, messages]
-  );
+      setInputValue("");
+      setLastVisible(null);
+      let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+      if (roomType === "direct") {
+        channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+      }
+      const messageRef = doc(collection(channelRef, "messages"));
+      const newMessage = {
+        pinned: false,
+        read_by: [],
+        edited: false,
+        message: inputValue,
+        node: {},
+        createdAt: new Date(),
+        replies: [],
+        sender: user.uname,
+        mentions: [],
+        imageUrl: "",
+        editedAt: new Date(),
+        reactions: [],
+        channelId: selectedChannel?.id,
+      };
+      await setDoc(messageRef, newMessage);
+      scrollToBottom();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [inputValue, messages]);
 
   useEffect(() => {
     if (!selectedChannel) return;
@@ -217,7 +212,7 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [selectedChannel, db, loadMore]);
+  }, [selectedChannel, db, loadMore, roomType]);
 
   const handleKeyPress = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
@@ -265,6 +260,8 @@ export const Message = ({
     let channelRef = doc(db, "channelMessages", editingMessage.channelId);
     if (roomType === "direct") {
       channelRef = doc(db, "conversationMessages", editingMessage.channelId);
+    } else if (roomType === "news") {
+      channelRef = doc(db, "announcementsMessages", editingMessage.channelId);
     }
     const messageRef = doc(collection(channelRef, "messages"), editingMessage.id);
     setEditingMessage(null);
@@ -305,7 +302,19 @@ export const Message = ({
                     </Box>
                     {messagesByDate[date].map((message: any) => (
                       <Box key={message.id}>
-                        {roomType === "news" && <NewsCard message={message} />}
+                        {roomType === "news" && (
+                          <NewsCard
+                            message={message}
+                            membersInfo={selectedChannel.membersInfo}
+                            toggleEmojiPicker={toggleEmojiPicker}
+                            channelUsers={channelUsers}
+                            sendReplyOnMessage={sendReplyOnMessage}
+                            toggleReaction={toggleReaction}
+                            forwardMessage={forwardMessage}
+                            editingMessage={editingMessage}
+                            setEditingMessage={setEditingMessage}
+                          />
+                        )}
                         {roomType !== "news" && (
                           <MessageLeft
                             selectedMessage={selectedMessage}
