@@ -16,9 +16,9 @@ type NewsListProps = {
 export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "9px" }}>
-      {newsChannels.map((news: any, idx: number) => (
+      {newsChannels.map((channel: any, idx: number) => (
         <Paper
-          onClick={() => openRoom("news")}
+          onClick={() => openRoom("news", channel)}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"
@@ -56,7 +56,7 @@ export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
                   lineHeight: "24px",
                 }}
               >
-                {news.title}
+                {channel.title}
               </Typography>
               <Typography
                 sx={{
@@ -65,8 +65,7 @@ export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
                     theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
                 }}
               >
-                {/* {dayjs(new Date()).format("h:mm A")} */}
-                {news.createdAt}
+                {dayjs(new Date()).format("h:mm A")}
               </Typography>
             </Box>
             <Box
@@ -93,17 +92,19 @@ export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
                       theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
                   }}
                 >
-                  {news.tag}
+                  {channel.tag}
                 </Box>
               </Box>
-              <CustomBadge
-                value={news.totalMessages}
-                sx={{
-                  height: "20px",
-                  p: "6px",
-                  fontSize: "13px",
-                }}
-              />
+              {false && (
+                <CustomBadge
+                  value={2}
+                  sx={{
+                    height: "20px",
+                    p: "6px",
+                    fontSize: "13px",
+                  }}
+                />
+              )}
             </Box>
           </Box>
         </Paper>

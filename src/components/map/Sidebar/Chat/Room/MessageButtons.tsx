@@ -5,6 +5,7 @@ import ReplyIcon from "@mui/icons-material/Reply";
 import { IconButton } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
+import { IChannelMessage } from "src/chatTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type MessageButtonProps = {
@@ -12,7 +13,7 @@ type MessageButtonProps = {
   sx?: SxProps<Theme>;
   replyMessage?: (message: any) => void;
   forwardMessage: (message: any) => void;
-  toggleEmojiPicker: (event: any, messageId?: string) => void;
+  toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
 };
 export const MessageButtons = ({
   message,
@@ -42,7 +43,7 @@ export const MessageButtons = ({
         </IconButton>
       )}
       <IconButton>
-        <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message.id)} />
+        <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
       </IconButton>
       <IconButton onClick={() => forwardMessage(message)}>
         <ReplyIcon sx={{ transform: "scaleX(-1)" }} />

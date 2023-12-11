@@ -15,9 +15,11 @@ export const getChannelsSnapshot = (
   callback: (changes: channelsChange[]) => void
 ): Unsubscribe => {
   const channelRef = collection(db, "channels");
+  console.log({ data: data.username });
   let q = query(channelRef, where("members", "array-contains", data.username));
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
+    console.log(docChanges);
 
     const channelDocuments: channelsChange[] = docChanges.map(change => {
       const document = change.doc.data() as IChannels;

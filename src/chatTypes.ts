@@ -7,9 +7,9 @@ type Node = {
   image?: string;
   video?: string;
 };
-type Reactions = {
+export type Reaction = {
   user: string;
-  icon: string;
+  emoji: string;
 };
 
 type QuotedMessage = {
@@ -43,7 +43,8 @@ type MembersInfo = {
 
 export type IChannelMessage = {
   doc?: any;
-  documentId?: string;
+  heading?: string;
+  id?: string;
   channelId: string;
   quotedMessage?: QuotedMessage;
   message: string;
@@ -54,7 +55,7 @@ export type IChannelMessage = {
   videoUrl?: string;
   sender: string;
   read_by?: string[];
-  reactions: Reactions[];
+  reactions: Reaction[];
   mentions?: string[];
   replies?: IChannelMessage[];
   pinned?: boolean;
@@ -117,7 +118,7 @@ export type IConversationMessage = {
   videoUrl?: string;
   sender: string;
   read_by?: string[];
-  reactions: Reactions[];
+  reactions: Reaction[];
   mentions?: string[];
   replies?: IConversationMessage[];
   pinned?: boolean;

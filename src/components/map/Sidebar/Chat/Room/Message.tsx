@@ -2,8 +2,8 @@ import { Divider } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, doc, getFirestore, setDoc } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
+import { arrayUnion, collection, doc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
+import React, { useCallback, useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 //import { IChannelMessage } from "src/chatTypes";
@@ -26,15 +26,9 @@ type MessageProps = {
   theme: UserTheme;
   selectedChannel: any;
   user: any;
-  reactionsMap: { [key: string]: string[] };
-  setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
-  toggleEmojiPicker: (event: any, messageId?: string) => void;
-  toggleReaction: (messageId: string, emoji: string) => void;
-  setShowEmojiPicker: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
+  toggleReaction: (messageId: IChannelMessage, emoji: string) => void;
   messageBoxRef: any;
-  messageRef: any;
-  position: { top: number; left: number };
-  setPosition: React.Dispatch<React.SetStateAction<{ top: number; left: number }>>;
 };
 
 export const Message = ({
@@ -42,8 +36,6 @@ export const Message = ({
   theme,
   selectedChannel,
   user,
-  reactionsMap,
-  setReactionsMap,
   toggleEmojiPicker,
   toggleReaction,
   messageBoxRef,
@@ -90,7 +82,7 @@ export const Message = ({
         ) {
           formattedDate = "Yesterday";
         } else {
-          const options: any = { weekday: "long", month: "long", day: "numeric" };
+          const options: any = { weekday: "short", month: "short", day: "numeric" };
           formattedDate = messageDate.toLocaleDateString("en-US", options);
         }
       }
@@ -120,37 +112,45 @@ export const Message = ({
   //   }
   // };
 
-  const sendMessage = useCallback(async () => {
-    try {
-      if (!inputValue.trim()) return;
-      let channelRef = doc(db, "channelMessages", selectedChannel?.id);
-      if (roomType === "direct") {
-        channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+  const sendMessage = useCallback(
+    async (isAnnouncement = false) => {
+      try {
+        if (!inputValue.trim()) return;
+        setInputValue("");
+        setLastVisible(null);
+        let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+        if (roomType === "direct") {
+          channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+        }
+        const messageRef = doc(collection(channelRef, "messages"));
+        const newMessage = {
+          pinned: false,
+          read_by: [],
+          edited: true,
+          message: inputValue,
+          node: {},
+          createdAt: new Date(),
+          replies: [],
+          sender: user.uname,
+          mentions: [],
+          imageUrl: "",
+          editedAt: new Date(),
+          reactions: [],
+          channelId: selectedChannel?.id,
+        };
+        await setDoc(messageRef, newMessage);
+        if (isAnnouncement) {
+          let announcementRef = doc(db, "announcementsMessages", selectedChannel?.id);
+          const messageRef = doc(collection(announcementRef, "messages"));
+          await setDoc(messageRef, newMessage);
+        }
+        scrollToBottom();
+      } catch (error) {
+        console.error(error);
       }
-      const messageRef = doc(collection(channelRef, "messages"));
-
-      await setDoc(messageRef, {
-        pinned: false,
-        read_by: [],
-        edited: true,
-        message: inputValue,
-        node: {},
-        createdAt: new Date(),
-        replies: [],
-        sender: user.uname,
-        mentions: [],
-        imageUrl: user.imageUrl,
-        editedAt: new Date(),
-        reactions: [],
-        channelId: selectedChannel?.id,
-      });
-      scrollToBottom();
-    } catch (error) {
-      console.error(error);
-    }
-
-    setInputValue("");
-  }, [inputValue, messages]);
+    },
+    [inputValue, messages]
+  );
 
   useEffect(() => {
     if (!selectedChannel) return;
@@ -170,70 +170,6 @@ export const Message = ({
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
 
-      // const currentDate = new Date();
-      // const previousDate = new Date(currentDate);
-      // previousDate.setDate(currentDate.getDate() - 1);
-      // const _previosDate = new Date(currentDate);
-      // _previosDate.setDate(currentDate.getDate() - 3);
-      // const messages = [
-      //   {
-      //     id: "1",
-      //     imageUrl:
-      //       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-      //     message: "Hey Olivia, can you please review the latest node when you can?",
-      //     replies: [
-      //       {
-      //         id: "5",
-      //         message: "Hey Olivia, can you please review the latest node when you can?",
-      //         sender: "1man",
-      //         createdAt: Timestamp.fromDate(new Date()),
-      //       },
-      //       {
-      //         id: "6",
-      //         message: "Hey Olivia, can you please review the latest node when you can?",
-      //         sender: "Sam",
-      //         createdAt: Timestamp.fromDate(new Date()),
-      //       },
-      //     ],
-      //     sender: "Haroon",
-      //     createdAt: Timestamp.fromDate(new Date()),
-      //   },
-      //   {
-      //     id: "2",
-      //     message: "Hey Olivia, can you please review the latest node when you can?",
-      //     sender: "You",
-      //     createdAt: Timestamp.fromDate(new Date()),
-      //   },
-      //   {
-      //     id: "3",
-      //     imageUrl:
-      //       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-      //     message: "Hey Olivia, can you please review the latest node when you can?",
-      //     sender: "Haroon",
-      //     createdAt: Timestamp.fromDate(previousDate),
-      //   },
-      //   {
-      //     id: "4",
-      //     message: "Hey Olivia, can you please review the latest node when you can?",
-      //     sender: "You",
-      //     createdAt: Timestamp.fromDate(previousDate),
-      //   },
-      //   {
-      //     id: "5",
-      //     imageUrl:
-      //       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FJqxTY6ZE08dudguFF0KDPqbkoZt2%2FWed%2C%2018%20Jan%202023%2022%3A14%3A06%20GMT_430x1300.jpeg?alt=media&token=9ef2b4e0-1d78-483a-ae3d-79c2007dfb31",
-      //     message: "Hey Olivia, can you please review the latest node when you can?",
-      //     sender: "Haroon",
-      //     createdAt: Timestamp.fromDate(_previosDate),
-      //   },
-      //   {
-      //     id: "6",
-      //     message: "Hey Olivia, can you please review the latest node when you can?",
-      //     sender: "You",
-      //     createdAt: Timestamp.fromDate(_previosDate),
-      //   },
-      // ];
-      // setMessages(messages);
       setTimeout(() => {
         if (firstLoad) {
           setFirstLoad(false);
@@ -253,10 +189,6 @@ export const Message = ({
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       sendMessage();
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
-      setInputValue(prevMessage => prevMessage + "\n");
     }
   };
   const scrollToBottom = () => {
@@ -281,6 +213,19 @@ export const Message = ({
       messageList.removeEventListener("scroll", handleScroll);
     };
   }, [loadMore]);
+  const handleTyping = async (e: any) => {
+    setInputValue(e.target.value);
+    const channelRef = doc(collection(db, "channels"), selectedChannel.id);
+    if (user.uname)
+      await updateDoc(channelRef, {
+        typing: arrayUnion(user.uname),
+      });
+    setTimeout(async () => {
+      await updateDoc(channelRef, {
+        typing: [],
+      });
+    }, 10000);
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
@@ -306,7 +251,7 @@ export const Message = ({
             <Box>
               {Object.keys(messagesByDate).map(date => {
                 return (
-                  <>
+                  <Box key={date}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Divider sx={{ borderColor: "#f99346", width: "30%" }} />
                       {date}
@@ -314,23 +259,13 @@ export const Message = ({
                     </Box>
                     {messagesByDate[date].map((message: any) => (
                       <Box key={message.id}>
-                        {roomType === "news" && (
-                          <NewsCard
-                            tag="1cademy"
-                            image={message.imageUrl}
-                            text={
-                              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-                            }
-                            heading="Card Test Heading"
-                          />
-                        )}
+                        {roomType === "news" && <NewsCard message={message} />}
                         {roomType !== "news" && (
                           <MessageLeft
                             selectedMessage={selectedMessage}
                             message={message}
                             reply={reply}
-                            reactionsMap={reactionsMap}
-                            setReactionsMap={setReactionsMap}
+                            handleTyping={handleTyping}
                             toggleEmojiPicker={toggleEmojiPicker}
                             toggleReaction={toggleReaction}
                             membersInfo={selectedChannel.membersInfo}
@@ -340,7 +275,7 @@ export const Message = ({
                         )}
                       </Box>
                     ))}
-                  </>
+                  </Box>
                 );
               })}
             </Box>
@@ -348,31 +283,12 @@ export const Message = ({
         </Box>
         {roomType !== "news" && (
           <Box>
-            {/* <Box
-              sx={{
-                display: showEmojiPicker ? "block" : "none",
-                position: "absolute",
-                top: position.top,
-                left: position.left,
-              }}
-            >
-              <Box sx={{ display: "flex", justifyContent: "end" }}>
-                <IconButton onClick={() => setShowEmojiPicker(false)}>
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              <DynamicMemoEmojiPicker
-                width="300px"
-                height="400px"
-                onEmojiClick={handleEmojiClick}
-                lazyLoadEmojis={true}
-              />
-            </Box> */}
             <MessageInput
               theme={theme}
               channelUsers={channelUsers}
+              placeholder="Type message here ...."
               sendMessage={sendMessage}
-              setInputValue={setInputValue}
+              handleTyping={handleTyping}
               handleKeyPress={handleKeyPress}
               inputValue={inputValue}
               toggleEmojiPicker={toggleEmojiPicker}

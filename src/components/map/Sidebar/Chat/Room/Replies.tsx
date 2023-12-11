@@ -2,6 +2,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
 import React from "react";
+import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -11,18 +12,11 @@ import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 type MessageLeftProps = {
   reply: any;
-  reactionsMap: { [key: string]: string[] };
-  toggleEmojiPicker: (event: any, messageId?: string) => void;
-  toggleReaction: (messageId: string, emoji: string) => void;
+  toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
+  toggleReaction: (message: IChannelMessage, emoji: string) => void;
   forwardMessage: (message: any) => void;
 };
-export const Replies = ({
-  reply,
-  reactionsMap,
-  toggleEmojiPicker,
-  toggleReaction,
-  forwardMessage,
-}: MessageLeftProps) => {
+export const Replies = ({ reply, toggleEmojiPicker, toggleReaction, forwardMessage }: MessageLeftProps) => {
   return (
     <Box
       sx={{
@@ -55,7 +49,7 @@ export const Replies = ({
           },
         }}
       >
-        <Box className="user-image">
+        <Box>
           <OptimizedAvatar2 alt={"Haroon Waheed"} imageUrl={reply?.imageUrl} size={30} sx={{ border: "none" }} />
         </Box>
         <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
@@ -73,7 +67,7 @@ export const Replies = ({
             {reply.sender}
           </Typography>
           <Typography sx={{ ml: "4px", fontSize: "12px" }}>
-            {moment(reply.createdAt.toDate().getTime()).format("MMM D, YYYY h:mm a")}
+            {moment(reply.createdAt.toDate().getTime()).format("h:mm a")}
           </Typography>
         </Box>
 
@@ -85,30 +79,18 @@ export const Replies = ({
             fontWeight: "400",
             lineHeight: "24px",
             p: "10px 14px",
+            borderRadius: "12px",
             background: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
           }}
         >
-          <Typography
-            sx={{
-              fontSize: "16px",
-              fontWeight: "400",
-              lineHeight: "24px",
-            }}
-          >
-            <MarkdownRender text={reply.message || ""} />
-          </Typography>
+          <MarkdownRender text={reply.message || ""} />
           <Box className="message-buttons" sx={{ display: "none" }}>
             <MessageButtons message={reply} toggleEmojiPicker={toggleEmojiPicker} forwardMessage={forwardMessage} />
           </Box>
 
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
-            <Emoticons
-              messageId={reply.id}
-              reactionsMap={reactionsMap}
-              toggleEmojiPicker={toggleEmojiPicker}
-              toggleReaction={toggleReaction}
-            />
+            <Emoticons message={reply} toggleEmojiPicker={toggleEmojiPicker} toggleReaction={toggleReaction} />
           </Box>
         </Box>
       </Box>

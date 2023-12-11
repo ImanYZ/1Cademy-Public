@@ -30,21 +30,22 @@ export const getChannelMesasgesSnapshot = (
   let channelRef = doc(db, "channelMessages", channelId);
   if (roomType === "direct") {
     channelRef = doc(db, "conversationMessages", channelId);
+  } else if (roomType === "news") {
+    channelRef = doc(db, "announcementsMessages", channelId);
   }
 
   const messageRef = collection(channelRef, "messages");
 
-  let q = query(messageRef, orderBy("createdAt", "desc"), limit(10));
+  let q = query(messageRef, orderBy("createdAt", "desc"), limit(50));
 
   if (lastVisible) {
-    q = query(messageRef, orderBy("createdAt", "desc"), startAfter(lastVisible), limit(10));
+    q = query(messageRef, orderBy("createdAt", "desc"), startAfter(lastVisible), limit(50));
   }
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 
     const actionTrackDocuments: channelMessagesChange[] = docChanges.map(change => {
       const document = change.doc.data() as IChannelMessage;
-      console.log({ documentDDSSS: document });
       return { type: change.type, data: { id: change.doc.id, ...document }, doc: change.doc };
     });
     callback(actionTrackDocuments);

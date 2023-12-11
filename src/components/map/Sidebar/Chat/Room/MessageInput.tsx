@@ -5,6 +5,7 @@ import { Button, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 import { Mention, MentionsInput } from "react-mentions";
+import { IChannelMessage } from "src/chatTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -12,20 +13,22 @@ import { UsersTag } from "./UsersTag";
 type MessageInputProps = {
   theme: string;
   inputValue: string;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  handleTyping: any;
   handleKeyPress: (event: any) => void;
   channelUsers: { id: string; display: string }[];
   sendMessage: () => void;
-  toggleEmojiPicker: (event: any, messageId?: string) => void;
+  toggleEmojiPicker: (event: any, message: IChannelMessage) => void;
+  placeholder: string;
 };
 export const MessageInput = ({
   theme,
   inputValue,
-  setInputValue,
+  handleTyping,
   handleKeyPress,
   channelUsers,
   sendMessage,
   toggleEmojiPicker,
+  placeholder,
 }: MessageInputProps) => {
   return (
     <Box
@@ -41,7 +44,7 @@ export const MessageInput = ({
       }}
     >
       <MentionsInput
-        placeholder="Type message here ...."
+        placeholder={placeholder}
         style={{
           control: {
             fontSize: 16,
@@ -74,7 +77,7 @@ export const MessageInput = ({
         }}
         value={inputValue}
         singleLine={false}
-        onChange={(e: any) => setInputValue(e.target.value)}
+        onChange={handleTyping}
         onKeyDown={handleKeyPress}
       >
         <Mention

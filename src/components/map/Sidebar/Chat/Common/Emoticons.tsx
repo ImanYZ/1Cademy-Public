@@ -1,20 +1,35 @@
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import { Button, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { IChannelMessage, Reaction } from "src/chatTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type EmoticonsProps = {
-  messageId: string;
-  reactionsMap: { [key: string]: string[] };
-  toggleEmojiPicker: (event: any, messageId?: string) => void;
-  toggleReaction: (messageId: string, emoji: string) => void;
+  message: IChannelMessage;
+  reactionsMap: Reaction[];
+  toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
+  toggleReaction: (message: IChannelMessage, emoji: string) => void;
 };
-export const Emoticons = ({ messageId, reactionsMap, toggleEmojiPicker, toggleReaction }: EmoticonsProps) => {
+export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReaction }: EmoticonsProps) => {
+  const [reactions, setReactions] = useState<any>({});
+  useEffect(() => {
+    setReactions(
+      reactionsMap.reduce((acu: { [emoji: string]: string[] }, cur: Reaction) => {
+        if (acu.hasOwnProperty(cur.emoji)) {
+          acu[cur.emoji].push(cur.user);
+        } else {
+          acu[cur.emoji] = [cur.user];
+        }
+        return acu;
+      }, {})
+    );
+  }, [reactionsMap]);
+
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
-      {reactionsMap[messageId]?.map(emoji => (
+      {Object.keys(reactions)?.map((emoji: string) => (
         <Button
           sx={{
             color: theme =>
@@ -28,14 +43,14 @@ export const Emoticons = ({ messageId, reactionsMap, toggleEmojiPicker, toggleRe
           }}
           key={emoji}
           onClick={() => {
-            toggleReaction(messageId, emoji);
+            toggleReaction(message, emoji);
           }}
         >
-          {emoji} 1
+          {emoji} {reactions[emoji].length}
         </Button>
       ))}
-      {reactionsMap[messageId]?.length > 0 && (
-        <IconButton onClick={(e: any) => toggleEmojiPicker(e, messageId)}>
+      {reactionsMap?.length > 0 && (
+        <IconButton onClick={(e: any) => toggleEmojiPicker(e, message)}>
           <AddReactionIcon color="secondary" />
         </IconButton>
       )}

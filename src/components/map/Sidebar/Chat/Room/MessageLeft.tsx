@@ -2,6 +2,7 @@ import { Avatar, Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
 import React, { useState } from "react";
+import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -14,20 +15,19 @@ type MessageLeftProps = {
   selectedMessage: any;
   message: any;
   reply: boolean;
-  reactionsMap: { [key: string]: string[] };
-  setReactionsMap: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
-  toggleEmojiPicker: (event: any, messageId?: string) => void;
-  toggleReaction: (messageId: string, emoji: string) => void;
+  toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
+  toggleReaction: (message: IChannelMessage, emoji: string) => void;
   replyMessage: (message: any) => void;
   forwardMessage: (message: any) => void;
+  handleTyping: any;
   membersInfo: any;
 };
 export const MessageLeft = ({
   message,
-  reply,
-  reactionsMap,
+  // reply,
   toggleEmojiPicker,
   toggleReaction,
+  handleTyping,
   forwardMessage,
   membersInfo,
   replyMessage,
@@ -57,7 +57,7 @@ export const MessageLeft = ({
           >
             {membersInfo[message.sender]?.fullname || "Haroon Waheed"}
           </Typography>
-          <Typography sx={{ ml: "4px", fontSize: "12px" }}>
+          <Typography sx={{ fontSize: "12px" }}>
             {moment(message.createdAt.toDate().getTime()).format("h:mm a")}
           </Typography>
         </Box>
@@ -84,8 +84,8 @@ export const MessageLeft = ({
             <MarkdownRender text={message.message || ""} />
           </Typography>
           {message?.replies?.length > 0 && (
-            <Button onClick={() => setOpenReplies(!openReplies)}>
-              {message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+            <Button onClick={() => setOpenReplies(!openReplies)} style={{ border: "none" }}>
+              {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
             </Button>
           )}
           <Box className="message-buttons" sx={{ display: "none" }}>
@@ -98,8 +98,8 @@ export const MessageLeft = ({
           </Box>
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
             <Emoticons
-              messageId={message.id}
-              reactionsMap={reactionsMap}
+              message={message}
+              reactionsMap={message.reactions}
               toggleEmojiPicker={toggleEmojiPicker}
               toggleReaction={toggleReaction}
             />
@@ -109,6 +109,7 @@ export const MessageLeft = ({
           <Box
             sx={{
               transition: "ease-in",
+              ml: "25px",
             }}
           >
             {message.replies.length > 0 &&
@@ -116,23 +117,23 @@ export const MessageLeft = ({
                 <Replies
                   key={idx}
                   reply={reply}
-                  reactionsMap={reactionsMap}
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   forwardMessage={forwardMessage}
                 />
               ))}
-            {reply && (
+            <Box sx={{ ml: "37px" }}>
               <MessageInput
                 theme={"Dark"}
+                placeholder={"Type your reply..."}
                 channelUsers={[]}
                 sendMessage={() => {}}
-                setInputValue={() => {}}
+                handleTyping={handleTyping}
                 handleKeyPress={() => {}}
                 inputValue={""}
                 toggleEmojiPicker={toggleEmojiPicker}
               />
-            )}
+            </Box>
           </Box>
         )}
       </Box>
