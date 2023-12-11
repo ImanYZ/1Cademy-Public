@@ -1,4 +1,4 @@
-import { Avatar, Button, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
 import moment from "moment";
@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
@@ -83,8 +84,37 @@ export const MessageLeft = ({
         pb: 3,
       }}
     >
-      <Box sx={{ pt: 1 }}>
-        <Avatar src={membersInfo[message.sender]?.imageUrl} />
+      <Box
+        sx={{
+          width: `${40}px`,
+          height: `${40}px`,
+          cursor: "pointer",
+          transition: "all 0.2s 0s ease",
+          background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+          borderRadius: "50%",
+          "& > .user-image": {
+            borderRadius: "50%",
+            overflow: "hidden",
+            width: "30px",
+            height: "30px",
+          },
+          "@keyframes slidein": {
+            from: {
+              transform: "translateY(0%)",
+            },
+            to: {
+              transform: "translateY(100%)",
+            },
+          },
+        }}
+      >
+        <OptimizedAvatar2
+          alt={membersInfo[message.sender].fullname}
+          imageUrl={membersInfo[message.sender].imageUrl}
+          size={40}
+          sx={{ border: "none" }}
+        />
+        <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
       </Box>
 
       <Box sx={{ width: "90%" }}>
@@ -167,6 +197,7 @@ export const MessageLeft = ({
                   reactionsMap={message.reactions}
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
+                  user={user}
                 />
               </Box>
             </>
@@ -187,6 +218,7 @@ export const MessageLeft = ({
                 toggleReaction={toggleReaction}
                 forwardMessage={forwardMessage}
                 membersInfo={membersInfo}
+                user={user}
               />
             ))}
             <Box sx={{ ml: "37px" }}>

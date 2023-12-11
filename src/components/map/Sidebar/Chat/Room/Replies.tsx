@@ -16,6 +16,7 @@ type MessageLeftProps = {
   toggleReaction: (message: IChannelMessage, emoji: string) => void;
   forwardMessage: (message: any) => void;
   membersInfo: any;
+  user: any;
 };
 export const Replies = ({
   reply,
@@ -23,6 +24,7 @@ export const Replies = ({
   toggleReaction,
   forwardMessage,
   membersInfo,
+  user,
 }: MessageLeftProps) => {
   return (
     <Box
@@ -107,6 +109,7 @@ export const Replies = ({
               reactionsMap={reply.reactions}
               toggleEmojiPicker={toggleEmojiPicker}
               toggleReaction={toggleReaction}
+              user={user}
             />
           </Box>
         </Box>

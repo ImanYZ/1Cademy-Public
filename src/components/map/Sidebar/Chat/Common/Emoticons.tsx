@@ -11,8 +11,9 @@ type EmoticonsProps = {
   reactionsMap: Reaction[];
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   toggleReaction: (message: IChannelMessage, emoji: string) => void;
+  user: any;
 };
-export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReaction }: EmoticonsProps) => {
+export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReaction, user }: EmoticonsProps) => {
   const [reactions, setReactions] = useState<any>({});
   useEffect(() => {
     setReactions(
@@ -27,7 +28,6 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
     );
   }, [reactionsMap]);
   const handleAddReaction = (e: any) => toggleEmojiPicker(e, message);
-
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
       {Object.keys(reactions)?.map((emoji: string) => (
@@ -39,8 +39,10 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
             minWidth: "0",
             padding: "0px 10px",
             borderRadius: "12px",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+            background: reactions[emoji].includes(user?.uname)
+              ? DESIGN_SYSTEM_COLORS.orange400
+              : theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
           }}
           key={emoji}
           onClick={() => {

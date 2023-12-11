@@ -22,6 +22,7 @@ type NewsCardProps = {
   forwardMessage: any;
   editingMessage: any;
   setEditingMessage: any;
+  user: any;
 };
 export const NewsCard = ({
   message,
@@ -33,6 +34,7 @@ export const NewsCard = ({
   forwardMessage,
   editingMessage,
   setEditingMessage,
+  user,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -143,6 +145,7 @@ export const NewsCard = ({
                   reactionsMap={message.reactions}
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
+                  user={user}
                 />
               </Box>
             </>
@@ -161,6 +164,7 @@ export const NewsCard = ({
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   forwardMessage={forwardMessage}
+                  user={user}
                 />
               ))}
               <Box sx={{ ml: "37px" }}>

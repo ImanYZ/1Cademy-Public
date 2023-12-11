@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -270,6 +270,7 @@ export const Message = ({
       edited: true,
     });
   };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
       <Box
@@ -283,7 +284,6 @@ export const Message = ({
           sx={{
             height: "100%",
             overflow: "auto",
-            borderBottom: "solid 1px grey",
             paddingTop: roomType === "news" ? "20px" : undefined,
             pt: 3,
           }}
@@ -295,10 +295,19 @@ export const Message = ({
               {Object.keys(messagesByDate).map(date => {
                 return (
                   <Box key={date}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Divider sx={{ borderColor: "#f99346", width: "30%" }} />
-                      {date}
-                      <Divider sx={{ borderColor: "#f99346", width: "30%" }} />
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <Paper
+                        sx={{
+                          alignItems: "center",
+                          borderRadius: "15px",
+                          padding: "10px",
+                          fontSize: "12px",
+                          p: 1,
+                          backgroundColor: "grey",
+                        }}
+                      >
+                        {date}
+                      </Paper>
                     </Box>
                     {messagesByDate[date].map((message: any) => (
                       <Box key={message.id}>
@@ -313,6 +322,7 @@ export const Message = ({
                             forwardMessage={forwardMessage}
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
+                            user={user}
                           />
                         )}
                         {roomType !== "news" && (

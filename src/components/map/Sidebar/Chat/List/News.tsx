@@ -2,10 +2,8 @@ import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import NextImage from "next/image";
 import React from "react";
 
-import TagIcon from "../../../../../../public/tag.svg";
 import { CustomBadge } from "../../../CustomBudge";
 
 dayjs.extend(relativeTime);
@@ -48,25 +46,47 @@ export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
                 justifyContent: "space-between",
               }}
             >
-              <Typography
+              <Box
                 sx={{
-                  width: "50%",
-                  fontSize: "16px",
-                  fontWeight: "500",
-                  lineHeight: "24px",
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "200px",
+                  background: "linear-gradient(to right, #FDC830, #F37335)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                {channel.title}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  color: theme =>
-                    theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
-                }}
-              >
-                {dayjs(new Date()).format("h:mm A")}
-              </Typography>
+                {channel.title
+                  .split(" ")
+                  .slice(0, 2)
+                  .map((word: string) => word[0])
+                  .join(" ")}
+              </Box>
+              <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography
+                  sx={{
+                    width: "50%",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    lineHeight: "24px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {channel.title}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "12px",
+                    ml: "auto",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+                  }}
+                >
+                  {dayjs(new Date()).format("h:mm A")}
+                </Typography>
+              </Box>
             </Box>
             <Box
               sx={{
@@ -83,7 +103,6 @@ export const NewsList = ({ openRoom, newsChannels }: NewsListProps) => {
                   justifyContent: "space-between",
                 }}
               >
-                <NextImage width={"20px"} src={TagIcon} alt="tag icon" />
                 <Box
                   sx={{
                     fontSize: "12px",
