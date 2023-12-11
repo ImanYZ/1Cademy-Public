@@ -54,7 +54,7 @@ export const Message = ({
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [loadMore, setLoadMore] = useState<boolean>(false);
   const [messagesByDate, setMessagesByDate] = useState<any>({});
-  const [firstLoad, setFirstLoad] = useState<boolean>(true);
+  // const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [replyOnMessage, setReplyOnMessage] = useState<any>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
 
@@ -199,12 +199,12 @@ export const Message = ({
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
 
-      setTimeout(() => {
-        if (firstLoad) {
-          setFirstLoad(false);
-          scrollToBottom();
-        }
-      }, 500);
+      // setTimeout(() => {
+      //   if (firstLoad) {
+      //     setFirstLoad(false);
+      //     scrollToBottom();
+      //   }
+      // }, 500);
     };
     const killSnapshot = getChannelMesasgesSnapshot(
       db,
@@ -212,7 +212,7 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [selectedChannel, db, loadMore, roomType]);
+  }, [db]);
 
   const handleKeyPress = (event: any) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {

@@ -15,8 +15,15 @@ type MessageLeftProps = {
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   toggleReaction: (message: IChannelMessage, emoji: string) => void;
   forwardMessage: (message: any) => void;
+  membersInfo: any;
 };
-export const Replies = ({ reply, toggleEmojiPicker, toggleReaction, forwardMessage }: MessageLeftProps) => {
+export const Replies = ({
+  reply,
+  toggleEmojiPicker,
+  toggleReaction,
+  forwardMessage,
+  membersInfo,
+}: MessageLeftProps) => {
   return (
     <Box
       sx={{
@@ -50,7 +57,12 @@ export const Replies = ({ reply, toggleEmojiPicker, toggleReaction, forwardMessa
         }}
       >
         <Box>
-          <OptimizedAvatar2 alt={"Haroon Waheed"} imageUrl={reply?.imageUrl} size={30} sx={{ border: "none" }} />
+          <OptimizedAvatar2
+            alt={reply.fullname}
+            imageUrl={membersInfo[reply?.sender].imageUrl}
+            size={30}
+            sx={{ border: "none" }}
+          />
         </Box>
         <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
       </Box>

@@ -186,6 +186,7 @@ export const MessageLeft = ({
                 toggleEmojiPicker={toggleEmojiPicker}
                 toggleReaction={toggleReaction}
                 forwardMessage={forwardMessage}
+                membersInfo={membersInfo}
               />
             ))}
             <Box sx={{ ml: "37px" }}>
