@@ -4905,9 +4905,6 @@ const Notebook = ({}: NotebookProps) => {
               delete changedNodes[nodeBookState.selectedNode];
             }
 
-            oldNodes[nodeBookState.selectedNode].title = proposalsTemp[proposalIdx].title;
-            oldNodes[nodeBookState.selectedNode].content = proposalsTemp[proposalIdx].content;
-
             if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
               const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
               if (previewNode) {
@@ -4916,6 +4913,9 @@ const Notebook = ({}: NotebookProps) => {
               if (tempNodes.has(newNodeId)) {
                 tempNodes.delete(newNodeId);
               }
+            } else {
+              oldNodes[nodeBookState.selectedNode].title = proposalsTemp[proposalIdx].title;
+              oldNodes[nodeBookState.selectedNode].content = proposalsTemp[proposalIdx].content;
             }
             setOpenSidebar(null);
           }

@@ -606,7 +606,7 @@ const NodeFooter = ({
                             }}
                           >
                             <DoneIcon sx={{ fontSize: "18px", color: markedCorrect ? "#00E676" : "inherit" }} />
-                            <span style={{ marginLeft: "2px" }}>{shortenNumber(correctNum, 2, false)}</span>
+                            <Box sx={{ pr: "7px" }}>{shortenNumber(correctNum, 2, false)}</Box>
                           </Box>
                         </Button>
                       </span>
@@ -660,6 +660,8 @@ const NodeFooter = ({
                               display: "flex",
                               fontSize: "14px",
                               alignItems: "center",
+                              pl: 1,
+                              pr: 1,
                             }}
                           >
                             <CloseIcon
@@ -668,7 +670,7 @@ const NodeFooter = ({
                                 color: markedWrong ? "red" : "inherit",
                               }}
                             />
-                            <span style={{ marginLeft: "2px" }}>{shortenNumber(wrongNum, 2, false)}</span>
+                            <Box>{shortenNumber(wrongNum, 2, false)}</Box>
                           </Box>
                         </Button>
                       </span>
