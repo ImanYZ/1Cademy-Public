@@ -423,7 +423,7 @@ const Ontology = ({
   };
 
   const deleteCategory = async (type: string, category: string) => {
-    if (await confirmIt("Are you sure you want to delete this Category?")) {
+    if (await confirmIt("Are you sure you want to delete this Category?", "Delete Category", "Keep Category")) {
       const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
       if (ontologyDoc.exists()) {
         const ontologyData = ontologyDoc.data();
@@ -531,7 +531,7 @@ const Ontology = ({
   const deleteSubOntologyEditable = async () => {
     try {
       console.info("deleteSubOntologyEditable");
-      if (await confirmIt("Are you sure you want to delete?")) {
+      if (await confirmIt("Are you sure you want to delete the Ontology?", "Delete Ontology", "Keep Ontology")) {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
           const ontologyData = ontologyDoc.data();

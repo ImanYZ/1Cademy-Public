@@ -473,7 +473,7 @@ export const ToolbarSidebar = ({
     try {
       if (!editableNotebook) return;
 
-      if (!(await confirmIt("Are you sure to delete notebook"))) return;
+      if (!(await confirmIt("Are you sure to delete notebook", "Delete Notebook", "Keep Notebook"))) return;
       setNotebooks(prevNotebooks => {
         const newNotebooks = prevNotebooks.filter(cur => cur.id !== editableNotebook.id);
         onChangeNotebook(newNotebooks[0]?.id ?? "");

@@ -254,7 +254,7 @@ const Tutor = () => {
         setPlayingAudio(messageId);
       }
     } catch (error: any) {
-      confirmIt("There appears to be an issue with sending the request to 1Tutor. Please try again.", false);
+      confirmIt("There appears to be an issue with sending the request to 1Tutor. Please try again.", "Ok", "");
       console.error(error);
       setWaitingForResponse(false);
     }
@@ -422,7 +422,8 @@ const Tutor = () => {
             } else {
               confirmIt(
                 "I didn't catch what you said; please ensure that you've granted microphone permissions.",
-                false
+                "Ok",
+                ""
               );
             }
           }
@@ -435,7 +436,7 @@ const Tutor = () => {
       .catch(error => {
         console.error("Error accessing microphone:", error);
         setWatingWhisper(false);
-        confirmIt("I didn't catch what you said; please ensure that you've granted microphone permissions.", false);
+        confirmIt("I didn't catch what you said; please ensure that you've granted microphone permissions.", "Ok", "");
       });
   };
 
@@ -518,7 +519,13 @@ const Tutor = () => {
 
   const deleteBook = async (defaultBook: boolean) => {
     try {
-      if (await confirmIt(`Are you sure you want to delete this ${defaultBook ? "Conversation" : "Book"} ?`)) {
+      if (
+        await confirmIt(
+          `Are you sure you want to delete this ${defaultBook ? "Conversation" : "Book"} ?`,
+          `Delete ${defaultBook ? "Conversation" : "Book"}`,
+          `Keep ${defaultBook ? "Conversation" : "Book"}`
+        )
+      ) {
         const remainThreads = threads.filter((t: any) => t.id !== bookId);
         if (!defaultBook) {
           if (remainThreads.length) {

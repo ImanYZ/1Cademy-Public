@@ -731,7 +731,7 @@ const CIOntology = () => {
         setUpdateComment("");
         return;
       }
-      if (await confirmIt("Are you sure you want to delete the comment?")) {
+      if (await confirmIt("Are you sure you want to delete the comment?", "Delete Comment", "Keep Comment")) {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         const ontologyData = ontologyDoc.data();
         let comments = ontologyData?.comments || [];
