@@ -2,7 +2,7 @@ import AddReactionIcon from "@mui/icons-material/AddReaction";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ReplyIcon from "@mui/icons-material/Reply";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
 import { IChannelMessage } from "src/chatTypes";
@@ -54,26 +54,36 @@ export const MessageButtons = ({
         ...sx,
       }}
     >
-      {replyMessage && (
-        <IconButton onClick={replyMessage}>
-          <ReplyIcon />
-        </IconButton>
+      {replyMessage && !message.parentMessage && (
+        <Tooltip title={"reply"}>
+          <IconButton onClick={replyMessage}>
+            <ReplyIcon />
+          </IconButton>
+        </Tooltip>
       )}
-      <IconButton>
-        <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
-      </IconButton>
-      <IconButton onClick={handleForwardMessage}>
-        <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
-      </IconButton>
-      {isSender && (
-        <IconButton onClick={handleEditMessage}>
-          <EditIcon />
+      <Tooltip title={"react"}>
+        <IconButton>
+          <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
         </IconButton>
+      </Tooltip>
+      <Tooltip title={"forward"}>
+        <IconButton onClick={handleForwardMessage}>
+          <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
+        </IconButton>
+      </Tooltip>
+      {isSender && (
+        <Tooltip title={"edit"}>
+          <IconButton onClick={handleEditMessage}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
       )}
       {handleDeleteMessage && isSender && (
-        <IconButton onClick={handleDeleteMessage}>
-          <DeleteIcon />
-        </IconButton>
+        <Tooltip title={"delete"}>
+          <IconButton onClick={handleDeleteMessage}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
       )}
     </Box>
   );

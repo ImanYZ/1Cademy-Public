@@ -6,19 +6,16 @@ import { arrayUnion, collection, doc, getFirestore, setDoc, updateDoc } from "fi
 import React, { useCallback, useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
-//import { IChannelMessage } from "src/chatTypes";
-//import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { newId } from "@/lib/utils/newFirestoreId";
+
 import { Forward } from "../List/Forward";
-// import { MessageRight } from "./MessageRight";
-// import { NodeLink } from "./NodeLink";
 import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
 import { Reply } from "./Reply";
-// import { DirectMessagesList } from "../List/Direct";
-// import { Forward } from "../List/Forward";
+// import { NodeLink } from "./NodeLink";
 
 dayjs.extend(relativeTime);
 type MessageProps = {
@@ -33,6 +30,7 @@ type MessageProps = {
   messages: any;
   setForward: (forward: boolean) => void;
   forward: boolean;
+  getMessageRef: any;
 };
 
 export const Message = ({
@@ -47,6 +45,7 @@ export const Message = ({
   messages,
   setForward,
   forward,
+  getMessageRef,
 }: MessageProps) => {
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [inputValue, setInputValue] = useState<string>("");
@@ -116,19 +115,16 @@ export const Message = ({
 
   const sendReplyOnMessage = async (curMessage: IChannelMessage, inputMessage: string) => {
     try {
-      let channelRef = doc(db, "channelMessages", curMessage?.channelId);
-      if (roomType === "direct") {
-        channelRef = doc(db, "conversationMessages", curMessage?.channelId);
-      }
-      const messageRef = doc(collection(channelRef, "messages"), curMessage.id);
+      const messageRef = getMessageRef(curMessage.id, curMessage?.channelId);
       setInputValue("");
       setReplyOnMessage(null);
       await updateDoc(messageRef, {
         replies: arrayUnion({
-          messageId: curMessage.id,
+          id: newId(db),
+          parentMessage: curMessage.id,
           pinned: false,
           read_by: [],
-          edited: true,
+          edited: false,
           message: inputMessage,
           node: {},
           createdAt: new Date(),
@@ -257,18 +253,29 @@ export const Message = ({
   };
   const saveMessageEdit = async (newMessage: string) => {
     if (!editingMessage?.channelId) return;
-    let channelRef = doc(db, "channelMessages", editingMessage.channelId);
-    if (roomType === "direct") {
-      channelRef = doc(db, "conversationMessages", editingMessage.channelId);
-    } else if (roomType === "news") {
-      channelRef = doc(db, "announcementsMessages", editingMessage.channelId);
+    if (editingMessage.parentMessage) {
+      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+      parentMessage.replies[replyIdx] = {
+        ...parentMessage.replies[replyIdx],
+        message: newMessage,
+        edited: true,
+        editedAt: new Date(),
+      };
+      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+      await updateDoc(messageRef, {
+        replies: parentMessage.replies,
+      });
+    } else {
+      const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
+
+      await updateDoc(messageRef, {
+        message: newMessage,
+        edited: true,
+        editedAt: new Date(),
+      });
     }
-    const messageRef = doc(collection(channelRef, "messages"), editingMessage.id);
     setEditingMessage(null);
-    await updateDoc(messageRef, {
-      message: newMessage,
-      edited: true,
-    });
   };
 
   return (
@@ -318,6 +325,7 @@ export const Message = ({
                             toggleEmojiPicker={toggleEmojiPicker}
                             channelUsers={channelUsers}
                             sendReplyOnMessage={sendReplyOnMessage}
+                            setReplyOnMessage={setReplyOnMessage}
                             toggleReaction={toggleReaction}
                             forwardMessage={forwardMessage}
                             editingMessage={editingMessage}
@@ -352,26 +360,26 @@ export const Message = ({
             </Box>
           )}
         </Box>
-        {roomType !== "news" && (
-          <Box>
-            {replyOnMessage && (
-              <Reply
-                message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
-                close={() => setReplyOnMessage(null)}
-              />
-            )}
-            <MessageInput
-              theme={theme}
-              channelUsers={channelUsers}
-              placeholder="Type message here ...."
-              sendMessage={sendMessage}
-              handleTyping={handleTyping}
-              handleKeyPress={handleKeyPress}
-              inputValue={inputValue}
-              toggleEmojiPicker={toggleEmojiPicker}
+
+        <Box>
+          {replyOnMessage && (
+            <Reply
+              message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
+              close={() => setReplyOnMessage(null)}
             />
-          </Box>
-        )}
+          )}
+          <MessageInput
+            theme={theme}
+            channelUsers={channelUsers}
+            placeholder="Type message here ...."
+            sendMessage={sendMessage}
+            handleTyping={handleTyping}
+            handleKeyPress={handleKeyPress}
+            inputValue={inputValue}
+            toggleEmojiPicker={toggleEmojiPicker}
+            roomType={roomType}
+          />
+        </Box>
       </Box>
     </Box>
   );

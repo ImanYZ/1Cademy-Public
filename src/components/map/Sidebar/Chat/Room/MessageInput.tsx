@@ -1,9 +1,7 @@
-import AddIcon from "@mui/icons-material/Add";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import { Button, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
@@ -21,6 +19,7 @@ type MessageInputProps = {
   placeholder: string;
   editingMessage?: IChannelMessage;
   setEditingMessage?: any;
+  roomType?: string;
 };
 export const MessageInput = ({
   theme,
@@ -33,7 +32,8 @@ export const MessageInput = ({
   placeholder,
   editingMessage,
   setEditingMessage,
-}: MessageInputProps) => {
+}: // roomType,
+MessageInputProps) => {
   const cancel = () => {
     setEditingMessage(null);
   };
@@ -107,9 +107,6 @@ export const MessageInput = ({
       >
         {!editingMessage && (
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <IconButton>
-              <AddIcon />
-            </IconButton>
             <IconButton>
               <CollectionsIcon />
             </IconButton>
