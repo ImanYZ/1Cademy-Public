@@ -517,7 +517,7 @@ const UserSettigsSidebar = ({
     const setDefaultTag = async () => {
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         if (notebookOwner !== user.uname)
-          return confirmIt("You cannot modify this tag. Please ask the notebook's owner for permission.", false);
+          return confirmIt("You cannot modify this tag. Please ask the notebook's owner for permission.", "Ok", "");
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
         notebookRef.current.choosingNode = null;
         notebookRef.current.chosenNode = null;
@@ -849,7 +849,7 @@ const UserSettigsSidebar = ({
   };
 
   const removeAllNodes = useCallback(async () => {
-    if (await confirmIt("Are you sure to hide all the nodes")) {
+    if (await confirmIt("Are you sure to hide all the nodes", "Hide", "Cancel")) {
       const batch = writeBatch(db);
       const userNodesCol = collection(db, "userNodes");
       const q = query(
