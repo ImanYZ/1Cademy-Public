@@ -1,3 +1,5 @@
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
@@ -7,12 +9,12 @@ import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
-import { Replies } from "./Replies";
 type MessageLeftProps = {
   selectedMessage: any;
   message: any;
@@ -28,8 +30,10 @@ type MessageLeftProps = {
   editingMessage: any;
   setEditingMessage: any;
   saveMessageEdit?: any;
+  roomType: string;
 };
 export const MessageLeft = ({
+  selectedMessage,
   message,
   toggleEmojiPicker,
   toggleReaction,
@@ -43,7 +47,9 @@ export const MessageLeft = ({
   editingMessage,
   setEditingMessage,
   saveMessageEdit,
+  roomType,
 }: MessageLeftProps) => {
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
   const [inputMessage, setInputMessage] = useState("");
@@ -75,19 +81,50 @@ export const MessageLeft = ({
   const handleEditMessage = () => {
     saveMessageEdit(inputMessage);
   };
-
+  const handleDeleteMessage = async () => {
+    if (
+      await confirmIt(
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: "10px",
+          }}
+        >
+          <DeleteForeverIcon />
+          <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this message?</Typography>
+          <Typography>Deleting a message will permanently remove it from this chat.</Typography>
+        </Box>,
+        "Delete Message",
+        "Keep Message"
+      )
+    ) {
+      let channelRef = doc(db, "channelMessages", message?.channelId);
+      if (roomType === "direct") {
+        channelRef = doc(db, "conversationMessages", message?.channelId);
+      }
+      const messageRef = doc(collection(channelRef, "messages"), message.id);
+      await updateDoc(messageRef, {
+        deleted: true,
+      });
+    }
+  };
   return (
     <Box
       sx={{
         display: "flex",
         gap: "5px",
-        pb: 3,
+        // pb: 3,
+        pt: 2,
       }}
     >
       <Box
         sx={{
-          width: `${40}px`,
-          height: `${40}px`,
+          width: `${!message.parentMessage ? 40 : 30}px`,
+          height: `${!message.parentMessage ? 40 : 30}px`,
           cursor: "pointer",
           transition: "all 0.2s 0s ease",
           background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
@@ -111,7 +148,7 @@ export const MessageLeft = ({
         <OptimizedAvatar2
           alt={membersInfo[message.sender].fullname}
           imageUrl={membersInfo[message.sender].imageUrl}
-          size={40}
+          size={!message.parentMessage ? 40 : 30}
           sx={{ border: "none" }}
         />
         <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
@@ -119,15 +156,25 @@ export const MessageLeft = ({
 
       <Box sx={{ width: "90%" }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography
-            sx={{
-              fontSize: "16px",
-              fontWeight: "500",
-              lineHeight: "24px",
-            }}
-          >
-            {membersInfo[message.sender]?.fullname}
-          </Typography>
+          <Box sx={{ display: "flex" }}>
+            <Typography
+              sx={{
+                fontSize: "16px",
+                fontWeight: "500",
+                lineHeight: "24px",
+              }}
+            >
+              {membersInfo[message.sender]?.fullname}
+            </Typography>
+            {message.important && (
+              <Box sx={{ display: "flex", ml: 2 }}>
+                {" "}
+                <Typography sx={{ fontWeight: "bold", color: "red" }}>IMPORTANT</Typography>
+                <PriorityHighIcon sx={{ color: "red", p: 0 }} />
+              </Box>
+            )}
+          </Box>
+
           <Typography sx={{ fontSize: "12px" }}>
             {moment(message.createdAt.toDate().getTime()).format("h:mm a")}
           </Typography>
@@ -189,6 +236,8 @@ export const MessageLeft = ({
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
                   setInputMessage={setInputMessage}
+                  handleDeleteMessage={handleDeleteMessage}
+                  user={user}
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -211,17 +260,26 @@ export const MessageLeft = ({
             }}
           >
             {(message.replies || []).map((reply: any, idx: number) => (
-              <Replies
+              <MessageLeft
                 key={idx}
-                reply={{ ...reply, fullname: membersInfo[reply.sender].fullname }}
+                selectedMessage={selectedMessage}
+                message={reply}
                 toggleEmojiPicker={toggleEmojiPicker}
                 toggleReaction={toggleReaction}
                 forwardMessage={forwardMessage}
                 membersInfo={membersInfo}
                 user={user}
+                setReplyOnMessage={setReplyOnMessage}
+                channelUsers={channelUsers}
+                sendReplyOnMessage={sendReplyOnMessage}
+                saveMessageEdit={saveMessageEdit}
+                db={db}
+                editingMessage={editingMessage}
+                setEditingMessage={setEditingMessage}
+                roomType={roomType}
               />
             ))}
-            <Box sx={{ ml: "37px" }}>
+            <Box sx={{ ml: "37px", mt: 0 }}>
               <MessageInput
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
@@ -236,6 +294,7 @@ export const MessageLeft = ({
           </Box>
         )}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };

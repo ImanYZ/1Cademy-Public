@@ -3052,11 +3052,16 @@ const Notebook = ({}: NotebookProps) => {
           if (node?.children.length > 0) {
             confirmIt(
               "To be able to delete this node, you should first delete its children or move them under other parent node.",
-              false
+              "Ok",
+              ""
             );
             deleteOK = false;
           } else {
-            deleteOK = await confirmIt("You are going to permanently delete this node by downvoting it. Are you sure?");
+            deleteOK = await confirmIt(
+              "You are going to permanently delete this node by downvoting it. Are you sure?",
+              "Delete Node",
+              "Keep Node"
+            );
           }
         }
 
@@ -3514,7 +3519,11 @@ const Notebook = ({}: NotebookProps) => {
         ["Concept", "Relation", "Question", "News"].includes(currentNode.nodeType) &&
         currentNode.references.length === 0
       ) {
-        referencesOK = await confirmIt("You are proposing a node without any reference. Are you sure?");
+        referencesOK = await confirmIt(
+          "You are proposing a node without any reference. Are you sure?",
+          "Yes",
+          "cancel"
+        );
       }
       return referencesOK;
     },
@@ -3607,7 +3616,7 @@ const Notebook = ({}: NotebookProps) => {
             if (isTheSame) {
               onFail();
               setTimeout(() => {
-                confirmIt("You've not changed anything yet!", false);
+                confirmIt("You've not changed anything yet!", "Ok", "");
               });
               return graph;
             }
@@ -3903,7 +3912,11 @@ const Notebook = ({}: NotebookProps) => {
           ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
-          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+          referencesOK = await confirmIt(
+            "You are proposing a node without citing any reference. Are you sure?",
+            "Yes",
+            "Cancel"
+          );
         }
         if (!referencesOK) {
           return;
@@ -3934,7 +3947,7 @@ const Notebook = ({}: NotebookProps) => {
 
           if (newNode.tags.length == 0) {
             setTimeout(() => {
-              confirmIt("Please add relevant tag(s) to your proposed node.", false);
+              confirmIt("Please add relevant tag(s) to your proposed node.", "Ok", "");
             });
             return graph;
           }
@@ -4086,7 +4099,11 @@ const Notebook = ({}: NotebookProps) => {
           ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
-          referencesOK = await confirmIt("You are proposing a node without citing any reference. Are you sure?");
+          referencesOK = await confirmIt(
+            "You are proposing a node without citing any reference. Are you sure?",
+            "Yes",
+            "Cancel"
+          );
         }
         if (!referencesOK) {
           return;
@@ -4120,7 +4137,7 @@ const Notebook = ({}: NotebookProps) => {
           if (newNode.tags.length == 0) {
             setTimeout(() => {
               setTimeout(() => {
-                confirmIt("Please add relevant tag(s) to your proposed node.", false);
+                confirmIt("Please add relevant tag(s) to your proposed node.", "Ok", "");
               });
             });
             return graph;
@@ -4722,20 +4739,26 @@ const Notebook = ({}: NotebookProps) => {
         event.preventDefault();
         const image = event.target.files[0];
         if (!image && !image?.type) {
-          confirmIt("Oops! Something went wrong with the image upload. Please try uploading a different image.", false);
+          confirmIt(
+            "Oops! Something went wrong with the image upload. Please try uploading a different image.",
+            "Ok",
+            ""
+          );
         } else if (
           image.type !== "image/jpg" &&
           image.type !== "image/jpeg" &&
           image.type !== "image/gif" &&
           image.type !== "image/png"
         ) {
-          confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", false);
+          confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", "Ok", "");
         } else {
           let userName = await promptIt(
-            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
+            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
+            "Save",
+            ""
           );
           if (userName != `${user?.fName} ${user?.lName}`) {
-            confirmIt("Entered full name is not correct", false);
+            confirmIt("Entered full name is not correct", "Ok", "");
             return;
           }
           setIsSubmitting(true);
@@ -4766,7 +4789,8 @@ const Notebook = ({}: NotebookProps) => {
               setIsUploading(false);
               confirmIt(
                 "There is an error with uploading your image. Please upload it again! If the problem persists, please try another image.",
-                false
+                "Ok",
+                ""
               );
             },
             async function complete() {
@@ -4891,7 +4915,7 @@ const Notebook = ({}: NotebookProps) => {
         setRatingProposale(false);
 
         if (willBeApproved) {
-          const res = await confirmIt("Are you sure you want to approve this proposal?");
+          const res = await confirmIt("Are you sure you want to approve this proposal?", "Yes", "Cancel");
           if (!res) return;
         }
 

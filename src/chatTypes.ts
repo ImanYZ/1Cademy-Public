@@ -45,7 +45,7 @@ export type IChannelMessage = {
   doc?: any;
   heading?: string;
   id?: string;
-  messageId: string; //this is is for the parent message
+  parentMessage: string; //this is is for the parent message
   channelId: string;
   quotedMessage?: QuotedMessage;
   message: string;
@@ -65,6 +65,7 @@ export type IChannelMessage = {
   createdAt: Timestamp;
   updatedAt?: Timestamp;
   deleted: boolean;
+  important: boolean;
 };
 
 export type IAnnouncement = {

@@ -1,3 +1,4 @@
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Avatar, Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
@@ -23,6 +24,7 @@ type NewsCardProps = {
   editingMessage: any;
   setEditingMessage: any;
   user: any;
+  setReplyOnMessage: any;
 };
 export const NewsCard = ({
   message,
@@ -35,6 +37,7 @@ export const NewsCard = ({
   editingMessage,
   setEditingMessage,
   user,
+  setReplyOnMessage,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -47,12 +50,16 @@ export const NewsCard = ({
   const handleTyping = async (e: any) => {
     setInputMessage(e.target.value);
   };
+  const handleReplyOnMessage = () => {
+    setReplyOnMessage(message);
+  };
   return (
     <Box
       sx={{
         display: "flex",
         gap: "5px",
-        pb: 3,
+        // pb: 3,
+        mt: 2,
       }}
     >
       <Box sx={{ pt: 1 }}>
@@ -61,15 +68,25 @@ export const NewsCard = ({
 
       <Box sx={{ width: "90%" }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography
-            sx={{
-              fontSize: "16px",
-              fontWeight: "500",
-              lineHeight: "24px",
-            }}
-          >
-            {membersInfo[message.sender]?.fullname}
-          </Typography>
+          <Box sx={{ display: "flex" }}>
+            <Typography
+              sx={{
+                fontSize: "16px",
+                fontWeight: "500",
+                lineHeight: "24px",
+              }}
+            >
+              {membersInfo[message.sender]?.fullname}
+            </Typography>
+            {message.important && (
+              <Box sx={{ display: "flex", ml: 2 }}>
+                {" "}
+                <Typography sx={{ fontWeight: "bold", color: "red" }}>IMPORTANT</Typography>
+                <PriorityHighIcon sx={{ color: "red", p: 0 }} />
+              </Box>
+            )}
+          </Box>
+
           <Typography sx={{ fontSize: "12px" }}>
             {moment(message.createdAt.toDate().getTime()).format("h:mm a")}
           </Typography>
@@ -122,21 +139,18 @@ export const NewsCard = ({
               alt="news image"
             />
           )}
-          {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
-            <Button onClick={handleOpenReplies} style={{ border: "none" }}>
-              {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
-            </Button>
-          )}
+
           {editingMessage?.id !== message.id && (
             <>
               <Box className="message-buttons" sx={{ display: "none" }}>
                 <MessageButtons
                   message={message}
                   toggleEmojiPicker={toggleEmojiPicker}
-                  replyMessage={() => {}}
+                  replyMessage={handleReplyOnMessage}
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
                   setInputMessage={setInputMessage}
+                  user={user}
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -150,39 +164,46 @@ export const NewsCard = ({
               </Box>
             </>
           )}
-          {openReplies && (
-            <Box
-              sx={{
-                transition: "ease-in",
-                ml: "25px",
-              }}
-            >
-              {(message.replies || []).map((reply: any, idx: number) => (
-                <Replies
-                  key={idx}
-                  reply={{ ...reply, fullname: membersInfo[reply.sender].fullname }}
-                  toggleEmojiPicker={toggleEmojiPicker}
-                  toggleReaction={toggleReaction}
-                  forwardMessage={forwardMessage}
-                  user={user}
-                  membersInfo={membersInfo}
-                />
-              ))}
-              <Box sx={{ ml: "37px" }}>
-                <MessageInput
-                  theme={"Dark"}
-                  placeholder={"Type your reply..."}
-                  channelUsers={channelUsers}
-                  sendMessage={handleSendReply}
-                  handleTyping={handleTyping}
-                  handleKeyPress={() => {}}
-                  inputValue={inputMessage}
-                  toggleEmojiPicker={toggleEmojiPicker}
-                />
-              </Box>
-            </Box>
+          {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
+            <Button onClick={handleOpenReplies} style={{ border: "none" }}>
+              {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+            </Button>
           )}
         </Box>
+
+        {openReplies && (
+          <Box
+            sx={{
+              transition: "ease-in",
+              ml: "25px",
+            }}
+          >
+            {(message.replies || []).map((reply: any, idx: number) => (
+              <Replies
+                key={idx}
+                reply={{ ...reply, fullname: membersInfo[reply.sender].fullname }}
+                toggleEmojiPicker={toggleEmojiPicker}
+                toggleReaction={toggleReaction}
+                forwardMessage={forwardMessage}
+                user={user}
+                membersInfo={membersInfo}
+              />
+            ))}
+
+            <Box sx={{ ml: "37px" }}>
+              <MessageInput
+                theme={"Dark"}
+                placeholder={"Type your reply..."}
+                channelUsers={channelUsers}
+                sendMessage={handleSendReply}
+                handleTyping={handleTyping}
+                handleKeyPress={() => {}}
+                inputValue={inputMessage}
+                toggleEmojiPicker={toggleEmojiPicker}
+              />
+            </Box>
+          </Box>
+        )}
       </Box>
     </Box>
   );

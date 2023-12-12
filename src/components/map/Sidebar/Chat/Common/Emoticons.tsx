@@ -39,10 +39,9 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
             minWidth: "0",
             padding: "0px 10px",
             borderRadius: "12px",
-            background: reactions[emoji].includes(user?.uname)
-              ? DESIGN_SYSTEM_COLORS.orange400
-              : theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+            border: reactions[emoji].includes(user?.uname) ? "1px solid orange" : "",
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
           }}
           key={emoji}
           onClick={() => {

@@ -2,7 +2,7 @@ import AddReactionIcon from "@mui/icons-material/AddReaction";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ReplyIcon from "@mui/icons-material/Reply";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
 import { IChannelMessage } from "src/chatTypes";
@@ -16,6 +16,8 @@ type MessageButtonProps = {
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   setEditingMessage?: any;
   setInputMessage?: any;
+  handleDeleteMessage?: any;
+  user: any;
 };
 export const MessageButtons = ({
   message,
@@ -25,7 +27,10 @@ export const MessageButtons = ({
   forwardMessage,
   setEditingMessage,
   setInputMessage,
+  handleDeleteMessage,
+  user,
 }: MessageButtonProps) => {
+  const isSender = user.uname === message.sender;
   const handleForwardMessage = () => {
     forwardMessage(message);
   };
@@ -49,23 +54,37 @@ export const MessageButtons = ({
         ...sx,
       }}
     >
-      {replyMessage && (
-        <IconButton onClick={replyMessage}>
-          <ReplyIcon />
-        </IconButton>
+      {replyMessage && !message.parentMessage && (
+        <Tooltip title={"reply"}>
+          <IconButton onClick={replyMessage}>
+            <ReplyIcon />
+          </IconButton>
+        </Tooltip>
       )}
-      <IconButton>
-        <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
-      </IconButton>
-      <IconButton onClick={handleForwardMessage}>
-        <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
-      </IconButton>
-      <IconButton onClick={handleEditMessage}>
-        <EditIcon />
-      </IconButton>
-      <IconButton>
-        <DeleteIcon />
-      </IconButton>
+      <Tooltip title={"react"}>
+        <IconButton>
+          <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={"forward"}>
+        <IconButton onClick={handleForwardMessage}>
+          <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
+        </IconButton>
+      </Tooltip>
+      {isSender && (
+        <Tooltip title={"edit"}>
+          <IconButton onClick={handleEditMessage}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {handleDeleteMessage && isSender && (
+        <Tooltip title={"delete"}>
+          <IconButton onClick={handleDeleteMessage}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 };
