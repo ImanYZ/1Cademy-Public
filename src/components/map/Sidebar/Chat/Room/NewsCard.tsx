@@ -137,6 +137,7 @@ export const NewsCard = ({
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
                   setInputMessage={setInputMessage}
+                  user={user}
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>

@@ -100,7 +100,12 @@ export const Replies = ({
         >
           <MarkdownRender text={reply.message || ""} />
           <Box className="message-buttons" sx={{ display: "none" }}>
-            <MessageButtons message={reply} toggleEmojiPicker={toggleEmojiPicker} forwardMessage={forwardMessage} />
+            <MessageButtons
+              message={reply}
+              toggleEmojiPicker={toggleEmojiPicker}
+              forwardMessage={forwardMessage}
+              user={user}
+            />
           </Box>
 
           <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>

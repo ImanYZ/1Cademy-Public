@@ -341,6 +341,7 @@ export const Message = ({
                             db={db}
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
+                            roomType={roomType}
                           />
                         )}
                       </Box>
@@ -381,10 +382,10 @@ const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string }
   const curData = messageChange.data as IChannelMessage & { id: string };
 
   const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
-  if (docType === "added" && messageIdx === -1) {
+  if (docType === "added" && messageIdx === -1 && !curData.deleted) {
     prevMessages.push({ ...curData, doc: messageChange.doc });
   }
-  if (docType === "modified" && messageIdx !== -1) {
+  if (docType === "modified" && messageIdx !== -1 && !curData.deleted) {
     prevMessages[messageIdx] = { ...curData, doc: messageChange.doc };
   }
 

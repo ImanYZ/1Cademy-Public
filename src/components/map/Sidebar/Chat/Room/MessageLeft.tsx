@@ -1,3 +1,4 @@
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
@@ -7,6 +8,7 @@ import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
@@ -28,6 +30,7 @@ type MessageLeftProps = {
   editingMessage: any;
   setEditingMessage: any;
   saveMessageEdit?: any;
+  roomType: string;
 };
 export const MessageLeft = ({
   message,
@@ -43,7 +46,9 @@ export const MessageLeft = ({
   editingMessage,
   setEditingMessage,
   saveMessageEdit,
+  roomType,
 }: MessageLeftProps) => {
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
   const [inputMessage, setInputMessage] = useState("");
@@ -75,7 +80,37 @@ export const MessageLeft = ({
   const handleEditMessage = () => {
     saveMessageEdit(inputMessage);
   };
-
+  const handleDeleteMessage = async () => {
+    if (
+      await confirmIt(
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: "10px",
+          }}
+        >
+          <DeleteForeverIcon />
+          <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this message?</Typography>
+          <Typography>Deleting a message will permanently remove it from this chat.</Typography>
+        </Box>,
+        "Delete Message",
+        "Keep Message"
+      )
+    ) {
+      let channelRef = doc(db, "channelMessages", message?.channelId);
+      if (roomType === "direct") {
+        channelRef = doc(db, "conversationMessages", message?.channelId);
+      }
+      const messageRef = doc(collection(channelRef, "messages"), message.id);
+      await updateDoc(messageRef, {
+        deleted: true,
+      });
+    }
+  };
   return (
     <Box
       sx={{
@@ -189,6 +224,8 @@ export const MessageLeft = ({
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
                   setInputMessage={setInputMessage}
+                  handleDeleteMessage={handleDeleteMessage}
+                  user={user}
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -236,6 +273,7 @@ export const MessageLeft = ({
           </Box>
         )}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };

@@ -16,6 +16,8 @@ type MessageButtonProps = {
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   setEditingMessage?: any;
   setInputMessage?: any;
+  handleDeleteMessage?: any;
+  user: any;
 };
 export const MessageButtons = ({
   message,
@@ -25,7 +27,10 @@ export const MessageButtons = ({
   forwardMessage,
   setEditingMessage,
   setInputMessage,
+  handleDeleteMessage,
+  user,
 }: MessageButtonProps) => {
+  const isSender = user.uname === message.sender;
   const handleForwardMessage = () => {
     forwardMessage(message);
   };
@@ -60,12 +65,16 @@ export const MessageButtons = ({
       <IconButton onClick={handleForwardMessage}>
         <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
       </IconButton>
-      <IconButton onClick={handleEditMessage}>
-        <EditIcon />
-      </IconButton>
-      <IconButton>
-        <DeleteIcon />
-      </IconButton>
+      {isSender && (
+        <IconButton onClick={handleEditMessage}>
+          <EditIcon />
+        </IconButton>
+      )}
+      {handleDeleteMessage && isSender && (
+        <IconButton onClick={handleDeleteMessage}>
+          <DeleteIcon />
+        </IconButton>
+      )}
     </Box>
   );
 };

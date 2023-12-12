@@ -62,8 +62,8 @@ export const SidebarWrapper = ({
   }, [sidebarContentRef]);
 
   const sidebarContent = useMemo(() => {
-    return <Box>{SidebarContent}</Box>;
-  }, [contentSignalState, SidebarContent]);
+    return <>{SidebarContent}</>;
+  }, [contentSignalState]);
 
   return (
     <Drawer
