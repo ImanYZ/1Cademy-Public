@@ -51,19 +51,25 @@ const ProfileAvatar = ({ id, userId, userImage, setUserImage, name, lastName }: 
 
         const image = event.target.files[0];
         if (!image || !image?.type) {
-          confirmIt("Oops! Something went wrong with the image upload. Please try uploading a different image.", false);
+          confirmIt(
+            "Oops! Something went wrong with the image upload. Please try uploading a different image.",
+            "Ok",
+            ""
+          );
           setImageUrlError("There is an error with the image, try to upload other one");
         } else if (image.type !== "image/jpg" && image.type !== "image/jpeg" && image.type !== "image/png") {
-          confirmIt("We only accept JPG, JPEG, or PNG images. Please upload another image.", false);
+          confirmIt("We only accept JPG, JPEG, or PNG images. Please upload another image.", "Ok", "");
           setImageUrlError("We only accept JPG, JPEG, or PNG images. Please upload another image.");
         } else if (image.size > 1024 * 1024) {
           setImageUrlError("We only accept file sizes less than 1MB for profile images. Please upload another image.");
         } else {
           let fullName = await promptIt(
-            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws."
+            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
+            "Save",
+            ""
           );
           if (fullName !== `${name} ${lastName}`) {
-            confirmIt("Entered full name is not correct", false);
+            confirmIt("Entered full name is not correct", "Ok", "");
             return;
           }
           setIsUploading(true);

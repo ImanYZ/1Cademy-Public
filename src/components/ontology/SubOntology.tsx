@@ -52,7 +52,7 @@ const SubOntology = ({
   };
   const deleteSubOntologyEditable = async () => {
     try {
-      if (await confirmIt("Are you sure you want to delete?")) {
+      if (await confirmIt("Are you sure you want to delete?", "Delete", "Keep")) {
         const ontologyDoc = await getDoc(doc(collection(db, "ontology"), openOntology.id));
         if (ontologyDoc.exists()) {
           const ontologyData = ontologyDoc.data();
