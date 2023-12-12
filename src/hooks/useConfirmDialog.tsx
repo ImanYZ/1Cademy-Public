@@ -1,19 +1,23 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, TextField } from "@mui/material";
 import React, { useCallback, useState } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 const useDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [isPrompt, setIsPrompt] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const resolveRef = React.useRef<any>(null);
-  const [confirmation, setConfirmation] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
+  const [cancel, setCancel] = useState("");
 
-  const showDialog = useCallback((message: string, prompt = false, confirmation = false) => {
+  const showDialog = useCallback((message: string, prompt = false, confirmation: string, cancel: string) => {
     setDialogMessage(message);
     setIsOpen(true);
     setIsPrompt(prompt);
     setConfirmation(confirmation);
+    setCancel(cancel);
 
     return new Promise(resolve => {
       resolveRef.current = resolve;
@@ -61,22 +65,29 @@ const useDialog = () => {
           />
         )}
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "center" }}>
-        <Button onClick={() => closeDialog(true)} color="primary">
-          {isPrompt || !confirmation ? "OK" : "Yes"}
+      <DialogActions sx={{ justifyContent: "center", mb: "5px" }}>
+        <Button
+          onClick={() => closeDialog(true)}
+          variant="contained"
+          sx={{ borderRadius: "26px", backgroundColor: DESIGN_SYSTEM_COLORS.primary800 }}
+        >
+          {confirmation}
         </Button>
-        {!isPrompt && confirmation && (
-          <Button onClick={() => closeDialog(false)} color="primary">
-            Cancel
+        {!isPrompt && cancel && (
+          <Button onClick={() => closeDialog(false)} color="primary" variant="outlined" sx={{ borderRadius: "26px" }}>
+            {cancel}
           </Button>
         )}
       </DialogActions>
     </Dialog>
   );
 
-  const promptIt = useCallback((message: string) => showDialog(message, true), [showDialog]);
+  const promptIt = useCallback(
+    (message: string, confirmation: string, cancel: string) => showDialog(message, true, confirmation, cancel),
+    [showDialog]
+  );
   const confirmIt = useCallback(
-    (message: string, confirmation = true) => showDialog(message, false, confirmation),
+    (message: any, confirmation: string, cancel: string) => showDialog(message, false, confirmation, cancel),
     [showDialog]
   );
 
