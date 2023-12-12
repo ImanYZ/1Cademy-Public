@@ -85,20 +85,21 @@ export const SidebarNodeLink = ({
             {dayjs(changedAt).fromNow()}
           </Typography>
         </Stack>
-        {linkMessage !== "" && (
-          <Button
-            onClick={onClick}
-            variant="contained"
-            sx={{
-              minWidth: "30px",
-              height: "30px",
-              borderRadius: "16px",
-              backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-            }}
-          >
-            {linkMessage}
-          </Button>
-        )}
+        {!linkMessage ||
+          (linkMessage !== "" && (
+            <Button
+              onClick={onClick}
+              variant="contained"
+              sx={{
+                minWidth: "30px",
+                height: "30px",
+                borderRadius: "16px",
+                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+              }}
+            >
+              {linkMessage}
+            </Button>
+          ))}
       </Stack>
     </Stack>
   );
