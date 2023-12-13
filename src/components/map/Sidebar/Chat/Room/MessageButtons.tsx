@@ -24,16 +24,16 @@ export const MessageButtons = ({
   sx,
   replyMessage,
   toggleEmojiPicker,
-  forwardMessage,
+  // forwardMessage,
   setEditingMessage,
   setInputMessage,
   handleDeleteMessage,
   user,
 }: MessageButtonProps) => {
   const isSender = user.uname === message.sender;
-  const handleForwardMessage = () => {
-    forwardMessage(message);
-  };
+  // const handleForwardMessage = () => {
+  //   forwardMessage(message);
+  // };
 
   const handleEditMessage = () => {
     setEditingMessage(message);
@@ -66,11 +66,11 @@ export const MessageButtons = ({
           <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
         </IconButton>
       </Tooltip>
-      <Tooltip title={"forward"}>
+      {/* <Tooltip title={"forward"}>
         <IconButton onClick={handleForwardMessage}>
           <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
         </IconButton>
-      </Tooltip>
+      </Tooltip> */}
       {isSender && (
         <Tooltip title={"edit"}>
           <IconButton onClick={handleEditMessage}>

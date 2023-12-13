@@ -2,8 +2,9 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
+import { collection, doc, updateDoc } from "firebase/firestore";
 import moment from "moment";
+import NextImage from "next/image";
 import React, { useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
@@ -17,14 +18,14 @@ import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
 type MessageLeftProps = {
   selectedMessage: any;
-  message: any;
+  message: IChannelMessage;
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   toggleReaction: (message: IChannelMessage, emoji: string) => void;
   forwardMessage: (message: any) => void;
   membersInfo: any;
   setReplyOnMessage: any;
   channelUsers: any;
-  sendReplyOnMessage: (message: IChannelMessage, inputMessage: string) => void;
+  sendReplyOnMessage: (message: IChannelMessage, inputMessage: string, imageUrls: string[], important: boolean) => void;
   user: any;
   db: any;
   editingMessage: any;
@@ -58,23 +59,23 @@ export const MessageLeft = ({
     setReplyOnMessage(message);
   };
 
-  const handleSendReply = () => {
-    if (!inputMessage) return;
-    sendReplyOnMessage(message, inputMessage);
+  const handleSendReply = (imageUrls: string[], important = false) => {
+    if (!inputMessage || !imageUrls.length) return;
+    sendReplyOnMessage(message, inputMessage, imageUrls, important);
     setInputMessage("");
   };
   const handleTyping = async (e: any) => {
     setInputMessage(e.target.value);
-    const channelRef = doc(collection(db, "channels"), message.channelId);
-    if (user.uname)
-      await updateDoc(channelRef, {
-        typing: arrayUnion(user.uname),
-      });
-    setTimeout(async () => {
-      await updateDoc(channelRef, {
-        typing: [],
-      });
-    }, 10000);
+    // const channelRef = doc(collection(db, "channels"), message.channelId);
+    // if (user.uname)
+    //   await updateDoc(channelRef, {
+    //     typing: arrayUnion(user.uname),
+    //   });
+    // setTimeout(async () => {
+    //   await updateDoc(channelRef, {
+    //     typing: [],
+    //   });
+    // }, 10000);
   };
 
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -112,6 +113,7 @@ export const MessageLeft = ({
       });
     }
   };
+
   return (
     <Box
       sx={{
@@ -201,7 +203,6 @@ export const MessageLeft = ({
                 channelUsers={channelUsers}
                 sendMessage={handleEditMessage}
                 handleTyping={handleTyping}
-                handleKeyPress={() => {}}
                 inputValue={inputMessage}
                 toggleEmojiPicker={toggleEmojiPicker}
                 editingMessage={editingMessage}
@@ -209,17 +210,28 @@ export const MessageLeft = ({
               />
             </Box>
           ) : (
-            <Typography
+            <Box
               sx={{
                 fontSize: "16px",
                 fontWeight: "400",
                 lineHeight: "24px",
-                display: "flex",
               }}
             >
               <MarkdownRender text={message.message || ""} />
-              <Typography sx={{ color: "grey", ml: 1 }}>{message.edited ? "(edited)" : ""}</Typography>
-            </Typography>
+              <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
+              <Box sx={{ pt: 1, display: "flex" }}>
+                {(message.imageUrls || []).map(imageUrl => (
+                  <NextImage
+                    width={"200px"}
+                    height={"200px"}
+                    style={{ borderRadius: "8px" }}
+                    src={imageUrl}
+                    alt="news image"
+                    key={imageUrl}
+                  />
+                ))}
+              </Box>
+            </Box>
           )}
           {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
             <Button onClick={handleOpenReplies} style={{ border: "none" }}>
@@ -286,7 +298,6 @@ export const MessageLeft = ({
                 channelUsers={channelUsers}
                 sendMessage={handleSendReply}
                 handleTyping={handleTyping}
-                handleKeyPress={() => {}}
                 inputValue={inputMessage}
                 toggleEmojiPicker={toggleEmojiPicker}
               />

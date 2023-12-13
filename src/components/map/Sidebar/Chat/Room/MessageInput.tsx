@@ -1,20 +1,25 @@
-import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
-import { Button, IconButton } from "@mui/material";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
+import { Button, IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
+import { getStorage } from "firebase/storage";
+import NextImage from "next/image";
+import { useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
+import { useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
 type MessageInputProps = {
   theme: string;
   inputValue: string;
   handleTyping: any;
-  handleKeyPress: (event: any) => void;
   channelUsers: { id: string; display: string }[];
-  sendMessage: () => void;
+  sendMessage: (imageUrl: string[], important: boolean) => void;
   toggleEmojiPicker: (event: any, message: IChannelMessage) => void;
   placeholder: string;
   editingMessage?: IChannelMessage;
@@ -25,7 +30,6 @@ export const MessageInput = ({
   theme,
   inputValue,
   handleTyping,
-  handleKeyPress,
   channelUsers,
   sendMessage,
   // toggleEmojiPicker,
@@ -34,9 +38,43 @@ export const MessageInput = ({
   setEditingMessage,
 }: // roomType,
 MessageInputProps) => {
+  const storage = getStorage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [important, setImportant] = useState(false);
+
   const cancel = () => {
     setEditingMessage(null);
   };
+
+  const handleKeyPress = (event: any) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      handleSendMessage();
+    }
+  };
+  const uploadImageClicked = () => {
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = "";
+    fileInputRef.current.click();
+  };
+  const onUploadImage = (event: any) => {
+    let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+    if (isValidHttpUrl(bucket)) {
+      const { hostname } = new URL(bucket);
+      bucket = hostname;
+    }
+    const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
+    let imageFileName = new Date().toUTCString();
+    uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
+  };
+  const handleSendMessage = () => {
+    sendMessage(imageUrls, important);
+    setImageUrls([]);
+    setImportant(false);
+  };
+
   return (
     <Box
       sx={{
@@ -75,7 +113,7 @@ MessageInputProps) => {
               padding: "2px",
               fontSize: 16,
               position: "absolute",
-              top: "-175px",
+              top: "-120px",
               left: "-16px",
               maxHeight: "150px",
               overflowY: "auto",
@@ -96,6 +134,44 @@ MessageInputProps) => {
           renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
         />
       </MentionsInput>
+      <Box sx={{ display: "flex" }}>
+        {imageUrls.map(imageUrl => (
+          <Box
+            key={imageUrl}
+            sx={{
+              display: "flex",
+              p: 1,
+              position: "relative",
+              "&:hover .close-icon": {
+                opacity: 1,
+              },
+            }}
+          >
+            <Tooltip title={"Remove Image"} placement="top">
+              <CloseIcon
+                className="close-icon"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  zIndex: 1,
+                  cursor: "pointer",
+                  borderRadius: "50%",
+                  opacity: 0,
+                  transition: "opacity 0.3s",
+                  backgroundColor: "grey",
+                  height: "20px",
+                  width: "20px",
+                }}
+                onClick={() => setImageUrls((prev: string[]) => prev.filter(image => image !== imageUrl))}
+              />
+            </Tooltip>
+
+            <NextImage width={"90px"} height={"90px"} style={{ borderRadius: "8px" }} src={imageUrl} alt="" />
+          </Box>
+        ))}
+      </Box>
+
       <Box
         sx={{
           width: "100%",
@@ -105,20 +181,29 @@ MessageInputProps) => {
           justifyContent: "space-between",
         }}
       >
+        <input type="file" ref={fileInputRef} onChange={onUploadImage} hidden />
         {!editingMessage && (
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <IconButton>
-              <CollectionsIcon />
-            </IconButton>
-            <IconButton>
-              <AttachFileIcon />
-            </IconButton>
+            {isUploading ? (
+              <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
+            ) : (
+              <Tooltip title={"Upload Image"}>
+                <IconButton onClick={uploadImageClicked}>
+                  <CollectionsIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
+              <IconButton onClick={() => setImportant(prev => !prev)}>
+                <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
         {!editingMessage ? (
           <Button
             variant="contained"
-            onClick={sendMessage}
+            onClick={handleSendMessage}
             sx={{
               minWidth: "0px",
               width: "36px",
@@ -163,7 +248,7 @@ MessageInputProps) => {
             </Button>
             <Button
               variant="contained"
-              onClick={sendMessage}
+              onClick={handleSendMessage}
               sx={{
                 minWidth: "0px",
                 width: "80px",

@@ -8,6 +8,8 @@ import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import React, { ReactNode, useCallback, useMemo, useRef } from "react";
 
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+
 type SidebarWrapperProps = {
   id?: string;
   title: string;
@@ -31,6 +33,8 @@ type SidebarWrapperProps = {
   selectedChannel?: any;
   setDisplayTagSearcher?: any;
   openChatInfoPage?: any;
+  onlineUsers?: any;
+  user?: any;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -58,6 +62,8 @@ export const SidebarWrapper = ({
   selectedChannel = null,
   setDisplayTagSearcher,
   openChatInfoPage,
+  onlineUsers,
+  user,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -70,6 +76,45 @@ export const SidebarWrapper = ({
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
+  const AvatarUser = ({ members }: any) => {
+    const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
+    const userInfo = members[otherUser];
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+        <Box
+          sx={{
+            width: `30px`,
+            height: `30px`,
+            cursor: "pointer",
+            transition: "all 0.2s 0s ease",
+            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+            borderRadius: "50%",
+            "& > .user-image": {
+              borderRadius: "50%",
+              overflow: "hidden",
+              width: "30px",
+              height: "30px",
+            },
+            "@keyframes slidein": {
+              from: {
+                transform: "translateY(0%)",
+              },
+              to: {
+                transform: "translateY(100%)",
+              },
+            },
+          }}
+        >
+          <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={30} sx={{ border: "none" }} />
+          <Box
+            sx={{ background: onlineUsers.includes(userInfo.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
+            className="UserStatusOnlineIcon"
+          />
+        </Box>
+        <Typography sx={{ pl: 2 }}>{userInfo.fullname}</Typography>
+      </Box>
+    );
+  };
   return (
     <Drawer
       id="sidebarDrawer"
@@ -113,15 +158,18 @@ export const SidebarWrapper = ({
             </Tooltip>
           )}
           <Typography
-            onClick={() => setDisplayTagSearcher(true)}
             variant="h6"
-            sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0 }}
+            sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0, fontWeight: "bold" }}
+            onClick={() => setDisplayTagSearcher(true)}
           >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography>
-          <IconButton sx={{ marginTop: "15px" }} onClick={() => openChatInfoPage()}>
-            <MoreVertIcon />
-          </IconButton>
+          {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
+          {!!selectedChannel && !!selectedChannel.title && (
+            <IconButton sx={{ mt: 3 }} onClick={() => openChatInfoPage()}>
+              <MoreVertIcon />
+            </IconButton>
+          )}
         </Box>
       )}
       {title && (

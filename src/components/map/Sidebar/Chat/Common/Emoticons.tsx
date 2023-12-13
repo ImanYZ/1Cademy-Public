@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { IChannelMessage, Reaction } from "src/chatTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import shortenNumber from "@/lib/utils/shortenNumber";
 
 type EmoticonsProps = {
   message: IChannelMessage;
@@ -48,7 +49,10 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
             toggleReaction(message, emoji);
           }}
         >
-          {emoji} {reactions[emoji].length}
+          {emoji}{" "}
+          <span style={{ fontWeight: reactions[emoji].includes(user?.uname) ? "bold" : "", paddingLeft: "2px" }}>
+            {shortenNumber(reactions[emoji].length, 2, false)}
+          </span>
         </Button>
       ))}
       {Object.keys(reactions)?.length > 0 && (

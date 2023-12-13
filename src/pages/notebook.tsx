@@ -7243,6 +7243,7 @@ const Notebook = ({}: NotebookProps) => {
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
                 dispatch={dispatch}
                 selectedNotebook={selectedNotebook}
+                onlineUsers={onlineUsers}
               />
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}

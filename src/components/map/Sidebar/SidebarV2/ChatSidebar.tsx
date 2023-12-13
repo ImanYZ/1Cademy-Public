@@ -3,11 +3,16 @@ import { EmojiClickData } from "emoji-picker-react";
 import {
   arrayRemove,
   arrayUnion,
+  collection,
   doc,
   DocumentData,
   DocumentReference,
+  getDocs,
   getFirestore,
+  query,
+  setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
@@ -39,6 +44,7 @@ const DynamicMemoEmojiPicker = dynamic(() => import("../Chat/Common/EmojiPicker"
 type ChatSidebarProps = {
   user: any;
   settings: any;
+  onlineUsers: any;
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
@@ -75,6 +81,7 @@ export const ChatSidebar = ({
   selectedNotebook,
   dispatch,
   onChangeTagOfNotebookById,
+  onlineUsers,
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -321,6 +328,63 @@ export const ChatSidebar = ({
     openChatInfo,
   ]);
 
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelsChange[]) => {
+      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+    };
+    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: conversationChange[]) => {
+      setConversations((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+    };
+    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  const openDMChannel = async (user2: any) => {
+    if (!user?.uname || !user2.uname) return;
+    const findConversation = await getDocs(
+      query(collection(db, "conversations"), where("members", "==", [user2.uname, user?.uname]))
+    );
+
+    if (findConversation.docs.length > 0) {
+      const conversationData: any = findConversation.docs[0].data();
+      openRoom("direct", { ...conversationData, id: findConversation.docs[0].id });
+    } else {
+      const converstionRef = doc(collection(db, "conversations"));
+      const conversationData = {
+        title: "",
+        members: [user2.uname, user?.uname],
+        membersInfo: {
+          [user2.uname]: {
+            uname: user2.uname,
+            imageUrl: user2.imageUrl,
+            chooseUname: !!user2.chooseUname,
+            fullname: `${user2.fName} ${user2.lName}`,
+            role: "",
+          },
+          [user?.uname]: {
+            uname: user?.uname,
+            imageUrl: user.imageUrl,
+            chooseUname: !!user.chooseUname,
+            fullname: `${user.fName} ${user.lName}`,
+            role: "",
+          },
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await setDoc(converstionRef, conversationData);
+      openRoom("direct", { ...conversationData, id: converstionRef.id });
+    }
+  };
   return (
     <SidebarWrapper
       title={""}
@@ -339,8 +403,10 @@ export const ChatSidebar = ({
       setDisplayTagSearcher={setDisplayTagSearcher}
       openChatInfoPage={openChatInfoPage}
       sidebarType={"chat"}
+      onlineUsers={onlineUsers}
+      user={user}
       SidebarContent={
-        <Box sx={{ borderTop: "solid 1px ", marginTop: openChatRoom ? "9px" : "22px" }}>
+        <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover
             open={openPicker}
             anchorEl={anchorEl}
@@ -406,7 +472,15 @@ export const ChatSidebar = ({
               <Box sx={{ p: "2px 16px" }}>
                 {value === 0 && <NewsList openRoom={openRoom} newsChannels={channels} />}
                 {value === 1 && <ChannelsList openRoom={openRoom} channels={channels} />}
-                {value === 2 && <DirectMessagesList openRoom={openConversation} conversations={conversations} />}
+                {value === 2 && (
+                  <DirectMessagesList
+                    openRoom={openConversation}
+                    conversations={conversations}
+                    db={db}
+                    onlineUsers={onlineUsers}
+                    openDMChannel={openDMChannel}
+                  />
+                )}
               </Box>
             </Box>
           )}

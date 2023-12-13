@@ -12,7 +12,8 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
-import { Replies } from "./Replies";
+import { MessageLeft } from "./MessageLeft";
+
 type NewsCardProps = {
   message: IChannelMessage;
   membersInfo: any;
@@ -25,6 +26,10 @@ type NewsCardProps = {
   setEditingMessage: any;
   user: any;
   setReplyOnMessage: any;
+  selectedMessage: any;
+  saveMessageEdit: any;
+  db: any;
+  roomType: any;
 };
 export const NewsCard = ({
   message,
@@ -38,13 +43,17 @@ export const NewsCard = ({
   setEditingMessage,
   user,
   setReplyOnMessage,
+  selectedMessage,
+  saveMessageEdit,
+  db,
+  roomType,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState("");
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
-  const handleSendReply = () => {
+  const handleSendReply = (imageUrls: string[], important = false) => {
     if (!inputMessage) return;
-    sendReplyOnMessage(message, inputMessage);
+    sendReplyOnMessage(message, inputMessage, imageUrls, important);
     setInputMessage("");
   };
   const handleTyping = async (e: any) => {
@@ -108,18 +117,6 @@ export const NewsCard = ({
         >
           <Typography
             sx={{
-              fontSize: "25px",
-              fontWeight: "500",
-              lineHeight: "24px",
-              textTransform: "capitalize",
-              p: "14px",
-              pl: 0,
-            }}
-          >
-            {message.heading}
-          </Typography>
-          <Typography
-            sx={{
               fontSize: "16px",
               fontWeight: "400",
               lineHeight: "24px",
@@ -130,15 +127,18 @@ export const NewsCard = ({
             <MarkdownRender text={message.message || ""} />
             <Typography sx={{ color: "grey", ml: 1 }}>{message.edited ? "(edited)" : ""}</Typography>
           </Typography>
-          {message.imageUrl && (
-            <NextImage
-              width={"500px"}
-              height={"300px"}
-              style={{ borderRadius: "8px" }}
-              src={message.imageUrl}
-              alt="news image"
-            />
-          )}
+          <Box sx={{ display: "flex" }}>
+            {(message.imageUrls || []).map(imageUrl => (
+              <NextImage
+                width={"500px"}
+                height={"300px"}
+                style={{ borderRadius: "8px" }}
+                src={imageUrl}
+                alt="news image"
+                key={imageUrl}
+              />
+            ))}
+          </Box>
 
           {editingMessage?.id !== message.id && (
             <>
@@ -179,14 +179,23 @@ export const NewsCard = ({
             }}
           >
             {(message.replies || []).map((reply: any, idx: number) => (
-              <Replies
+              <MessageLeft
                 key={idx}
-                reply={{ ...reply, fullname: membersInfo[reply.sender].fullname }}
+                selectedMessage={selectedMessage}
+                message={reply}
                 toggleEmojiPicker={toggleEmojiPicker}
                 toggleReaction={toggleReaction}
                 forwardMessage={forwardMessage}
-                user={user}
                 membersInfo={membersInfo}
+                user={user}
+                setReplyOnMessage={setReplyOnMessage}
+                channelUsers={channelUsers}
+                sendReplyOnMessage={sendReplyOnMessage}
+                saveMessageEdit={saveMessageEdit}
+                db={db}
+                editingMessage={editingMessage}
+                setEditingMessage={setEditingMessage}
+                roomType={roomType}
               />
             ))}
 
@@ -197,7 +206,6 @@ export const NewsCard = ({
                 channelUsers={channelUsers}
                 sendMessage={handleSendReply}
                 handleTyping={handleTyping}
-                handleKeyPress={() => {}}
                 inputValue={inputMessage}
                 toggleEmojiPicker={toggleEmojiPicker}
               />

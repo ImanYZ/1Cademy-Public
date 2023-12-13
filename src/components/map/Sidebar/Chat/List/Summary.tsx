@@ -31,6 +31,12 @@ export const Summary = ({ selectedChannel, roomType }: SummaryProps) => {
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
+  const leaveChannel = () => {
+    try {
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
       <Box
@@ -59,7 +65,7 @@ export const Summary = ({ selectedChannel, roomType }: SummaryProps) => {
             theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
         }}
       >
-        {Object.keys(selectedChannel.membersInfo).length} members
+        {selectedChannel.members.length} members
       </Typography>
       <Box sx={{ display: "flex", gap: "10px" }}>
         {/* <Box
@@ -118,6 +124,7 @@ export const Summary = ({ selectedChannel, roomType }: SummaryProps) => {
             height: "100px",
             borderRadius: "8px",
             cursor: "pointer",
+            color: "red",
             background: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
             ":hover": {
@@ -125,6 +132,7 @@ export const Summary = ({ selectedChannel, roomType }: SummaryProps) => {
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
             },
           }}
+          onClick={leaveChannel}
         >
           <Box>
             <LogoutIcon sx={{ color: "red" }} />
