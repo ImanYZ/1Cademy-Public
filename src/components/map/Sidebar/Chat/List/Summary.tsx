@@ -16,7 +16,9 @@ import { Nodes } from "./Nodes";
 
 dayjs.extend(relativeTime);
 
-export const Summary = () => {
+type SummaryProps = { selectedChannel: any };
+
+export const Summary = ({ selectedChannel }: SummaryProps) => {
   const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -25,6 +27,12 @@ export const Summary = () => {
     return {
       "aria-controls": `simple-tabpanel-${index}`,
     };
+  };
+  const leaveChannel = () => {
+    try {
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
@@ -78,7 +86,7 @@ export const Summary = () => {
             theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray500,
         }}
       >
-        234 members, 734 online
+        {selectedChannel.members.length} members
       </Typography>
       <Box sx={{ display: "flex", gap: "10px" }}>
         <Box
@@ -137,6 +145,7 @@ export const Summary = () => {
             height: "100px",
             borderRadius: "8px",
             cursor: "pointer",
+            color: "red",
             background: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
             ":hover": {
@@ -144,11 +153,12 @@ export const Summary = () => {
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
             },
           }}
+          onClick={leaveChannel}
         >
           <Box>
             <LogoutIcon />
           </Box>
-          <Typography>Leave</Typography>
+          Leave
         </Box>
       </Box>
       <Box

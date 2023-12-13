@@ -2,6 +2,7 @@ import { Theme } from "@emotion/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
@@ -107,9 +108,14 @@ export const SidebarWrapper = ({
               </IconButton>
             </Tooltip>
           )}
-          <Typography variant="h6" sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0 }}>
+          <Typography variant="h6" sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0, fontWeight: "bold" }}>
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography>
+          {!!selectedChannel && (
+            <IconButton sx={{ mt: 3 }}>
+              <MoreVertIcon />
+            </IconButton>
+          )}
         </Box>
       )}
       {title && (
