@@ -52,8 +52,8 @@ export type IChannelMessage = {
   forwarded?: boolean;
   forwardedFrom?: string;
   node?: Node;
-  imageUrl?: string;
-  videoUrl?: string;
+  imageUrls?: string[];
+  videoUrls?: string[];
   sender: string;
   read_by?: string[];
   reactions: Reaction[];

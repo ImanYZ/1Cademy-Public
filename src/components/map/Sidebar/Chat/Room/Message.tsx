@@ -113,7 +113,12 @@ export const Message = ({
   //   }
   // };
 
-  const sendReplyOnMessage = async (curMessage: IChannelMessage, inputMessage: string) => {
+  const sendReplyOnMessage = async (
+    curMessage: IChannelMessage,
+    inputMessage: string,
+    imageUrls: string[] = [],
+    important = false
+  ) => {
     try {
       const messageRef = getMessageRef(curMessage.id, curMessage?.channelId);
       setInputValue("");
@@ -131,51 +136,58 @@ export const Message = ({
           replies: [],
           sender: user.uname,
           mentions: [],
-          imageUrl: "",
+          imageUrls,
           editedAt: new Date(),
           reactions: [],
           channelId: selectedChannel?.id,
+          important,
         }),
       });
     } catch (error) {
       console.error(error);
     }
   };
-  const sendMessage = useCallback(async () => {
-    try {
-      if (!inputValue.trim()) return;
-      if (!!replyOnMessage) {
-        sendReplyOnMessage(replyOnMessage, inputValue);
-        return;
+  const sendMessage = useCallback(
+    async (imageUrls: string[], important = false) => {
+      try {
+        if (!inputValue.trim()) return;
+        if (!!replyOnMessage) {
+          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
+          return;
+        }
+        setInputValue("");
+        setLastVisible(null);
+        let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+        if (roomType === "direct") {
+          channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+        } else if (roomType === "news") {
+          channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
+        }
+        const messageRef = doc(collection(channelRef, "messages"));
+        const newMessage = {
+          pinned: false,
+          read_by: [],
+          edited: false,
+          message: inputValue,
+          node: {},
+          createdAt: new Date(),
+          replies: [],
+          sender: user.uname,
+          mentions: [],
+          imageUrls,
+          editedAt: new Date(),
+          reactions: [],
+          channelId: selectedChannel?.id,
+          important,
+        };
+        await setDoc(messageRef, newMessage);
+        scrollToBottom();
+      } catch (error) {
+        console.error(error);
       }
-      setInputValue("");
-      setLastVisible(null);
-      let channelRef = doc(db, "channelMessages", selectedChannel?.id);
-      if (roomType === "direct") {
-        channelRef = doc(db, "conversationMessages", selectedChannel?.id);
-      }
-      const messageRef = doc(collection(channelRef, "messages"));
-      const newMessage = {
-        pinned: false,
-        read_by: [],
-        edited: false,
-        message: inputValue,
-        node: {},
-        createdAt: new Date(),
-        replies: [],
-        sender: user.uname,
-        mentions: [],
-        imageUrl: "",
-        editedAt: new Date(),
-        reactions: [],
-        channelId: selectedChannel?.id,
-      };
-      await setDoc(messageRef, newMessage);
-      scrollToBottom();
-    } catch (error) {
-      console.error(error);
-    }
-  }, [inputValue, messages]);
+    },
+    [inputValue, messages]
+  );
 
   useEffect(() => {
     if (!selectedChannel) return;
@@ -210,12 +222,6 @@ export const Message = ({
     return () => killSnapshot();
   }, [db]);
 
-  const handleKeyPress = (event: any) => {
-    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      sendMessage();
-    }
-  };
   const scrollToBottom = () => {
     const messageList: any = messageBoxRef.current;
     if (messageList) {
@@ -311,6 +317,7 @@ export const Message = ({
                           fontSize: "12px",
                           p: 1,
                           backgroundColor: "grey",
+                          mt: "7px",
                         }}
                       >
                         {date}
@@ -331,6 +338,10 @@ export const Message = ({
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
                             user={user}
+                            selectedMessage={selectedMessage}
+                            saveMessageEdit={saveMessageEdit}
+                            db={db}
+                            roomType={roomType}
                           />
                         )}
                         {roomType !== "news" && (
@@ -374,7 +385,6 @@ export const Message = ({
             placeholder="Type message here ...."
             sendMessage={sendMessage}
             handleTyping={handleTyping}
-            handleKeyPress={handleKeyPress}
             inputValue={inputValue}
             toggleEmojiPicker={toggleEmojiPicker}
             roomType={roomType}

@@ -201,7 +201,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
       selectedChannel={selectedChannel}
       sidebarType={"chat"}
       SidebarContent={
-        <Box sx={{ borderTop: "solid 1px ", marginTop: openChatRoom ? "9px" : "22px" }}>
+        <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover
             open={openPicker}
             anchorEl={anchorEl}
