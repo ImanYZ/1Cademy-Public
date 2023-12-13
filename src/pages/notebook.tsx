@@ -7233,6 +7233,7 @@ const Notebook = ({}: NotebookProps) => {
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
                 bookmark={bookmark}
+                onlineUsers={onlineUsers}
               />
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}

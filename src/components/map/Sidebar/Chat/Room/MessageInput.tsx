@@ -113,7 +113,7 @@ MessageInputProps) => {
               padding: "2px",
               fontSize: 16,
               position: "absolute",
-              top: "-175px",
+              top: "-120px",
               left: "-16px",
               maxHeight: "150px",
               overflowY: "auto",
@@ -136,12 +136,38 @@ MessageInputProps) => {
       </MentionsInput>
       <Box sx={{ display: "flex" }}>
         {imageUrls.map(imageUrl => (
-          <Box key={imageUrl} sx={{ display: "flex", p: 1 }}>
+          <Box
+            key={imageUrl}
+            sx={{
+              display: "flex",
+              p: 1,
+              position: "relative",
+              "&:hover .close-icon": {
+                opacity: 1,
+              },
+            }}
+          >
+            <Tooltip title={"Remove Image"} placement="top">
+              <CloseIcon
+                className="close-icon"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  zIndex: 1,
+                  cursor: "pointer",
+                  borderRadius: "50%",
+                  opacity: 0,
+                  transition: "opacity 0.3s",
+                  backgroundColor: "grey",
+                  height: "20px",
+                  width: "20px",
+                }}
+                onClick={() => setImageUrls((prev: string[]) => prev.filter(image => image !== imageUrl))}
+              />
+            </Tooltip>
+
             <NextImage width={"90px"} height={"90px"} style={{ borderRadius: "8px" }} src={imageUrl} alt="" />
-            <CloseIcon
-              sx={{ mb: "5px", cursor: "pointer" }}
-              onClick={() => setImageUrls((prev: string[]) => prev.filter(image => image !== imageUrl))}
-            />
           </Box>
         ))}
       </Box>

@@ -3,11 +3,17 @@ import { EmojiClickData } from "emoji-picker-react";
 import {
   arrayRemove,
   arrayUnion,
+  collection,
   doc,
   DocumentData,
   DocumentReference,
+  Firestore,
+  getDocs,
   getFirestore,
+  query,
+  setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -41,9 +47,18 @@ type ChatSidebarProps = {
   innerHeight?: number;
   innerWidth: number;
   bookmark: any;
+  onlineUsers: any;
 };
 
-export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWidth, theme }: ChatSidebarProps) => {
+export const ChatSidebar = ({
+  open,
+  onClose,
+  sidebarWidth,
+  innerHeight,
+  innerWidth,
+  theme,
+  onlineUsers,
+}: ChatSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [{ user, settings }] = useAuth();
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -65,7 +80,7 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   const [anchorEl, setAnchorEl] = useState(null);
   const [forward, setForward] = useState<boolean>(false);
   const openPicker = Boolean(anchorEl);
-  const db = getFirestore();
+  const db: Firestore = getFirestore();
 
   const a11yProps = (index: number) => {
     return {
@@ -184,6 +199,44 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
   }, [db, user]);
+
+  const openDMChannel = async (user2: any) => {
+    if (!user?.uname || !user2.uname) return;
+    const findConversation = await getDocs(
+      query(collection(db, "conversations"), where("members", "==", [user2.uname, user?.uname]))
+    );
+
+    if (findConversation.docs.length > 0) {
+      const conversationData: any = findConversation.docs[0].data();
+      openRoom("direct", { ...conversationData, id: findConversation.docs[0].id });
+    } else {
+      const converstionRef = doc(collection(db, "conversations"));
+      const conversationData = {
+        title: "",
+        members: [user2.uname, user?.uname],
+        membersInfo: {
+          [user2.uname]: {
+            uname: user2.uname,
+            imageUrl: user2.imageUrl,
+            chooseUname: !!user2.chooseUname,
+            fullname: `${user2.fName} ${user2.lName}`,
+            role: "",
+          },
+          [user?.uname]: {
+            uname: user?.uname,
+            imageUrl: user.imageUrl,
+            chooseUname: !!user.chooseUname,
+            fullname: `${user.fName} ${user.lName}`,
+            role: "",
+          },
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await setDoc(converstionRef, conversationData);
+      openRoom("direct", { ...conversationData, id: converstionRef.id });
+    }
+  };
   return (
     <SidebarWrapper
       title={""}
@@ -200,6 +253,8 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
       sidebarType={"chat"}
+      onlineUsers={onlineUsers}
+      user={user}
       SidebarContent={
         <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover
@@ -261,7 +316,15 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
               <Box sx={{ p: "2px 16px" }}>
                 {value === 0 && <NewsList openRoom={openRoom} newsChannels={channels} />}
                 {value === 1 && <ChannelsList openRoom={openRoom} channels={channels} />}
-                {value === 2 && <DirectMessagesList openRoom={openConversation} conversations={conversations} />}
+                {value === 2 && (
+                  <DirectMessagesList
+                    openRoom={openConversation}
+                    conversations={conversations}
+                    db={db}
+                    onlineUsers={onlineUsers}
+                    openDMChannel={openDMChannel}
+                  />
+                )}
               </Box>
             </Box>
           )}

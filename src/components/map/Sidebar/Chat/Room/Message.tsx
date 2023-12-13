@@ -150,7 +150,7 @@ export const Message = ({
   const sendMessage = useCallback(
     async (imageUrls: string[], important = false) => {
       try {
-        if (!inputValue.trim()) return;
+        if (!inputValue.trim() && !imageUrls.length) return;
         if (!!replyOnMessage) {
           sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
           return;
@@ -246,16 +246,16 @@ export const Message = ({
   }, [loadMore]);
   const handleTyping = async (e: any) => {
     setInputValue(e.target.value);
-    const channelRef = doc(collection(db, "channels"), selectedChannel.id);
-    if (user.uname)
-      await updateDoc(channelRef, {
-        typing: arrayUnion(user.uname),
-      });
-    setTimeout(async () => {
-      await updateDoc(channelRef, {
-        typing: [],
-      });
-    }, 10000);
+    // const channelRef = doc(collection(db, "channels"), selectedChannel.id);
+    // if (user.uname)
+    //   await updateDoc(channelRef, {
+    //     typing: arrayUnion(user.uname),
+    //   });
+    // setTimeout(async () => {
+    //   await updateDoc(channelRef, {
+    //     typing: [],
+    //   });
+    // }, 10000);
   };
   const saveMessageEdit = async (newMessage: string) => {
     if (!editingMessage?.channelId) return;

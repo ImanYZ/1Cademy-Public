@@ -2,7 +2,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
+import { collection, doc, updateDoc } from "firebase/firestore";
 import moment from "moment";
 import NextImage from "next/image";
 import React, { useState } from "react";
@@ -66,16 +66,16 @@ export const MessageLeft = ({
   };
   const handleTyping = async (e: any) => {
     setInputMessage(e.target.value);
-    const channelRef = doc(collection(db, "channels"), message.channelId);
-    if (user.uname)
-      await updateDoc(channelRef, {
-        typing: arrayUnion(user.uname),
-      });
-    setTimeout(async () => {
-      await updateDoc(channelRef, {
-        typing: [],
-      });
-    }, 10000);
+    // const channelRef = doc(collection(db, "channels"), message.channelId);
+    // if (user.uname)
+    //   await updateDoc(channelRef, {
+    //     typing: arrayUnion(user.uname),
+    //   });
+    // setTimeout(async () => {
+    //   await updateDoc(channelRef, {
+    //     typing: [],
+    //   });
+    // }, 10000);
   };
 
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -113,6 +113,7 @@ export const MessageLeft = ({
       });
     }
   };
+
   return (
     <Box
       sx={{
