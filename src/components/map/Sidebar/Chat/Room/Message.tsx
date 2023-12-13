@@ -175,11 +175,13 @@ export const Message = ({
           sender: user.uname,
           mentions: [],
           imageUrls,
-          editedAt: new Date(),
           reactions: [],
           channelId: selectedChannel?.id,
           important,
         };
+        // await updateDoc(channelRef, {
+        //   updatedAt: new Date(),
+        // });
         await setDoc(messageRef, newMessage);
         scrollToBottom();
       } catch (error) {

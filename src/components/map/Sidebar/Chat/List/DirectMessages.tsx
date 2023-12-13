@@ -9,9 +9,12 @@ import Fuse from "fuse.js";
 import { useEffect, useState } from "react";
 import { IConversation } from "src/chatTypes";
 
+import { CustomBadge } from "@/components/map/CustomBudge";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { getMessageSummary } from "../../helpers/common";
 
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
@@ -20,13 +23,36 @@ type DirectMessageProps = {
   db: Firestore;
   onlineUsers: any;
   openDMChannel: any;
+  notifications: any;
 };
-export const DirectMessagesList = ({ openRoom, conversations, db, onlineUsers, openDMChannel }: DirectMessageProps) => {
+export const DirectMessagesList = ({
+  openRoom,
+  conversations,
+  db,
+  onlineUsers,
+  openDMChannel,
+  notifications,
+}: DirectMessageProps) => {
   const [{ user }] = useAuth();
   const [users, setUsers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
 
   const fuse = new Fuse(users, { keys: ["uname"] });
+
+  const [notificationHash, setNotificationHash] = useState<any>({});
+
+  useEffect(() => {
+    setNotificationHash(
+      notifications.reduce((acu: { [channelId: string]: any }, cur: any) => {
+        if (!acu.hasOwnProperty(cur.channelId)) {
+          acu[cur.channelId] = [];
+        }
+        acu[cur.channelId].push(cur);
+        return acu;
+      }, {})
+    );
+  }, [notifications]);
+
   const generateChannelName = (members: any) => {
     const name = [];
     let more = 0;
@@ -219,44 +245,50 @@ export const DirectMessagesList = ({ openRoom, conversations, db, onlineUsers, o
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "9px",
             }}
           >
-            <Box
+            <Box sx={{ mr: "7px" }}>
+              <OverlappingAvatars members={conversation.membersInfo} />
+            </Box>
+            <Box sx={{ display: "block" }}>
+              <Typography
+                sx={{
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  lineHeight: "24px",
+                }}
+              >
+                {generateChannelName(conversation.membersInfo)}
+              </Typography>
+              {(notificationHash[conversation.id] || []).length > 0 && (
+                <Typography sx={{ fontSize: "13px", color: "grey" }}>
+                  {getMessageSummary(notificationHash[conversation.id][0])}
+                </Typography>
+              )}
+            </Box>
+
+            <Typography
               sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
+                fontSize: "12px",
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+                ml: "auto",
               }}
             >
-              <Box sx={{ mr: "7px" }}>
-                <OverlappingAvatars members={conversation.membersInfo} />
-              </Box>
-              <Box>
-                <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography
-                    sx={{
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      lineHeight: "24px",
-                    }}
-                  >
-                    {generateChannelName(conversation.membersInfo)}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG200
-                          : theme.palette.common.gray500,
-                    }}
-                  >
-                    {dayjs(conversation.updatedAt.toDate().getTime()).fromNow()}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
+              {dayjs(conversation.updatedAt.toDate().getTime()).fromNow()}
+            </Typography>
+            {(notificationHash[conversation.id] || []).length > 0 && (
+              <CustomBadge
+                value={notificationHash[conversation.id].length}
+                sx={{
+                  height: "20px",
+                  p: "6px",
+                  fontSize: "13px",
+                }}
+              />
+            )}
           </Box>
         </Paper>
       ))}

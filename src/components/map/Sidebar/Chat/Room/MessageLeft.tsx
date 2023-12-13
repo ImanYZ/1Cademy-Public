@@ -60,7 +60,7 @@ export const MessageLeft = ({
   };
 
   const handleSendReply = (imageUrls: string[], important = false) => {
-    if (!inputMessage || !imageUrls.length) return;
+    if (!inputMessage && !imageUrls.length) return;
     sendReplyOnMessage(message, inputMessage, imageUrls, important);
     setInputMessage("");
   };
@@ -148,8 +148,8 @@ export const MessageLeft = ({
         }}
       >
         <OptimizedAvatar2
-          alt={membersInfo[message.sender].fullname}
-          imageUrl={membersInfo[message.sender].imageUrl}
+          alt={membersInfo[message.sender]?.fullname || ""}
+          imageUrl={membersInfo[message.sender]?.imageUrl || ""}
           size={!message.parentMessage ? 40 : 30}
           sx={{ border: "none" }}
         />
@@ -166,7 +166,7 @@ export const MessageLeft = ({
                 lineHeight: "24px",
               }}
             >
-              {membersInfo[message.sender]?.fullname}
+              {membersInfo[message.sender]?.fullname || ""}
             </Typography>
             {message.important && (
               <Box sx={{ display: "flex", ml: 2 }}>
@@ -219,7 +219,7 @@ export const MessageLeft = ({
             >
               <MarkdownRender text={message.message || ""} />
               <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
-              <Box sx={{ pt: 1, display: "flex" }}>
+              <Box sx={{ pt: 1, display: "flex", gap: "5px" }}>
                 {(message.imageUrls || []).map(imageUrl => (
                   <NextImage
                     width={"200px"}

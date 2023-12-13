@@ -16,6 +16,7 @@ import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
+import { trigerNotifications } from "./actions/trigerNotifications";
 
 import { db } from "./admin";
 
@@ -223,6 +224,38 @@ export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onC
     console.log("error onNodeDeleted:", error);
   }
 });
+
+export const onDirectMessagesNotification = functions.firestore
+  .document("/conversationMessages/{cid}/messages/{id}")
+  .onCreate(async change => {
+    try {
+      const message = change.data();
+      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
+    } catch (error) {
+      console.log("error onNodeDeleted:", error);
+    }
+  });
+
+export const onChannelMessagesNotification = functions.firestore
+  .document("/channelMessages/{cid}/messages/{id}")
+  .onCreate(async change => {
+    try {
+      const message = change.data();
+      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "channel" } });
+    } catch (error) {
+      console.log("error onNodeDeleted:", error);
+    }
+  });
+export const onAnnouncementsMessagesNotification = functions.firestore
+  .document("/announcementsMessages/{cid}/messages/{id}")
+  .onCreate(async change => {
+    try {
+      const message = change.data();
+      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "announcement" } });
+    } catch (error) {
+      console.log("error onNodeDeleted:", error);
+    }
+  });
 
 exports.assignNodeContributorsInstitutionsStats = functions
   .runWith({ memory: "1GB", timeoutSeconds: 520 })

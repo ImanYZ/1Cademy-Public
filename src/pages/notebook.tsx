@@ -48,6 +48,10 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import {
+  channelNotificationChange,
+  getchatNotificationsSnapshot,
+} from "src/client/firestore/chatNotifications.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
@@ -403,6 +407,8 @@ const Notebook = ({}: NotebookProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
+
+  const [notificationsMessages, setNotificationsMessages] = useState<any>([]);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
   const { ref: toolbarRef, isHovered } = useHover();
@@ -6984,6 +6990,37 @@ const Notebook = ({}: NotebookProps) => {
     };
   }, [tutorialTargetCallback, tutorialTargetId]);
 
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelNotificationChange[]) => {
+      setNotificationsMessages((prev: any) =>
+        changes.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = change.data as any & { id: string };
+
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1) {
+              prev.push(curData);
+            }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = curData;
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx);
+            }
+            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            return prev;
+          },
+          [...prev]
+        )
+      );
+    };
+    const killSnapshot = getchatNotificationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -7210,6 +7247,7 @@ const Notebook = ({}: NotebookProps) => {
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
                 isHovered={toolbarIsHovered}
                 toolbarRef={toolbarRef}
+                newMessages={notificationsMessages.length}
               />
 
               <MemoizedBookmarksSidebar
@@ -7244,6 +7282,7 @@ const Notebook = ({}: NotebookProps) => {
                 dispatch={dispatch}
                 selectedNotebook={selectedNotebook}
                 onlineUsers={onlineUsers}
+                notifications={notificationsMessages}
               />
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}

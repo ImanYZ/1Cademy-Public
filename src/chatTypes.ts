@@ -100,7 +100,7 @@ export type IChatNotification = {
 };
 
 export type IConversation = {
-  id?: string;
+  id: string;
   title: string;
   members: string[];
   membersInfo: MembersInfo;

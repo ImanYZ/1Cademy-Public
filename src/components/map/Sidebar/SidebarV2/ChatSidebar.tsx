@@ -62,6 +62,7 @@ type ChatSidebarProps = {
   selectedNotebook: any;
   dispatch: any;
   onChangeTagOfNotebookById: any;
+  notifications: any;
 };
 
 export const ChatSidebar = ({
@@ -83,6 +84,7 @@ export const ChatSidebar = ({
   onChangeTagOfNotebookById,
   onlineUsers,
   openLinkedNode,
+  notifications,
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -113,7 +115,7 @@ export const ChatSidebar = ({
   useEffect(() => {
     if (!user) return;
     const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
       setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
@@ -123,7 +125,7 @@ export const ChatSidebar = ({
   useEffect(() => {
     if (!user) return;
     const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
       // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
@@ -289,12 +291,7 @@ export const ChatSidebar = ({
     setRoomType(type);
     setSelectedChannel(channel);
     setMessages([]);
-  };
-
-  const openConversation = (type: string, channel: any) => {
-    setOpenChatRoom(true);
-    setRoomType(type);
-    setSelectedChannel(channel);
+    clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
   };
 
   const moveBack = () => {
@@ -327,12 +324,13 @@ export const ChatSidebar = ({
     setChosenTags,
     chosenTags,
     openChatInfo,
+    notifications,
   ]);
 
   useEffect(() => {
     if (!user) return;
     const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
       setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
@@ -342,7 +340,7 @@ export const ChatSidebar = ({
   useEffect(() => {
     if (!user) return;
     const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
       // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
@@ -386,6 +384,15 @@ export const ChatSidebar = ({
       openRoom("direct", { ...conversationData, id: converstionRef.id });
     }
   };
+  const clearNotifications = (notifications: any) => {
+    for (let notif of notifications) {
+      const notifRef = doc(collection(db, "chatNotifications"), notif.id);
+      updateDoc(notifRef, {
+        seen: true,
+      });
+    }
+  };
+
   return (
     <SidebarWrapper
       title={""}
@@ -466,20 +473,33 @@ export const ChatSidebar = ({
                       id={`chat-tab-${tabItem.title.toLowerCase()}`}
                       label={tabItem.title}
                       {...a11yProps(idx)}
-                    />
+                    ></Tab>
                   ))}
                 </Tabs>
               </Box>
               <Box sx={{ p: "2px 16px" }}>
-                {value === 0 && <NewsList openRoom={openRoom} newsChannels={channels} />}
-                {value === 1 && <ChannelsList openRoom={openRoom} channels={channels} />}
+                {value === 0 && (
+                  <NewsList
+                    openRoom={openRoom}
+                    newsChannels={channels}
+                    notifications={notifications.filter((n: any) => n.chatType === "announcement")}
+                  />
+                )}
+                {value === 1 && (
+                  <ChannelsList
+                    openRoom={openRoom}
+                    channels={channels}
+                    notifications={notifications.filter((n: any) => n.chatType === "channel")}
+                  />
+                )}
                 {value === 2 && (
                   <DirectMessagesList
-                    openRoom={openConversation}
+                    openRoom={openRoom}
                     conversations={conversations}
                     db={db}
                     onlineUsers={onlineUsers}
                     openDMChannel={openDMChannel}
+                    notifications={notifications.filter((n: any) => n.chatType === "direct")}
                   />
                 )}
               </Box>
@@ -523,7 +543,7 @@ export const ChatSidebar = ({
 
 export const MemoizedChatSidebar = React.memo(ChatSidebar);
 
-const synchronizationChannels = (prev: (any & { id: string })[], change: any) => {
+const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
   const docType = change.type;
   const curData = change.data as any & { id: string };
 
