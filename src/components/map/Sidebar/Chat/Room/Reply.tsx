@@ -16,6 +16,7 @@ export const Reply = ({ message, sx, close }: ReplyProps) => {
       sx={{
         display: "flex",
         justifyContent: "space-between",
+        alignItems: "center",
         gap: "10px",
         ...sx,
       }}

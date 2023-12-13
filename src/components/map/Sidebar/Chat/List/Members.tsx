@@ -1,50 +1,17 @@
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import NextImage from "next/image";
-import { useEffect, useState } from "react";
-
-import TagIcon from "../../../../../../public/tag.svg";
 
 dayjs.extend(relativeTime);
-export const Members = () => {
-  const [members, setMembers] = useState<any>([]);
-  useEffect(() => {
-    const members = [
-      {
-        title: "Phoneix Baker",
-        username: "username",
-        tag: "1Cademy",
-      },
-      {
-        title: "Phoneix Baker",
-        username: "username",
-        tag: "1Cademy",
-      },
-      {
-        title: "Phoneix Baker",
-        username: "username",
-        tag: "1Cademy",
-      },
-      {
-        title: "Phoneix Baker",
-        username: "username",
-        tag: "1Cademy",
-      },
-      {
-        title: "Phoneix Baker",
-        username: "username",
-        tag: "1Cademy",
-      },
-    ];
-    [];
-    setMembers(members);
-  }, []);
+
+type MemberProps = {
+  selectedChannel: any;
+};
+export const Members = ({ selectedChannel }: MemberProps) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
-      <Paper
+      {/* <Paper
         onClick={() => {}}
         elevation={3}
         className="CollapsedProposal collection-item"
@@ -66,8 +33,8 @@ export const Members = () => {
       >
         <PersonAddIcon />
         <Typography>Add a member</Typography>
-      </Paper>
-      {members.map((member: any, idx: number) => (
+      </Paper> */}
+      {Object.keys(selectedChannel.membersInfo).map((member: any, idx: number) => (
         <Paper
           onClick={() => {}}
           key={idx}
@@ -115,7 +82,7 @@ export const Members = () => {
                   justifyContent: "center",
                 }}
               >
-                {member.title
+                {selectedChannel.membersInfo[member].fullname
                   .split(" ")
                   .slice(0, 2)
                   .map((word: string) => word[0])
@@ -130,7 +97,7 @@ export const Members = () => {
                       lineHeight: "24px",
                     }}
                   >
-                    {member.title}
+                    {selectedChannel.membersInfo[member].fullname}
                   </Typography>
                   <Typography
                     sx={{
@@ -141,10 +108,10 @@ export const Members = () => {
                           : theme.palette.common.gray500,
                     }}
                   >
-                    @{member.username}
+                    @{selectedChannel.membersInfo[member].uname}
                   </Typography>
                 </Box>
-                <Box
+                {/* <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -169,10 +136,10 @@ export const Members = () => {
                             : theme.palette.common.gray500,
                       }}
                     >
-                      {member.tag}
+                      Tag
                     </Box>
                   </Box>
-                </Box>
+                </Box> */}
               </Box>
             </Box>
           </Box>

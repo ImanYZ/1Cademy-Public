@@ -1,20 +1,18 @@
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDocs, query } from "firebase/firestore";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { SidebarNodeLink } from "../../SidebarNodeLink";
-
 dayjs.extend(relativeTime);
-type NodesProps = {
+type MediaProps = {
   db: any;
   selectedChannel: any;
   roomType: string;
 };
-export const Nodes = ({ db, selectedChannel, roomType }: NodesProps) => {
-  const [nodes, setNodes] = useState<any>([]);
-
+export const Media = ({ db, selectedChannel, roomType }: MediaProps) => {
+  const [medias, setMedias] = useState<any>([]);
   useEffect(() => {
     (async () => {
       let channelRef = doc(db, "channelMessages", selectedChannel.id);
@@ -25,30 +23,29 @@ export const Nodes = ({ db, selectedChannel, roomType }: NodesProps) => {
       }
       const messageRef = collection(channelRef, "messages");
 
-      let q = query(messageRef, where("node", "!=", {}));
+      let q = query(messageRef);
       const messagesDoc = await getDocs(q);
       if (!messagesDoc.empty) {
-        let nodes = [];
+        let medias = [];
         for (const doc of messagesDoc.docs) {
           const messageData = doc.data();
-          nodes.push(messageData.node);
+          if (messageData?.imageUrls && Array.isArray(messageData?.imageUrls)) {
+            for (const data of messageData?.imageUrls) {
+              medias.push({ imageUrl: data });
+            }
+          }
         }
-        setNodes(nodes);
+        setMedias(medias);
       }
     })();
   }, [roomType, selectedChannel.id]);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px", width: "100%" }}>
-      {nodes.map((node: any) => (
-        <SidebarNodeLink
-          key={node.id}
-          onClick={() => {}}
-          {...node}
-          sx={{
-            borderLeft: "studied" in node && node.studied ? "solid 6px #fdc473" : " solid 6px #fd7373",
-          }}
-        />
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: "9px", marginTop: "9px" }}>
+      {medias.map((media: any, idx: number) => (
+        <Box key={idx} sx={{ cursor: "pointer" }}>
+          <Image src={media.imageUrl} width={"105px"} height={"100px"} />
+        </Box>
       ))}
     </Box>
   );

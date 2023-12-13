@@ -159,7 +159,7 @@ MessageInputProps) => {
                 backgroundColor: "transparent",
               }}
             >
-              cancel
+              Cancel
             </Button>
             <Button
               variant="contained"
@@ -172,7 +172,7 @@ MessageInputProps) => {
                 borderRadius: "8px",
               }}
             >
-              save
+              Save
             </Button>
           </Box>
         )}

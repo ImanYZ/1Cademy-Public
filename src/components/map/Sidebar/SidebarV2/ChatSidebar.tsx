@@ -1,4 +1,4 @@
-import { Box, Popover, Tab, Tabs } from "@mui/material";
+import { Box, ClickAwayListener, Modal, Popover, Tab, Tabs } from "@mui/material";
 import { EmojiClickData } from "emoji-picker-react";
 import {
   arrayRemove,
@@ -10,17 +10,22 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { IChannelMessage, IChannels, IConversation } from "src/chatTypes";
 import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
-import { useAuth } from "@/context/AuthContext";
+import { AllTagsTreeView, ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
+import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
+import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
+import { Post } from "@/lib/mapApi";
 
 import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/DirectMessages";
 import { NewsList } from "../Chat/List/News";
+import { Summary } from "../Chat/List/Summary";
 //import { NodeLink } from "../Chat/Room/NodeLink";
 import { Message } from "../Chat/Room/Message";
 //import { NewsCard } from "../Chat/Room/NewsCard";
@@ -32,6 +37,8 @@ const DynamicMemoEmojiPicker = dynamic(() => import("../Chat/Common/EmojiPicker"
 });
 
 type ChatSidebarProps = {
+  user: any;
+  settings: any;
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
@@ -41,11 +48,37 @@ type ChatSidebarProps = {
   innerHeight?: number;
   innerWidth: number;
   bookmark: any;
+  notebookRef: any;
+  nodeBookDispatch: any;
+  nodeBookState: any;
+  notebooks: any;
+  onChangeNotebook: any;
+  selectedNotebook: any;
+  dispatch: any;
+  onChangeTagOfNotebookById: any;
 };
 
-export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWidth, theme }: ChatSidebarProps) => {
+export const ChatSidebar = ({
+  user,
+  settings,
+  open,
+  onClose,
+  sidebarWidth,
+  innerHeight,
+  innerWidth,
+  theme,
+  notebookRef,
+  nodeBookDispatch,
+  nodeBookState,
+  notebooks,
+  onChangeNotebook,
+  selectedNotebook,
+  dispatch,
+  onChangeTagOfNotebookById,
+}: ChatSidebarProps) => {
+  const db = getFirestore();
   const [value, setValue] = React.useState(0);
-  const [{ user, settings }] = useAuth();
+  const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -65,7 +98,111 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
   const [anchorEl, setAnchorEl] = useState(null);
   const [forward, setForward] = useState<boolean>(false);
   const openPicker = Boolean(anchorEl);
-  const db = getFirestore();
+  const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
+  const [openChatInfo, setOpenChatInfo] = useState<boolean>(false);
+  const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelsChange[]) => {
+      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+    };
+    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: conversationChange[]) => {
+      setConversations((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
+      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+    };
+    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
+    if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
+      notebookRef.current.chosenNode = { id: chosenTags[0].id, title: chosenTags[0].title };
+      nodeBookDispatch({ type: "setChosenNode", payload: { id: chosenTags[0].id, title: chosenTags[0].title } });
+      onCloseTagSearcher();
+    }
+  }, [allTags, chosenTags, nodeBookDispatch]);
+
+  useEffect(() => {
+    const targetTag: any = user?.tagId;
+    setAllTags(oldAllTags => {
+      const updatedTag = {
+        [targetTag]: { ...oldAllTags[targetTag], checked: true },
+      };
+      delete oldAllTags[targetTag];
+      const newAllTags: AllTagsTreeView = {
+        ...updatedTag,
+        ...oldAllTags,
+      };
+      2;
+
+      for (let aTag in newAllTags) {
+        if (aTag !== targetTag && newAllTags[aTag].checked) {
+          newAllTags[aTag] = { ...newAllTags[aTag], checked: false };
+        }
+      }
+      return newAllTags;
+    });
+  }, [user?.tagId]);
+
+  useEffect(() => {
+    const setDefaultTag = async () => {
+      if (!selectedNotebook) return;
+      const thisNotebook = notebooks.find((cur: any) => cur.id === selectedNotebook);
+      if (!thisNotebook) return;
+
+      if (thisNotebook.owner !== user.uname) return alert("Cant modify this tag, ask to the notebook's owner");
+
+      if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
+        const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
+        notebookRef.current.choosingNode = null;
+        notebookRef.current.chosenNode = null;
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        try {
+          // onChangeNotebook(selectedNotebook);
+          dispatch({
+            type: "setAuthUser",
+            payload: { ...user, tagId: nodeId, tag: nodeTitle },
+          });
+          onChangeTagOfNotebookById(selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
+          await Post(`/changeDefaultTag/${nodeId}`);
+
+          await updateNotebookTag(db, selectedNotebook, { defaultTagId: nodeId, defaultTagName: nodeTitle });
+
+          let { reputation, user: userUpdated } = await retrieveAuthenticatedUser(user.userId, user.role, user.claims);
+          if (!reputation) throw Error("Cant find Reputation");
+          if (!userUpdated) throw Error("Cant find User");
+
+          dispatch({ type: "setReputation", payload: reputation });
+          dispatch({ type: "setAuthUser", payload: userUpdated });
+          setDisplayTagSearcher(false);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+    setDefaultTag();
+  }, [
+    db,
+    dispatch,
+    nodeBookDispatch,
+    nodeBookState.choosingNode?.id,
+    nodeBookState.chosenNode,
+    notebookRef,
+    notebooks,
+    onChangeNotebook,
+    onChangeTagOfNotebookById,
+    selectedNotebook,
+    user,
+  ]);
 
   const a11yProps = (index: number) => {
     return {
@@ -161,29 +298,29 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
     }
   };
 
+  const onCloseTagSearcher = () => setDisplayTagSearcher(false);
+
+  const openChatInfoPage = () => {
+    setOpenChatInfo(!openChatInfo);
+  };
+
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [openChatRoom, value, roomType, anchorEl, selectedChannel, channels, conversations, messages]);
+  }, [
+    openChatRoom,
+    value,
+    roomType,
+    anchorEl,
+    selectedChannel,
+    channels,
+    conversations,
+    messages,
+    displayTagSearcher,
+    setChosenTags,
+    chosenTags,
+    openChatInfo,
+  ]);
 
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
-
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizationChannels, [...prev]));
-      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
   return (
     <SidebarWrapper
       title={""}
@@ -199,6 +336,8 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
       contentSignalState={contentSignalState}
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
+      setDisplayTagSearcher={setDisplayTagSearcher}
+      openChatInfoPage={openChatInfoPage}
       sidebarType={"chat"}
       SidebarContent={
         <Box sx={{ borderTop: "solid 1px ", marginTop: openChatRoom ? "9px" : "22px" }}>
@@ -223,20 +362,26 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
           </Popover>
 
           {openChatRoom ? (
-            <Message
-              roomType={roomType}
-              theme={theme}
-              selectedChannel={selectedChannel}
-              user={user}
-              toggleEmojiPicker={toggleEmojiPicker}
-              toggleReaction={toggleReaction}
-              messageBoxRef={messageBoxRef}
-              setMessages={setMessages}
-              messages={messages}
-              setForward={setForward}
-              forward={forward}
-              getMessageRef={getMessageRef}
-            />
+            <>
+              {openChatInfo ? (
+                <Summary roomType={roomType} selectedChannel={selectedChannel} />
+              ) : (
+                <Message
+                  roomType={roomType}
+                  theme={theme}
+                  selectedChannel={selectedChannel}
+                  user={user}
+                  toggleEmojiPicker={toggleEmojiPicker}
+                  toggleReaction={toggleReaction}
+                  messageBoxRef={messageBoxRef}
+                  setMessages={setMessages}
+                  messages={messages}
+                  setForward={setForward}
+                  forward={forward}
+                  getMessageRef={getMessageRef}
+                />
+              )}
+            </>
           ) : (
             <Box>
               <Box
@@ -264,6 +409,36 @@ export const ChatSidebar = ({ open, onClose, sidebarWidth, innerHeight, innerWid
                 {value === 2 && <DirectMessagesList openRoom={openConversation} conversations={conversations} />}
               </Box>
             </Box>
+          )}
+          {displayTagSearcher && (
+            <Suspense fallback={<div>loading...</div>}>
+              <ClickAwayListener onClickAway={onCloseTagSearcher}>
+                <Modal
+                  open={displayTagSearcher}
+                  disablePortal
+                  hideBackdrop
+                  sx={{
+                    "&.MuiModal-root": {
+                      top: "10px",
+                      left: "240px",
+                      right: "unset",
+                      bottom: "unset",
+                    },
+                  }}
+                >
+                  <MemoizedTagsSearcher
+                    id="user-settings-tag-searcher"
+                    setChosenTags={setChosenTags}
+                    chosenTags={chosenTags}
+                    allTags={allTags}
+                    setAllTags={setAllTags}
+                    width={"440px"}
+                    height={"440px"}
+                    onClose={onCloseTagSearcher}
+                  />
+                </Modal>
+              </ClickAwayListener>
+            </Suspense>
           )}
         </Box>
       }

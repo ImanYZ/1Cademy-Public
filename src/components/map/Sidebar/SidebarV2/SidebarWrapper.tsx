@@ -2,6 +2,7 @@ import { Theme } from "@emotion/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
@@ -28,6 +29,8 @@ type SidebarWrapperProps = {
   moveBack?: any;
   sidebarType?: string | null;
   selectedChannel?: any;
+  setDisplayTagSearcher?: any;
+  openChatInfoPage?: any;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -53,6 +56,8 @@ export const SidebarWrapper = ({
   moveBack = null,
   sidebarType = null,
   selectedChannel = null,
+  setDisplayTagSearcher,
+  openChatInfoPage,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -107,9 +112,16 @@ export const SidebarWrapper = ({
               </IconButton>
             </Tooltip>
           )}
-          <Typography variant="h6" sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0 }}>
+          <Typography
+            onClick={() => setDisplayTagSearcher(true)}
+            variant="h6"
+            sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0 }}
+          >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography>
+          <IconButton sx={{ marginTop: "15px" }} onClick={() => openChatInfoPage()}>
+            <MoreVertIcon />
+          </IconButton>
         </Box>
       )}
       {title && (

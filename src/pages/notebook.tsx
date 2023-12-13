@@ -7224,6 +7224,8 @@ const Notebook = ({}: NotebookProps) => {
                 bookmark={bookmark}
               />
               <MemoizedChatSidebar
+                user={user}
+                settings={settings}
                 theme={settings.theme}
                 openLinkedNode={openLinkedNode}
                 username={user.uname}
@@ -7233,6 +7235,14 @@ const Notebook = ({}: NotebookProps) => {
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
                 bookmark={bookmark}
+                nodeBookDispatch={nodeBookDispatch}
+                notebookRef={notebookRef}
+                nodeBookState={nodeBookState}
+                notebooks={notebooks}
+                onChangeNotebook={onChangeNotebook}
+                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                dispatch={dispatch}
+                selectedNotebook={selectedNotebook}
               />
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}
