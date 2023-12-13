@@ -82,6 +82,7 @@ export const ChatSidebar = ({
   dispatch,
   onChangeTagOfNotebookById,
   onlineUsers,
+  openLinkedNode,
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -430,7 +431,7 @@ export const ChatSidebar = ({
           {openChatRoom ? (
             <>
               {openChatInfo ? (
-                <Summary roomType={roomType} selectedChannel={selectedChannel} />
+                <Summary roomType={roomType} selectedChannel={selectedChannel} openLinkedNode={openLinkedNode} />
               ) : (
                 <Message
                   roomType={roomType}

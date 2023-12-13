@@ -11,8 +11,9 @@ type NodesProps = {
   db: any;
   selectedChannel: any;
   roomType: string;
+  openLinkedNode: any;
 };
-export const Nodes = ({ db, selectedChannel, roomType }: NodesProps) => {
+export const Nodes = ({ db, selectedChannel, roomType, openLinkedNode }: NodesProps) => {
   const [nodes, setNodes] = useState<any>([]);
 
   useEffect(() => {
@@ -43,7 +44,8 @@ export const Nodes = ({ db, selectedChannel, roomType }: NodesProps) => {
       {nodes.map((node: any) => (
         <SidebarNodeLink
           key={node.id}
-          onClick={() => {}}
+          onClick={() => openLinkedNode(node.id, "Searcher")}
+          linkMessage="Open"
           {...node}
           sx={{
             borderLeft: "studied" in node && node.studied ? "solid 6px #fdc473" : " solid 6px #fd7373",

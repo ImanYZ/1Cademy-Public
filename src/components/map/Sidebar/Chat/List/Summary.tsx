@@ -18,8 +18,9 @@ dayjs.extend(relativeTime);
 type SummaryProps = {
   selectedChannel: any;
   roomType: string;
+  openLinkedNode: any;
 };
-export const Summary = ({ selectedChannel, roomType }: SummaryProps) => {
+export const Summary = ({ selectedChannel, roomType, openLinkedNode }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
 
@@ -161,7 +162,9 @@ export const Summary = ({ selectedChannel, roomType }: SummaryProps) => {
       </Box>
       <Box sx={{ width: "100%" }}>
         {value === 0 && <Members selectedChannel={selectedChannel} />}
-        {value === 1 && <Nodes db={db} roomType={roomType} selectedChannel={selectedChannel} />}
+        {value === 1 && (
+          <Nodes db={db} roomType={roomType} selectedChannel={selectedChannel} openLinkedNode={openLinkedNode} />
+        )}
         {value === 2 && <Media db={db} roomType={roomType} selectedChannel={selectedChannel} />}
       </Box>
     </Box>
