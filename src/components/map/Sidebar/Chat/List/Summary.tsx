@@ -19,8 +19,9 @@ type SummaryProps = {
   selectedChannel: any;
   roomType: string;
   openLinkedNode: any;
+  leading: boolean;
 };
-export const Summary = ({ selectedChannel, roomType, openLinkedNode }: SummaryProps) => {
+export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
 
@@ -115,31 +116,33 @@ export const Summary = ({ selectedChannel, roomType, openLinkedNode }: SummaryPr
           </Box>
           <Typography>Mute</Typography>
         </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100px",
-            height: "100px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            color: "red",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
-            ":hover": {
+        {!leading && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100px",
+              height: "100px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              color: "red",
               background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
-            },
-          }}
-          onClick={leaveChannel}
-        >
-          <Box>
-            <LogoutIcon sx={{ color: "red" }} />
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
+              },
+            }}
+            onClick={leaveChannel}
+          >
+            <Box>
+              <LogoutIcon sx={{ color: "red" }} />
+            </Box>
+            <Typography sx={{ color: "red" }}>Leave</Typography>
           </Box>
-          <Typography sx={{ color: "red" }}>Leave</Typography>
-        </Box>
+        )}
       </Box>
       <Box
         sx={{

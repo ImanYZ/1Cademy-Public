@@ -31,6 +31,7 @@ type MessageProps = {
   setForward: (forward: boolean) => void;
   forward: boolean;
   getMessageRef: any;
+  leading: boolean;
 };
 
 export const Message = ({
@@ -46,6 +47,7 @@ export const Message = ({
   setForward,
   forward,
   getMessageRef,
+  leading,
 }: MessageProps) => {
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [inputValue, setInputValue] = useState<string>("");
@@ -344,6 +346,7 @@ export const Message = ({
                             saveMessageEdit={saveMessageEdit}
                             db={db}
                             roomType={roomType}
+                            leading={leading}
                           />
                         )}
                         {roomType !== "news" && (
@@ -363,6 +366,7 @@ export const Message = ({
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
                             roomType={roomType}
+                            leading={leading}
                           />
                         )}
                       </Box>
@@ -381,16 +385,19 @@ export const Message = ({
               close={() => setReplyOnMessage(null)}
             />
           )}
-          <MessageInput
-            theme={theme}
-            channelUsers={channelUsers}
-            placeholder="Type message here ...."
-            sendMessage={sendMessage}
-            handleTyping={handleTyping}
-            inputValue={inputValue}
-            toggleEmojiPicker={toggleEmojiPicker}
-            roomType={roomType}
-          />
+          {(leading || replyOnMessage || roomType !== "news") && (
+            <MessageInput
+              theme={theme}
+              channelUsers={channelUsers}
+              placeholder="Type message here ...."
+              sendMessage={sendMessage}
+              handleTyping={handleTyping}
+              inputValue={inputValue}
+              toggleEmojiPicker={toggleEmojiPicker}
+              roomType={roomType}
+              leading={leading}
+            />
+          )}
         </Box>
       </Box>
     </Box>

@@ -25,6 +25,7 @@ type MessageInputProps = {
   editingMessage?: IChannelMessage;
   setEditingMessage?: any;
   roomType?: string;
+  leading: boolean;
 };
 export const MessageInput = ({
   theme,
@@ -36,6 +37,7 @@ export const MessageInput = ({
   placeholder,
   editingMessage,
   setEditingMessage,
+  leading,
 }: // roomType,
 MessageInputProps) => {
   const storage = getStorage();
@@ -193,11 +195,13 @@ MessageInputProps) => {
                 </IconButton>
               </Tooltip>
             )}
-            <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
-              <IconButton onClick={() => setImportant(prev => !prev)}>
-                <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
-              </IconButton>
-            </Tooltip>
+            {leading && (
+              <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
+                <IconButton onClick={() => setImportant(prev => !prev)}>
+                  <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         )}
         {!editingMessage ? (

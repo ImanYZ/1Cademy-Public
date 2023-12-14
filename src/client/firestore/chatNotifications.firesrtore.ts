@@ -16,9 +16,14 @@ export const getchatNotificationsSnapshot = (
 ): Unsubscribe => {
   const { username } = data;
 
-  const chatNotificationsRef = collection(db, "chatNotifications");
+  const chatNotificationsRef = collection(db, "notifications");
 
-  let q = query(chatNotificationsRef, where("notify", "==", username), where("seen", "==", false));
+  let q = query(
+    chatNotificationsRef,
+    where("notify", "==", username),
+    where("notificationType", "==", "chat"),
+    where("seen", "==", false)
+  );
 
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();

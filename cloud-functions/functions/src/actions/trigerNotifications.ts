@@ -19,8 +19,8 @@ export const trigerNotifications = async ({ message }: ItrigerNotifications) => 
     });
     if (channelData) {
       for (let member of channelData.members.filter((m: string) => m !== message.sender)) {
-        const newNotification = { ...message, seen: false, notify: member };
-        const notificationRef = db.collection("chatNotifications").doc();
+        const newNotification = { ...message, seen: false, notify: member, notificationType: "chat" };
+        const notificationRef = db.collection("notifications").doc();
         await notificationRef.set(newNotification);
       }
     }

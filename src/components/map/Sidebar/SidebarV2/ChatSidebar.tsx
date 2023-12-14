@@ -111,6 +111,7 @@ export const ChatSidebar = ({
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [openChatInfo, setOpenChatInfo] = useState<boolean>(false);
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
+  const leading = (user.claims?.leading || []).includes(selectedChannel?.id);
 
   useEffect(() => {
     if (!user) return;
@@ -390,9 +391,10 @@ export const ChatSidebar = ({
   };
   const clearNotifications = (notifications: any) => {
     for (let notif of notifications) {
-      const notifRef = doc(collection(db, "chatNotifications"), notif.id);
+      const notifRef = doc(collection(db, "notifications"), notif.id);
       updateDoc(notifRef, {
         seen: true,
+        seenAt: new Date(),
       });
     }
   };
@@ -442,7 +444,12 @@ export const ChatSidebar = ({
           {openChatRoom ? (
             <>
               {openChatInfo ? (
-                <Summary roomType={roomType} selectedChannel={selectedChannel} openLinkedNode={openLinkedNode} />
+                <Summary
+                  roomType={roomType}
+                  selectedChannel={selectedChannel}
+                  openLinkedNode={openLinkedNode}
+                  leading={leading}
+                />
               ) : (
                 <Message
                   roomType={roomType}
@@ -457,6 +464,7 @@ export const ChatSidebar = ({
                   setForward={setForward}
                   forward={forward}
                   getMessageRef={getMessageRef}
+                  leading={leading}
                 />
               )}
             </>

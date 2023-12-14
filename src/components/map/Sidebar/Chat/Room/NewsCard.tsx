@@ -30,6 +30,7 @@ type NewsCardProps = {
   saveMessageEdit: any;
   db: any;
   roomType: any;
+  leading: boolean;
 };
 export const NewsCard = ({
   message,
@@ -47,6 +48,7 @@ export const NewsCard = ({
   saveMessageEdit,
   db,
   roomType,
+  leading,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -196,6 +198,7 @@ export const NewsCard = ({
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
                 roomType={roomType}
+                leading={leading}
               />
             ))}
 
@@ -208,6 +211,7 @@ export const NewsCard = ({
                 handleTyping={handleTyping}
                 inputValue={inputMessage}
                 toggleEmojiPicker={toggleEmojiPicker}
+                leading={leading}
               />
             </Box>
           </Box>

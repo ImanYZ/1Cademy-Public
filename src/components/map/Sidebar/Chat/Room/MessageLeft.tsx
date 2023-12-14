@@ -32,6 +32,7 @@ type MessageLeftProps = {
   setEditingMessage: any;
   saveMessageEdit?: any;
   roomType: string;
+  leading: boolean;
 };
 export const MessageLeft = ({
   selectedMessage,
@@ -49,6 +50,7 @@ export const MessageLeft = ({
   setEditingMessage,
   saveMessageEdit,
   roomType,
+  leading,
 }: MessageLeftProps) => {
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [openReplies, setOpenReplies] = useState<boolean>(false);
@@ -207,6 +209,7 @@ export const MessageLeft = ({
                 toggleEmojiPicker={toggleEmojiPicker}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
+                leading={leading}
               />
             </Box>
           ) : (
@@ -289,6 +292,7 @@ export const MessageLeft = ({
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
                 roomType={roomType}
+                leading={leading}
               />
             ))}
             <Box sx={{ ml: "37px", mt: 0 }}>
@@ -300,6 +304,7 @@ export const MessageLeft = ({
                 handleTyping={handleTyping}
                 inputValue={inputMessage}
                 toggleEmojiPicker={toggleEmojiPicker}
+                leading={leading}
               />
             </Box>
           </Box>
