@@ -104,6 +104,14 @@ export const Message = ({
     setMessagesByDate(messagesObject);
   }, [messages]);
 
+  useEffect(() => {
+    const sidebarContentElement = document.getElementById("chat-content");
+
+    if (sidebarContentElement) {
+      sidebarContentElement.scrollTop = sidebarContentElement.scrollHeight;
+    }
+  }, [inputValue]);
+
   const forwardMessage = (message: any) => {
     setSelectedMessage(message);
     setForward(true);

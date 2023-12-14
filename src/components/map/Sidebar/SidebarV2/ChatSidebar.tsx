@@ -403,6 +403,7 @@ export const ChatSidebar = ({
 
   return (
     <SidebarWrapper
+      id="chat"
       title={""}
       open={open}
       onClose={onClose}
