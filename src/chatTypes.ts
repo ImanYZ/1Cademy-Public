@@ -85,6 +85,7 @@ export type IChannels = {
   membersInfo: MembersInfo;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  newsUpdatedAt: Timestamp;
   tag: string;
   channelType: "directMessage" | "group";
 };

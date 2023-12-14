@@ -2,13 +2,16 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 // import SearchIcon from "@mui/icons-material/Search";
 import { Tab, Tabs, Typography } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
 import NextImage from "next/image";
-import React from "react";
+import React, { useState } from "react";
 
+import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import TagIcon from "../../../../../../public/tag.svg";
@@ -23,6 +26,8 @@ type SummaryProps = {
   openLinkedNode: any;
   leading: boolean;
   openUserInfoSidebar: any;
+  setOpenChatRoom: any;
+  moveBack: any;
   onlineUsers: any;
 };
 export const Summary = ({
@@ -31,10 +36,14 @@ export const Summary = ({
   openLinkedNode,
   leading,
   openUserInfoSidebar,
+  moveBack,
+  setOpenChatRoom,
   onlineUsers,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
+  const [leavingChannel, setLeavingChannel] = useState(false);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -44,8 +53,36 @@ export const Summary = ({
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-  const leaveChannel = () => {
+  const leaveChannel = async () => {
     try {
+      if (
+        await confirmIt(
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            <LogoutIcon />
+            <Typography sx={{ fontWeight: "bold" }}>Do you want to leave this Channel?</Typography>
+            <Typography>This action will permanently remove you from this Channel.</Typography>
+          </Box>,
+          "Leave Channel",
+          "Stay in Channel"
+        )
+      ) {
+        setLeavingChannel(true);
+        await Post("/chat/leaveChannel", {
+          channelId: selectedChannel.id,
+        });
+        setLeavingChannel(false);
+        moveBack();
+        setOpenChatRoom(false);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -174,10 +211,16 @@ export const Summary = ({
             }}
             onClick={leaveChannel}
           >
-            <Box>
-              <LogoutIcon sx={{ color: "red" }} />
-            </Box>
-            <Typography sx={{ color: "red" }}>Leave</Typography>
+            {leavingChannel ? (
+              <CircularProgress />
+            ) : (
+              <>
+                <Box>
+                  <LogoutIcon sx={{ color: "red" }} />
+                </Box>
+                <Typography sx={{ color: "red" }}>Leave</Typography>
+              </>
+            )}
           </Box>
         )}
       </Box>
@@ -206,6 +249,7 @@ export const Summary = ({
             selectedChannel={selectedChannel}
             openUserInfoSidebar={openUserInfoSidebar}
             onlineUsers={onlineUsers}
+            leading={leading}
           />
         )}
         {value === 1 && (
@@ -213,6 +257,7 @@ export const Summary = ({
         )}
         {value === 2 && <Media db={db} roomType={roomType} selectedChannel={selectedChannel} />}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };
