@@ -17,6 +17,7 @@ import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
 import { trigerNotifications } from "./actions/trigerNotifications";
+import { addUserToChannel } from "./actions/addUserToChannel";
 
 import { db } from "./admin";
 
@@ -232,7 +233,7 @@ export const onDirectMessagesNotification = functions.firestore
       const message = change.data();
       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
     } catch (error) {
-      console.log("error onNodeDeleted:", error);
+      console.log("error onDirectMessagesNotification:", error);
     }
   });
 
@@ -243,7 +244,7 @@ export const onChannelMessagesNotification = functions.firestore
       const message = change.data();
       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "channel" } });
     } catch (error) {
-      console.log("error onNodeDeleted:", error);
+      console.log("error onChannelMessagesNotification:", error);
     }
   });
 export const onAnnouncementsMessagesNotification = functions.firestore
@@ -253,9 +254,21 @@ export const onAnnouncementsMessagesNotification = functions.firestore
       const message = change.data();
       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "announcement" } });
     } catch (error) {
-      console.log("error onNodeDeleted:", error);
+      console.log("error onAnnouncementsMessagesNotification:", error);
     }
   });
+
+export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate(async change => {
+  try {
+    const userData = change.after.data();
+    const previousData = change.before.data();
+    if (userData.tagId !== previousData.tagId) {
+      addUserToChannel({ userData });
+    }
+  } catch (error) {
+    console.log("error onUserUpdate:", error);
+  }
+});
 
 exports.assignNodeContributorsInstitutionsStats = functions
   .runWith({ memory: "1GB", timeoutSeconds: 520 })
