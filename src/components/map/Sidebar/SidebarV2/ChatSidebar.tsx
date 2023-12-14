@@ -295,6 +295,10 @@ export const ChatSidebar = ({
   };
 
   const moveBack = () => {
+    if (openChatInfo) {
+      setOpenChatInfo(false);
+      return;
+    }
     if (forward) {
       setForward(!forward);
     } else {
