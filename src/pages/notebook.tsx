@@ -7283,6 +7283,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedNotebook={selectedNotebook}
                 onlineUsers={onlineUsers}
                 notifications={notificationsMessages}
+                openUserInfoSidebar={openUserInfoSidebar}
               />
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}

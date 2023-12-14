@@ -44,7 +44,7 @@ export const Media = ({ db, selectedChannel, roomType }: MediaProps) => {
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: "9px", marginTop: "9px" }}>
       {medias.map((media: any, idx: number) => (
         <Box key={idx} sx={{ cursor: "pointer" }}>
-          <Image src={media.imageUrl} width={"105px"} height={"100px"} />
+          <Image src={media.imageUrl} width={"108px"} height={"100px"} />
         </Box>
       ))}
     </Box>

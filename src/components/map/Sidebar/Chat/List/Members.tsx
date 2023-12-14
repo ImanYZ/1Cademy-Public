@@ -1,14 +1,19 @@
-import { Paper, Typography } from "@mui/material";
+import { Button, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 dayjs.extend(relativeTime);
 
 type MemberProps = {
   selectedChannel: any;
+  openUserInfoSidebar: any;
 };
-export const Members = ({ selectedChannel }: MemberProps) => {
+export const Members = ({ selectedChannel, openUserInfoSidebar }: MemberProps) => {
+  const [openActions, setOpenActions] = useState<any>(null);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
       {/* <Paper
@@ -34,9 +39,88 @@ export const Members = ({ selectedChannel }: MemberProps) => {
         <PersonAddIcon />
         <Typography>Add a member</Typography>
       </Paper> */}
+      {openActions && (
+        <Box
+          sx={{
+            position: "fixed",
+            width: "23.8%",
+            bottom: "0px",
+            display: "flex",
+            gap: "10px",
+            flexDirection: "column",
+            alignItems: "center",
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray25,
+            py: "10px",
+          }}
+        >
+          <Button
+            sx={{
+              width: "95%",
+              height: "46px",
+              color: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+              },
+            }}
+          >
+            Remove member from chat
+          </Button>
+          <Button
+            onClick={() => {
+              openUserInfoSidebar(
+                openActions.uname,
+                openActions.imageUrl,
+                openActions.fullname,
+                openActions.chooseUname
+              );
+              setOpenActions(null);
+            }}
+            sx={{
+              width: "95%",
+              height: "46px",
+              color: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+              },
+            }}
+          >
+            View Profile
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenActions(null);
+            }}
+            sx={{
+              width: "95%",
+              height: "46px",
+              color: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+              },
+            }}
+          >
+            Cancel
+          </Button>
+        </Box>
+      )}
       {Object.keys(selectedChannel.membersInfo).map((member: any, idx: number) => (
         <Paper
-          onClick={() => {}}
+          onClick={() => {
+            setOpenActions(selectedChannel.membersInfo[member]);
+          }}
           key={idx}
           elevation={3}
           className="CollapsedProposal collection-item"

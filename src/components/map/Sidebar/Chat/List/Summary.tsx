@@ -6,10 +6,12 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
+import NextImage from "next/image";
 import React from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
+import TagIcon from "../../../../../../public/tag.svg";
 import { Media } from "./Media";
 import { Members } from "./Members";
 import { Nodes } from "./Nodes";
@@ -20,8 +22,9 @@ type SummaryProps = {
   roomType: string;
   openLinkedNode: any;
   leading: boolean;
+  openUserInfoSidebar: any;
 };
-export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading }: SummaryProps) => {
+export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading, openUserInfoSidebar }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
 
@@ -60,7 +63,33 @@ export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading }: 
           .join(" ")}
       </Box>
       <Typography sx={{ fontWeight: "500", fontSize: "17px" }}>{selectedChannel.title}</Typography>
-
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <NextImage width={"20px"} src={TagIcon} alt="tag icon" />
+          <Box
+            sx={{
+              fontSize: "12px",
+              marginLeft: "5px",
+              color: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+            }}
+          >
+            {selectedChannel.tagLabel}
+          </Box>
+        </Box>
+      </Box>
       <Typography
         sx={{
           color: theme =>
@@ -163,8 +192,8 @@ export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading }: 
           ))}
         </Tabs>
       </Box>
-      <Box sx={{ width: "100%" }}>
-        {value === 0 && <Members selectedChannel={selectedChannel} />}
+      <Box sx={{ width: "100%", px: "10px" }}>
+        {value === 0 && <Members selectedChannel={selectedChannel} openUserInfoSidebar={openUserInfoSidebar} />}
         {value === 1 && (
           <Nodes db={db} roomType={roomType} selectedChannel={selectedChannel} openLinkedNode={openLinkedNode} />
         )}

@@ -63,6 +63,7 @@ type ChatSidebarProps = {
   dispatch: any;
   onChangeTagOfNotebookById: any;
   notifications: any;
+  openUserInfoSidebar: any;
 };
 
 export const ChatSidebar = ({
@@ -85,6 +86,7 @@ export const ChatSidebar = ({
   onlineUsers,
   openLinkedNode,
   notifications,
+  openUserInfoSidebar,
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -449,6 +451,7 @@ export const ChatSidebar = ({
                   selectedChannel={selectedChannel}
                   openLinkedNode={openLinkedNode}
                   leading={leading}
+                  openUserInfoSidebar={openUserInfoSidebar}
                 />
               ) : (
                 <Message
