@@ -23,8 +23,16 @@ type SummaryProps = {
   openLinkedNode: any;
   leading: boolean;
   openUserInfoSidebar: any;
+  onlineUsers: any;
 };
-export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading, openUserInfoSidebar }: SummaryProps) => {
+export const Summary = ({
+  selectedChannel,
+  roomType,
+  openLinkedNode,
+  leading,
+  openUserInfoSidebar,
+  onlineUsers,
+}: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
 
@@ -193,7 +201,13 @@ export const Summary = ({ selectedChannel, roomType, openLinkedNode, leading, op
         </Tabs>
       </Box>
       <Box sx={{ width: "100%", px: "10px" }}>
-        {value === 0 && <Members selectedChannel={selectedChannel} openUserInfoSidebar={openUserInfoSidebar} />}
+        {value === 0 && (
+          <Members
+            selectedChannel={selectedChannel}
+            openUserInfoSidebar={openUserInfoSidebar}
+            onlineUsers={onlineUsers}
+          />
+        )}
         {value === 1 && (
           <Nodes db={db} roomType={roomType} selectedChannel={selectedChannel} openLinkedNode={openLinkedNode} />
         )}

@@ -1,7 +1,6 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import SendIcon from "@mui/icons-material/Send";
-import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import { Box, Button, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -9,7 +8,6 @@ import { Reputation, UserTheme } from "src/knowledgeTypes";
 import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTypedCollections } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
@@ -454,24 +452,9 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
                 </div>
               </>
             )}
-
-            {/* this Button has no functionality yet once it has remove the display none */}
-            <Button
-              variant="contained"
-              endIcon={<SendRoundedIcon sx={{ transform: "rotate(-45deg)" }} />}
-              sx={{
-                display: "none",
-                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-                borderRadius: "24px",
-                mt: "16px",
-              }}
-              fullWidth
-            >
-              Message
-            </Button>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <Button sx={{ width: "90%", borderRadius: "20px" }} endIcon={<SendIcon />} variant="contained">
+            <Button sx={{ width: "70%", borderRadius: "20px" }} endIcon={<SendIcon />} variant="contained">
               Message
             </Button>
           </Box>

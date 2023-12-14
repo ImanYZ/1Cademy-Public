@@ -8,6 +8,7 @@ import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import { Forward } from "../List/Forward";
@@ -324,12 +325,15 @@ export const Message = ({
                       <Paper
                         sx={{
                           alignItems: "center",
-                          borderRadius: "15px",
-                          padding: "10px",
-                          fontSize: "12px",
-                          p: 1,
-                          backgroundColor: "grey",
-                          mt: "7px",
+                          borderRadius: "20px",
+                          padding: "8px 40px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG600
+                              : DESIGN_SYSTEM_COLORS.gray100,
+                          mt: "15px",
                         }}
                       >
                         {date}

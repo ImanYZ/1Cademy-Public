@@ -1,4 +1,4 @@
-import { Box, ClickAwayListener, Modal, Popover, Tab, Tabs } from "@mui/material";
+import { Box, ClickAwayListener, Modal, Popover, Tab, Tabs, Typography } from "@mui/material";
 import { EmojiClickData } from "emoji-picker-react";
 import {
   arrayRemove,
@@ -27,6 +27,7 @@ import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
 import { Post } from "@/lib/mapApi";
 
+import { CustomBadge } from "../../CustomBudge";
 import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/DirectMessages";
 import { NewsList } from "../Chat/List/News";
@@ -453,6 +454,7 @@ export const ChatSidebar = ({
                   openLinkedNode={openLinkedNode}
                   leading={leading}
                   openUserInfoSidebar={openUserInfoSidebar}
+                  onlineUsers={onlineUsers}
                 />
               ) : (
                 <Message
@@ -487,7 +489,20 @@ export const ChatSidebar = ({
                     <Tab
                       key={tabItem.title}
                       id={`chat-tab-${tabItem.title.toLowerCase()}`}
-                      label={tabItem.title}
+                      label={
+                        <Box sx={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                          <Typography>{tabItem.title}</Typography>
+                          <CustomBadge
+                            value={99}
+                            key={idx}
+                            sx={{
+                              height: "20px",
+                              p: "6px",
+                              fontSize: "13px",
+                            }}
+                          />
+                        </Box>
+                      }
                       {...a11yProps(idx)}
                     ></Tab>
                   ))}

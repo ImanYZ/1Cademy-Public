@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useState } from "react";
 
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 dayjs.extend(relativeTime);
@@ -11,9 +12,11 @@ dayjs.extend(relativeTime);
 type MemberProps = {
   selectedChannel: any;
   openUserInfoSidebar: any;
+  onlineUsers: any;
 };
-export const Members = ({ selectedChannel, openUserInfoSidebar }: MemberProps) => {
+export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers }: MemberProps) => {
   const [openActions, setOpenActions] = useState<any>(null);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
       {/* <Paper
@@ -56,8 +59,9 @@ export const Members = ({ selectedChannel, openUserInfoSidebar }: MemberProps) =
         >
           <Button
             sx={{
-              width: "95%",
+              width: "80%",
               height: "46px",
+              borderRadius: "15px",
               color: theme =>
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
               background: theme =>
@@ -81,8 +85,9 @@ export const Members = ({ selectedChannel, openUserInfoSidebar }: MemberProps) =
               setOpenActions(null);
             }}
             sx={{
-              width: "95%",
+              width: "80%",
               height: "46px",
+              borderRadius: "15px",
               color: theme =>
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
               background: theme =>
@@ -100,8 +105,9 @@ export const Members = ({ selectedChannel, openUserInfoSidebar }: MemberProps) =
               setOpenActions(null);
             }}
             sx={{
-              width: "95%",
+              width: "80%",
               height: "46px",
+              borderRadius: "15px",
               color: theme =>
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
               background: theme =>
@@ -157,44 +163,62 @@ export const Members = ({ selectedChannel, openUserInfoSidebar }: MemberProps) =
             >
               <Box
                 sx={{
-                  width: "50px",
-                  height: "50px",
-                  borderRadius: "200px",
-                  background: "linear-gradient(to right, #FDC830, #F37335)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: `40px`,
+                  height: `40px`,
+                  cursor: "pointer",
+                  transition: "all 0.2s 0s ease",
+                  background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+                  borderRadius: "50%",
+                  "& > .user-image": {
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    width: "30px",
+                    height: "30px",
+                  },
+                  "@keyframes slidein": {
+                    from: {
+                      transform: "translateY(0%)",
+                    },
+                    to: {
+                      transform: "translateY(100%)",
+                    },
+                  },
                 }}
               >
-                {selectedChannel.membersInfo[member].fullname
-                  .split(" ")
-                  .slice(0, 2)
-                  .map((word: string) => word[0])
-                  .join(" ")}
+                <OptimizedAvatar2
+                  alt={selectedChannel.membersInfo[member].fullname}
+                  imageUrl={selectedChannel.membersInfo[member].imageUrl}
+                  size={40}
+                  sx={{ border: "none" }}
+                />
+                <Box
+                  sx={{
+                    background: onlineUsers.includes(selectedChannel.membersInfo[member].uname) ? "#12B76A" : "grey",
+                    fontSize: "1px",
+                  }}
+                  className="UserStatusOnlineIcon"
+                />
               </Box>
               <Box>
-                <Box sx={{ width: "350px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography
-                    sx={{
-                      fontSize: "16px",
-                      fontWeight: "500",
-                      lineHeight: "24px",
-                    }}
-                  >
-                    {selectedChannel.membersInfo[member].fullname}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "14px",
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG200
-                          : theme.palette.common.gray500,
-                    }}
-                  >
-                    @{selectedChannel.membersInfo[member].uname}
-                  </Typography>
-                </Box>
+                <Typography
+                  sx={{
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    lineHeight: "24px",
+                  }}
+                >
+                  {selectedChannel.membersInfo[member].fullname}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "14px",
+                    color: theme =>
+                      theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+                  }}
+                >
+                  @{selectedChannel.membersInfo[member].uname}
+                </Typography>
+
                 {/* <Box
                   sx={{
                     display: "flex",
