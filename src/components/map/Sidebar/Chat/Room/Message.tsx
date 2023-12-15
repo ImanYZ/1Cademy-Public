@@ -301,7 +301,7 @@ export const Message = ({
   };
 
   return (
-    <Box ref={messageBoxRef} sx={{ gap: "4px", pl: 3, pr: 3, position: "relative", height: "90vh" }}>
+    <Box ref={messageBoxRef} sx={{ gap: "4px", pl: 3, pr: 3, position: "relative", height: "80vh", overflow: "auto" }}>
       {forward ? (
         <Forward />
       ) : (
@@ -399,9 +399,10 @@ export const Message = ({
       {(leading || replyOnMessage || roomType !== "news") && (
         <Box
           sx={{
-            position: "sticky",
-            bottom: 0,
+            position: "fixed",
+            bottom: "10px",
             mt: "15px",
+            width: "450px",
           }}
         >
           <Paper>
