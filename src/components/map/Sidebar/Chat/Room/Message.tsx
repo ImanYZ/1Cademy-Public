@@ -306,7 +306,7 @@ export const Message = ({
           {Object.keys(messagesByDate).map(date => {
             return (
               <Box key={date}>
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", position: "sticky", top: 0, zIndex: 1 }}>
                   <Paper
                     sx={{
                       alignItems: "center",
@@ -314,10 +314,7 @@ export const Message = ({
                       padding: "8px 20px",
                       fontSize: "14px",
                       fontWeight: "500",
-                      background: theme =>
-                        theme.palette.mode === "dark"
-                          ? DESIGN_SYSTEM_COLORS.notebookG600
-                          : DESIGN_SYSTEM_COLORS.gray100,
+                      background: DESIGN_SYSTEM_COLORS.orange400,
                       mt: "15px",
                     }}
                   >
