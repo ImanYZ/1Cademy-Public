@@ -64,7 +64,7 @@ export const SidebarButton = ({
           position: "relative",
         }}
       >
-        {icon ? icon : <NextImage width={"22px"} src={iconSrc} alt="search icon" />}
+        {icon ? icon : <NextImage width={"22px"} height={"22px"} src={iconSrc} alt="search icon" />}
         {toolbarIsOpen && (
           <Typography
             className="toolbarDescription"

@@ -449,6 +449,7 @@ export const ChatSidebar = ({
             <>
               {openChatInfo ? (
                 <Summary
+                  theme={theme}
                   roomType={roomType}
                   selectedChannel={selectedChannel}
                   openLinkedNode={openLinkedNode}

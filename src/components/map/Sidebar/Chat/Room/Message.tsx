@@ -1,8 +1,9 @@
-import { Paper } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { arrayUnion, collection, doc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
+import NextImage from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
@@ -11,11 +12,14 @@ import { UserTheme } from "src/knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
+import NoProposalDarkIcon from "../../../../../../public/no-proposals-dark-mode.svg";
+import NoProposalLightIcon from "../../../../../../public/no-proposals-light-mode.svg";
 import { Forward } from "../List/Forward";
 import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
 import { Reply } from "./Reply";
+
 // import { NodeLink } from "./NodeLink";
 
 dayjs.extend(relativeTime);
@@ -50,6 +54,7 @@ export const Message = ({
   getMessageRef,
   leading,
 }: MessageProps) => {
+  const db = getFirestore();
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [inputValue, setInputValue] = useState<string>("");
   const [channelUsers, setChannelUsers] = useState([]);
@@ -59,8 +64,6 @@ export const Message = ({
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [replyOnMessage, setReplyOnMessage] = useState<any>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
-
-  const db = getFirestore();
 
   useEffect(() => {
     const currentDate = new Date();
@@ -318,6 +321,31 @@ export const Message = ({
             <Forward />
           ) : (
             <Box>
+              {!firstLoad && !Object.keys(messagesByDate).length && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: "40%",
+                  }}
+                >
+                  <NextImage
+                    src={theme === "Dark" ? NoProposalDarkIcon : NoProposalLightIcon}
+                    alt="Notification icon"
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: "20px",
+
+                      fontWeight: "500",
+                    }}
+                  >
+                    There are no messages yet.
+                  </Typography>
+                </Box>
+              )}
               {Object.keys(messagesByDate).map(date => {
                 return (
                   <Box key={date}>

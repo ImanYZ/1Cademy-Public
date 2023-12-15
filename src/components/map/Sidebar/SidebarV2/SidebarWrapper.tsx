@@ -166,8 +166,19 @@ export const SidebarWrapper = ({
           </Typography>
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && (
-            <IconButton sx={{ mt: 3 }} onClick={() => openChatInfoPage()}>
-              <MoreVertIcon />
+            <IconButton
+              sx={{
+                width: "2px",
+                ml: "-15px",
+                mt: 3,
+                ":hover": {
+                  background: "transparent",
+                  color: "grey",
+                },
+              }}
+              onClick={() => openChatInfoPage()}
+            >
+              <MoreVertIcon sx={{ color: "inherit" }} />
             </IconButton>
           )}
         </Box>

@@ -658,7 +658,7 @@ export const ToolbarSidebar = ({
             />
 
             <SidebarButton
-              id="toolbar-pending-proposal-button"
+              id="chat-button"
               iconSrc={ChatIcon}
               onClick={() => {
                 onOpenSidebar("CHAT", "chat");

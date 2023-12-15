@@ -18,6 +18,7 @@ import { Nodes } from "./Nodes";
 
 dayjs.extend(relativeTime);
 type SummaryProps = {
+  theme: any;
   selectedChannel: any;
   roomType: string;
   openLinkedNode: any;
@@ -26,6 +27,7 @@ type SummaryProps = {
   onlineUsers: any;
 };
 export const Summary = ({
+  theme,
   selectedChannel,
   roomType,
   openLinkedNode,
@@ -209,9 +211,15 @@ export const Summary = ({
           />
         )}
         {value === 1 && (
-          <Nodes db={db} roomType={roomType} selectedChannel={selectedChannel} openLinkedNode={openLinkedNode} />
+          <Nodes
+            db={db}
+            theme={theme}
+            roomType={roomType}
+            selectedChannel={selectedChannel}
+            openLinkedNode={openLinkedNode}
+          />
         )}
-        {value === 2 && <Media db={db} roomType={roomType} selectedChannel={selectedChannel} />}
+        {value === 2 && <Media db={db} theme={theme} roomType={roomType} selectedChannel={selectedChannel} />}
       </Box>
     </Box>
   );
