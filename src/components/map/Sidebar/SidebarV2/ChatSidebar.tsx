@@ -425,7 +425,7 @@ export const ChatSidebar = ({
       contentSignalState={contentSignalState}
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
-      setDisplayTagSearcher={setDisplayTagSearcher}
+      // setDisplayTagSearcher={setDisplayTagSearcher}
       openChatInfoPage={openChatInfoPage}
       sidebarType={"chat"}
       onlineUsers={onlineUsers}
@@ -464,6 +464,7 @@ export const ChatSidebar = ({
                   moveBack={moveBack}
                   setOpenChatRoom={setOpenChatRoom}
                   onlineUsers={onlineUsers}
+                  user={user}
                 />
               ) : (
                 <Message

@@ -21,7 +21,10 @@ export const Reply = ({ message, sx, close }: ReplyProps) => {
         ...sx,
       }}
     >
-      <ReplyIcon color="primary" />
+      <Box sx={{ pl: 3 }}>
+        <ReplyIcon color="primary" />
+      </Box>
+
       <Divider
         sx={{
           borderColor: "#f99346",
@@ -32,7 +35,7 @@ export const Reply = ({ message, sx, close }: ReplyProps) => {
       <Box sx={{ width: "70%" }}>
         <Typography
           sx={{
-            fontSize: "16px",
+            fontSize: "15px",
             fontWeight: "500",
             lineHeight: "24px",
           }}
@@ -43,7 +46,7 @@ export const Reply = ({ message, sx, close }: ReplyProps) => {
         <Typography
           sx={{
             fontSize: "16px",
-            fontWeight: "400",
+            fontWeight: "bold",
             lineHeight: "24px",
           }}
         >

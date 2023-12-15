@@ -1,5 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 // import SearchIcon from "@mui/icons-material/Search";
 import { Tab, Tabs, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -29,6 +30,7 @@ type SummaryProps = {
   setOpenChatRoom: any;
   moveBack: any;
   onlineUsers: any;
+  user: any;
 };
 export const Summary = ({
   selectedChannel,
@@ -39,11 +41,14 @@ export const Summary = ({
   moveBack,
   setOpenChatRoom,
   onlineUsers,
+  user,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [leavingChannel, setLeavingChannel] = useState(false);
+  const [mutingChannel, setMutingChannel] = useState(false);
+  const muted = !selectedChannel?.membersInfo[user.uname].muteChannel;
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -87,6 +92,40 @@ export const Summary = ({
       console.error(error);
     }
   };
+  const muteChannel = async () => {
+    try {
+      if (
+        await confirmIt(
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            {muted ? <NotificationsIcon /> : <NotificationsOffIcon />}
+            <Typography sx={{ fontWeight: "bold" }}>
+              Are you sure you want to {muted ? "unmute" : "mute"} this Channel?
+            </Typography>
+          </Box>,
+          `${muted ? "Unmute" : "Mute"} Channel`,
+          "Cancel"
+        )
+      ) {
+        setMutingChannel(true);
+        await Post("/chat/muteChannel", {
+          channelId: selectedChannel.id,
+        });
+        setMutingChannel(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
       <Box
@@ -184,11 +223,17 @@ export const Summary = ({
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
             },
           }}
+          onClick={muteChannel}
         >
-          <Box>
-            <NotificationsIcon />
-          </Box>
-          <Typography>Mute</Typography>
+          {" "}
+          {mutingChannel ? (
+            <CircularProgress />
+          ) : (
+            <>
+              <Box>{muted ? <NotificationsOffIcon /> : <NotificationsIcon />}</Box>
+              <Typography>{muted ? "Unmute" : "Mute"}</Typography>
+            </>
+          )}
         </Box>
         {!leading && (
           <Box
