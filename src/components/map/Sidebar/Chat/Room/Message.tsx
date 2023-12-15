@@ -301,145 +301,130 @@ export const Message = ({
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px", pl: 3, pr: 3 }}>
-      <Box
-        sx={{
-          height: roomType !== "news" ? "725px" : "777px",
-        }}
-      >
-        <Box
-          ref={messageBoxRef}
-          className="messages-room"
-          sx={{
-            height: "100%",
-            overflow: "auto",
-            paddingTop: roomType === "news" ? "20px" : undefined,
-            pt: 3,
-          }}
-        >
-          {forward ? (
-            <Forward />
-          ) : (
-            <Box>
-              {!firstLoad && !Object.keys(messagesByDate).length && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginTop: "40%",
-                  }}
-                >
-                  <NextImage
-                    src={theme === "Dark" ? NoProposalDarkIcon : NoProposalLightIcon}
-                    alt="Notification icon"
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: "20px",
+    <Box ref={messageBoxRef} sx={{ gap: "4px", pl: 3, pr: 3, position: "relative", height: "90vh" }}>
+      {forward ? (
+        <Forward />
+      ) : (
+        <Box>
+          {!firstLoad && !Object.keys(messagesByDate).length && (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: "40%",
+              }}
+            >
+              <NextImage src={theme === "Dark" ? NoProposalDarkIcon : NoProposalLightIcon} alt="Notification icon" />
+              <Typography
+                sx={{
+                  fontSize: "20px",
 
-                      fontWeight: "500",
-                    }}
-                  >
-                    There are no messages yet.
-                  </Typography>
-                </Box>
-              )}
-              {Object.keys(messagesByDate).map(date => {
-                return (
-                  <Box key={date}>
-                    <Box sx={{ display: "flex", justifyContent: "center" }}>
-                      <Paper
-                        sx={{
-                          alignItems: "center",
-                          borderRadius: "20px",
-                          padding: "8px 40px",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          background: theme =>
-                            theme.palette.mode === "dark"
-                              ? DESIGN_SYSTEM_COLORS.notebookG600
-                              : DESIGN_SYSTEM_COLORS.gray100,
-                          mt: "15px",
-                        }}
-                      >
-                        {date}
-                      </Paper>
-                    </Box>
-                    {messagesByDate[date].map((message: any) => (
-                      <Box key={message.id}>
-                        {roomType === "news" && (
-                          <NewsCard
-                            message={message}
-                            membersInfo={selectedChannel.membersInfo}
-                            toggleEmojiPicker={toggleEmojiPicker}
-                            channelUsers={channelUsers}
-                            sendReplyOnMessage={sendReplyOnMessage}
-                            setReplyOnMessage={setReplyOnMessage}
-                            toggleReaction={toggleReaction}
-                            forwardMessage={forwardMessage}
-                            editingMessage={editingMessage}
-                            setEditingMessage={setEditingMessage}
-                            user={user}
-                            selectedMessage={selectedMessage}
-                            saveMessageEdit={saveMessageEdit}
-                            db={db}
-                            roomType={roomType}
-                            leading={leading}
-                          />
-                        )}
-                        {roomType !== "news" && (
-                          <MessageLeft
-                            selectedMessage={selectedMessage}
-                            message={message}
-                            toggleEmojiPicker={toggleEmojiPicker}
-                            toggleReaction={toggleReaction}
-                            membersInfo={selectedChannel.membersInfo}
-                            forwardMessage={forwardMessage}
-                            setReplyOnMessage={setReplyOnMessage}
-                            channelUsers={channelUsers}
-                            sendReplyOnMessage={sendReplyOnMessage}
-                            saveMessageEdit={saveMessageEdit}
-                            user={user}
-                            db={db}
-                            editingMessage={editingMessage}
-                            setEditingMessage={setEditingMessage}
-                            roomType={roomType}
-                            leading={leading}
-                          />
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                );
-              })}
+                  fontWeight: "500",
+                }}
+              >
+                There are no messages yet.
+              </Typography>
             </Box>
           )}
+          {Object.keys(messagesByDate).map(date => {
+            return (
+              <Box key={date}>
+                <Box sx={{ display: "flex", justifyContent: "center", position: "sticky", top: 0, zIndex: 1 }}>
+                  <Paper
+                    sx={{
+                      alignItems: "center",
+                      borderRadius: "20px",
+                      padding: "8px 20px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      background: DESIGN_SYSTEM_COLORS.orange400,
+                      mt: "15px",
+                    }}
+                  >
+                    {date}
+                  </Paper>
+                </Box>
+                {messagesByDate[date].map((message: any) => (
+                  <Box key={message.id}>
+                    {roomType === "news" && (
+                      <NewsCard
+                        message={message}
+                        membersInfo={selectedChannel.membersInfo}
+                        toggleEmojiPicker={toggleEmojiPicker}
+                        channelUsers={channelUsers}
+                        sendReplyOnMessage={sendReplyOnMessage}
+                        setReplyOnMessage={setReplyOnMessage}
+                        toggleReaction={toggleReaction}
+                        forwardMessage={forwardMessage}
+                        editingMessage={editingMessage}
+                        setEditingMessage={setEditingMessage}
+                        user={user}
+                        selectedMessage={selectedMessage}
+                        saveMessageEdit={saveMessageEdit}
+                        db={db}
+                        roomType={roomType}
+                        leading={leading}
+                      />
+                    )}
+                    {roomType !== "news" && (
+                      <MessageLeft
+                        selectedMessage={selectedMessage}
+                        message={message}
+                        toggleEmojiPicker={toggleEmojiPicker}
+                        toggleReaction={toggleReaction}
+                        membersInfo={selectedChannel.membersInfo}
+                        forwardMessage={forwardMessage}
+                        setReplyOnMessage={setReplyOnMessage}
+                        channelUsers={channelUsers}
+                        sendReplyOnMessage={sendReplyOnMessage}
+                        saveMessageEdit={saveMessageEdit}
+                        user={user}
+                        db={db}
+                        editingMessage={editingMessage}
+                        setEditingMessage={setEditingMessage}
+                        roomType={roomType}
+                        leading={leading}
+                      />
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            );
+          })}
         </Box>
+      )}
 
-        <Box>
-          {replyOnMessage && (
-            <Reply
-              message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
-              close={() => setReplyOnMessage(null)}
-            />
-          )}
-          {(leading || replyOnMessage || roomType !== "news") && (
-            <MessageInput
-              theme={theme}
-              channelUsers={channelUsers}
-              placeholder="Type message here ...."
-              sendMessage={sendMessage}
-              handleTyping={handleTyping}
-              inputValue={inputValue}
-              toggleEmojiPicker={toggleEmojiPicker}
-              roomType={roomType}
-              leading={leading}
-            />
-          )}
+      {(leading || replyOnMessage || roomType !== "news") && (
+        <Box
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            mt: "15px",
+          }}
+        >
+          <Paper>
+            {replyOnMessage && (
+              <Reply
+                message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
+                close={() => setReplyOnMessage(null)}
+              />
+            )}
+          </Paper>
+          <MessageInput
+            theme={theme}
+            channelUsers={channelUsers}
+            placeholder="Type message here ...."
+            sendMessage={sendMessage}
+            handleTyping={handleTyping}
+            inputValue={inputValue}
+            toggleEmojiPicker={toggleEmojiPicker}
+            roomType={roomType}
+            leading={leading}
+          />
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };

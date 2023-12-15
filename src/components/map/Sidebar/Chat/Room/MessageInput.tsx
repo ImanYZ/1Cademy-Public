@@ -80,7 +80,6 @@ MessageInputProps) => {
   return (
     <Box
       sx={{
-        marginTop: "12px",
         border: theme =>
           `solid 1px ${
             theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG500

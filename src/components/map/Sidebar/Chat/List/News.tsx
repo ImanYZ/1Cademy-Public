@@ -100,7 +100,7 @@ export const NewsList = ({ openRoom, newsChannels, notifications }: NewsListProp
                   theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
               }}
             >
-              {dayjs(channel.updatedAt.toDate().getTime()).fromNow()}
+              {dayjs(channel.newsUpdatedAt.toDate().getTime()).fromNow()}
             </Typography>
 
             {(notificationHash[channel.id] || []).length > 0 && (

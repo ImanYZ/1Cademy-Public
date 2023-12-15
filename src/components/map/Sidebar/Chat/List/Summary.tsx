@@ -1,14 +1,18 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 // import SearchIcon from "@mui/icons-material/Search";
 import { Tab, Tabs, Typography } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
 import NextImage from "next/image";
-import React from "react";
+import React, { useState } from "react";
 
+import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import TagIcon from "../../../../../../public/tag.svg";
@@ -24,7 +28,10 @@ type SummaryProps = {
   openLinkedNode: any;
   leading: boolean;
   openUserInfoSidebar: any;
+  setOpenChatRoom: any;
+  moveBack: any;
   onlineUsers: any;
+  user: any;
 };
 export const Summary = ({
   theme,
@@ -33,10 +40,17 @@ export const Summary = ({
   openLinkedNode,
   leading,
   openUserInfoSidebar,
+  moveBack,
+  setOpenChatRoom,
   onlineUsers,
+  user,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
+  const [leavingChannel, setLeavingChannel] = useState(false);
+  const [mutingChannel, setMutingChannel] = useState(false);
+  const muted = !selectedChannel?.membersInfo[user.uname].muteChannel;
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -46,12 +60,74 @@ export const Summary = ({
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-  const leaveChannel = () => {
+  const leaveChannel = async () => {
     try {
+      if (
+        await confirmIt(
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            <LogoutIcon />
+            <Typography sx={{ fontWeight: "bold" }}>Do you want to leave this Channel?</Typography>
+            <Typography>This action will permanently remove you from this Channel.</Typography>
+          </Box>,
+          "Leave Channel",
+          "Stay in Channel"
+        )
+      ) {
+        setLeavingChannel(true);
+        await Post("/chat/leaveChannel", {
+          channelId: selectedChannel.id,
+        });
+        setLeavingChannel(false);
+        moveBack();
+        setOpenChatRoom(false);
+      }
     } catch (error) {
       console.error(error);
     }
   };
+  const muteChannel = async () => {
+    try {
+      if (
+        await confirmIt(
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            {muted ? <NotificationsIcon /> : <NotificationsOffIcon />}
+            <Typography sx={{ fontWeight: "bold" }}>
+              Are you sure you want to {muted ? "unmute" : "mute"} this Channel?
+            </Typography>
+          </Box>,
+          `${muted ? "Unmute" : "Mute"} Channel`,
+          "Cancel"
+        )
+      ) {
+        setMutingChannel(true);
+        await Post("/chat/muteChannel", {
+          channelId: selectedChannel.id,
+        });
+        setMutingChannel(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
       <Box
@@ -149,11 +225,17 @@ export const Summary = ({
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
             },
           }}
+          onClick={muteChannel}
         >
-          <Box>
-            <NotificationsIcon />
-          </Box>
-          <Typography>Mute</Typography>
+          {" "}
+          {mutingChannel ? (
+            <CircularProgress />
+          ) : (
+            <>
+              <Box>{muted ? <NotificationsOffIcon /> : <NotificationsIcon />}</Box>
+              <Typography>{muted ? "Unmute" : "Mute"}</Typography>
+            </>
+          )}
         </Box>
         {!leading && (
           <Box
@@ -176,10 +258,16 @@ export const Summary = ({
             }}
             onClick={leaveChannel}
           >
-            <Box>
-              <LogoutIcon sx={{ color: "red" }} />
-            </Box>
-            <Typography sx={{ color: "red" }}>Leave</Typography>
+            {leavingChannel ? (
+              <CircularProgress />
+            ) : (
+              <>
+                <Box>
+                  <LogoutIcon sx={{ color: "red" }} />
+                </Box>
+                <Typography sx={{ color: "red" }}>Leave</Typography>
+              </>
+            )}
           </Box>
         )}
       </Box>
@@ -208,6 +296,7 @@ export const Summary = ({
             selectedChannel={selectedChannel}
             openUserInfoSidebar={openUserInfoSidebar}
             onlineUsers={onlineUsers}
+            leading={leading}
           />
         )}
         {value === 1 && (
@@ -221,6 +310,7 @@ export const Summary = ({
         )}
         {value === 2 && <Media db={db} theme={theme} roomType={roomType} selectedChannel={selectedChannel} />}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };

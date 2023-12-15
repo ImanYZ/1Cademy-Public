@@ -159,7 +159,7 @@ export const SidebarWrapper = ({
           )}
           <Typography
             variant="h6"
-            sx={{ ml: moveBack ? 2 : 0, p: 3, pb: 0, fontWeight: "bold" }}
+            sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}
             onClick={() => setDisplayTagSearcher(true)}
           >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}

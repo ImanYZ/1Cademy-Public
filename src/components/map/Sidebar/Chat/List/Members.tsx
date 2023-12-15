@@ -13,8 +13,9 @@ type MemberProps = {
   selectedChannel: any;
   openUserInfoSidebar: any;
   onlineUsers: any;
+  leading: boolean;
 };
-export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers }: MemberProps) => {
+export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers, leading }: MemberProps) => {
   const [openActions, setOpenActions] = useState<any>(null);
 
   return (
@@ -52,28 +53,28 @@ export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers }: M
             gap: "10px",
             flexDirection: "column",
             alignItems: "center",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray25,
             py: "10px",
           }}
         >
-          <Button
-            sx={{
-              width: "80%",
-              height: "46px",
-              borderRadius: "15px",
-              color: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
-              background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
-              ":hover": {
+          {leading && (
+            <Button
+              sx={{
+                width: "80%",
+                height: "46px",
+                borderRadius: "15px",
+                color: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
                 background: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
-              },
-            }}
-          >
-            Remove member from chat
-          </Button>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+                ":hover": {
+                  background: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+                },
+              }}
+            >
+              Remove member from chat
+            </Button>
+          )}
           <Button
             onClick={() => {
               openUserInfoSidebar(

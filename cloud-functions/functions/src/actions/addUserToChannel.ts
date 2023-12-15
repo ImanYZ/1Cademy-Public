@@ -24,6 +24,7 @@ export const addUserToChannel = async ({ userData }: IaddUserToChannel) => {
           membersInfo,
           members: channelData.members,
         });
+        console.log("user", userData.uname, "added to", userData.tagId);
       }
     }
   } catch (error) {

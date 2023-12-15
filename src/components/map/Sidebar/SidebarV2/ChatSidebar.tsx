@@ -15,7 +15,7 @@ import {
   where,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
-import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IChannelMessage, IChannels, IConversation } from "src/chatTypes";
 import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
@@ -130,7 +130,7 @@ export const ChatSidebar = ({
     if (!user) return;
     const onSynchronize = (changes: conversationChange[]) => {
       setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
@@ -402,6 +402,13 @@ export const ChatSidebar = ({
     }
   };
 
+  const getNotificationsNumbers = useCallback(
+    (type: string) => {
+      return notifications.filter((n: any) => n.chatType === type).length;
+    },
+    [notifications]
+  );
+
   return (
     <SidebarWrapper
       id="chat"
@@ -418,7 +425,7 @@ export const ChatSidebar = ({
       contentSignalState={contentSignalState}
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
-      setDisplayTagSearcher={setDisplayTagSearcher}
+      // setDisplayTagSearcher={setDisplayTagSearcher}
       openChatInfoPage={openChatInfoPage}
       sidebarType={"chat"}
       onlineUsers={onlineUsers}
@@ -455,7 +462,10 @@ export const ChatSidebar = ({
                   openLinkedNode={openLinkedNode}
                   leading={leading}
                   openUserInfoSidebar={openUserInfoSidebar}
+                  moveBack={moveBack}
+                  setOpenChatRoom={setOpenChatRoom}
                   onlineUsers={onlineUsers}
+                  user={user}
                 />
               ) : (
                 <Message
@@ -486,22 +496,28 @@ export const ChatSidebar = ({
                 }}
               >
                 <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"} variant="fullWidth">
-                  {[{ title: "News" }, { title: "Channels" }, { title: "Direct" }].map((tabItem: any, idx: number) => (
+                  {[
+                    { title: "News", type: "announcement" },
+                    { title: "Channels", type: "channel" },
+                    { title: "Direct", type: "direct" },
+                  ].map((tabItem: any, idx: number) => (
                     <Tab
                       key={tabItem.title}
                       id={`chat-tab-${tabItem.title.toLowerCase()}`}
                       label={
                         <Box sx={{ display: "flex", gap: "10px", alignItems: "center" }}>
                           <Typography>{tabItem.title}</Typography>
-                          <CustomBadge
-                            value={99}
-                            key={idx}
-                            sx={{
-                              height: "20px",
-                              p: "6px",
-                              fontSize: "13px",
-                            }}
-                          />
+                          {getNotificationsNumbers(tabItem.type) > 0 && (
+                            <CustomBadge
+                              value={getNotificationsNumbers(tabItem.type)}
+                              key={idx}
+                              sx={{
+                                height: "20px",
+                                p: "6px",
+                                fontSize: "13px",
+                              }}
+                            />
+                          )}
                         </Box>
                       }
                       {...a11yProps(idx)}
@@ -513,14 +529,16 @@ export const ChatSidebar = ({
                 {value === 0 && (
                   <NewsList
                     openRoom={openRoom}
-                    newsChannels={channels}
+                    newsChannels={channels.sort(
+                      (a, b) => b.newsUpdatedAt.toDate().getTime() - a.newsUpdatedAt.toDate().getTime()
+                    )}
                     notifications={notifications.filter((n: any) => n.chatType === "announcement")}
                   />
                 )}
                 {value === 1 && (
                   <ChannelsList
                     openRoom={openRoom}
-                    channels={channels}
+                    channels={channels.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime())}
                     notifications={notifications.filter((n: any) => n.chatType === "channel")}
                   />
                 )}
@@ -588,9 +606,9 @@ const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
   }
 
   if (docType === "removed" && prevIdx !== -1) {
-    prev.splice(prevIdx);
+    prev.splice(prevIdx, 1);
   }
-  prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+  prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
   return prev;
 };
 

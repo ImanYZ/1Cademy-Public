@@ -14,9 +14,16 @@ export const trigerNotifications = async ({ message }: ItrigerNotifications) => 
 
     const channelData = channelDoc.data();
     console.log(channelId);
-    await channelRef.update({
-      updatedAt: new Date(),
-    });
+    if (message.chatType === "announcement") {
+      await channelRef.update({
+        newsUpdatedAt: new Date(),
+      });
+    } else {
+      await channelRef.update({
+        updatedAt: new Date(),
+      });
+    }
+
     if (channelData) {
       for (let member of channelData.members.filter((m: string) => m !== message.sender)) {
         const newNotification = { ...message, seen: false, notify: member, notificationType: "chat" };
