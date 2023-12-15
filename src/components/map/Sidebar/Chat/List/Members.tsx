@@ -53,8 +53,6 @@ export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers, lea
             gap: "10px",
             flexDirection: "column",
             alignItems: "center",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray25,
             py: "10px",
           }}
         >

@@ -1,7 +1,6 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
-import SendIcon from "@mui/icons-material/Send";
-import { Box, Button, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { Box, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { Reputation, UserTheme } from "src/knowledgeTypes";
@@ -452,11 +451,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
                 </div>
               </>
             )}
-          </Box>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <Button sx={{ width: "70%", borderRadius: "20px" }} endIcon={<SendIcon />} variant="contained">
-              Message
-            </Button>
           </Box>
           <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"}>
             {tabsItems.map((tabItem: UserInfoTabs, idx: number) => (
