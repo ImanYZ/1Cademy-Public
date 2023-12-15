@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -59,15 +58,6 @@ export const Nodes = ({ db, selectedChannel, roomType, openLinkedNode, theme }: 
           }}
         >
           <NextImage src={theme === "Dark" ? NoProposalDarkIcon : NoProposalLightIcon} alt="Node icon" />
-          <Typography
-            sx={{
-              fontSize: "20px",
-
-              fontWeight: "500",
-            }}
-          >
-            There are no nodes yet.
-          </Typography>
         </Box>
       )}
       {nodes.map((node: any) => (

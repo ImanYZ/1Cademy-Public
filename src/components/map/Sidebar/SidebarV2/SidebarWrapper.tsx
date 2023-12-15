@@ -2,11 +2,11 @@ import { Theme } from "@emotion/react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import InfoIcon from "@mui/icons-material/Info";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
-import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+import { ReactNode, useCallback, useMemo, useRef } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
@@ -35,6 +35,7 @@ type SidebarWrapperProps = {
   openChatInfoPage?: any;
   onlineUsers?: any;
   user?: any;
+  openChatInfo: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -60,10 +61,11 @@ export const SidebarWrapper = ({
   moveBack = null,
   sidebarType = null,
   selectedChannel = null,
-  setDisplayTagSearcher,
+  // setDisplayTagSearcher,
   openChatInfoPage,
   onlineUsers,
   user,
+  openChatInfo,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -157,29 +159,27 @@ export const SidebarWrapper = ({
               </IconButton>
             </Tooltip>
           )}
-          <Typography
-            variant="h6"
-            sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}
-            onClick={() => setDisplayTagSearcher(true)}
-          >
+          <Typography variant="h6" sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}>
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography>
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
-          {!!selectedChannel && !!selectedChannel.title && (
-            <IconButton
-              sx={{
-                width: "2px",
-                ml: "-15px",
-                mt: 3,
-                ":hover": {
-                  background: "transparent",
-                  color: "grey",
-                },
-              }}
-              onClick={() => openChatInfoPage()}
-            >
-              <MoreVertIcon sx={{ color: "inherit" }} />
-            </IconButton>
+          {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
+            <Tooltip title={"More Info"}>
+              <IconButton
+                sx={{
+                  width: "2px",
+                  mt: 3,
+                  ":hover": {
+                    background: "transparent",
+                    color: "grey",
+                  },
+                  ml: "5px",
+                }}
+                onClick={() => openChatInfoPage()}
+              >
+                <InfoIcon sx={{ color: "inherit" }} />
+              </IconButton>
+            </Tooltip>
           )}
         </Box>
       )}

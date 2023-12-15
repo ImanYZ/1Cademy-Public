@@ -1,6 +1,5 @@
-import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
-import { Autocomplete, IconButton, Paper, TextField, Typography } from "@mui/material";
+import { Autocomplete, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -12,7 +11,6 @@ import { IConversation } from "src/chatTypes";
 import { CustomBadge } from "@/components/map/CustomBudge";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { useAuth } from "@/context/AuthContext";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { getMessageSummary } from "../../helpers/common";
 
@@ -200,7 +198,7 @@ export const DirectMessagesList = ({
           getOptionLabel={(option: any) => (option.fullname ? option.fullname : "")}
           fullWidth
         />
-        {conversations.length > 0 && (
+        {/* {conversations.length > 0 && (
           <IconButton
             sx={{
               ml: "5px",
@@ -215,7 +213,7 @@ export const DirectMessagesList = ({
           >
             <CreateIcon color="primary" />
           </IconButton>
-        )}
+        )} */}
       </Box>
       {conversations.map((conversation: IConversation, idx: number) => (
         <Paper

@@ -430,6 +430,7 @@ export const ChatSidebar = ({
       sidebarType={"chat"}
       onlineUsers={onlineUsers}
       user={user}
+      openChatInfo={openChatInfo}
       SidebarContent={
         <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover

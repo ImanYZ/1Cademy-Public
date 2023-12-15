@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -61,20 +60,11 @@ export const Media = ({ db, theme, selectedChannel, roomType }: MediaProps) => {
           }}
         >
           <Image src={theme === "Dark" ? NoProposalDarkIcon : NoProposalLightIcon} alt="Media icon" />
-          <Typography
-            sx={{
-              fontSize: "20px",
-
-              fontWeight: "500",
-            }}
-          >
-            There are no media yet.
-          </Typography>
         </Box>
       )}
       {medias.map((media: any, idx: number) => (
         <Box key={idx} sx={{ cursor: "pointer" }}>
-          <Image src={media.imageUrl} width={"108px"} height={"100px"} />
+          <Image src={media.imageUrl} width={"108px"} height={"100px"} alt={""} />
         </Box>
       ))}
     </Box>
