@@ -3,7 +3,7 @@ import { getToken, MessagePayload, onMessage } from "firebase/messaging";
 
 import { db, messaging } from "./firestoreClient.config";
 
-const VAPID_KEY = "BA0H_VeujQO0J5al5Ppua9zxrocPiWbGX81CrU1b4D-CpoupCTYVyqH-mSU5tTzXbLq2aIuLKIXUfzkEZ7SFPwU";
+const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_KEY;
 
 // Requests permissions to show notifications.
 async function requestNotificationsPermissions(uid: string) {
