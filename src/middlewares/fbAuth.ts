@@ -1,3 +1,4 @@
+import { getAuth } from "firebase-admin/auth";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
@@ -8,6 +9,10 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
     let userData: any = {};
     let query: any;
     let errorMessage = "";
+
+    const auth = getAuth();
+    const user = await auth.getUser(uid);
+
     if (uname) {
       query = db.doc(`/users/${uname}`);
     } else if (uid) {
@@ -42,6 +47,7 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
         clickedPP: userData.clickedPP,
         clickedCP: userData.clickedCP,
         createdAt: userData.createdAt.toDate(),
+        customClaims: user.customClaims,
       };
       try {
         creditsData = await db

@@ -85,7 +85,7 @@ export const SidebarNodeLink = ({
             {dayjs(changedAt).fromNow()}
           </Typography>
         </Stack>
-        {linkMessage !== "" && (
+        {!!linkMessage && (
           <Button
             onClick={onClick}
             variant="contained"

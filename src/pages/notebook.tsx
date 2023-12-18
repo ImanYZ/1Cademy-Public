@@ -48,6 +48,10 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import {
+  channelNotificationChange,
+  getchatNotificationsSnapshot,
+} from "src/client/firestore/chatNotifications.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
@@ -64,6 +68,7 @@ import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsChildrenSidebar";
@@ -219,6 +224,7 @@ export type OpenLeftSidebar =
   | "PROPOSALS"
   | "USER_SETTINGS"
   | "CITATIONS"
+  | "CHAT"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -401,6 +407,8 @@ const Notebook = ({}: NotebookProps) => {
   const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
+
+  const [notificationsMessages, setNotificationsMessages] = useState<any>([]);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
   const { ref: toolbarRef, isHovered } = useHover();
@@ -1044,17 +1052,17 @@ const Notebook = ({}: NotebookProps) => {
       window.location.hash = "no-back-button";
     };
 
-    window.onbeforeunload = function (e) {
-      e = e || window.event;
+    // window.onbeforeunload = function (e) {
+    //   e = e || window.event;
 
-      // For IE and Firefox prior to version 4
-      if (e) {
-        e.returnValue = "Do you want to close 1Cademy?";
-      }
+    //   // For IE and Firefox prior to version 4
+    //   if (e) {
+    //     e.returnValue = "Do you want to close 1Cademy?";
+    //   }
 
-      // For Safari
-      return "Do you want to close 1Cademy?";
-    };
+    //   // For Safari
+    //   return "Do you want to close 1Cademy?";
+    // };
 
     // movement through map using keyboard arrow keys
     document.addEventListener("keydown", event => {
@@ -6982,6 +6990,37 @@ const Notebook = ({}: NotebookProps) => {
     };
   }, [tutorialTargetCallback, tutorialTargetId]);
 
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelNotificationChange[]) => {
+      setNotificationsMessages((prev: any) =>
+        changes.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = change.data as any & { id: string };
+
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1) {
+              prev.push(curData);
+            }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = curData;
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx);
+            }
+            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            return prev;
+          },
+          [...prev]
+        )
+      );
+    };
+    const killSnapshot = getchatNotificationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -7208,6 +7247,7 @@ const Notebook = ({}: NotebookProps) => {
                 onChangeTagOfNotebookById={onChangeTagOfNotebookById}
                 isHovered={toolbarIsHovered}
                 toolbarRef={toolbarRef}
+                newMessages={notificationsMessages.length}
               />
 
               <MemoizedBookmarksSidebar
@@ -7220,6 +7260,30 @@ const Notebook = ({}: NotebookProps) => {
                 innerHeight={innerHeight}
                 innerWidth={windowWith}
                 bookmark={bookmark}
+              />
+              <MemoizedChatSidebar
+                user={user}
+                settings={settings}
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                open={openSidebar === "CHAT"}
+                onClose={() => setOpenSidebar(null)}
+                sidebarWidth={sidebarWidth()}
+                innerHeight={innerHeight}
+                innerWidth={windowWith}
+                bookmark={bookmark}
+                nodeBookDispatch={nodeBookDispatch}
+                notebookRef={notebookRef}
+                nodeBookState={nodeBookState}
+                notebooks={notebooks}
+                onChangeNotebook={onChangeNotebook}
+                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                dispatch={dispatch}
+                selectedNotebook={selectedNotebook}
+                onlineUsers={onlineUsers}
+                notifications={notificationsMessages}
+                openUserInfoSidebar={openUserInfoSidebar}
               />
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}

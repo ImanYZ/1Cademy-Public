@@ -51,6 +51,7 @@ import { Delete, Post } from "@/lib/mapApi";
 import Logo from "../../../../../public/1Cademy-head.svg";
 import AssistantIcon from "../../../../../public/assistant.svg";
 import BookmarkIcon from "../../../../../public/bookmark.svg";
+import ChatIcon from "../../../../../public/chat.svg";
 import EditIcon from "../../../../../public/edit.svg";
 import GraduatedIcon from "../../../../../public/graduated.svg";
 import NotebookIcon from "../../../../../public/notebooks.svg";
@@ -115,6 +116,7 @@ type MainSidebarProps = {
   onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
   toolbarRef: (node?: HTMLElement | null | undefined) => void;
   isHovered: boolean;
+  newMessages: number;
 };
 
 export const ToolbarSidebar = ({
@@ -146,6 +148,7 @@ export const ToolbarSidebar = ({
   onChangeTagOfNotebookById,
   toolbarRef,
   isHovered,
+  newMessages = 0,
 }: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
@@ -652,6 +655,19 @@ export const ToolbarSidebar = ({
               toolbarIsOpen={displayLargeToolbar}
               rightOption={<CustomBadge value={pendingProposalsNum} />}
               rightFloatingOption={<CustomSmallBadge value={pendingProposalsNum} />}
+            />
+
+            <SidebarButton
+              id="chat-button"
+              iconSrc={ChatIcon}
+              onClick={() => {
+                onOpenSidebar("CHAT", "chat");
+                setIsMenuOpen(false);
+              }}
+              text="Chat"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={<CustomBadge value={newMessages} />}
+              rightFloatingOption={<CustomSmallBadge value={newMessages} />}
             />
 
             {/* dashboard */}

@@ -1,10 +1,14 @@
 import { Theme } from "@emotion/react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
+import InfoIcon from "@mui/icons-material/Info";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
-import React, { ReactNode, useCallback, useMemo, useRef } from "react";
+import { ReactNode, useCallback, useMemo, useRef } from "react";
+
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
 type SidebarWrapperProps = {
   id?: string;
@@ -24,6 +28,14 @@ type SidebarWrapperProps = {
   disabled?: boolean;
   sx?: SxProps<Theme>;
   sxContentWrapper?: SxProps<Theme>;
+  moveBack?: any;
+  sidebarType?: string | null;
+  selectedChannel?: any;
+  setDisplayTagSearcher?: any;
+  openChatInfoPage?: any;
+  onlineUsers?: any;
+  user?: any;
+  openChatInfo?: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -46,6 +58,14 @@ export const SidebarWrapper = ({
   disabled,
   sx,
   sxContentWrapper,
+  moveBack = null,
+  sidebarType = null,
+  selectedChannel = null,
+  // setDisplayTagSearcher,
+  openChatInfoPage,
+  onlineUsers,
+  user,
+  openChatInfo,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -58,6 +78,45 @@ export const SidebarWrapper = ({
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
+  const AvatarUser = ({ members }: any) => {
+    const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
+    const userInfo = members[otherUser];
+    return (
+      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+        <Box
+          sx={{
+            width: `30px`,
+            height: `30px`,
+            cursor: "pointer",
+            transition: "all 0.2s 0s ease",
+            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+            borderRadius: "50%",
+            "& > .user-image": {
+              borderRadius: "50%",
+              overflow: "hidden",
+              width: "30px",
+              height: "30px",
+            },
+            "@keyframes slidein": {
+              from: {
+                transform: "translateY(0%)",
+              },
+              to: {
+                transform: "translateY(100%)",
+              },
+            },
+          }}
+        >
+          <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={30} sx={{ border: "none" }} />
+          <Box
+            sx={{ background: onlineUsers.includes(userInfo.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
+            className="UserStatusOnlineIcon"
+          />
+        </Box>
+        <Typography sx={{ pl: 2 }}>{userInfo.fullname}</Typography>
+      </Box>
+    );
+  };
   return (
     <Drawer
       id="sidebarDrawer"
@@ -91,23 +150,58 @@ export const SidebarWrapper = ({
         },
       }}
     >
+      {sidebarType === "chat" && (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {moveBack && (
+            <Tooltip title={"Go Back"}>
+              <IconButton onClick={() => moveBack()} sx={{ mt: 2, ml: 2 }}>
+                <ArrowBackIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Typography variant="h6" sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}>
+            {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
+          </Typography>
+          {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
+          {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
+            <Tooltip title={"More Info"}>
+              <IconButton
+                sx={{
+                  width: "2px",
+                  mt: 3,
+                  ":hover": {
+                    background: "transparent",
+                    color: "grey",
+                  },
+                  ml: "5px",
+                }}
+                onClick={() => openChatInfoPage()}
+              >
+                <InfoIcon sx={{ color: "inherit" }} />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      )}
       {title && (
         <Box>
           <Box>
             {!innerHeight || (height > 50 && innerHeight > 600) ? (
               <Box sx={{ position: "relative", height: headerImage ? "127px" : "auto", p: "24px", pb: 0 }}>
                 {headerImage && <Image src={headerImage} alt="header image" width={width} height={127} />}
-                <Typography
-                  component={"h2"}
-                  sx={{
-                    fontSize: { xs: "24px", sm: "40px" },
-                    fontWeight: "700",
-                    lineHeight: "29.05px",
-                    marginBottom: headerImage ? "50px" : undefined,
-                  }}
-                >
-                  {title}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography
+                    component={"h2"}
+                    sx={{
+                      fontSize: { xs: "24px", sm: "40px" },
+                      fontWeight: "700",
+                      lineHeight: "29.05px",
+                      marginBottom: headerImage ? "50px" : undefined,
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                </Box>
               </Box>
             ) : (
               <Box
@@ -133,7 +227,6 @@ export const SidebarWrapper = ({
           </Box>
         </Box>
       )}
-
       <Box>{SidebarOptions}</Box>
       <Box
         id={`${id}-content`}
