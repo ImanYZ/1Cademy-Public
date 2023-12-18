@@ -305,7 +305,17 @@ export const Message = ({
   };
   if (!selectedChannel) return <></>;
   return (
-    <Box ref={messageBoxRef} sx={{ gap: "4px", pl: 3, pr: 3, position: "relative", height: "80vh", overflow: "auto" }}>
+    <Box
+      ref={messageBoxRef}
+      sx={{
+        gap: "4px",
+        pl: 3,
+        pr: 3,
+        position: "relative",
+        height: leading || replyOnMessage || roomType !== "news" ? "80vh" : "90vh",
+        overflow: "auto",
+      }}
+    >
       {forward ? (
         <Forward />
       ) : (
@@ -400,36 +410,36 @@ export const Message = ({
         </Box>
       )}
 
-      {/* {(leading || replyOnMessage || roomType !== "news") && ( */}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: "10px",
-          mt: "15px",
-          width: "450px",
-        }}
-      >
-        <Paper>
-          {replyOnMessage && (
-            <Reply
-              message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
-              close={() => setReplyOnMessage(null)}
-            />
-          )}
-        </Paper>
-        <MessageInput
-          theme={theme}
-          channelUsers={channelUsers}
-          placeholder="Type message here ...."
-          sendMessage={sendMessage}
-          handleTyping={handleTyping}
-          inputValue={inputValue}
-          toggleEmojiPicker={toggleEmojiPicker}
-          roomType={roomType}
-          leading={leading}
-        />
-      </Box>
-      {/* )} */}
+      {(leading || replyOnMessage || roomType !== "news") && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: "10px",
+            mt: "15px",
+            width: "450px",
+          }}
+        >
+          <Paper>
+            {replyOnMessage && (
+              <Reply
+                message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
+                close={() => setReplyOnMessage(null)}
+              />
+            )}
+          </Paper>
+          <MessageInput
+            theme={theme}
+            channelUsers={channelUsers}
+            placeholder="Type message here ...."
+            sendMessage={sendMessage}
+            handleTyping={handleTyping}
+            inputValue={inputValue}
+            toggleEmojiPicker={toggleEmojiPicker}
+            roomType={roomType}
+            leading={leading}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

@@ -280,9 +280,9 @@ export const ChatSidebar = ({
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
         const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions = prevMessages[messageIdx].replies[replyIdx].filter(
-          (r: any) => r.emoji !== emoji && r.user !== user?.uname
-        );
+        prevMessages[messageIdx].replies[replyIdx].reactions = prevMessages[messageIdx].replies[
+          replyIdx
+        ].reactions.filter((r: any) => r.emoji !== emoji && r.user !== user?.uname);
         return prevMessages;
       });
     } else {
