@@ -202,7 +202,7 @@ export const NewsCard = ({
               />
             ))}
 
-            <Box sx={{ ml: "37px" }}>
+            <Box sx={{ ml: "37px", mt: "13px" }}>
               <MessageInput
                 theme={"Dark"}
                 placeholder={"Type your reply..."}

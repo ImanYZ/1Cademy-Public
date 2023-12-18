@@ -2,13 +2,14 @@ import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { arrayUnion, collection, doc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
@@ -134,29 +135,32 @@ export const Message = ({
     important = false
   ) => {
     try {
-      const messageRef = getMessageRef(curMessage.id, curMessage?.channelId);
       setInputValue("");
       setReplyOnMessage(null);
-      await updateDoc(messageRef, {
-        replies: arrayUnion({
-          id: newId(db),
-          parentMessage: curMessage.id,
-          pinned: false,
-          read_by: [],
-          edited: false,
-          message: inputMessage,
-          node: {},
-          createdAt: new Date(),
-          replies: [],
-          sender: user.uname,
-          mentions: [],
-          imageUrls,
-          editedAt: new Date(),
-          reactions: [],
-          channelId: selectedChannel?.id,
-          important,
-        }),
+      const reply = {
+        id: newId(db),
+        parentMessage: curMessage.id,
+        pinned: false,
+        read_by: [],
+        edited: false,
+        message: inputMessage,
+        node: {},
+        createdAt: Timestamp.fromDate(new Date()),
+        replies: [],
+        sender: user.uname,
+        mentions: [],
+        imageUrls,
+        editedAt: Timestamp.fromDate(new Date()),
+        reactions: [],
+        channelId: selectedChannel?.id,
+        important,
+      };
+      setMessages((prevMessages: any) => {
+        const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage.id);
+        prevMessages[messageIdx].replies.push(reply);
+        return prevMessages;
       });
+      await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
     } catch (error) {
       console.error(error);
     }

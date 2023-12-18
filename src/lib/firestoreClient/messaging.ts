@@ -27,7 +27,7 @@ export async function saveMessagingDeviceToken(uid: string) {
     const msg = await messaging();
     const fcmToken = await getToken(msg, { vapidKey: VAPID_KEY });
     if (fcmToken) {
-      console.log("Got FCM device token:", fcmToken);
+      console.log("Got FCM device token:");
       // Save device token to Firestore
       const tokenRef = doc(db, "fcmTokens", uid);
       await setDoc(tokenRef, { token: fcmToken });
