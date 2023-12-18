@@ -468,11 +468,44 @@ service cloud.firestore {
     match /{documents=**} {
       allow read, write: if false;
     }
-    match /channels/{channelId} {
-      allow read, write: if request.auth != null 
+    match /conversations/{conversationId} {
+      allow create: if request.auth != null 
+                    && request.auth.token != null;
+      allow read: if request.auth != null 
                     && request.auth.token != null
                     && request.auth.token.name in resource.data.members;
+      allow write: if false;   
     }
+    
+     match /conversationMessages/{conversationId} {
+      allow read, write: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;
+
+      match /messages/{messageId} {
+         allow create: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name == request.resource.data.sender 
+                    && request.auth.token.name in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members
+         allow write : if request.auth != null 
+                    && request.auth.token != null
+										&& request.auth.token.name == resource.data.sender 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'message'])
+                    && request.auth.token.name in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;
+         allow read: if request.auth != null 
+                    && request.auth.token != null
+                    && exists(/databases/$(database)/documents/conversations/$(conversationId)) 
+                    && request.auth.token.name in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;           
+        }
+     }
+    
+    match /channels/{channelId} {
+      allow read: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name in resource.data.members;
+      allow write: if false;              
+    }
+    
     match /channelMessages/{channelId} {
       allow read, write: if request.auth != null 
                     && request.auth.token != null
@@ -484,9 +517,33 @@ service cloud.firestore {
                     && request.auth.token.name == request.resource.data.sender 
                     && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members
          allow write : if request.auth != null 
-                    && request.auth.token != null 
-                    && request.auth.token.name == resource.data.sender
+                    && request.auth.token != null
+                    && request.auth.token.name == resource.data.sender 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'message'])                    
                     && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members;
+         allow read: if request.auth != null 
+                    && request.auth.token != null
+                    && exists(/databases/$(database)/documents/channels/$(channelId)) 
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members;           
+         }
+   } 
+  
+    match /announcementsMessages/{channelId} {
+      allow read, write: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members;
+
+      match /messages/{messageId} {
+         allow create: if request.auth != null 
+                    && request.auth.token != null
+                    && request.auth.token.leading != null 
+                    && channelId in request.auth.token.leading
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members
+         allow write : if request.auth != null 
+                    && request.auth.token != null 
+                    && request.auth.token.name == resource.data.sender 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'message'])
+                    && request.auth.token.name in get(/databases/$(database)/documents/channels/$(channelId)).data.members
          allow read: if request.auth != null 
                     && request.auth.token != null
                     && exists(/databases/$(database)/documents/channels/$(channelId)) 
