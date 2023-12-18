@@ -213,7 +213,7 @@ const ProposalsSidebar = ({
                   fontWeight: "500",
                 }}
               >
-                You've not checked off any notifications
+                There's no Pending Proposals
               </Typography>
             </Box>
           )}

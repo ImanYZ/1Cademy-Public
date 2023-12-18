@@ -534,8 +534,8 @@
   position: relative;
   white-space: nowrap;
   margin: -10px 0px -4px 0px;
-  height: 13px;
-  width: 13px;
+  height: 10px;
+  width: 10px;
   border-radius: 50%;
   background-color: #12b76a;
   overflow: hidden;
@@ -696,6 +696,22 @@
 #Sidebar::-webkit-scrollbar {
   /* CHECK: I add this to hide scroll and have functionality */
   width: 10px;
+}
+
+#chat-users-tag::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  width: 3px;
+  background: transparent;
+}
+
+#chat-users-tag::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.messages-room::-webkit-scrollbar {
+  /* CHECK: I add this to hide scroll and have functionality */
+  display: none;
 }
 
 #Sidebar::-webkit-scrollbar-thumb {
@@ -2891,4 +2907,12 @@ right: 5px; */
 
 .input.validatedInput .MuiFormHelperText-root {
   color: #f44336;
+}
+
+.highlight-letter {
+  font-weight: bold;
+  background-color: yellow;
+}
+.reply-box:hover > .message-buttons {
+  display: block;
 }

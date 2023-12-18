@@ -9,6 +9,7 @@ module.exports = {
       "node.1cademy.us",
       "1cademy.us",
       "randomuser.me",
+      "img.freepik.com",
     ],
     minimumCacheTTL: 315360,
   },
