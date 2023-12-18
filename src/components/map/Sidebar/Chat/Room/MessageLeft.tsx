@@ -220,7 +220,6 @@ export const MessageLeft = ({
                 lineHeight: "24px",
               }}
             >
-              {/* {message.channelId}/{message.id} */}
               <MarkdownRender text={message.message || ""} />
               <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
               <Box sx={{ pt: 1, display: "flex", gap: "5px" }}>

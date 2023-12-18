@@ -64,6 +64,9 @@ export const NewsCard = ({
   const handleReplyOnMessage = () => {
     setReplyOnMessage(message);
   };
+  const handleEditMessage = () => {
+    saveMessageEdit(inputMessage);
+  };
   return (
     <Box
       sx={{
@@ -117,30 +120,46 @@ export const NewsCard = ({
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
           }}
         >
-          <Typography
-            sx={{
-              fontSize: "16px",
-              fontWeight: "400",
-              lineHeight: "24px",
-              display: "flex",
-              mb: "9px",
-            }}
-          >
-            <MarkdownRender text={message.message || ""} />
-            <Typography sx={{ color: "grey", ml: 1 }}>{message.edited ? "(edited)" : ""}</Typography>
-          </Typography>
-          <Box sx={{ display: "flex" }}>
-            {(message.imageUrls || []).map(imageUrl => (
-              <NextImage
-                width={"500px"}
-                height={"300px"}
-                style={{ borderRadius: "8px" }}
-                src={imageUrl}
-                alt="news image"
-                key={imageUrl}
+          {editingMessage?.id === message.id ? (
+            <Box>
+              {" "}
+              <MessageInput
+                theme={"Dark"}
+                placeholder={"Type your reply..."}
+                channelUsers={channelUsers}
+                sendMessage={handleEditMessage}
+                handleTyping={handleTyping}
+                inputValue={inputMessage}
+                toggleEmojiPicker={toggleEmojiPicker}
+                editingMessage={editingMessage}
+                setEditingMessage={setEditingMessage}
+                leading={leading}
               />
-            ))}
-          </Box>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                fontSize: "16px",
+                fontWeight: "400",
+                lineHeight: "24px",
+              }}
+            >
+              <MarkdownRender text={message.message || ""} />
+              <Typography sx={{ color: "grey", ml: 1 }}>{message.edited ? "(edited)" : ""}</Typography>
+              <Box sx={{ display: "flex" }}>
+                {(message.imageUrls || []).map(imageUrl => (
+                  <NextImage
+                    width={"500px"}
+                    height={"300px"}
+                    style={{ borderRadius: "8px" }}
+                    src={imageUrl}
+                    alt="news image"
+                    key={imageUrl}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
 
           {editingMessage?.id !== message.id && (
             <>
