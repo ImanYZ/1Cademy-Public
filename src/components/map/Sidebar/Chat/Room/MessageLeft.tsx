@@ -220,6 +220,7 @@ export const MessageLeft = ({
                 lineHeight: "24px",
               }}
             >
+              {/* {message.channelId}/{message.id} */}
               <MarkdownRender text={message.message || ""} />
               <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
               <Box sx={{ pt: 1, display: "flex", gap: "5px" }}>
@@ -295,7 +296,7 @@ export const MessageLeft = ({
                 leading={leading}
               />
             ))}
-            <Box sx={{ ml: "37px", mt: 0 }}>
+            <Box sx={{ ml: "37px", mt: 2 }}>
               <MessageInput
                 theme={"Dark"}
                 placeholder={"Type your reply..."}

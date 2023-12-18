@@ -2,9 +2,15 @@ import { getAnalytics } from "firebase/analytics";
 import { getApps, initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { getMessaging, isSupported } from "firebase/messaging";
+
 let appExp: any;
 let dbExp: any;
 let auth: any;
+
+let app: any;
+let db: any;
+let messaging: any;
 
 export const initFirebaseClientSDK = () => {
   if (!getApps().filter(app => app.name === "[DEFAULT]").length) {
@@ -19,7 +25,7 @@ export const initFirebaseClientSDK = () => {
       const auth = getAuth(app);
       connectAuthEmulator(auth, "http://localhost:9099");
     } else {
-      initializeApp({
+      app = initializeApp({
         apiKey: process.env.NEXT_PUBLIC_API_KEY,
         authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
         databaseURL: process.env.NEXT_PUBLIC_DATA_BASE_URL,
@@ -34,6 +40,9 @@ export const initFirebaseClientSDK = () => {
       getAnalytics();
     }
   }
+
+  db = getFirestore(app);
+  messaging = async () => (await isSupported()) && getMessaging(app);
 
   if (!getApps().filter(app => app.name === "visualexp").length) {
     appExp = initializeApp(
@@ -57,4 +66,4 @@ export const getFirebaseApp = () => {
   return getApps()[0];
 };
 
-export { dbExp, auth, appExp };
+export { dbExp, auth, appExp, app, db, messaging };

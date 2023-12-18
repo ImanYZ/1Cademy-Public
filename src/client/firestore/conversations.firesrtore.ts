@@ -20,8 +20,8 @@ export const getConversationsSnapshot = (
     const docChanges = snapshot.docChanges();
 
     const convDocuments: conversationChange[] = docChanges.map(change => {
-      const document = change.doc.data() as IConversation;
-      return { type: change.type, data: { id: change.doc.id, ...document }, doc: change.doc };
+      const data = { id: change.doc.id, ...change.doc.data() } as IConversation;
+      return { type: change.type, data, doc: change.doc };
     });
     callback(convDocuments);
   });

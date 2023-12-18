@@ -251,32 +251,21 @@ export const ChatSidebar = ({
   };
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
-    if (message.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === message.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === message.id);
-      parentMessage.replies[replyIdx].reactions.push({ user: user?.uname, emoji });
-      const mRef = getMessageRef(message.parentMessage, message.channelId);
-      await updateDoc(mRef, { replies: parentMessage.replies });
-    } else {
+    if (message.sender === user?.uname && !message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
+    } else {
+      await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
     }
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId) return;
-    if (message.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === message.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === message.id);
-      const reactionIdx = parentMessage.replies[replyIdx].reactions.findIndex(
-        (r: any) => r.emoji === emoji && r.user === user?.uname
-      );
-      parentMessage.replies[replyIdx].reactions.splice(reactionIdx, 1);
-      const mRef = getMessageRef(message.parentMessage, message.channelId);
-      await updateDoc(mRef, { replies: parentMessage.replies });
-    } else {
+    if (message.sender === user?.uname && !message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
+    } else {
+      await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
     }
   };
 

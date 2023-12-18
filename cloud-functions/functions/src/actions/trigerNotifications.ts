@@ -1,10 +1,16 @@
-import { db } from "../admin";
+import { admin, batchSet, batchUpdate, commitBatch, db } from "../admin";
 type ItrigerNotifications = {
   message: any;
 };
 export const trigerNotifications = async ({ message }: ItrigerNotifications) => {
   try {
     const { channelId } = message;
+    const fcmTokensHash: { [key: string]: string } = {};
+    const fcmTokensDocs = await db.collection("fcmTokens").get();
+
+    for (let fcmToken of fcmTokensDocs.docs) {
+      fcmTokensHash[fcmToken.id] = fcmToken.data().token;
+    }
 
     let channelRef = db.collection("channels").doc(channelId);
     if (message.chatType === "direct") {
@@ -13,24 +19,45 @@ export const trigerNotifications = async ({ message }: ItrigerNotifications) => 
     const channelDoc = await channelRef.get();
 
     const channelData = channelDoc.data();
-    console.log(channelId);
+
     if (message.chatType === "announcement") {
-      await channelRef.update({
+      batchUpdate(channelRef, {
         newsUpdatedAt: new Date(),
       });
     } else {
-      await channelRef.update({
+      batchUpdate(channelRef, {
         updatedAt: new Date(),
       });
     }
-
+    console.log(fcmTokensHash);
     if (channelData) {
-      for (let member of channelData.members.filter((m: string) => m !== message.sender)) {
+      console.log(channelData?.members);
+      const _member = channelData.members.filter((m: string) => m !== message.sender);
+      for (let member of _member) {
         const newNotification = { ...message, seen: false, notify: member, notificationType: "chat" };
         const notificationRef = db.collection("notifications").doc();
-        await notificationRef.set(newNotification);
+        const payload = {
+          token: fcmTokensHash[channelData.membersInfo[member].uid],
+          notification: {
+            title: "New Message",
+            body: message.message,
+          },
+        };
+        console.log(payload);
+        admin
+          .messaging()
+          .send(payload)
+          .then(response => {
+            console.log(response);
+          })
+          .catch(error => {
+            console.log("error: ", error);
+          });
+        batchSet(notificationRef, newNotification);
       }
     }
+    await commitBatch();
+    console.log("documents created");
   } catch (error) {
     console.log(error);
   }
