@@ -72,7 +72,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid } = req.body?.data?.user?.userData;
     const { message } = req.body;
-    console.log(req.body);
     const conversationDoc = await db.collection("tutorConversations").doc(uid).get();
     let conversationData: any = {
       messages: [],
