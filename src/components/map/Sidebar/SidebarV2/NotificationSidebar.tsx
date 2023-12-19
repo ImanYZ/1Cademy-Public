@@ -338,7 +338,7 @@ const NotificationSidebar = ({
   );
 };
 
-const NotFoundNotification = ({ title, description }: { title: string; description: string }) => {
+export const NotFoundNotification = ({ title, description }: { title: string; description: string }) => {
   return (
     <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
       <Box>

@@ -74,7 +74,6 @@ export const ChatSidebar = ({
   onClose,
   sidebarWidth,
   innerHeight,
-  innerWidth,
   theme,
   notebookRef,
   nodeBookDispatch,
@@ -439,7 +438,6 @@ export const ChatSidebar = ({
       open={open}
       onClose={onClose}
       width={sidebarWidth}
-      height={innerWidth > 599 ? 100 : 35}
       innerHeight={innerHeight}
       sx={{
         boxShadow: "none",
