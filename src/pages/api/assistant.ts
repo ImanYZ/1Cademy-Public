@@ -145,7 +145,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         : "";
     let commands: string[] = [];
 
-    if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
+    if (payload.actionType === "TeachContent") {
       commands = await getGPT4Queries(conversationData, payload.message);
       const nodes = await getNodeResultFromCommands(commands, tagTitle, userData, 8);
       prompt =
@@ -175,7 +175,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     };
     conversationData.messages.push(assistantMessage);
 
-    if (payload.actionType === "TeachContent" || payload.actionType === "DirectQuestion") {
+    if (payload.actionType === "TeachContent") {
       const _message = assistantMessage.gptMessage?.content || "";
       const response: {
         response: string;
@@ -193,7 +193,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     // converting current response to 404 is not nodes found
-    if (["DirectQuestion", "TeachContent"].includes(payload.actionType) && !(assistantMessage.nodes || []).length) {
+    if (["TeachContent"].includes(payload.actionType) && !(assistantMessage.nodes || []).length) {
       assistantMessage.is404 = true;
     }
 
