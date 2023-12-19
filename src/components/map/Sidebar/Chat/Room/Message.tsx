@@ -1,10 +1,9 @@
-import { Paper, Typography } from "@mui/material";
+import { Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, doc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
-import NextImage from "next/image";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
@@ -13,8 +12,7 @@ import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 
-import NoProposalDarkIcon from "../../../../../../public/no-proposals-dark-mode.svg";
-import NoProposalLightIcon from "../../../../../../public/no-proposals-light-mode.svg";
+import { NotFoundNotification } from "../../SidebarV2/NotificationSidebar";
 import { Forward } from "../List/Forward";
 import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
@@ -330,16 +328,7 @@ export const Message = ({
                 marginTop: "40%",
               }}
             >
-              <NextImage src={theme === "Dark" ? NoProposalDarkIcon : NoProposalLightIcon} alt="Notification icon" />
-              <Typography
-                sx={{
-                  fontSize: "20px",
-
-                  fontWeight: "500",
-                }}
-              >
-                There are no messages yet.
-              </Typography>
+              <NotFoundNotification title="Start Chatting" description="" />
             </Box>
           )}
           {Object.keys(messagesByDate).map(date => {
