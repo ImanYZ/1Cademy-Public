@@ -16,12 +16,6 @@ export type IAssistantRequestPayload = {
 const PROMPT = (flashcards: any) => {
   return `You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should motivate and help the user learn all the flashcards in the following JSON array of objects:
 ${JSON.stringify(flashcards)}
-Your response should always be a JSON object. Do not write any extra words outside of the JSON object. The JSON object should have the following structure:
-{
-"prior_evaluation": "A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question.",
-"message": "The message to be sent to the user",
-"flashcards_used": [A JSON array if the 'id's of flashcards used to formulate this message.]
-}
 You initiate the learning process by greeting the user and posing a series of concise questions that pertain to the material's introductory concepts.
 Your methodology is systematic: if the user responds accurately to the questions, you seamlessly transition to more complex subject matter. Conversely, should the user struggle with the initial questions, you tactfully revert to foundational topics. This ensures that the user has a robust understanding of the basics before progressing, thereby solidifying their comprehension and retention of the material.
 To maintain the user's engagement and prevent any waning of their learning enthusiasm, you should make your messages as short as possible. You should not include more than one question in each of your messages.  
@@ -43,6 +37,9 @@ IMPORTANT: Limit the frequency of applying the remaining instructions to prevent
 14. **Learning Environment**: Advise the user on creating an optimal learning environment, free from distractions, with adequate lighting and comfortable seating. The physical context can significantly impact the ability to focus and learn effectively.
 15. **Continuous Improvement**: Regularly solicit feedback from the user on their learning experience and make adjustments to your teaching methods accordingly. This iterative process ensures that the tutoring remains responsive to the user's needs and preferences.
 By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.
+At the end of your response you should add two more lines:
+- "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question."
+- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
 `;
 };
 
@@ -60,7 +57,18 @@ const generateSystemPrompt = async (url: string, fullbook: boolean) => {
   return PROMPT(flashcards);
 };
 
-const encoder = new TextEncoder();
+const extractFlashcardId = (inputText: string) => {
+  const regex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
+  const match = inputText.match(regex);
+  if (match)
+    return {
+      prior_evaluation: match[1],
+      flashcard_used: match[2],
+      content: inputText.replace(regex, ""),
+    };
+  return null;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid } = req.body?.data?.user?.userData;
@@ -106,15 +114,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let completeMessage = "";
     for await (const result of response) {
       if (result.choices[0].delta.content) {
-        completeMessage = completeMessage + result.choices[0].delta.content;
         res.write(`${result.choices[0].delta.content}`);
+        completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
-    conversationData.messages.push({
-      role: "assistant",
-      content: completeMessage,
-      sentAt: new Date(),
-    });
+    const cleanData = extractFlashcardId(completeMessage);
+    if (cleanData) {
+      conversationData.messages.push({
+        role: "assistant",
+        ...cleanData,
+        sentAt: new Date(),
+      });
+    } else {
+      conversationData.messages.push({
+        role: "assistant",
+        content: completeMessage,
+        sentAt: new Date(),
+      });
+    }
+
     await conversationDoc.ref.set({ ...conversationData, unit });
   } catch (error) {
     console.error(error);
