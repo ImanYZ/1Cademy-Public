@@ -95,7 +95,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         conversationData.messages[0] = {
           role: "system",
           content: await generateSystemPrompt(unit, fullbook),
-          ù,
         };
       }
     } else {
