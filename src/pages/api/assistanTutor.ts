@@ -127,6 +127,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
+    res.end();
     const cleanData = extractFlashcardId(completeMessage);
     const input = completeMessage;
     const mp3 = await openai.audio.speech.create({
@@ -156,6 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
     await conversationDoc.ref.set({ ...conversationData, unit });
+    console.log({ reaction });
     if (reaction && cleanData?.flashcard_used) {
       let booksQuery = db.collection("chaptersBook").where("url", "==", url);
       const booksDocs = await booksQuery.get();
