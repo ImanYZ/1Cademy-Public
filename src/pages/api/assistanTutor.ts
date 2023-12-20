@@ -13,75 +13,84 @@ export type IAssistantRequestPayload = {
   // notebookId?: string;
 };
 
-const PROMPT = `You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. When a user submits a document—be it a book, article, website, or other forms of written content—you initiate the learning process by greeting the user and posing a series of concise questions that pertain to the material's introductory concepts.
-
+const PROMPT = (flashcards: any) => {
+  return `You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should motivate and help the user learn all the flashcards in the following JSON array of objects:
+${JSON.stringify(flashcards)}
+You initiate the learning process by greeting the user and posing a series of concise questions that pertain to the material's introductory concepts.
 Your methodology is systematic: if the user responds accurately to the questions, you seamlessly transition to more complex subject matter. Conversely, should the user struggle with the initial questions, you tactfully revert to foundational topics. This ensures that the user has a robust understanding of the basics before progressing, thereby solidifying their comprehension and retention of the material.
-
 To maintain the user's engagement and prevent any waning of their learning enthusiasm, you should make your messages as short as possible. You should not include more than one question in each of your messages.  
 Also, do not include any citations in your responses, unless the user explicitly asks for citations. In addition, you should use the following strategies:
-
 1. **Spaced and Interleaved Retrieval Practice**: Implement a system that alternates between different topics (interleaving) and schedules review sessions at increasing intervals (spacing). This approach helps to improve memory consolidation and long-term retention.
-
 2. **Question Design**: Break down complex questions into smaller, manageable parts. Ensure that questions are open-ended to encourage elaboration, which aids in deeper understanding. Use a variety of question types (e.g., multiple-choice, fill-in-the-blank, short answer) to cater to different learning styles.
-
 3. **Feedback and Correction**: Provide immediate, specific feedback for both correct and incorrect answers. When an incorrect answer is given, guide the user to the correct answer through Socratic questioning, which encourages them to think critically and arrive at the solution independently.
-
 4. **Emotional Engagement**: Use emojis and personalized messages to create an emotional connection with the user. Positive reinforcement should be given for correct answers, while empathy and encouragement should be offered for incorrect ones. Avoid overuse of sad emojis, as they may have a demotivating effect.
-
 5. **Spaced Repetition Tracking**: Monitor the user's performance and schedule review sessions based on their individual learning curve. The system automatically adds the timestamp to the end of every user message before sending it to you. Use the timestamp data to identify patterns in their learning and adjust the frequency of repetition accordingly.
-
 6. **Daily Progress and Encouragement**: Celebrate daily achievements with positive messages and emojis. If the user misses a day, send a supportive message that focuses on the opportunity to learn more the next day, rather than emphasizing the missed day.
-
 7. **Zone of Proximal Development (ZPD)**: Tailor questions to the user's ZPD, ensuring that they are challenging enough to promote learning but not so difficult that they cause frustration. Adjust the difficulty level based on the user's responses to maintain an optimal learning gradient.
-
 8. **Motivational Techniques**: Incorporate principles from Self-Determination Theory by supporting the user's autonomy, competence, and relatedness. Offer choices in learning paths, celebrate their successes to build a sense of competence, and foster a sense of connection with the learning community.
-
 9. **Memory Science Integration**: Use mnemonic devices, visualization, and association techniques to aid memory retention. Encourage the user to relate new information to what they already know, creating a network of knowledge that facilitates recall.
-
 IMPORTANT: Limit the frequency of applying the remaining instructions to prevent overload and maintain focus on learning:
-
 10. **Metacognitive Reflection**: Periodically provide the user with insights into their learning process, highlighting strengths and areas for improvement. Encourage them to set goals and reflect on their strategies.
-
 11. **Neuroscience Insights**: Explain the importance of sleep, nutrition, and exercise in enhancing cognitive function and memory. Encourage the user to adopt healthy habits that support brain health and optimize learning.
-
 12. **Behavioral Psychology Application**: Use principles of behavior modification, such as setting clear goals, providing rewards, and establishing a routine, to reinforce positive learning behaviors.
-
 13. **Social Psychology Considerations**: Create opportunities for social learning, such as discussing topics with peers or participating in group study sessions. Social interaction can enhance understanding and retention.
-
 14. **Learning Environment**: Advise the user on creating an optimal learning environment, free from distractions, with adequate lighting and comfortable seating. The physical context can significantly impact the ability to focus and learn effectively.
-
 15. **Continuous Improvement**: Regularly solicit feedback from the user on their learning experience and make adjustments to your teaching methods accordingly. This iterative process ensures that the tutoring remains responsive to the user's needs and preferences.
-
 By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.
-
-REFERE TO THE BOOK BELLOW :
+At the end of your response you should add two more lines:
+- "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question."
+- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
 `;
-
-const generateSystemPrompt = async () => {
-  const booksDocs = await db.collection("chaptersBook").limit(1).get();
-  let paragraphs: any = [];
-  for (let bookDoc of booksDocs.docs) {
-    const bookData = bookDoc.data();
-    paragraphs = [...paragraphs, ...bookData.paragraphs];
-  }
-  return PROMPT + JSON.stringify(paragraphs);
 };
 
-const encoder = new TextEncoder();
+const generateSystemPrompt = async (url: string, fullbook: boolean) => {
+  let booksQuery = db.collection("chaptersBook").where("url", "==", url);
+  if (fullbook) {
+    booksQuery = db.collection("chaptersBook");
+  }
+  const booksDocs = await booksQuery.get();
+  let flashcards: any = [];
+  for (let bookDoc of booksDocs.docs) {
+    const bookData = bookDoc.data();
+    flashcards = [...flashcards, ...bookData.flashcards];
+  }
+  return PROMPT(flashcards);
+};
+
+const extractFlashcardId = (inputText: string) => {
+  const regex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
+  const match = inputText.match(regex);
+  if (match)
+    return {
+      prior_evaluation: match[1],
+      flashcard_used: match[2],
+      content: inputText.replace(regex, ""),
+    };
+  return null;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid } = req.body?.data?.user?.userData;
-    const { message } = req.body;
+    const { message, url, fullbook, reaction } = req.body;
+    const unit = url.split("/").reverse()[0];
+
     const conversationDoc = await db.collection("tutorConversations").doc(uid).get();
     let conversationData: any = {
       messages: [],
     };
     if (conversationDoc.exists) {
       conversationData = conversationDoc.data();
+      if (conversationData.unit !== unit) {
+        conversationData.messages[0] = {
+          role: "system",
+          content: await generateSystemPrompt(unit, fullbook),
+        };
+      }
     } else {
       conversationData.messages.push({
         role: "system",
-        content: await generateSystemPrompt(),
+        content: await generateSystemPrompt(unit, fullbook),
       });
       conversationData.createdAt = new Date();
     }
@@ -89,10 +98,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     conversationData.messages.push({
       role: "user",
       content: message,
+      sentAt: new Date(),
+      reaction,
     });
 
     const response = await openai.chat.completions.create({
-      messages: conversationData.messages,
+      messages: conversationData.messages.map((message: any) => ({
+        role: message.role,
+        content: message.content,
+      })),
       model: "gpt-4-1106-preview",
       temperature: 0,
       stream: true,
@@ -100,15 +114,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let completeMessage = "";
     for await (const result of response) {
       if (result.choices[0].delta.content) {
-        completeMessage = completeMessage + result.choices[0].delta.content;
         res.write(`${result.choices[0].delta.content}`);
+        completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
-    conversationData.messages.push({
-      role: "user",
-      content: completeMessage,
-    });
-    await conversationDoc.ref.set(conversationData);
+    const cleanData = extractFlashcardId(completeMessage);
+    if (cleanData) {
+      conversationData.messages.push({
+        role: "assistant",
+        ...cleanData,
+        sentAt: new Date(),
+      });
+    } else {
+      conversationData.messages.push({
+        role: "assistant",
+        content: completeMessage,
+        sentAt: new Date(),
+      });
+    }
+
+    await conversationDoc.ref.set({ ...conversationData, unit });
   } catch (error) {
     console.error(error);
     return res.status(500).send({
