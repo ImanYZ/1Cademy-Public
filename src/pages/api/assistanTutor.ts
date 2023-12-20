@@ -80,7 +80,9 @@ const extractFlashcardId = (inputText: string) => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname } = req.body?.data?.user?.userData;
-    const { message, url, fullbook, reaction } = req.body;
+    const { message, url, reaction } = req.body;
+    const fullbook = message === "Teach me this whole book";
+
     const unit = url.split("/").reverse()[0];
 
     const conversationDoc = await db.collection("tutorConversations").doc(uid).get();
@@ -93,6 +95,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         conversationData.messages[0] = {
           role: "system",
           content: await generateSystemPrompt(unit, fullbook),
+          ù,
         };
       }
     } else {
@@ -168,7 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const prevReactions = bookData.flashcards[flashcardIdx].reactions || [];
       bookData.flashcards[flashcardIdx].reactions = {
         ...prevReactions,
-        uname: reaction,
+        [uname]: reaction,
       };
       await bookDoc.ref.update(bookData);
     }
