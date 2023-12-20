@@ -130,12 +130,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         role: "assistant",
         ...cleanData,
         sentAt: new Date(),
+        showProgress: message === "How am I doing in this course so far?",
       });
     } else {
       conversationData.messages.push({
         role: "assistant",
         content: completeMessage,
         sentAt: new Date(),
+        showProgress: message === "How am I doing in this course so far?",
       });
     }
 
