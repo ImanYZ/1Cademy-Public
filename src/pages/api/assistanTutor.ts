@@ -59,13 +59,19 @@ const generateSystemPrompt = async (url: string, fullbook: boolean) => {
 
 const extractFlashcardId = (inputText: string) => {
   const regex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
-  const match = inputText.match(regex);
-  if (match)
+  let match = inputText.match(regex);
+  if (!match) {
+    const regex2 = /\s*-\s*"prior_evaluation"\s*:\s*([^"]+)\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
+    match = inputText.match(regex2);
+  }
+  if (match) {
     return {
       prior_evaluation: match[1],
       flashcard_used: match[2],
       content: inputText.replace(regex, ""),
     };
+  }
+
   return null;
 };
 
