@@ -79,7 +79,7 @@ const extractFlashcardId = (inputText: string) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { uid } = req.body?.data?.user?.userData;
+    const { uid, uname } = req.body?.data?.user?.userData;
     const { message, url, fullbook, reaction } = req.body;
     const unit = url.split("/").reverse()[0];
 
@@ -155,8 +155,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         audioUrl,
       });
     }
-
     await conversationDoc.ref.set({ ...conversationData, unit });
+    if (reaction && cleanData?.flashcard_used) {
+      let booksQuery = db.collection("chaptersBook").where("url", "==", url);
+      const booksDocs = await booksQuery.get();
+      const bookDoc = booksDocs.docs[0];
+      const bookData = bookDoc.data();
+
+      const flashcardIdx = bookData.flashcards.findIndex((f: any) => f.id === cleanData?.flashcard_used);
+      const prevReactions = bookData.flashcards[flashcardIdx].reactions || [];
+      bookData.flashcards[flashcardIdx].reactions = {
+        ...prevReactions,
+        uname: reaction,
+      };
+      await bookDoc.ref.update(bookData);
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).send({
