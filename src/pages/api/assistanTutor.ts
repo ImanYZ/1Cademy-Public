@@ -4,6 +4,8 @@ import fbAuth from "src/middlewares/fbAuth";
 import { IAssitantRequestAction } from "src/types/IAssitantConversation";
 
 import { openai } from "./openAI/helpers";
+import { newId } from "@/lib/utils/newFirestoreId";
+import { uploadToCloudStorage } from "./STT";
 
 export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
@@ -105,6 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       role: "user",
       content: message,
       sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
       reaction,
     });
 
@@ -125,19 +128,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       }
     }
     const cleanData = extractFlashcardId(completeMessage);
+    const input = completeMessage;
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1-hd",
+      voice: "alloy",
+      input,
+    });
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    const audioUrl = await uploadToCloudStorage(buffer);
     if (cleanData) {
       conversationData.messages.push({
         role: "assistant",
         ...cleanData,
         sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
         showProgress: message === "How am I doing in this course so far?",
+        audioUrl,
       });
     } else {
       conversationData.messages.push({
         role: "assistant",
         content: completeMessage,
         sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
         showProgress: message === "How am I doing in this course so far?",
+        audioUrl,
       });
     }
 
