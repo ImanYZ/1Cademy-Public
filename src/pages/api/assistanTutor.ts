@@ -41,8 +41,7 @@ IMPORTANT: Limit the frequency of applying the remaining instructions to prevent
 By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.
 At the end of your response you should add two more lines - this is emprtant and needs to be added for each reponse:
 - "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question."
-- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
-- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
+- "flashcard_used": "The 'id' of the flashcards used to formulate this current message."
 - "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying message.
 `;
 };
