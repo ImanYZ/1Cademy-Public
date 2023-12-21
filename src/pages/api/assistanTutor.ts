@@ -41,8 +41,7 @@ IMPORTANT: Limit the frequency of applying the remaining instructions to prevent
 By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.
 At the end of your response you should add two more lines - this is emprtant and needs to be added for each reponse:
 - "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question."
-- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
-- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
+- "flashcard_used": "The 'id' of the flashcards used to formulate this current message."
 - "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying message.
 `;
 };
@@ -143,7 +142,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       }
     }
     res.end();
-    const cleanData = extractFlashcardId(completeMessage);
+    let cleanData = extractFlashcardId(completeMessage);
     const input = completeMessage;
     const mp3 = await openai.audio.speech.create({
       model: "tts-1-hd",
@@ -152,25 +151,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const audioUrl = await uploadToCloudStorage(buffer);
-    if (cleanData) {
-      conversationData.messages.push({
-        role: "assistant",
-        ...cleanData,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-        showProgress: message === "How am I doing in this course so far?",
-        audioUrl,
-      });
-    } else {
-      conversationData.messages.push({
-        role: "assistant",
-        content: completeMessage,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-        showProgress: message === "How am I doing in this course so far?",
-        audioUrl,
-      });
+
+    if (!cleanData?.prior_evaluation || !cleanData?.flashcard_used) {
+      try {
+        conversationData.messages.push({
+          role: "user",
+          content: `You did not generate correct values for "prior_evaluation", "flashcard_used", or "emotion"
+          Respond to this message with only a JSON object with the following structure. Do not include anything other than the JSON object in your response.
+          {
+          "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question.",
+          "flashcard_used": "The 'id' of the flashcards used to formulate this last message.",
+          "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying this last message.
+          }`,
+        });
+        const response = await openai.chat.completions.create({
+          messages: conversationData.messages.map((message: any) => ({
+            role: message.role,
+            content: message.content,
+          })),
+          model: "gpt-4-1106-preview",
+          temperature: 0,
+        });
+        const responseText = response.choices[0].message.content;
+        cleanData = JSON.parse(responseText);
+        console.log({ cleanData });
+      } catch (error) {
+        console.log(error);
+      }
     }
+    conversationData.messages.push({
+      role: "assistant",
+      ...cleanData,
+      sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
+      showProgress: message === "How am I doing in this course so far?",
+      audioUrl,
+    });
+
     await conversationDoc.ref.set({ ...conversationData, unit });
     console.log({ reaction });
     if (reaction && cleanData?.flashcard_used) {
