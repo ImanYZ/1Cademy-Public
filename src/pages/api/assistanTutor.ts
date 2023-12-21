@@ -15,11 +15,13 @@ export type IAssistantRequestPayload = {
   // notebookId?: string;
 };
 
-const PROMPT = (flashcards: any) => {
-  return `You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should motivate and help the user learn all the flashcards in the following JSON array of objects:
+const PROMPT = (flashcards: any, url: string) => {
+  return `
+  You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should make your messages very short. You should motivate and help the user learn all the flashcards in the following JSON array of objects from unit${url}:
 ${JSON.stringify(flashcards)}
 You initiate the learning process by greeting the user and posing a series of concise questions that pertain to the material's introductory concepts.
 Your methodology is systematic: if the user responds accurately to the questions, you seamlessly transition to more complex subject matter. Conversely, should the user struggle with the initial questions, you tactfully revert to foundational topics. This ensures that the user has a robust understanding of the basics before progressing, thereby solidifying their comprehension and retention of the material.
+
 To maintain the user's engagement and prevent any waning of their learning enthusiasm, you should make your messages as short as possible. You should not include more than one question in each of your messages.  
 Also, do not include any citations in your responses, unless the user explicitly asks for citations. In addition, you should use the following strategies:
 1. **Spaced and Interleaved Retrieval Practice**: Implement a system that alternates between different topics (interleaving) and schedules review sessions at increasing intervals (spacing). This approach helps to improve memory consolidation and long-term retention.
@@ -39,10 +41,7 @@ IMPORTANT: Limit the frequency of applying the remaining instructions to prevent
 14. **Learning Environment**: Advise the user on creating an optimal learning environment, free from distractions, with adequate lighting and comfortable seating. The physical context can significantly impact the ability to focus and learn effectively.
 15. **Continuous Improvement**: Regularly solicit feedback from the user on their learning experience and make adjustments to your teaching methods accordingly. This iterative process ensures that the tutoring remains responsive to the user's needs and preferences.
 By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.
-At the end of your response you should add two more lines - this is emprtant and needs to be added for each reponse:
-- "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question."
-- "flashcard_used": "The 'id' of the flashcards used to formulate this current message."
-- "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying message.
+You should make your messages very short.
 `;
 };
 
@@ -57,7 +56,18 @@ const generateSystemPrompt = async (url: string, fullbook: boolean) => {
     const bookData = bookDoc.data();
     flashcards = [...flashcards, ...(bookData?.flashcards || [])];
   }
-  return PROMPT(flashcards);
+  const copy_flashcards = flashcards
+    .filter((f: any) => f.paragraphs.length > 0)
+    .map(
+      (f: any) =>
+        (f = {
+          title: f.title,
+          content: f.content,
+          id: f.id,
+        })
+    );
+  console.log(copy_flashcards[0]);
+  return PROMPT(copy_flashcards, url.replace(".html", ""));
 };
 
 const extractFlashcardId = (inputText: string) => {
@@ -88,6 +98,21 @@ const extractFlashcardId = (inputText: string) => {
     emotion: emotion,
     content: inputText,
   };
+};
+
+const extractJSON = (text: string) => {
+  try {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    console.log({ start, end });
+    // if (end !== -1 || start !== -1) {
+    //   return null;
+    // }
+    const jsonArrayString = text.slice(start, end + 1);
+    return JSON.parse(jsonArrayString);
+  } catch (error) {
+    return null;
+  }
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
@@ -135,35 +160,45 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       stream: true,
     });
     let completeMessage = "";
+    let sendreponseTUser = false;
     for await (const result of response) {
       if (result.choices[0].delta.content) {
+        console.log(completeMessage);
         res.write(`${result.choices[0].delta.content}`);
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
-    res.end();
-    let cleanData = extractFlashcardId(completeMessage);
-    const input = completeMessage;
-    const mp3 = await openai.audio.speech.create({
-      model: "tts-1-hd",
-      voice: "alloy",
-      input,
-    });
-    const buffer = Buffer.from(await mp3.arrayBuffer());
-    const audioUrl = await uploadToCloudStorage(buffer);
+    console.log({ completeMessage });
 
-    if (!cleanData?.prior_evaluation || !cleanData?.flashcard_used) {
+    // let cleanData = extractFlashcardId(completeMessage);
+    // const input = completeMessage;
+    // const mp3 = await openai.audio.speech.create({
+    //   model: "tts-1-hd",
+    //   voice: "alloy",
+    //   input,
+    // });
+    // const buffer = Buffer.from(await mp3.arrayBuffer());
+    // const audioUrl = await uploadToCloudStorage(buffer);
+    let lateResponse: { flashcard_id: string; prior_evaluation: any; emotion: string } = {
+      flashcard_id: "",
+      prior_evaluation: "",
+      emotion: "",
+    };
+    let got_response = false;
+    while (!got_response) {
       try {
         const _messages = [...conversationData.messages];
         _messages.push({
           role: "user",
-          content: `You did not generate correct values for "prior_evaluation", "flashcard_used", or "emotion"
-          Respond to this message with only a JSON object with the following structure. Do not include anything other than the JSON object in your response.
-          {
-          "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question.",
-          "flashcard_used": "The 'id' of the flashcards used to formulate this last message.",
-          "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying this last message.
-          }`,
+          content: `
+            Which flashcard id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
+            {
+            "flashcard_id": "The id of the flashcard that the user should look into to lean better about your last message", 
+            "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question.",
+            "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying message.
+            }
+            Do not print anything other than this JSON object.
+            }`,
         });
         const response = await openai.chat.completions.create({
           messages: _messages.map((message: any) => ({
@@ -174,43 +209,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           temperature: 0,
         });
         const responseText = response.choices[0].message.content;
-        cleanData = JSON.parse(responseText);
-        console.log({ cleanData });
+        lateResponse = extractJSON(responseText);
+        got_response = true;
+        console.log(lateResponse.flashcard_id);
+        console.log({ lateResponse });
       } catch (error) {
         console.log(error);
       }
     }
+    res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
+    res.end();
+
     conversationData.messages.push({
       role: "assistant",
-      ...cleanData,
+      flashcard_used: lateResponse.flashcard_id,
+      emotion: lateResponse.emotion,
+      prior_evaluation: lateResponse.prior_evaluation,
       content: completeMessage,
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
       showProgress: message === "How am I doing in this course so far?",
-      audioUrl,
     });
 
     await conversationDoc.ref.set({ ...conversationData, unit });
     console.log({ reaction });
-    if (reaction && cleanData?.flashcard_used) {
-      let booksQuery = db.collection("chaptersBook").where("url", "==", url);
+    if (reaction && lateResponse.flashcard_id) {
+      let booksQuery = db.collection("chaptersBook").where("url", "==", unit);
       const booksDocs = await booksQuery.get();
       const bookDoc = booksDocs.docs[0];
-      const bookData = bookDoc.data();
+      if (bookDoc.exists) {
+        const bookData = bookDoc.data();
 
-      const flashcardIdx = bookData.flashcards.findIndex((f: any) => f.id === cleanData?.flashcard_used);
-      const prevReactions = bookData.flashcards[flashcardIdx].reactions || [];
-      bookData.flashcards[flashcardIdx].reactions = {
-        ...prevReactions,
-        [uname]: reaction,
-      };
-      await bookDoc.ref.update(bookData);
+        const flashcardIdx = bookData.flashcards.findIndex((f: any) => f.id === lateResponse.flashcard_id);
+        if (flashcardIdx) {
+          const prevReactions = bookData.flashcards[flashcardIdx]?.reactions || {};
+          bookData.flashcards[flashcardIdx].reactions = {
+            ...prevReactions,
+            [uname]: reaction,
+          };
+          await bookDoc.ref.update(bookData);
+        }
+      }
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).send({
-      error: true,
-    });
   }
 }
 
