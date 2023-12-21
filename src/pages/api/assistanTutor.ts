@@ -183,6 +183,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     conversationData.messages.push({
       role: "assistant",
       ...cleanData,
+      content: completeMessage,
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
       showProgress: message === "How am I doing in this course so far?",
