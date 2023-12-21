@@ -142,7 +142,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       }
     }
     res.end();
-    const cleanData = extractFlashcardId(completeMessage);
+    let cleanData = extractFlashcardId(completeMessage);
     const input = completeMessage;
     const mp3 = await openai.audio.speech.create({
       model: "tts-1-hd",
@@ -172,6 +172,34 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     await conversationDoc.ref.set({ ...conversationData, unit });
     console.log({ reaction });
+
+    if (!cleanData?.prior_evaluation || !cleanData?.flashcard_used) {
+      try {
+        conversationData.messages.push({
+          role: "user",
+          content: `You did not generate correct values for "prior_evaluation", "flashcard_used", or "emotion"
+          Respond to this message with only a JSON object with the following structure. Do not include anything other than the JSON object in your response.
+          {
+          "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question.",
+          "flashcard_used": "The 'id' of the flashcards used to formulate this last message.",
+          "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying this last message.
+          }`,
+        });
+        const response = await openai.chat.completions.create({
+          messages: conversationData.messages.map((message: any) => ({
+            role: message.role,
+            content: message.content,
+          })),
+          model: "gpt-4-1106-preview",
+          temperature: 0,
+        });
+        const responseText = response.choices[0].message.content;
+        cleanData = JSON.parse(responseText);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
     if (reaction && cleanData?.flashcard_used) {
       let booksQuery = db.collection("chaptersBook").where("url", "==", url);
       const booksDocs = await booksQuery.get();
