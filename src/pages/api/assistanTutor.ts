@@ -151,27 +151,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
     const buffer = Buffer.from(await mp3.arrayBuffer());
     const audioUrl = await uploadToCloudStorage(buffer);
-    if (cleanData) {
-      conversationData.messages.push({
-        role: "assistant",
-        ...cleanData,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-        showProgress: message === "How am I doing in this course so far?",
-        audioUrl,
-      });
-    } else {
-      conversationData.messages.push({
-        role: "assistant",
-        content: completeMessage,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-        showProgress: message === "How am I doing in this course so far?",
-        audioUrl,
-      });
-    }
-    await conversationDoc.ref.set({ ...conversationData, unit });
-    console.log({ reaction });
 
     if (!cleanData?.prior_evaluation || !cleanData?.flashcard_used) {
       try {
@@ -195,11 +174,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
         const responseText = response.choices[0].message.content;
         cleanData = JSON.parse(responseText);
+        console.log({ cleanData });
       } catch (error) {
         console.log(error);
       }
     }
+    conversationData.messages.push({
+      role: "assistant",
+      ...cleanData,
+      sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
+      showProgress: message === "How am I doing in this course so far?",
+      audioUrl,
+    });
 
+    await conversationDoc.ref.set({ ...conversationData, unit });
+    console.log({ reaction });
     if (reaction && cleanData?.flashcard_used) {
       let booksQuery = db.collection("chaptersBook").where("url", "==", url);
       const booksDocs = await booksQuery.get();
