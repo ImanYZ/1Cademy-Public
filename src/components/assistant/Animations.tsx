@@ -47,7 +47,7 @@ export const Animations = ({ emotion }: { emotion: string }) => {
       if (emotion === "clapping") {
         happyTrigger?.fire();
       }
-      if (emotion === "Knock Knock") {
+      if (emotion === "knock knock") {
         nocking2Trigger?.fire();
       }
       if (emotion === "crying") {
@@ -56,7 +56,7 @@ export const Animations = ({ emotion }: { emotion: string }) => {
       if (emotion === "handOverHead") {
         handOverHead?.fire();
       }
-      if (emotion === "wating") {
+      if (emotion === "waiting") {
         nocking1Trigger?.fire();
       }
     };
