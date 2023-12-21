@@ -154,7 +154,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     if (!cleanData?.prior_evaluation || !cleanData?.flashcard_used) {
       try {
-        conversationData.messages.push({
+        const _messages = [...conversationData.messages];
+        _messages.push({
           role: "user",
           content: `You did not generate correct values for "prior_evaluation", "flashcard_used", or "emotion"
           Respond to this message with only a JSON object with the following structure. Do not include anything other than the JSON object in your response.
@@ -165,7 +166,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           }`,
         });
         const response = await openai.chat.completions.create({
-          messages: conversationData.messages.map((message: any) => ({
+          messages: _messages.map((message: any) => ({
             role: message.role,
             content: message.content,
           })),
