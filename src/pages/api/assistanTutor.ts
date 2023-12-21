@@ -39,9 +39,11 @@ IMPORTANT: Limit the frequency of applying the remaining instructions to prevent
 14. **Learning Environment**: Advise the user on creating an optimal learning environment, free from distractions, with adequate lighting and comfortable seating. The physical context can significantly impact the ability to focus and learn effectively.
 15. **Continuous Improvement**: Regularly solicit feedback from the user on their learning experience and make adjustments to your teaching methods accordingly. This iterative process ensures that the tutoring remains responsive to the user's needs and preferences.
 By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.
-At the end of your response you should add two more lines:
+At the end of your response you should add two more lines - this is emprtant and needs to be added for each reponse:
 - "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question."
 - "flashcard_used": "The 'id' of the flashcards used to formulate this message."
+- "flashcard_used": "The 'id' of the flashcards used to formulate this message."
+- "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying message.
 `;
 };
 
@@ -54,34 +56,45 @@ const generateSystemPrompt = async (url: string, fullbook: boolean) => {
   let flashcards: any = [];
   for (let bookDoc of booksDocs.docs) {
     const bookData = bookDoc.data();
-    flashcards = [...flashcards, ...bookData.flashcards];
+    flashcards = [...flashcards, ...(bookData?.flashcards || [])];
   }
   return PROMPT(flashcards);
 };
 
 const extractFlashcardId = (inputText: string) => {
-  let regex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
-  let match = inputText.match(regex);
-  if (!match) {
-    regex = /\s*-\s*"prior_evaluation"\s*:\s*([^"]+)\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
-    match = inputText.match(regex);
-  }
-  if (match) {
-    return {
-      prior_evaluation: match[1],
-      flashcard_used: match[2],
-      content: inputText.replace(regex, ""),
-    };
-  }
+  // extract prior_evaluation
+  let prior_evaluationRegex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"/;
+  let flashcard_usedRegex = /\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
+  let emotion_regex = /\s*-\s*"emotion"\s*:\s*"([^"]+)"/;
 
-  return null;
+  const matchEvaluation = inputText.match(prior_evaluationRegex);
+  const matchflashcard_used = inputText.match(flashcard_usedRegex);
+  const matchEmotion = inputText.match(emotion_regex);
+
+  let emotion = "";
+  let flashcard_used = "";
+  let prior_evaluation = "";
+  if (matchEvaluation) {
+    prior_evaluation = matchEvaluation[1];
+  }
+  if (matchflashcard_used) {
+    flashcard_used = matchflashcard_used[1];
+  }
+  if (matchEmotion) {
+    emotion = matchEmotion[1];
+  }
+  return {
+    prior_evaluation: prior_evaluation,
+    flashcard_used: flashcard_used,
+    emotion: emotion,
+    content: inputText,
+  };
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname } = req.body?.data?.user?.userData;
-    const { message, url, reaction } = req.body;
-    const fullbook = message === "Teach me this whole book";
+    const { message, url, reaction, fullbook } = req.body;
 
     const unit = url.split("/").reverse()[0];
 
