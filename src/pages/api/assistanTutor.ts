@@ -45,16 +45,19 @@ You should make your messages very short.
 `;
 };
 
-const generateSystemPrompt = async (url: string, fullbook: boolean) => {
-  let booksQuery = db.collection("chaptersBook").where("url", "==", url);
-  if (fullbook) {
-    booksQuery = db.collection("chaptersBook");
-  }
-  const booksDocs = await booksQuery.get();
-  let flashcards: any = [];
-  for (let bookDoc of booksDocs.docs) {
-    const bookData = bookDoc.data();
-    flashcards = [...flashcards, ...(bookData?.flashcards || [])];
+const generateSystemPrompt = async (url: string, fullbook: boolean, concepts: any) => {
+  const flashcards = concepts;
+  if (!flashcards.length) {
+    let booksQuery = db.collection("chaptersBook").where("url", "==", url);
+    if (fullbook) {
+      booksQuery = db.collection("chaptersBook");
+    }
+    const booksDocs = await booksQuery.get();
+    let flashcards: any = [];
+    for (let bookDoc of booksDocs.docs) {
+      const bookData = bookDoc.data();
+      flashcards = [...flashcards, ...(bookData?.flashcards || [])];
+    }
   }
   const copy_flashcards = flashcards
     .filter((f: any) => f.paragraphs.length > 0)
@@ -118,7 +121,7 @@ const extractJSON = (text: string) => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname } = req.body?.data?.user?.userData;
-    const { message, url, reaction, fullbook } = req.body;
+    const { message, url, reaction, fullbook, concepts } = req.body;
 
     const unit = url.split("/").reverse()[0];
 
@@ -131,13 +134,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (conversationData.unit !== unit) {
         conversationData.messages[0] = {
           role: "system",
-          content: await generateSystemPrompt(unit, fullbook),
+          content: await generateSystemPrompt(unit, fullbook, concepts || []),
         };
       }
     } else {
       conversationData.messages.push({
         role: "system",
-        content: await generateSystemPrompt(unit, fullbook),
+        content: await generateSystemPrompt(unit, fullbook, concepts || []),
       });
       conversationData.createdAt = new Date();
     }
