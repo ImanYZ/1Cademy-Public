@@ -41,6 +41,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
+import { getMessaging, onMessage } from "firebase/messaging";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -266,6 +267,7 @@ const Notebook = ({}: NotebookProps) => {
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
   const db = getFirestore();
+  const messaging = getMessaging();
   // const storage = getStorage();
   const theme = useTheme();
   const router = useRouter();
@@ -7021,6 +7023,13 @@ const Notebook = ({}: NotebookProps) => {
     return () => killSnapshot();
   }, [db, user]);
 
+  useEffect(() => {
+    onMessage(messaging, (message: any) => {
+      setTimeout(() => {
+        new Notification(message.notification.title, { body: message.notification.body });
+      }, 500);
+    });
+  }, [messaging]);
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (

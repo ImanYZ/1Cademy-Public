@@ -124,7 +124,6 @@ export const DirectMessagesList = ({
       .map(result => result.item)
       .filter((item: any) => !item.deleted);
   };
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>

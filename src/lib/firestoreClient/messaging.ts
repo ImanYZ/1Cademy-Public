@@ -21,13 +21,10 @@ async function requestNotificationsPermissions(uid: string) {
 
 // Saves the messaging device token to Cloud Firestore.
 export async function saveMessagingDeviceToken(uid: string) {
-  console.log("save msg device token");
-
   try {
     const msg = await messaging();
     const fcmToken = await getToken(msg, { vapidKey: VAPID_KEY });
     if (fcmToken) {
-      console.log("Got FCM device token:");
       // Save device token to Firestore
       const tokenRef = doc(db, "fcmTokens", uid);
       await setDoc(tokenRef, { token: fcmToken });
