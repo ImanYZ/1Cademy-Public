@@ -188,7 +188,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // const audioUrl = await uploadToCloudStorage(buffer);
     let lateResponse: { flashcard_id: string; evaluation: any; emotion: string } = {
       flashcard_id: "",
-      evaluation: "",
+      evaluation: "0",
       emotion: "",
     };
     let got_response = false;
