@@ -186,10 +186,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // });
     // const buffer = Buffer.from(await mp3.arrayBuffer());
     // const audioUrl = await uploadToCloudStorage(buffer);
-    let lateResponse: { flashcard_id: string; evaluation: any; emotion: string } = {
+    let lateResponse: { flashcard_id: string; evaluation: any; emotion: string; progress: string } = {
       flashcard_id: "",
       evaluation: "0",
       emotion: "",
+      progress: "0",
     };
     let got_response = false;
     let tries = 0;
@@ -200,13 +201,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         _messages.push({
           role: "user",
           content: `
-             Evaluate my answer to your last question. Which flashcard id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
-             {
-             "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give them a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
-             "emotion": How happy are you with my last response? Give me only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
-             "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message", 
-             }
-             Do not print anything other than this JSON object.
+          Evaluate my answer to your last question. Which flashcard id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
+          {
+          "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give them a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
+          "emotion": How happy are you with my last response? Give me only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
+          "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message",
+          "progress": A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned.
+          }
+          Do not print anything other than this JSON object.
           `,
         });
         const response = await openai.chat.completions.create({
@@ -227,6 +229,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         console.log(error);
       }
     }
+    // lateResponse.flashcard_id = "qdBqfitqoWZtZg4w7FEO";
     res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
     res.end();
 
@@ -240,6 +243,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       emotion: lateResponse.emotion,
       prior_evaluation: lateResponse.evaluation,
       content: completeMessage,
+      progress: lateResponse.progress,
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
       showProgress: message === "How am I doing in this course so far?",
