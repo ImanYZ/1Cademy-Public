@@ -17,8 +17,9 @@ export type IAssistantRequestPayload = {
 
 const PROMPT = (flashcards: any, url: string) => {
   return `
-  You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should make your messages very short. You should motivate and help the user learn all the flashcards in the following JSON array of objects from unit${url}:
+  You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should make your messages very short. You should motivate and help the user learn all the concept cards in the following JSON array of objects from unit${url}:
 ${JSON.stringify(flashcards)}
+If the user asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the above concept cards. 
 You initiate the learning process by greeting the user and posing a series of concise questions that pertain to the material's introductory concepts.
 Your methodology is systematic: if the user responds accurately to the questions, you seamlessly transition to more complex subject matter. Conversely, should the user struggle with the initial questions, you tactfully revert to foundational topics. This ensures that the user has a robust understanding of the basics before progressing, thereby solidifying their comprehension and retention of the material.
 
@@ -147,7 +148,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     conversationData.messages.push({
       role: "user",
-      content: message,
+      content:
+        message +
+        "\nthe user can't see this PS:If the user asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the above concept cards. ",
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
       reaction,
@@ -163,7 +166,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       stream: true,
     });
     let completeMessage = "";
-    let sendreponseTUser = false;
     for await (const result of response) {
       if (result.choices[0].delta.content) {
         console.log(completeMessage);
@@ -171,6 +173,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
+
+    conversationData.messages[conversationData.messages.length - 1].content = message;
     console.log({ completeMessage });
 
     // let cleanData = extractFlashcardId(completeMessage);
