@@ -188,12 +188,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // const audioUrl = await uploadToCloudStorage(buffer);
     let lateResponse: { flashcard_id: string; evaluation: any; emotion: string } = {
       flashcard_id: "",
-      evaluation: "",
+      evaluation: "0",
       emotion: "",
     };
     let got_response = false;
-    while (!got_response) {
+    let tries = 0;
+    while (!got_response && tries < 5) {
       try {
+        tries = tries + 1;
         const _messages = [...conversationData.messages];
         _messages.push({
           role: "user",
@@ -218,6 +220,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         const responseText = response.choices[0].message.content;
         lateResponse = extractJSON(responseText);
         got_response = true;
+
         console.log(lateResponse.flashcard_id);
         console.log({ lateResponse });
       } catch (error) {
@@ -226,6 +229,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
     res.end();
+
+    if (conversationData.messages.length === 2) {
+      lateResponse.emotion = "";
+    }
 
     conversationData.messages.push({
       role: "assistant",
