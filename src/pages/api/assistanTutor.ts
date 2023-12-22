@@ -229,7 +229,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         console.log(error);
       }
     }
-    lateResponse.flashcard_id = "qdBqfitqoWZtZg4w7FEO";
+    // lateResponse.flashcard_id = "qdBqfitqoWZtZg4w7FEO";
     res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
     res.end();
 
