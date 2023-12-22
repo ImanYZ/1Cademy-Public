@@ -186,9 +186,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // });
     // const buffer = Buffer.from(await mp3.arrayBuffer());
     // const audioUrl = await uploadToCloudStorage(buffer);
-    let lateResponse: { flashcard_id: string; prior_evaluation: any; emotion: string } = {
+    let lateResponse: { flashcard_id: string; evaluation: any; emotion: string } = {
       flashcard_id: "",
-      prior_evaluation: "",
+      evaluation: "",
       emotion: "",
     };
     let got_response = false;
@@ -198,14 +198,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         _messages.push({
           role: "user",
           content: `
-            Which flashcard id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
+            Evaluate my answer to your last question. Which flashcard id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
             {
-            "flashcard_id": "The id of the flashcard that the user should look into to lean better about your last message", 
-            "prior_evaluation":"A number between 0 to 10 about the user's response to your previous question. If the user correctly answered the previous question with no difficulties, give them a 10, otherwise give the a lower number, 0 meaning the user gave a response that is completely wrong or irrelevant to the question.",
-            "emotion": Only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy" depending on the accompanying message.
+            "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give them a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
+            "emotion": How happy are you with my last response? Give me only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy",
+            "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message", 
             }
             Do not print anything other than this JSON object.
-            }`,
+          `,
         });
         const response = await openai.chat.completions.create({
           messages: _messages.map((message: any) => ({
@@ -231,7 +231,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       role: "assistant",
       flashcard_used: lateResponse.flashcard_id,
       emotion: lateResponse.emotion,
-      prior_evaluation: lateResponse.prior_evaluation,
+      prior_evaluation: lateResponse.evaluation,
       content: completeMessage,
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
