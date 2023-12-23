@@ -227,7 +227,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     /* we calculate the progress of the user in this unit
     100% means the user has 400 points
     */
-    conversationData.progress = roundNum(conversationData.progress + parseInt(lateResponse.evaluation) / 400);
+    conversationData.progress = roundNum(conversationData.progress + parseInt(lateResponse.evaluation) / 160);
     if (conversationData.hasOwnProperty("scores")) {
       conversationData.scores.push({
         score: parseInt(lateResponse.evaluation),
@@ -247,7 +247,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //send the flashcard used in generating the previous question by GPT
     //so we can scroll to it
     res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
-
+    console.log({ reaction });
     /*  if the user added a reaction to the message we need to save it in the chaptersBook collection 
     corresponding to this flashcard */
     if (reaction && lateResponse.flashcard_id) {
@@ -320,7 +320,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       showProgress: message === "How am I doing in this course so far?",
     });
     await newConversationRef.set({ ...conversationData });
-    console.log({ reaction });
+    console.log("Done");
   } catch (error) {
     console.error(error);
   }
