@@ -119,7 +119,7 @@ const extractJSON = (text: string) => {
     return null;
   }
 };
-
+const roundNum = (num: number) => Number(Number.parseFloat(Number(num).toFixed(2)));
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname } = req.body?.data?.user?.userData;
@@ -137,9 +137,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       messages: [],
       unit,
       uid,
+      uname,
       createdAt: new Date(),
       concepts,
       progress: 0,
+      scores: [],
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
@@ -226,7 +228,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     /* we calculate the progress of the user in this unit
     100% means the user has 400 points
     */
-    conversationData.progress += parseInt(lateResponse.evaluation) / 400;
+    conversationData.progress = roundNum(conversationData.progress + parseInt(lateResponse.evaluation) / 400);
+    if (conversationData.hasOwnProperty("scores")) {
+      conversationData.scores.push({
+        score: parseInt(lateResponse.evaluation),
+        date: new Date(),
+      });
+    } else {
+      conversationData.scores = [
+        {
+          score: parseInt(lateResponse.evaluation),
+          date: new Date(),
+        },
+      ];
+    }
 
     // lateResponse.flashcard_id = "QbAPBvAY73lTKrc90HIA";
     console.log(`flashcard_id: ${lateResponse.flashcard_id}`);
