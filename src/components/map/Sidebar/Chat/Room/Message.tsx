@@ -216,7 +216,8 @@ export const Message = ({
                       padding: "8px 20px",
                       fontSize: "14px",
                       fontWeight: "500",
-                      background: DESIGN_SYSTEM_COLORS.orange400,
+                      background: DESIGN_SYSTEM_COLORS.orange300,
+                      color: "white",
                       mt: "15px",
                     }}
                   >
