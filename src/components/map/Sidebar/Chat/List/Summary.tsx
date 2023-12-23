@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
 import NextImage from "next/image";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
@@ -52,15 +52,18 @@ export const Summary = ({
   const [mutingChannel, setMutingChannel] = useState(false);
   const muted = !selectedChannel?.membersInfo[user.uname].muteChannel;
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  const handleChange = useCallback(
+    (event: React.SyntheticEvent, newValue: number) => {
+      setValue(newValue);
+    },
+    [value]
+  );
   const a11yProps = (index: number) => {
     return {
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-  const leaveChannel = async () => {
+  const leaveChannel = useCallback(async () => {
     try {
       if (
         await confirmIt(
@@ -93,8 +96,8 @@ export const Summary = ({
     } catch (error) {
       console.error(error);
     }
-  };
-  const muteChannel = async () => {
+  }, [selectedChannel, roomType]);
+  const muteChannel = useCallback(async () => {
     try {
       if (
         await confirmIt(
@@ -126,7 +129,7 @@ export const Summary = ({
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [selectedChannel, roomType]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>

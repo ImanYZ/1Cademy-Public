@@ -26,7 +26,6 @@ export const MessageButtons = ({
   toggleEmojiPicker,
   // forwardMessage,
   setEditingMessage,
-  setInputMessage,
   handleDeleteMessage,
   user,
 }: MessageButtonProps) => {
@@ -37,7 +36,6 @@ export const MessageButtons = ({
 
   const handleEditMessage = () => {
     setEditingMessage(message);
-    setInputMessage(message.message);
   };
   return (
     <Box

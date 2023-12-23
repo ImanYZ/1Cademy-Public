@@ -1,14 +1,10 @@
-importScripts("https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/3.5.2/firebase-messaging.js");
-importScripts("/firebase-configs.js");
+importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js");
+importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js");
 
-console.log({ firebaseConfig });
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(JSON.parse(new URL(location).searchParams.get("firebaseConfig")));
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(payload => {
-  console.log("Received background message ", payload);
-
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,

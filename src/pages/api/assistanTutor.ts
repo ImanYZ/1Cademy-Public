@@ -6,6 +6,7 @@ import { IAssitantRequestAction } from "src/types/IAssitantConversation";
 import { openai } from "./openAI/helpers";
 import { newId } from "@/lib/utils/newFirestoreId";
 import { uploadToCloudStorage } from "./STT";
+import { delay } from "@/lib/utils/utils";
 
 export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
@@ -124,7 +125,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { uid, uname } = req.body?.data?.user?.userData;
     const { message, url, reaction, fullbook, concepts } = req.body;
 
-    const unit = url.split("/").reverse()[0];
+    const unit = (url.split("/").pop() || "").split("#")[0];
 
     const conversationDoc = await db.collection("tutorConversations").doc(uid).get();
     let conversationData: any = {
@@ -156,36 +157,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       reaction,
     });
 
-    const response = await openai.chat.completions.create({
-      messages: conversationData.messages.map((message: any) => ({
-        role: message.role,
-        content: message.content,
-      })),
-      model: "gpt-4-1106-preview",
-      temperature: 0,
-      stream: true,
-    });
     let completeMessage = "";
-    for await (const result of response) {
-      if (result.choices[0].delta.content) {
-        console.log(completeMessage);
-        res.write(`${result.choices[0].delta.content}`);
-        completeMessage = completeMessage + result.choices[0].delta.content;
-      }
-    }
-
-    conversationData.messages[conversationData.messages.length - 1].content = message;
-    console.log({ completeMessage });
-
-    // let cleanData = extractFlashcardId(completeMessage);
-    // const input = completeMessage;
-    // const mp3 = await openai.audio.speech.create({
-    //   model: "tts-1-hd",
-    //   voice: "alloy",
-    //   input,
-    // });
-    // const buffer = Buffer.from(await mp3.arrayBuffer());
-    // const audioUrl = await uploadToCloudStorage(buffer);
     let lateResponse: { flashcard_id: string; evaluation: any; emotion: string; progress: string } = {
       flashcard_id: "",
       evaluation: "0",
@@ -205,12 +177,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           {
           "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give them a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
           "emotion": How happy are you with my last response? Give me only one of the values "happy", "very happy", "blinking", "clapping", "partying", "happy drumming", "celebrating daily goal achievement", "sad", and "unhappy". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
-          "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message",
-          "progress": A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned.
+          "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message"
           }
           Do not print anything other than this JSON object.
           `,
         });
+        // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I’ve already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
+
         const response = await openai.chat.completions.create({
           messages: _messages.map((message: any) => ({
             role: message.role,
@@ -229,9 +202,57 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         console.log(error);
       }
     }
-    // lateResponse.flashcard_id = "qdBqfitqoWZtZg4w7FEO";
+    // lateResponse.flashcard_id = "QbAPBvAY73lTKrc90HIA";
+    console.log(`flashcard_id: ${lateResponse.flashcard_id}`);
     res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
+
+    if (reaction && lateResponse.flashcard_id) {
+      let booksQuery = db.collection("chaptersBook").where("url", "==", unit);
+      const booksDocs = await booksQuery.get();
+      const bookDoc = booksDocs.docs[0];
+      if (bookDoc.exists) {
+        const bookData = bookDoc.data();
+
+        const flashcardIdx = bookData.flashcards.findIndex((f: any) => f.id === lateResponse.flashcard_id);
+        if (flashcardIdx) {
+          const prevReactions = bookData.flashcards[flashcardIdx]?.reactions || {};
+          bookData.flashcards[flashcardIdx].reactions = {
+            ...prevReactions,
+            [uname]: reaction,
+          };
+          await bookDoc.ref.update(bookData);
+        }
+      }
+    }
+    const response = await openai.chat.completions.create({
+      messages: conversationData.messages.map((message: any) => ({
+        role: message.role,
+        content: message.content,
+      })),
+      model: "gpt-4-1106-preview",
+      temperature: 0,
+      stream: true,
+    });
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        console.log(completeMessage);
+        res.write(`${result.choices[0].delta.content}`);
+        completeMessage = completeMessage + result.choices[0].delta.content;
+      }
+    }
     res.end();
+    conversationData.messages[conversationData.messages.length - 1].content = message;
+    console.log({ completeMessage });
+
+    // let cleanData = extractFlashcardId(completeMessage);
+    // const input = completeMessage;
+    // const mp3 = await openai.audio.speech.create({
+    //   model: "tts-1-hd",
+    //   voice: "alloy",
+    //   input,
+    // });
+    // const buffer = Buffer.from(await mp3.arrayBuffer());
+    // const audioUrl = await uploadToCloudStorage(buffer);
 
     if (conversationData.messages.length === 2) {
       lateResponse.emotion = "";
@@ -251,24 +272,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     await conversationDoc.ref.set({ ...conversationData, unit });
     console.log({ reaction });
-    if (reaction && lateResponse.flashcard_id) {
-      let booksQuery = db.collection("chaptersBook").where("url", "==", unit);
-      const booksDocs = await booksQuery.get();
-      const bookDoc = booksDocs.docs[0];
-      if (bookDoc.exists) {
-        const bookData = bookDoc.data();
-
-        const flashcardIdx = bookData.flashcards.findIndex((f: any) => f.id === lateResponse.flashcard_id);
-        if (flashcardIdx) {
-          const prevReactions = bookData.flashcards[flashcardIdx]?.reactions || {};
-          bookData.flashcards[flashcardIdx].reactions = {
-            ...prevReactions,
-            [uname]: reaction,
-          };
-          await bookDoc.ref.update(bookData);
-        }
-      }
-    }
   } catch (error) {
     console.error(error);
   }
