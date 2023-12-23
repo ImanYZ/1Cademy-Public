@@ -141,6 +141,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       createdAt: new Date(),
       concepts,
       progress: 0,
+      scores: [],
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
@@ -228,6 +229,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     100% means the user has 400 points
     */
     conversationData.progress = roundNum(conversationData.progress + parseInt(lateResponse.evaluation) / 400);
+    if (conversationData.hasOwnProperty("scores")) {
+      conversationData.scores.push({
+        score: parseInt(lateResponse.evaluation),
+        date: new Date(),
+      });
+    } else {
+      conversationData.scores = [
+        {
+          score: parseInt(lateResponse.evaluation),
+          date: new Date(),
+        },
+      ];
+    }
 
     // lateResponse.flashcard_id = "QbAPBvAY73lTKrc90HIA";
     console.log(`flashcard_id: ${lateResponse.flashcard_id}`);
