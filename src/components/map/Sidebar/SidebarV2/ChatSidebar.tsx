@@ -426,6 +426,10 @@ export const ChatSidebar = ({
       });
     }
   };
+  useEffect(() => {
+    if (!selectedChannel) return;
+    clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id));
+  }, [notifications, selectedChannel]);
 
   const getNotificationsNumbers = useCallback(
     (type: string) => {
