@@ -268,13 +268,14 @@ MessageInputProps) => {
             border: "none",
             outline: "none",
             width: "100%",
-            color: theme === "dark" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG900,
+            color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
             padding: "8px",
             overFlow: "auto",
           },
           suggestions: {
             list: {
-              background: theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+              background:
+                theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
               padding: "2px",
               fontSize: 16,
               position: "absolute",
@@ -408,7 +409,7 @@ MessageInputProps) => {
                 p: "10px",
                 borderRadius: "8px",
                 mr: "5px",
-                backgroundColor: theme === "dark" ? "transparent" : DESIGN_SYSTEM_COLORS.notebookG400,
+                backgroundColor: theme.toLowerCase() === "dark" ? "transparent" : DESIGN_SYSTEM_COLORS.notebookG400,
               }}
             >
               Cancel
