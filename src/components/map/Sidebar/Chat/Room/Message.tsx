@@ -3,7 +3,7 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
@@ -60,6 +60,7 @@ export const Message = ({
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [replyOnMessage, setReplyOnMessage] = useState<any>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
+  const scrolling = useRef<any>();
 
   useEffect(() => {
     const currentDate = new Date();
@@ -152,10 +153,8 @@ export const Message = ({
   }, [db]);
 
   const scrollToBottom = () => {
-    const messageList: any = messageBoxRef.current;
-    if (messageList) {
-      // Scroll to the bottom of the message list
-      messageList.scrollTop = messageList.scrollHeight;
+    if (scrolling.current) {
+      scrolling.current.scrollIntoView({ behaviour: "smooth" });
     }
   };
 
@@ -271,6 +270,7 @@ export const Message = ({
                     )}
                   </Box>
                 ))}
+                <Box ref={scrolling}></Box>
               </Box>
             );
           })}
