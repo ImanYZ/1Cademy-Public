@@ -4,9 +4,9 @@ import fbAuth from "src/middlewares/fbAuth";
 import { IAssitantRequestAction } from "src/types/IAssitantConversation";
 
 import { openai } from "./openAI/helpers";
-import { newId } from "@/lib/utils/newFirestoreId";
-import { uploadToCloudStorage } from "./STT";
-import { delay } from "@/lib/utils/utils";
+
+// import { uploadToCloudStorage } from "./STT";
+// import { delay } from "@/lib/utils/utils";
 
 export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
@@ -16,9 +16,10 @@ export type IAssistantRequestPayload = {
   // notebookId?: string;
 };
 
-const PROMPT = (flashcards: any, url: string) => {
+const PROMPT = (flashcards: any, title: string) => {
+  //we generete this prompt based on the concepts that are visible to the user on the front-end
   return `
-  You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should make your messages very short. You should motivate and help the user learn all the concept cards in the following JSON array of objects from unit${url}:
+  You are a professional tutor. Your approach to teaching is both strategic and adaptive. You employ the spaced and interleaved retrieval practice method, rooted in the desirable difficulties framework of cognitive psychology. You should make your messages very short. You should motivate and help the user learn all the concept cards in the following JSON array of objects ${title}:
 ${JSON.stringify(flashcards)}
 If the user asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the above concept cards. 
 You initiate the learning process by greeting the user and posing a series of concise questions that pertain to the material's introductory concepts.
@@ -47,20 +48,19 @@ You should make your messages very short.
 `;
 };
 
-const generateSystemPrompt = async (url: string, fullbook: boolean, concepts: any) => {
-  const flashcards = concepts;
-  if (!flashcards.length) {
-    let booksQuery = db.collection("chaptersBook").where("url", "==", url);
-    if (fullbook) {
-      booksQuery = db.collection("chaptersBook");
-    }
-    const booksDocs = await booksQuery.get();
-    let flashcards: any = [];
-    for (let bookDoc of booksDocs.docs) {
-      const bookData = bookDoc.data();
-      flashcards = [...flashcards, ...(bookData?.flashcards || [])];
-    }
+const generateSystemPrompt = async (url: string, concepts: any) => {
+  let flashcards = concepts;
+  let booksQuery = db.collection("chaptersBook").where("url", "==", url);
+  const booksDocs = await booksQuery.get();
+  const bookData = booksDocs.docs[0].data();
+  let title = "";
+  if (bookData.sectionTitle) {
+    title = `from a unit titled ${bookData.sectionTitle}`;
   }
+  if (!flashcards.length) {
+    flashcards = [...flashcards, ...(bookData?.flashcards || [])];
+  }
+
   const copy_flashcards = flashcards
     .filter((f: any) => f.paragraphs.length > 0)
     .map(
@@ -72,38 +72,38 @@ const generateSystemPrompt = async (url: string, fullbook: boolean, concepts: an
         })
     );
   console.log(copy_flashcards[0]);
-  return PROMPT(copy_flashcards, url.replace(".html", ""));
+  return PROMPT(copy_flashcards, title);
 };
 
-const extractFlashcardId = (inputText: string) => {
-  // extract prior_evaluation
-  let prior_evaluationRegex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"/;
-  let flashcard_usedRegex = /\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
-  let emotion_regex = /\s*-\s*"emotion"\s*:\s*"([^"]+)"/;
+// const extractFlashcardId = (inputText: string) => {
+//   // extract prior_evaluation
+//   let prior_evaluationRegex = /\s*-\s*"prior_evaluation"\s*:\s*"([^"]+)"/;
+//   let flashcard_usedRegex = /\s*-\s*"flashcard_used"\s*:\s*"([^"]+)"/;
+//   let emotion_regex = /\s*-\s*"emotion"\s*:\s*"([^"]+)"/;
 
-  const matchEvaluation = inputText.match(prior_evaluationRegex);
-  const matchflashcard_used = inputText.match(flashcard_usedRegex);
-  const matchEmotion = inputText.match(emotion_regex);
+//   const matchEvaluation = inputText.match(prior_evaluationRegex);
+//   const matchflashcard_used = inputText.match(flashcard_usedRegex);
+//   const matchEmotion = inputText.match(emotion_regex);
 
-  let emotion = "";
-  let flashcard_used = "";
-  let prior_evaluation = "";
-  if (matchEvaluation) {
-    prior_evaluation = matchEvaluation[1];
-  }
-  if (matchflashcard_used) {
-    flashcard_used = matchflashcard_used[1];
-  }
-  if (matchEmotion) {
-    emotion = matchEmotion[1];
-  }
-  return {
-    prior_evaluation: prior_evaluation,
-    flashcard_used: flashcard_used,
-    emotion: emotion,
-    content: inputText,
-  };
-};
+//   let emotion = "";
+//   let flashcard_used = "";
+//   let prior_evaluation = "";
+//   if (matchEvaluation) {
+//     prior_evaluation = matchEvaluation[1];
+//   }
+//   if (matchflashcard_used) {
+//     flashcard_used = matchflashcard_used[1];
+//   }
+//   if (matchEmotion) {
+//     emotion = matchEmotion[1];
+//   }
+//   return {
+//     prior_evaluation: prior_evaluation,
+//     flashcard_used: flashcard_used,
+//     emotion: emotion,
+//     content: inputText,
+//   };
+// };
 
 const extractJSON = (text: string) => {
   try {
@@ -127,26 +127,38 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const unit = (url.split("/").pop() || "").split("#")[0];
 
-    const conversationDoc = await db.collection("tutorConversations").doc(uid).get();
+    const conversationDocs = await db
+      .collection("tutorConversations")
+      .where("unit", "==", unit)
+      .where("uid", "==", uid)
+      .get();
+
     let conversationData: any = {
       messages: [],
+      unit,
+      uid,
+      createdAt: new Date(),
+      concepts,
+      progress: 0,
     };
-    if (conversationDoc.exists) {
+    //new reference to the "tutorConversations" collection
+    let newConversationRef = db.collection("tutorConversations").doc();
+
+    /*  if the conversation associated with this unit already exist we continue the conversation from there 
+     otherwise we initilise a new one  */
+    if (conversationDocs.docs.length > 0) {
+      const conversationDoc = conversationDocs.docs[0];
       conversationData = conversationDoc.data();
-      if (conversationData.unit !== unit) {
-        conversationData.messages[0] = {
-          role: "system",
-          content: await generateSystemPrompt(unit, fullbook, concepts || []),
-        };
-      }
+      newConversationRef = conversationDoc.ref;
     } else {
       conversationData.messages.push({
         role: "system",
-        content: await generateSystemPrompt(unit, fullbook, concepts || []),
+        //we need the system prompt when the user starts chatting
+        content: await generateSystemPrompt(unit, concepts || []),
       });
-      conversationData.createdAt = new Date();
     }
-
+    // add the extra PS to the message of the user
+    // we ignore it afterward when savinfg the conversation in the db
     conversationData.messages.push({
       role: "user",
       content:
@@ -166,6 +178,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     };
     let got_response = false;
     let tries = 0;
+    // we need to generate the JSON before start streaming to the user
+    /* 
+    {
+      evaluation,
+      emotion,
+      flashcard_id,
+    }
+     */
     while (!got_response && tries < 5) {
       try {
         tries = tries + 1;
@@ -202,10 +222,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         console.log(error);
       }
     }
+
+    /* we calculate the progress of the user in this unit
+    100% means the user has 400 points
+    */
+    conversationData.progress += parseInt(lateResponse.evaluation) / 400;
+
     // lateResponse.flashcard_id = "QbAPBvAY73lTKrc90HIA";
     console.log(`flashcard_id: ${lateResponse.flashcard_id}`);
+    //send the flashcard used in generating the previous question by GPT
+    //so we can scroll to it
     res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
 
+    /*  if the user added a reaction to the message we need to save it in the chaptersBook collection 
+    corresponding to this flashcard */
     if (reaction && lateResponse.flashcard_id) {
       let booksQuery = db.collection("chaptersBook").where("url", "==", unit);
       const booksDocs = await booksQuery.get();
@@ -224,6 +254,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
       }
     }
+
     const response = await openai.chat.completions.create({
       messages: conversationData.messages.map((message: any) => ({
         role: message.role,
@@ -233,6 +264,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       temperature: 0,
       stream: true,
     });
+    // stream the main reponse to the user
     for await (const result of response) {
       if (result.choices[0].delta.content) {
         console.log(completeMessage);
@@ -240,8 +272,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
+    //end stream
     res.end();
+    //ignore the PS from the message sent by the user
     conversationData.messages[conversationData.messages.length - 1].content = message;
+
     console.log({ completeMessage });
 
     // let cleanData = extractFlashcardId(completeMessage);
@@ -254,10 +289,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // const buffer = Buffer.from(await mp3.arrayBuffer());
     // const audioUrl = await uploadToCloudStorage(buffer);
 
+    // if the user is sending the fist message we need to ignore the emotion
     if (conversationData.messages.length === 2) {
       lateResponse.emotion = "";
     }
-
+    // save the reponse from GPT in the db
     conversationData.messages.push({
       role: "assistant",
       flashcard_used: lateResponse.flashcard_id,
@@ -269,8 +305,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       mid: db.collection("tutorConversations").doc().id,
       showProgress: message === "How am I doing in this course so far?",
     });
-
-    await conversationDoc.ref.set({ ...conversationData, unit });
+    await newConversationRef.set({ ...conversationData });
     console.log({ reaction });
   } catch (error) {
     console.error(error);
