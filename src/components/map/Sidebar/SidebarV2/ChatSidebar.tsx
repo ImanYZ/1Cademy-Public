@@ -438,6 +438,7 @@ export const ChatSidebar = ({
       open={open}
       onClose={onClose}
       width={sidebarWidth}
+      height={100}
       innerHeight={innerHeight}
       sx={{
         boxShadow: "none",
@@ -504,6 +505,7 @@ export const ChatSidebar = ({
                   forward={forward}
                   getMessageRef={getMessageRef}
                   leading={leading}
+                  sidebarWidth={sidebarWidth}
                 />
               )}
             </>

@@ -18,7 +18,7 @@ type NewsCardProps = {
   message: IChannelMessage;
   membersInfo: any;
   toggleEmojiPicker: any;
-  sendReplyOnMessage: any;
+  replyOnMessage: any;
   channelUsers: any;
   toggleReaction: any;
   forwardMessage: any;
@@ -27,16 +27,16 @@ type NewsCardProps = {
   user: any;
   setReplyOnMessage: any;
   selectedMessage: any;
-  saveMessageEdit: any;
   db: any;
   roomType: any;
   leading: boolean;
+  getMessageRef: any;
+  selectedChannel: any;
 };
 export const NewsCard = ({
   message,
   membersInfo,
   toggleEmojiPicker,
-  sendReplyOnMessage,
   channelUsers,
   toggleReaction,
   forwardMessage,
@@ -45,28 +45,20 @@ export const NewsCard = ({
   user,
   setReplyOnMessage,
   selectedMessage,
-  saveMessageEdit,
   db,
   roomType,
   leading,
+  replyOnMessage,
+  getMessageRef,
+  selectedChannel,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
-  const [inputMessage, setInputMessage] = useState("");
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
-  const handleSendReply = (imageUrls: string[], important = false) => {
-    if (!inputMessage) return;
-    sendReplyOnMessage(message, inputMessage, imageUrls, important);
-    setInputMessage("");
-  };
-  const handleTyping = async (e: any) => {
-    setInputMessage(e.target.value);
-  };
+
   const handleReplyOnMessage = () => {
     setReplyOnMessage(message);
   };
-  const handleEditMessage = () => {
-    saveMessageEdit(inputMessage);
-  };
+
   return (
     <Box
       sx={{
@@ -124,16 +116,20 @@ export const NewsCard = ({
             <Box>
               {" "}
               <MessageInput
+                db={db}
+                user={user}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
                 channelUsers={channelUsers}
-                sendMessage={handleEditMessage}
-                handleTyping={handleTyping}
-                inputValue={inputMessage}
+                sendMessageType={"reply"}
                 toggleEmojiPicker={toggleEmojiPicker}
+                leading={leading}
+                getMessageRef={getMessageRef}
+                selectedChannel={selectedChannel}
+                replyOnMessage={replyOnMessage}
+                setReplyOnMessage={setReplyOnMessage}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
-                leading={leading}
               />
             </Box>
           ) : (
@@ -170,7 +166,6 @@ export const NewsCard = ({
                   replyMessage={handleReplyOnMessage}
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
-                  setInputMessage={setInputMessage}
                   user={user}
                 />
               </Box>
@@ -209,28 +204,33 @@ export const NewsCard = ({
                 forwardMessage={forwardMessage}
                 membersInfo={membersInfo}
                 user={user}
+                replyOnMessage={replyOnMessage}
                 setReplyOnMessage={setReplyOnMessage}
                 channelUsers={channelUsers}
-                sendReplyOnMessage={sendReplyOnMessage}
-                saveMessageEdit={saveMessageEdit}
                 db={db}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
                 roomType={roomType}
                 leading={leading}
+                selectedChannel={selectedChannel}
+                getMessageRef={getMessageRef}
               />
             ))}
 
             <Box sx={{ ml: "37px", mt: "13px" }}>
               <MessageInput
+                db={db}
+                user={user}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
                 channelUsers={channelUsers}
-                sendMessage={handleSendReply}
-                handleTyping={handleTyping}
-                inputValue={inputMessage}
+                sendMessageType={"reply"}
                 toggleEmojiPicker={toggleEmojiPicker}
                 leading={leading}
+                getMessageRef={getMessageRef}
+                selectedChannel={selectedChannel}
+                replyOnMessage={message}
+                setReplyOnMessage={setReplyOnMessage}
               />
             </Box>
           </Box>

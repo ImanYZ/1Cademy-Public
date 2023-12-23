@@ -151,7 +151,7 @@ export const SidebarWrapper = ({
       }}
     >
       {sidebarType === "chat" && (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: { xs: "center", sm: "start" } }}>
           {moveBack && (
             <Tooltip title={"Go Back"}>
               <IconButton onClick={() => moveBack()} sx={{ mt: 2, ml: 2 }}>

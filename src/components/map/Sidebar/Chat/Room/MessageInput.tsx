@@ -3,74 +3,234 @@ import CollectionsIcon from "@mui/icons-material/Collections";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
+import { arrayUnion, collection, doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import NextImage from "next/image";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
 import { useUploadImage } from "@/hooks/useUploadImage";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { newId } from "@/lib/utils/newFirestoreId";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
 type MessageInputProps = {
+  db: any;
   theme: string;
-  inputValue: string;
-  handleTyping: any;
   channelUsers: { id: string; display: string }[];
-  sendMessage: (imageUrl: string[], important: boolean) => void;
   toggleEmojiPicker: (event: any, message: IChannelMessage) => void;
   placeholder: string;
   editingMessage?: IChannelMessage;
   setEditingMessage?: any;
   roomType?: string;
   leading: boolean;
+  getMessageRef: any;
+  setReplyOnMessage: any;
+  user: any;
+  selectedChannel: any;
+  replyOnMessage: any;
+  messages?: any;
+  scrollToBottom?: any;
+  sendMessageType?: string;
+  setMessages?: any;
 };
 export const MessageInput = ({
+  db,
   theme,
-  inputValue,
-  handleTyping,
   channelUsers,
-  sendMessage,
   // toggleEmojiPicker,
   placeholder,
   editingMessage,
   setEditingMessage,
   leading,
+  getMessageRef,
+  replyOnMessage,
+  setReplyOnMessage,
+  user,
+  selectedChannel,
+  roomType,
+  messages,
+  scrollToBottom,
+  sendMessageType,
+  setMessages,
 }: // roomType,
 MessageInputProps) => {
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState<string>("");
   const [important, setImportant] = useState(false);
 
-  const cancel = () => {
+  useEffect(() => {
+    if (editingMessage) {
+      setInputValue(editingMessage.message);
+    }
+  }, [editingMessage]);
+
+  const sendReplyOnMessage = useCallback(
+    async (curMessage: IChannelMessage, inputMessage: string, imageUrls: string[] = [], important = false) => {
+      try {
+        setInputValue("");
+        setReplyOnMessage(null);
+        const reply = {
+          id: newId(db),
+          parentMessage: curMessage.id,
+          pinned: false,
+          read_by: [],
+          edited: false,
+          message: inputMessage,
+          node: {},
+          createdAt: Timestamp.fromDate(new Date()),
+          replies: [],
+          sender: user.uname,
+          mentions: [],
+          imageUrls,
+          editedAt: Timestamp.fromDate(new Date()),
+          reactions: [],
+          channelId: selectedChannel?.id,
+          important,
+        };
+        setMessages((prevMessages: any) => {
+          const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage.id);
+          prevMessages[messageIdx].replies.push(reply);
+          return prevMessages;
+        });
+        await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [getMessageRef, setInputValue, setReplyOnMessage, updateDoc, arrayUnion, newId, db, user.uname, selectedChannel?.id]
+  );
+
+  const saveMessageEdit = async (newMessage: string) => {
+    if (!editingMessage?.channelId) return;
+    if (editingMessage.parentMessage) {
+      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+      parentMessage.replies[replyIdx] = {
+        ...parentMessage.replies[replyIdx],
+        message: newMessage,
+        edited: true,
+        editedAt: new Date(),
+      };
+      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+      await updateDoc(messageRef, {
+        replies: parentMessage.replies,
+      });
+    } else {
+      const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
+
+      await updateDoc(messageRef, {
+        message: newMessage,
+        edited: true,
+        editedAt: new Date(),
+      });
+    }
     setEditingMessage(null);
   };
 
-  const handleKeyPress = (event: any) => {
-    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      handleSendMessage();
-    }
-  };
-  const uploadImageClicked = () => {
+  const sendMessage = useCallback(
+    async (imageUrls: string[], important = false) => {
+      try {
+        if (sendMessageType === "edit") {
+          saveMessageEdit(inputValue);
+        } else if (!!replyOnMessage || sendMessageType === "reply") {
+          if (!inputValue.trim() && !imageUrls.length) return;
+          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
+          return;
+        } else {
+          //setLastVisible(null);
+          let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+          if (roomType === "direct") {
+            channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+          } else if (roomType === "news") {
+            channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
+          }
+          const messageRef = doc(collection(channelRef, "messages"));
+          const newMessage = {
+            pinned: false,
+            read_by: [],
+            edited: false,
+            message: inputValue,
+            node: {},
+            createdAt: new Date(),
+            replies: [],
+            sender: user.uname,
+            mentions: [],
+            imageUrls,
+            reactions: [],
+            channelId: selectedChannel?.id,
+            important,
+          };
+          // await updateDoc(channelRef, {
+          //   updatedAt: new Date(),
+          // });
+          await setDoc(messageRef, newMessage);
+
+          scrollToBottom();
+        }
+        setInputValue("");
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [inputValue, messages]
+  );
+
+  const cancel = useCallback(() => {
+    setEditingMessage(null);
+  }, [setEditingMessage]);
+
+  const handleKeyPress = useCallback(
+    (event: any) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [inputValue]
+  );
+
+  const handleTyping = useCallback(
+    async (e: any) => {
+      setInputValue(e.target.value);
+      // const channelRef = doc(collection(db, "channels"), selectedChannel.id);
+      // if (user.uname)
+      //   await updateDoc(channelRef, {
+      //     typing: arrayUnion(user.uname),
+      //   });
+      // setTimeout(async () => {
+      //   await updateDoc(channelRef, {
+      //     typing: [],
+      //   });
+      // }, 10000);
+    },
+    [setInputValue]
+  );
+  const uploadImageClicked = useCallback(() => {
     if (!fileInputRef.current) return;
     fileInputRef.current.value = "";
     fileInputRef.current.click();
-  };
-  const onUploadImage = (event: any) => {
-    let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
-    if (isValidHttpUrl(bucket)) {
-      const { hostname } = new URL(bucket);
-      bucket = hostname;
-    }
-    const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
-    let imageFileName = new Date().toUTCString();
-    uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
-  };
+  }, [fileInputRef]);
+  const onUploadImage = useCallback(
+    (event: any) => {
+      let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+      if (isValidHttpUrl(bucket)) {
+        const { hostname } = new URL(bucket);
+        bucket = hostname;
+      }
+      const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
+      let imageFileName = new Date().toUTCString();
+      uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
+    },
+    [setImageUrls]
+  );
+
   const handleSendMessage = () => {
     sendMessage(imageUrls, important);
     setImageUrls([]);
