@@ -427,7 +427,7 @@ export const ChatSidebar = ({
     }
   };
   useEffect(() => {
-    if (!selectedChannel) return;
+    if (!selectedChannel || !roomType) return;
     clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id));
   }, [notifications, selectedChannel]);
 
