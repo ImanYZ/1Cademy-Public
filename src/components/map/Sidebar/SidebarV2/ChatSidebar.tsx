@@ -398,6 +398,7 @@ export const ChatSidebar = ({
             chooseUname: !!user2.chooseUname,
             fullname: `${user2.fName} ${user2.lName}`,
             role: "",
+            uid: user2.userId,
           },
           [user?.uname]: {
             uname: user?.uname,
@@ -405,6 +406,7 @@ export const ChatSidebar = ({
             chooseUname: !!user.chooseUname,
             fullname: `${user.fName} ${user.lName}`,
             role: "",
+            uid: user?.userId,
           },
         },
         createdAt: new Date(),
@@ -426,11 +428,10 @@ export const ChatSidebar = ({
 
   const getNotificationsNumbers = useCallback(
     (type: string) => {
-      return notifications.filter((n: any) => n.chatType === type).length;
+      return notifications.filter((n: any) => n.roomType === type).length;
     },
     [notifications]
   );
-
   return (
     <SidebarWrapper
       id="chat"
@@ -556,14 +557,14 @@ export const ChatSidebar = ({
                     newsChannels={channels.sort(
                       (a, b) => b.newsUpdatedAt.toDate().getTime() - a.newsUpdatedAt.toDate().getTime()
                     )}
-                    notifications={notifications.filter((n: any) => n.chatType === "announcement")}
+                    notifications={notifications.filter((n: any) => n.roomType === "news")}
                   />
                 )}
                 {value === 1 && (
                   <ChannelsList
                     openRoom={openRoom}
                     channels={channels.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime())}
-                    notifications={notifications.filter((n: any) => n.chatType === "channel")}
+                    notifications={notifications.filter((n: any) => n.roomType === "channel")}
                   />
                 )}
                 {value === 2 && (
@@ -573,7 +574,7 @@ export const ChatSidebar = ({
                     db={db}
                     onlineUsers={onlineUsers}
                     openDMChannel={openDMChannel}
-                    notifications={notifications.filter((n: any) => n.chatType === "direct")}
+                    notifications={notifications.filter((n: any) => n.roomType === "direct")}
                   />
                 )}
               </Box>

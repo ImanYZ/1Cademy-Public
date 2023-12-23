@@ -173,6 +173,10 @@ MessageInputProps) => {
           await setDoc(messageRef, newMessage);
 
           scrollToBottom();
+          await Post("/chat/sendNotification", {
+            newMessage,
+            roomType,
+          });
         }
         setInputValue("");
       } catch (error) {
