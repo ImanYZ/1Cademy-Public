@@ -7235,6 +7235,7 @@ const Notebook = ({}: NotebookProps) => {
                 reputation={reputation}
                 theme={settings.theme}
                 setOpenSideBar={onOpenSideBar}
+                openSidebar={openSidebar}
                 mapRendered={true}
                 selectedUser={selectedUser}
                 uncheckedNotificationsNum={uncheckedNotificationsNum}

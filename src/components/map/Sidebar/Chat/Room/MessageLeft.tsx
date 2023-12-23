@@ -25,14 +25,16 @@ type MessageLeftProps = {
   membersInfo: any;
   setReplyOnMessage: any;
   channelUsers: any;
-  sendReplyOnMessage: (message: IChannelMessage, inputMessage: string, imageUrls: string[], important: boolean) => void;
+  replyOnMessage: any;
   user: any;
   db: any;
   editingMessage: any;
   setEditingMessage: any;
-  saveMessageEdit?: any;
   roomType: string;
   leading: boolean;
+  getMessageRef: any;
+  selectedChannel: any;
+  setMessages?: any;
 };
 export const MessageLeft = ({
   selectedMessage,
@@ -43,47 +45,25 @@ export const MessageLeft = ({
   membersInfo,
   setReplyOnMessage,
   channelUsers,
-  sendReplyOnMessage,
+  replyOnMessage,
   user,
   db,
   editingMessage,
   setEditingMessage,
-  saveMessageEdit,
   roomType,
   leading,
+  getMessageRef,
+  selectedChannel,
+  setMessages,
 }: MessageLeftProps) => {
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [openReplies, setOpenReplies] = useState<boolean>(false);
-
-  const [inputMessage, setInputMessage] = useState("");
 
   const handleReplyMessage = () => {
     setReplyOnMessage(message);
   };
 
-  const handleSendReply = (imageUrls: string[], important = false) => {
-    if (!inputMessage && !imageUrls.length) return;
-    sendReplyOnMessage(message, inputMessage, imageUrls, important);
-    setInputMessage("");
-  };
-  const handleTyping = async (e: any) => {
-    setInputMessage(e.target.value);
-    // const channelRef = doc(collection(db, "channels"), message.channelId);
-    // if (user.uname)
-    //   await updateDoc(channelRef, {
-    //     typing: arrayUnion(user.uname),
-    //   });
-    // setTimeout(async () => {
-    //   await updateDoc(channelRef, {
-    //     typing: [],
-    //   });
-    // }, 10000);
-  };
-
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
-  const handleEditMessage = () => {
-    saveMessageEdit(inputMessage);
-  };
   const handleDeleteMessage = async () => {
     if (
       await confirmIt(
@@ -200,16 +180,20 @@ export const MessageLeft = ({
             <Box>
               {" "}
               <MessageInput
+                db={db}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
                 channelUsers={channelUsers}
-                sendMessage={handleEditMessage}
-                handleTyping={handleTyping}
-                inputValue={inputMessage}
+                sendMessageType={"edit"}
                 toggleEmojiPicker={toggleEmojiPicker}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
                 leading={leading}
+                getMessageRef={getMessageRef}
+                selectedChannel={selectedChannel}
+                replyOnMessage={replyOnMessage}
+                setReplyOnMessage={setReplyOnMessage}
+                user={user}
               />
             </Box>
           ) : (
@@ -250,7 +234,6 @@ export const MessageLeft = ({
                   replyMessage={handleReplyMessage}
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
-                  setInputMessage={setInputMessage}
                   handleDeleteMessage={handleDeleteMessage}
                   user={user}
                 />
@@ -286,25 +269,31 @@ export const MessageLeft = ({
                 user={user}
                 setReplyOnMessage={setReplyOnMessage}
                 channelUsers={channelUsers}
-                sendReplyOnMessage={sendReplyOnMessage}
-                saveMessageEdit={saveMessageEdit}
+                replyOnMessage={replyOnMessage}
                 db={db}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
                 roomType={roomType}
                 leading={leading}
+                getMessageRef={getMessageRef}
+                selectedChannel={selectedChannel}
               />
             ))}
             <Box sx={{ ml: "37px", mt: 2 }}>
               <MessageInput
+                db={db}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
                 channelUsers={channelUsers}
-                sendMessage={handleSendReply}
-                handleTyping={handleTyping}
-                inputValue={inputMessage}
+                sendMessageType={"reply"}
                 toggleEmojiPicker={toggleEmojiPicker}
                 leading={leading}
+                getMessageRef={getMessageRef}
+                selectedChannel={selectedChannel}
+                replyOnMessage={message}
+                setReplyOnMessage={setReplyOnMessage}
+                user={user}
+                setMessages={setMessages}
               />
             </Box>
           </Box>

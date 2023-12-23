@@ -17,7 +17,6 @@ type MemberProps = {
 };
 export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers, leading }: MemberProps) => {
   const [openActions, setOpenActions] = useState<any>(null);
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
       {/* <Paper

@@ -117,6 +117,7 @@ type MainSidebarProps = {
   toolbarRef: (node?: HTMLElement | null | undefined) => void;
   isHovered: boolean;
   newMessages: number;
+  openSidebar: any;
 };
 
 export const ToolbarSidebar = ({
@@ -149,6 +150,7 @@ export const ToolbarSidebar = ({
   toolbarRef,
   isHovered,
   newMessages = 0,
+  openSidebar,
 }: MainSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const theme = useTheme();
@@ -1295,28 +1297,30 @@ export const ToolbarSidebar = ({
 
   return (
     <>
-      <Tooltip
-        placement={isMenuOpen ? "right" : "bottom"}
-        title={isMenuOpen ? "Hide Menu" : "Open Menu"}
-        sx={{
-          display: { xs: "block", sm: "none" },
-          position: "fixed",
-          top: "10px",
-          left: isMenuOpen ? "10px" : "10px",
-          zIndex: isMenuOpen ? "1300" : "1200",
-          background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
-          height: "40px",
-          width: "40px",
-        }}
-      >
-        <IconButton
-          onClick={() => {
-            setIsMenuOpen(!isMenuOpen);
+      {!openSidebar && (
+        <Tooltip
+          placement={isMenuOpen ? "right" : "bottom"}
+          title={isMenuOpen ? "Hide Menu" : "Open Menu"}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            position: "fixed",
+            top: "10px",
+            left: isMenuOpen ? "10px" : "10px",
+            zIndex: isMenuOpen ? "1300" : "1200",
+            background: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "#f0f0f0"),
+            height: "40px",
+            width: "40px",
           }}
         >
-          {!isMenuOpen ? <MenuIcon /> : <KeyboardArrowLeftIcon />}
-        </IconButton>
-      </Tooltip>
+          <IconButton
+            onClick={() => {
+              setIsMenuOpen(!isMenuOpen);
+            }}
+          >
+            {!isMenuOpen ? <MenuIcon /> : <KeyboardArrowLeftIcon />}
+          </IconButton>
+        </Tooltip>
+      )}
 
       <SidebarWrapper
         id="sidebar-wrapper-toolbar"
