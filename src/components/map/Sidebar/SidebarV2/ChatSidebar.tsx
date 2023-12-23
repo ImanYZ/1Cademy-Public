@@ -355,6 +355,7 @@ export const ChatSidebar = ({
     chosenTags,
     openChatInfo,
     notifications,
+    theme,
   ]);
 
   useEffect(() => {
