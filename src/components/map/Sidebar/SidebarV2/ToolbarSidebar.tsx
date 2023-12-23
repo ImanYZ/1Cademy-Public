@@ -37,6 +37,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import moment from "moment";
 import NextImage from "next/image";
 import React, { Dispatch, SetStateAction, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -49,6 +50,7 @@ import { Delete, Post } from "@/lib/mapApi";
 
 // import LogoDarkMode from "../../../../../public/LogoDarkMode.svg";
 import Logo from "../../../../../public/1Cademy-head.svg";
+import LogoChristmas from "../../../../../public/1Cademy-head-christmas.svg";
 import AssistantIcon from "../../../../../public/assistant.svg";
 import BookmarkIcon from "../../../../../public/bookmark.svg";
 import ChatIcon from "../../../../../public/chat.svg";
@@ -535,6 +537,15 @@ export const ToolbarSidebar = ({
     setDisplayNotebooks(displayNotebooks => !displayNotebooks);
     setDisplayConversation(false);
   };
+  const checkDate = () => {
+    const startDate = moment().month(11).date(20);
+    const endDate = moment().add(1, "year").month(0).date(2);
+    if (moment().isBetween(startDate, endDate, null, "[]")) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   const toolbarContentMemoized = useMemo(() => {
     return (
@@ -563,7 +574,15 @@ export const ToolbarSidebar = ({
               height: "64px",
             }}
           >
-            {<img src={Logo.src} alt="onecademy logo" width={"auto"} height={"52px"} />}
+            {
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={checkDate() ? LogoChristmas.src : Logo.src}
+                alt="onecademy logo"
+                width={"auto"}
+                height={checkDate() ? "70px" : "52px"}
+              />
+            }
             {displayLargeToolbar && (
               <svg
                 width="118"
