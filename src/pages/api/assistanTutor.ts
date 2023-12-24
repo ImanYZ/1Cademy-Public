@@ -227,7 +227,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     /* we calculate the progress of the user in this unit
     100% means the user has 400 points
     */
-    conversationData.progress = roundNum(conversationData.progress + parseInt(lateResponse.evaluation) / 160);
+    conversationData.progress = roundNum(
+      conversationData.progress + parseInt(lateResponse.evaluation) / (concepts.length * 10)
+    );
     if (conversationData.hasOwnProperty("scores")) {
       conversationData.scores.push({
         score: parseInt(lateResponse.evaluation),
