@@ -4,6 +4,7 @@ import fbAuth from "src/middlewares/fbAuth";
 import { IAssitantRequestAction } from "src/types/IAssitantConversation";
 
 import { openai } from "./openAI/helpers";
+import { delay } from "@/lib/utils/utils";
 
 // import { uploadToCloudStorage } from "./STT";
 // import { delay } from "@/lib/utils/utils";
@@ -119,6 +120,7 @@ const extractJSON = (text: string) => {
     return null;
   }
 };
+
 const roundNum = (num: number) => Number(Number.parseFloat(Number(num).toFixed(2)));
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -248,7 +250,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     console.log(`flashcard_id: ${lateResponse.flashcard_id}`);
     //send the flashcard used in generating the previous question by GPT
     //so we can scroll to it
-    res.write(`flashcard_id: ${lateResponse.flashcard_id}`);
+    res.write(`flashcard_id: "${lateResponse.flashcard_id}", reaction:"${reaction}"`);
+    await delay(1000);
+    res.write(`flashcard_id: "${lateResponse.flashcard_id}"`);
     console.log({ reaction });
     /*  if the user added a reaction to the message we need to save it in the chaptersBook collection 
     corresponding to this flashcard */
