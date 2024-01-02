@@ -168,6 +168,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
 
+    if (!conversationData.usedFlashcards) {
+      conversationData.usedFlashcards = [];
+    }
     const previousFlashcard = conversationData.usedFlashcards.reverse()[0];
 
     const nextFlashcard = getNextFlashcard(concepts, conversationData.usedFlashcards);
