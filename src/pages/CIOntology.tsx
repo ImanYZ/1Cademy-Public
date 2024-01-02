@@ -179,18 +179,10 @@ const INITIAL_VALUES: {
 
 const CIOntology = () => {
   const db = getFirestore();
-  // const MAIN_CATEGORIES = [
-  //   { title: "WHAT: Activities", id: newId(db) },
-  //   { title: "WHO: Actors", id: newId(db) },
-  //   { title: "HOW: Processes", id: newId(db) },
-  //   { title: "WHY: Evaluation", id: newId(db) },
-  // ];
-
   const [{ user }] = useAuth();
   const isMobile = useMediaQuery("(max-width:599px)");
 
   const [ontologies, setOntologies] = useState<any>([]);
-  // const [userOntology, setUserOntology] = useState<IUserOntology[]>([]);
   const [openOntology, setOpenOntology] = useState<any>(null);
   const [ontologyPath, setOntologyPath] = useState<IOntologyPath[]>([]);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
@@ -203,9 +195,6 @@ const CIOntology = () => {
   const [lockedOntology, setLockedOntology] = useState<any>({});
   const [value, setValue] = useState<number>(1);
   const [searchValue, setSearchValue] = useState("");
-  // const [markdownContent, setMarkdownContent] = useState("");
-
-  // const [classes, setClasses] = useState([]);
   const fuse = new Fuse(ontologies, { keys: ["title"] });
 
   const headerRef = useRef<HTMLHeadElement | null>(null);
@@ -270,31 +259,6 @@ const CIOntology = () => {
     }
     return _mainSpecializations;
   };
-  // const addMissingCategories = ({ __mainSpecializations }: any) => {
-  //   for (let category of ["WHAT: Activities", "WHO: Actors", "HOW: Processes", "WHY: Evaluation"]) {
-  //     if (!__mainSpecializations.hasOwnProperty(category)) {
-  //       __mainSpecializations = {
-  //         [category]: {
-  //           id: newId(db),
-  //           specializations: {},
-  //         },
-  //         ...__mainSpecializations,
-  //       };
-  //     }
-  //   }
-  //   return __mainSpecializations;
-  // };
-
-  // useEffect(() => {
-  //   import("../components/ontology/Markdown-Here-Cheatsheet.md")
-  //     .then(res => {
-  //       fetch(res.default)
-  //         .then(res => res.text())
-  //         .then(res => setMarkdownContent(res))
-  //         .catch(err => console.error(err));
-  //     })
-  //     .catch(err => console.error(err));
-  // });
 
   const recordLogs = async (logs: any) => {
     try {
@@ -313,8 +277,6 @@ const CIOntology = () => {
       return order.indexOf(a.title) - order.indexOf(b.title);
     });
     let __mainSpecializations = getSpecializationsTree({ mainOntologies, path: [] });
-    // __mainSpecializations = addMissingCategories({ __mainSpecializations });
-    /* ------------------  */
     setMainSpecializations(__mainSpecializations);
   }, [ontologies]);
 
@@ -356,32 +318,6 @@ const CIOntology = () => {
 
     return () => unsubscribeUser();
   }, [db, user, ontologies]);
-
-  // useEffect(() => {
-  //   if (!user) return;
-  //   const ontologyQuery = query(collection(db, "userOntology"), where("uname", "==", user.uname));
-  //   const unsubscribeOntology = onSnapshot(ontologyQuery, snapshot => {
-  //     const docChanges = snapshot.docChanges();
-  //     setUserOntology(userOntologies => {
-  //       for (let change of docChanges) {
-  //         const changeData: any = change.doc.data();
-  //         const previousIdx = userOntologies.findIndex(d => d.id === changeData.id);
-  //         if (change.type === "removed" && previousIdx !== -1) {
-  //           userOntologies.splice(previousIdx, 1);
-  //         } else if ((change.type === "modified" || change.type === "added") && previousIdx !== -1) {
-  //           userOntologies[previousIdx] = { id: change.doc.id, ...changeData };
-  //         } else if (change.type === "added") {
-  //           userOntologies.push({
-  //             id: change.doc.id,
-  //             ...changeData,
-  //           });
-  //         }
-  //       }
-  //       return userOntologies;
-  //     });
-  //   });
-  //   return () => unsubscribeOntology();
-  // }, [user, db]);
 
   useEffect(() => {
     if (!user) return;
@@ -625,67 +561,6 @@ const CIOntology = () => {
       .filter((item: any) => !item.deleted);
   };
 
-  // const TreeViewSimplified = ({ mainSpecializations }: any) => {
-  //   /*
-  // mainSpecializations is an object like:
-  // {
-  //   ["TITLE"]:{
-  //       id:"id",
-  //       specializations:
-  //         {
-  //           ["TITLE1"]:{
-  //              id:"id1",
-  //              specializations:[]
-  //           },
-  //           ["TITLE2"]:{
-  //              id:"id2",
-  //              specializations:[]
-  //           }
-  //         }
-
-  //   }
-  // }
-  //  */
-  //   return (
-  //     <TreeView
-  //       defaultCollapseIcon={<ExpandMoreIcon />}
-  //       defaultExpandIcon={<ChevronRightIcon />}
-  //       // defaultExpanded={[]}
-  //       sx={{
-  //         "& .Mui-selected": {
-  //           backgroundColor: "transparent", // Remove the background color
-  //         },
-  //       }}
-  //     >
-  //       {Object.keys(mainSpecializations).map(category => (
-  //         <TreeItem
-  //           key={mainSpecializations[category]?.id || category}
-  //           nodeId={mainSpecializations[category]?.id || category}
-  //           label={
-  //             <Box sx={{ display: "flex", alignItems: "center", height: "30px" }}>
-  //               <Typography
-  //                 sx={{ fontWeight: mainSpecializations[category].isCategory ? "bold" : "" }}
-  //                 onClick={() => {
-  //                   if (!mainSpecializations[category].isCategory)
-  //                     openMainCategory(category, mainSpecializations[category]?.path || []);
-  //                 }}
-  //               >
-  //                 {!mainSpecializations[category].isCategory
-  //                   ? category.split(" ").splice(0, 3).join(" ") + (category.split(" ").length > 3 ? "..." : "")
-  //                   : category}
-  //               </Typography>
-  //             </Box>
-  //           }
-  //           sx={{ mt: "5px" }}
-  //         >
-  //           {Object.keys(mainSpecializations[category].specializations).length > 0 && (
-  //             <TreeViewSimplified mainSpecializations={mainSpecializations[category].specializations} />
-  //           )}
-  //         </TreeItem>
-  //       ))}
-  //     </TreeView>
-  //   );
-  // };
   const handleSendComment = async () => {
     try {
       if (!user) return;
