@@ -73,7 +73,7 @@ const SubPlainText = ({
           for (let parentId of openOntology?.parents || []) {
             const parentRef = doc(collection(db, "ontology"), parentId);
             const parentDoc = await getDoc(parentRef);
-            const parentData = parentDoc.data();
+            const parentData: any = parentDoc.data();
             editTitleSubOntology({ parentData, newTitle: openOntology.title, id: openOntology.id });
             await updateDoc(parentRef, parentData);
           }
