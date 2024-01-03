@@ -336,7 +336,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // save the reponse from GPT in the db
     conversationData.messages.push({
       role: "assistant",
-      flashcard_used: nextFlashcard?.id || "",
+      flashcard_used: lateResponse.flashcard_id,
       emotion: lateResponse.emotion,
       prior_evaluation: lateResponse.evaluation,
       content: completeMessage,
