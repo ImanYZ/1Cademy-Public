@@ -172,7 +172,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.usedFlashcards = [];
     }
     const previousFlashcard = conversationData.usedFlashcards.reverse()[0];
-
+    if (!concepts.length) {
+      res.write("Sorry, Something went wrong,  can you please try again!");
+      return;
+    }
     const nextFlashcard = getNextFlashcard(concepts, conversationData.usedFlashcards);
 
     if (nextFlashcard?.id) {
@@ -193,13 +196,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // add the extra PS to the message of the user
     // we ignore it afterward when savinfg the conversation in the db
 
+    if (!nextFlashcard && !conversationData.done) {
+      await delay(2000);
+      const doneMessage = `Congrats you have completed Studying all the concepts in this Unit.`;
+      res.write(doneMessage);
+      conversationData.messages.push({
+        role: "assistant",
+        content: doneMessage,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+      });
+      conversationData.done = true;
+      await newConversationRef.set({ ...conversationData });
+    }
     conversationData.messages[conversationData.messages.length - 1].content =
       message +
-      `\n${fName} can't see this PS:If ${fName} asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the above concept cards. Respond to ${fName} and then focus on the following flashcard:
+      `\n${fName} can't see this PS:If ${fName} asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the above concept cards.` +
+      (!nextFlashcard
+        ? ``
+        : `Respond to ${fName} and then focus on the following flashcard:
     {
     title: "${nextFlashcard.title}", 
     content: "${nextFlashcard.content}"
-    }`;
+    }`);
 
     let completeMessage = "";
     let lateResponse: { flashcard_id: string; evaluation: any; emotion: string; progress: string } = {
@@ -314,7 +333,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // save the reponse from GPT in the db
     conversationData.messages.push({
       role: "assistant",
-      flashcard_used: nextFlashcard?.id,
+      flashcard_used: nextFlashcard?.id || "",
       emotion: lateResponse.emotion,
       prior_evaluation: lateResponse.evaluation,
       content: completeMessage,
@@ -326,7 +345,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     await newConversationRef.set({ ...conversationData });
     console.log("Done");
   } catch (error) {
-    console.error(error);
+    console.log(error);
   }
 }
 
