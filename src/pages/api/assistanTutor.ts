@@ -190,9 +190,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     await newConversationRef.set({ ...conversationData });
 
     console.log("previousFlashcard:", previousFlashcard);
-    if (previousFlashcard) {
-      res.write(`flashcard_id: "${previousFlashcard}"`);
-    }
+
     // add the extra PS to the message of the user
     // we ignore it afterward when savinfg the conversation in the db
 
@@ -248,11 +246,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           {
           "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give them a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
           "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy" , "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
+          "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message"
           }
           Do not print anything other than this JSON object.`,
         });
         // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I’ve already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
-        // "flashcard_id": "The id of the most important flashcard that I should study to lean better about your last message"
+
         const response = await openai.chat.completions.create({
           messages: _messages.map((message: any) => ({
             role: message.role,
@@ -271,7 +270,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         console.log(error);
       }
     }
-
+    if (lateResponse.flashcard_id) {
+      res.write(`flashcard_id: "${lateResponse.flashcard_id}"`);
+    } else if (nextFlashcard) {
+      res.write(`flashcard_id: "${nextFlashcard}"`);
+    }
     /* we calculate the progress of the user in this unit
     100% means the user has 400 points
     */
@@ -333,7 +336,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // save the reponse from GPT in the db
     conversationData.messages.push({
       role: "assistant",
-      flashcard_used: nextFlashcard?.id || "",
+      flashcard_used: lateResponse.flashcard_id,
       emotion: lateResponse.emotion,
       prior_evaluation: lateResponse.evaluation,
       content: completeMessage,
