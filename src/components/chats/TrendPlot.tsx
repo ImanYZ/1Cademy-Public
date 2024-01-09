@@ -89,12 +89,9 @@ export const TrendPlot = ({
           }
         >
           <VictoryAxis
-            // scale={{ x: props.scaleX }}
-            scale={scaleX}
-            label={labelX}
-            axisLabelComponent={<VictoryLabel dy={25} />}
+            // scale={{ x: props.scaleX }
             style={{
-              axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
+              axis: { strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
               tickLabels: {
                 fontSize: 13,
                 fill: theme === "Dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
@@ -107,6 +104,9 @@ export const TrendPlot = ({
               },
               ticks: { size: 0 },
             }}
+            scale={scaleX}
+            label={labelX}
+            axisLabelComponent={<VictoryLabel dy={25} />}
           />
           <VictoryAxis
             dependentAxis
@@ -115,7 +115,7 @@ export const TrendPlot = ({
             label={labelY}
             axisLabelComponent={<VictoryLabel dy={-40} />}
             style={{
-              axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
+              axis: { strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
               tickLabels: {
                 fontSize: 13,
                 fill: theme === "Dark" ? "white" : "#454545",
