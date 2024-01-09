@@ -18,6 +18,7 @@ module.exports = {
       test: /\.md$/,
       use: "raw-loader",
     });
+    config.experiments = { ...config.experiments, topLevelAwait: true };
 
     return config;
   },
