@@ -22,6 +22,7 @@ import { conversationChange, getConversationsSnapshot } from "src/client/firesto
 import { UserTheme } from "src/knowledgeTypes";
 
 import { AllTagsTreeView, ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
+import useConfirmationDialog from "@/hooks/useConfirmDialog";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
@@ -90,6 +91,7 @@ export const ChatSidebar = ({
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
+  const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -171,7 +173,8 @@ export const ChatSidebar = ({
       const thisNotebook = notebooks.find((cur: any) => cur.id === selectedNotebook);
       if (!thisNotebook) return;
 
-      if (thisNotebook.owner !== user.uname) return alert("Cant modify this tag, ask to the notebook's owner");
+      if (thisNotebook.owner !== user.uname)
+        return confirmIt("Cant modify this tag, ask to the notebook's owner", "Ok", "");
 
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
@@ -615,6 +618,7 @@ export const ChatSidebar = ({
               </ClickAwayListener>
             </Suspense>
           )}
+          {ConfirmDialog}
         </Box>
       }
     />
