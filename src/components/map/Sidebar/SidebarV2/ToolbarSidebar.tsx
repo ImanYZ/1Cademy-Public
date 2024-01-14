@@ -207,7 +207,8 @@ export const ToolbarSidebar = ({
       const thisNotebook = notebooks.find(cur => cur.id === selectedNotebook);
       if (!thisNotebook) return;
 
-      if (thisNotebook.owner !== user.uname) return alert("Cant modify this tag, ask to the notebook's owner");
+      if (thisNotebook.owner !== user.uname)
+        return confirmIt("Cant modify this tag, ask to the notebook's owner", "Ok", "");
 
       if (nodeBookState.choosingNode?.id === "Tag" && nodeBookState.chosenNode) {
         const { id: nodeId, title: nodeTitle } = nodeBookState.chosenNode;
