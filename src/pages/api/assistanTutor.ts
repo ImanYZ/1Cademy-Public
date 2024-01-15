@@ -107,6 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { uid, uname, fName } = req.body?.data?.user?.userData;
     const { message, url, concepts, cardsModel } = req.body;
     let selectedModel = "";
+    console.log({ cardsModel });
     if (!!cardsModel) {
       selectedModel = cardsModel;
     }
@@ -189,19 +190,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // add the extra PS to the message of the user
     // we ignore it afterward when savinfg the conversation in the db
 
-    if (!nextFlashcard && !conversationData.done) {
-      await delay(2000);
-      const doneMessage = `Congrats you have completed Studying all the concepts in this Unit.`;
-      res.write(doneMessage);
-      conversationData.messages.push({
-        role: "assistant",
-        content: doneMessage,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-      });
-      conversationData.done = true;
-      await newConversationRef.set({ ...conversationData });
-    }
     conversationData.messages[conversationData.messages.length - 1].content =
       message +
       `\n${fName} can't see this PS:If ${fName}  asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
@@ -335,6 +323,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // if the user is sending the fist message we need to ignore the emotion
     if (conversationData.messages.length === 2) {
       lateResponse.emotion = "";
+    }
+    if (!nextFlashcard && !conversationData.done) {
+      await delay(2000);
+      const doneMessage = `Congrats you have completed Studying all the concepts in this Unit.`;
+      res.write(doneMessage);
+      conversationData.messages.push({
+        role: "assistant",
+        content: doneMessage,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+      });
+      conversationData.done = true;
+      await newConversationRef.set({ ...conversationData });
     }
     // save the reponse from GPT in the db
     conversationData.messages.push({
