@@ -185,7 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
     await newConversationRef.set({ ...conversationData });
     //scroll to flashcard
-    if (conversationData.usedFlashcards.length > 2) {
+    if (conversationData.usedFlashcards.length >= 2) {
       const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
       console.log({ scroll_to_flashcard });
       res.write(`flashcard_id: "${scroll_to_flashcard}"`);
