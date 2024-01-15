@@ -184,7 +184,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       mid: db.collection("tutorConversations").doc().id,
     });
     await newConversationRef.set({ ...conversationData });
-
+    //scroll to flashcard
+    if (conversationData.usedFlashcards.length > 2) {
+      const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
+      console.log({ scroll_to_flashcard });
+      res.write(`flashcard_id: "${scroll_to_flashcard}"`);
+    }
     console.log("previousFlashcard:", previousFlashcard);
 
     // add the extra PS to the message of the user
@@ -263,12 +268,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     if (!lateResponse.concept_card_id) {
       lateResponse.concept_card_id = nextFlashcard;
-    }
-    //scroll to flashcard
-    if (conversationData.usedFlashcards.length > 2) {
-      const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
-      console.log({ scroll_to_flashcard });
-      res.write(`flashcard_id: "${scroll_to_flashcard}"`);
     }
 
     /* we calculate the progress of the user in this unit
