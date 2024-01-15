@@ -236,7 +236,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           {
             "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
             "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy" , "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
-            "concept_card_id": "The id of the most important concept card that I should study to lean better about your last message",
+            "concept_card_id": "The id of the most important concept card that I should study to learn better about your last message",
             "inform_instructor": "Yes” if the instructor should be informed about my response to your last message. “No” if there is no reason to take the instructor’s time about my last message to you.
           }
           Do not print anything other than this JSON object.`,
@@ -261,11 +261,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         console.log(error);
       }
     }
-    if (lateResponse.concept_card_id) {
-      res.write(`flashcard_id: "${lateResponse.concept_card_id}"`);
-    } else if (nextFlashcard) {
-      res.write(`flashcard_id: "${nextFlashcard}"`);
+    if (!lateResponse.concept_card_id) {
+      lateResponse.concept_card_id = nextFlashcard;
     }
+    //scroll to flashcard
+    if (conversationData.usedFlashcards.length > 2) {
+      const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
+      console.log({ scroll_to_flashcard });
+      res.write(`flashcard_id: "${scroll_to_flashcard}"`);
+    }
+
     /* we calculate the progress of the user in this unit
     100% means the user has 400 points
     */
