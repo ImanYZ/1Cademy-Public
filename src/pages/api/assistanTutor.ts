@@ -105,7 +105,11 @@ const getPromptInstructions = async (url: string) => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname, fName } = req.body?.data?.user?.userData;
-    const { message, url, concepts } = req.body;
+    const { message, url, concepts, cardsModel } = req.body;
+    let selectedModel = "";
+    if (!!cardsModel) {
+      selectedModel = cardsModel;
+    }
     const unit = (url.split("/").pop() || "").split("#")[0];
     let courseUrl = unit;
     if (url.includes("/the-economy/microeconomics")) {
@@ -116,6 +120,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       .collection("tutorConversations")
       .where("unit", "==", unit)
       .where("uid", "==", uid)
+      .where("cardsModel", "==", selectedModel)
       .get();
 
     let conversationData: any = {
@@ -128,6 +133,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       progress: 0,
       scores: [],
       usedFlashcards: [],
+      cardsModel: selectedModel,
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
@@ -343,7 +349,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       mid: db.collection("tutorConversations").doc().id,
       showProgress: message === "How am I doing in this course so far?",
     });
-    await newConversationRef.set({ ...conversationData });
+    await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done");
   } catch (error) {
     console.log(error);
