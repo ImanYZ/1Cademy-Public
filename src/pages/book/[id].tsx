@@ -17,6 +17,7 @@ const HtmlRenderer = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const nodeId = router.query.id as string;
   useEffect(() => {
+    if (!nodeId) return;
     const pageIndex = PAGES.indexOf(nodeId);
     if (pageIndex === -1) {
       router.push(`/book/the-mission-corporation-section-4.html`);
