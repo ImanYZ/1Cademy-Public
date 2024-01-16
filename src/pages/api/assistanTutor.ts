@@ -167,12 +167,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (!conversationData.usedFlashcards) {
       conversationData.usedFlashcards = [];
     }
-    const previousFlashcard = conversationData.usedFlashcards.reverse()[0];
+    const previousFlashcard = [...conversationData.usedFlashcards].reverse()[0];
     if (!concepts.length) {
       res.write("Sorry, Something went wrong,  can you please try again!");
       return;
     }
-    const nextFlashcard = getNextFlashcard(concepts, conversationData.usedFlashcards);
+    const nextFlashcard = getNextFlashcard(concepts, [...conversationData.usedFlashcards]);
 
     if (nextFlashcard?.id) {
       conversationData.usedFlashcards.push(nextFlashcard.id);
