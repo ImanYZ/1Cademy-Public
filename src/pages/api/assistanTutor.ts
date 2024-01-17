@@ -344,19 +344,57 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.done = true;
       await newConversationRef.set({ ...conversationData });
     }
+    let answer = "";
+    let question = "";
+    try {
+      const _response = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: `Separate the answer from the question in this text "${completeMessage}"
+            {
+              "answer":"",
+              "question":"",
+            }
+            Do not print anything other than this JSON object.`,
+          },
+        ],
+        model: "gpt-4-1106-preview",
+        temperature: 0,
+      });
+      console.log(_response.choices[0].message.content);
+      const _responseText = _response.choices[0].message.content;
+      const question_answer = extractJSON(_responseText);
+      answer = question_answer?.answer || "";
+      question = question_answer?.question || "";
+    } catch (error) {
+      console.log("error", error);
+    }
+
+    if (!answer) {
+      answer = completeMessage;
+    }
     // save the reponse from GPT in the db
     conversationData.messages.push({
       role: "assistant",
       flashcard_used: lateResponse.concept_card_id,
       emotion: lateResponse.emotion,
       prior_evaluation: lateResponse.evaluation,
-      content: completeMessage,
+      content: answer,
       inform_instructor: lateResponse.inform_instructor,
       progress: lateResponse.progress,
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
-      showProgress: message === "How am I doing in this course so far?",
     });
+    if (!!answer && !!question) {
+      conversationData.messages.push({
+        role: "assistant",
+        content: question,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+      });
+    }
+
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done");
   } catch (error) {
