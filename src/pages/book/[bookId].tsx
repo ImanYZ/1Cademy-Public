@@ -94,6 +94,7 @@ const HtmlRenderer = () => {
 
       <Box
         ref={containerRef}
+        id="book-corporation"
         sx={{ height: "100vh", overflow: "auto", display: "flex", flexDirection: "column", alignItems: "center" }}
       >
         <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
