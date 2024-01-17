@@ -18,6 +18,7 @@ import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
 import { trigerNotifications } from "./actions/trigerNotifications";
 import { addUserToChannel } from "./actions/addUserToChannel";
+import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 
 import { db } from "./admin";
 
@@ -270,6 +271,15 @@ export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate
   }
 });
 
+export const onDeleteSavedFlashcard = functions.firestore.document("/savedBookCards/{id}").onDelete(async change => {
+  try {
+    const changeData = change.data();
+    console.log(changeData);
+    removeReactionFromCard(changeData);
+  } catch (error) {
+    console.log("error onUserUpdate:", error);
+  }
+});
 exports.assignNodeContributorsInstitutionsStats = functions
   .runWith({ memory: "1GB", timeoutSeconds: 520 })
   .pubsub.schedule("every 25 hours")
