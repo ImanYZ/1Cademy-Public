@@ -116,6 +116,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (url.includes("/the-economy/microeconomics")) {
       courseUrl = "the-economy/microeconomics";
     }
+    if (url.includes("the-mission-corporation")) {
+      courseUrl = "the-mission-corporation-4R-trimmed.html";
+    }
     const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(courseUrl);
     const conversationDocs = await db
       .collection("tutorConversations")
