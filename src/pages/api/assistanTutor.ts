@@ -203,8 +203,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         content: sysetmPrompt,
       });
     }
-
-    if (!conversationData.usedFlashcards) {
+    if (!message) {
+      message = `Hello My name is ${fName}, Teach me the concept cards on this page.`;
+      default_message = true;
+    }
+    if (default_message) {
       conversationData.usedFlashcards = [];
     }
     const previousFlashcard = [...conversationData.usedFlashcards].reverse()[0];
@@ -217,10 +220,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (nextFlashcard?.id) {
       conversationData.usedFlashcards.push(nextFlashcard.id);
     }
-    if (!message) {
-      message = `Hello My name is ${fName}, Teach me the concept cards on this page.`;
-      default_message = true;
-    }
+
     conversationData.messages.push({
       role: "user",
       content: message,
@@ -342,7 +342,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // stream the main reponse to the user
     for await (const result of response) {
       if (result.choices[0].delta.content) {
-        console.log(completeMessage);
+        console.log(`${result.choices[0].delta.content}`);
         res.write(`${result.choices[0].delta.content}`);
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
@@ -383,29 +383,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     let answer = "";
     let question = "";
-    try {
-      const _response = await openai.chat.completions.create({
-        messages: [
-          {
-            role: "user",
-            content: `Separate the question from the rest of the text in: "${completeMessage}"
+    if (!default_message) {
+      try {
+        const _response = await openai.chat.completions.create({
+          messages: [
+            {
+              role: "user",
+              content: `Separate the question from the rest of the text in: "${completeMessage}"
             {
               "rest_of_the_text":"",
               "question":"",
             }
             Do not print anything other than this JSON object.`,
-          },
-        ],
-        model: "gpt-4-1106-preview",
-        temperature: 0,
-      });
-      console.log(_response.choices[0].message.content);
-      const _responseText = _response.choices[0].message.content;
-      const question_answer = extractJSON(_responseText);
-      answer = question_answer?.rest_of_the_text || "";
-      question = question_answer?.question || "";
-    } catch (error) {
-      console.log("error", error);
+            },
+          ],
+          model: "gpt-4-1106-preview",
+          temperature: 0,
+        });
+        console.log(_response.choices[0].message.content);
+        const _responseText = _response.choices[0].message.content;
+        const question_answer = extractJSON(_responseText);
+        answer = question_answer?.rest_of_the_text || "";
+        question = question_answer?.question || "";
+      } catch (error) {
+        console.log("error", error);
+      }
     }
 
     // save the reponse from GPT in the db
