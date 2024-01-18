@@ -409,7 +409,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     // save the reponse from GPT in the db
-    const divided = db.collection("tutorConversations").doc().id;
+    const divideId = db.collection("tutorConversations").doc().id;
     conversationData.messages.push({
       role: "assistant",
       flashcard_used: lateResponse.concept_card_id,
