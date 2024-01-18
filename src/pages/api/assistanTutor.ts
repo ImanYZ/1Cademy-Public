@@ -93,14 +93,43 @@ const roundNum = (num: number) => Number(Number.parseFloat(Number(num).toFixed(2
 const getNextFlashcard = (concepts: any, usedFlashcards: string[]) => {
   return concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
 };
-const getPromptInstructions = async (url: string) => {
-  const promptDocs = await db.collection("assistantPrompt").where("url", "==", url).get();
+const getPromptInstructions = async (url: string, uname: string) => {
+  let promptDocs = await db.collection("assistantPrompt").where("url", "==", url).where("uname", "==", uname).get();
   if (promptDocs.docs.length <= 0) {
-    throw new Error("Prompt don't exist");
+    promptDocs = await db.collection("assistantPrompt").where("url", "==", url).where("uname", "==", "1man").get();
   }
   const promptDoc = promptDocs.docs[0];
   return promptDoc.data();
 };
+
+function mergeDividedMessages(messages: any) {
+  const mergedMessages = [];
+  let currentDivideId = null;
+  let mergedMessage = null;
+
+  for (const message of messages) {
+    if (message.divideId !== currentDivideId) {
+      if (mergedMessage) {
+        mergedMessages.push(mergedMessage);
+      }
+      currentDivideId = message.divideId;
+      mergedMessage = { ...message };
+    } else {
+      mergedMessage.content += "\n" + message.content;
+      mergedMessage.sentAt = message.sentAt;
+      mergedMessage.mid = message.mid;
+    }
+  }
+
+  if (mergedMessage) {
+    mergedMessages.push(mergedMessage);
+  }
+
+  return mergedMessages.map((message: any) => ({
+    role: message.role,
+    content: message.content,
+  }));
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -119,7 +148,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (url.includes("the-mission-corporation")) {
       courseUrl = "the-mission-corporation-4R-trimmed.html";
     }
-    const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(courseUrl);
+    const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(courseUrl, uname);
     const conversationDocs = await db
       .collection("tutorConversations")
       .where("unit", "==", unit)
@@ -236,7 +265,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     while (!got_response && tries < 5) {
       try {
         tries = tries + 1;
-        const _messages = [...conversationData.messages];
+        const _messages = mergeDividedMessages([...conversationData.messages]);
         _messages.push({
           role: "user",
           content: `
@@ -252,10 +281,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I’ve already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
 
         const response = await openai.chat.completions.create({
-          messages: _messages.map((message: any) => ({
-            role: message.role,
-            content: message.content,
-          })),
+          messages: _messages,
           model: "gpt-4-1106-preview",
           temperature: 0,
         });
@@ -294,10 +320,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     const response = await openai.chat.completions.create({
-      messages: conversationData.messages.map((message: any) => ({
-        role: message.role,
-        content: message.content,
-      })),
+      messages: mergeDividedMessages([...conversationData.messages]),
       model: "gpt-4-1106-preview",
       temperature: 0,
       stream: true,
@@ -351,9 +374,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         messages: [
           {
             role: "user",
-            content: `Separate the answer from the question in this text "${completeMessage}"
+            content: `Separate the question from the rest of the text in: "${completeMessage}"
             {
-              "answer":"",
+              "rest_of_the_text":"",
               "question":"",
             }
             Do not print anything other than this JSON object.`,
@@ -365,22 +388,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       console.log(_response.choices[0].message.content);
       const _responseText = _response.choices[0].message.content;
       const question_answer = extractJSON(_responseText);
-      answer = question_answer?.answer || "";
+      answer = question_answer?.rest_of_the_text || "";
       question = question_answer?.question || "";
     } catch (error) {
       console.log("error", error);
     }
 
-    if (!answer) {
-      answer = completeMessage;
-    }
     // save the reponse from GPT in the db
+    const divideId = db.collection("tutorConversations").doc().id;
     conversationData.messages.push({
       role: "assistant",
       flashcard_used: lateResponse.concept_card_id,
       emotion: lateResponse.emotion,
       prior_evaluation: lateResponse.evaluation,
-      content: answer,
+      content: !answer ? completeMessage : answer,
+      divided: !!answer ? divideId : false,
       inform_instructor: lateResponse.inform_instructor,
       progress: lateResponse.progress,
       sentAt: new Date(),
@@ -390,6 +412,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.messages.push({
         role: "assistant",
         content: question,
+        divided: !!answer ? divideId : false,
         sentAt: new Date(),
         mid: db.collection("tutorConversations").doc().id,
       });
