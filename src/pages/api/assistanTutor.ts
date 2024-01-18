@@ -108,12 +108,12 @@ const mergeDividedMessages = (messages: any) => {
   let mergedMessage = null;
 
   for (const message of messages) {
-    if ("divideId" in message) {
-      if (message.divideId !== currentDivideId) {
+    if ("divided" in message) {
+      if (message.divided !== currentDivideId) {
         if (mergedMessage) {
           mergedMessages.push(mergedMessage);
         }
-        currentDivideId = message.divideId;
+        currentDivideId = message.divided;
         mergedMessage = { ...message };
       } else {
         mergedMessage.content += "\n" + message.content;
