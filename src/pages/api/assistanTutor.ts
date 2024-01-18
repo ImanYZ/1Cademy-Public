@@ -102,22 +102,28 @@ const getPromptInstructions = async (url: string, uname: string) => {
   return promptDoc.data();
 };
 
-function mergeDividedMessages(messages: any) {
+const mergeDividedMessages = (messages: any) => {
   const mergedMessages = [];
   let currentDivideId = null;
   let mergedMessage = null;
 
   for (const message of messages) {
-    if (message.divideId !== currentDivideId) {
+    if ("divideId" in message) {
+      if (message.divideId !== currentDivideId) {
+        if (mergedMessage) {
+          mergedMessages.push(mergedMessage);
+        }
+        currentDivideId = message.divideId;
+        mergedMessage = { ...message };
+      } else {
+        mergedMessage.content += "\n" + message.content;
+      }
+    } else {
       if (mergedMessage) {
         mergedMessages.push(mergedMessage);
+        mergedMessage = null;
       }
-      currentDivideId = message.divideId;
-      mergedMessage = { ...message };
-    } else {
-      mergedMessage.content += "\n" + message.content;
-      mergedMessage.sentAt = message.sentAt;
-      mergedMessage.mid = message.mid;
+      mergedMessages.push({ ...message });
     }
   }
 
@@ -129,12 +135,14 @@ function mergeDividedMessages(messages: any) {
     role: message.role,
     content: message.content,
   }));
-}
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname, fName } = req.body?.data?.user?.userData;
-    const { message, url, concepts, cardsModel } = req.body;
+    const { url, concepts, cardsModel } = req.body;
+    let { message } = req.body;
+    let default_message = false;
     let selectedModel = "";
     console.log({ cardsModel });
     if (!!cardsModel) {
@@ -209,11 +217,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (nextFlashcard?.id) {
       conversationData.usedFlashcards.push(nextFlashcard.id);
     }
+    if (!message) {
+      message = `Hello My name is ${fName}, Teach me the concept cards on this page.`;
+      default_message = true;
+    }
     conversationData.messages.push({
       role: "user",
       content: message,
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
+      default_message,
     });
     await newConversationRef.set({ ...conversationData });
     //scroll to flashcard
@@ -262,6 +275,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       flashcard_id,
     }
      */
+    console.log(mergeDividedMessages([...conversationData.messages]));
     while (!got_response && tries < 5) {
       try {
         tries = tries + 1;
