@@ -3,24 +3,18 @@ export const removeReactionFromCard = async (data: any) => {
   try {
     const doer = data.savedBy;
     const flashcardId = data.cardId;
-    const documentId = data.passageId;
 
-    await db.runTransaction(async transaction => {
-      const bookDoc = await transaction.get(db.collection("chaptersBook").doc(documentId));
-      const bookData = bookDoc.data();
-      if (bookData) {
-        const flashcards = bookData.flashcards || [];
-
-        const flashcardIdx = flashcards.findIndex((f: any) => f.id === flashcardId);
-
-        if (flashcardIdx !== -1) {
-          if (flashcards[flashcardIdx].reactions && flashcards[flashcardIdx].reactions[doer]) {
-            delete flashcards[flashcardIdx].reactions[doer];
-          }
-          transaction.update(bookDoc.ref, { flashcards });
-        } else {
-          console.error("Flashcard not found");
+    await db.runTransaction(async (transaction: any) => {
+      const flashcardDoc = await transaction.get(db.collection("flashcards").doc(flashcardId));
+      const flashcardData = flashcardDoc.data();
+      const reactions = flashcardData.reactions || {};
+      if (flashcardData) {
+        if (reactions[doer]) {
+          delete flashcardData.reactions[doer];
         }
+        transaction.update(flashcardDoc.ref, { reactions });
+      } else {
+        console.error("Flashcard not found");
       }
     });
   } catch (error) {
