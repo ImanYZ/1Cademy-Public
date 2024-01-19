@@ -321,13 +321,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     );
     if (conversationData.hasOwnProperty("scores")) {
       conversationData.scores.push({
-        score: parseInt(lateResponse.evaluation),
+        score: parseFloat(lateResponse.evaluation),
         date: new Date(),
       });
     } else {
       conversationData.scores = [
         {
-          score: parseInt(lateResponse.evaluation),
+          score: parseFloat(lateResponse.evaluation),
           date: new Date(),
         },
       ];

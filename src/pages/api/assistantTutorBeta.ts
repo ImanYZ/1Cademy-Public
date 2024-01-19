@@ -156,10 +156,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     /*  */
     if (!concepts.length) {
-      res.write("Sorry, Something went wrong,  can you please try again!");
+      res.write("Sorry, something went wrong, can you please try again!");
       return;
     }
     /*  */
+    console.log({ url });
     const unit = (url.split("/").pop() || "").split("#")[0];
     let course = unit;
     if (url.includes("/the-economy/microeconomics")) {
@@ -341,16 +342,18 @@ content: "${nextFlashcard.content}"
     /* we calculate the progress of the user in this unit
     100% means the user has 400 points
     */
-    conversationData = roundNum(conversationData.progress + parseInt(lateResponse.evaluation) / (concepts.length * 10));
+    conversationData.progress = roundNum(
+      conversationData.progress + parseInt(lateResponse.evaluation) / (concepts.length * 10)
+    );
     if (conversationData.hasOwnProperty("scores")) {
       conversationData.scores.push({
-        score: parseInt(lateResponse.evaluation),
+        score: parseFloat(lateResponse.evaluation),
         date: new Date(),
       });
     } else {
       conversationData.scores = [
         {
-          score: parseInt(lateResponse.evaluation),
+          score: parseFloat(lateResponse.evaluation),
           date: new Date(),
         },
       ];
@@ -473,6 +476,7 @@ content: "${nextFlashcard.content}"
     console.log("Done");
   } catch (error) {
     console.log(error);
+    return res.status(500).send("Sorry, something went wrong,  can you please try again!");
   }
 }
 
