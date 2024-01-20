@@ -99,13 +99,38 @@ const getNextFlashcard = (concepts: any, usedFlashcards: string[], furtherExplai
   }
   return concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
 };
-const getPromptInstructions = async (course: string, uname: string) => {
-  let promptDocs = await db.collection("assistantPrompt").where("url", "==", course).where("uname", "==", uname).get();
-  if (promptDocs.docs.length <= 0) {
-    promptDocs = await db.collection("assistantPrompt").where("url", "==", course).where("uname", "==", "1man").get();
+const getPromptInstructions = async (course: string, uname: string, isInstructor: boolean) => {
+  if (isInstructor) {
+    let promptDocs = await db
+      .collection("courseSettings")
+      .where("url", "==", course)
+      .where("instructor", "==", uname)
+      .get();
+    if (promptDocs.docs.length <= 0) {
+      // TO:DO get the instructor settings here if the current user is a student
+      promptDocs = await db
+        .collection("courseSettings")
+        .where("url", "==", course)
+        .where("instructor", "==", "1man")
+        .get();
+    }
+    const promptDoc = promptDocs.docs[0];
+    const promptSettings = promptDoc.data().promptSettings;
+    return promptSettings;
+  } else {
+    let promptDocs = await db
+      .collection("courseSettings")
+      .where("url", "==", course)
+      .where("students", "array-contains", uname)
+      .get();
+    if (promptDocs.docs.length > 0) {
+      const promptDoc = promptDocs.docs[0];
+      const promptSettings = promptDoc.data().promptSettings;
+      return promptSettings;
+    } else {
+      throw new Error("You are not a student in this course!");
+    }
   }
-  const promptDoc = promptDocs.docs[0];
-  return promptDoc.data();
 };
 
 const mergeDividedMessages = (messages: any) => {
@@ -145,12 +170,14 @@ const mergeDividedMessages = (messages: any) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { uid, uname, fName } = req.body?.data?.user?.userData;
+    console.log("assistant Tutor");
+    const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
     const { url, concepts, cardsModel, furtherExplain } = req.body;
     let { message } = req.body;
     let default_message = false;
     let selectedModel = "";
-    console.log({ cardsModel });
+    console.log({ cardsModel, customClaims });
+    const isInstructor = customClaims.instructor;
     if (!!cardsModel) {
       selectedModel = cardsModel;
     }
@@ -169,7 +196,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (url.includes("the-mission-corporation")) {
       course = "the-mission-corporation-4R-trimmed.html";
     }
-    const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(course, uname);
+    const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(
+      course,
+      uname,
+      isInstructor
+    );
     const systemPrompt = await generateSystemPrompt(
       unit,
       concepts || [],
@@ -199,6 +230,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       scores: [],
       usedFlashcards: [],
       cardsModel: selectedModel,
+      deleted: false,
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
@@ -243,13 +275,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       mid: db.collection("tutorConversations").doc().id,
       default_message,
     });
-
-    //scroll to flashcard
-    if (conversationData.usedFlashcards.length >= 2) {
-      const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
-      console.log({ scroll_to_flashcard });
-      res.write(`flashcard_id: "${scroll_to_flashcard}"`);
-    }
 
     // add the extra PS to the message of the user
     // we ignore it afterward when saving the conversation in the db
@@ -378,6 +403,12 @@ content: "${nextFlashcard.content}"
         }
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
+    }
+    //scroll to flashcard
+    if (conversationData.usedFlashcards.length >= 2) {
+      const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
+      console.log({ scroll_to_flashcard });
+      res.write(`flashcard_id: "${scroll_to_flashcard}"`);
     }
     //end stream
     res.end();

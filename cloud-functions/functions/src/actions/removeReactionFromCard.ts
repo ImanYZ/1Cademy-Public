@@ -8,6 +8,7 @@ export const removeReactionFromCard = async (data: any) => {
       const flashcardDoc = await transaction.get(db.collection("flashcards").doc(flashcardId));
       const flashcardData = flashcardDoc.data();
       const reactions = flashcardData.reactions || {};
+      console.log(flashcardData);
       if (flashcardData) {
         if (reactions[doer]) {
           delete flashcardData.reactions[doer];
