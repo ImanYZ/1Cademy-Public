@@ -240,12 +240,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     /*  */
     console.log({ url });
     const unit = (url.split("/").pop() || "").split("#")[0];
-    let course = unit;
+    let course = "";
     if (url.includes("/the-economy/microeconomics")) {
       course = "the-economy/microeconomics";
     }
     if (url.includes("the-mission-corporation")) {
       course = "the-mission-corporation-4R-trimmed.html";
+    }
+    if (!course) {
+      res.write("Sorry, something went wrong, can you please try again!");
+      return;
     }
     const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(
       course,
@@ -318,9 +322,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       questionMessage = conversationData.messages.pop();
     }
 
-    const nextFlashcard = !furtherExplain
-      ? getNextFlashcard(concepts, [...conversationData.usedFlashcards], furtherExplain)
-      : conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+    const nextFlashcard = getNextFlashcard(concepts, [...conversationData.usedFlashcards], furtherExplain);
 
     if (nextFlashcard?.id && !furtherExplain) {
       conversationData.usedFlashcards.push(nextFlashcard.id);
