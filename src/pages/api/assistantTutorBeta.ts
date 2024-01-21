@@ -50,7 +50,6 @@ const generateSystemPrompt = async (
   directions: string,
   techniques: string
 ) => {
-  let flashcards = concepts;
   let booksQuery = db.collection("chaptersBook").where("url", "==", url);
   const booksDocs = await booksQuery.get();
   const bookData = booksDocs.docs[0].data();
@@ -58,11 +57,7 @@ const generateSystemPrompt = async (
   if (bookData.sectionTitle) {
     title = `from a unit titled ${bookData.sectionTitle}`;
   }
-  if (!flashcards.length) {
-    flashcards = [...flashcards, ...(bookData?.flashcards || [])];
-  }
-
-  const copy_flashcards = flashcards
+  const copy_flashcards = concepts
     .filter((f: any) => f.paragraphs.length > 0)
     .map(
       (f: any) =>
@@ -167,12 +162,71 @@ const mergeDividedMessages = (messages: any) => {
     content: message.content,
   }));
 };
+const sortConcepts = (concepts: any, cardsModel: string) => {
+  return concepts
+    .filter((f: any) => f.model === cardsModel)
+    .sort((a: any, b: any) => {
+      const numA = parseInt(a.paragraphs[0]?.split("-")[1] || 0);
+      const numB = parseInt(b.paragraphs[0]?.split("-")[1] || 0);
+      return numA - numB;
+    });
+};
+const getConcepts = async (
+  unit: string,
+  uname: string,
+  selectedModel: string,
+  isInstructor: boolean,
+  course: string
+) => {
+  const concepts: any = [];
+  if (isInstructor) {
+    const flashcardsDocs = await db
+      .collection("flashcards")
+      .where("url", "==", unit)
+      .where("instructor", "==", uname)
+      .get();
+
+    flashcardsDocs.docs.forEach(doc => {
+      const concept = doc.data();
+      if (concept.paragraphs.length > 0) {
+        concepts.push(concept);
+      }
+    });
+
+    return sortConcepts(concepts, selectedModel);
+  } else {
+    let promptDocs = await db
+      .collection("courseSettings")
+      .where("url", "==", course)
+      .where("students", "array-contains", uname)
+      .get();
+    if (promptDocs.docs.length > 0) {
+      const promptDoc = promptDocs.docs[0];
+      const instructorForStudent = promptDoc.data().instructor;
+      const flashcardsDocs = await db
+        .collection("flashcards")
+        .where("url", "==", unit)
+        .where("instructor", "==", instructorForStudent)
+        .get();
+
+      flashcardsDocs.docs.forEach(doc => {
+        const concept = doc.data();
+        if (concept.paragraphs.length > 0) {
+          concepts.push(concept);
+        }
+      });
+      return sortConcepts(concepts, selectedModel);
+    } else {
+      throw new Error("You are not a student in this course!");
+    }
+  }
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     console.log("assistant Tutor");
     const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-    const { url, concepts, cardsModel, furtherExplain } = req.body;
+    const { url, cardsModel, furtherExplain } = req.body;
     let { message } = req.body;
     let default_message = false;
     let selectedModel = "";
@@ -182,10 +236,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       selectedModel = cardsModel;
     }
     /*  */
-    if (!concepts.length) {
-      res.write("Sorry, something went wrong, can you please try again!");
-      return;
-    }
+
     /*  */
     console.log({ url });
     const unit = (url.split("/").pop() || "").split("#")[0];
@@ -201,6 +252,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       uname,
       isInstructor
     );
+
+    const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
+    console.log(concepts.length);
+    if (!concepts.length) {
+      res.write("Sorry, something went wrong, can you please try again!");
+      return;
+    }
     const systemPrompt = await generateSystemPrompt(
       unit,
       concepts || [],
