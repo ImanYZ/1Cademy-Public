@@ -21,6 +21,7 @@ import { addUserToChannel } from "./actions/addUserToChannel";
 import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 
 import { db } from "./admin";
+import { updateSavedCards } from "./actions/updateSavedCards";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -276,6 +277,16 @@ export const onDeleteSavedFlashcard = functions.firestore.document("/savedBookCa
     const changeData = change.data();
     console.log(changeData);
     removeReactionFromCard(changeData);
+  } catch (error) {
+    console.log("error onUserUpdate:", error);
+  }
+});
+
+export const onUpdatedFlashcard = functions.firestore.document("/flashcards/{id}").onUpdate(async change => {
+  try {
+    const newData = change.after.data();
+    const cardId = change.after.id;
+    updateSavedCards(newData, cardId);
   } catch (error) {
     console.log("error onUserUpdate:", error);
   }
