@@ -337,23 +337,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     conversationData.messages[conversationData.messages.length - 1].content =
       message +
-      `\n${fName} can't see this PS:If ${fName}  asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
+      `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
       `Always separate your response to the student's last message from your next question using “\n—-------\n”.` +
       (!!nextFlashcard
         ? `Respond to ${fName} and then ask them a question about the following the concept card:
     {
     title: "${nextFlashcard.title}",
     content: "${nextFlashcard.content}"
-    }`
+    }
+    Note that ${fName} has not read the concept card yet. They will see the concept card only after answering your question.`
         : "");
     console.log(
       `\n${fName} can't see this PS:If ${fName}  asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
         (!!nextFlashcard
-          ? `Respond to ${fName} and then focus on the following the concept card:
+          ? `Respond to ${fName} and then ask them a question about the following the concept card:
 {
 title: "${nextFlashcard.title}",
 content: "${nextFlashcard.content}"
-}`
+}
+Note that ${fName} has not read the concept card yet. They will see the concept card only after answering your question.`
           : "") +
         `Always separate your response to the student's last message from your next question using “\n—-------\n”.`
     );
