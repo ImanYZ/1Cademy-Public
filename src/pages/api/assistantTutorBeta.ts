@@ -324,10 +324,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const nextFlashcard = getNextFlashcard(concepts, [...conversationData.usedFlashcards], furtherExplain);
 
-    if (nextFlashcard?.id && !furtherExplain) {
-      conversationData.usedFlashcards.push(nextFlashcard.id);
-    }
-
     conversationData.messages.push({
       role: "user",
       content: message,
@@ -387,13 +383,14 @@ content: "${nextFlashcard.content}"
      */
 
     console.log(mergeDividedMessages([...conversationData.messages]));
-    while (!got_response && tries < 5) {
-      try {
-        tries = tries + 1;
-        const _messages = mergeDividedMessages([...conversationData.messages]);
-        _messages.push({
-          role: "user",
-          content: `
+    if (!furtherExplain) {
+      while (!got_response && tries < 5) {
+        try {
+          tries = tries + 1;
+          const _messages = mergeDividedMessages([...conversationData.messages]);
+          _messages.push({
+            role: "user",
+            content: `
           Evaluate my answer to your last question. Which concept card id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
           {
             "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
@@ -402,26 +399,28 @@ content: "${nextFlashcard.content}"
             "inform_instructor": "Yes” if the instructor should be informed about my response to your last message. “No” if there is no reason to take the instructor’s time about my last message to you.
           }
           Do not print anything other than this JSON object.`,
-        });
-        // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I’ve already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
+          });
+          // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I’ve already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
 
-        const response = await openai.chat.completions.create({
-          messages: _messages,
-          model: "gpt-4-1106-preview",
-          temperature: 0,
-        });
-        const responseText = response.choices[0].message.content;
-        lateResponse = extractJSON(responseText);
-        got_response = true;
+          const response = await openai.chat.completions.create({
+            messages: _messages,
+            model: "gpt-4-1106-preview",
+            temperature: 0,
+          });
+          const responseText = response.choices[0].message.content;
+          lateResponse = extractJSON(responseText);
+          got_response = true;
 
-        console.log(lateResponse.concept_card_id);
-        console.log({ lateResponse });
-      } catch (error) {
-        console.log(error);
+          console.log(lateResponse.concept_card_id);
+          console.log({ lateResponse });
+        } catch (error) {
+          console.log(error);
+        }
       }
     }
-    if (!lateResponse.concept_card_id) {
-      lateResponse.concept_card_id = nextFlashcard;
+    let scroll_to_flashcard = "";
+    if (lateResponse.concept_card_id) {
+      scroll_to_flashcard = lateResponse.concept_card_id;
     }
 
     /* we calculate the progress of the user in this unit
@@ -464,7 +463,10 @@ content: "${nextFlashcard.content}"
         completeMessage = completeMessage + result.choices[0].delta.content;
       }
     }
-    //scroll to flashcard
+    if (scroll_to_flashcard) {
+      conversationData.usedFlashcards.push(scroll_to_flashcard);
+    }
+
     if (conversationData.usedFlashcards.length >= 2) {
       const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
       console.log({ scroll_to_flashcard });
