@@ -323,7 +323,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     const nextFlashcard = getNextFlashcard(concepts, [...conversationData.usedFlashcards], furtherExplain);
-
     conversationData.messages.push({
       role: "user",
       content: message,
@@ -383,7 +382,7 @@ content: "${nextFlashcard.content}"
      */
 
     console.log(mergeDividedMessages([...conversationData.messages]));
-    if (!furtherExplain) {
+    if (!furtherExplain && !default_message) {
       while (!got_response && tries < 5) {
         try {
           tries = tries + 1;
@@ -465,12 +464,11 @@ content: "${nextFlashcard.content}"
     }
     if (scroll_to_flashcard) {
       conversationData.usedFlashcards.push(scroll_to_flashcard);
-    }
-
-    if (conversationData.usedFlashcards.length >= 2) {
-      const scroll_to_flashcard = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 2];
-      console.log({ scroll_to_flashcard });
       res.write(`flashcard_id: "${scroll_to_flashcard}"`);
+    }
+    if (furtherExplain) {
+      const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+      res.write(`flashcard_id: "${scroll_to}"`);
     }
     //end stream
     res.end();
