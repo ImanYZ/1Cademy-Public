@@ -329,6 +329,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
       default_message,
+      nextFlashcard: nextFlashcard.id,
     });
 
     // add the extra PS to the message of the user
