@@ -28,7 +28,7 @@ const PROMPT = (
   techniques: string
 ) => {
   const instructions = `Your name is ${tutorName}.
-  The student’s name is ${fName}.
+  The student's name is ${fName}.
   You are a professional tutor, teaching ${courseName}.
   ${objectives}
   You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
@@ -36,7 +36,7 @@ const PROMPT = (
   ${directions}
   ${techniques}
   You should make your messages very short.
-  Always separate your response to the student’s last message from your next question using “\n—-------\n”.`;
+  Always separate your response to the student's last message from your next question using “\n—-------\n”.`;
   return instructions;
 };
 
@@ -337,15 +337,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     conversationData.messages[conversationData.messages.length - 1].content =
       message +
-      `\n${fName} can't see this PS:If ${fName}  asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
+      `\n${fName} can't see this PS:If ${fName}  asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
+      `Always separate your response to the student's last message from your next question using “\n—-------\n”.` +
       (!!nextFlashcard
-        ? `Respond to ${fName} and then focus on the following the concept card:
+        ? `Respond to ${fName} and then ask them a question about the following the concept card:
     {
     title: "${nextFlashcard.title}",
     content: "${nextFlashcard.content}"
     }`
-        : "") +
-      `Always separate your response to the student’s last message from your next question using “\n—-------\n”.`;
+        : "");
     console.log(
       `\n${fName} can't see this PS:If ${fName}  asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
         (!!nextFlashcard
@@ -355,7 +355,7 @@ title: "${nextFlashcard.title}",
 content: "${nextFlashcard.content}"
 }`
           : "") +
-        `Always separate your response to the student’s last message from your next question using “\n—-------\n”.`
+        `Always separate your response to the student's last message from your next question using “\n—-------\n”.`
     );
     let completeMessage = "";
     let lateResponse: {
@@ -396,11 +396,11 @@ content: "${nextFlashcard.content}"
             "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
             "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy" , "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
             "concept_card_id": "The id of the most important concept card that I should study to learn better about your last message",
-            "inform_instructor": "Yes” if the instructor should be informed about my response to your last message. “No” if there is no reason to take the instructor’s time about my last message to you.
+            "inform_instructor": "Yes” if the instructor should be informed about my response to your last message. “No” if there is no reason to take the instructor's time about my last message to you.
           }
           Do not print anything other than this JSON object.`,
           });
-          // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I’ve already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
+          // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
 
           const response = await openai.chat.completions.create({
             messages: _messages,
