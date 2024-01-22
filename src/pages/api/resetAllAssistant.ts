@@ -28,6 +28,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
       }
     }
+
+    const commentsDocs = await db.collection("conceptCardComments").get();
+
+    for (let commentDoc of commentsDocs.docs) {
+      const commentData = commentDoc.data();
+      if (commentData.user.uname === uname) {
+        batch.delete(commentDoc.ref);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      } else {
+        for (let replyIdx = 0; replyIdx < commentData.replies.length; replyIdx++) {
+          const reply = commentData.replies[replyIdx];
+          if (reply.user.uname == uname) {
+            commentData.replies.splice(replyIdx, 1);
+          }
+        }
+        batch.update(commentDoc.ref, commentData);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+    }
     await batch.commit();
     return res.status(200).send({ success: true });
   } catch (error) {
