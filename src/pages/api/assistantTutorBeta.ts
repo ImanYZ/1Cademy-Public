@@ -30,10 +30,10 @@ const PROMPT = (
   const instructions = `Your name is ${tutorName}.
   The student's name is ${fName}.
   You are a professional tutor, teaching ${courseName}.
-  ${objectives}
-  You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
-  ${JSON.stringify(flashcards)}
-  ${directions}
+  ${objectives}` +
+  // You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
+  // ${JSON.stringify(flashcards)}
+  `${directions}
   ${techniques}
   You should make your messages very short.
   Always separate your response to the student's last message from your next question using “\n—-------\n”.`;
@@ -342,18 +342,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       (!!nextFlashcard
         ? `Respond to ${fName} and then ask them a question about the following the concept card:
     {
-    title: "${nextFlashcard.title}",
-    content: "${nextFlashcard.content}"
+      id: "${nextFlashcard.id}",
+      title: "${nextFlashcard.title}",
+      content: "${nextFlashcard.content}"
     }
     Note that ${fName} has not read the concept card yet. They will see the concept card only after answering your question.`
         : "");
     console.log(
-      `\n${fName} can't see this PS:If ${fName}  asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
+      `\n${fName} can't see this PS:If ${fName} asked any questions, you should  answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
         (!!nextFlashcard
           ? `Respond to ${fName} and then ask them a question about the following the concept card:
 {
-title: "${nextFlashcard.title}",
-content: "${nextFlashcard.content}"
+  id: "${nextFlashcard.id}",
+  title: "${nextFlashcard.title}",
+  content: "${nextFlashcard.content}"
 }
 Note that ${fName} has not read the concept card yet. They will see the concept card only after answering your question.`
           : "") +
