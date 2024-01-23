@@ -236,328 +236,333 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
     console.log("assistant Tutor", uname);
     const { url, cardsModel, furtherExplain } = req.body;
-    let { message } = req.body;
-    let default_message = false;
-    let selectedModel = "";
-    console.log({ cardsModel, customClaims });
-    const isInstructor = customClaims.instructor;
-    if (!!cardsModel) {
-      selectedModel = cardsModel;
-    }
-    /*  */
-
-    /*  */
-    console.log({ url });
-    const unit = (url.split("/").pop() || "").split("#")[0];
-    let course = "";
-    if (url.includes("/the-economy/microeconomics")) {
-      course = "the-economy/microeconomics";
-    }
-    if (url.includes("the-mission-corporation")) {
-      course = "the-mission-corporation-4R-trimmed.html";
-    }
-    if (!course) {
-      res.write("Sorry, something went wrong, can you please try again!");
-      return;
-    }
-    const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(
-      course,
-      uname,
-      isInstructor
-    );
-
-    const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
-    console.log(concepts.length);
-    if (!concepts.length) {
-      res.write("Sorry, something went wrong, can you please try again!");
-      return;
-    }
-    const systemPrompt = await generateSystemPrompt(
-      unit,
-      concepts || [],
-      fName,
-      tutorName,
-      courseName,
-      objectives,
-      directions,
-      techniques
-    );
-
-    const conversationDocs = await db
-      .collection("tutorConversations")
-      .where("unit", "==", unit)
-      .where("uid", "==", uid)
-      .where("cardsModel", "==", selectedModel)
-      .where("deleted", "==", false)
-      .get();
-
-    let conversationData: any = {
-      messages: [],
-      unit,
-      uid,
-      uname,
-      createdAt: new Date(),
-      concepts,
-      progress: 0,
-      scores: [],
-      usedFlashcards: [],
-      cardsModel: selectedModel,
-      deleted: false,
-    };
-    //new reference to the "tutorConversations" collection
-    let newConversationRef = db.collection("tutorConversations").doc();
-
-    /*  if the conversation associated with this unit already exist we continue the conversation from there
-     otherwise we initialize a new one  */
-    if (conversationDocs.docs.length > 0) {
-      const conversationDoc = conversationDocs.docs[0];
-      conversationData = conversationDoc.data();
-      conversationData.messages[0].content = systemPrompt;
-      newConversationRef = conversationDoc.ref;
-    } else {
-      conversationData.messages.push({
-        role: "system",
-        //we need the system prompt when the user starts chatting
-        content: systemPrompt,
-      });
-    }
-    if (!message) {
-      message = `Hello My name is ${fName}.`;
-      default_message = true;
-      conversationData.usedFlashcards = [];
-    }
-
-    let scroll_flashcard_next = "";
-    let nextFlashcard = null;
-    if (!furtherExplain) {
-      scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
-      console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
-      if (scroll_flashcard_next) {
-        conversationData.usedFlashcards.push(scroll_flashcard_next);
+    await db.runTransaction(async t => {
+      let { message } = req.body;
+      let default_message = false;
+      let selectedModel = "";
+      console.log({ cardsModel, customClaims });
+      const isInstructor = customClaims.instructor;
+      if (!!cardsModel) {
+        selectedModel = cardsModel;
       }
-      nextFlashcard = getNextFlashcard(
-        concepts,
-        [...conversationData.usedFlashcards],
-        conversationData.flashcardsScores || {}
+      /*  */
+
+      /*  */
+      console.log({ url });
+      const unit = (url.split("/").pop() || "").split("#")[0];
+      let course = "";
+      if (url.includes("/the-economy/microeconomics")) {
+        course = "the-economy/microeconomics";
+      }
+      if (url.includes("the-mission-corporation")) {
+        course = "the-mission-corporation-4R-trimmed.html";
+      }
+      if (!course) {
+        res.write("Sorry, something went wrong, can you please try again!");
+        return;
+      }
+      const { tutorName, courseName, objectives, directions, techniques } = await getPromptInstructions(
+        course,
+        uname,
+        isInstructor
       );
-      if (nextFlashcard) {
-        conversationData.nextFlashcard = nextFlashcard;
-      } else {
-        delete conversationData.nextFlashcard;
+
+      const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
+      console.log(concepts.length);
+      if (!concepts.length) {
+        res.write("Sorry, something went wrong, can you please try again!");
+        return;
       }
-    }
+      const systemPrompt = await generateSystemPrompt(
+        unit,
+        concepts || [],
+        fName,
+        tutorName,
+        courseName,
+        objectives,
+        directions,
+        techniques
+      );
 
-    console.log({ nextFlashcard });
-    // add the extra PS to the message of the user
-    // we ignore it afterward when saving the conversation in the db
-    const extraInfoPrompt =
-      `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
-      `Always separate your response to the student's last message from your next question using “\n—-------\n”.` +
-      (!!nextFlashcard
-        ? `Respond to ${fName} and then ask them a question about the following card:
-  {
-    title: "${nextFlashcard.title}",
-    content: "${nextFlashcard.content}"
-  }
-  Note that ${fName} has not read the card yet. They will see the card only after answering your question.`
-        : "");
+      const conversationDocs = await t.get(
+        db
+          .collection("tutorConversations")
+          .where("unit", "==", unit)
+          .where("uid", "==", uid)
+          .where("cardsModel", "==", selectedModel)
+          .where("deleted", "==", false)
+      );
 
-    conversationData.messages.push({
-      role: "user",
-      content: message,
-      sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
-      default_message,
-      nextFlashcard: nextFlashcard?.id || "",
-      extraInfoPrompt,
-    });
+      let conversationData: any = {
+        messages: [],
+        unit,
+        uid,
+        uname,
+        createdAt: new Date(),
+        concepts,
+        progress: 0,
+        scores: [],
+        usedFlashcards: [],
+        cardsModel: selectedModel,
+        deleted: false,
+      };
+      //new reference to the "tutorConversations" collection
+      let newConversationRef = db.collection("tutorConversations").doc();
 
-    let completeMessage = "";
-    let lateResponse: {
-      evaluation: any;
-      emotion: string;
-      progress: string;
-      inform_instructor: string;
-    } = {
-      evaluation: "0",
-      emotion: "",
-      progress: "0",
-      inform_instructor: "",
-    };
-    let got_response = false;
-    let tries = 0;
-    // we need to generate the JSON before start streaming to the user
-    /*
-    {
-      evaluation,
-      emotion,
-      flashcard_id,
-    }
-     */
-    const { mergedMessage } = mergeDividedMessages([...conversationData.messages]);
+      /*  if the conversation associated with this unit already exist we continue the conversation from there
+       otherwise we initialize a new one  */
+      if (conversationDocs.docs.length > 0) {
+        const conversationDoc = conversationDocs.docs[0];
+        conversationData = conversationDoc.data();
+        conversationData.messages[0].content = systemPrompt;
+        newConversationRef = conversationDoc.ref;
+      } else {
+        conversationData.messages.push({
+          role: "system",
+          //we need the system prompt when the user starts chatting
+          content: systemPrompt,
+        });
+      }
+      if (!message) {
+        message = `Hello My name is ${fName}.`;
+        default_message = true;
+        conversationData.usedFlashcards = [];
+      }
 
-    const response = await openai.chat.completions.create({
-      messages: mergedMessage,
-      model: "gpt-4-1106-preview",
-      temperature: 0,
-      stream: true,
-    });
-    // stream the main reponse to the user
-    let stopStreaming = false;
-    let question = "";
-    let answer = "";
-    let scrolled = false;
-    for await (const result of response) {
-      if (result.choices[0].delta.content) {
-        console.log(stopStreaming, `${result.choices[0].delta.content}`);
-        if (!stopStreaming) {
-          res.write(`${result.choices[0].delta.content}`);
-          answer += `${result.choices[0].delta.content}`;
+      let scroll_flashcard_next = "";
+      let nextFlashcard = null;
+      if (!furtherExplain) {
+        scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
+        console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
+        if (scroll_flashcard_next) {
+          conversationData.usedFlashcards.push(scroll_flashcard_next);
+        }
+        nextFlashcard = getNextFlashcard(
+          concepts,
+          [...conversationData.usedFlashcards],
+          conversationData.flashcardsScores || {}
+        );
+        if (nextFlashcard) {
+          conversationData.nextFlashcard = nextFlashcard;
         } else {
-          question += `${result.choices[0].delta.content}`;
+          delete conversationData.nextFlashcard;
         }
-        if (result.choices[0].delta.content.includes("-------") && !default_message) {
-          stopStreaming = true;
-          if (!scrolled) {
-            console.log({ scroll_flashcard_next });
-            if (scroll_flashcard_next) {
-              conversationData.usedFlashcards.push(scroll_flashcard_next);
-              res.write(`flashcard_id: "${scroll_flashcard_next}"`);
-            }
-            if (furtherExplain) {
-              const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
-              res.write(`flashcard_id: "${scroll_to}"`);
-            }
-            scrolled = true;
-          }
-        }
-        completeMessage = completeMessage + result.choices[0].delta.content;
       }
+
+      console.log({ nextFlashcard });
+      // add the extra PS to the message of the user
+      // we ignore it afterward when saving the conversation in the db
+      const extraInfoPrompt =
+        `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
+        `Always separate your response to the student's last message from your next question using “\n—-------\n”.` +
+        (!!nextFlashcard
+          ? `Respond to ${fName} and then ask them a question about the following card:
+    {
+      title: "${nextFlashcard.title}",
+      content: "${nextFlashcard.content}"
     }
+    Note that ${fName} has not read the card yet. They will see the card only after answering your question.`
+          : "");
 
-    //end stream
-    res.end();
-
-    if (!nextFlashcard && !conversationData.done && conversationData.progress >= 1) {
-      await delay(2000);
-      const doneMessage = `Congrats you have completed Studying all the concepts in this Unit.`;
-      res.write(doneMessage);
       conversationData.messages.push({
-        role: "assistant",
-        content: doneMessage,
+        role: "user",
+        content: message,
         sentAt: new Date(),
         mid: db.collection("tutorConversations").doc().id,
+        default_message,
+        nextFlashcard: nextFlashcard?.id || "",
+        extraInfoPrompt,
       });
-      conversationData.done = true;
-      await newConversationRef.set({ ...conversationData });
-    }
 
-    completeMessage = completeMessage.replace("-------", "");
+      let completeMessage = "";
+      let lateResponse: {
+        evaluation: any;
+        emotion: string;
+        progress: string;
+        inform_instructor: string;
+      } = {
+        evaluation: "0",
+        emotion: "",
+        progress: "0",
+        inform_instructor: "",
+      };
+      let got_response = false;
+      let tries = 0;
+      // we need to generate the JSON before start streaming to the user
+      /*
+      {
+        evaluation,
+        emotion,
+        flashcard_id,
+      }
+       */
+      const { mergedMessage } = mergeDividedMessages([...conversationData.messages]);
 
-    // save the reponse from GPT in the db
-    const divideId = db.collection("tutorConversations").doc().id;
-    conversationData.messages.push({
-      role: "assistant",
-      content: !answer ? completeMessage : answer,
-      divided: !!answer ? divideId : false,
-      sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
-    });
-    // if (furtherExplain) {
-    //   delete questionMessage.divided;
-    //   conversationData.messages.push(questionMessage);
-    // }
-    if (!!answer && !!question) {
+      const response = await openai.chat.completions.create({
+        messages: mergedMessage,
+        model: "gpt-4-1106-preview",
+        temperature: 0,
+        stream: true,
+      });
+      // stream the main reponse to the user
+      let stopStreaming = false;
+      let question = "";
+      let answer = "";
+      let scrolled = false;
+      for await (const result of response) {
+        if (result.choices[0].delta.content) {
+          console.log(stopStreaming, `${result.choices[0].delta.content}`);
+          if (!stopStreaming) {
+            res.write(`${result.choices[0].delta.content}`);
+            answer += `${result.choices[0].delta.content}`;
+          } else {
+            question += `${result.choices[0].delta.content}`;
+          }
+          if (result.choices[0].delta.content.includes("-------") && !default_message) {
+            stopStreaming = true;
+            if (!scrolled) {
+              console.log({ scroll_flashcard_next });
+              if (scroll_flashcard_next) {
+                conversationData.usedFlashcards.push(scroll_flashcard_next);
+                res.write(`flashcard_id: "${scroll_flashcard_next}"`);
+              }
+              if (furtherExplain) {
+                const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+                res.write(`flashcard_id: "${scroll_to}"`);
+              }
+              scrolled = true;
+            }
+          }
+          completeMessage = completeMessage + result.choices[0].delta.content;
+        }
+      }
+
+      //end stream
+      res.end();
+
+      if (!nextFlashcard && !conversationData.done && conversationData.progress >= 1) {
+        await delay(2000);
+        const doneMessage = `Congrats you have completed Studying all the concepts in this Unit.`;
+        res.write(doneMessage);
+        conversationData.messages.push({
+          role: "assistant",
+          content: doneMessage,
+          sentAt: new Date(),
+          mid: db.collection("tutorConversations").doc().id,
+        });
+        conversationData.done = true;
+        await newConversationRef.set({ ...conversationData });
+      }
+
+      completeMessage = completeMessage.replace("-------", "");
+
+      // save the reponse from GPT in the db
+      const divideId = db.collection("tutorConversations").doc().id;
       conversationData.messages.push({
         role: "assistant",
-        content: question,
+        content: !answer ? completeMessage : answer,
         divided: !!answer ? divideId : false,
-        question: true,
         sentAt: new Date(),
         mid: db.collection("tutorConversations").doc().id,
       });
-    }
+      // if (furtherExplain) {
+      //   delete questionMessage.divided;
+      //   conversationData.messages.push(questionMessage);
+      // }
+      if (!!answer && !!question) {
+        conversationData.messages.push({
+          role: "assistant",
+          content: question,
+          divided: !!answer ? divideId : false,
+          question: true,
+          sentAt: new Date(),
+          mid: db.collection("tutorConversations").doc().id,
+        });
+      }
+      t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
+      if (!furtherExplain && !default_message) {
+        while (!got_response && tries < 5) {
+          try {
+            tries = tries + 1;
+            const _messages = mergedMessage;
+            _messages.push({
+              role: "user",
+              content: `
+            Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
+            {
+              "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
+              "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy" , "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
+              "inform_instructor": "Yes” if the instructor should be informed about my response to your last message. “No” if there is no reason to take the instructor's time about my last message to you.
+            }
+            Do not print anything other than this JSON object.`,
+            });
+            // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
 
-    if (!furtherExplain && !default_message) {
-      while (!got_response && tries < 5) {
-        try {
-          tries = tries + 1;
-          const _messages = mergedMessage;
-          _messages.push({
-            role: "user",
-            content: `
-          Evaluate my answer to your last question. Which concept card id should I look into to lean better about your last message? Your response should be a JSON object with the following structure:
-          {
-            "evaluation":"A number between 0 to 10 about the my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question. Note that I expect you to rarely give 0s or 10s because they're extremes.",
-            "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy" , "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers to add some joy to my learning,
-            "inform_instructor": "Yes” if the instructor should be informed about my response to your last message. “No” if there is no reason to take the instructor's time about my last message to you.
+            const response = await openai.chat.completions.create({
+              messages: _messages,
+              model: "gpt-4-1106-preview",
+              temperature: 0,
+            });
+            const responseText = response.choices[0].message.content;
+            lateResponse = extractJSON(responseText);
+            got_response = true;
+
+            console.log({ lateResponse });
+          } catch (error) {
+            console.log(error);
           }
-          Do not print anything other than this JSON object.`,
-          });
-          // “progress”: A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
+        }
+        /* we calculate the progress of the user in this unit
+         */
+        if (conversationData.progress < 1) {
+          conversationData.progress = roundNum(
+            conversationData.progress + parseInt(lateResponse.evaluation) / (concepts.length * 10)
+          );
+        }
 
-          const response = await openai.chat.completions.create({
-            messages: _messages,
-            model: "gpt-4-1106-preview",
-            temperature: 0,
-          });
-          const responseText = response.choices[0].message.content;
-          lateResponse = extractJSON(responseText);
-          got_response = true;
+        if (scroll_flashcard_next && !furtherExplain) {
+          if (conversationData.hasOwnProperty("flashcardsScores")) {
+            conversationData.flashcardsScores[scroll_flashcard_next] = parseFloat(lateResponse.evaluation);
+          } else {
+            conversationData.flashcardsScores = {
+              [scroll_flashcard_next]: parseFloat(lateResponse.evaluation),
+            };
+          }
+        }
 
-          console.log({ lateResponse });
-        } catch (error) {
-          console.log(error);
+        if (conversationData.hasOwnProperty("scores")) {
+          conversationData.scores.push({
+            score: parseFloat(lateResponse.evaluation),
+            date: new Date(),
+            flashcard: scroll_flashcard_next,
+          });
+        } else {
+          conversationData.scores = [
+            {
+              score: parseFloat(lateResponse.evaluation),
+              date: new Date(),
+            },
+          ];
         }
       }
-    }
-    /* we calculate the progress of the user in this unit
-    100% means the user has 400 points
-    */
-    conversationData.progress = roundNum(
-      conversationData.progress + parseInt(lateResponse.evaluation) / (concepts.length * 10)
-    );
-    if (scroll_flashcard_next) {
-      if (conversationData.hasOwnProperty("flashcardsScores")) {
-        conversationData.flashcardsScores[scroll_flashcard_next] = parseFloat(lateResponse.evaluation);
-      } else {
-        conversationData.flashcardsScores = {
-          [scroll_flashcard_next]: parseFloat(lateResponse.evaluation),
-        };
+
+      if (conversationData.messages.length === 2) {
+        lateResponse.emotion = "";
       }
-    }
-
-    if (conversationData.hasOwnProperty("scores")) {
-      conversationData.scores.push({
-        score: parseFloat(lateResponse.evaluation),
-        date: new Date(),
-        flashcard: scroll_flashcard_next,
-      });
-    } else {
-      conversationData.scores = [
-        {
-          score: parseFloat(lateResponse.evaluation),
-          date: new Date(),
-        },
-      ];
-    }
-
-    if (conversationData.messages.length === 2) {
-      lateResponse.emotion = "";
-    }
-    let messageIdx = conversationData.messages.length - 1;
-    if (!!answer && !!question) {
-      messageIdx = conversationData.messages.length - 2;
-    }
-    conversationData.messages[messageIdx] = {
-      ...conversationData.messages[messageIdx],
-      inform_instructor: lateResponse.inform_instructor,
-      prior_evaluation: lateResponse.evaluation,
-      emotion: lateResponse.emotion,
-      progress: lateResponse.progress,
-    };
-    await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
-    console.log("Done");
+      let messageIdx = conversationData.messages.length - 1;
+      if (!!answer && !!question) {
+        messageIdx = conversationData.messages.length - 2;
+      }
+      conversationData.messages[messageIdx] = {
+        ...conversationData.messages[messageIdx],
+        inform_instructor: lateResponse.inform_instructor,
+        prior_evaluation: lateResponse.evaluation,
+        emotion: lateResponse.emotion,
+        progress: lateResponse.progress,
+      };
+      t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
+      console.log("Done");
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).send("Sorry, something went wrong,  can you please try again!");
