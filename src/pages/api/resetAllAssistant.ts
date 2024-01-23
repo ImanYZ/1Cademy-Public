@@ -4,7 +4,8 @@ import fbAuth from "src/middlewares/fbAuth";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { uname } = req.body?.data?.user?.userData;
+    const { uname, customClaims } = req.body?.data?.user?.userData;
+    console.log("reset all", uname);
     let batch = db.batch();
     let writeCounts = 0;
     const saveConceptCardsQ = await db.collection("savedBookCards").where("savedBy", "==", uname).get();
@@ -28,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
       }
     }
-
+    // reset user Comments
     const commentsDocs = await db.collection("conceptCardComments").get();
 
     for (let commentDoc of commentsDocs.docs) {
@@ -44,6 +45,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           }
         }
         batch.update(commentDoc.ref, commentData);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      }
+    }
+    //reset Flashcards
+    console.log({ uname });
+    if (customClaims.instructor) {
+      const flashcardsDocs = await db.collection("flashcards").where("instructor", "==", uname).get();
+      for (let flashcardDoc of flashcardsDocs.docs) {
+        let flashcardData = flashcardDoc.data();
+
+        if (!!flashcardData.defaultData) {
+          flashcardData = {
+            ...flashcardData.defaultData,
+            reactions: flashcardData.reactions,
+          };
+          batch.set(flashcardDoc.ref, flashcardData);
+        }
+        if (!!flashcardData.deletedByInstructor) {
+          batch.update(flashcardDoc.ref, { deletedByInstructor: false });
+        }
+        if (!!flashcardData.addedByInstructor) {
+          batch.delete(flashcardDoc.ref);
+        }
         [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
     }
