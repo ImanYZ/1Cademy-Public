@@ -34,7 +34,7 @@ const PROMPT = (
     `${directions}
   ${techniques}
   You should make your messages very short.
-  Always separate your response to the student's last message from your next question using “\n—-------\n”.`;
+  Always separate your response to the student's last message from your next question using “\n— ~~~~\n”.`;
   return instructions;
 };
 
@@ -147,7 +147,7 @@ const mergeDividedMessages = (messages: any) => {
         currentDivideId = message.divided;
         mergedMessage = { ...message };
       } else {
-        mergedMessage.content += "\n—-------\n" + message.content;
+        mergedMessage.content += "\n~~~~\n" + message.content;
       }
     } else {
       if (mergedMessage) {
@@ -354,7 +354,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       // we ignore it afterward when saving the conversation in the db
       const extraInfoPrompt =
         `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
-        `Always separate your response to the student's last message from your next question using “\n—-------\n”.` +
+        `Always separate your response to the student's last message from your next question using “\n~~~~\n”.` +
         (!!nextFlashcard
           ? `Respond to ${fName} and then ask them a question about the following card:
     {
@@ -409,16 +409,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       let question = "";
       let answer = "";
       let scrolled = false;
+      const regex = /~{2,}/g;
       for await (const result of response) {
         if (result.choices[0].delta.content) {
           console.log(stopStreaming, `${result.choices[0].delta.content}`);
           if (!stopStreaming) {
-            res.write(`${result.choices[0].delta.content}`);
-            answer += `${result.choices[0].delta.content}`;
+            const streamText = result.choices[0].delta.content.replace(/~{2,}/g, "");
+            res.write(`${streamText}`);
+            answer += `${streamText}`;
           } else {
             question += `${result.choices[0].delta.content}`;
           }
-          if (result.choices[0].delta.content.includes("-------") && !default_message) {
+          console.log(result.choices[0].delta.content);
+          const matches = result.choices[0].delta.content.match(regex);
+          if (matches && !default_message) {
             stopStreaming = true;
             if (!scrolled) {
               console.log({ scroll_flashcard_next });
@@ -454,7 +458,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         await newConversationRef.set({ ...conversationData });
       }
 
-      completeMessage = completeMessage.replace("-------", "");
+      completeMessage = completeMessage.replace(/~{2,}/g, "");
 
       // save the reponse from GPT in the db
       const divideId = db.collection("tutorConversations").doc().id;
@@ -589,7 +593,7 @@ export default fbAuth(handler);
 //       messages: [
 //         {
 //           role: "user",
-//           content: `Separate the question from the rest of the text in: "${completeMessage.replace("-------", "")}"
+//           content: `Separate the question from the rest of the text in: "${completeMessage.replace(" ~~~~", "")}"
 //         {
 //           "rest_of_the_text":"",
 //           "question":"",
