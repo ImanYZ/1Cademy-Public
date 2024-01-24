@@ -132,13 +132,21 @@ const getPromptInstructions = async (course: string, uname: string, isInstructor
     }
   }
 };
+const replaceExtraPhrase = (messageContent: string) => {
+  const phrases = [
+    "Look over this page and when you’re ready for me, let me know.",
+    "When you are ready to check your understanding, let me know.",
+    "Want to see how well you’ve grasped this material? I can help.",
+  ];
 
+  return phrases.reduce((acc, phrase) => acc.replace(phrase, ""), messageContent);
+};
 const mergeDividedMessages = (messages: any) => {
   const mergedMessages = [];
   let currentDivideId = null;
   let mergedMessage = null;
-
-  for (const message of messages) {
+  const filteredMessages = messages.filter((m: any) => !m.ignoreMessage);
+  for (const message of filteredMessages) {
     if ("divided" in message) {
       if (message.divided !== currentDivideId) {
         if (mergedMessage) {
@@ -166,7 +174,9 @@ const mergeDividedMessages = (messages: any) => {
   return {
     mergedMessage: mergedMessages.map((message: any) => ({
       role: message.role,
-      content: message.content + (message.extraInfoPrompt || ""),
+      content: !!message.furtherExplainPrompt
+        ? message.furtherExplainPrompt
+        : replaceExtraPhrase(message.content) + (message.extraInfoPrompt || ""),
     })),
     scroll_flashcard_next: mergedMessages[mergedMessages.length - 3]?.nextFlashcard || "",
   };
@@ -343,12 +353,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           conversationData.flashcardsScores || {}
         );
         if (nextFlashcard) {
+          conversationData.previousFlashcard = conversationData.nextFlashcard;
           conversationData.nextFlashcard = nextFlashcard;
         } else {
           delete conversationData.nextFlashcard;
         }
       }
 
+      if (furtherExplain) {
+        if (!!conversationData.messages[conversationData.messages.length - 1].question) {
+          conversationData.messages.pop();
+        }
+      }
       console.log({ nextFlashcard });
       // add the extra PS to the message of the user
       // we ignore it afterward when saving the conversation in the db
@@ -363,6 +379,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     Note that ${fName} has not read the card yet. They will see the card only after answering your question.`
           : "");
+      const furtherExplainPrompt =
+        furtherExplain && conversationData.previousFlashcard
+          ? `Further explain the content of the following card:{
+        title: "${conversationData?.previousFlashcard?.title || ""}",
+        content: "${conversationData?.previousFlashcard?.content || ""}"
+      }`
+          : "";
 
       conversationData.messages.push({
         role: "user",
@@ -372,6 +395,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         default_message,
         nextFlashcard: nextFlashcard?.id || "",
         extraInfoPrompt,
+        furtherExplainPrompt,
       });
 
       let completeMessage = "";
@@ -422,7 +446,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           }
           console.log(result.choices[0].delta.content);
           const matches = result.choices[0].delta.content.match(regex);
-          if (matches && !default_message) {
+          if (matches) {
             stopStreaming = true;
             if (!scrolled) {
               console.log({ scroll_flashcard_next });
@@ -439,6 +463,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           }
           completeMessage = completeMessage + result.choices[0].delta.content;
         }
+      }
+
+      if (default_message) {
+        const extraPhrases = [
+          "Look over this page and when you’re ready for me, let me know.",
+          "When you are ready to check your understanding, let me know.",
+          "Want to see how well you’ve grasped this material? I can help.",
+        ];
+        const randomIndex = Math.floor(Math.random() * extraPhrases.length);
+        const phrase = extraPhrases[randomIndex];
+        res.write(`${phrase}`);
+        answer += phrase;
       }
 
       //end stream
