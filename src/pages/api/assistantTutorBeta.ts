@@ -465,17 +465,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
       }
 
-      if (default_message) {
-        const extraPhrases = [
-          "Look over this page and when you’re ready for me, let me know.",
-          "When you are ready to check your understanding, let me know.",
-          "Want to see how well you’ve grasped this material? I can help.",
-        ];
-        const randomIndex = Math.floor(Math.random() * extraPhrases.length);
-        const phrase = extraPhrases[randomIndex];
-        res.write(`${phrase}`);
-        answer += phrase;
-      }
+      // if (default_message) {
+      //   const extraPhrases = [
+      //     "Look over this page and when you’re ready for me, let me know.",
+      //     "When you are ready to check your understanding, let me know.",
+      //     "Want to see how well you’ve grasped this material? I can help.",
+      //   ];
+      //   const randomIndex = Math.floor(Math.random() * extraPhrases.length);
+      //   const phrase = extraPhrases[randomIndex];
+      //   res.write(`${phrase}`);
+      //   answer += phrase;
+      // }
 
       //end stream
       res.end();
