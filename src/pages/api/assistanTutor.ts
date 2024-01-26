@@ -296,7 +296,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
         const response = await openai.chat.completions.create({
           messages: _messages,
-          model: "gpt-4-1106-preview",
+          model: "gpt-4-0125-preview",
           temperature: 0,
         });
         const responseText = response.choices[0].message.content;
@@ -335,7 +335,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const response = await openai.chat.completions.create({
       messages: mergeDividedMessages([...conversationData.messages]),
-      model: "gpt-4-1106-preview",
+      model: "gpt-4-0125-preview",
       temperature: 0,
       stream: true,
     });
@@ -397,7 +397,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             Do not print anything other than this JSON object.`,
             },
           ],
-          model: "gpt-4-1106-preview",
+          model: "gpt-4-0125-preview",
           temperature: 0,
         });
         console.log(_response.choices[0].message.content);
