@@ -285,7 +285,7 @@ export const sendMessageToGPT4V2 = async (
 };
 
 export const sendGPTPrompt = async (
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview" | "gpt-4-0613",
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613",
   messages: any[]
 ) => {
   const config = {
@@ -1134,7 +1134,7 @@ export const generateQuestionNode = async (
 export const generateFlashcard = async (
   passages: string[],
   context: any[],
-  model: "gpt-4-1106-preview" | "gpt-4-0613"
+  model: "gpt-4-0125-preview" | "gpt-4-0613"
 ): Promise<{
   Stem: string;
   Choices: {
