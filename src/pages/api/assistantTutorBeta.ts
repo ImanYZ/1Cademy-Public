@@ -362,11 +362,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         message = `Hello My name is ${fName}.`;
         default_message = true;
         conversationData.usedFlashcards = [];
-      } /* else {
+      } else {
         if (!conversationData.messages[conversationData.messages.length - 2].ignoreMessage) {
           furtherExplain = true;
         }
-      } */
+      }
 
       let scroll_flashcard_next = "";
       let nextFlashcard = null;
