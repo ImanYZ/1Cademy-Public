@@ -240,12 +240,37 @@ const getConcepts = async (
     }
   }
 };
+const addScoreToSavedCard = async (score: any, cardId: string, uname: string) => {
+  const previousSavedCardDoc = await db
+    .collection("savedBookCards")
+    .where("savedBy", "==", uname)
+    .where("cardId", "==", cardId)
+    .get();
+
+  if (previousSavedCardDoc.docs.length > 0) {
+    previousSavedCardDoc.docs[0].ref.update({
+      score,
+    });
+  } else {
+    const flashcardDoc = await db.collection("flashcards").doc(cardId).get();
+    const flashcardData = flashcardDoc.data();
+
+    const newSavedFlashcard = {
+      savedBy: uname,
+      savedAt: new Date(),
+      ...flashcardData,
+      cardId,
+    };
+    const newRef = db.collection("savedBookCards").doc();
+    await newRef.set(newSavedFlashcard);
+  }
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
     console.log("assistant Tutor", uname);
-    const { url, cardsModel, furtherExplain } = req.body;
+    let { url, cardsModel, furtherExplain } = req.body;
     await db.runTransaction(async t => {
       let { message } = req.body;
       let default_message = false;
@@ -337,7 +362,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         message = `Hello My name is ${fName}.`;
         default_message = true;
         conversationData.usedFlashcards = [];
-      }
+      } /* else {
+        if (!conversationData.messages[conversationData.messages.length - 2].ignoreMessage) {
+          furtherExplain = true;
+        }
+      } */
 
       let scroll_flashcard_next = "";
       let nextFlashcard = null;
@@ -569,6 +598,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             };
           }
         }
+        await addScoreToSavedCard(parseFloat(lateResponse.evaluation), scroll_flashcard_next, uname);
 
         if (conversationData.hasOwnProperty("scores")) {
           conversationData.scores.push({
