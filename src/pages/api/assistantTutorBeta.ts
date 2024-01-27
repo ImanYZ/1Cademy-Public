@@ -363,7 +363,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         default_message = true;
         conversationData.usedFlashcards = [];
       } else {
-        if (!conversationData.messages[conversationData.messages.length - 2].ignoreMessage) {
+        if (!!conversationData.messages[conversationData.messages.length - 1].question) {
           furtherExplain = true;
         }
       }
