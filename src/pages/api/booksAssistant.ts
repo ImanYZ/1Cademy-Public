@@ -8,6 +8,7 @@ import {
   getAssistantGenerateTitle,
   getAssistantTutorID,
   getFile,
+  getJSON,
   openai,
   sendMessageTime,
 } from "./openAI/helpers";
@@ -120,8 +121,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       content: newMessage,
     });
     //get response
-    const { response, messageId } = await fetchCompelation(threadId, assistantId);
-
+    let { response, messageId } = await fetchCompelation(threadId, assistantId);
+    response = getJSON(response);
     const threadMessages = await openai.beta.threads.messages.list(threadId);
     let audioUrl = "";
     if (asAudio) {
