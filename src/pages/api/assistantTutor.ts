@@ -113,14 +113,13 @@ const createSecondAgentFile = async (uname: string) => {
       content: flashcardData.content,
     });
   }
-
-  fs.writeFileSync("flashcards.json", JSON.stringify(flashcardsJSON, null, 2));
+  const filePath = "/tmp/flashcards.json";
+  fs.writeFileSync(filePath, JSON.stringify(flashcardsJSON, null, 2));
 
   const file = await openai.files.create({
     file: fs.createReadStream("flashcards.json"),
     purpose: "assistants",
   });
-  await fs.unlinkSync("flashcards.json");
   const newAssistant = await openai.beta.assistants.create({
     instructions: `Always Respond by generating a JSON object with the following structure (this is important):
     {
