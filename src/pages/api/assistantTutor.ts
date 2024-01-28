@@ -121,8 +121,21 @@ const createSecondAgentFile = async (uname: string) => {
     purpose: "assistants",
   });
   await fs.unlinkSync("flashcards.json");
-  console.log("file here", file.id);
-  return file.id;
+  const newAssistant = await openai.beta.assistants.create({
+    instructions: `Always Respond by generating a JSON object with the following structure (this is important):
+    {
+    "reasoning": "Explain why you think the question can be responded using the selected concepts.",
+    "concepts": [An array of ids of concepts from the JSON file that you used to answer this question.],
+    "concept_titles": [An array of titles, each as a string, of concepts from the JSON file that you used to answer this question.],
+    "response": "Your response to the question based on the concepts."
+    }`,
+    name: "Adrian",
+    tools: [{ type: "retrieval" }],
+    file_ids: [file.id],
+    model: "gpt-4-0125-preview",
+  });
+  console.log("file here", newAssistant.id);
+  return { assistantId: newAssistant.id, fileId: file.id };
 };
 
 const getPromptInstructions = async (course: string, uname: string, isInstructor: boolean) => {
@@ -140,14 +153,15 @@ const getPromptInstructions = async (course: string, uname: string, isInstructor
         .get();
     }
     const promptDoc = promptDocs.docs[0];
-    let { promptSettings, secondAgentFile } = promptDoc.data();
-    if (!secondAgentFile) {
-      secondAgentFile = await createSecondAgentFile(uname);
+    let { promptSettings, assistantSecondAgent } = promptDoc.data();
+    if (!assistantSecondAgent) {
+      const { assistantId, fileId } = await createSecondAgentFile(uname);
       await promptDocs.docs[0].ref.update({
-        secondAgentFile,
+        assistantSecondAgent: assistantId,
+        fileSecondAgent: fileId,
       });
     }
-    return { ...promptSettings, secondAgentFile };
+    return { ...promptSettings, assistantSecondAgent };
   } else {
     let promptDocs = await db
       .collection("courseSettings")
@@ -309,22 +323,9 @@ const generateListMessagesText = (messages: any) => {
   return messagesText;
 };
 
-const secondAgent = async (question: string, secondAgentFile: string) => {
-  console.log({ secondAgentFile });
+const secondAgent = async (question: string, assistantSecondAgent: string) => {
+  console.log({ assistantSecondAgent });
   const newThread = await openai.beta.threads.create();
-  const newAssistant = await openai.beta.assistants.create({
-    instructions: `Always Respond by generating a JSON object with the following structure (this is important):
-    {
-    "reasoning": "Explain why you think the question can be responded using the selected concepts.",
-    "concepts": [An array of ids of concepts from the JSON file that you used to answer this question.],
-    "concept_titles": [An array of titles, each as a string, of concepts from the JSON file that you used to answer this question.],
-    "response": "Your response to the question based on the concepts."
-    }`,
-    name: "Adrian",
-    tools: [{ type: "retrieval" }],
-    model: "gpt-4-0125-preview",
-  });
-
   const secondAgentPrompt = `
   The attached file includes a JSON array of the concepts extracted from the Economy book. Answer the following question only based on these concept cards:
   '''
@@ -340,23 +341,23 @@ const secondAgent = async (question: string, secondAgentFile: string) => {
   }`;
   await openai.beta.threads.messages.create(newThread.id, {
     role: "user",
-    file_ids: [secondAgentFile],
     content: secondAgentPrompt,
   });
   let response = null;
   while (!response) {
     try {
       console.log("waiting on response second agent");
-      const completionResponse = await fetchCompelation(newThread.id, newAssistant.id);
+      const completionResponse = await fetchCompelation(newThread.id, assistantSecondAgent);
+      console.log(completionResponse);
       response = extractJSON(completionResponse.response);
       if (!response.hasOwnProperty("response")) {
         response = null;
       }
     } catch (error) {
+      console.log(error);
       response = null;
     }
   }
-  await openai.beta.assistants.del(newAssistant.id);
   return response;
 };
 
@@ -452,7 +453,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         res.write("Sorry, something went wrong, can you please try again!");
         return;
       }
-      const { tutorName, courseName, objectives, directions, techniques, secondAgentFile } =
+      const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent } =
         await getPromptInstructions(course, uname, isInstructor);
 
       const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
@@ -575,13 +576,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         furtherExplainPrompt,
       });
       const { mergedMessage, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
-
-      const deviatingResponse: boolean = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
+      let deviatingResponse: boolean = false;
+      if (!default_message) {
+        deviatingResponse = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
+      }
       if (deviatingResponse) {
         conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
 
         // call other agent to respond
-        let { concepts, response } = await secondAgent(message, secondAgentFile);
+        let { concepts, response } = await secondAgent(message, assistantSecondAgent);
         concepts = await getDeviatingConcepts(concepts, uname);
         const responseMessage = {
           role: "assistant",
