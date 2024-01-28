@@ -159,7 +159,7 @@ export const fetchCompelation = async (threadId: string, assistant_id: string) =
   console.log("message text", getTextMessage(lastMessageForRun).text.value);
   await saveMessageImage(lastMessageForRun, threadId);
   return {
-    response: getJSON(getTextMessage(lastMessageForRun).text.value),
+    response: getTextMessage(lastMessageForRun).text.value,
     messageId: lastMessageForRun.id,
   };
 };
