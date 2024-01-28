@@ -163,15 +163,16 @@ const getPromptInstructions = async (course: string, uname: string, isInstructor
     }
     return { ...promptSettings, assistantSecondAgent };
   } else {
-    let promptDocs = await db
+    let courseDocs = await db
       .collection("courseSettings")
       .where("url", "==", course)
       .where("students", "array-contains", uname)
       .get();
-    if (promptDocs.docs.length > 0) {
-      const promptDoc = promptDocs.docs[0];
-      const promptSettings = promptDoc.data().promptSettings;
-      return { ...promptSettings, secondAgentFile: promptDoc.data().secondAgentFile };
+    if (courseDocs.docs.length > 0) {
+      const courseDoc = courseDocs.docs[0];
+      const courseSettingsData = courseDoc.data();
+      const promptSettings = courseSettingsData.promptSettings;
+      return { ...promptSettings, assistantSecondAgent: courseSettingsData.assistantSecondAgent };
     } else {
       throw new Error("You are not a student in this course!");
     }
