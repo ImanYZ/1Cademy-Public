@@ -578,33 +578,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
       const { mergedMessage, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
       let deviatingResponse: boolean = false;
-      if (!default_message) {
-        deviatingResponse = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
-      }
-      if (deviatingResponse && !!assistantSecondAgent) {
-        conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
+      // if (!default_message) {
+      //   deviatingResponse = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
+      // }
+      // if (deviatingResponse && !!assistantSecondAgent) {
+      //   conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
 
-        // call other agent to respond
-        let { concepts, response } = await secondAgent(message, assistantSecondAgent);
-        concepts = await getDeviatingConcepts(concepts, uname);
-        const responseMessage = {
-          role: "assistant",
-          content: response,
-          sentAt: new Date(),
-          mid: db.collection("tutorConversations").doc().id,
-          concepts,
-          deviatingMessage: true,
-        };
-        conversationData.messages.push(responseMessage);
-        if (!questionMessage) {
-          questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-        }
-        if (!!questionMessage) {
-          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
-        }
-        t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
-        return;
-      }
+      //   // call other agent to respond
+      //   let { concepts, response } = await secondAgent(message, assistantSecondAgent);
+      //   concepts = await getDeviatingConcepts(concepts, uname);
+      //   const responseMessage = {
+      //     role: "assistant",
+      //     content: response,
+      //     sentAt: new Date(),
+      //     mid: db.collection("tutorConversations").doc().id,
+      //     concepts,
+      //     deviatingMessage: true,
+      //   };
+      //   conversationData.messages.push(responseMessage);
+      //   if (!questionMessage) {
+      //     questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+      //   }
+      //   if (!!questionMessage) {
+      //     conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+      //   }
+      //   t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
+      //   return;
+      // }
 
       let completeMessage = "";
       let lateResponse: {
