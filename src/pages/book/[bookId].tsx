@@ -65,8 +65,7 @@ const HtmlRenderer = () => {
         sx={{
           position: "absolute",
           top: 10,
-          left: 10,
-          right: 0,
+          right: 50,
           zIndex: 1,
           width: "40px",
           height: "40px",
@@ -82,7 +81,7 @@ const HtmlRenderer = () => {
         </Button>
       </Box>
 
-      <Drawer anchor="left" open={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} sx={{ width: "100px" }}>
+      <Drawer anchor="right" open={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} sx={{ width: "100px" }}>
         <List>
           {PAGES.map((page, index) => (
             <ListItem button key={index} selected={currentPage === index} onClick={() => handleSelectBook(page)}>
