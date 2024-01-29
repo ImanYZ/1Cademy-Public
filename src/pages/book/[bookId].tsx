@@ -65,7 +65,7 @@ const HtmlRenderer = () => {
         sx={{
           position: "absolute",
           top: 10,
-          right: 50,
+          right: 90,
           zIndex: 1,
           width: "40px",
           height: "40px",
