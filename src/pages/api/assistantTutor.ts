@@ -117,7 +117,7 @@ const createSecondAgentFile = async (uname: string) => {
   fs.writeFileSync(filePath, JSON.stringify(flashcardsJSON, null, 2));
 
   const file = await openai.files.create({
-    file: fs.createReadStream("flashcards.json"),
+    file: fs.createReadStream(filePath),
     purpose: "assistants",
   });
   const newAssistant = await openai.beta.assistants.create({
@@ -154,11 +154,12 @@ const getPromptInstructions = async (course: string, uname: string, isInstructor
     const promptDoc = promptDocs.docs[0];
     let { promptSettings, assistantSecondAgent } = promptDoc.data();
     if (!assistantSecondAgent) {
-      const { assistantId, fileId } = await createSecondAgentFile(uname);
-      await promptDocs.docs[0].ref.update({
-        assistantSecondAgent: assistantId,
-        fileSecondAgent: fileId,
-      });
+      assistantSecondAgent = "";
+      // const { assistantId, fileId } = await createSecondAgentFile(uname);
+      // await promptDocs.docs[0].ref.update({
+      //   assistantSecondAgent: assistantId,
+      //   fileSecondAgent: fileId,
+      // });
     }
     return { ...promptSettings, assistantSecondAgent };
   } else {
@@ -580,7 +581,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (!default_message) {
         deviatingResponse = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
       }
-      if (deviatingResponse) {
+      if (deviatingResponse && !!assistantSecondAgent) {
         conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
 
         // call other agent to respond
@@ -597,9 +598,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         conversationData.messages.push(responseMessage);
         if (!questionMessage) {
           questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-          questionMessage.question = true;
         }
-        conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
+        if (!!questionMessage) {
+          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+        }
         t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
         return;
       }
