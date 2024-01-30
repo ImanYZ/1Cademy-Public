@@ -73,7 +73,6 @@ const extractJSON = (text: string) => {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
-    console.log({ start, end });
     // if (end !== -1 || start !== -1) {
     //   return null;
     // }
@@ -644,7 +643,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           } else {
             question += `${result.choices[0].delta.content}`;
           }
-          console.log(result.choices[0].delta.content);
           const matches = result.choices[0].delta.content.match(regex);
           if (matches) {
             stopStreaming = true;
@@ -666,7 +664,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       }
       //end stream
       res.end();
-
+      console.log({ answer });
+      console.log({ question });
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= 1) {
         await delay(2000);
         const doneMessage = `Congrats! you have completed studying all the concepts in this unit.`;
@@ -692,7 +691,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         mid: db.collection("tutorConversations").doc().id,
       });
 
-      if (!!answer && !!question) {
+      if (!!question) {
         conversationData.messages.push({
           role: "assistant",
           content: question,
@@ -701,6 +700,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           sentAt: new Date(),
           mid: db.collection("tutorConversations").doc().id,
         });
+      } else {
+        conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
       }
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       if (!furtherExplain && !default_message) {
