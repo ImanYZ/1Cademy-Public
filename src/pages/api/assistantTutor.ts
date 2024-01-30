@@ -288,6 +288,7 @@ const getConcepts = async (
   }
 };
 const addScoreToSavedCard = async (score: any, cardId: string, uname: string) => {
+  if (!cardId) return;
   const previousSavedCardDoc = await db
     .collection("savedBookCards")
     .where("savedBy", "==", uname)
@@ -636,7 +637,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const regex = /~{2,}/g;
       for await (const result of response) {
         if (result.choices[0].delta.content) {
-          console.log(stopStreaming, `${result.choices[0].delta.content}`);
           if (!stopStreaming) {
             const streamText = result.choices[0].delta.content.replace(/~{2,}/g, "");
             res.write(`${streamText}`);
@@ -664,25 +664,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           completeMessage = completeMessage + result.choices[0].delta.content;
         }
       }
-
-      // if (default_message) {
-      //   const extraPhrases = [
-      //     "Look over this page and when you’re ready for me, let me know.",
-      //     "When you are ready to check your understanding, let me know.",
-      //     "Want to see how well you’ve grasped this material? I can help.",
-      //   ];
-      //   const randomIndex = Math.floor(Math.random() * extraPhrases.length);
-      //   const phrase = extraPhrases[randomIndex];
-      //   res.write(`${phrase}`);
-      //   answer += phrase;
-      // }
-
       //end stream
       res.end();
 
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= 1) {
         await delay(2000);
-        const doneMessage = `Congrats you have completed Studying all the concepts in this Unit.`;
+        const doneMessage = `Congrats! you have completed studying all the concepts in this unit.`;
         res.write(doneMessage);
         conversationData.messages.push({
           role: "assistant",
@@ -691,7 +678,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           mid: db.collection("tutorConversations").doc().id,
         });
         conversationData.done = true;
-        await newConversationRef.set({ ...conversationData });
       }
 
       completeMessage = completeMessage.replace(/~{2,}/g, "");
