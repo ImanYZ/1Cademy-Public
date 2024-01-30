@@ -715,7 +715,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         while (!got_response && tries < 5) {
           try {
             tries = tries + 1;
-            const _messages = mergedMessage;
+            const _messages = mergedMessages;
             _messages.push({
               role: "user",
               content: `
