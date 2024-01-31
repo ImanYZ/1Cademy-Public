@@ -426,6 +426,12 @@ const getDeviatingConcepts = async (concepts: string[], uname: string) => {
   return _concepts;
 };
 
+const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
+  const scores = Object.values(flashcardsScores);
+  const sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  return sum;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
@@ -455,7 +461,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         res.write("Sorry, something went wrong, can you please try again!");
         return;
       }
-      const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent } =
+      const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
         await getPromptInstructions(course, uname, isInstructor);
 
       const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
@@ -671,7 +677,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       res.end();
       console.log({ answer });
       console.log({ question });
-      if (!nextFlashcard && !conversationData.done && conversationData.progress >= 1) {
+      if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
         await delay(2000);
         const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
         res.write(doneMessage);
@@ -745,11 +751,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
         /* we calculate the progress of the user in this unit
          */
-        if (conversationData.progress < 1) {
-          conversationData.progress = roundNum(
-            conversationData.progress + parseInt(lateResponse.evaluation) / (concepts.length * 10)
-          );
-        }
 
         if (scroll_flashcard_next && !furtherExplain) {
           if (conversationData.hasOwnProperty("flashcardsScores")) {
@@ -759,6 +760,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
               [scroll_flashcard_next]: parseFloat(lateResponse.evaluation),
             };
           }
+        }
+        console.log(
+          "calculateProgress(conversationData.flashcardsScores):",
+          calculateProgress(conversationData.flashcardsScores)
+        );
+        if (conversationData.progress < 1) {
+          conversationData.progress = calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10);
         }
         await addScoreToSavedCard(parseFloat(lateResponse.evaluation), scroll_flashcard_next, uname);
 
