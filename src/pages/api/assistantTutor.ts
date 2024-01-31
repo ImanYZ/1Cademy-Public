@@ -192,6 +192,7 @@ const mergeDividedMessages = (messages: any) => {
   let mergedMessage = null;
   const filteredMessages = messages.filter((m: any) => !m.ignoreMessage && !m.deviatingMessage);
   for (const message of filteredMessages) {
+    if (!message?.content) continue;
     if ("divided" in message) {
       if (message.divided !== currentDivideId) {
         if (mergedMessage) {
@@ -200,7 +201,7 @@ const mergeDividedMessages = (messages: any) => {
         currentDivideId = message.divided;
         mergedMessage = { ...message };
       } else {
-        mergedMessage.content += "\n~~~~~~~~\n" + message.content;
+        mergedMessage.content += "\n~~~~~~~~\n" + (message?.content || "");
       }
     } else {
       if (mergedMessage) {
@@ -218,11 +219,11 @@ const mergeDividedMessages = (messages: any) => {
   console.log(mergedMessages);
   return {
     mergedMessagesMinusFurtherExplain: mergedMessages,
-    mergedMessage: mergedMessages.map((message: any) => ({
+    mergedMessages: mergedMessages.map((message: any) => ({
       role: message.role,
       content: !!message.furtherExplainPrompt
         ? message.furtherExplainPrompt
-        : replaceExtraPhrase(message.content) + (message.extraInfoPrompt || ""),
+        : replaceExtraPhrase(message?.content || "") + (message.extraInfoPrompt || ""),
     })),
     scroll_flashcard_next: mergedMessages[mergedMessages.length - 3]?.nextFlashcard || "",
   };
@@ -576,7 +577,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         extraInfoPrompt,
         furtherExplainPrompt,
       });
-      const { mergedMessage, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
+      const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([
+        ...conversationData.messages,
+      ]);
       let deviatingResponse: boolean = false;
       // if (!default_message) {
       //   deviatingResponse = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
@@ -612,18 +615,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         emotion: string;
         progress: string;
         inform_instructor: string;
+        learning_summary: string;
       } = {
         evaluation: "0",
         emotion: "",
         progress: "0",
         inform_instructor: "",
+        learning_summary: "",
       };
       let got_response = false;
       let tries = 0;
 
       console.log({ deviatingResponse });
       const response = await openai.chat.completions.create({
-        messages: mergedMessage,
+        messages: mergedMessages,
         model: "gpt-4-0125-preview",
         temperature: 0,
         stream: true,
@@ -668,12 +673,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       console.log({ question });
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= 1) {
         await delay(2000);
-        const doneMessage = `Congrats! you have completed studying all the concepts in this unit.`;
+        const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
         res.write(doneMessage);
+        const sentAt = new Date(new Date());
+        sentAt.setSeconds(sentAt.getSeconds() + 20);
         conversationData.messages.push({
           role: "assistant",
           content: doneMessage,
-          sentAt: new Date(),
+          sentAt,
           mid: db.collection("tutorConversations").doc().id,
         });
         conversationData.done = true;
@@ -708,7 +715,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         while (!got_response && tries < 5) {
           try {
             tries = tries + 1;
-            const _messages = mergedMessage;
+            const _messages = mergedMessages;
             _messages.push({
               role: "user",
               content: `
@@ -769,6 +776,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             },
           ];
         }
+      }
+      if (lateResponse.learning_summary) {
+        conversationData.learningSummary = lateResponse.learning_summary;
       }
 
       if (conversationData.messages.length === 2) {
