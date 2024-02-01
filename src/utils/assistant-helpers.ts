@@ -1147,18 +1147,14 @@ export const generateFlashcard = async (
   Flashcards are in two types: Concept or Relation\n
   - A "Concept" flashcard defines/explains a concept.\n
   - A "Relation" flashcard explains some relationships between multiple concepts.\n
-  Print a JSON array of objects, each representing a flashcard. Include as many flashcards as possible for students to learn, ONLY from the following triple-quoted JSON object of paragraphs:\n
+  Print a flashcard. ONLY from the following triple-quoted JSON object of paragraphs:\n
   '''
   ${JSON.stringify(passages)}
   '''\n
-  Do not include any information beyond the provided text. Each array item (flashcard) should be a JSON object with the following keys:\n
+  Do not include any information beyond the provided text. The Flashcard should be a JSON object with the following keys:\n
   {
-  "why_matters": A string explaining why this flashcard is important for students to learn.,
-  "paragraphs": [An array of the paragraph keys that were used in the flashcard. The keys come from the JSON object.],
   "title": The flashcard title as a string,
-  "content": The flashcard content as a paraphrased string,,
-  "type": Concept or Relation,
-  "image":[Optional. If the flashcard includes an image, the image key should be included here.]
+  "content": The flashcard content as a paraphrased string (needs to be short as possible),
   }`;
 
   context.push({
@@ -1168,6 +1164,7 @@ export const generateFlashcard = async (
 
   const gptResponse = await sendGPTPrompt(model, context);
 
+  console.log({ gptResponse });
   const response: string = gptResponse || "";
 
   if (gptResponse) {
@@ -1177,8 +1174,9 @@ export const generateFlashcard = async (
     });
   }
 
-  const start = response.indexOf("[");
-  const end = response.lastIndexOf("]");
+  const start = response.indexOf("{");
+  const end = response.lastIndexOf("}");
   const jsonArrayString = response.slice(start, end + 1);
+  console.log(JSON.parse(jsonArrayString));
   return JSON.parse(jsonArrayString);
 };
