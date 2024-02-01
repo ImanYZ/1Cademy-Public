@@ -97,6 +97,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let chunks = input.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
     console.log(chunks);
     for (let chunk of chunks) {
+      if (!chunk) continue;
       const mp3 = await openai.audio.speech.create({
         model: "tts-1-hd",
         voice: audioType,
