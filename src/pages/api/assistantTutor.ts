@@ -308,6 +308,7 @@ const addScoreToSavedCard = async (score: any, cardId: string, uname: string) =>
       savedAt: new Date(),
       ...flashcardData,
       cardId,
+      score,
     };
     const newRef = db.collection("savedBookCards").doc();
     await newRef.set(newSavedFlashcard);
