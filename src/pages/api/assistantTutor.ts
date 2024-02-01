@@ -752,13 +752,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
         /* we calculate the progress of the user in this unit
          */
+        const evaluation = isNaN(lateResponse.evaluation) ? 0 : parseFloat(lateResponse.evaluation);
 
         if (scroll_flashcard_next && !furtherExplain) {
           if (conversationData.hasOwnProperty("flashcardsScores")) {
-            conversationData.flashcardsScores[scroll_flashcard_next] = parseFloat(lateResponse.evaluation);
+            conversationData.flashcardsScores[scroll_flashcard_next] = evaluation;
           } else {
             conversationData.flashcardsScores = {
-              [scroll_flashcard_next]: parseFloat(lateResponse.evaluation),
+              [scroll_flashcard_next]: evaluation,
             };
           }
         }
@@ -769,18 +770,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         if (conversationData.progress < 1) {
           conversationData.progress = calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10);
         }
-        await addScoreToSavedCard(parseFloat(lateResponse.evaluation), scroll_flashcard_next, uname);
+        await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
 
         if (conversationData.hasOwnProperty("scores")) {
           conversationData.scores.push({
-            score: parseFloat(lateResponse.evaluation),
+            score: evaluation,
             date: new Date(),
             flashcard: scroll_flashcard_next,
           });
         } else {
           conversationData.scores = [
             {
-              score: parseFloat(lateResponse.evaluation),
+              score: evaluation,
               date: new Date(),
             },
           ];
