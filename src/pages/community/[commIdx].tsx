@@ -105,7 +105,18 @@ const subSections = [
         <ul>
           {community.responsibilities &&
             community.responsibilities.map((responsibility: any, rIdx: number) => {
-              return <li key={rIdx}>{responsibility}</li>;
+              return typeof responsibility === "string" ? (
+                <li key={rIdx}>{responsibility}</li>
+              ) : (
+                <li key={rIdx}>
+                  {responsibility.title}
+                  <ul style={{ marginTop: "18px" }}>
+                    {responsibility.subRes.map((res: string) => (
+                      <li key={res}>{res}</li>
+                    ))}
+                  </ul>
+                </li>
+              );
             })}
         </ul>
       ) : null;
@@ -715,7 +726,7 @@ const Communities = (props: Props) => {
               <CircularProgress />
             </Stack>
           )}
-          {reputationsLoaded && (
+          {reputationsLoaded && community.allTime.length > 0 && (
             <Box
               sx={{
                 m: "24px 2.5px",
