@@ -462,7 +462,7 @@ export const allCommunities = [
       },
     ],
     YouTube: "pWYt3vtPm6U",
-    description: `The Disability Studies community explores current and past research related to disability. We investigate a wide range of topics related to disability including, disability legislation, disability culture, the psychosocial impact of disability, the economics of disability, and more. Interns summarize research articles and present their findings weekly with the rest of the group. By using 1Cademy, interns learn how to break down articles into smaller ideas, connect them to broader concepts, extrapolate the research for deeper analysis, and communicate their findings to other community members. We value collaborative learning and expect interns to participate in group discussions to dive deeper into the content.`,
+    description: `The Disability Studies community explores current and past research topics related to disability such as disability legislation, disability culture, the psychosocial impact of disability, the economics of disability, the interaction of technology and disability, and more. Interns summarize research articles and present their findings weekly with the rest of the group. By using the 1Cademy online network, interns synthesize articles into smaller ideas, connect them to broader concepts both within the disability studies community and other communities on the platform, extrapolate the research for deeper analysis, and communicate their findings to other community members. We value collaborative learning and expect interns to participate in group discussions and leverage collective knowledge to dive deeper into the content.`,
     accomplishments: `We have created a strong foundation of knowledge about a wide variety of topics and how they relate to disability.
     Some of the topics we have explored include:
     different models of disability,
@@ -475,9 +475,9 @@ export const allCommunities = [
     We have summarized information from numerous research articles and other scholarly sources and we allow interns to find specific topics that interest them, accomplishing a flexible and personally rewarding environment.`,
     gains: [
       `Gain valuable research skills and experience, such as analyzing scientific journals and articles, summarization, and making connections between disciplines.`,
-      `Publish research on topics on the 1Cademy platform related to disability`,
+      `Publish research on topics on the 1Cademy platform related to disability.`,
       `Collaborate with others to review and summarize existing research and identify topics for further study.`,
-      `Work remotely with all interactions, task fulfillment, and communications (about 5-10 hours per week)`,
+      `Work remotely with all interactions, task fulfillment, and communications (about 5-10 hours per week).`,
     ],
     requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5 GPA to apply for this position. All majors are welcome to apply. A personal or academic interest in disability is highly preferred, and answer our quiz questions to evaluate their domain knowledge.`,
     hasTest: true,
@@ -485,17 +485,17 @@ export const allCommunities = [
       `Interest and enthusiasm for topics related to Disability Studies.`,
       `Strong desire and willingness to collaborate with others and engage in group discussions.`,
       `Willingness to present work at weekly meetings.`,
-      `Fluency in writing and reading in English (will have to summarize research articles). `,
+      `Fluency in writing and reading in English (will have to summarize research articles).`,
     ],
     responsibilities: [
-      `Read and condense different modalities of research that relate to disabilities`,
-      `Actively contribute information to 1Cademy’s platform `,
-      `Frequently revise and improve personal work `,
-      `Attend weekly meetings to present weekly findings and partake in discussions`,
-      `Engage with other members within the community`,
-      `Provide feedback`,
-      `Collaborate on ideas`,
-      `Participate in peer review`,
+      `Read and condense empirical sources that relate to disabilities.`,
+      `Actively contribute information to 1Cademy’s platform with the goal of achieving a unified research resource encompassing many disciplines.`,
+      `Frequently revise and improve personal work.`,
+      `Attend weekly meetings to present weekly findings and partake in discussions.`,
+      {
+        title: `Connect with other members within the community`,
+        subRes: [`Provide feedback`, `Collaborate on ideas`, `Participate in peer review`],
+      },
     ],
   },
   {
