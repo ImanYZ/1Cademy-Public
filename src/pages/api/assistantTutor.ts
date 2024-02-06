@@ -87,7 +87,7 @@ const roundNum = (num: number) => Number(Number.parseFloat(Number(num).toFixed(2
 
 const getNextFlashcard = (concepts: any, usedFlashcards: string[], flashcardsScores: any) => {
   const nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
-  if (!nextFlashcard) {
+  if (!nextFlashcard && Object.entries(flashcardsScores).length > 0) {
     const [flashcard, minScore] = Object.entries(flashcardsScores).reduce((min: any, current: any) => {
       if (current[1] < min[1] && current[1] !== 10) {
         return current;
@@ -432,6 +432,25 @@ const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
   const sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   return sum;
 };
+const getTheNextQuestion = async (nextFlashcard: { title: string; content: string }) => {
+  try {
+    const prompt = `Ask me a question about the following card:
+    {
+      title: "${nextFlashcard.title}",
+      content: "${nextFlashcard.content}"
+    }`;
+    const context = [
+      {
+        content: prompt,
+        role: "user",
+      },
+    ];
+    const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
+    return gptResponse;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -714,8 +733,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           sentAt: new Date(),
           mid: db.collection("tutorConversations").doc().id,
         });
-      } else {
+      } else if (questionMessage) {
         conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
+      } else if (!!nextFlashcard) {
+        const question = await getTheNextQuestion(nextFlashcard);
+        conversationData.messages.push({
+          role: "assistant",
+          content: question,
+          divided: !!answer ? divideId : false,
+          question: true,
+          sentAt: new Date(),
+          mid: db.collection("tutorConversations").doc().id,
+        });
       }
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       if (!furtherExplain && !default_message) {
@@ -768,7 +797,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           calculateProgress(conversationData.flashcardsScores)
         );
         if (conversationData.progress < 1) {
-          conversationData.progress = calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10);
+          conversationData.progress = roundNum(
+            calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
+          );
         }
         await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
 
