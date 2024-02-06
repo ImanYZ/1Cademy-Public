@@ -432,6 +432,25 @@ const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
   const sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   return sum;
 };
+const getTheNextQuestion = async (nextFlashcard: { title: string; content: string }) => {
+  try {
+    const prompt = `Ask me a question about the following card:
+    {
+      title: "${nextFlashcard.title}",
+      content: "${nextFlashcard.content}"
+    }`;
+    const context = [
+      {
+        content: prompt,
+        role: "user",
+      },
+    ];
+    const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
+    return gptResponse;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -714,8 +733,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           sentAt: new Date(),
           mid: db.collection("tutorConversations").doc().id,
         });
-      } else {
+      } else if (questionMessage) {
         conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
+      } else if (!!nextFlashcard) {
+        const question = await getTheNextQuestion(nextFlashcard);
+        conversationData.messages.push({
+          role: "assistant",
+          content: question,
+          divided: !!answer ? divideId : false,
+          question: true,
+          sentAt: new Date(),
+          mid: db.collection("tutorConversations").doc().id,
+        });
       }
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       if (!furtherExplain && !default_message) {
@@ -768,7 +797,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           calculateProgress(conversationData.flashcardsScores)
         );
         if (conversationData.progress < 1) {
-          conversationData.progress = calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10);
+          conversationData.progress = roundNum(
+            calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
+          );
         }
         await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
 
