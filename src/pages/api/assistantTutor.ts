@@ -87,7 +87,7 @@ const roundNum = (num: number) => Number(Number.parseFloat(Number(num).toFixed(2
 
 const getNextFlashcard = (concepts: any, usedFlashcards: string[], flashcardsScores: any) => {
   const nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
-  if (!nextFlashcard) {
+  if (!nextFlashcard && Object.entries(flashcardsScores).length > 0) {
     const [flashcard, minScore] = Object.entries(flashcardsScores).reduce((min: any, current: any) => {
       if (current[1] < min[1] && current[1] !== 10) {
         return current;
