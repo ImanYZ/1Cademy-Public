@@ -1,8 +1,10 @@
+import Cors from "cors";
 import { getAuth } from "firebase-admin/auth";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 
 import { admin, db } from "../lib/firestoreServer/admin";
+import { runMiddleware } from "./cors";
 
 const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null; uid: string }) => {
   try {
@@ -131,10 +133,16 @@ const retrieveAuthenticatedUser = async ({ uname, uid }: { uname: string | null;
 export type CustomNextApiRequest = NextApiRequest & {
   user: any;
 };
-
+const cors = Cors({
+  origin: "*", // Change this to your specific origin or origins
+  methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+  optionsSuccessStatus: 200, // Return status code 200 for preflight requests
+});
 const fbAuth = (handler: NextApiHandler) => {
   return async (req: CustomNextApiRequest, res: NextApiResponse) => {
     try {
+      await runMiddleware(req, res, cors);
       let token = (req.headers.authorization || req.headers.Authorization || "") as string;
       token = token.replace("Bearer ", "");
       const decodedToken = await admin.auth().verifyIdToken(token);
