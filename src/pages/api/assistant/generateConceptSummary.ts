@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fbAuth from "src/middlewares/fbAuth";
 import { generateFlashcard } from "src/utils/assistant-helpers";
 
 export type IAssistantConetentSummary = {
@@ -23,4 +24,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   }
 }
 
-export default handler;
+export default fbAuth(handler);
