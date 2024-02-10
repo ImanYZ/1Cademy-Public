@@ -476,7 +476,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         course = "the-mission-corporation-4R-trimmed.html";
       }
       if (!course) {
-        res.write("Sorry, something went wrong, can you please try again!");
+        res.write("Something went wrong! We appologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education");
         return;
       }
       const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
@@ -485,7 +485,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
       console.log(concepts.length);
       if (!concepts.length) {
-        res.write("Sorry, something went wrong!");
+        res.write("Something went wrong! We appologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education");
         return;
       }
       const systemPrompt = await generateSystemPrompt(
@@ -839,7 +839,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).send("Sorry, something went wrong! Please try again! If the issue persists, please contact iman@honor.education");
+    return res.status(500).send("Something went wrong! We appologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education");
   }
 }
 
