@@ -834,6 +834,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         emotion: lateResponse.emotion,
         progress: lateResponse.progress,
       };
+      conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       console.log("Done");
     });
