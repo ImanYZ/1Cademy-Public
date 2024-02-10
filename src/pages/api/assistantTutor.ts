@@ -573,19 +573,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       // add the extra PS to the message of the user
       // we ignore it afterward when saving the conversation in the db
       const extraInfoPrompt =
-        `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the above concept cards. Do not answer any question that is irrelevant to the concept cards.` +
-        `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".` +
-        (!!nextFlashcard
-          ? `Respond to ${fName} and then ask them a question about the following card:
-    {
-      title: "${nextFlashcard.title}",
-      content: "${nextFlashcard.content}"
-    }
-    Note that ${fName} has not read the card yet. They will see the card only after answering your question.`
-          : "");
-      const furtherExplainPrompt =
+      `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
+      `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".` +
+      (!!nextFlashcard
+        ? `Respond to ${fName} and then ask them a question about the following concept:
+        {
+          title: "${nextFlashcard.title}",
+          content: "${nextFlashcard.content}"
+        }
+        Note that you can repeat asking the same question about a concept that the student previously had difficulties with. Also ${fName} has not read the concept yet. They will read the concept only after answering your question.`
+        : "");
+    const furtherExplainPrompt =
         furtherExplain && conversationData.previousFlashcard
-          ? `Further explain the content of the following card:{
+          ? `Further explain the content of the following concept:{
         title: "${conversationData?.previousFlashcard?.title || ""}",
         content: "${conversationData?.previousFlashcard?.content || ""}"
       }`
