@@ -691,8 +691,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           completeMessage = completeMessage + result.choices[0].delta.content;
         }
       }
-      //end stream
-      res.end();
+
       console.log({ answer });
       console.log({ question });
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
@@ -745,6 +744,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
       }
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
+      //end stream
+      res.end();
       if (!furtherExplain && !default_message) {
         while (!got_response && tries < 5) {
           try {
