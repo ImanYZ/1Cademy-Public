@@ -31,7 +31,7 @@ export const generateQuestionNode = async (
     role: "user",
   });
 
-  const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
+  const gptResponse = await sendGPTPrompt("gpt-4-0125-preview", context);
 
   const response: string = gptResponse || "";
   if (gptResponse) {

@@ -445,7 +445,7 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
         role: "user",
       },
     ];
-    const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
+    const gptResponse = await sendGPTPrompt("gpt-4-0125-preview", context);
     return gptResponse;
   } catch (error) {
     console.log(error);
