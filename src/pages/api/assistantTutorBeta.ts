@@ -163,10 +163,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       ]);
       console.log("deviating");
       let deviating: boolean = false;
-      if (!default_message) {
+      if (!default_message && !furtherExplain) {
         const exposedParagraphsIds = getExposedParagraphs(concepts, [
           ...conversationData.usedFlashcards,
-          nextFlashcard.id,
+          nextFlashcard?.id || "",
         ]);
         deviating = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain, unit, exposedParagraphsIds);
       }
@@ -474,6 +474,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       console.log("Done", conversationId);
+    });
+    const newLogRef = db.collection("logs").doc();
+    await newLogRef.set({
+      uname: uname || "",
+      severity: "default",
+      where: "assistant tutor endpoint",
+      conversationId,
+      createdAt: new Date(),
     });
   } catch (error: any) {
     console.log("error at handler", {
@@ -927,8 +935,9 @@ const getInteractedParagraphs = (paragraphs: any, ids: string[]) => {
 };
 const getExposedParagraphs = (concepts: any, exposedCardsIds: string[]) => {
   let ids: string[] = [];
+  console.log(concepts);
   for (let id of exposedCardsIds) {
-    const concept = concepts.find((c: any) => c.id === id);
+    const concept = concepts.find((c: any) => c?.id === id);
     ids = [...ids, ...concept.paragraphs];
   }
   return Array.from(new Set(ids));

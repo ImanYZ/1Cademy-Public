@@ -857,6 +857,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         stack: error.stack,
       },
     });
+    const newLogRef = db.collection("logs").doc();
+    await newLogRef.set({
+      uname: uname || "",
+      severity: "default",
+      where: "assistant tutor endpoint",
+      conversationId,
+      createdAt: new Date(),
+    });
     try {
       const newLogRef = db.collection("logs").doc();
       await newLogRef.set({
