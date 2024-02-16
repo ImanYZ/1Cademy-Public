@@ -4748,7 +4748,7 @@ const Notebook = ({}: NotebookProps) => {
         const image = event.target.files[0];
         if (!image && !image?.type) {
           confirmIt(
-            "Oops! Something went wrong with the image upload. Please try uploading a different image.",
+            "Oops! Something went wrong with the image upload. Please try uploading a different image. We appologize for the inconvenience! If the issue persists, please contact iman@honor.education",
             "Ok",
             ""
           );

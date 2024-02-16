@@ -285,7 +285,7 @@ export const sendMessageToGPT4V2 = async (
 };
 
 export const sendGPTPrompt = async (
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613",
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
   messages: any[]
 ) => {
   const config = {
