@@ -207,6 +207,7 @@ const mergeDividedMessages = (messages: any) => {
       if (mergedMessage) {
         mergedMessages.push(mergedMessage);
         mergedMessage = null;
+        currentDivideId = null;
       }
       mergedMessages.push({ ...message });
     }
@@ -453,15 +454,16 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+  const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
+  let conversationId = "";
   try {
-    const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
     console.log("assistant Tutor", uname);
     let { url, cardsModel, furtherExplain, message } = req.body;
     await db.runTransaction(async t => {
       let default_message = false;
       let selectedModel = "";
       console.log({ cardsModel, customClaims });
-      const isInstructor = customClaims.instructor;
+      const isInstructor = !!customClaims?.instructor;
       if (!!cardsModel) {
         selectedModel = cardsModel;
       }
@@ -476,7 +478,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         course = "the-mission-corporation-4R-trimmed.html";
       }
       if (!course) {
-        res.write("Sorry, something went wrong, can you please try again!");
+        res.write("You don't have access to this course. Please contact iman@honor.education.");
         return;
       }
       const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
@@ -485,7 +487,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
       console.log(concepts.length);
       if (!concepts.length) {
-        res.write("Sorry, something went wrong!");
+        res.write("You don't have access to this course, please contact iman@honor.education.");
         return;
       }
       const systemPrompt = await generateSystemPrompt(
@@ -538,6 +540,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           content: systemPrompt,
         });
       }
+      conversationId = newConversationRef.id;
       let questionMessage = null;
       if (!message) {
         message = `Hello My name is ${fName}.`;
@@ -573,17 +576,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       // add the extra PS to the message of the user
       // we ignore it afterward when saving the conversation in the db
       const extraInfoPrompt =
-      `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
-      `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".` +
-      (!!nextFlashcard
-        ? `Respond to ${fName} and then ask them a question about the following concept:
+        `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
+        `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".` +
+        (!!nextFlashcard
+          ? `Respond to ${fName} and then ask them a question about the following concept:
         {
           title: "${nextFlashcard.title}",
           content: "${nextFlashcard.content}"
         }
         Note that you can repeat asking the same question about a concept that the student previously had difficulties with. Also ${fName} has not read the concept yet. They will read the concept only after answering your question.`
-        : "");
-    const furtherExplainPrompt =
+          : "");
+      const furtherExplainPrompt =
         furtherExplain && conversationData.previousFlashcard
           ? `Further explain the content of the following concept:{
         title: "${conversationData?.previousFlashcard?.title || ""}",
@@ -833,15 +836,44 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         inform_instructor: lateResponse.inform_instructor,
         prior_evaluation: lateResponse.evaluation,
         emotion: lateResponse.emotion,
-        progress: lateResponse.progress,
       };
       conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       console.log("Done");
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
-    return res.status(500).send("Sorry, something went wrong! Please try again! If the issue persists, please contact iman@honor.education");
+    console.log("error at handler", {
+      uname: uname || "",
+      severity: "error",
+      where: "assistant tutor endpoint",
+      conversationId,
+      error: {
+        message: error.message,
+        stack: error.stack,
+      },
+    });
+    try {
+      const newLogRef = db.collection("logs").doc();
+      await newLogRef.set({
+        uname: uname || "",
+        severity: "error",
+        where: "assistant tutor endpoint",
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+        conversationId,
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      console.log("error saving the log", error);
+    }
+    return res
+      .status(500)
+      .send(
+        "Sorry, something went wrong! Please try again! If the issue persists, please contact iman@honor.education"
+      );
   }
 }
 
