@@ -183,7 +183,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             sectionsString += `- ${s}\n`;
           });
 
-          res.write(`Generating a response from:\n\n ${sectionsString} keepLoading`);
+          res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
           console.log(allParagraphs);
           const prompt = `Respond to the student (user)'s last message based on the following JSON array of paragraphs.  
         ${JSON.stringify(paragraphs)}
