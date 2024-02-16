@@ -72,7 +72,10 @@ const ResetPasswordForm = () => {
       setIsLoadingForgotPassword(true);
       const auth = getAuth();
       if (!auth.currentUser || !auth.currentUser.email)
-        return formik.setStatus({ success: false, msg: "Something went wrong restoring your password" });
+        return formik.setStatus({
+          success: false,
+          msg: "Something went wrong when restoring your password! We appologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education",
+        });
       await sendPasswordResetEmail(auth, auth.currentUser.email);
       setIsLoadingForgotPassword(false);
       return formik.setStatus({ success: true, msg: "Check your email and open the link to rest the password" });
