@@ -282,11 +282,9 @@ export const onDeleteSavedFlashcard = functions.firestore.document("/savedBookCa
   }
 });
 
-export const onErrorDetected = functions.firestore.document("/flashcards/{id}").onUpdate(async change => {
+export const onErrorDetected = functions.firestore.document("/logs/{id}").onCreate(async change => {
   try {
-    const newData = change.after.data();
-    const cardId = change.after.id;
-    updateSavedCards(newData, cardId);
+    // TO:DO SEND email notification if there is any errors
   } catch (error) {
     console.log("error onUserUpdate:", error);
   }
