@@ -164,7 +164,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       console.log("deviating");
       let deviating: boolean = false;
       if (!default_message) {
-        deviating = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
+        const exposedParagraphsIds = getExposedParagraphs(concepts, [
+          ...conversationData.usedFlashcards,
+          nextFlashcard.id,
+        ]);
+        deviating = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain, unit, exposedParagraphsIds);
       }
       if (deviating) {
         const relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
@@ -182,10 +186,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           sections.map((s: string) => {
             sectionsString += `- ${s}\n`;
           });
-
-          res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
-          console.log(allParagraphs);
-          const prompt = `Respond to the student (user)'s last message based on the following JSON array of paragraphs.  
+          if (paragraphs.length > 0) {
+            res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
+            console.log(allParagraphs);
+            const prompt = `Respond to the student (user)'s last message based on the following JSON array of paragraphs.  
         ${JSON.stringify(paragraphs)}
         Always respond a JSON object with the following structure:
         {
@@ -195,41 +199,47 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
         }`;
 
-          const response2 = await openai.chat.completions.create({
-            messages: [
-              {
-                role: "system",
-                content: prompt,
-              },
-              {
-                role: "user",
-                content: message,
-              },
-            ],
-            model: "gpt-4-0125-preview",
-            temperature: 0,
-            stream: true,
-          });
-          let fullMessage = "";
+            const response2 = await openai.chat.completions.create({
+              messages: [
+                {
+                  role: "system",
+                  content: prompt,
+                },
+                {
+                  role: "user",
+                  content: message,
+                },
+              ],
+              model: "gpt-4-0125-preview",
+              temperature: 0,
+              stream: true,
+            });
+            let fullMessage = "";
 
-          for await (const result of response2) {
-            if (!result.choices[0].delta.content) continue;
-            if (!fullMessage.includes(`"sentences":`) && fullMessage.includes(`"response":`)) {
-              let cleanText = result.choices[0].delta.content;
-              res.write(cleanText);
-              answer += cleanText;
-              console.log(result.choices[0].delta.content);
+            for await (const result of response2) {
+              if (!result.choices[0].delta.content) continue;
+              if (!fullMessage.includes(`"sentences":`) && fullMessage.includes(`"response":`)) {
+                let cleanText = result.choices[0].delta.content;
+                res.write(cleanText);
+                answer += cleanText;
+                console.log(result.choices[0].delta.content);
+              }
+              fullMessage += result.choices[0].delta.content;
             }
-            fullMessage += result.choices[0].delta.content;
-          }
-          // Extract the object from the fullMessage
-          /* {
+            // Extract the object from the fullMessage
+            /* {
           "response": "Your response to the question based on the sentences.",
           "sentences": [An array of the sentences that you used to answer the question.],
           "paragraphs": [An array of paragraphs that you used to answer the question]
         } */
-          //
-          featuredConcepts = await extractFlashcards(fullMessage, allParagraphs, sections, uname);
+            //
+            featuredConcepts = await extractFlashcards(fullMessage, allParagraphs, sections, uname);
+          } else {
+            const _answer =
+              "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+            res.write(_answer);
+            answer = _answer;
+          }
         } else {
           const _answer =
             "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
@@ -904,22 +914,51 @@ const secondAgent = async (question: string, assistantSecondAgent: string) => {
   return response;
 };
 
-const checkIfTheQuestionIsRelated = async (messages: any): Promise<boolean> => {
+const concatenateParagraphs = (paragraphs: any) => {
+  let pText = "";
+  for (let paragraph of paragraphs) {
+    pText += `${paragraph.text}\n\n`;
+  }
+  return pText;
+};
+
+const getInteractedParagraphs = (paragraphs: any, ids: string[]) => {
+  return paragraphs.filter((p: { ids: string[] }) => ids.includes(p.ids[0]));
+};
+const getExposedParagraphs = (concepts: any, exposedCardsIds: string[]) => {
+  let ids: string[] = [];
+  for (let id of exposedCardsIds) {
+    const concept = concepts.find((c: any) => c.id === id);
+    ids = [...ids, ...concept.paragraphs];
+  }
+  return Array.from(new Set(ids));
+};
+
+const checkIfTheQuestionIsRelated = async (messages: any, unit: string, paragraphsIds: string[]): Promise<boolean> => {
+  const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
+  const chapterDoc = chaptersDoc.docs[0];
+  const chapterData = chapterDoc.data();
+
+  const paragraphs = getInteractedParagraphs(chapterData.paragraphs, paragraphsIds);
   console.log("checkIfTheQuestionIsRelated");
   let _messages = [...messages];
   const lasMessage = _messages.pop();
   _messages = _messages.filter((m: any) => m.role !== "system");
 
   const deviatingPrompt = `
-    The following is a conversation between a student and a tutor:
-    '''
-    ${generateListMessagesText(_messages)}
-    '''
-    The student just responded:
-    '''
-    ${lasMessage.content}
-    '''
-    Is the student deviating from the exact topic of conversation with the tutor? Only generate a JSON response with this structure: {"reasoning": "Your reasoning for why the student is deviating from the exact topic of conversation with the tutor.", "response": "Yes" or "No".}`;
+  The following is the course material about this learning session:
+  '''
+  ${concatenateParagraphs(paragraphs)}
+  '''
+  The following is the conversation you've had with a student about the above material:
+  '''
+  ${generateListMessagesText(_messages)}
+  '''
+  The student just responded:
+  '''
+  ${lasMessage.content}
+  '''
+  Is the student deviating from the topic of this learning session? Only generate a JSON response with this structure: {"reasoning": "Your reasoning for why the student is deviating from the topic of this learning session", "response": "Yes" or "No".}`;
   console.log("deviatingPrompt", deviatingPrompt);
   let response = null;
   try {
