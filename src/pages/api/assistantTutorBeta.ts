@@ -174,24 +174,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
         if (relevanceResponse) {
           res.write(
-            "For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading"
+            `You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading`
           );
           // call other agent to respond
           const { paragraphs, allParagraphs, sections }: any = await getChapterRelatedToResponse(message);
           let sectionsString = "";
           sections.map((s: string) => {
-            sectionsString += `-${s}`;
+            sectionsString += `- ${s}\n`;
           });
 
           res.write(`Generating a response from:\n\n ${sectionsString} keepLoading`);
           console.log(allParagraphs);
-          const prompt = `Answer the student (user)'s question based on the following JSON array of paragraphs.  
+          const prompt = `Respond to the student (user)'s last message based on the following JSON array of paragraphs.  
         ${JSON.stringify(paragraphs)}
         Always respond a JSON object with the following structure:
         {
-        "response": "Your response to the question based on the sentences.",
-        "sentences": [An array of the sentences that you used to answer the question.],
-        "paragraphs": [An array of paragraphs that you used to answer the question]
+        "response": "Your response to the student's last message based on the sentences.",
+        "sentences": [An array of the sentences that you used to respond to the student's last message.],
+        "paragraphs": [An array of paragraphs that you used to respond to the student's last message]
         }
         }`;
 
@@ -919,7 +919,7 @@ const checkIfTheQuestionIsRelated = async (messages: any): Promise<boolean> => {
     '''
     ${lasMessage.content}
     '''
-    Is the student deviating from the topic of conversation with the tutor? Only generate a JSON response with this structure: {"reasoning": "Your reasoning for why the student is deviating from the topic of conversation with the tutor.", "response": "Yes" or "No".}`;
+    Is the student deviating from the exact topic of conversation with the tutor? Only generate a JSON response with this structure: {"reasoning": "Your reasoning for why the student is deviating from the exact topic of conversation with the tutor.", "response": "Yes" or "No".}`;
   console.log("deviatingPrompt", deviatingPrompt);
   let response = null;
   try {
