@@ -10,6 +10,8 @@ import { sendGPTPrompt } from "src/utils/assistant-helpers";
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let conversationId = "";
+  let deviating: boolean = false;
+  let relevanceResponse: boolean = false;
   try {
     console.log("assistant Tutor", uname);
     let { url, cardsModel, furtherExplain, message } = req.body;
@@ -162,7 +164,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         ...conversationData.messages,
       ]);
       console.log("deviating");
-      let deviating: boolean = false;
+
       if (!default_message && !furtherExplain) {
         const exposedParagraphsIds = getExposedParagraphs(concepts, [
           ...conversationData.usedFlashcards,
@@ -170,9 +172,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         ]);
         deviating = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain, unit, exposedParagraphsIds);
       }
+      console.log({ deviating });
       if (deviating) {
-        const relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
-
+        relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
+        console.log({ relevanceResponse });
         let featuredConcepts: any = [];
         let answer = "";
         conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
@@ -489,6 +492,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       severity: "error",
       where: "assistant tutor endpoint",
       conversationId,
+      deviating,
+      relevanceResponse,
       error: {
         message: error.message,
         stack: error.stack,
