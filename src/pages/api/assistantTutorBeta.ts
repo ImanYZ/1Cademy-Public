@@ -6,7 +6,15 @@ import { IAssitantRequestAction } from "src/types/IAssitantConversation";
 import { fetchCompelation, openai } from "./openAI/helpers";
 import { delay } from "@/lib/utils/utils";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
-
+import { Timestamp } from "firebase-admin/firestore";
+type Message = {
+  role: string;
+  content: string;
+  divided: string;
+  question: true;
+  sentAt: Timestamp;
+  mid: string;
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let conversationId = "";
@@ -165,17 +173,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       ]);
       console.log("deviating");
 
-      if (!default_message && !furtherExplain) {
-        const exposedParagraphsIds = getExposedParagraphs(concepts, [
-          ...conversationData.usedFlashcards,
-          nextFlashcard?.id || "",
-        ]);
-        deviating = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain, unit, exposedParagraphsIds);
+      if (!default_message) {
+        // const exposedParagraphsIds = getExposedParagraphs(concepts, [
+        //   ...conversationData.usedFlashcards,
+        //   nextFlashcard?.id || "",
+        // ]);
+        deviating = await checkIfUserIsDeviating(mergedMessagesMinusFurtherExplain, false);
       }
       console.log({ deviating });
       if (deviating) {
         relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
-        console.log({ relevanceResponse });
+
         let featuredConcepts: any = [];
         let answer = "";
         conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
@@ -191,7 +199,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           });
           if (paragraphs.length > 0) {
             res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
-            console.log(allParagraphs);
+
             const prompt = `Respond to the student (user)'s last message based on the following JSON array of paragraphs.  
         ${JSON.stringify(paragraphs)}
         Always respond a JSON object with the following structure:
@@ -249,7 +257,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           res.write(_answer);
           answer = _answer;
         }
-        console.log(featuredConcepts);
         answer = answer.replace(`{ "response":`, "");
         answer = answer.replace(`"sentences":`, "");
         answer = answer.replace(`",`, "");
@@ -332,8 +339,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         }
       }
 
-      console.log({ answer });
-      console.log({ question });
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
         await delay(2000);
         const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
@@ -384,8 +389,117 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
       }
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
-      //end stream
-      res.end();
+
+      mergedMessagesMinusFurtherExplain.push({
+        role: "assistant",
+        content: !answer ? completeMessage : answer,
+        divided: !!answer ? divideId : false,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+      });
+      deviating = await checkIfUserIsDeviating(mergedMessagesMinusFurtherExplain, true);
+      if (deviating) {
+        console.log({ deviatingAfterResponse: deviating });
+
+        relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
+
+        let featuredConcepts: any = [];
+        let answer = "";
+        conversationData.messages[conversationData.messages.length - 3].deviatingMessage = true;
+        conversationData.messages[conversationData.messages.length - 2].deviatingMessage = true;
+        if (relevanceResponse) {
+          res.write(
+            `You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading`
+          );
+          // call other agent to respond
+          const { paragraphs, allParagraphs, sections }: any = await getChapterRelatedToResponse(message);
+          let sectionsString = "";
+          sections.map((s: string) => {
+            sectionsString += `- ${s}\n`;
+          });
+          if (paragraphs.length > 0) {
+            res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
+
+            const prompt = `Respond to the student (user)'s last message based on the following JSON array of paragraphs.  
+        ${JSON.stringify(paragraphs)}
+        Always respond a JSON object with the following structure:
+        {
+        "response": "Your response to the student's last message based on the sentences.",
+        "sentences": [An array of the sentences that you used to respond to the student's last message.],
+        "paragraphs": [An array of paragraphs that you used to respond to the student's last message]
+        }
+        }`;
+
+            const response2 = await openai.chat.completions.create({
+              messages: [
+                {
+                  role: "system",
+                  content: prompt,
+                },
+                {
+                  role: "user",
+                  content: message,
+                },
+              ],
+              model: "gpt-4-0125-preview",
+              temperature: 0,
+              stream: true,
+            });
+            let fullMessage = "";
+
+            for await (const result of response2) {
+              if (!result.choices[0].delta.content) continue;
+              if (!fullMessage.includes(`"sentences":`) && fullMessage.includes(`"response":`)) {
+                let cleanText = result.choices[0].delta.content;
+                res.write(cleanText);
+                answer += cleanText;
+                console.log(result.choices[0].delta.content);
+              }
+              fullMessage += result.choices[0].delta.content;
+            }
+            // Extract the object from the fullMessage
+            /* {
+          "response": "Your response to the question based on the sentences.",
+          "sentences": [An array of the sentences that you used to answer the question.],
+          "paragraphs": [An array of paragraphs that you used to answer the question]
+        } */
+            //
+            featuredConcepts = await extractFlashcards(fullMessage, allParagraphs, sections, uname);
+          } else {
+            const _answer =
+              "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+            res.write(_answer);
+            answer = _answer;
+          }
+        } else {
+          const _answer =
+            "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+          res.write(_answer);
+          answer = _answer;
+        }
+        answer = answer.replace(`{ "response":`, "");
+        answer = answer.replace(`"sentences":`, "");
+        answer = answer.replace(`",`, "");
+        answer = answer.replace(`"`, "");
+        const responseMessage = {
+          role: "assistant",
+          content: answer,
+          sentAt: new Date(),
+          mid: db.collection("tutorConversations").doc().id,
+          concepts: featuredConcepts,
+          deviatingMessage: true,
+        };
+        conversationData.messages.push(responseMessage);
+        if (!questionMessage) {
+          questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+        }
+        if (!!questionMessage) {
+          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+        }
+        t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
+        return;
+      }
+
       if (!furtherExplain && !default_message) {
         while (!got_response && tries < 5) {
           try {
@@ -741,7 +855,6 @@ const replaceExtraPhrase = (messageContent: string) => {
   return phrases.reduce((acc, phrase) => acc.replace(phrase, ""), messageContent);
 };
 const mergeDividedMessages = (messages: any) => {
-  console.log("mergeDividedMessages", messages);
   const mergedMessages = [];
   let currentDivideId = null;
   let mergedMessage = null;
@@ -756,7 +869,6 @@ const mergeDividedMessages = (messages: any) => {
         currentDivideId = message.divided;
         mergedMessage = { ...message };
       } else {
-        console.log(message.divided);
         mergedMessage.content += "\n~~~~~~~~\n" + (message?.content || "").trim();
       }
     } else {
@@ -772,8 +884,7 @@ const mergeDividedMessages = (messages: any) => {
   if (mergedMessage) {
     mergedMessages.push(mergedMessage);
   }
-  console.log(mergedMessages[mergedMessages.length - 3]);
-  console.log(mergedMessages);
+
   return {
     mergedMessagesMinusFurtherExplain: mergedMessages,
     mergedMessages: mergedMessages.map((message: any) => ({
@@ -948,31 +1059,40 @@ const getExposedParagraphs = (concepts: any, exposedCardsIds: string[]) => {
   return Array.from(new Set(ids));
 };
 
-const checkIfTheQuestionIsRelated = async (messages: any, unit: string, paragraphsIds: string[]): Promise<boolean> => {
-  const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
-  const chapterDoc = chaptersDoc.docs[0];
-  const chapterData = chapterDoc.data();
+const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Promise<boolean> => {
+  // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
+  // const chapterDoc = chaptersDoc.docs[0];
+  // const chapterData = chapterDoc.data();
 
-  const paragraphs = getInteractedParagraphs(chapterData.paragraphs, paragraphsIds);
+  // const paragraphs = getInteractedParagraphs(chapterData.paragraphs, paragraphsIds);
   console.log("checkIfTheQuestionIsRelated");
   let _messages = [...messages];
-  const lasMessage = _messages.pop();
+  const lastMessage = _messages.pop();
   _messages = _messages.filter((m: any) => m.role !== "system");
 
-  const deviatingPrompt = `
-  The following is the course material about this learning session:
-  '''
-  ${concatenateParagraphs(paragraphs)}
-  '''
-  The following is the conversation you've had with a student about the above material:
+  let deviatingPrompt = `
+  The following is a conversation between a student and a tutor:
   '''
   ${generateListMessagesText(_messages)}
   '''
   The student just responded:
   '''
-  ${lasMessage.content}
+  ${lastMessage.content}
   '''
-  Is the student deviating from the topic of this learning session? Only generate a JSON response with this structure: {"reasoning": "Your reasoning for why the student is deviating from the topic of this learning session", "response": "Yes" or "No".}`;
+  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message about a topic different from the topic of conversation with the tutor? Only answer "Yes" or "No", "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor}`;
+  console.log({ secondPrompt });
+  if (secondPrompt) {
+    deviatingPrompt = `
+  The following is a conversation between a student and a tutor:
+  '''
+  ${generateListMessagesText(_messages)}
+  '''
+  The tutor just responded:
+  '''
+  ${lastMessage.content}
+  '''
+Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No", "deviating_evidence": "Your reasoning for why you think the tutor's last message indicates that the student was deviating from the topic of conversation with the tutor}`;
+  }
   console.log("deviatingPrompt", deviatingPrompt);
   let response = null;
   try {
@@ -987,8 +1107,8 @@ const checkIfTheQuestionIsRelated = async (messages: any, unit: string, paragrap
   } catch (error) {
     console.log("Error at checkIfTheQuestionIsRelated", error);
   }
-
-  return !!response && response.response.toLowerCase() === "yes";
+  console.log(response);
+  return !!response && response.deviating_topic.toLowerCase() === "yes";
 };
 const getDeviatingConcepts = async (concepts: string[], uname: string) => {
   if (concepts.length <= 0) return [];
@@ -1114,7 +1234,6 @@ const getChapterRelatedToResponse = async (message: string) => {
 };
 const extractFlashcards = async (response: string, chaptersParagraphs: any, sections: string[], uname: string) => {
   const responseJson = JSON.parse(response);
-  console.log(chaptersParagraphs);
   let pIds: string[] = [];
   responseJson.paragraphs.map((p: string) => {
     const pIdx = chaptersParagraphs.findIndex((_p: any) => _p.text === p);
@@ -1133,13 +1252,13 @@ const extractFlashcards = async (response: string, chaptersParagraphs: any, sect
     addScoreToSavedCard(0, flashcardDoc.id, uname, false);
   }
   return concepts;
-  console.log(responseJson);
 };
 
 const checkIfTheMessageIsRelevant = async (messages: any, courseName: string) => {
   console.log("checkIfTheMessageIsRelevant");
   let _messages = [...messages];
-  const lasMessage = _messages.pop();
+  _messages.pop();
+  const lastMessage = _messages.pop();
   _messages = _messages.filter((m: any) => m.role !== "system");
 
   const deviatingPrompt = `
@@ -1149,7 +1268,7 @@ const checkIfTheMessageIsRelevant = async (messages: any, courseName: string) =>
     '''
     The student just responded:
     '''
-    ${lasMessage.content}
+    ${lastMessage.content}
     '''
     Is the student's message relevant to ${courseName}? Your response should be only a JSON object with this structure {"reason": "Your reasoning for why you think it is relevant/irrelevant.", "relevant": "Yes" if it is relevant, "No": if it is irrelevant}`;
   console.log("deviatingPrompt", deviatingPrompt);
