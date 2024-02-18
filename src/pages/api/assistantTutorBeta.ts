@@ -598,6 +598,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       severity: "default",
       where: "assistant tutor endpoint",
       conversationId,
+      deviating,
+      relevanceResponse,
       createdAt: new Date(),
     });
   } catch (error: any) {
