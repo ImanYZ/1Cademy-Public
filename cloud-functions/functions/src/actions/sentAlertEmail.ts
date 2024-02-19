@@ -19,7 +19,7 @@ export const sentAlertEmail = async (logData: any) => {
       <p>conversationId: ${logData.conversationId}</p>
       <p>severity: ${logData?.severity || ""}</p>
       <p>message: ${logData.message}</p>
-      <p>error: ${logData?.error || ""}</p>`,
+      <p>error: - ${logData?.error.message || ""} /n - ${logData?.error?.stack || ""}</p>`,
     };
 
     transporter.sendMail(mailOptions, async (error: any, data: any) => {
