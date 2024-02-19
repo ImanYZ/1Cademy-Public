@@ -8,9 +8,12 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAILPASS,
   },
 });
-export const sentAlertEmail = async ({ logData }: any) => {
+export const sentAlertEmail = async (logData: any) => {
   try {
-    console.log(logData);
+    console.log(logData, {
+      user: process.env.EMAIL,
+      pass: process.env.EMAILPASS,
+    });
     const mailOptions = {
       from: process.env.EMAIL,
       to: "ouhrac@gmail.com",
