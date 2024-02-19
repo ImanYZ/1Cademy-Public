@@ -43,8 +43,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         course = "the-mission-corporation-4R-trimmed.html";
       }
       if (!course) {
-        res.write("Sorry, something went wrong, can you please try again!");
-        return;
+        throw new Error("Course Doesn't exist");
       }
       const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
         await getPromptInstructions(course, uname, isInstructor);
@@ -52,8 +51,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
       console.log(concepts.length);
       if (!concepts.length) {
-        res.write("Sorry, something went wrong!");
-        return;
+        throw new Error("Flashcards don't exist in this page.");
       }
       const systemPrompt = await generateSystemPrompt(
         unit,
