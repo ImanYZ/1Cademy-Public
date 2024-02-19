@@ -14,12 +14,9 @@ export const sentAlertEmail = async (logData: any) => {
       from: process.env.EMAIL,
       to: "ouhrac@gmail.com",
       subject: `Error in 1cademy`,
-      html: `Error:
-      <p>Sent by: ${logData.uname}</p>
-      <p>conversationId: ${logData.conversationId}</p>
-      <p>severity: ${logData?.severity || ""}</p>
-      <p>message: ${logData.message}</p>
-      <p>error: - ${logData?.error?.message || ""} /n - ${logData?.error?.stack || ""}</p>`,
+      html: `Details:
+      
+     ${JSON.stringify(logData)}`,
     };
 
     transporter.sendMail(mailOptions, async (error: any, data: any) => {
