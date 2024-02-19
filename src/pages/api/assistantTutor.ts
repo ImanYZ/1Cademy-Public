@@ -845,6 +845,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
       console.log("Done");
     });
+    const newLogRef = db.collection("logs").doc();
+    await newLogRef.set({
+      uname: uname || "",
+      severity: "default",
+      where: "assistant tutor endpoint",
+      conversationId,
+      createdAt: new Date(),
+    });
   } catch (error: any) {
     console.log(error);
     console.log("error at handler", {
