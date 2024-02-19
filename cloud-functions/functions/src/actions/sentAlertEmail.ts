@@ -10,15 +10,15 @@ const transporter = nodemailer.createTransport({
 });
 export const sentAlertEmail = async (logData: any) => {
   try {
-    console.log(logData, {
-      user: process.env.EMAIL,
-      pass: process.env.EMAILPASS,
-    });
     const mailOptions = {
       from: process.env.EMAIL,
       to: "ouhrac@gmail.com",
       subject: `Error in 1cademy`,
-      html: `check error`,
+      html: `Error:
+      <p>Sent by: ${logData.uname}</p>
+      <p>conversationId: ${logData.uname}</p>
+      <p>message: ${logData.message}</p>
+      <p>error: ${logData?.error || ""}</p>`,
     };
 
     transporter.sendMail(mailOptions, async (error: any, data: any) => {
