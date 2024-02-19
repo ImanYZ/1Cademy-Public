@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 export const sentAlertEmail = async (logData: any) => {
   try {
     let details = "";
-    for (let key of logData) {
+    for (let key in logData) {
       details += `${key}: ${logData[key]}\n`;
     }
     const mailOptions = {
