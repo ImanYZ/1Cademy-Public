@@ -22,6 +22,7 @@ import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 
 import { db } from "./admin";
 import { updateSavedCards } from "./actions/updateSavedCards";
+import { sentAlertEmail } from "./actions/sentAlertEmail";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -285,6 +286,10 @@ export const onDeleteSavedFlashcard = functions.firestore.document("/savedBookCa
 export const onErrorDetected = functions.firestore.document("/logs/{id}").onCreate(async change => {
   try {
     // TO:DO SEND email notification if there is any errors
+    const logData = change.data();
+    // if (logData.severity === "error") {
+    sentAlertEmail(logData);
+    // }
   } catch (error) {
     console.log("error onUserUpdate:", error);
   }
