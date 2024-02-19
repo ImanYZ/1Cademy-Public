@@ -16,7 +16,8 @@ export const sentAlertEmail = async (logData: any) => {
       subject: `Error in 1cademy`,
       html: `Error:
       <p>Sent by: ${logData.uname}</p>
-      <p>conversationId: ${logData.uname}</p>
+      <p>conversationId: ${logData.conversationId}</p>
+      <p>severity: ${logData?.severity || ""}</p>
       <p>message: ${logData.message}</p>
       <p>error: ${logData?.error || ""}</p>`,
     };
