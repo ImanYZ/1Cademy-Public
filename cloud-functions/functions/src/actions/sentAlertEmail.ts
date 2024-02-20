@@ -21,12 +21,17 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
   try {
     let details = "";
     for (let key in logData) {
-      details += `<li>${key}: ${JSON.stringify(logData[key])}</li>\n`;
+      if (key === "createdAt") {
+        const date = logData.createdAt.toDate();
+        details += `<li>detected at: ${date}</li>\n`;
+      } else {
+        details += `<li>${key}: ${JSON.stringify(logData[key])}</li>\n`;
+      }
     }
     let mailOptions = {
       from: process.env.EMAIL,
       to: ["ouhrac@gmail.com", "oneweb@umich.edu"],
-      subject: `Error Alert 1Cademy`,
+      subject: `Error Alert ${logData.project || "1Cademy"}`,
       html: `Details:\n\n<ul>${details}</ul>`,
     };
     if (error) {
@@ -38,12 +43,12 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
     } else {
       mailOptions.from = process.env.EMAIL2;
       mailOptions.to = ["ouhrac@gmail.com"];
-
-      transporter2.sendMail(mailOptions, async (error: any, data: any) => {
-        if (error) {
-          console.log(error);
-        }
-      });
+      (mailOptions.subject = `Info ${logData.project || "1Cademy"}`),
+        transporter2.sendMail(mailOptions, async (error: any, data: any) => {
+          if (error) {
+            console.log(error);
+          }
+        });
     }
   } catch (error) {
     console.log(error);
