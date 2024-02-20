@@ -35,15 +35,16 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
           console.log(error);
         }
       });
-    }
-    mailOptions.from = process.env.EMAIL2;
-    mailOptions.to = ["ouhrac@gmail.com"];
+    } else {
+      mailOptions.from = process.env.EMAIL2;
+      mailOptions.to = ["ouhrac@gmail.com"];
 
-    transporter2.sendMail(mailOptions, async (error: any, data: any) => {
-      if (error) {
-        console.log(error);
-      }
-    });
+      transporter2.sendMail(mailOptions, async (error: any, data: any) => {
+        if (error) {
+          console.log(error);
+        }
+      });
+    }
   } catch (error) {
     console.log(error);
   }
