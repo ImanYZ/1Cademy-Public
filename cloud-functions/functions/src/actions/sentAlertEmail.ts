@@ -21,12 +21,12 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
   try {
     let details = "";
     for (let key in logData) {
-      details += `<li>${key}: ${logData[key]}</li>\n`;
+      details += `<li>${key}: ${JSON.stringify(logData[key])}</li>\n`;
     }
     let mailOptions = {
       from: process.env.EMAIL,
       to: ["ouhrac@gmail.com", "oneweb@umich.edu"],
-      subject: `Error in 1cademy`,
+      subject: `Error Alert 1Cademy`,
       html: `Details:\n\n<ul>${details}</ul>`,
     };
     if (error) {
