@@ -8,20 +8,38 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAILPASS,
   },
 });
-export const sentAlertEmail = async (logData: any) => {
+const transporter2 = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL2,
+    pass: process.env.EMAILPASS2,
+  },
+});
+export const sentAlertEmail = async (logData: any, error: boolean) => {
   try {
     let details = "";
     for (let key in logData) {
       details += `<li>${key}: ${logData[key]}</li>\n`;
     }
-    const mailOptions = {
+    let mailOptions = {
       from: process.env.EMAIL,
-      to: "ouhrac@gmail.com",
+      to: ["ouhrac@gmail.com", "oneweb@umich.edu"],
       subject: `Error in 1cademy`,
       html: `Details:\n\n<ul>${details}</ul>`,
     };
+    if (error) {
+      transporter.sendMail(mailOptions, async (error: any, data: any) => {
+        if (error) {
+          console.log(error);
+        }
+      });
+    }
+    mailOptions.from = process.env.EMAIL2;
+    mailOptions.to = ["ouhrac@gmail.com"];
 
-    transporter.sendMail(mailOptions, async (error: any, data: any) => {
+    transporter2.sendMail(mailOptions, async (error: any, data: any) => {
       if (error) {
         console.log(error);
       }

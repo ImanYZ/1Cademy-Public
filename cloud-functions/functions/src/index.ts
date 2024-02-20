@@ -288,7 +288,8 @@ export const onErrorDetected = functions.firestore.document("/logs/{id}").onCrea
     // TO:DO SEND email notification if there is any errors
     const logData = change.data();
     // if (logData.severity === "error") {
-    sentAlertEmail({ ...logData, logId: change.id });
+    const error = logData.severity === "error";
+    sentAlertEmail({ ...logData, logId: change.id }, error);
     // }
   } catch (error) {
     console.log("error onUserUpdate:", error);
