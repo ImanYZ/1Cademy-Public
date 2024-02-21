@@ -951,7 +951,7 @@ const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Pro
   '''
   ${lastMessage.content}
   '''
-  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No", "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor}`;
+  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No"}`;
   console.log({ secondPrompt });
   if (secondPrompt) {
     deviatingPrompt = `
@@ -963,7 +963,7 @@ const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Pro
   '''
   ${lastMessage.content}
   '''
-Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No", "deviating_evidence": "Your reasoning for why you think the tutor's last message indicates that the student was deviating from the topic of conversation with the tutor}`;
+Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No"}`;
   }
   console.log("deviatingPrompt", deviatingPrompt);
   let response = null;
