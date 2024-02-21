@@ -307,22 +307,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       project: "1Tutor",
     });
   } catch (error: any) {
-    console.log(error);
-    console.log(conversationId);
     try {
-      // const newLogRef = db.collection("logs").doc();
-      // await newLogRef.set({
-      //   uname: uname || "",
-      //   severity: "error",
-      //   where: "assistant tutor endpoint",
-      //   error: {
-      //     message: error.message,
-      //     stack: error.stack,
-      //   },
-      //   conversationId,
-      // project: "1Tutor",
-      //   createdAt: new Date(),
-      // });
+      const newLogRef = db.collection("logs").doc();
+      await newLogRef.set({
+        uname: uname || "",
+        severity: "error",
+        where: "assistant tutor endpoint",
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+        conversationId,
+        project: "1Tutor",
+        createdAt: new Date(),
+      });
     } catch (error) {
       console.log("error saving the log", error);
     }
