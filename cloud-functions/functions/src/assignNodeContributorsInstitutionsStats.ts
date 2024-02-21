@@ -1,9 +1,10 @@
 import { db, commitBatch, batchSet, batchUpdate } from "./admin";
+import { roundNum } from "./helpers";
 
 // On 1Cademy.com nodes do not have their list of contributors and institutions
 // assigned to them. We should run this function every 25 hours in a PubSub to
 // assign these arrays.
-const roundNum = (num: any) => Number(Number.parseFloat(Number(num).toFixed(2)));
+
 exports.assignNodeContributorsInstitutionsStats = async () => {
   // First get the list of all users and create an Object to map their ids to their
   // institution names.
