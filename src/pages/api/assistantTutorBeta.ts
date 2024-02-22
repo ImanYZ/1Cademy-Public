@@ -1125,7 +1125,7 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
     let allParagraphs: any = [];
     for (let section of sections) {
       const chaptersBookDocs = await db.collection("chaptersBook").where("sectionTitle", "==", section).get();
-      if (!chaptersBookDocs.docs.length) {
+      if (chaptersBookDocs.docs.length > 0) {
         const chapterDoc = chaptersBookDocs.docs[0];
         const chapterData = chapterDoc.data();
         const _paragraphs: any = [];
