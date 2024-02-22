@@ -984,9 +984,7 @@ const streamPrompt = async (messages: any) => {
         if (match) {
           const deviatingTopic = match[1];
           console.log(deviatingTopic);
-          if (!deviating) {
-            deviating = deviatingTopic.toLowerCase().includes("yes");
-          }
+          deviating = deviatingTopic.toLowerCase().includes("yes");
           break;
         } else {
           console.log("No match found.");
