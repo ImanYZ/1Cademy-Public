@@ -178,7 +178,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         courseName,
         questionMessage,
         newConversationRef,
-        true,
+        false,
         uname,
         cardsModel
       );
@@ -569,10 +569,23 @@ const handleDeviating = async (
   let featuredConcepts: any = [];
   let answer = "";
   if (secondPrompt) {
-    conversationData.messages[conversationData.messages.length - 3].deviatingMessage = true;
-    conversationData.messages[conversationData.messages.length - 2].deviatingMessage = true;
-  } else {
-    conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
+    conversationData.messages.pop();
+  }
+
+  console.log(conversationData.messages);
+  console.log(message);
+  let lastDeviatingMessageIndex = -1;
+  for (let i = conversationData.messages.length - 1; i >= 0; i--) {
+    if (conversationData.messages[i].content === message) {
+      lastDeviatingMessageIndex = i;
+      break;
+    }
+  }
+  if (lastDeviatingMessageIndex !== -1) {
+    conversationData.messages[lastDeviatingMessageIndex].deviatingMessage = true;
+    if (secondPrompt) {
+      conversationData.messages[lastDeviatingMessageIndex + 1].deviatingMessage = true;
+    }
   }
 
   if (relevanceResponse) {
