@@ -182,6 +182,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         uname,
         cardsModel
       );
+
+      const newLogRef = db.collection("logs").doc();
+      await newLogRef.set({
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        conversationId,
+        deviating,
+        relevanceResponse,
+        createdAt: new Date(),
+        message,
+        project: "1Tutor",
+      });
       return;
     }
 
@@ -265,6 +278,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         uname,
         cardsModel
       );
+      const newLogRef = db.collection("logs").doc();
+      await newLogRef.set({
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        conversationId,
+        deviating,
+        relevanceResponse,
+        createdAt: new Date(),
+        message,
+        project: "1Tutor",
+      });
       return;
     }
 
@@ -954,9 +979,8 @@ const streamPrompt = async (messages: any) => {
       if (result.choices[0].delta.content) {
         completeMessage += result.choices[0].delta.content;
         const regex = /"deviating_topic": "(\w+)",/;
-
-        const match = regex.exec(completeMessage);
         console.log(completeMessage);
+        const match = regex.exec(completeMessage);
         if (match) {
           const deviatingTopic = match[1];
           console.log(deviatingTopic);
@@ -993,7 +1017,8 @@ const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Pro
   '''
   ${lastMessage.content}
   '''
-  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No"}`;
+  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No", 
+  "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
   console.log({ secondPrompt });
   if (secondPrompt) {
     deviatingPrompt = `
@@ -1005,7 +1030,8 @@ const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Pro
   '''
   ${lastMessage.content}
   '''
-Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No",  "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor}`;
+Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No", 
+"deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
   }
   console.log("deviatingPrompt", deviatingPrompt);
   const deviating = await streamPrompt([{ content: deviatingPrompt, role: "user" }]);
