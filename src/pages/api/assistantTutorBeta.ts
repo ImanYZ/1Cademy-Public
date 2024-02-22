@@ -7,7 +7,6 @@ import { delay } from "@/lib/utils/utils";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
-import { clearGlobalAppDefaultCred } from "firebase-admin/lib/app/credential-factory";
 type Message = {
   role: string;
   content: string;
@@ -16,12 +15,21 @@ type Message = {
   sentAt: Timestamp;
   mid: string;
 };
+const saveLogs = async (logs: { [key: string]: any }) => {
+  const newLogRef = db.collection("logs").doc();
+  await newLogRef.set({
+    ...logs,
+    createdAt: new Date(),
+  });
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let { url, cardsModel, furtherExplain, message } = req.body;
   let conversationId = "";
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
+  let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
 
@@ -38,7 +46,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     console.log({ url });
     const unit = (url.split("/").pop() || "").split("#")[0];
     console.log({ unit });
-    let course = "the-economy/microeconomics";
+
     if (url.includes("the-mission-corporation")) {
       course = "the-mission-corporation-4R-trimmed.html";
     }
@@ -182,16 +190,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         uname,
         cardsModel
       );
-
-      const newLogRef = db.collection("logs").doc();
-      await newLogRef.set({
+      await saveLogs({
+        course,
+        url,
         uname: uname || "",
         severity: "default",
         where: "assistant tutor endpoint",
         conversationId,
         deviating,
         relevanceResponse,
-        createdAt: new Date(),
         message,
         project: "1Tutor",
       });
@@ -278,8 +285,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         uname,
         cardsModel
       );
-      const newLogRef = db.collection("logs").doc();
-      await newLogRef.set({
+      await saveLogs({
+        course,
+        url,
         uname: uname || "",
         severity: "default",
         where: "assistant tutor endpoint",
@@ -320,8 +328,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done", conversationId);
 
-    const newLogRef = db.collection("logs").doc();
-    await newLogRef.set({
+    await saveLogs({
+      course,
+      url,
       uname: uname || "",
       severity: "default",
       where: "assistant tutor endpoint",
@@ -335,8 +344,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   } catch (error: any) {
     console.log(error);
     try {
-      const newLogRef = db.collection("logs").doc();
-      await newLogRef.set({
+      await saveLogs({
+        course,
+        url,
         uname: uname || "",
         severity: "error",
         where: "assistant tutor endpoint",
