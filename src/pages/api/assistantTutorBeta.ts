@@ -1125,16 +1125,17 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
     let allParagraphs: any = [];
     for (let section of sections) {
       const chaptersBookDocs = await db.collection("chaptersBook").where("sectionTitle", "==", section).get();
-
-      const chapterDoc = chaptersBookDocs.docs[0];
-      const chapterData = chapterDoc.data();
-      const _paragraphs: any = [];
-      chapterData.paragraphs.map((p: any) => _paragraphs.push({ text: p.text, id: p.ids[0] }));
-      allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
-      paragraphs.push({
-        section,
-        paragraphs: _paragraphs,
-      });
+      if (chaptersBookDocs.docs.length > 0) {
+        const chapterDoc = chaptersBookDocs.docs[0];
+        const chapterData = chapterDoc.data();
+        const _paragraphs: any = [];
+        chapterData.paragraphs.map((p: any) => _paragraphs.push({ text: p.text, id: p.ids[0] }));
+        allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
+        paragraphs.push({
+          section,
+          paragraphs: _paragraphs,
+        });
+      }
     }
     console.log("paragraphs.length", paragraphs.length);
     return { paragraphs, allParagraphs, sections };
