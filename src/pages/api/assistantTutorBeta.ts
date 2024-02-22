@@ -7,6 +7,7 @@ import { delay } from "@/lib/utils/utils";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
+import { clearGlobalAppDefaultCred } from "firebase-admin/lib/app/credential-factory";
 type Message = {
   role: string;
   content: string;
@@ -939,6 +940,39 @@ const generateListMessagesText = (messages: any) => {
   return messagesText;
 };
 
+const streamPrompt = async (messages: any) => {
+  try {
+    const response = await openai.chat.completions.create({
+      messages,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+      stream: true,
+    });
+    let completeMessage = "";
+    let deviating = false;
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        completeMessage += result.choices[0].delta.content;
+        const regex = /"deviating_topic": "(\w+)",/;
+
+        const match = regex.exec(completeMessage);
+        console.log(completeMessage);
+        if (match) {
+          const deviatingTopic = match[1];
+          console.log(deviatingTopic);
+          deviating = deviatingTopic.toLowerCase().includes("yes");
+          break;
+        } else {
+          console.log("No match found.");
+        }
+      }
+    }
+    return deviating;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Promise<boolean> => {
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
   // const chapterDoc = chaptersDoc.docs[0];
@@ -971,24 +1005,11 @@ const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Pro
   '''
   ${lastMessage.content}
   '''
-Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No"}`;
+Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No",  "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor}`;
   }
   console.log("deviatingPrompt", deviatingPrompt);
-  let response = null;
-  try {
-    while (!response) {
-      response = await sendGPTPrompt("gpt-4-0125-preview", [{ content: deviatingPrompt, role: "user" }]);
-      if (typeof response === "string") {
-        response = extractJSON(response);
-      } else {
-        response = null;
-      }
-    }
-  } catch (error) {
-    console.log("Error at checkIfTheQuestionIsRelated", error);
-  }
-  console.log(response);
-  return !!response && response.deviating_topic.toLowerCase() === "yes";
+  const deviating = await streamPrompt([{ content: deviatingPrompt, role: "user" }]);
+  return !!deviating;
 };
 const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
   const scores = Object.values(flashcardsScores);
@@ -1130,7 +1151,7 @@ const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: stri
   };
   let maxCose = 0;
   for (let paragraph of allParagraphs) {
-    console.log(paragraph);
+    if (!paragraph?.text) continue;
     const paragraphSentences = (paragraph?.text || "").split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
     let cosSimilarityParagraph = 0;
     for (let sentence of paragraphSentences) {
