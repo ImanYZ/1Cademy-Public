@@ -307,6 +307,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       project: "1Tutor",
     });
   } catch (error: any) {
+    console.log(error);
     try {
       const newLogRef = db.collection("logs").doc();
       await newLogRef.set({
@@ -568,10 +569,10 @@ const handleDeviating = async (
   {
   "message": "Your concise message to the student's last message based on the sentences.",
   "sentences": [An array of the sentences that you used to respond to the student's last message.],
-  "paragraphs": [An array of the paragraphs that you used to respond to the student's last message]
+  "paragraphs": [An array of the paragraphs ids that you used to respond to the student's last message]
   }
   Your response should be only a complete and syntactically correct JSON object.`;
-
+      console.log(prompt);
       const response2 = await openai.chat.completions.create({
         messages: [
           {
@@ -606,7 +607,14 @@ const handleDeviating = async (
     "paragraphs": [An array of paragraphs that you used to answer the question]
   } */
       //
-      featuredConcepts = await extractFlashcards(fullMessage, allParagraphs, sections, uname, cardsModel);
+
+      const responseJson = JSON.parse(fullMessage);
+      const sentences = responseJson.sentences;
+      const paragraph: { text: string; ids: string[] } = searchParagraphs(allParagraphs, sentences);
+      console.log(paragraph);
+      if (paragraph.text) {
+        featuredConcepts = await extractFlashcards(paragraph, sections, uname, cardsModel);
+      }
     } else {
       const _answer =
         "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
@@ -1014,14 +1022,14 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
     const chaptersBookDocs = await chaptersBookQuery.get();
     //Create a chapterMap that will have all the chapters and subchapters in an array of objects
     //
-    const chaptersMap: { chapter: string; subSections: { title: string; pageSummary: string }[] }[] = [];
+    const chaptersMap: { chapter: string; subSections: { title: string; key_words: string[] }[] }[] = [];
     for (let chapterDoc of chaptersBookDocs.docs) {
       const chapterData = chapterDoc.data();
       const chapterIdx = chaptersMap.findIndex(c => c.chapter === chapterData.chapterTitle);
       if (chapterIdx !== -1) {
         chaptersMap[chapterIdx].subSections.push({
           title: chapterData.sectionTitle,
-          pageSummary: chapterData.pageSummary,
+          key_words: chapterData.keyWords,
         });
       } else {
         chaptersMap.push({
@@ -1029,7 +1037,7 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
           subSections: [
             {
               title: chapterData.sectionTitle,
-              pageSummary: chapterData.pageSummary,
+              key_words: chapterData.keyWords,
             },
           ],
         });
@@ -1074,7 +1082,7 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
       const chapterDoc = chaptersBookDocs.docs[0];
       const chapterData = chapterDoc.data();
       const _paragraphs: any = [];
-      chapterData.paragraphs.map((p: any) => _paragraphs.push(p.text));
+      chapterData.paragraphs.map((p: any) => _paragraphs.push({ text: p.text, id: p.ids[0] }));
       allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
       paragraphs.push({
         section,
@@ -1083,41 +1091,89 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
     }
     console.log("paragraphs.length", paragraphs.length);
     return { paragraphs, allParagraphs, sections };
-    return {
-      allParagraphs: [],
-      paragraphs: [],
-    };
   } catch (error) {
     console.log(error);
   }
 };
 const extractFlashcards = async (
-  response: string,
-  chaptersParagraphs: any,
+  paragraph: { text: string; ids: string[] },
   sections: string[],
   uname: string,
   cardsModel: string
 ) => {
-  console.log(response);
-  const responseJson = JSON.parse(response);
-  let pIds: string[] = [];
-  responseJson.paragraphs.map((p: string) => {
-    const pIdx = chaptersParagraphs.findIndex((_p: any) => _p.text === p);
-    if (pIdx !== -1) pIds = [...pIds, ...chaptersParagraphs[pIdx].ids];
-  });
-  if (!pIds.length) return [];
-  const flashcardsDocs = await db
-    .collection("flashcards")
-    .where("paragraphs", "array-contains-any", pIds)
-    .where("instructor", "==", uname)
-    .where("model", "==", cardsModel)
-    .where("sectionTitle", "in", sections)
-    .get();
-  const concepts = [];
-  for (let flashcardDoc of flashcardsDocs.docs) {
-    const flashcardData = flashcardDoc.data();
-    concepts.push({ ...flashcardData, cardId: flashcardDoc.id });
-    addScoreToSavedCard(0, flashcardDoc.id, uname, false);
+  try {
+    let pIds: string[] = [...paragraph.ids];
+    if (!pIds.length) return [];
+    const flashcardsDocs = await db
+      .collection("flashcards")
+      .where("paragraphs", "array-contains-any", pIds)
+      .where("instructor", "==", uname)
+      .where("model", "==", cardsModel)
+      .where("sectionTitle", "in", sections)
+      .get();
+    const concepts = [];
+    for (let flashcardDoc of flashcardsDocs.docs) {
+      const flashcardData = flashcardDoc.data();
+      concepts.push({ ...flashcardData, cardId: flashcardDoc.id });
+      addScoreToSavedCard(0, flashcardDoc.id, uname, false);
+    }
+    return concepts;
+  } catch (error) {
+    console.log(error);
   }
-  return concepts;
+};
+
+const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: string; ids: string[] } => {
+  let result = {
+    text: "",
+    ids: [""],
+  };
+  let maxCose = 0;
+  for (let paragraph of allParagraphs) {
+    console.log(paragraph);
+    const paragraphSentences = (paragraph?.text || "").split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
+    let cosSimilarityParagraph = 0;
+    for (let sentence of paragraphSentences) {
+      const v1 = tokenizeAndCount(sentence);
+      for (let sentence of sentences) {
+        const v2 = tokenizeAndCount(sentence);
+        const cosSimilarity = calculateCosineSimilarity(v1, v2);
+        cosSimilarityParagraph += cosSimilarity;
+      }
+    }
+    if (cosSimilarityParagraph > maxCose) {
+      result = paragraph;
+      maxCose = cosSimilarityParagraph;
+    }
+  }
+  return result;
+};
+
+export const tokenizeAndCount = (text: string): Record<string, number> => {
+  const wordCounts: Record<string, number> = {};
+  const words = text.toLowerCase().match(/\b(\w+)\b/g);
+  if (words) {
+    words.forEach(word => {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+    });
+  }
+  return wordCounts;
+};
+
+export const calculateCosineSimilarity = (vec1: object, vec2: object): number => {
+  const intersection = Object.keys(vec1).filter(value => Object.keys(vec2).includes(value));
+
+  const dotProduct = intersection.reduce(
+    (sum, key) => sum + vec1[key as keyof typeof vec1] * vec2[key as keyof typeof vec2],
+    0
+  );
+
+  const magnitude1 = Math.sqrt(Object.values(vec1).reduce((sum, val) => sum + val * val, 0));
+  const magnitude2 = Math.sqrt(Object.values(vec2).reduce((sum, val) => sum + val * val, 0));
+
+  if (magnitude1 && magnitude2) {
+    return dotProduct / (magnitude1 * magnitude2);
+  } else {
+    return 0;
+  }
 };
