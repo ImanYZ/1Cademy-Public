@@ -25,7 +25,7 @@ const saveLogs = async (logs: { [key: string]: any }) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let { url, cardsModel, furtherExplain, message } = req.body;
+  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo } = req.body;
   let conversationId = "";
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
@@ -226,6 +226,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       scroll_flashcard_next,
       conversationData,
       furtherExplain,
+      removeAdditionalInfo,
+      default_message,
     });
 
     // save the response from GPT in the db
@@ -485,6 +487,8 @@ const streamMainResponse = async ({
   scroll_flashcard_next,
   conversationData,
   furtherExplain,
+  removeAdditionalInfo,
+  default_message,
 }: {
   res: NextApiResponse<any>;
   deviating: boolean;
@@ -492,6 +496,8 @@ const streamMainResponse = async ({
   scroll_flashcard_next: string;
   conversationData: any;
   furtherExplain: boolean;
+  removeAdditionalInfo: boolean;
+  default_message: boolean;
 }) => {
   let completeMessage = "";
 
@@ -535,6 +541,9 @@ const streamMainResponse = async ({
       }
       completeMessage = completeMessage + result.choices[0].delta.content;
     }
+  }
+  if (default_message && removeAdditionalInfo) {
+    answer += "You can either study the page on your own and review it with me, or I can walk you through the page.";
   }
   completeMessage = completeMessage.replace(/~{2,}/g, "");
   return {
