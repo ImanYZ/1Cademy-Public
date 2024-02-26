@@ -129,10 +129,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (scroll_flashcard_next) {
         conversationData.usedFlashcards.push(scroll_flashcard_next);
       }
-      nextFlashcard = getNextFlashcard(
+      const selfStudy = !!conversationData.selfStudy && removeAdditionalInfo;
+      nextFlashcard = await getNextFlashcard(
         concepts,
         [...conversationData.usedFlashcards],
-        conversationData.flashcardsScores || {}
+        conversationData.flashcardsScores || {},
+        selfStudy
       );
       if (nextFlashcard) {
         conversationData.previousFlashcard = conversationData.nextFlashcard;
@@ -543,7 +545,8 @@ const streamMainResponse = async ({
     }
   }
   if (default_message && removeAdditionalInfo) {
-    answer += "You can either study the page on your own and review it with me, or I can walk you through the page.";
+    answer +=
+      "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
   }
   completeMessage = completeMessage.replace(/~{2,}/g, "");
   return {
@@ -783,8 +786,49 @@ const extractJSON = (text: string) => {
   }
 };
 
-const getNextFlashcard = (concepts: any, usedFlashcards: string[], flashcardsScores: any) => {
-  const nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
+const askGPTForFlashcard = async (concepts: any) => {
+  try {
+    if (!concepts.length) return null;
+    const _concepts: any = [];
+    concepts.map((c: any) => _concepts.push({ title: c.title, content: c.content, id: c.id }));
+    const prompt = `From the list of flashcards bellow Give me the id of the flashcard that i need to learn first (your response should be in a object like {flashcard_id:"id of the flashcard that i need to learn first"})
+    ${JSON.stringify(_concepts)}`;
+
+    const response = await sendGPTPrompt("gpt-4-turbo-preview", [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ]);
+    let parsedResponse: any = null;
+    if (response) {
+      try {
+        console.log("askGPTForFlashcard:::", response);
+        parsedResponse = extractJSON(response);
+        console.log("parsed askGPTForFlashcard:::", parsedResponse);
+        const flashcardIdx = concepts.findIndex((f: any) => f.id === parsedResponse?.flashcard_id);
+        if (flashcardIdx !== -1) {
+          return concepts[flashcardIdx];
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    return null;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getNextFlashcard = async (concepts: any, usedFlashcards: string[], flashcardsScores: any, selfStudy: boolean) => {
+  let nextFlashcard = null;
+
+  if (selfStudy) {
+    nextFlashcard = await askGPTForFlashcard(concepts);
+  } else {
+    nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
+  }
+
   if (!nextFlashcard && Object.entries(flashcardsScores).length > 0) {
     const [flashcard, minScore] = Object.entries(flashcardsScores).reduce((min: any, current: any) => {
       if (current[1] < min[1] && current[1] !== 10) {
