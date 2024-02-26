@@ -790,7 +790,14 @@ const askGPTForFlashcard = async (concepts: any) => {
   try {
     if (!concepts.length) return null;
     const _concepts: any = [];
-    concepts.map((c: any) => _concepts.push({ title: c.title, content: c.content, id: c.id }));
+    concepts.map((c: any) =>
+      _concepts.push({
+        title: c.title,
+        content: c.content,
+        cid: c.id,
+        id: c.content.split(" ").splice(0, 10).join(" "),
+      })
+    );
     const prompt = `From the list of flashcards bellow Give me the id of the flashcard that i need to learn first (your response should be in a object like {flashcard_id:"id of the flashcard that i need to learn first"})
     ${JSON.stringify(_concepts)}`;
 
@@ -806,10 +813,12 @@ const askGPTForFlashcard = async (concepts: any) => {
         console.log("askGPTForFlashcard:::", response);
         parsedResponse = extractJSON(response);
         console.log("parsed askGPTForFlashcard:::", parsedResponse);
-        const flashcardIdx = concepts.findIndex((f: any) => f.id === parsedResponse?.flashcard_id);
-        if (flashcardIdx !== -1) {
-          return concepts[flashcardIdx];
-        }
+        const flashcardIdx = _concepts.findIndex((f: any) => f.id === parsedResponse?.flashcard_id);
+        return {
+          id: _concepts[flashcardIdx].cid,
+          title: _concepts[flashcardIdx].title,
+          content: _concepts[flashcardIdx].content,
+        };
       } catch (error) {
         console.log(error);
       }
@@ -822,9 +831,9 @@ const askGPTForFlashcard = async (concepts: any) => {
 
 const getNextFlashcard = async (concepts: any, usedFlashcards: string[], flashcardsScores: any, selfStudy: boolean) => {
   let nextFlashcard = null;
-
+  console.log("========= selfStudy =======>", selfStudy);
   if (selfStudy) {
-    nextFlashcard = await askGPTForFlashcard(concepts);
+    nextFlashcard = await askGPTForFlashcard(concepts.filter((c: any) => !usedFlashcards.includes(c.id)));
   } else {
     nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
   }
@@ -1232,7 +1241,6 @@ const extractFlashcards = async (
       .collection("flashcards")
       .where("paragraphs", "array-contains-any", pIds)
       .where("instructor", "==", uname)
-      .where("model", "==", cardsModel)
       .where("sectionTitle", "in", sections)
       .get();
     const concepts = [];
