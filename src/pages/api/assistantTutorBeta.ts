@@ -786,44 +786,11 @@ const extractJSON = (text: string) => {
   }
 };
 
-const askGPTForFlashcard = async (concepts: any) => {
+const getRandomFlashcard = async (concepts: any) => {
   try {
     if (!concepts.length) return null;
-    const _concepts: any = [];
-    concepts.map((c: any) =>
-      _concepts.push({
-        title: c.title,
-        content: c.content,
-        cid: c.id,
-        id: c.content.split(" ").splice(0, 10).join(" "),
-      })
-    );
-    const prompt = `From the list of flashcards bellow Give me the id of the flashcard that i need to learn first (your response should be in a object like {flashcard_id:"id of the flashcard that i need to learn first"})
-    ${JSON.stringify(_concepts)}`;
-
-    const response = await sendGPTPrompt("gpt-4-turbo-preview", [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ]);
-    let parsedResponse: any = null;
-    if (response) {
-      try {
-        console.log("askGPTForFlashcard:::", response);
-        parsedResponse = extractJSON(response);
-        console.log("parsed askGPTForFlashcard:::", parsedResponse);
-        const flashcardIdx = _concepts.findIndex((f: any) => f.id === parsedResponse?.flashcard_id);
-        return {
-          id: _concepts[flashcardIdx].cid,
-          title: _concepts[flashcardIdx].title,
-          content: _concepts[flashcardIdx].content,
-        };
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    return null;
+    const randomArbitrary = Math.floor(Math.random() * concepts.length - 1);
+    return concepts[randomArbitrary];
   } catch (error) {
     console.log(error);
   }
@@ -833,7 +800,7 @@ const getNextFlashcard = async (concepts: any, usedFlashcards: string[], flashca
   let nextFlashcard = null;
   console.log("========= selfStudy =======>", selfStudy);
   if (selfStudy) {
-    nextFlashcard = await askGPTForFlashcard(concepts.filter((c: any) => !usedFlashcards.includes(c.id)));
+    nextFlashcard = await getRandomFlashcard(concepts.filter((c: any) => !usedFlashcards.includes(c.id)));
   } else {
     nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
   }
