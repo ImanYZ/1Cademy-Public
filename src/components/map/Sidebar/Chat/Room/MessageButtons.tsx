@@ -45,7 +45,7 @@ export const MessageButtons = ({
         position: "absolute",
         background: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
-        top: "-46px",
+        top: "-50px",
         right: "20px",
         borderRadius: "8px",
         p: "3px",

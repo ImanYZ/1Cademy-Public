@@ -2916,3 +2916,7 @@ right: 5px; */
 .reply-box:hover > .message-buttons {
   display: block;
 }
+
+#message-box::-webkit-scrollbar {
+  display: none;
+}
