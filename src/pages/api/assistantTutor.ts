@@ -1,11 +1,714 @@
-const fs = require("fs");
 import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { IAssitantRequestAction } from "src/types/IAssitantConversation";
-import { fetchCompelation, openai } from "./openAI/helpers";
+import { openai } from "./openAI/helpers";
 import { delay } from "@/lib/utils/utils";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
+import { Timestamp } from "firebase-admin/firestore";
+import { roundNum } from "src/utils/common.utils";
+type Message = {
+  role: string;
+  content: string;
+  divided: string;
+  question: true;
+  sentAt: Timestamp;
+  mid: string;
+};
+const saveLogs = async (logs: { [key: string]: any }) => {
+  const newLogRef = db.collection("logs").doc();
+  await newLogRef.set({
+    ...logs,
+    createdAt: new Date(),
+  });
+};
+
+async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+  const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
+  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo } = req.body;
+  let conversationId = "";
+  let deviating: boolean = false;
+  let relevanceResponse: boolean = true;
+  let course = "the-economy/microeconomics";
+  try {
+    console.log("assistant Tutor", uname);
+
+    let default_message = false;
+    let selectedModel = "";
+    console.log({ cardsModel, customClaims });
+    const isInstructor = customClaims.instructor;
+    if (!!cardsModel) {
+      selectedModel = cardsModel;
+    }
+    /*  */
+
+    /*  */
+    console.log({ url });
+    const unit = (url.split("/").pop() || "").split("#")[0];
+    console.log({ unit });
+
+    if (url.includes("the-mission-corporation")) {
+      course = "the-mission-corporation-4R-trimmed.html";
+    }
+    if (!course) {
+      throw new Error("Course Doesn't exist");
+    }
+    const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
+      await getPromptInstructions(course, uname, isInstructor);
+
+    const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
+    console.log(concepts.length);
+    if (!concepts.length) {
+      throw new Error("Flashcards don't exist in this page.");
+    }
+    const systemPrompt = await generateSystemPrompt(
+      unit,
+      concepts || [],
+      fName,
+      tutorName,
+      courseName,
+      objectives,
+      directions,
+      techniques
+    );
+
+    const conversationDocs = await db
+      .collection("tutorConversations")
+      .where("unit", "==", unit)
+      .where("uid", "==", uid)
+      .where("cardsModel", "==", selectedModel)
+      .where("deleted", "==", false)
+      .get();
+
+    let conversationData: any = {
+      messages: [],
+      unit,
+      uid,
+      uname,
+      createdAt: new Date(),
+      concepts,
+      progress: 0,
+      scores: [],
+      usedFlashcards: [],
+      cardsModel: selectedModel,
+      deleted: false,
+    };
+    //new reference to the "tutorConversations" collection
+    let newConversationRef = db.collection("tutorConversations").doc();
+
+    /*  if the conversation associated with this unit already exist we continue the conversation from there
+       otherwise we initialize a new one  */
+    if (conversationDocs.docs.length > 0) {
+      const conversationDoc = conversationDocs.docs[0];
+      conversationData = conversationDoc.data();
+      conversationData.messages[0].content = systemPrompt;
+      newConversationRef = conversationDoc.ref;
+    } else {
+      conversationData.messages.push({
+        role: "system",
+        //we need the system prompt when the user starts chatting
+        content: systemPrompt,
+      });
+    }
+    conversationId = newConversationRef.id;
+    let questionMessage = null;
+    if (!message) {
+      message = `Hello My name is ${fName}.`;
+      default_message = true;
+      conversationData.usedFlashcards = [];
+    } else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
+      furtherExplain = true;
+      questionMessage = conversationData.messages.pop();
+    }
+
+    let scroll_flashcard_next = "";
+    let nextFlashcard = null;
+    if (!furtherExplain) {
+      scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
+      console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
+      if (scroll_flashcard_next) {
+        conversationData.usedFlashcards.push(scroll_flashcard_next);
+      }
+      const selfStudy = !!conversationData.selfStudy && removeAdditionalInfo;
+      nextFlashcard = await getNextFlashcard(
+        concepts,
+        [...conversationData.usedFlashcards],
+        conversationData.flashcardsScores || {},
+        selfStudy
+      );
+      if (nextFlashcard) {
+        conversationData.previousFlashcard = conversationData.nextFlashcard;
+        conversationData.nextFlashcard = nextFlashcard;
+      } else {
+        delete conversationData.nextFlashcard;
+      }
+    }
+
+    console.log({ nextFlashcard });
+    // add the extra PS to the message of the user
+    // we ignore it afterward when saving the conversation in the db
+    const extraInfoPrompt = getExtraInfo(fName, nextFlashcard);
+    let furtherExplainPrompt = "";
+    if (furtherExplain && conversationData.previousFlashcard) {
+      furtherExplainPrompt = `Further explain the content of the following concept:{
+    title: "${conversationData?.previousFlashcard?.title || ""}",
+    content: "${conversationData?.previousFlashcard?.content || ""}"
+  }`;
+
+      /*  */
+    }
+    conversationData.messages.push({
+      role: "user",
+      content: message,
+      sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
+      default_message,
+      nextFlashcard: nextFlashcard?.id || "",
+      extraInfoPrompt,
+      furtherExplainPrompt,
+    });
+    const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
+    console.log(mergedMessages);
+    console.log("deviating");
+
+    if (!default_message) {
+      // const exposedParagraphsIds = getExposedParagraphs(concepts, [
+      //   ...conversationData.usedFlashcards,
+      //   nextFlashcard?.id || "",
+      // ]);
+      deviating = await checkIfUserIsDeviating(mergedMessagesMinusFurtherExplain, false);
+    }
+    console.log({ deviating });
+    if (deviating) {
+      await handleDeviating(
+        res,
+        conversationData,
+        relevanceResponse,
+        message,
+        courseName,
+        questionMessage,
+        newConversationRef,
+        false,
+        uname,
+        cardsModel
+      );
+      await saveLogs({
+        course,
+        url,
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        conversationId,
+        deviating,
+        relevanceResponse,
+        message,
+        project: "1Tutor",
+      });
+      return;
+    }
+
+    if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
+      await delay(2000);
+      const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
+      res.write(doneMessage);
+      const sentAt = new Date(new Date());
+      sentAt.setSeconds(sentAt.getSeconds() + 20);
+      conversationData.messages.push({
+        role: "assistant",
+        content: doneMessage,
+        sentAt,
+        mid: db.collection("tutorConversations").doc().id,
+      });
+      conversationData.done = true;
+    }
+    const { completeMessage, answer, question } = await streamMainResponse({
+      res,
+      deviating,
+      mergedMessages,
+      scroll_flashcard_next,
+      conversationData,
+      furtherExplain,
+      removeAdditionalInfo,
+      default_message,
+    });
+
+    // save the response from GPT in the db
+    const divideId = db.collection("tutorConversations").doc().id;
+    conversationData.messages.push({
+      role: "assistant",
+      content: !answer ? completeMessage : answer,
+      divided: !!answer ? divideId : false,
+      sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
+    });
+
+    if (!!question) {
+      conversationData.messages.push({
+        role: "assistant",
+        content: question,
+        divided: !!answer ? divideId : false,
+        question: true,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+      });
+    } else if (questionMessage) {
+      conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
+    } else if (!!nextFlashcard) {
+      const question = await getTheNextQuestion(nextFlashcard);
+      conversationData.messages.push({
+        role: "assistant",
+        content: question,
+        divided: !!answer ? divideId : false,
+        question: true,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+      });
+    }
+    await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+
+    mergedMessagesMinusFurtherExplain.push({
+      role: "assistant",
+      content: !answer ? completeMessage : answer,
+      divided: !!answer ? divideId : false,
+      sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
+    });
+    deviating = await checkIfUserIsDeviating(mergedMessagesMinusFurtherExplain, true);
+    console.log({ deviatingAfterResponse: deviating });
+    if (deviating) {
+      // handle the case where the user deviates from the conversation
+      await handleDeviating(
+        res,
+        conversationData,
+        relevanceResponse,
+        message,
+        courseName,
+        questionMessage,
+        newConversationRef,
+        true,
+        uname,
+        cardsModel
+      );
+      await saveLogs({
+        course,
+        url,
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        conversationId,
+        deviating,
+        relevanceResponse,
+        createdAt: new Date(),
+        message,
+        project: "1Tutor",
+      });
+      return;
+    }
+
+    const lateResponse = await getEvaluation({
+      mergedMessages,
+      furtherExplain,
+      scroll_flashcard_next,
+      conversationData,
+      uname,
+      concepts,
+      default_message,
+    });
+
+    if (conversationData.messages.length === 2) {
+      lateResponse.emotion = "";
+    }
+    let messageIdx = conversationData.messages.length - 1;
+    if (!!answer && !!question) {
+      messageIdx = conversationData.messages.length - 2;
+    }
+    conversationData.messages[messageIdx] = {
+      ...conversationData.messages[messageIdx],
+      inform_instructor: lateResponse.inform_instructor,
+      prior_evaluation: lateResponse.evaluation,
+      emotion: lateResponse.emotion,
+    };
+    conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
+    await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+    console.log("Done", conversationId);
+
+    await saveLogs({
+      course,
+      url,
+      uname: uname || "",
+      severity: "default",
+      where: "assistant tutor endpoint",
+      conversationId,
+      deviating,
+      relevanceResponse,
+      createdAt: new Date(),
+      message,
+      project: "1Tutor",
+    });
+  } catch (error: any) {
+    console.log(error);
+    try {
+      await saveLogs({
+        course,
+        url,
+        uname: uname || "",
+        severity: "error",
+        where: "assistant tutor endpoint",
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+        conversationId,
+        project: "1Tutor",
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      console.log("error saving the log", error);
+    }
+    return res
+      .status(500)
+      .send("Sorry, something went wrong! Please try again! If the issue persists, contact iman@honor.education");
+  }
+}
+
+export default fbAuth(handler);
+
+const getEvaluation = async ({
+  mergedMessages,
+  furtherExplain,
+  scroll_flashcard_next,
+  conversationData,
+  uname,
+  concepts,
+  default_message,
+}: {
+  mergedMessages: any;
+  furtherExplain: boolean;
+  scroll_flashcard_next: string;
+  conversationData: any;
+  uname: string;
+  concepts: any;
+  default_message: boolean;
+}) => {
+  console.log("getEvaluation");
+  let lateResponse: {
+    evaluation: any;
+    emotion: string;
+    progress: string;
+    inform_instructor: string;
+    learning_summary: string;
+  } = {
+    evaluation: "0",
+    emotion: "",
+    progress: "0",
+    inform_instructor: "",
+    learning_summary: "",
+  };
+  let got_response = false;
+  let tries = 0;
+
+  if (!furtherExplain && !default_message) {
+    while (!got_response && tries < 5) {
+      try {
+        tries = tries + 1;
+        const _messages = mergedMessages;
+        _messages.push({
+          role: "user",
+          content: `
+          Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
+          {
+            "evaluation":"A number between 0 to 10 indicating the quality of my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question.",
+            "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy", "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers,
+            "inform_instructor": "Yes" if the instructor should be informed about my response to your last message. "No" if there is no reason to take the instructor's time about my last message to you.
+          }
+          Do not print anything other than this JSON object.`,
+        });
+        // "progress": A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
+
+        const response = await openai.chat.completions.create({
+          messages: _messages,
+          model: "gpt-4-0125-preview",
+          temperature: 0,
+        });
+        const responseText = response.choices[0].message.content;
+        lateResponse = extractJSON(responseText);
+        got_response = true;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    console.log(lateResponse);
+    /* we calculate the progress of the user in this unit
+     */
+
+    const evaluation = isNaN(lateResponse.evaluation) ? 0 : parseFloat(lateResponse.evaluation);
+
+    if (scroll_flashcard_next && !furtherExplain) {
+      if (conversationData.hasOwnProperty("flashcardsScores")) {
+        conversationData.flashcardsScores[scroll_flashcard_next] = evaluation;
+      } else {
+        conversationData.flashcardsScores = {
+          [scroll_flashcard_next]: evaluation,
+        };
+      }
+    }
+    console.log(
+      "calculateProgress(conversationData.flashcardsScores):",
+      calculateProgress(conversationData.flashcardsScores)
+    );
+    if (conversationData.progress < 1) {
+      conversationData.progress = roundNum(
+        calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
+      );
+    }
+    await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
+
+    if (conversationData.hasOwnProperty("scores")) {
+      conversationData.scores.push({
+        score: evaluation,
+        date: new Date(),
+        flashcard: scroll_flashcard_next,
+      });
+    } else {
+      conversationData.scores = [
+        {
+          score: evaluation,
+          date: new Date(),
+        },
+      ];
+    }
+    console.log({ lateResponse });
+  }
+  return lateResponse;
+};
+/*  */
+const streamMainResponse = async ({
+  res,
+  deviating,
+  mergedMessages,
+  scroll_flashcard_next,
+  conversationData,
+  furtherExplain,
+  removeAdditionalInfo,
+  default_message,
+}: {
+  res: NextApiResponse<any>;
+  deviating: boolean;
+  mergedMessages: any;
+  scroll_flashcard_next: string;
+  conversationData: any;
+  furtherExplain: boolean;
+  removeAdditionalInfo: boolean;
+  default_message: boolean;
+}) => {
+  let completeMessage = "";
+
+  console.log({ deviatingResponse: deviating });
+  const response = await openai.chat.completions.create({
+    messages: mergedMessages,
+    model: "gpt-4-0125-preview",
+    temperature: 0,
+    stream: true,
+  });
+  // stream the main response to the user
+  let stopStreaming = false;
+  let question = "";
+  let answer = "";
+  let scrolled = false;
+  const regex = /~{2,}/g;
+  for await (const result of response) {
+    if (result.choices[0].delta.content) {
+      if (!stopStreaming) {
+        const streamText = result.choices[0].delta.content.replace(/~{2,}/g, "");
+        res.write(`${streamText}`);
+        answer += `${streamText}`;
+      } else {
+        question += `${result.choices[0].delta.content}`;
+      }
+      const matches = result.choices[0].delta.content.match(regex);
+      if (matches) {
+        stopStreaming = true;
+        if (!scrolled) {
+          console.log({ scroll_flashcard_next });
+          if (scroll_flashcard_next) {
+            conversationData.usedFlashcards.push(scroll_flashcard_next);
+            res.write(`flashcard_id: "${scroll_flashcard_next}"`);
+          }
+          if (furtherExplain) {
+            const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+            res.write(`flashcard_id: "${scroll_to}"`);
+          }
+          scrolled = true;
+        }
+      }
+      completeMessage = completeMessage + result.choices[0].delta.content;
+    }
+  }
+  if (default_message && removeAdditionalInfo) {
+    answer +=
+      "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
+  }
+  completeMessage = completeMessage.replace(/~{2,}/g, "");
+  return {
+    completeMessage,
+    answer,
+    question,
+  };
+};
+
+const getExtraInfo = (fName: string, nextFlashcard: any) => {
+  let prompt =
+    `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their` +
+    `questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
+    `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".`;
+  // if there a next Flashcard add this
+  if (nextFlashcard) {
+    prompt +=
+      `Respond to ${fName} and then ask them a question about the following concept:
+    {
+      title: "${nextFlashcard.title}",
+      content: "${nextFlashcard.content}"
+    }
+    Note that you can repeat asking the same question about a concept that the student previously had difficulties with.` +
+      ` Also ${fName} has not read the concept yet. They will read the concept only after answering your question.`;
+  }
+  return prompt;
+};
+const handleDeviating = async (
+  res: NextApiResponse<any>,
+  conversationData: any,
+  relevanceResponse: boolean,
+  message: string,
+  courseName: string,
+  questionMessage: any,
+  newConversationRef: any,
+  secondPrompt: boolean,
+  uname: string,
+  cardsModel: string
+) => {
+  // relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
+
+  let featuredConcepts: any = [];
+  let answer = "";
+  if (secondPrompt) {
+    conversationData.messages.pop();
+  }
+
+  console.log(conversationData.messages);
+  console.log(message);
+  let lastDeviatingMessageIndex = -1;
+  for (let i = conversationData.messages.length - 1; i >= 0; i--) {
+    if (conversationData.messages[i].content === message) {
+      lastDeviatingMessageIndex = i;
+      break;
+    }
+  }
+  if (lastDeviatingMessageIndex !== -1) {
+    conversationData.messages[lastDeviatingMessageIndex].deviatingMessage = true;
+    if (secondPrompt) {
+      conversationData.messages[lastDeviatingMessageIndex + 1].deviatingMessage = true;
+    }
+  }
+
+  if (relevanceResponse) {
+    //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
+    res.write(
+      `You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading`
+    );
+    // call other agent to respond
+    const { paragraphs, allParagraphs, sections }: any = await getChapterRelatedToResponse(message, courseName);
+    let sectionsString = "";
+    sections.map((s: string) => {
+      sectionsString += `- ${s}\n`;
+    });
+    if (paragraphs.length > 0) {
+      res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
+
+      const prompt = `Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.  
+  ${JSON.stringify(paragraphs)}
+  Always respond a JSON object with the following structure:
+  {
+  "message": "Your concise message to the student's last message based on the sentences.",
+  "sentences": [An array of the sentences that you used to respond to the student's last message.],
+  "paragraphs": [An array of the paragraphs ids that you used to respond to the student's last message]
+  }
+  Your response should be only a complete and syntactically correct JSON object.`;
+      console.log(prompt);
+      const response2 = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: prompt,
+          },
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+        model: "gpt-4-0125-preview",
+        temperature: 0,
+        stream: true,
+      });
+      let fullMessage = "";
+
+      for await (const result of response2) {
+        if (!result.choices[0].delta.content) continue;
+        if (!fullMessage.includes(`"sentences":`) && fullMessage.includes(`"message":`)) {
+          let cleanText = result.choices[0].delta.content;
+          res.write(cleanText);
+          answer += cleanText;
+          console.log(result.choices[0].delta.content);
+        }
+        fullMessage += result.choices[0].delta.content;
+      }
+      // Extract the object from the fullMessage
+      /* {
+    "response": "Your response to the question based on the sentences.",
+    "sentences": [An array of the sentences that you used to answer the question.],
+    "paragraphs": [An array of paragraphs that you used to answer the question]
+  } */
+      //
+
+      const responseJson = JSON.parse(fullMessage);
+      const sentences = responseJson.sentences;
+      const paragraph: { text: string; ids: string[] } = searchParagraphs(allParagraphs, sentences);
+      console.log(paragraph);
+      if (paragraph.text) {
+        featuredConcepts = await extractFlashcards(paragraph, sections, uname, cardsModel);
+      }
+    } else {
+      const _answer =
+        "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+      res.write(_answer);
+      answer = _answer;
+    }
+  } else {
+    const _answer =
+      "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+    res.write(_answer);
+    answer = _answer;
+  }
+  answer = answer.replace(`{ "message":`, "");
+  answer = answer.replace(`"sentences":`, "");
+  answer = answer.replace(`",`, "");
+  answer = answer.replace(`"`, "");
+  const responseMessage = {
+    role: "assistant",
+    content: answer,
+    sentAt: new Date(),
+    mid: db.collection("tutorConversations").doc().id,
+    concepts: featuredConcepts,
+    deviatingMessage: true,
+  };
+  conversationData.messages.push(responseMessage);
+  if (!questionMessage) {
+    questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+  }
+  if (!!questionMessage) {
+    conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+  }
+  await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+};
 
 export type IAssistantRequestPayload = {
   actionType: IAssitantRequestAction;
@@ -83,10 +786,25 @@ const extractJSON = (text: string) => {
   }
 };
 
-const roundNum = (num: number) => Number(Number.parseFloat(Number(num).toFixed(2)));
+const getRandomFlashcard = async (concepts: any) => {
+  try {
+    if (!concepts.length) return null;
+    const randomArbitrary = Math.floor(Math.random() * concepts.length - 1);
+    return concepts[randomArbitrary];
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-const getNextFlashcard = (concepts: any, usedFlashcards: string[], flashcardsScores: any) => {
-  const nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
+const getNextFlashcard = async (concepts: any, usedFlashcards: string[], flashcardsScores: any, selfStudy: boolean) => {
+  let nextFlashcard = null;
+  console.log("========= selfStudy =======>", selfStudy);
+  if (selfStudy) {
+    nextFlashcard = await getRandomFlashcard(concepts.filter((c: any) => !usedFlashcards.includes(c.id)));
+  } else {
+    nextFlashcard = concepts.filter((c: any) => !usedFlashcards.includes(c.id))[0];
+  }
+
   if (!nextFlashcard && Object.entries(flashcardsScores).length > 0) {
     const [flashcard, minScore] = Object.entries(flashcardsScores).reduce((min: any, current: any) => {
       if (current[1] < min[1] && current[1] !== 10) {
@@ -98,42 +816,6 @@ const getNextFlashcard = (concepts: any, usedFlashcards: string[], flashcardsSco
     return minScore !== 10 ? concepts.find((c: any) => c.id === flashcard) : null;
   }
   return nextFlashcard;
-};
-const createSecondAgentFile = async (uname: string) => {
-  let flashcardsJSON = [];
-  const instructorFlashcards = await db.collection("flashcards").where("instructor", "==", uname).get();
-
-  for (let flashcardDoc of instructorFlashcards.docs) {
-    const flashcardData = flashcardDoc.data();
-    if (!flashcardData.model) continue;
-    flashcardsJSON.push({
-      id: flashcardDoc.id,
-      title: flashcardData.title,
-      content: flashcardData.content,
-    });
-  }
-  const filePath = "/tmp/flashcards.json";
-  fs.writeFileSync(filePath, JSON.stringify(flashcardsJSON, null, 2));
-
-  const file = await openai.files.create({
-    file: fs.createReadStream(filePath),
-    purpose: "assistants",
-  });
-  const newAssistant = await openai.beta.assistants.create({
-    instructions: `Always Respond by generating a JSON object with the following structure (this is important):
-    {
-    "reasoning": "Explain why you think the question can be responded using the selected concepts.",
-    "concepts": [An array of ids of concepts from the JSON file that you used to answer this question.],
-    "concept_titles": [An array of titles, each as a string, of concepts from the JSON file that you used to answer this question.],
-    "response": "Your response to the question based on the concepts."
-    }`,
-    name: "Adrian",
-    tools: [{ type: "retrieval" }],
-    file_ids: [file.id],
-    model: "gpt-4-0125-preview",
-  });
-  console.log("file here", newAssistant.id);
-  return { assistantId: newAssistant.id, fileId: file.id };
 };
 
 const getPromptInstructions = async (course: string, uname: string, isInstructor: boolean) => {
@@ -187,6 +869,7 @@ const replaceExtraPhrase = (messageContent: string) => {
   return phrases.reduce((acc, phrase) => acc.replace(phrase, ""), messageContent);
 };
 const mergeDividedMessages = (messages: any) => {
+  console.log("mergeDividedMessages");
   const mergedMessages = [];
   let currentDivideId = null;
   let mergedMessage = null;
@@ -201,7 +884,9 @@ const mergeDividedMessages = (messages: any) => {
         currentDivideId = message.divided;
         mergedMessage = { ...message };
       } else {
-        mergedMessage.content += "\n~~~~~~~~\n" + (message?.content || "");
+        if (!mergedMessage.content.includes(message?.content)) {
+          mergedMessage.content += "\n~~~~~~~~\n" + (message?.content || "").trim();
+        }
       }
     } else {
       if (mergedMessage) {
@@ -216,8 +901,7 @@ const mergeDividedMessages = (messages: any) => {
   if (mergedMessage) {
     mergedMessages.push(mergedMessage);
   }
-  console.log(mergedMessages[mergedMessages.length - 3]);
-  console.log(mergedMessages);
+
   return {
     mergedMessagesMinusFurtherExplain: mergedMessages,
     mergedMessages: mergedMessages.map((message: any) => ({
@@ -229,6 +913,8 @@ const mergeDividedMessages = (messages: any) => {
     scroll_flashcard_next: mergedMessages[mergedMessages.length - 3]?.nextFlashcard || "",
   };
 };
+//
+//
 const sortConcepts = (concepts: any, cardsModel: string) => {
   return concepts
     .filter((f: any) => f.model === cardsModel)
@@ -288,7 +974,7 @@ const getConcepts = async (
     }
   }
 };
-const addScoreToSavedCard = async (score: any, cardId: string, uname: string) => {
+const addScoreToSavedCard = async (score: any, cardId: string, uname: string, addScore = true) => {
   if (!cardId) return;
   const previousSavedCardDoc = await db
     .collection("savedBookCards")
@@ -297,9 +983,11 @@ const addScoreToSavedCard = async (score: any, cardId: string, uname: string) =>
     .get();
 
   if (previousSavedCardDoc.docs.length > 0) {
-    previousSavedCardDoc.docs[0].ref.update({
-      score,
-    });
+    if (addScore) {
+      previousSavedCardDoc.docs[0].ref.update({
+        score,
+      });
+    }
   } else {
     const flashcardDoc = await db.collection("flashcards").doc(cardId).get();
     const flashcardData = flashcardDoc.data();
@@ -318,622 +1006,273 @@ const addScoreToSavedCard = async (score: any, cardId: string, uname: string) =>
 const generateListMessagesText = (messages: any) => {
   let messagesText = "";
   for (let message of messages) {
-    if (message.role === "user") {
-      messagesText += `\nStudent: "${message.content.replace(/~{2,}/g, "")}"`;
-    } else {
-      messagesText += `\nTutor: "${message.content.replace(/~{2,}/g, "")}"`;
+    if (message.content) {
+      if (message.role === "user") {
+        messagesText += `\n\nStudent: "${message.content.replace(/~{2,}/g, "").trim()}"`;
+      } else {
+        messagesText += `\n\nTutor: "${message.content.replace(/~{2,}/g, "").trim()}"`;
+      }
     }
   }
   return messagesText;
 };
 
-const secondAgent = async (question: string, assistantSecondAgent: string) => {
-  console.log({ assistantSecondAgent });
-  const newThread = await openai.beta.threads.create();
-  const secondAgentPrompt = `
-  The attached file includes a JSON array of the concepts extracted from the Economy book. Answer the following question only based on these concept cards:
-  '''
-  ${question}
-  '''
-  If the question requires knowledge beyond the concepts, explain that you cannot answer it.
-  Always Respond by generating a JSON object with the following structure (this is important):
-  {
-  "reasoning": "Explain why you think the question can be responded using the selected concepts.",
-  "concepts": [An array of ids of concepts from the JSON file that you used to answer this question.],
-  "concept_titles": [An array of titles, each as a string, of concepts from the JSON file that you used to answer this question.],
-  "response": "Your response to the question based on the concepts."
-  }`;
-  await openai.beta.threads.messages.create(newThread.id, {
-    role: "user",
-    content: secondAgentPrompt,
-  });
-  let response = null;
-  while (!response) {
-    try {
-      console.log("waiting on response second agent");
-      const completionResponse = await fetchCompelation(newThread.id, assistantSecondAgent);
-      console.log(completionResponse);
-      response = extractJSON(completionResponse.response);
-      if (!response.hasOwnProperty("response")) {
-        response = null;
-      }
-    } catch (error) {
-      console.log(error);
-      response = null;
-    }
-  }
-  return response;
-};
-
-const checkIfTheQuestionIsRelated = async (messages: any): Promise<boolean> => {
-  const lasMessage = messages.pop();
-  messages = messages.filter((m: any) => m.role !== "system");
+const streamPrompt = async (messages: any) => {
   try {
-    const deviatingPrompt = `
-    The following is a conversation between a student and a tutor:
-    '''
-    ${generateListMessagesText(messages)}
-    '''
-    The student just responded:
-    '''
-    ${lasMessage.content}
-    '''
-    Is the student deviating from the topic of conversation with the tutor? Only generate a JSON response with this structure: {"reasoning": "Your reasoning for why the student is deviating from the topic of conversation with the tutor.", "response": "Yes" or "No".}`;
-    console.log("deviatingPrompt", deviatingPrompt);
-    let response = null;
-    try {
-      while (!response) {
-        response = await sendGPTPrompt("gpt-4-0125-preview", [{ content: deviatingPrompt, role: "user" }]);
-        if (typeof response === "string") {
-          response = extractJSON(response);
+    const response = await openai.chat.completions.create({
+      messages,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+      stream: true,
+    });
+    let completeMessage = "";
+    let deviating = false;
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        completeMessage += result.choices[0].delta.content;
+        const regex = /"deviating_topic": "(\w+)",/;
+        console.log(completeMessage);
+        const match = regex.exec(completeMessage);
+        if (match) {
+          const deviatingTopic = match[1];
+          console.log(deviatingTopic);
+          deviating = deviatingTopic.toLowerCase().includes("yes");
+          break;
         } else {
-          response = null;
+          console.log("No match found.");
         }
       }
-    } catch (error) {
-      console.log("Error at checkIfTheQuestionIsRelated", error);
     }
-
-    return !!response && response.response.toLowerCase() === "yes";
+    return deviating;
   } catch (error) {
-    console.log("Error at checkIfTheQuestionIsRelated", error);
-    return false;
+    console.log(error);
   }
 };
-const getDeviatingConcepts = async (concepts: string[], uname: string) => {
-  if (concepts.length <= 0) return [];
-  const sliceConcepts = concepts.splice(0, 4);
-  const flashcardsDocs = await db.collection("flashcards").where("__name__", "in", sliceConcepts).get();
-  const _concepts = [];
-  for (let flashcardsDoc of flashcardsDocs.docs) {
-    const flashcardData = flashcardsDoc.data();
-    _concepts.push({ ...flashcardData, cardId: flashcardsDoc.id });
-    const previousSavedCardDoc = await db
-      .collection("savedBookCards")
-      .where("savedBy", "==", uname)
-      .where("cardId", "==", flashcardsDoc.id)
-      .get();
 
-    if (previousSavedCardDoc.docs.length <= 0) {
-      const newSavedFlashcard = {
-        savedBy: uname,
-        savedAt: new Date(),
-        ...flashcardData,
-        cardId: flashcardsDoc.id,
-      };
-      const newRef = db.collection("savedBookCards").doc();
-      newRef.set(newSavedFlashcard);
-    }
+const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Promise<boolean> => {
+  // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
+  // const chapterDoc = chaptersDoc.docs[0];
+  // const chapterData = chapterDoc.data();
+
+  // const paragraphs = getInteractedParagraphs(chapterData.paragraphs, paragraphsIds);
+  console.log("checkIfTheQuestionIsRelated");
+  let _messages = [...messages];
+  const lastMessage = _messages.pop();
+  _messages = _messages.filter((m: any) => m.role !== "system");
+
+  let deviatingPrompt = `
+  The following is a conversation between a student and a tutor:
+  '''
+  ${generateListMessagesText(_messages)}
+  '''
+  The student just responded:
+  '''
+  ${lastMessage.content}
+  '''
+  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No", 
+  "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
+  console.log({ secondPrompt });
+  if (secondPrompt) {
+    deviatingPrompt = `
+  The following is a conversation between a student and a tutor:
+  '''
+  ${generateListMessagesText(_messages)}
+  '''
+  The tutor just responded:
+  '''
+  ${lastMessage.content}
+  '''
+Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No", 
+"deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
   }
-  return _concepts;
+  console.log("deviatingPrompt", deviatingPrompt);
+  const deviating = await streamPrompt([{ content: deviatingPrompt, role: "user" }]);
+  return !!deviating;
 };
-
 const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
   const scores = Object.values(flashcardsScores);
   const sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
   return sum;
 };
 const getTheNextQuestion = async (nextFlashcard: { title: string; content: string }) => {
-  try {
-    const prompt = `Ask me a question about the following card:
+  const prompt = `Ask me a question about the following card:
     {
       title: "${nextFlashcard.title}",
       content: "${nextFlashcard.content}"
     }`;
-    const context = [
+  const context = [
+    {
+      content: prompt,
+      role: "user",
+    },
+  ];
+  const gptResponse = await sendGPTPrompt("gpt-4-0125-preview", context);
+  return gptResponse;
+};
+
+const getChapterRelatedToResponse = async (message: string, courseName: string) => {
+  try {
+    let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
+
+    if (courseName == "Mission Corporation") {
+      chaptersBookQuery = db.collection("chaptersBook").where("book", "==", "Mission Corporation");
+    }
+
+    const chaptersBookDocs = await chaptersBookQuery.get();
+    //Create a chapterMap that will have all the chapters and subchapters in an array of objects
+    //
+    const chaptersMap: { chapter: string; subSections: { title: string; key_words: string[] }[] }[] = [];
+    for (let chapterDoc of chaptersBookDocs.docs) {
+      const chapterData = chapterDoc.data();
+      const chapterIdx = chaptersMap.findIndex(c => c.chapter === chapterData.chapterTitle);
+      if (chapterIdx !== -1) {
+        chaptersMap[chapterIdx].subSections.push({
+          title: chapterData.sectionTitle,
+          key_words: chapterData.keyWords,
+        });
+      } else {
+        chaptersMap.push({
+          chapter: chapterData.chapterTitle,
+          subSections: [
+            {
+              title: chapterData.sectionTitle,
+              key_words: chapterData.keyWords,
+            },
+          ],
+        });
+      }
+    }
+    //
+    console.log(chaptersMap);
+    const systemPrompt =
+      `You are an expert on ${courseName}.
+        The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:
+        ${JSON.stringify(chaptersMap)}
+        The user asks you a question and you should respond an array of strings ["____", "____", ...] ` +
+      `of the titles of the sub-sections of the book the user should study to learn the answer to their question. ` +
+      `The array should only include the sub-section titles that are very related to the student's question. ` +
+      `If none of the sub-sections are very related to the student's question, return an empty array []`;
+
+    console.log(systemPrompt);
+    const response = await sendGPTPrompt("gpt-4-turbo-preview", [
       {
-        content: prompt,
-        role: "user",
+        role: "system",
+        content: systemPrompt,
       },
-    ];
-    const gptResponse = await sendGPTPrompt("gpt-4-0125-preview", context);
-    return gptResponse;
+      {
+        role: "user",
+        content: message,
+      },
+    ]);
+    console.log({ response });
+    let sections = [];
+    if (response) {
+      try {
+        sections = JSON.parse(response);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    const paragraphs = [];
+    let allParagraphs: any = [];
+    for (let section of sections) {
+      const chaptersBookDocs = await db.collection("chaptersBook").where("sectionTitle", "==", section).get();
+      if (chaptersBookDocs.docs.length > 0) {
+        const chapterDoc = chaptersBookDocs.docs[0];
+        const chapterData = chapterDoc.data();
+        const _paragraphs: any = [];
+        chapterData.paragraphs.map((p: any) => _paragraphs.push({ text: p.text, id: p.ids[0] }));
+        allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
+        paragraphs.push({
+          section,
+          paragraphs: _paragraphs,
+        });
+      }
+    }
+    console.log("paragraphs.length", paragraphs.length);
+    return { paragraphs, allParagraphs, sections };
+  } catch (error) {
+    console.log(error);
+  }
+};
+const extractFlashcards = async (
+  paragraph: { text: string; ids: string[] },
+  sections: string[],
+  uname: string,
+  cardsModel: string
+) => {
+  try {
+    let pIds: string[] = [...paragraph.ids];
+    if (!pIds.length) return [];
+    const flashcardsDocs = await db
+      .collection("flashcards")
+      .where("paragraphs", "array-contains-any", pIds)
+      .where("instructor", "==", uname)
+      .where("sectionTitle", "in", sections)
+      .get();
+    const concepts = [];
+    for (let flashcardDoc of flashcardsDocs.docs) {
+      const flashcardData = flashcardDoc.data();
+      concepts.push({ ...flashcardData, cardId: flashcardDoc.id });
+      addScoreToSavedCard(0, flashcardDoc.id, uname, false);
+    }
+    return concepts;
   } catch (error) {
     console.log(error);
   }
 };
 
-async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
-  const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let conversationId = "";
-  try {
-    console.log("assistant Tutor", uname);
-    let { url, cardsModel, furtherExplain, message } = req.body;
-    await db.runTransaction(async t => {
-      let default_message = false;
-      let selectedModel = "";
-      console.log({ cardsModel, customClaims });
-      const isInstructor = !!customClaims?.instructor;
-      if (!!cardsModel) {
-        selectedModel = cardsModel;
+const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: string; ids: string[] } => {
+  let result = {
+    text: "",
+    ids: [""],
+  };
+  let maxCose = 0;
+  for (let paragraph of allParagraphs) {
+    if (!paragraph?.text) continue;
+    const paragraphSentences = (paragraph?.text || "").split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
+    let cosSimilarityParagraph = 0;
+    for (let sentence of paragraphSentences) {
+      const v1 = tokenizeAndCount(sentence);
+      for (let sentence of sentences) {
+        const v2 = tokenizeAndCount(sentence);
+        const cosSimilarity = calculateCosineSimilarity(v1, v2);
+        cosSimilarityParagraph += cosSimilarity;
       }
-      /*  */
-
-      /*  */
-      console.log({ url });
-      const unit = (url.split("/").pop() || "").split("#")[0];
-      console.log({ unit });
-      let course = "the-economy/microeconomics";
-      if (url.includes("the-mission-corporation")) {
-        course = "the-mission-corporation-4R-trimmed.html";
-      }
-      if (!course) {
-        res.write(
-          "Something went wrong! We apologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education"
-        );
-        return;
-      }
-      const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
-        await getPromptInstructions(course, uname, isInstructor);
-
-      const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
-      console.log(concepts.length);
-      if (!concepts.length) {
-        res.write(
-          "Something went wrong! We apologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education"
-        );
-        return;
-      }
-      const systemPrompt = await generateSystemPrompt(
-        unit,
-        concepts || [],
-        fName,
-        tutorName,
-        courseName,
-        objectives,
-        directions,
-        techniques
-      );
-
-      const conversationDocs = await t.get(
-        db
-          .collection("tutorConversations")
-          .where("unit", "==", unit)
-          .where("uid", "==", uid)
-          .where("cardsModel", "==", selectedModel)
-          .where("deleted", "==", false)
-      );
-
-      let conversationData: any = {
-        messages: [],
-        unit,
-        uid,
-        uname,
-        createdAt: new Date(),
-        concepts,
-        progress: 0,
-        scores: [],
-        usedFlashcards: [],
-        cardsModel: selectedModel,
-        deleted: false,
-      };
-      //new reference to the "tutorConversations" collection
-      let newConversationRef = db.collection("tutorConversations").doc();
-
-      /*  if the conversation associated with this unit already exist we continue the conversation from there
-       otherwise we initialize a new one  */
-      if (conversationDocs.docs.length > 0) {
-        const conversationDoc = conversationDocs.docs[0];
-        conversationData = conversationDoc.data();
-        conversationData.messages[0].content = systemPrompt;
-        newConversationRef = conversationDoc.ref;
-      } else {
-        conversationData.messages.push({
-          role: "system",
-          //we need the system prompt when the user starts chatting
-          content: systemPrompt,
-        });
-      }
-      conversationId = newConversationRef.id;
-      let questionMessage = null;
-      if (!message) {
-        message = `Hello My name is ${fName}.`;
-        default_message = true;
-        conversationData.usedFlashcards = [];
-      } else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
-        furtherExplain = true;
-        questionMessage = conversationData.messages.pop();
-      }
-
-      let scroll_flashcard_next = "";
-      let nextFlashcard = null;
-      if (!furtherExplain) {
-        scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
-        console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
-        if (scroll_flashcard_next) {
-          conversationData.usedFlashcards.push(scroll_flashcard_next);
-        }
-        nextFlashcard = getNextFlashcard(
-          concepts,
-          [...conversationData.usedFlashcards],
-          conversationData.flashcardsScores || {}
-        );
-        if (nextFlashcard) {
-          conversationData.previousFlashcard = conversationData.nextFlashcard;
-          conversationData.nextFlashcard = nextFlashcard;
-        } else {
-          delete conversationData.nextFlashcard;
-        }
-      }
-
-      console.log({ nextFlashcard });
-      // add the extra PS to the message of the user
-      // we ignore it afterward when saving the conversation in the db
-      const extraInfoPrompt =
-        `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
-        `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".` +
-        (!!nextFlashcard
-          ? `Respond to ${fName} and then ask them a question about the following concept:
-        {
-          title: "${nextFlashcard.title}",
-          content: "${nextFlashcard.content}"
-        }
-        Note that you can repeat asking the same question about a concept that the student previously had difficulties with. Also ${fName} has not read the concept yet. They will read the concept only after answering your question.`
-          : "");
-      const furtherExplainPrompt =
-        furtherExplain && conversationData.previousFlashcard
-          ? `Further explain the content of the following concept:{
-        title: "${conversationData?.previousFlashcard?.title || ""}",
-        content: "${conversationData?.previousFlashcard?.content || ""}"
-      }`
-          : "";
-
-      conversationData.messages.push({
-        role: "user",
-        content: message,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-        default_message,
-        nextFlashcard: nextFlashcard?.id || "",
-        extraInfoPrompt,
-        furtherExplainPrompt,
-      });
-      const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([
-        ...conversationData.messages,
-      ]);
-      let deviatingResponse: boolean = false;
-      // if (!default_message) {
-      //   deviatingResponse = await checkIfTheQuestionIsRelated(mergedMessagesMinusFurtherExplain);
-      // }
-      // if (deviatingResponse && !!assistantSecondAgent) {
-      //   conversationData.messages[conversationData.messages.length - 1].deviatingMessage = true;
-
-      //   // call other agent to respond
-      //   let { concepts, response } = await secondAgent(message, assistantSecondAgent);
-      //   concepts = await getDeviatingConcepts(concepts, uname);
-      //   const responseMessage = {
-      //     role: "assistant",
-      //     content: response,
-      //     sentAt: new Date(),
-      //     mid: db.collection("tutorConversations").doc().id,
-      //     concepts,
-      //     deviatingMessage: true,
-      //   };
-      //   conversationData.messages.push(responseMessage);
-      //   if (!questionMessage) {
-      //     questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-      //   }
-      //   if (!!questionMessage) {
-      //     conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
-      //   }
-      //   t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
-      //   return;
-      // }
-
-      let completeMessage = "";
-      let lateResponse: {
-        evaluation: any;
-        emotion: string;
-        progress: string;
-        inform_instructor: string;
-        learning_summary: string;
-      } = {
-        evaluation: "0",
-        emotion: "",
-        progress: "0",
-        inform_instructor: "",
-        learning_summary: "",
-      };
-      let got_response = false;
-      let tries = 0;
-
-      console.log({ deviatingResponse });
-      const response = await openai.chat.completions.create({
-        messages: mergedMessages,
-        model: "gpt-4-0125-preview",
-        temperature: 0,
-        stream: true,
-      });
-      // stream the main reponse to the user
-      let stopStreaming = false;
-      let question = "";
-      let answer = "";
-      let scrolled = false;
-      const regex = /~{2,}/g;
-      for await (const result of response) {
-        if (result.choices[0].delta.content) {
-          if (!stopStreaming) {
-            const streamText = result.choices[0].delta.content.replace(/~{2,}/g, "");
-            res.write(`${streamText}`);
-            answer += `${streamText}`;
-          } else {
-            question += `${result.choices[0].delta.content}`;
-          }
-          const matches = result.choices[0].delta.content.match(regex);
-          if (matches) {
-            stopStreaming = true;
-            if (!scrolled) {
-              console.log({ scroll_flashcard_next });
-              if (scroll_flashcard_next) {
-                conversationData.usedFlashcards.push(scroll_flashcard_next);
-                res.write(`flashcard_id: "${scroll_flashcard_next}"`);
-              }
-              if (furtherExplain) {
-                const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
-                res.write(`flashcard_id: "${scroll_to}"`);
-              }
-              scrolled = true;
-            }
-          }
-          completeMessage = completeMessage + result.choices[0].delta.content;
-        }
-      }
-
-      console.log({ answer });
-      console.log({ question });
-      if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
-        await delay(2000);
-        const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
-        res.write(doneMessage);
-        const sentAt = new Date(new Date());
-        sentAt.setSeconds(sentAt.getSeconds() + 20);
-        conversationData.messages.push({
-          role: "assistant",
-          content: doneMessage,
-          sentAt,
-          mid: db.collection("tutorConversations").doc().id,
-        });
-        conversationData.done = true;
-      }
-
-      completeMessage = completeMessage.replace(/~{2,}/g, "");
-
-      // save the response from GPT in the db
-      const divideId = db.collection("tutorConversations").doc().id;
-      conversationData.messages.push({
-        role: "assistant",
-        content: !answer ? completeMessage : answer,
-        divided: !!answer ? divideId : false,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-      });
-
-      if (!!question) {
-        conversationData.messages.push({
-          role: "assistant",
-          content: question,
-          divided: !!answer ? divideId : false,
-          question: true,
-          sentAt: new Date(),
-          mid: db.collection("tutorConversations").doc().id,
-        });
-      } else if (questionMessage) {
-        conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
-      } else if (!!nextFlashcard) {
-        const question = await getTheNextQuestion(nextFlashcard);
-        conversationData.messages.push({
-          role: "assistant",
-          content: question,
-          divided: !!answer ? divideId : false,
-          question: true,
-          sentAt: new Date(),
-          mid: db.collection("tutorConversations").doc().id,
-        });
-      }
-      t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
-      //end stream
-      res.end();
-      if (!furtherExplain && !default_message) {
-        while (!got_response && tries < 5) {
-          try {
-            tries = tries + 1;
-            const _messages = mergedMessages;
-            _messages.push({
-              role: "user",
-              content: `
-            Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
-            {
-              "evaluation":"A number between 0 to 10 indicating the quality of my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question.",
-              "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy", "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers,
-              "inform_instructor": "Yes" if the instructor should be informed about my response to your last message. "No" if there is no reason to take the instructor's time about my last message to you.
-            }
-            Do not print anything other than this JSON object.`,
-            });
-            // "progress": A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
-
-            const response = await openai.chat.completions.create({
-              messages: _messages,
-              model: "gpt-4-0125-preview",
-              temperature: 0,
-            });
-            const responseText = response.choices[0].message.content;
-            lateResponse = extractJSON(responseText);
-            got_response = true;
-
-            console.log({ lateResponse });
-          } catch (error) {
-            console.log(error);
-          }
-        }
-        /* we calculate the progress of the user in this unit
-         */
-        const evaluation = isNaN(lateResponse.evaluation) ? 0 : parseFloat(lateResponse.evaluation);
-
-        if (scroll_flashcard_next && !furtherExplain) {
-          if (conversationData.hasOwnProperty("flashcardsScores")) {
-            conversationData.flashcardsScores[scroll_flashcard_next] = evaluation;
-          } else {
-            conversationData.flashcardsScores = {
-              [scroll_flashcard_next]: evaluation,
-            };
-          }
-        }
-        console.log(
-          "calculateProgress(conversationData.flashcardsScores):",
-          calculateProgress(conversationData.flashcardsScores)
-        );
-        if (conversationData.progress < 1) {
-          conversationData.progress = roundNum(
-            calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
-          );
-        }
-        await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
-
-        if (conversationData.hasOwnProperty("scores")) {
-          conversationData.scores.push({
-            score: evaluation,
-            date: new Date(),
-            flashcard: scroll_flashcard_next,
-          });
-        } else {
-          conversationData.scores = [
-            {
-              score: evaluation,
-              date: new Date(),
-            },
-          ];
-        }
-      }
-      if (lateResponse.learning_summary) {
-        conversationData.learningSummary = lateResponse.learning_summary;
-      }
-
-      if (conversationData.messages.length === 2) {
-        lateResponse.emotion = "";
-      }
-      let messageIdx = conversationData.messages.length - 1;
-      if (!!answer && !!question) {
-        messageIdx = conversationData.messages.length - 2;
-      }
-      conversationData.messages[messageIdx] = {
-        ...conversationData.messages[messageIdx],
-        inform_instructor: lateResponse.inform_instructor,
-        prior_evaluation: lateResponse.evaluation,
-        emotion: lateResponse.emotion,
-      };
-      conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
-      t.set(newConversationRef, { ...conversationData, updatedAt: new Date() });
-      console.log("Done");
-    });
-    const newLogRef = db.collection("logs").doc();
-    await newLogRef.set({
-      uname: uname || "",
-      severity: "default",
-      where: "assistant tutor endpoint",
-      conversationId,
-      createdAt: new Date(),
-    });
-  } catch (error: any) {
-    console.log(error);
-    console.log("error at handler", {
-      uname: uname || "",
-      severity: "error",
-      where: "assistant tutor endpoint",
-      conversationId,
-      error: {
-        message: error.message,
-        stack: error.stack,
-      },
-    });
-    const newLogRef = db.collection("logs").doc();
-    await newLogRef.set({
-      uname: uname || "",
-      severity: "default",
-      where: "assistant tutor endpoint",
-      conversationId,
-      createdAt: new Date(),
-    });
-    try {
-      const newLogRef = db.collection("logs").doc();
-      await newLogRef.set({
-        uname: uname || "",
-        severity: "error",
-        where: "assistant tutor endpoint",
-        error: {
-          message: error.message,
-          stack: error.stack,
-        },
-        conversationId,
-        createdAt: new Date(),
-      });
-    } catch (error) {
-      console.log("error saving the log", error);
     }
-    return res
-      .status(500)
-      .send(
-        "Something went wrong! We apologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education"
-      );
+    if (cosSimilarityParagraph > maxCose) {
+      result = paragraph;
+      maxCose = cosSimilarityParagraph;
+    }
   }
-}
+  return result;
+};
 
-export default fbAuth(handler);
+export const tokenizeAndCount = (text: string): Record<string, number> => {
+  const wordCounts: Record<string, number> = {};
+  const words = text.toLowerCase().match(/\b(\w+)\b/g);
+  if (words) {
+    words.forEach(word => {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+    });
+  }
+  return wordCounts;
+};
 
-// let cleanData = extractFlashcardId(completeMessage);
-// const input = completeMessage;
-// const mp3 = await openai.audio.speech.create({
-//   model: "tts-1-hd",
-//   voice: "alloy",
-//   input,
-// });
-// const buffer = Buffer.from(await mp3.arrayBuffer());
-// const audioUrl = await uploadToCloudStorage(buffer);
+export const calculateCosineSimilarity = (vec1: object, vec2: object): number => {
+  const intersection = Object.keys(vec1).filter(value => Object.keys(vec2).includes(value));
 
-// if the user is sending the fist message we need to ignore the emotion
+  const dotProduct = intersection.reduce(
+    (sum, key) => sum + vec1[key as keyof typeof vec1] * vec2[key as keyof typeof vec2],
+    0
+  );
 
-// if (!default_message) {
-//   try {
-//     const _response = await openai.chat.completions.create({
-//       messages: [
-//         {
-//           role: "user",
-//           content: `Separate the question from the rest of the text in: "${completeMessage.replace(" ~~~~~~~~", "")}"
-//         {
-//           "rest_of_the_text":"",
-//           "question":"",
-//         }
-//         Do not print anything other than this JSON object.`,
-//         },
-//       ],
-//       model: "gpt-4-0125-preview",
-//       temperature: 0,
-//     });
-//     console.log(_response.choices[0].message.content);
-//     const _responseText = _response.choices[0].message.content;
-//     const question_answer = extractJSON(_responseText);
-//     answer = question_answer?.rest_of_the_text || "";
-//     question = question_answer?.question || "";
-//   } catch (error) {
-//     console.log("error", error);
-//   }
-// }
+  const magnitude1 = Math.sqrt(Object.values(vec1).reduce((sum, val) => sum + val * val, 0));
+  const magnitude2 = Math.sqrt(Object.values(vec2).reduce((sum, val) => sum + val * val, 0));
+
+  if (magnitude1 && magnitude2) {
+    return dotProduct / (magnitude1 * magnitude2);
+  } else {
+    return 0;
+  }
+};
