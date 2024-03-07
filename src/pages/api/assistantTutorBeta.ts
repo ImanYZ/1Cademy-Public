@@ -1030,8 +1030,8 @@ const checkIfUserIsDeviating = async (
   unitTitle: string
 ): Promise<{ _deviating: boolean; sections: string[] }> => {
   const { sections }: any = await getChapterRelatedToResponse(message, courseName);
-  console.log(sections);
-  return { _deviating: sections.includes(unitTitle), sections };
+  console.log(sections, unitTitle);
+  return { _deviating: !sections.includes(unitTitle), sections };
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
   // const chapterDoc = chaptersDoc.docs[0];
   // const chapterData = chapterDoc.data();
