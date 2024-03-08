@@ -1,9 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
 
-const extractArray = (arrayString: string) => {
+export const extractArray = (arrayString: string) => {
   const start = arrayString.indexOf("[");
   const end = arrayString.lastIndexOf("]");
+  if (start === -1 || end === -1) {
+    return "[]";
+  }
   const jsonArrayString = arrayString.slice(start, end + 1);
   return jsonArrayString;
 };

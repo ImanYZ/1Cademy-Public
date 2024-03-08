@@ -7,6 +7,7 @@ import { delay } from "@/lib/utils/utils";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
+import { extractArray } from "./assignment/generateRubrics";
 type Message = {
   role: string;
   content: string;
@@ -97,7 +98,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
-
+    console.log(conversationDocs.docs.length);
+    if (conversationDocs.docs.length > 0 && !message) {
+      console.log(conversationDocs.docs[0].id);
+      return;
+    }
     /*  if the conversation associated with this unit already exist we continue the conversation from there
        otherwise we initialize a new one  */
     if (conversationDocs.docs.length > 0) {
@@ -178,7 +183,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       //   ...conversationData.usedFlashcards,
       //   nextFlashcard?.id || "",
       // ]);
-      const { _deviating, sections } = await checkIfUserIsDeviating(message, courseName, unitTitle);
+      const { _deviating, sections } = await checkIfUserIsDeviating(
+        message,
+        courseName,
+        unitTitle,
+        mergedMessagesMinusFurtherExplain
+      );
       deviating = _deviating;
       detectedSections = sections;
     }
@@ -1027,11 +1037,13 @@ const streamPrompt = async (messages: any) => {
 const checkIfUserIsDeviating = async (
   message: any,
   courseName: string,
-  unitTitle: string
+  unitTitle: string,
+  mergedMessages: any
 ): Promise<{ _deviating: boolean; sections: string[] }> => {
-  const { sections }: any = await getChapterRelatedToResponse(message, courseName);
+  const { sections }: any = await getChapterRelatedToResponse(mergedMessages, courseName);
   console.log(sections, unitTitle);
-  return { _deviating: !sections.includes(unitTitle), sections };
+  const _deviating = !checkIncludes(unitTitle, sections);
+  return { _deviating, sections };
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
   // const chapterDoc = chaptersDoc.docs[0];
   // const chapterData = chapterDoc.data();
@@ -1092,8 +1104,9 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
   return gptResponse;
 };
 
-const getChapterRelatedToResponse = async (message: string, courseName: string) => {
+const getChapterRelatedToResponse = async (mergedMessages: any, courseName: string) => {
   try {
+    const messagesHistory = [...mergedMessages].splice(1);
     let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
 
     if (courseName == "Mission Corporation") {
@@ -1126,31 +1139,43 @@ const getChapterRelatedToResponse = async (message: string, courseName: string) 
     }
     //
     console.log(chaptersMap);
-    const systemPrompt =
-      `You are an expert on ${courseName}.
-        The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:
-        ${JSON.stringify(chaptersMap)}
-        The user asks you a question and you should respond an array of strings ["____", "____", ...] ` +
-      `of the titles of the sub-sections of the book the user should study to learn the answer to their question. ` +
-      `The array should only include the sub-section titles that are very related to the student's question. ` +
-      `If none of the sub-sections are very related to the student's question, return an empty array []`;
+    const tutorLastMessage = messagesHistory[messagesHistory.length - 2].content;
+    const studentLastMessage = messagesHistory[messagesHistory.length - 1].content;
+    /* 
+        `You are an expert on ${courseName}.\n` +
+      `The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:\n` +
+      `${JSON.stringify(chaptersMap)}\n` +
+      `You have access to the conversation between an instructor and a student.\n` +
+      `You should respond an array of strings ["____", "____", ...] \n` +
+      `of the titles of the sub-sections of the book the student should study to learn what they want. \n` +
+      `The array should only include the sub-section titles that are very related to the student's last message. \n` +
+      `If none of the sub-sections are very related to the student's last message, return an empty array []\n` +
+      `The last message that the instructor sent to the student is: '''${tutorLastMessage}'''\n` +
+      `The student's last message is: '''${studentLastMessage}'''`;
+     */
+    const userPrompt =
+      `The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:\n` +
+      `${JSON.stringify(chaptersMap)}\n` +
+      `You have access to the conversation between an instructor and a student.\n` +
+      `You should respond an array of strings ["____", "____", ...] \n` +
+      `of the titles of the sub-sections of the book the student should study to learn what they want. \n` +
+      `The array should only include the sub-section titles that are very related to the student's last message. \n` +
+      `If none of the sub-sections are very related to the student's last message, return an empty array []\n` +
+      `The last message that the instructor sent to the student is: '''${tutorLastMessage}'''\n` +
+      `The student's last message is: '''${studentLastMessage}'''`;
 
-    console.log(systemPrompt);
+    console.log(userPrompt);
     const response = await sendGPTPrompt("gpt-4-turbo-preview", [
       {
-        role: "system",
-        content: systemPrompt,
-      },
-      {
         role: "user",
-        content: message,
+        content: userPrompt,
       },
     ]);
     console.log({ response });
     let sections = [];
     if (response) {
       try {
-        sections = JSON.parse(response);
+        sections = JSON.parse(extractArray(response));
       } catch (error) {
         console.log(error);
       }
@@ -1219,10 +1244,10 @@ const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: stri
     if (!paragraph?.text) continue;
     const paragraphSentences = (paragraph?.text || "").split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
     let cosSimilarityParagraph = 0;
-    for (let sentence of paragraphSentences) {
-      const v1 = tokenizeAndCount(sentence);
-      for (let sentence of sentences) {
-        const v2 = tokenizeAndCount(sentence);
+    for (let sentence1 of paragraphSentences) {
+      const v1 = tokenizeAndCount(sentence1);
+      for (let sentence2 of sentences) {
+        const v2 = tokenizeAndCount(sentence2);
         const cosSimilarity = calculateCosineSimilarity(v1, v2);
         cosSimilarityParagraph += cosSimilarity;
       }
@@ -1262,4 +1287,15 @@ export const calculateCosineSimilarity = (vec1: object, vec2: object): number =>
   } else {
     return 0;
   }
+};
+
+const checkIncludes = (searchString: string, arrayString: string[]) => {
+  const v1 = tokenizeAndCount(searchString);
+  for (let section of arrayString) {
+    const v2 = tokenizeAndCount(section);
+    if (calculateCosineSimilarity(v1, v2) > 0.8) {
+      return true;
+    }
+  }
+  return false;
 };
