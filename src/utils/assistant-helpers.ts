@@ -303,7 +303,26 @@ export const sendGPTPrompt = async (
 
   return response.choices[0].message.content;
 };
+export const sendGPTPromptJSON = async (
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
+  messages: any[]
+) => {
+  const config = {
+    apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_API_ORG_ID,
+  };
 
+  const openai = new OpenAI(config);
+
+  const response = await openai.chat.completions.create({
+    messages,
+    model,
+    temperature: 0,
+    response_format: { type: "json_object" },
+  });
+
+  return response.choices[0].message.content;
+};
 export const getGPT4Queries = async (conversation: IAssistantConversation, bookText: string): Promise<string[]> => {
   const prompt =
     `You're a tutor and I'm a student.\n` +
