@@ -388,11 +388,11 @@ const getEvaluation = async ({
     inform_instructor: "",
     learning_summary: "",
   };
-  let got_response = false;
+  let gpt_response = false;
   let tries = 0;
 
   if (!furtherExplain && !default_message) {
-    while (!got_response && tries < 5) {
+    while (!gpt_response && tries < 5) {
       try {
         tries = tries + 1;
         const _messages = mergedMessages;
@@ -416,10 +416,19 @@ const getEvaluation = async ({
         });
         const responseText = response.choices[0].message.content;
         lateResponse = extractJSON(responseText);
-        got_response = true;
+        gpt_response = true;
       } catch (error) {
         console.log(error);
       }
+    }
+    if (!lateResponse) {
+      lateResponse = {
+        evaluation: "0",
+        emotion: "",
+        progress: "0",
+        inform_instructor: "",
+        learning_summary: "",
+      };
     }
     console.log(lateResponse);
     /* we calculate the progress of the user in this unit
