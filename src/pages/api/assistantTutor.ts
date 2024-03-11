@@ -597,9 +597,17 @@ const handleDeviating = async (
 
   if (relevanceResponse) {
     //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
-    res.write(
-      `You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading`
-    );
+    const messDev =
+      "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
+    res.write(`${messDev}keepLoading`);
+    conversationData.messages.push({
+      role: "assistant",
+      content: messDev,
+      sentAt: new Date(),
+      mid: db.collection("tutorConversations").doc().id,
+      concepts: featuredConcepts,
+      deviatingMessage: true,
+    });
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
     let sectionsString = "";
@@ -607,8 +615,16 @@ const handleDeviating = async (
       sectionsString += `- ${s}\n`;
     });
     if (paragraphs.length > 0) {
-      res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
-
+      const messDev = `I'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
+      res.write(`${messDev} keepLoading`);
+      conversationData.messages.push({
+        role: "assistant",
+        content: messDev,
+        sentAt: new Date(),
+        mid: db.collection("tutorConversations").doc().id,
+        concepts: featuredConcepts,
+        deviatingMessage: true,
+      });
       const prompt = `Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.  
   ${JSON.stringify(paragraphs)}
   Always respond a JSON object with the following structure:
