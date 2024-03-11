@@ -2,9 +2,9 @@ import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { IAssitantRequestAction } from "src/types/IAssitantConversation";
-import { openai } from "./openAI/helpers";
+import { chaptersMapCoreEcon, openai } from "./openAI/helpers";
 import { delay } from "@/lib/utils/utils";
-import { sendGPTPrompt } from "src/utils/assistant-helpers";
+import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
 import { extractArray } from "./assignment/generateRubrics";
@@ -1107,38 +1107,37 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
 const getChapterRelatedToResponse = async (mergedMessages: any, courseName: string) => {
   try {
     const messagesHistory = [...mergedMessages].splice(1);
-    let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
-
+    // let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
+    let chapterMap = chaptersMapCoreEcon;
     if (courseName == "Mission Corporation") {
-      chaptersBookQuery = db.collection("chaptersBook").where("book", "==", "Mission Corporation");
-    }
+      const chaptersBookQuery = db.collection("chaptersBook").where("book", "==", "Mission Corporation");
 
-    const chaptersBookDocs = await chaptersBookQuery.get();
-    //Create a chapterMap that will have all the chapters and subchapters in an array of objects
-    //
-    const chaptersMap: { chapter: string; subSections: { title: string; key_words: string[] }[] }[] = [];
-    for (let chapterDoc of chaptersBookDocs.docs) {
-      const chapterData = chapterDoc.data();
-      const chapterIdx = chaptersMap.findIndex(c => c.chapter === chapterData.chapterTitle);
-      if (chapterIdx !== -1) {
-        chaptersMap[chapterIdx].subSections.push({
-          title: chapterData.sectionTitle,
-          key_words: chapterData.keyWords,
-        });
-      } else {
-        chaptersMap.push({
-          chapter: chapterData.chapterTitle,
-          subSections: [
-            {
-              title: chapterData.sectionTitle,
-              key_words: chapterData.keyWords,
-            },
-          ],
-        });
+      const chaptersBookDocs = await chaptersBookQuery.get();
+      //Create a chapterMap that will have all the chapters and subchapters in an array of objects
+      //
+      const _chapterMap: { chapter: string; subSections: { title: string; key_words: string[] }[] }[] = [];
+      for (let chapterDoc of chaptersBookDocs.docs) {
+        const chapterData = chapterDoc.data();
+        const chapterIdx = _chapterMap.findIndex(c => c.chapter === chapterData.chapterTitle);
+        if (chapterIdx !== -1) {
+          _chapterMap[chapterIdx].subSections.push({
+            title: chapterData.sectionTitle,
+            key_words: chapterData.keyWords,
+          });
+        } else {
+          _chapterMap.push({
+            chapter: chapterData.chapterTitle,
+            subSections: [
+              {
+                title: chapterData.sectionTitle,
+                key_words: chapterData.keyWords,
+              },
+            ],
+          });
+        }
       }
     }
-    //
-    console.log(chaptersMap);
+    console.log(chapterMap);
     const tutorLastMessage = messagesHistory[messagesHistory.length - 2].content;
     const studentLastMessage = messagesHistory[messagesHistory.length - 1].content;
     /* 
@@ -1154,18 +1153,27 @@ const getChapterRelatedToResponse = async (mergedMessages: any, courseName: stri
       `The student's last message is: '''${studentLastMessage}'''`;
      */
     const userPrompt =
-      `The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:\n` +
-      `${JSON.stringify(chaptersMap)}\n` +
-      `You have access to the conversation between an instructor and a student.\n` +
-      `You should respond an array of strings ["____", "____", ...] \n` +
-      `of the titles of the sub-sections of the book the student should study to learn what they want. \n` +
-      `The array should only include the sub-section titles that are very related to the student's last message. \n` +
-      `If none of the sub-sections are very related to the student's last message, return an empty array []\n` +
-      `The last message that the instructor sent to the student is: '''${tutorLastMessage}'''\n` +
-      `The student's last message is: '''${studentLastMessage}'''`;
+      `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student,` +
+      `your task is to evaluate the student's last message for its relevance to the course material.` +
+      `The table of contents is as follows:` +
+      `${JSON.stringify(chapterMap)}\n` +
+      `The last message sent by the instructor to the student is:\n` +
+      `'''${tutorLastMessage}'''\n` +
+      `The student's last response is:\n` +
+      `'''${studentLastMessage}'''\n` +
+      `Based on the student's last message, determine whether the student is staying on topic with the
+      course material or deviating from it. Provide a brief explanation for your determination.\n` +
+      `If the student is staying on topic, identify any specific sub-sections from the book that directly relate to their query or discussion point.\n` +
+      `If the student is deviating, suggest a polite reminder or guidance to steer them back towards relevant course content.\n` +
+      `Your response should be structured as json object as follows:\n` +
+      `{\n` +
+      `"relevantSubSections": ["Sub-section title 1", "Sub-section title 2", ...] (If the student is on topic)\n` +
+      `"status": "On Topic" or "Deviating"\n` +
+      `"explanation": "Your brief explanation here."\n` +
+      `"guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)}`;
 
     console.log(userPrompt);
-    const response = await sendGPTPrompt("gpt-4-turbo-preview", [
+    const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
       {
         role: "user",
         content: userPrompt,
@@ -1175,7 +1183,7 @@ const getChapterRelatedToResponse = async (mergedMessages: any, courseName: stri
     let sections = [];
     if (response) {
       try {
-        sections = JSON.parse(extractArray(response));
+        sections = JSON.parse(response).relevantSubSections;
       } catch (error) {
         console.log(error);
       }
@@ -1195,7 +1203,11 @@ const getParagraphs = async (sections: string[]) => {
       const chapterDoc = chaptersBookDocs.docs[0];
       const chapterData = chapterDoc.data();
       const _paragraphs: any = [];
-      chapterData.paragraphs.map((p: any) => _paragraphs.push({ text: p.text, id: p.ids[0] }));
+      chapterData.paragraphs.map((p: any) => {
+        if ((p.ids || []).length > 0) {
+          _paragraphs.push({ text: p.text, id: p.ids[0] });
+        }
+      });
       allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
       paragraphs.push({
         section,
