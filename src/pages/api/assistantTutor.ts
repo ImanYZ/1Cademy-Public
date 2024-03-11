@@ -2,11 +2,12 @@ import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { IAssitantRequestAction } from "src/types/IAssitantConversation";
-import { openai } from "./openAI/helpers";
+import { chaptersMapCoreEcon, openai } from "./openAI/helpers";
 import { delay } from "@/lib/utils/utils";
-import { sendGPTPrompt } from "src/utils/assistant-helpers";
+import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
+import { extractArray } from "./assignment/generateRubrics";
 type Message = {
   role: string;
   content: string;
@@ -29,6 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   let conversationId = "";
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
+  let detectedSections: string[] = [];
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
@@ -57,6 +59,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       await getPromptInstructions(course, uname, isInstructor);
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
+    const unitTitle = concepts[0]?.sectionTitle || "";
     console.log(concepts.length);
     if (!concepts.length) {
       throw new Error("Flashcards don't exist in this page.");
@@ -95,7 +98,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
-
+    console.log(conversationDocs.docs.length);
+    if (conversationDocs.docs.length > 0 && !message) {
+      console.log(conversationDocs.docs[0].id);
+      return;
+    }
     /*  if the conversation associated with this unit already exist we continue the conversation from there
        otherwise we initialize a new one  */
     if (conversationDocs.docs.length > 0) {
@@ -176,7 +183,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       //   ...conversationData.usedFlashcards,
       //   nextFlashcard?.id || "",
       // ]);
-      deviating = await checkIfUserIsDeviating(mergedMessagesMinusFurtherExplain, false);
+      const { _deviating, sections } = await checkIfUserIsDeviating(
+        message,
+        courseName,
+        unitTitle,
+        mergedMessagesMinusFurtherExplain
+      );
+      deviating = _deviating;
+      detectedSections = sections;
     }
     console.log({ deviating });
     if (deviating) {
@@ -190,7 +204,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         newConversationRef,
         false,
         uname,
-        cardsModel
+        cardsModel,
+        detectedSections
       );
       await saveLogs({
         course,
@@ -273,37 +288,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       sentAt: new Date(),
       mid: db.collection("tutorConversations").doc().id,
     });
-    deviating = await checkIfUserIsDeviating(mergedMessagesMinusFurtherExplain, true);
-    console.log({ deviatingAfterResponse: deviating });
-    if (deviating) {
-      // handle the case where the user deviates from the conversation
-      await handleDeviating(
-        res,
-        conversationData,
-        relevanceResponse,
-        message,
-        courseName,
-        questionMessage,
-        newConversationRef,
-        true,
-        uname,
-        cardsModel
-      );
-      await saveLogs({
-        course,
-        url,
-        uname: uname || "",
-        severity: "default",
-        where: "assistant tutor endpoint",
-        conversationId,
-        deviating,
-        relevanceResponse,
-        createdAt: new Date(),
-        message,
-        project: "1Tutor",
-      });
-      return;
-    }
 
     const lateResponse = await getEvaluation({
       mergedMessages,
@@ -584,7 +568,8 @@ const handleDeviating = async (
   newConversationRef: any,
   secondPrompt: boolean,
   uname: string,
-  cardsModel: string
+  cardsModel: string,
+  sections: string[]
 ) => {
   // relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
 
@@ -616,7 +601,7 @@ const handleDeviating = async (
       `You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading`
     );
     // call other agent to respond
-    const { paragraphs, allParagraphs, sections }: any = await getChapterRelatedToResponse(message, courseName);
+    const { paragraphs, allParagraphs } = await getParagraphs(sections);
     let sectionsString = "";
     sections.map((s: string) => {
       sectionsString += `- ${s}\n`;
@@ -1049,45 +1034,54 @@ const streamPrompt = async (messages: any) => {
   }
 };
 
-const checkIfUserIsDeviating = async (messages: any, secondPrompt: boolean): Promise<boolean> => {
+const checkIfUserIsDeviating = async (
+  message: any,
+  courseName: string,
+  unitTitle: string,
+  mergedMessages: any
+): Promise<{ _deviating: boolean; sections: string[] }> => {
+  const { sections }: any = await getChapterRelatedToResponse(mergedMessages, courseName);
+  console.log(sections, unitTitle);
+  const _deviating = !checkIncludes(unitTitle, sections);
+  return { _deviating, sections };
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
   // const chapterDoc = chaptersDoc.docs[0];
   // const chapterData = chapterDoc.data();
 
   // const paragraphs = getInteractedParagraphs(chapterData.paragraphs, paragraphsIds);
-  console.log("checkIfTheQuestionIsRelated");
-  let _messages = [...messages];
-  const lastMessage = _messages.pop();
-  _messages = _messages.filter((m: any) => m.role !== "system");
+  //   console.log("checkIfTheQuestionIsRelated");
+  //   let _messages = [...messages];
+  //   const lastMessage = _messages.pop();
+  //   _messages = _messages.filter((m: any) => m.role !== "system");
 
-  let deviatingPrompt = `
-  The following is a conversation between a student and a tutor:
-  '''
-  ${generateListMessagesText(_messages)}
-  '''
-  The student just responded:
-  '''
-  ${lastMessage.content}
-  '''
-  Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No", 
-  "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
-  console.log({ secondPrompt });
-  if (secondPrompt) {
-    deviatingPrompt = `
-  The following is a conversation between a student and a tutor:
-  '''
-  ${generateListMessagesText(_messages)}
-  '''
-  The tutor just responded:
-  '''
-  ${lastMessage.content}
-  '''
-Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No", 
-"deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
-  }
-  console.log("deviatingPrompt", deviatingPrompt);
-  const deviating = await streamPrompt([{ content: deviatingPrompt, role: "user" }]);
-  return !!deviating;
+  //   let deviatingPrompt = `
+  //   The following is a conversation between a student and a tutor:
+  //   '''
+  //   ${generateListMessagesText(_messages)}
+  //   '''
+  //   The student just responded:
+  //   '''
+  //   ${lastMessage.content}
+  //   '''
+  //   Only generate a JSON response with this structure: {"deviating_topic": Is the student's last message (not the tutor's) about a topic different from the tutor's last message? Only answer "Yes" or "No",
+  //   "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
+  //   console.log({ secondPrompt });
+  //   if (secondPrompt) {
+  //     deviatingPrompt = `
+  //   The following is a conversation between a student and a tutor:
+  //   '''
+  //   ${generateListMessagesText(_messages)}
+  //   '''
+  //   The tutor just responded:
+  //   '''
+  //   ${lastMessage.content}
+  //   '''
+  // Only generate a JSON response with this structure: {"deviating_topic": Is the tutor's last message indicating that the student (not the tutor) was deviating from the topic of conversation with the tutor? Only answer "Yes" or "No",
+  // "deviating_evidence": "Your reasoning for why you think the student's last message is about a topic different from the topic of conversation with the tutor"}`;
+  //   }
+  //   console.log("deviatingPrompt", deviatingPrompt);
+  //   const deviating = await streamPrompt([{ content: deviatingPrompt, role: "user" }]);
+  //   return !!deviating;
 };
 const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
   const scores = Object.values(flashcardsScores);
@@ -1110,91 +1104,121 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
   return gptResponse;
 };
 
-const getChapterRelatedToResponse = async (message: string, courseName: string) => {
+const getChapterRelatedToResponse = async (mergedMessages: any, courseName: string) => {
   try {
-    let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
-
+    const messagesHistory = [...mergedMessages].splice(1);
+    // let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
+    let chapterMap = chaptersMapCoreEcon;
     if (courseName == "Mission Corporation") {
-      chaptersBookQuery = db.collection("chaptersBook").where("book", "==", "Mission Corporation");
-    }
+      const chaptersBookQuery = db.collection("chaptersBook").where("book", "==", "Mission Corporation");
 
-    const chaptersBookDocs = await chaptersBookQuery.get();
-    //Create a chapterMap that will have all the chapters and subchapters in an array of objects
-    //
-    const chaptersMap: { chapter: string; subSections: { title: string; key_words: string[] }[] }[] = [];
-    for (let chapterDoc of chaptersBookDocs.docs) {
-      const chapterData = chapterDoc.data();
-      const chapterIdx = chaptersMap.findIndex(c => c.chapter === chapterData.chapterTitle);
-      if (chapterIdx !== -1) {
-        chaptersMap[chapterIdx].subSections.push({
-          title: chapterData.sectionTitle,
-          key_words: chapterData.keyWords,
-        });
-      } else {
-        chaptersMap.push({
-          chapter: chapterData.chapterTitle,
-          subSections: [
-            {
-              title: chapterData.sectionTitle,
-              key_words: chapterData.keyWords,
-            },
-          ],
-        });
+      const chaptersBookDocs = await chaptersBookQuery.get();
+      //Create a chapterMap that will have all the chapters and subchapters in an array of objects
+      //
+      const _chapterMap: { chapter: string; subSections: { title: string; key_words: string[] }[] }[] = [];
+      for (let chapterDoc of chaptersBookDocs.docs) {
+        const chapterData = chapterDoc.data();
+        const chapterIdx = _chapterMap.findIndex(c => c.chapter === chapterData.chapterTitle);
+        if (chapterIdx !== -1) {
+          _chapterMap[chapterIdx].subSections.push({
+            title: chapterData.sectionTitle,
+            key_words: chapterData.keyWords,
+          });
+        } else {
+          _chapterMap.push({
+            chapter: chapterData.chapterTitle,
+            subSections: [
+              {
+                title: chapterData.sectionTitle,
+                key_words: chapterData.keyWords,
+              },
+            ],
+          });
+        }
       }
     }
-    //
-    console.log(chaptersMap);
-    const systemPrompt =
-      `You are an expert on ${courseName}.
-        The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:
-        ${JSON.stringify(chaptersMap)}
-        The user asks you a question and you should respond an array of strings ["____", "____", ...] ` +
-      `of the titles of the sub-sections of the book the user should study to learn the answer to their question. ` +
-      `The array should only include the sub-section titles that are very related to the student's question. ` +
-      `If none of the sub-sections are very related to the student's question, return an empty array []`;
+    console.log(chapterMap);
+    const tutorLastMessage = messagesHistory[messagesHistory.length - 2].content;
+    const studentLastMessage = messagesHistory[messagesHistory.length - 1].content;
+    /* 
+        `You are an expert on ${courseName}.\n` +
+      `The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:\n` +
+      `${JSON.stringify(chaptersMap)}\n` +
+      `You have access to the conversation between an instructor and a student.\n` +
+      `You should respond an array of strings ["____", "____", ...] \n` +
+      `of the titles of the sub-sections of the book the student should study to learn what they want. \n` +
+      `The array should only include the sub-section titles that are very related to the student's last message. \n` +
+      `If none of the sub-sections are very related to the student's last message, return an empty array []\n` +
+      `The last message that the instructor sent to the student is: '''${tutorLastMessage}'''\n` +
+      `The student's last message is: '''${studentLastMessage}'''`;
+     */
+    const userPrompt =
+      `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student,` +
+      `your task is to evaluate the student's last message for its relevance to the course material.` +
+      `The table of contents is as follows:` +
+      `${JSON.stringify(chapterMap)}\n` +
+      `The last message sent by the instructor to the student is:\n` +
+      `'''${tutorLastMessage}'''\n` +
+      `The student's last response is:\n` +
+      `'''${studentLastMessage}'''\n` +
+      `Based on the student's last message, determine whether the student is staying on topic with the
+      course material or deviating from it. Provide a brief explanation for your determination.\n` +
+      `If the student is staying on topic, identify any specific sub-sections from the book that directly relate to their query or discussion point.\n` +
+      `If the student is deviating, suggest a polite reminder or guidance to steer them back towards relevant course content.\n` +
+      `Your response should be structured as json object as follows:\n` +
+      `{\n` +
+      `"relevantSubSections": ["Sub-section title 1", "Sub-section title 2", ...] (If the student is on topic)\n` +
+      `"status": "On Topic" or "Deviating"\n` +
+      `"explanation": "Your brief explanation here."\n` +
+      `"guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)}`;
 
-    console.log(systemPrompt);
-    const response = await sendGPTPrompt("gpt-4-turbo-preview", [
-      {
-        role: "system",
-        content: systemPrompt,
-      },
+    console.log(userPrompt);
+    const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
       {
         role: "user",
-        content: message,
+        content: userPrompt,
       },
     ]);
     console.log({ response });
     let sections = [];
     if (response) {
       try {
-        sections = JSON.parse(response);
+        sections = JSON.parse(response).relevantSubSections;
       } catch (error) {
         console.log(error);
       }
     }
-    const paragraphs = [];
-    let allParagraphs: any = [];
-    for (let section of sections) {
-      const chaptersBookDocs = await db.collection("chaptersBook").where("sectionTitle", "==", section).get();
-      if (chaptersBookDocs.docs.length > 0) {
-        const chapterDoc = chaptersBookDocs.docs[0];
-        const chapterData = chapterDoc.data();
-        const _paragraphs: any = [];
-        chapterData.paragraphs.map((p: any) => _paragraphs.push({ text: p.text, id: p.ids[0] }));
-        allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
-        paragraphs.push({
-          section,
-          paragraphs: _paragraphs,
-        });
-      }
-    }
-    console.log("paragraphs.length", paragraphs.length);
-    return { paragraphs, allParagraphs, sections };
+    return { sections };
   } catch (error) {
     console.log(error);
   }
 };
+
+const getParagraphs = async (sections: string[]) => {
+  const paragraphs = [];
+  let allParagraphs: any = [];
+  for (let section of sections) {
+    const chaptersBookDocs = await db.collection("chaptersBook").where("sectionTitle", "==", section).get();
+    if (chaptersBookDocs.docs.length > 0) {
+      const chapterDoc = chaptersBookDocs.docs[0];
+      const chapterData = chapterDoc.data();
+      const _paragraphs: any = [];
+      chapterData.paragraphs.map((p: any) => {
+        if ((p.ids || []).length > 0) {
+          _paragraphs.push({ text: p.text, id: p.ids[0] });
+        }
+      });
+      allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
+      paragraphs.push({
+        section,
+        paragraphs: _paragraphs,
+      });
+    }
+  }
+  console.log("paragraphs.length", paragraphs.length);
+  return { paragraphs, allParagraphs };
+};
+
 const extractFlashcards = async (
   paragraph: { text: string; ids: string[] },
   sections: string[],
@@ -1232,10 +1256,10 @@ const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: stri
     if (!paragraph?.text) continue;
     const paragraphSentences = (paragraph?.text || "").split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
     let cosSimilarityParagraph = 0;
-    for (let sentence of paragraphSentences) {
-      const v1 = tokenizeAndCount(sentence);
-      for (let sentence of sentences) {
-        const v2 = tokenizeAndCount(sentence);
+    for (let sentence1 of paragraphSentences) {
+      const v1 = tokenizeAndCount(sentence1);
+      for (let sentence2 of sentences) {
+        const v2 = tokenizeAndCount(sentence2);
         const cosSimilarity = calculateCosineSimilarity(v1, v2);
         cosSimilarityParagraph += cosSimilarity;
       }
@@ -1275,4 +1299,15 @@ export const calculateCosineSimilarity = (vec1: object, vec2: object): number =>
   } else {
     return 0;
   }
+};
+
+const checkIncludes = (searchString: string, arrayString: string[]) => {
+  const v1 = tokenizeAndCount(searchString);
+  for (let section of arrayString) {
+    const v2 = tokenizeAndCount(section);
+    if (calculateCosineSimilarity(v1, v2) > 0.8) {
+      return true;
+    }
+  }
+  return false;
 };
