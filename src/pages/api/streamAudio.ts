@@ -82,18 +82,16 @@ const saveMessageAssistant = async (audioUrl: string, message: any, uid: string)
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { message, audioType } = req.body;
+    let { message, audioType } = req.body;
     res.setHeader("Transfer-Encoding", "chunked");
 
     if (!audioType) {
-      throw new Error("Audio type is not specified");
+      audioType = "alloy";
     }
     //TO-DO restrict use cases
     let input = message.content;
-    let words = input.split(/\s+/);
 
-    // Divide the words into chunks of 5 words
-    let chunkSize = 5;
+    // Divide the input into chunk of sentences
     let chunks = input.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
     console.log(chunks);
     for (let chunk of chunks) {
