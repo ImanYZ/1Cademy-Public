@@ -12,7 +12,7 @@ import ImproveItemComp from "../ImproveItemComp";
 import OptimizedAvatar from "../OptimizedAvatar";
 import MessageInput from "./MessageInput";
 import MessageButtons from "./MessageButtons";
-import { sendMessageToChatGPT } from "../../../services/openai";
+import { sendMessageToChatGPT } from "../../services/openai";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import { User } from "src/knowledgeTypes";
