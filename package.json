@@ -83,6 +83,7 @@
     "remark-html": "^15.0.1",
     "remark-math": "^5.1.1",
     "rive-react": "github:elVengador/rive-react#tmp",
+    "styled-components": "^6.0.8",
     "sharp": "^0.30.7",
     "slate": "^0.81.1",
     "slate-react": "^0.81.0",
