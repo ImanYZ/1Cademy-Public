@@ -9,9 +9,10 @@ export type RiveProps = {
   autoplay: boolean;
   inView?: boolean;
   displayControls?: boolean;
+  style?: any;
 };
 
-const RiveComponentExtended = ({ src, artboard, animations, autoplay, displayControls = false }: RiveProps) => {
+const RiveComponentExtended = ({ src, artboard, animations, autoplay, displayControls = false, style }: RiveProps) => {
   const { RiveComponent, rive } = useRive({
     src,
     artboard,
@@ -31,7 +32,7 @@ const RiveComponentExtended = ({ src, artboard, animations, autoplay, displayCon
 
   return (
     <Box sx={{ width: "inherit", height: "inherit", position: "relative" }}>
-      <RiveComponent className={`rive-canvas`} />
+      <RiveComponent className={`rive-canvas`} style={{ ...style }} />
       {displayControls && (
         <Tooltip title="Restarts the animation">
           <IconButton onClick={onResetAnimation} sx={{ position: "absolute", bottom: "0px", right: "0px" }}>
