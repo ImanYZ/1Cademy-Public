@@ -388,11 +388,11 @@ const getEvaluation = async ({
     inform_instructor: "",
     learning_summary: "",
   };
-  let gpt_response = false;
+  let got_response = false;
   let tries = 0;
 
   if (!furtherExplain && !default_message) {
-    while (!gpt_response && tries < 5) {
+    while (!got_response && tries < 5) {
       try {
         tries = tries + 1;
         const _messages = mergedMessages;
@@ -416,19 +416,10 @@ const getEvaluation = async ({
         });
         const responseText = response.choices[0].message.content;
         lateResponse = extractJSON(responseText);
-        gpt_response = true;
+        got_response = true;
       } catch (error) {
         console.log(error);
       }
-    }
-    if (!lateResponse) {
-      lateResponse = {
-        evaluation: "0",
-        emotion: "",
-        progress: "0",
-        inform_instructor: "",
-        learning_summary: "",
-      };
     }
     console.log(lateResponse);
     /* we calculate the progress of the user in this unit
@@ -606,17 +597,9 @@ const handleDeviating = async (
 
   if (relevanceResponse) {
     //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
-    const messDev =
-      "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
-    res.write(`${messDev}keepLoading`);
-    conversationData.messages.push({
-      role: "assistant",
-      content: messDev,
-      sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
-      concepts: featuredConcepts,
-      deviatingMessage: true,
-    });
+    res.write(
+      `You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.keepLoading`
+    );
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
     let sectionsString = "";
@@ -624,16 +607,8 @@ const handleDeviating = async (
       sectionsString += `- ${s}\n`;
     });
     if (paragraphs.length > 0) {
-      const messDev = `I'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
-      res.write(`${messDev} keepLoading`);
-      conversationData.messages.push({
-        role: "assistant",
-        content: messDev,
-        sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
-        concepts: featuredConcepts,
-        deviatingMessage: true,
-      });
+      res.write(`I'm going to respond to you based on the following sections:\n\n ${sectionsString} keepLoading`);
+
       const prompt = `Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.  
   ${JSON.stringify(paragraphs)}
   Always respond a JSON object with the following structure:

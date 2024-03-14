@@ -54,7 +54,8 @@ const Custom404 = () => {
               mb: "10px",
             }}
           >
-            Something went wrong! We appologize for the inconvenience! Please try again! If the issue persists, please contact iman@honor.education
+            Something went wrong! We appologize for the inconvenience! Please try again! If the issue persists, please
+            contact iman@honor.education
           </Typography>
           <Typography
             sx={{
