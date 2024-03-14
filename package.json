@@ -97,7 +97,10 @@
     "wink-eng-lite-web-model": "^1.5.2",
     "wink-nlp": "^1.14.3",
     "xlsx": "^0.18.5",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "bootstrap": "^5.3.3",
+    "jquery": "^3.7.1",
+    "popper.js": "^1.16.1"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.10.0",
