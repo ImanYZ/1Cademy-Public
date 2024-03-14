@@ -2916,3 +2916,85 @@ right: 5px; */
 .reply-box:hover > .message-buttons {
   display: block;
 }
+
+#message-box::-webkit-scrollbar {
+  display: none;
+}
+
+.comment-input__suggestions__list::-webkit-scrollbar {
+  display: none;
+}
+
+#comment-concept-card::-webkit-scrollbar {
+  width: 2px;
+  border-radius: 10px;
+}
+
+.reply-box:hover > .message-buttons {
+  display: block;
+}
+
+.comment-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.comment-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 500ms, transform 500ms;
+}
+
+.comment-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.comment-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 500ms, transform 500ms;
+}
+
+.react-resizable-handle {
+  opacity: 0;
+  position: absolute;
+  bottom: -5px;
+  z-index: 998;
+}
+
+#coauth-section::-webkit-scrollbar {
+  display: none;
+}
+#co-auth-main::-webkit-scrollbar {
+  width: 6px;
+  border-radius: 10px;
+}
+
+#co-auth-main::-webkit-scrollbar-thumb {
+  background: rgba(117, 117, 117, 0.453);
+  border-radius: 4px;
+}
+#comment-section::-webkit-scrollbar {
+  width: 6px;
+  border-radius: 10px;
+}
+
+#comment-section::-webkit-scrollbar-thumb {
+  background: rgba(117, 117, 117, 0.453);
+  border-radius: 4px;
+}
+
+.ql-editor p,
+span,
+h1 {
+  color: white !important;
+}
+.ql-toolbar path,
+line,
+polygon {
+  stroke: white !important; /* Change this to the color you desire */
+}
+.ql-header span {
+  color: black;
+}
