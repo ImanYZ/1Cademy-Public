@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+
 import { Box, Button, Divider, MenuItem, Select, TextField } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
-import { delay } from "../../lib/utils/utils";
+import React, { useCallback, useEffect, useState } from "react";
+import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
+
+import { delay } from "../../lib/utils/utils";
 
 interface Props {
   selectedArticle: any;
@@ -175,51 +177,6 @@ const ContentComp: React.FC<Props> = ({
 
   return (
     <Box sx={{ m: "16px 10px" }}>
-      {/* <ContributorComp
-        users={[
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-        ]}
-        sx={{ mb: 2 }}
-      /> */}
       {!open && (
         <Select
           labelId="demo-simple-select-label"

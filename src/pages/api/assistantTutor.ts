@@ -30,7 +30,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   let conversationId = "";
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
-  let detectedSections: string[] = [];
+  let detectedSections: { section: string; url: string }[] = [];
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
@@ -175,7 +175,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       furtherExplainPrompt,
     });
     const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
-    console.log(mergedMessages);
+
     console.log("deviating");
 
     if (!default_message) {
@@ -183,12 +183,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       //   ...conversationData.usedFlashcards,
       //   nextFlashcard?.id || "",
       // ]);
-      const { _deviating, sections } = await checkIfUserIsDeviating(
-        message,
-        courseName,
-        unitTitle,
-        mergedMessagesMinusFurtherExplain
-      );
+      const { deviating: _deviating, sections } = await checkIfUserIsDeviating(message, courseName, unitTitle, [
+        ...conversationData.messages,
+      ]);
       deviating = _deviating;
       detectedSections = sections;
     }
@@ -219,6 +216,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         message,
         project: "1Tutor",
       });
+      console.log("conversationId", conversationId);
       return;
     }
 
@@ -430,7 +428,7 @@ const getEvaluation = async ({
         learning_summary: "",
       };
     }
-    console.log(lateResponse);
+    console.log(lateResponse, "lateResponse");
     /* we calculate the progress of the user in this unit
      */
 
@@ -470,7 +468,6 @@ const getEvaluation = async ({
         },
       ];
     }
-    console.log({ lateResponse });
   }
   return lateResponse;
 };
@@ -578,7 +575,7 @@ const handleDeviating = async (
   secondPrompt: boolean,
   uname: string,
   cardsModel: string,
-  sections: string[]
+  sections: { section: string; url: string }[]
 ) => {
   // relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
 
@@ -588,8 +585,6 @@ const handleDeviating = async (
     conversationData.messages.pop();
   }
 
-  console.log(conversationData.messages);
-  console.log(message);
   let lastDeviatingMessageIndex = -1;
   for (let i = conversationData.messages.length - 1; i >= 0; i--) {
     if (conversationData.messages[i].content === message) {
@@ -619,10 +614,8 @@ const handleDeviating = async (
     });
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
-    let sectionsString = "";
-    sections.map((s: string) => {
-      sectionsString += `- ${s}\n`;
-    });
+
+    let sectionsString = sections.map(s => `- [${s.section}](core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
       const messDev = `I'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
       res.write(`${messDev} keepLoading`);
@@ -1063,12 +1056,12 @@ const checkIfUserIsDeviating = async (
   message: any,
   courseName: string,
   unitTitle: string,
-  mergedMessages: any
-): Promise<{ _deviating: boolean; sections: string[] }> => {
-  const { sections }: any = await getChapterRelatedToResponse(mergedMessages, courseName);
+  messages: any
+): Promise<{ deviating: boolean; sections: { section: string; url: string }[] }> => {
+  const { sections, deviating }: any = await getChapterRelatedToResponse(messages, courseName, unitTitle);
   console.log(sections, unitTitle);
-  const _deviating = !checkIncludes(unitTitle, sections);
-  return { _deviating, sections };
+
+  return { deviating, sections };
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
   // const chapterDoc = chaptersDoc.docs[0];
   // const chapterData = chapterDoc.data();
@@ -1129,9 +1122,9 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
   return gptResponse;
 };
 
-const getChapterRelatedToResponse = async (mergedMessages: any, courseName: string) => {
+const getChapterRelatedToResponse = async (messages: any, courseName: string, unitTitle: string) => {
   try {
-    const messagesHistory = [...mergedMessages].splice(1);
+    const messagesHistory = [...messages].filter(m => !m.ignoreMessage && !m.deviatingMessage && !m.question);
     // let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
     let chapterMap = chaptersMapCoreEcon;
     if (courseName == "Mission Corporation") {
@@ -1162,7 +1155,6 @@ const getChapterRelatedToResponse = async (mergedMessages: any, courseName: stri
         }
       }
     }
-    console.log(chapterMap);
     const tutorLastMessage = messagesHistory[messagesHistory.length - 2].content;
     const studentLastMessage = messagesHistory[messagesHistory.length - 1].content;
     /* 
@@ -1178,26 +1170,38 @@ const getChapterRelatedToResponse = async (mergedMessages: any, courseName: stri
       `The student's last message is: '''${studentLastMessage}'''`;
      */
     const userPrompt =
-      `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student,` +
-      `your task is to evaluate the student's last message for its relevance to the course material.` +
-      `The table of contents is as follows:` +
-      `${JSON.stringify(chapterMap)}\n` +
-      `The last message sent by the instructor to the student is:\n` +
+      "```\n" +
+      `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student, your task is to evaluate the student's last message for its relevance to the course material. The table of contents is as follows:    
+      ${JSON.stringify(chapterMap)}\n \n` +
+      "\n" +
+      "The last message sent by the instructor to the student is:\n" +
       `'''${tutorLastMessage}'''\n` +
-      `The student's last response is:\n` +
+      "\n" +
+      "The student's last response is:\n" +
       `'''${studentLastMessage}'''\n` +
-      `Based on the student's last message, determine whether the student is staying on topic with the
-      course material or deviating from it. Provide a brief explanation for your determination.\n` +
-      `If the student is staying on topic, identify any specific sub-sections from the book that directly relate to their query or discussion point.\n` +
-      `If the student is deviating, suggest a polite reminder or guidance to steer them back towards relevant course content.\n` +
-      `Your response should be structured as json object as follows:\n` +
-      `{\n` +
-      `"relevantSubSections": ["Sub-section title 1", "Sub-section title 2", ...] (If the student is on topic)\n` +
-      `"status": "On Topic" or "Deviating"\n` +
-      `"explanation": "Your brief explanation here."\n` +
-      `"guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)}`;
+      "\n" +
+      "Based on the student's last message, determine whether the student is staying on topic with the course material or deviating from it. When evaluating the student's response, consider the following:\n" +
+      "- Direct answers to the instructor's questions, even if incorrect, should not be considered a deviation.\n" +
+      `- Responses indicating uncertainty or a request for clarification ("I don't know", "Could you explain...?") are part of the learning process and should not automatically be classified as deviation.\n` +
+      "- Determine the relevance of the student's response by identifying any connections to the course material, even if these are not explicitly mentioned.\n" +
+      "\n" +
+      "Provide a brief explanation for your determination. If the student is staying on topic, identify any specific sub-sections from the book that directly relate to their query or discussion point. If the student is deviating, suggest a polite reminder or guidance to steer them back towards relevant course content.\n" +
+      "\n" +
+      "Your response should be structured as a json object as follows:\n" +
+      "{\n" +
+      '  "relevant_sub_sections": [{section:"Sub-section title 1", url:"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (If the student is on topic),\n' +
+      '  "status": "On Topic" or "Deviating",\n' +
+      '  "explanation": "Your brief explanation here.",\n' +
+      `  "guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)\n` +
+      "}\n" +
+      `example:{
+        tutor:"What might be one reason Ibn Battuta's observations were significant?", 
+        user:"i don't know" or "tell me" or "i have no idea" or anything close to this
+        status:you should response with "on topic"
+      }` +
+      "```\n";
 
-    console.log(userPrompt);
+    console.log("waiting for response from GPT: deviating prompt");
     const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
       {
         role: "user",
@@ -1206,39 +1210,44 @@ const getChapterRelatedToResponse = async (mergedMessages: any, courseName: stri
     ]);
     console.log({ response });
     let sections = [];
+    let deviating = false;
     if (response) {
       try {
-        sections = JSON.parse(response).relevantSubSections;
+        sections = JSON.parse(response).relevant_sub_sections;
+        deviating = JSON.parse(response).status.trim().toLowerCase() === "deviating";
       } catch (error) {
         console.log(error);
       }
     }
-    return { sections };
+    const sectionsTitles = sections.map((s: { section: string; url: string }) => s.section);
+    if (sections.length > 0) {
+      deviating = !checkIncludes(unitTitle, sectionsTitles);
+    }
+
+    return { sections, deviating };
   } catch (error) {
     console.log(error);
   }
 };
 
-const getParagraphs = async (sections: string[]) => {
+const getParagraphs = async (sections: { section: string; url: string }[]) => {
   const paragraphs = [];
   let allParagraphs: any = [];
-  for (let section of sections) {
-    const chaptersBookDocs = await db.collection("chaptersBook").where("sectionTitle", "==", section).get();
-    if (chaptersBookDocs.docs.length > 0) {
-      const chapterDoc = chaptersBookDocs.docs[0];
-      const chapterData = chapterDoc.data();
-      const _paragraphs: any = [];
-      chapterData.paragraphs.map((p: any) => {
-        if ((p.ids || []).length > 0) {
-          _paragraphs.push({ text: p.text, id: p.ids[0] });
-        }
-      });
-      allParagraphs = [...allParagraphs, ...chapterData.paragraphs];
-      paragraphs.push({
-        section,
-        paragraphs: _paragraphs,
-      });
-    }
+  const sectionsUrls = sections.map(s => s.url);
+  const chaptersBookDocs = await db.collection("chaptersBook").where("url", "in", sectionsUrls).get();
+  for (let sectionDoc of chaptersBookDocs.docs) {
+    const sectionData = sectionDoc.data();
+    const _paragraphs: any = [];
+    sectionData.paragraphs.map((p: any) => {
+      if ((p.ids || []).length > 0) {
+        _paragraphs.push({ text: p.text, id: p.ids[0] });
+      }
+    });
+    allParagraphs = [...allParagraphs, ...sectionData.paragraphs];
+    paragraphs.push({
+      section: sectionData.sectionTitle,
+      paragraphs: _paragraphs,
+    });
   }
   console.log("paragraphs.length", paragraphs.length);
   return { paragraphs, allParagraphs };
@@ -1246,18 +1255,20 @@ const getParagraphs = async (sections: string[]) => {
 
 const extractFlashcards = async (
   paragraph: { text: string; ids: string[] },
-  sections: string[],
+  sections: { section: string; url: string }[],
   uname: string,
   cardsModel: string
 ) => {
   try {
     let pIds: string[] = [...paragraph.ids];
     if (!pIds.length) return [];
+    const sectionsUrls = sections.map(s => s.url);
     const flashcardsDocs = await db
       .collection("flashcards")
       .where("paragraphs", "array-contains-any", pIds)
       .where("instructor", "==", uname)
-      .where("sectionTitle", "in", sections)
+      .where("url", "in", sectionsUrls)
+      .where("model", "==", cardsModel)
       .get();
     const concepts = [];
     for (let flashcardDoc of flashcardsDocs.docs) {
