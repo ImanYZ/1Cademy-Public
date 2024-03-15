@@ -177,13 +177,15 @@ export const Message = ({
 
   return (
     <Box
+      id="message-box"
       ref={messageBoxRef}
       sx={{
         gap: "4px",
         pl: 3,
         pr: 3,
         position: "relative",
-        height: leading || replyOnMessage || roomType !== "news" ? "80vh" : "90vh",
+        height: leading || replyOnMessage || roomType !== "news" ? "88vh" : "90vh",
+        pb: "120px",
         overflow: "auto",
       }}
     >
@@ -283,7 +285,8 @@ export const Message = ({
             position: "fixed",
             bottom: "10px",
             mt: "15px",
-            width: { xs: `${sidebarWidth - 30}px`, sm: `${sidebarWidth - 32}px` },
+            zIndex: 99,
+            width: { xs: `${window.innerWidth - 30}px`, sm: `${sidebarWidth - 32}px` },
           }}
         >
           <Paper>

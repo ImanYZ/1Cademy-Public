@@ -37,6 +37,7 @@
     "@mui/lab": "5.0.0-alpha.90",
     "@mui/material": "5.9.0",
     "@mui/x-date-pickers": "^5.0.0-beta.0",
+    "@mui/x-tree-view": "^6.17.0",
     "@react-google-maps/api": "^2.7.0",
     "@types/d3-collection": "^1.0.10",
     "@types/diff": "^5.0.3",
@@ -73,6 +74,7 @@
     "react-map-interaction": "github:ImanYZ/react-map-interaction#master",
     "react-markdown": "^8.0.3",
     "react-mentions": "^4.4.10",
+    "react-quill": "^2.0.0",
     "react-query": "^3.39.1",
     "react-syntax-highlighter": "^15.5.0",
     "rehype-katex": "^6.0.2",
@@ -81,6 +83,7 @@
     "remark-html": "^15.0.1",
     "remark-math": "^5.1.1",
     "rive-react": "github:elVengador/rive-react#tmp",
+    "styled-components": "^6.0.8",
     "sharp": "^0.30.7",
     "slate": "^0.81.1",
     "slate-react": "^0.81.0",
@@ -94,7 +97,10 @@
     "wink-eng-lite-web-model": "^1.5.2",
     "wink-nlp": "^1.14.3",
     "xlsx": "^0.18.5",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "bootstrap": "^5.3.3",
+    "jquery": "^3.7.1",
+    "popper.js": "^1.16.1"
   },
   "devDependencies": {
     "@cypress/code-coverage": "^3.10.0",

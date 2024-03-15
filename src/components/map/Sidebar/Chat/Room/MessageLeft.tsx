@@ -101,7 +101,7 @@ export const MessageLeft = ({
       sx={{
         display: "flex",
         gap: "5px",
-        // pb: 3,
+        pb: 4,
         pt: 2,
       }}
     >
