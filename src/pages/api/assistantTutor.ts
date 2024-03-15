@@ -1170,7 +1170,6 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       `The student's last message is: '''${studentLastMessage}'''`;
      */
     const userPrompt =
-      "```\n" +
       `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student, your task is to evaluate the student's last message for its relevance to the course material. The table of contents is as follows:    
       ${JSON.stringify(chapterMap)}\n \n` +
       "\n" +
@@ -1189,18 +1188,25 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       "\n" +
       "Your response should be structured as a json object as follows:\n" +
       "{\n" +
-      '  "relevant_sub_sections": [{section:"Sub-section title 1", url:"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (If the student is on topic),\n' +
+      '  "relevant_sub_sections": [{section:"Sub-section title 1", url:"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (this should never be an empty array),\n' +
       '  "status": "On Topic" or "Deviating",\n' +
       '  "explanation": "Your brief explanation here.",\n' +
       `  "guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)\n` +
       "}\n" +
       `example:{
-        tutor:"What might be one reason Ibn Battuta's observations were significant?", 
-        user:"i don't know" or "tell me" or "i have no idea" or anything close to this
-        status:you should response with "on topic"
-      }` +
-      "```\n";
-
+        tutor:"What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",
+        user:"i don't know" or "tell me" or "i have no idea" or anything close to this,
+        response:{
+          "relevant_sub_sections":[{
+            url:"01-prosperity-inequality-07-malthusian-trap.html",
+            section:"1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"
+           }],
+           status:"On Topic",
+           "explanation": "",
+           "guidance":""
+        }
+      }`;
+    console.log(userPrompt);
     console.log("waiting for response from GPT: deviating prompt");
     const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
       {
@@ -1208,7 +1214,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
         content: userPrompt,
       },
     ]);
-    console.log({ response });
+    console.log("=== getChapterRelatedToResponse ===>", response);
     let sections = [];
     let deviating = false;
     if (response) {
@@ -1231,9 +1237,10 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
 };
 
 const getParagraphs = async (sections: { section: string; url: string }[]) => {
-  const paragraphs = [];
+  const paragraphs: any = [];
   let allParagraphs: any = [];
   const sectionsUrls = sections.map(s => s.url);
+  if (sectionsUrls.length <= 0) return { paragraphs, allParagraphs };
   const chaptersBookDocs = await db.collection("chaptersBook").where("url", "in", sectionsUrls).get();
   for (let sectionDoc of chaptersBookDocs.docs) {
     const sectionData = sectionDoc.data();
@@ -1263,6 +1270,7 @@ const extractFlashcards = async (
     let pIds: string[] = [...paragraph.ids];
     if (!pIds.length) return [];
     const sectionsUrls = sections.map(s => s.url);
+    if (sectionsUrls.length <= 0) return [];
     const flashcardsDocs = await db
       .collection("flashcards")
       .where("paragraphs", "array-contains-any", pIds)
