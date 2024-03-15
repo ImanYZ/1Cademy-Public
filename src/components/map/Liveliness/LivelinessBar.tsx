@@ -71,7 +71,7 @@ const LivelinessBar = ({ variant, onToggleDisplay, open, ...props }: ILiveliness
         bottom: "100px",
         right: "0px",
         p: `${USER_BUBBLE_SIZE / 2 + 20}px 10px`,
-        zIndex: 998,
+        zIndex: 1000,
         position: "absolute",
         width: "56px",
         background: theme =>
