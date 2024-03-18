@@ -1181,7 +1181,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       "\n" +
       "Based on the student's last message, determine whether the student is staying on topic with the course material or deviating from it. When evaluating the student's response, consider the following:\n" +
       "- Direct answers to the instructor's questions, even if incorrect, should not be considered a deviation.\n" +
-      `- Responses indicating uncertainty or a request for clarification ("I don't know", "Could you explain...?") are part of the learning process and should not automatically be classified as deviation.\n` +
+      `- Responses indicating uncertainty or a request for clarification ("I don't know", "Could you explain...?", "I have no ideas", "tell me", ...) are part of the learning process and should not automatically be classified as deviation.\n` +
       "- Determine the relevance of the student's response by identifying any connections to the course material, even if these are not explicitly mentioned.\n" +
       "\n" +
       "Provide a brief explanation for your determination. If the student is staying on topic, identify any specific sub-sections from the book that directly relate to their query or discussion point. If the student is deviating, suggest a polite reminder or guidance to steer them back towards relevant course content.\n" +
@@ -1189,23 +1189,35 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       "Your response should be structured as a json object as follows:\n" +
       "{\n" +
       '  "relevant_sub_sections": [{section:"Sub-section title 1", url:"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (this should never be an empty array),\n' +
-      '  "status": "On Topic" or "Deviating",\n' +
+      '  "deviating": "Yes" or "No",\n' +
       '  "explanation": "Your brief explanation here.",\n' +
       `  "guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)\n` +
       "}\n" +
-      `example:{
+      `examples:[{
         tutor:"What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",
-        user:"i don't know" or "tell me" or "i have no idea" or anything close to this,
+        user:"i don't know" or "tell me" or "i have no idea" or anything close to this",
         response:{
-          "relevant_sub_sections":[{
-            url:"01-prosperity-inequality-07-malthusian-trap.html",
-            section:"1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"
+          "relevant_sub_sections": [{
+            url: "01-prosperity-inequality-07-malthusian-trap.html",
+            section: "1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"
            }],
-           status:"On Topic",
+           "deviating": "NO",
            "explanation": "",
-           "guidance":""
+           "guidance": ""
         }
-      }`;
+      }, {
+        tutor:"How did socio-economic disparities within nations compare to the disparities between different regions several centuries ago?",
+        user:"tell me",
+        response:{
+          "relevant_sub_sections": [{
+            url: "01-prosperity-inequality-01-ibn-battuta.html",
+            section: "1.1 Ibn Battuta’s fourteenth-century travels in a flat world"
+           }],
+           "deviating": "NO",
+           "explanation": "",
+           "guidance": ""
+        }
+      }]`;
     console.log(userPrompt);
     console.log("waiting for response from GPT: deviating prompt");
     const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
@@ -1220,7 +1232,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
     if (response) {
       try {
         sections = JSON.parse(response).relevant_sub_sections;
-        deviating = JSON.parse(response).status.trim().toLowerCase() === "deviating";
+        deviating = JSON.parse(response).deviating.trim().toLowerCase() === "yes";
       } catch (error) {
         console.log(error);
       }
