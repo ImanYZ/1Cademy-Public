@@ -59,7 +59,7 @@ const ContentComp: React.FC<Props> = ({
         setContent(selectedArticle.content);
         await delay(1000);
         if (selectedArticle.content) {
-          setArticleandDOM();
+          setArticleAndDOM();
         }
       }
     })();
@@ -74,7 +74,7 @@ const ContentComp: React.FC<Props> = ({
     } catch (error) {}
   };
 
-  const setArticleandDOM = useCallback(() => {
+  const setArticleAndDOM = useCallback(() => {
     if (!quillRef) return;
     const quillEditor = quillRef.current.getEditor();
     const editorDOMs = document.getElementsByClassName("ql-editor");
@@ -85,7 +85,7 @@ const ContentComp: React.FC<Props> = ({
 
   const saveAndAnalyze = useCallback(async () => {
     if (selectedArticle?.id) {
-      setArticleandDOM();
+      setArticleAndDOM();
       await updateDoc(doc(db, "articles", selectedArticle.id), {
         content,
         updatedAt: new Date(),
