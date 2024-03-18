@@ -1,21 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
-import { doc, updateDoc, collection, addDoc, onSnapshot, query, where, getFirestore } from "firebase/firestore";
-import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import SchoolIcon from "@mui/icons-material/School";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import SchoolIcon from "@mui/icons-material/School";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
+import Typography from "@mui/material/Typography";
+import { addDoc, collection, doc, getFirestore,onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import moment from "moment";
+import React, { useEffect,useRef, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { User } from "src/knowledgeTypes";
+
+import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { sendMessageToChatGPT } from "../../../services/openai";
 import ImproveItemComp from "../ImproveItemComp";
 import OptimizedAvatar from "../OptimizedAvatar";
-import MessageInput from "./MessageInput";
 import MessageButtons from "./MessageButtons";
-import { sendMessageToChatGPT } from "../../../services/openai";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
-import { User } from "src/knowledgeTypes";
+import MessageInput from "./MessageInput";
 
 const mode: string = "dark";
 interface Improvement {
@@ -295,7 +297,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
                   {message?.type === "assistant" ? (
                     <OptimizedAvatar
                       name={"assistant"}
-                      imageUrl={"images/icon-8x.png"}
+                      imageUrl={"icon-8x.png"}
                       sx={{ border: "none" }}
                       imageSx={{ width: "40px", height: "40px" }}
                     />

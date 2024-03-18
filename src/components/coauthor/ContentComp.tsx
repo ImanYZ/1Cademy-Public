@@ -1,10 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+
 import { Box, Button, Divider, MenuItem, Select, TextField } from "@mui/material";
 import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
-import { delay } from "../../lib/utils/utils";
+import React, { useCallback, useEffect, useState } from "react";
+import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
+
+import { delay } from "../../lib/utils/utils";
+import DisciplinesComp from "./DisciplinesComp";
 
 interface Props {
   selectedArticle: any;
@@ -16,6 +19,9 @@ interface Props {
   quillRef: any;
   selection: any;
   setSelection: any;
+  articleContent: any;
+  articleTypePath: any;
+  setArticleTypePath: any;
 }
 
 const ContentComp: React.FC<Props> = ({
@@ -28,6 +34,9 @@ const ContentComp: React.FC<Props> = ({
   quillRef,
   selection,
   setSelection,
+  articleContent,
+  articleTypePath,
+  setArticleTypePath,
 }) => {
   const db = getFirestore();
   const [content, setContent] = useState(selectedArticle?.content);
@@ -175,6 +184,15 @@ const ContentComp: React.FC<Props> = ({
 
   return (
     <Box sx={{ m: "16px 10px" }}>
+      <Box sx={{ height: "24px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        {articleContent.trim() && (
+          <DisciplinesComp
+            allContent={articleContent}
+            articleTypePath={articleTypePath}
+            setArticleTypePath={setArticleTypePath}
+          />
+        )}
+      </Box>
       {/* <ContributorComp
         users={[
           {
@@ -220,93 +238,95 @@ const ContentComp: React.FC<Props> = ({
         ]}
         sx={{ mb: 2 }}
       /> */}
-      {!open && (
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={selectedArticle?.id || 0}
-          onChange={handleChange}
-          sx={{
-            zIndex: 9999,
-            width: "200px",
-            height: "36px",
-            position: "absolute",
-            right: "190px",
-            top: "78.5px",
-          }}
-        >
-          <MenuItem onClick={() => setOpen(true)} value={0}>
-            Create New Article
-          </MenuItem>
-          <Divider variant="fullWidth" sx={{ my: "10px" }} />
-          {userArticles.map((article: any, index: number) => (
-            <MenuItem key={index} value={article.id}>
-              {article?.title}
-            </MenuItem>
-          ))}
-        </Select>
-      )}
-      {open && (
-        <TextField
-          placeholder="Enter Article Title"
-          sx={{
-            position: "absolute",
-            right: "190px",
-            top: "78.5px",
-          }}
-          value={articleTitle}
-          onChange={handleInputChange}
-          variant="outlined"
-          onKeyDown={(event: any) => {
-            if (event.key === "Enter") {
-              saveAndAnalyze();
-            }
-          }}
-          InputProps={{
-            sx: {
+      <Box mt={2}>
+        {!open && (
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={selectedArticle?.id || 0}
+            onChange={handleChange}
+            sx={{
+              zIndex: 9999,
               width: "200px",
               height: "36px",
-            },
-          }}
+              position: "absolute",
+              right: "190px",
+              top: "59.5px",
+            }}
+          >
+            <MenuItem onClick={() => setOpen(true)} value={0}>
+              Create New Article
+            </MenuItem>
+            <Divider variant="fullWidth" sx={{ my: "10px" }} />
+            {userArticles.map((article: any, index: number) => (
+              <MenuItem key={index} value={article.id}>
+                {article?.title}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
+        {open && (
+          <TextField
+            placeholder="Enter Article Title"
+            sx={{
+              position: "absolute",
+              right: "190px",
+              top: "59.5px",
+            }}
+            value={articleTitle}
+            onChange={handleInputChange}
+            variant="outlined"
+            onKeyDown={(event: any) => {
+              if (event.key === "Enter") {
+                saveAndAnalyze();
+              }
+            }}
+            InputProps={{
+              sx: {
+                width: "200px",
+                height: "36px",
+              },
+            }}
+          />
+        )}
+        <ReactQuill
+          style={{ height: "calc(100vh - 110px)" }}
+          ref={quillRef}
+          value={content}
+          onChange={setContent}
+          onBlur={() => handleBlur()}
+          onFocus={() => handleFocus()}
+          onChangeSelection={(range: any) => handleSelectionChange(range)}
         />
-      )}
-      <ReactQuill
-        style={{ height: "calc(100vh - 130px)" }}
-        ref={quillRef}
-        value={content}
-        onChange={setContent}
-        onBlur={() => handleBlur()}
-        onFocus={() => handleFocus()}
-        onChangeSelection={(range: any) => handleSelectionChange(range)}
-      />
 
-      {open && (
+        {open && (
+          <Button
+            variant="contained"
+            color="error"
+            style={{ position: "absolute", right: "90px", top: "59.5px" }}
+            onClick={() => {
+              setOpen(false);
+              const latestArticle = userArticles.reduce((prev: any, current: any) => {
+                const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
+                const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
+                return currentTimestamp > prevTimestamp ? current : prev;
+              }, userArticles[0]);
+              setSelectedArticle(latestArticle);
+            }}
+          >
+            Cancel
+          </Button>
+        )}
+
         <Button
           variant="contained"
-          color="error"
-          style={{ position: "absolute", right: "90px", top: "78.5px" }}
-          onClick={() => {
-            setOpen(false);
-            const latestArticle = userArticles.reduce((prev: any, current: any) => {
-              const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
-              const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
-              return currentTimestamp > prevTimestamp ? current : prev;
-            }, userArticles[0]);
-            setSelectedArticle(latestArticle);
-          }}
+          color="success"
+          style={{ position: "absolute", right: "13px", top: "59.5px" }}
+          onClick={() => saveAndAnalyze()}
         >
-          Cancel
+          {open ? "Save" : "Save and Analyze"}
         </Button>
-      )}
-
-      <Button
-        variant="contained"
-        color="success"
-        style={{ position: "absolute", right: "13px", top: "78.5px" }}
-        onClick={() => saveAndAnalyze()}
-      >
-        {open ? "Save" : "Save and Analyze"}
-      </Button>
+      </Box>
     </Box>
   );
 };
