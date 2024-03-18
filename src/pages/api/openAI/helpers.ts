@@ -240,6 +240,7 @@ export const chaptersMapCoreEcon = [
           "Ethical behaviour",
           "Material wellbeing",
         ],
+        url: "01-prosperity-inequality-02-historys-hockey-stick.html",
       },
       {
         title:
@@ -291,6 +292,7 @@ export const chaptersMapCoreEcon = [
           "point of diminishing returns",
           "inverse relationship between population size and wage levels",
         ],
+        url: "01-prosperity-inequality-07-malthusian-trap.html",
       },
       {
         title: "1.11 Application: Did the British colonization of India reduce Indian living standards?",
@@ -342,6 +344,7 @@ export const chaptersMapCoreEcon = [
           "economic dominance",
           "productivity shifts",
         ],
+        url: "01-prosperity-inequality-11-british-colonization-india.html",
       },
       {
         title: "1.9 Structural transformation: From farm to firm",
@@ -400,8 +403,9 @@ export const chaptersMapCoreEcon = [
           "industrialized economies",
           "service-oriented economies",
         ],
+        url: "01-prosperity-inequality-09-structural-transformation.html",
       },
-      { title: "1.14 Summary" },
+      { title: "1.14 Summary", url: "01-prosperity-inequality-14-summary.html" },
       {
         title: "1.10 Capitalism, causation, and history’s hockey stick",
         key_words: [
@@ -438,6 +442,7 @@ export const chaptersMapCoreEcon = [
           "Soviet Union",
           "Latin American countries",
         ],
+        url: "01-prosperity-inequality-10-capitalism-causation.html",
       },
       {
         title: "1.3 Another hockey stick: Climate change",
@@ -470,6 +475,7 @@ export const chaptersMapCoreEcon = [
           "Industrial era impact on environment",
           "Global warming patterns",
         ],
+        url: "01-prosperity-inequality-03-climate-change.html",
       },
       {
         title: "1.5 The continuous technological revolution",
@@ -517,6 +523,7 @@ export const chaptersMapCoreEcon = [
           "assembly line",
           "Henry Ford",
         ],
+        url: "01-prosperity-inequality-05-technological-revolution.html",
       },
       {
         title: "1.12 Varieties of capitalism: Institutions, government, and politics",
@@ -568,6 +575,7 @@ export const chaptersMapCoreEcon = [
           "income inequality",
           "tax system",
         ],
+        url: "01-prosperity-inequality-12-capitalism-varieties.html",
       },
       {
         title:
@@ -606,6 +614,7 @@ export const chaptersMapCoreEcon = [
           "Concept of average product",
           "Economic assumptions about farming",
         ],
+        url: "01-prosperity-inequality-06-production-function.html",
       },
       {
         title: "1.1 Ibn Battuta’s fourteenth-century travels in a flat world",
@@ -658,6 +667,7 @@ export const chaptersMapCoreEcon = [
           "Social history",
           "Mathematical theorems",
         ],
+        url: "01-prosperity-inequality-01-ibn-battuta.html",
       },
       {
         title: "1.8 Capitalist institutions",
@@ -679,6 +689,7 @@ export const chaptersMapCoreEcon = [
           "Adam Smith",
           "Division of Labour",
         ],
+        url: "01-prosperity-inequality-08-capitalist-institutions.html",
       },
       {
         title: "1.4 Inequality in global income",
@@ -709,6 +720,7 @@ export const chaptersMapCoreEcon = [
           "Global income distribution",
           "Rich/poor ratio",
         ],
+        url: "01-prosperity-inequality-04-income-inequality.html",
       },
       {
         title: "1.13 Economics, the economy, and the biosphere",
@@ -778,8 +790,13 @@ export const chaptersMapCoreEcon = [
           "Food waste",
           "Food consumption behaviour",
         ],
+        url: "01-prosperity-inequality-13-economics-biosphere.html",
       },
-      { title: "1.15 References", key_words: ["CORE Econ", "Fact checker", "sources"] },
+      {
+        title: "1.15 References",
+        key_words: ["CORE Econ", "Fact checker", "sources"],
+        url: "01-prosperity-inequality-15-references.html",
+      },
     ],
   },
   {
@@ -817,6 +834,7 @@ export const chaptersMapCoreEcon = [
           "global interests",
           "wellbeing",
         ],
+        url: "04-strategic-interactions-09-using-experiments.html",
       },
       {
         title: "4.11 The ultimatum game: Dividing a pie (or leaving it on the table)",
@@ -848,6 +866,7 @@ export const chaptersMapCoreEcon = [
           "second mover",
           "Sierpinski triangle fractal",
         ],
+        url: "04-strategic-interactions-11-ultimatum-game.html",
       },
       {
         title: "4.3 Best responses in the rice–cassava game: Nash equilibrium",
@@ -860,8 +879,13 @@ export const chaptersMapCoreEcon = [
           "Invisible hand game",
           "Prisoners' dilemma game",
         ],
+        url: "04-strategic-interactions-03-nash-equilibrium.html",
       },
-      { title: "4.16 References", key_words: ["CORE Econ", "Fact checker", "sources"] },
+      {
+        title: "4.16 References",
+        key_words: ["CORE Econ", "Fact checker", "sources"],
+        url: "04-strategic-interactions-16-references.html",
+      },
       {
         title: "4.2 Social interactions: Game theory",
         key_words: [
@@ -882,6 +906,7 @@ export const chaptersMapCoreEcon = [
           "Simultaneous one-shot game",
           "Pay-offs",
         ],
+        url: "04-strategic-interactions-02-game-theory.html",
       },
       {
         title: "4.4 Dominant strategy equilibrium and the prisoners’ dilemma",
@@ -915,6 +940,7 @@ export const chaptersMapCoreEcon = [
           "political advertising",
           "campaign advertisements",
         ],
+        url: "04-strategic-interactions-04-dominant-strategy-equilibrium.html",
       },
       {
         title: "4.13 Coordination games and conflicts of interest",
@@ -946,6 +972,7 @@ export const chaptersMapCoreEcon = [
           "HD-DVD",
           "payoff matrix",
         ],
+        url: "04-strategic-interactions-13-coordination-games.html",
       },
       {
         title: "4.5 Evaluating outcomes: The Pareto criterion",
@@ -970,6 +997,7 @@ export const chaptersMapCoreEcon = [
           "dominant strategy equilibrium",
           "cooperative outcome",
         ],
+        url: "04-strategic-interactions-05-pareto-criterion.html",
       },
       {
         title: "4.1 Climate negotiations: Conflicts and common interests",
@@ -1022,8 +1050,9 @@ export const chaptersMapCoreEcon = [
           "game theory",
           "social interactions",
         ],
+        url: "04-strategic-interactions-01-climate-negotiations.html",
       },
-      { title: "4.15 Summary" },
+      { title: "4.15 Summary", url: "04-strategic-interactions-15-summary.html" },
       {
         title: "4.14 Modelling the global climate change problem",
         key_words: [
@@ -1058,6 +1087,7 @@ export const chaptersMapCoreEcon = [
           "Global environmental policy",
           "2x2 matrix scenarios in emissions reductions",
         ],
+        url: "04-strategic-interactions-14-modelling-climate-change.html",
       },
       {
         title: "4.6 Public good games and cooperation",
@@ -1096,6 +1126,7 @@ export const chaptersMapCoreEcon = [
           "Communication",
           "Informal agreements",
         ],
+        url: "04-strategic-interactions-06-public-good-games.html",
       },
       {
         title: "4.8 Repeated interaction: Social norms, reciprocity, and peer punishment in public good games",
@@ -1125,6 +1156,7 @@ export const chaptersMapCoreEcon = [
           "Mean contribution to common pool",
           "Data interpretation from line graphs",
         ],
+        url: "04-strategic-interactions-08-repeated-interaction.html",
       },
       {
         title: "4.7 Social preferences: Altruism",
@@ -1170,6 +1202,7 @@ export const chaptersMapCoreEcon = [
           "payoff matrix",
           "game theory",
         ],
+        url: "04-strategic-interactions-07-social-preferences.html",
       },
       {
         title: "4.10 Cooperation, negotiation, and conflicts of interest",
@@ -1203,6 +1236,7 @@ export const chaptersMapCoreEcon = [
           "Metal detecting",
           "Roman coins",
         ],
+        url: "04-strategic-interactions-10-cooperation-negotiation-conflicts.html",
       },
       {
         title: "4.12 Fair farmers, self-interested students? Experimental results of the ultimatum game",
@@ -1229,6 +1263,7 @@ export const chaptersMapCoreEcon = [
           "Self-interest in economic decisions",
           "Calculating expected pay-offs",
         ],
+        url: "04-strategic-interactions-12-experimental-results.html",
       },
     ],
   },
@@ -1262,8 +1297,13 @@ export const chaptersMapCoreEcon = [
           "Opportunity cost",
           "Preferences",
         ],
+        url: "03-scarcity-wellbeing-06-hours-technological-progress.html",
       },
-      { title: "3.14 References", key_words: ["CORE Econ", "Fact checker", "sources"] },
+      {
+        title: "3.14 References",
+        key_words: ["CORE Econ", "Fact checker", "sources"],
+        url: "03-scarcity-wellbeing-14-references.html",
+      },
       {
         title: "3.7 Income and substitution effects on hours of work and free time",
         key_words: [
@@ -1300,6 +1340,7 @@ export const chaptersMapCoreEcon = [
           "utility function",
           "decomposition into income and substitution effects",
         ],
+        url: "03-scarcity-wellbeing-07-income-substitution-effects.html",
       },
       {
         title: "3.2 A problem of choice and scarcity",
@@ -1326,6 +1367,7 @@ export const chaptersMapCoreEcon = [
           "y-axis",
           "linear relationship",
         ],
+        url: "03-scarcity-wellbeing-02-choice-and-scarcity.html",
       },
       {
         title: "3.12 Explaining our working hours: Differences between countries",
@@ -1362,6 +1404,7 @@ export const chaptersMapCoreEcon = [
           "utility levels",
           "work-life balance",
         ],
+        url: "03-scarcity-wellbeing-12-differences-between-countries.html",
       },
       {
         title: "3.11 Explaining our working hours: Gender and working time",
@@ -1390,6 +1433,7 @@ export const chaptersMapCoreEcon = [
           "Impact of domestic technology",
           "Supply and demand diagram",
         ],
+        url: "03-scarcity-wellbeing-11-gender-working-time.html",
       },
       {
         title: "3.5 Decision-making and scarcity",
@@ -1420,6 +1464,7 @@ export const chaptersMapCoreEcon = [
           "opportunity costs",
           "preferences and budget limitations",
         ],
+        url: "03-scarcity-wellbeing-05-decision-making-scarcity.html",
       },
       {
         title: "3.1 Would you work fewer hours if your hourly wage doubled?",
@@ -1443,8 +1488,9 @@ export const chaptersMapCoreEcon = [
           "GDP per capita",
           "Model of choice",
         ],
+        url: "03-scarcity-wellbeing-01-work-fewer-hours.html",
       },
-      { title: "3.13 Summary" },
+      { title: "3.13 Summary", url: "03-scarcity-wellbeing-13-summary.html" },
       {
         title: "3.3 Goods and preferences",
         key_words: [
@@ -1466,6 +1512,7 @@ export const chaptersMapCoreEcon = [
           "marginal change",
           "utility function",
         ],
+        url: "03-scarcity-wellbeing-03-goods-and-preferences.html",
       },
       {
         title: "3.9 Explaining our working hours: Changes over time",
@@ -1496,6 +1543,7 @@ export const chaptersMapCoreEcon = [
           "Labor-leisure trade-off",
           "Technological revolution's impact on work and leisure",
         ],
+        url: "03-scarcity-wellbeing-09-changes-over-time.html",
       },
       {
         title: "3.8 Is this a good model?",
@@ -1526,6 +1574,7 @@ export const chaptersMapCoreEcon = [
           "working hours and trade union bargaining",
           "model quality and insight",
         ],
+        url: "03-scarcity-wellbeing-08-a-good-model.html",
       },
       {
         title: "3.4 The feasible set",
@@ -1551,6 +1600,7 @@ export const chaptersMapCoreEcon = [
           "consumer behavior",
           "work-leisure trade-offs",
         ],
+        url: "03-scarcity-wellbeing-04-feasible-set.html",
       },
       {
         title: "3.10 Application: Work hours, free time, and inequality",
@@ -1580,6 +1630,7 @@ export const chaptersMapCoreEcon = [
           "carbon dioxide emissions",
           "greenhouse gases",
         ],
+        url: "03-scarcity-wellbeing-10-hours-free-time-inequality.html",
       },
     ],
   },
@@ -1627,6 +1678,7 @@ export const chaptersMapCoreEcon = [
           "Labour supply",
           "Extension of the right to vote",
         ],
+        url: "02-technology-incentives-10-malthusian-trap.html",
       },
       {
         title: "2.11 Capitalism + carbon = hockey stick growth + climate change",
@@ -1674,8 +1726,9 @@ export const chaptersMapCoreEcon = [
           "GDP per capita",
           "renewables vs fossil fuels cost comparison",
         ],
+        url: "02-technology-incentives-11-capitalism-climate-change.html",
       },
-      { title: "2.13 Summary" },
+      { title: "2.13 Summary", url: "02-technology-incentives-13-summary.html" },
       {
         title:
           "2.9 Markets, cheap calories, and cotton: The colonies, slavery, and the Industrial Revolution in Britain",
@@ -1730,6 +1783,7 @@ export const chaptersMapCoreEcon = [
           "Gavin Wright",
           "economic historian",
         ],
+        url: "02-technology-incentives-09-industrial-revolution-colonies.html",
       },
       {
         title: "2.5 Modelling a dynamic economy: Technology and costs",
@@ -1774,6 +1828,7 @@ export const chaptersMapCoreEcon = [
           "budget constraints",
           "indifference curves",
         ],
+        url: "02-technology-incentives-05-technology-costs.html",
       },
       {
         title: "2.6 Modelling a dynamic economy: Innovation and profit",
@@ -1820,6 +1875,7 @@ export const chaptersMapCoreEcon = [
           "economic upswings and downswings",
           "Journal of Evolutionary Economics",
         ],
+        url: "02-technology-incentives-06-innovation-profit.html",
       },
       {
         title: "2.12 How good is the model? Economists, historians, and the Industrial Revolution",
@@ -1852,6 +1908,7 @@ export const chaptersMapCoreEcon = [
           "sugar production",
           "British colonies",
         ],
+        url: "02-technology-incentives-12-how-good-is-the-model.html",
       },
       {
         title:
@@ -1893,6 +1950,7 @@ export const chaptersMapCoreEcon = [
           "labour markets",
           "mechanised spinning equipment",
         ],
+        url: "02-technology-incentives-07-industrial-revolution-technologies.html",
       },
       {
         title: "2.1 Kutesmart automates personalized tailoring",
@@ -1927,6 +1985,7 @@ export const chaptersMapCoreEcon = [
           "Real wage index",
           "Population growth",
         ],
+        url: "02-technology-incentives-01-kutesmart-tailoring.html",
       },
       {
         title: "2.3 Comparative advantage, specialization, and markets",
@@ -1965,6 +2024,7 @@ export const chaptersMapCoreEcon = [
           "exports",
           "imports",
         ],
+        url: "02-technology-incentives-03-comparative-advantage.html",
       },
       {
         title: "2.2 Economic decisions: Opportunity costs, economic rents, and incentives",
@@ -1991,8 +2051,13 @@ export const chaptersMapCoreEcon = [
           "legislation on tuition fees",
           "accounting perspective vs economic perspective",
         ],
+        url: "02-technology-incentives-02-economic-decisions.html",
       },
-      { title: "2.14 References", key_words: ["CORE Econ", "Fact checker", "sources"] },
+      {
+        title: "2.14 References",
+        key_words: ["CORE Econ", "Fact checker", "sources"],
+        url: "02-technology-incentives-14-references.html",
+      },
       {
         title: "2.8 Economic models: How to see more by looking at less",
         key_words: [
@@ -2029,6 +2094,7 @@ export const chaptersMapCoreEcon = [
           "Deliberate practice",
           "Academic performance",
         ],
+        url: "02-technology-incentives-08-economic-models.html",
       },
       {
         title: "2.4 Firms, technology, and production",
@@ -2066,6 +2132,7 @@ export const chaptersMapCoreEcon = [
           "Data visualization",
           "Nonlinear progression",
         ],
+        url: "02-technology-incentives-04-firms-technology-production.html",
       },
     ],
   },
