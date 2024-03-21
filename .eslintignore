@@ -4,3 +4,4 @@ typesenseIndexer/*
 src/pages/api/*
 src/utils
 cloud-functions/*
+public/core-econ/*

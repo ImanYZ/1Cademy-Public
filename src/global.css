@@ -2999,3 +2999,6 @@ polygon {
   color: black;
 }
 
+#tutor-book::-webkit-scrollbar {
+  display: none;
+}

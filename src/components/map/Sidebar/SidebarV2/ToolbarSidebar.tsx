@@ -1,4 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import CheckIcon from "@mui/icons-material/Check";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
@@ -691,6 +692,18 @@ export const ToolbarSidebar = ({
               rightOption={<CustomBadge value={newMessages} />}
               rightFloatingOption={<CustomSmallBadge value={newMessages} />}
             />
+            <SidebarButton
+              id="book-button"
+              icon={<AutoStoriesIcon />}
+              onClick={() => {
+                onOpenSidebar("BOOK", "book");
+                setIsMenuOpen(false);
+              }}
+              text="Books"
+              toolbarIsOpen={displayLargeToolbar}
+              rightOption={<CustomBadge value={newMessages} />}
+              rightFloatingOption={<CustomSmallBadge value={newMessages} />}
+            />
 
             {/* dashboard */}
             {["INSTRUCTOR", "STUDENT"].includes(user.role ?? "") && (
@@ -1323,7 +1336,7 @@ export const ToolbarSidebar = ({
           title={isMenuOpen ? "Hide Menu" : "Open Menu"}
           sx={{
             display: { xs: "block", sm: "none" },
-            position: "fixed",
+            position: "absolute",
             top: "10px",
             left: isMenuOpen ? "10px" : "10px",
             zIndex: isMenuOpen ? "1300" : "1200",

@@ -1,9 +1,15 @@
+import { Bar, Container as ResizeContainer, Resizer, Section } from "@column-resizer/react";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import UndoIcon from "@mui/icons-material/Undo";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
@@ -45,6 +51,7 @@ import { getMessaging, onMessage } from "firebase/messaging";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import Script from "next/script";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
@@ -69,6 +76,7 @@ import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedBooksSidebar } from "@/components/map/Sidebar/SidebarV2/BooksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -226,6 +234,7 @@ export type OpenLeftSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | "CHAT"
+  | "BOOK"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -255,6 +264,7 @@ export type Graph = { nodes: FullNodesData; edges: EdgesData };
  *  --- render nodes
  */
 let arrowKeyMapTransitionInitialized = false;
+const defaultSize = 780;
 const Notebook = ({}: NotebookProps) => {
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -321,6 +331,8 @@ const Notebook = ({}: NotebookProps) => {
     contributorsNodeId: null,
     showContributors: false,
   });
+
+  const [openBook, setOpenBook] = useState<string | null>(null);
 
   // scale and translation of the viewport over the map for the map interactions module
   const [mapInteractionValue, setMapInteractionValue] = useState({
@@ -454,7 +466,9 @@ const Notebook = ({}: NotebookProps) => {
 
   //last interaction date from the user
   const [lastInteractionDate, setLastInteractionDate] = useState<Date>(new Date(Date.now()));
-
+  const [rightPanelVisible, setRightPanelVisible] = useState<boolean>(true);
+  const [htmlContent, setHtmlContent] = useState("");
+  const columnResizerRef = useRef<any>();
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
       setNotebooks(prev => {
@@ -1549,6 +1563,15 @@ const Notebook = ({}: NotebookProps) => {
     };
     changeSelectedNode();
   }, [db, nodeBookState.selectedNode, user?.sNode, user?.uname]);
+
+  useEffect(() => {
+    const controller = columnResizerRef.current;
+    if (controller) {
+      const resizer = controller.getResizer();
+      resizer.resizeSection(1, { toSize: rightPanelVisible ? defaultSize : 0 });
+      controller.applyResizer(resizer);
+    }
+  }, [rightPanelVisible]);
 
   const resetUpdateLink = () => (updatedLinksRef.current = getInitialUpdateLinks());
 
@@ -6696,6 +6719,20 @@ const Notebook = ({}: NotebookProps) => {
     }
   }, [graph.nodes, setDynamicTargetId, dynamicTargetId, tutorial]);
 
+  useEffect(() => {
+    const fetchHtml = async () => {
+      try {
+        let url = `core-econ/microeconomics/pages/01-prosperity-inequality-01-ibn-battuta.html`;
+        const response = await fetch(url);
+        const html = await response.text();
+        setHtmlContent(html);
+      } catch (error) {
+        console.error("Error loading HTML:", error);
+      }
+    };
+    fetchHtml();
+  }, []);
+
   const tutorialGroup = useMemo(() => {
     return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
   }, [user?.livelinessBar]);
@@ -7065,452 +7102,658 @@ const Notebook = ({}: NotebookProps) => {
     return () => clearInterval(intervalId);
   }, [lastInteractionDate]);
 
+  const beforeApplyResizer = (resizer: Resizer): void => {
+    const sectionSize = resizer.getSectionSize(1);
+    handleResize(sectionSize);
+  };
+
+  const handleResize = (sideWidth: number) => {
+    const notebook = document.querySelector("#map-container") as HTMLElement;
+    if (notebook) {
+      notebook.style.position = "absolute";
+      notebook.style.top = "0px";
+      notebook.style.right = `${sideWidth + 7}px`;
+      notebook.style.zIndex = "10";
+      notebook.style.width = `calc(100% - ${sideWidth + 7}px)`;
+      notebook.style.height = "100%";
+    }
+
+    const bookControls = document.querySelector("#book-control-buttons") as HTMLElement;
+    if (bookControls) {
+      bookControls.style.width = sideWidth - 10 + "px";
+    }
+  };
+
   return (
-    <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
-      {currentStep?.anchor && (
-        <Portal anchor="portal">
-          {tutorial && (
-            <TooltipTutorial
-              tutorialStep={currentStep}
-              tutorial={tutorial}
-              targetClientRect={targetClientRect}
-              // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-              onSkip={onSkipTutorial}
-              onFinalize={onFinalizeTutorial}
-              onNextStep={onNextTutorialStep}
-              onPreviousStep={onPreviousTutorialStep}
-              stepsLength={tutorial.steps.length}
-              node={graph.nodes[dynamicTargetId]}
-              forcedTutorial={forcedTutorial}
-              groupTutorials={tutorialGroup}
-              onForceTutorial={setForcedTutorial}
-              tutorialProgress={tutorialProgress}
-              showNextTutorialStep={showNextTutorialStep}
-              setShowNextTutorialStep={setShowNextTutorialStep}
-              isOnPortal
-            />
-          )}
-        </Portal>
-      )}
-      <Box
-        id="Map"
-        sx={{
-          overflow: "hidden",
-          position: "relative",
-          background:
-            settings.background === "Color"
-              ? theme =>
-                  settings.theme === "Dark"
-                    ? theme.palette.common.darkGrayBackground
-                    : theme.palette.common.lightGrayBackground
-              : undefined,
-        }}
-      >
-        {/* {isWritingOnDB && <NotebookPopup showIcon={false}>Writing DB</NotebookPopup>} */}
-        {Object.keys(graph.nodes).length === 0 && !firstLoading && (
-          <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
-        )}
-
-        {nodeBookState.choosingNode?.type && (
-          <NotebookPopup
-            onClose={() => {
-              notebookRef.current.choosingNode = null;
-              notebookRef.current.selectedNode = null;
-              notebookRef.current.chosenNode = null;
-              nodeBookDispatch({ type: "setChoosingNode", payload: null });
-              nodeBookDispatch({ type: "setSelectedNode", payload: null });
-              nodeBookDispatch({ type: "setChosenNode", payload: null });
+    <>
+      {openBook && (
+        <ResizeContainer
+          columnResizerRef={columnResizerRef}
+          beforeApplyResizer={beforeApplyResizer}
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            height: "100vh",
+            width: "100%",
+            zIndex: 0,
+            backgroundColor: theme.palette.background.default,
+            color: theme.palette.text.primary,
+          }}
+        >
+          <Section
+            style={{
+              visibility: "hidden",
+            }}
+          ></Section>
+          <Bar
+            size={7}
+            style={{
+              background: "#2f3a4c",
+              // cursor: 'col-resize',
+              cursor: "ew-resize",
+              position: "relative",
             }}
           >
-            Cancel Adding a {nodeBookState.choosingNode.type}
-          </NotebookPopup>
-        )}
-
-        {nodeBookState.previousNode && (
-          <Box
-            sx={{
-              height: "40px",
-              display: "flex",
-              position: "absolute",
-              left: "50%",
-              bottom: "35px",
-              transform: "translateX(-50%)",
-              zIndex: "4",
-              backgroundColor: ({ palette: { mode } }) =>
-                mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-              borderRadius: "4px",
-            }}
-          >
-            <Button
-              onClick={() => {
-                notebookRef.current.selectedNode = nodeBookState.previousNode;
-                nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
-                nodeBookDispatch({ type: "setPreviousNode", payload: null });
-                scrollToNode(nodeBookState.previousNode);
-              }}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                ":hover": {
-                  backgroundColor: ({ palette: { mode } }) =>
-                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
-                },
-              }}
-            >
-              <UndoIcon
-                sx={{
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray800,
-                }}
-              />
-              <Typography
-                sx={{
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
-                }}
-              >
-                Return to previous node
-              </Typography>
-            </Button>
-            <Divider
-              orientation="vertical"
-              sx={{
-                borderColor: ({ palette: { mode } }) =>
-                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
-              }}
-            />
-            <Button
-              sx={{
-                minWidth: "30px!important",
-                ":hover": {
-                  backgroundColor: ({ palette: { mode } }) =>
-                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
-                },
-              }}
-              onClick={() => {
-                nodeBookDispatch({ type: "setPreviousNode", payload: null });
-              }}
-            >
-              <CloseIcon
-                fontSize="small"
-                sx={{
-                  color: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray400,
-                }}
-              />
-            </Button>
-          </Box>
-        )}
-        {settings.view === "Masonry" && (
-          <Box sx={{ height: "100vh", overflow: "auto" }}>
-            <Container>
-              <Masonry sx={{ my: 4, mx: { md: "0px" } }} columns={{ xm: 1, md: 2 }} spacing={4} defaultHeight={450}>
-                {Object.keys(graph.nodes)
-                  .map(key => graph.nodes[key])
-                  .map(fullNode => {
-                    const simpleNode: SimpleNode2 = {
-                      id: fullNode.node,
-                      choices: fullNode.choices,
-                      contributors: Object.keys(fullNode.contributors).map(key => ({
-                        fullName: fullNode.contributors[key].fullname,
-                        imageUrl: fullNode.contributors[key].imageUrl,
-                        username: key,
-                      })),
-                      institutions: Object.keys(fullNode.institutions).map(key => ({ name: key })),
-                      nodeType: fullNode.nodeType,
-                      tags: fullNode.tags,
-                      versions: fullNode.versions ?? 0,
-                      changedAt: fullNode.changedAt.toString(),
-                      content: fullNode.content,
-                      corrects: fullNode.corrects,
-                      nodeImage: fullNode.nodeImage,
-                      studied: fullNode.isStudied,
-                      title: fullNode.title,
-                      wrongs: fullNode.wrongs,
-                    };
-                    return simpleNode;
-                  })
-                  .map((simpleNode: SimpleNode2) => (
-                    <NodeItemDashboard
-                      key={simpleNode.id}
-                      node={simpleNode}
-                      userId={user?.userId}
-                      identifier={simpleNode.id}
-                      onHideNode={hideNodeHandler}
-                    />
-                  ))}
-              </Masonry>
-            </Container>
-            <Suspense fallback={<div></div>}>
-              {(isSubmitting || (!queueFinished && firstLoading)) && (
-                <div className="CenterredLoadingImageContainer">
-                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
-                </div>
-              )}
-            </Suspense>
-          </Box>
-        )}
-        <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
-          {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
             <Box
               sx={{
-                "& .GainedPoint, & .LostPoint": {
-                  borderRadius: "50%",
+                background: "#2f3a4c",
+                "&:hover": {
+                  backgroundColor: theme.palette.mode === "dark" ? "#3f4a5c" : "#1f2a3c",
                 },
+                width: "100%",
+                height: "100%",
               }}
             >
-              <MemoizedToolbarSidebar
-                notebookRef={notebookRef}
-                open={true}
-                onClose={onOnlyCloseSidebar}
-                reloadPermanentGrpah={revertNodesOnGraph}
-                user={user}
-                reputationSignal={reputationSignal}
-                reputation={reputation}
-                theme={settings.theme}
-                setOpenSideBar={onOpenSideBar}
-                openSidebar={openSidebar}
-                mapRendered={true}
-                selectedUser={selectedUser}
-                uncheckedNotificationsNum={uncheckedNotificationsNum}
-                bookmarkUpdatesNum={bookmarkUpdatesNum}
-                pendingProposalsNum={pendingProposalsNum}
-                windowHeight={windowHeight}
-                onlineUsers={onlineUsers}
-                usersOnlineStatusLoaded={usersOnlineStatusLoaded}
-                disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
-                // setCurrentTutorial={setCurrentTutorial}
-                userTutorial={userTutorial}
-                dispatch={dispatch}
-                notebooks={notebooks}
-                onChangeNotebook={onChangeNotebook}
-                selectedNotebook={selectedNotebookId}
-                openNodesOnNotebook={openNodesOnNotebook}
-                setNotebooks={setNotebooks}
-                onDisplayInstructorPage={onDisplayInstructorPage}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                isHovered={toolbarIsHovered}
-                toolbarRef={toolbarRef}
-                newMessages={notificationsMessages.length}
+              <MoreVertIcon
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  color: "lightgray",
+                }}
               />
+              <Button
+                onClick={() => {
+                  setRightPanelVisible(prev => !prev);
+                }}
+                sx={{
+                  position: "absolute",
+                  top: "calc(50% - 5px)",
+                  left: "calc(50% - 5px)",
+                  transform: "translate(-50%, -calc(50% - 5px))",
+                  borderRadius: "0px",
+                  color: "lightgray",
+                  backgroundColor: "#848d9e",
+                  "&:hover": {
+                    backgroundColor: "#138a07",
+                  },
+                  cursor: "pointer",
+                  width: "10px",
+                  minWidth: "10px",
+                  height: "50px",
+                  padding: "0px",
+                  zIndex: 25,
+                }}
+              >
+                {rightPanelVisible ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+              </Button>
+              <MoreVertIcon
+                style={{
+                  position: "absolute",
+                  top: "77.8%",
+                  left: "50%",
+                  transform: "translate(-50%, -77.8%)",
+                  color: "lightgray",
+                }}
+              />
+            </Box>
+          </Bar>
 
-              <MemoizedBookmarksSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "BOOKMARKS_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                bookmark={bookmark}
-              />
-              <MemoizedChatSidebar
-                user={user}
-                settings={settings}
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "CHAT"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                bookmark={bookmark}
-                nodeBookDispatch={nodeBookDispatch}
-                notebookRef={notebookRef}
-                nodeBookState={nodeBookState}
-                notebooks={notebooks}
-                onChangeNotebook={onChangeNotebook}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                dispatch={dispatch}
-                selectedNotebook={selectedNotebook}
-                onlineUsers={onlineUsers}
-                notifications={notificationsMessages}
-                openUserInfoSidebar={openUserInfoSidebar}
-              />
-              <MemoizedSearcherSidebar
-                notebookRef={notebookRef}
-                openLinkedNode={openLinkedNode}
-                open={openSidebar === "SEARCHER_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                enableElements={[]}
-                preLoadNodes={onPreLoadNodes}
-              />
-              <MemoizedNotificationSidebar
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "NOTIFICATION_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-              />
-              <MemoizedPendingProposalSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
-                open={openSidebar === "PENDING_PROPOSALS"}
-                onClose={() => onCloseSidebar()}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                // innerWidth={windowWith}
-              />
-              <MemoizedUserInfoSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "USER_INFO"}
-                onClose={() => setOpenSidebar(null)}
-                selectedUser={nodeBookState.selectedUser}
-              />
+          <Section minSize={0} defaultSize={defaultSize}>
+            <Box
+              id="tutor-book"
+              sx={{ height: "100%", overflowY: "auto" }}
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            />
+            <Script src="https://www.youtube.com/iframe_api" />
+            <Script
+              id="MathJax"
+              src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"
+            />
+            <Script src="https://www.googletagmanager.com/gtag/js?id=G-64NM9TBYSL" />
 
-              <MemoizedProposalsSidebar
-                theme={settings.theme}
-                open={
-                  openSidebar === "PROPOSALS" &&
-                  !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "")
-                }
-                onClose={() => onCloseSidebar()}
-                clearInitialProposal={clearInitialProposal}
-                initialProposal={nodeBookState.initialProposal}
-                nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
-                proposeNodeImprovement={proposeNodeImprovement}
-                fetchProposals={fetchProposals}
-                selectedNode={nodeBookState.selectedNode}
-                rateProposal={rateProposal}
-                ratingProposale={ratingProposale}
-                selectProposal={onSelectProposal}
-                deleteProposal={deleteProposal}
-                proposeNewChild={proposeNewChild}
-                openProposal={selectedProposalId}
-                db={db}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                username={user.uname}
+            <Script src="/core-econ/microeconomics/resources/email-decode.min.js" />
+            <Script src="/core-econ/microeconomics/resources/bundle.js" strategy="lazyOnload" />
+            <Box
+              id="book-control-buttons"
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "20px",
+                mb: "10px",
+                position: "absolute",
+                right: "5px",
+                bottom: "5px",
+              }}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "info.main",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "info.light",
+                  },
+                  flex: 1,
+                }}
+              >
+                <ArrowBackIcon sx={{ marginRight: "7px" }} />
+                Previous
+              </Button>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "info.main",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "info.light",
+                  },
+                  ml: "5px",
+                  flex: 1,
+                }}
+              >
+                Next
+                <ArrowForwardIcon sx={{ marginLeft: "7px" }} />
+              </Button>
+            </Box>
+          </Section>
+        </ResizeContainer>
+      )}
+      <div id="map-container" className="MapContainer" style={{ overflow: "hidden", position: "relative" }}>
+        {currentStep?.anchor && (
+          <Portal anchor="portal">
+            {tutorial && (
+              <TooltipTutorial
+                tutorialStep={currentStep}
+                tutorial={tutorial}
+                targetClientRect={targetClientRect}
+                // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                onSkip={onSkipTutorial}
+                onFinalize={onFinalizeTutorial}
+                onNextStep={onNextTutorialStep}
+                onPreviousStep={onPreviousTutorialStep}
+                stepsLength={tutorial.steps.length}
+                node={graph.nodes[dynamicTargetId]}
+                forcedTutorial={forcedTutorial}
+                groupTutorials={tutorialGroup}
+                onForceTutorial={setForcedTutorial}
+                tutorialProgress={tutorialProgress}
+                showNextTutorialStep={showNextTutorialStep}
+                setShowNextTutorialStep={setShowNextTutorialStep}
+                isOnPortal
               />
+            )}
+          </Portal>
+        )}
+        <Box
+          id="Map"
+          sx={{
+            overflow: "hidden",
+            position: "relative",
+            background:
+              settings.background === "Color"
+                ? theme =>
+                    settings.theme === "Dark"
+                      ? theme.palette.common.darkGrayBackground
+                      : theme.palette.common.lightGrayBackground
+                : undefined,
+          }}
+        >
+          {/* {isWritingOnDB && <NotebookPopup showIcon={false}>Writing DB</NotebookPopup>} */}
+          {Object.keys(graph.nodes).length === 0 && !firstLoading && (
+            <NotebookPopup showIcon={false}>This notebook has no nodes</NotebookPopup>
+          )}
 
-              <MemoizedUserSettingsSidebar
-                notebookRef={notebookRef}
-                openLinkedNode={openLinkedNode}
-                theme={settings.theme}
-                open={openSidebar === "USER_SETTINGS"}
-                onClose={() => setOpenSidebar(null)}
-                dispatch={dispatch}
-                nodeBookDispatch={nodeBookDispatch}
-                nodeBookState={nodeBookState}
-                userReputation={reputation}
-                user={user}
-                scrollToNode={scrollToNode}
-                settings={settings}
-                selectedNotebookId={selectedNotebookId}
-                onChangeNotebook={onChangeNotebook}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                notebookOwner={selectedNotebook?.owner ?? ""}
+          {nodeBookState.choosingNode?.type && (
+            <NotebookPopup
+              onClose={() => {
+                notebookRef.current.choosingNode = null;
+                notebookRef.current.selectedNode = null;
+                notebookRef.current.chosenNode = null;
+                nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                nodeBookDispatch({ type: "setSelectedNode", payload: null });
+                nodeBookDispatch({ type: "setChosenNode", payload: null });
+              }}
+            >
+              Cancel Adding a {nodeBookState.choosingNode.type}
+            </NotebookPopup>
+          )}
+
+          {nodeBookState.previousNode && (
+            <Box
+              sx={{
+                height: "40px",
+                display: "flex",
+                position: "absolute",
+                left: "50%",
+                bottom: "35px",
+                transform: "translateX(-50%)",
+                zIndex: "4",
+                backgroundColor: ({ palette: { mode } }) =>
+                  mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
+                borderRadius: "4px",
+              }}
+            >
+              <Button
+                onClick={() => {
+                  notebookRef.current.selectedNode = nodeBookState.previousNode;
+                  nodeBookDispatch({ type: "setSelectedNode", payload: nodeBookState.previousNode });
+                  nodeBookDispatch({ type: "setPreviousNode", payload: null });
+                  scrollToNode(nodeBookState.previousNode);
+                }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  ":hover": {
+                    backgroundColor: ({ palette: { mode } }) =>
+                      mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
+                  },
+                }}
+              >
+                <UndoIcon
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray800,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray25 : DESIGN_SYSTEM_COLORS.gray800,
+                  }}
+                >
+                  Return to previous node
+                </Typography>
+              </Button>
+              <Divider
+                orientation="vertical"
+                sx={{
+                  borderColor: ({ palette: { mode } }) =>
+                    mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+                }}
               />
-              {nodeBookState.selectedNode && (
-                <CitationsSidebar
-                  open={openSidebar === "CITATIONS"}
-                  onClose={() => setOpenSidebar(null)}
+              <Button
+                sx={{
+                  minWidth: "30px!important",
+                  ":hover": {
+                    backgroundColor: ({ palette: { mode } }) =>
+                      mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
+                  },
+                }}
+                onClick={() => {
+                  nodeBookDispatch({ type: "setPreviousNode", payload: null });
+                }}
+              >
+                <CloseIcon
+                  fontSize="small"
+                  sx={{
+                    color: theme =>
+                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray400,
+                  }}
+                />
+              </Button>
+            </Box>
+          )}
+          {settings.view === "Masonry" && (
+            <Box sx={{ height: "100vh", overflow: "auto" }}>
+              <Container>
+                <Masonry sx={{ my: 4, mx: { md: "0px" } }} columns={{ xm: 1, md: 2 }} spacing={4} defaultHeight={450}>
+                  {Object.keys(graph.nodes)
+                    .map(key => graph.nodes[key])
+                    .map(fullNode => {
+                      const simpleNode: SimpleNode2 = {
+                        id: fullNode.node,
+                        choices: fullNode.choices,
+                        contributors: Object.keys(fullNode.contributors).map(key => ({
+                          fullName: fullNode.contributors[key].fullname,
+                          imageUrl: fullNode.contributors[key].imageUrl,
+                          username: key,
+                        })),
+                        institutions: Object.keys(fullNode.institutions).map(key => ({ name: key })),
+                        nodeType: fullNode.nodeType,
+                        tags: fullNode.tags,
+                        versions: fullNode.versions ?? 0,
+                        changedAt: fullNode.changedAt.toString(),
+                        content: fullNode.content,
+                        corrects: fullNode.corrects,
+                        nodeImage: fullNode.nodeImage,
+                        studied: fullNode.isStudied,
+                        title: fullNode.title,
+                        wrongs: fullNode.wrongs,
+                      };
+                      return simpleNode;
+                    })
+                    .map((simpleNode: SimpleNode2) => (
+                      <NodeItemDashboard
+                        key={simpleNode.id}
+                        node={simpleNode}
+                        userId={user?.userId}
+                        identifier={simpleNode.id}
+                        onHideNode={hideNodeHandler}
+                      />
+                    ))}
+                </Masonry>
+              </Container>
+              <Suspense fallback={<div></div>}>
+                {(isSubmitting || (!queueFinished && firstLoading)) && (
+                  <div className="CenterredLoadingImageContainer">
+                    <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                  </div>
+                )}
+              </Suspense>
+            </Box>
+          )}
+          <Box sx={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
+            {user && reputation && (userTutorial.navigation.done || userTutorial.navigation.skipped) && (
+              <Box
+                sx={{
+                  "& .GainedPoint, & .LostPoint": {
+                    borderRadius: "50%",
+                  },
+                }}
+              >
+                <MemoizedToolbarSidebar
+                  notebookRef={notebookRef}
+                  open={true}
+                  onClose={onOnlyCloseSidebar}
+                  reloadPermanentGrpah={revertNodesOnGraph}
+                  user={user}
+                  reputationSignal={reputationSignal}
+                  reputation={reputation}
+                  theme={settings.theme}
+                  setOpenSideBar={onOpenSideBar}
+                  openSidebar={openSidebar}
+                  mapRendered={true}
+                  selectedUser={selectedUser}
+                  uncheckedNotificationsNum={uncheckedNotificationsNum}
+                  bookmarkUpdatesNum={bookmarkUpdatesNum}
+                  pendingProposalsNum={pendingProposalsNum}
+                  windowHeight={windowHeight}
+                  onlineUsers={onlineUsers}
+                  usersOnlineStatusLoaded={usersOnlineStatusLoaded}
+                  disableToolbar={Boolean(["TutorialStep"].includes("TOOLBAR"))}
+                  // setCurrentTutorial={setCurrentTutorial}
+                  userTutorial={userTutorial}
+                  dispatch={dispatch}
+                  notebooks={notebooks}
+                  onChangeNotebook={onChangeNotebook}
+                  selectedNotebook={selectedNotebookId}
+                  openNodesOnNotebook={openNodesOnNotebook}
+                  setNotebooks={setNotebooks}
+                  onDisplayInstructorPage={onDisplayInstructorPage}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  isHovered={toolbarIsHovered}
+                  toolbarRef={toolbarRef}
+                  newMessages={notificationsMessages.length}
+                />
+
+                <MemoizedBookmarksSidebar
+                  theme={settings.theme}
                   openLinkedNode={openLinkedNode}
-                  identifier={nodeBookState.selectedNode}
+                  username={user.uname}
+                  open={openSidebar === "BOOKMARKS_SIDEBAR"}
+                  onClose={() => setOpenSidebar(null)}
                   sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
                   innerWidth={windowWith}
+                  bookmark={bookmark}
                 />
-              )}
+                <MemoizedChatSidebar
+                  user={user}
+                  settings={settings}
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={openSidebar === "CHAT"}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  bookmark={bookmark}
+                  nodeBookDispatch={nodeBookDispatch}
+                  notebookRef={notebookRef}
+                  nodeBookState={nodeBookState}
+                  notebooks={notebooks}
+                  onChangeNotebook={onChangeNotebook}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  dispatch={dispatch}
+                  selectedNotebook={selectedNotebook}
+                  onlineUsers={onlineUsers}
+                  notifications={notificationsMessages}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                />
+                <MemoizedBooksSidebar
+                  setOpenBook={setOpenBook}
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  tagId={user.tagId}
+                  open={openSidebar === "BOOK"}
+                  onClose={() => onCloseSidebar()}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                />
 
-              <ReferencesSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Reference"}
-                username={user.uname}
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-              />
+                <MemoizedSearcherSidebar
+                  notebookRef={notebookRef}
+                  openLinkedNode={openLinkedNode}
+                  open={openSidebar === "SEARCHER_SIDEBAR"}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  enableElements={[]}
+                  preLoadNodes={onPreLoadNodes}
+                />
 
-              <TagsSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Tag"}
-                username={user.uname}
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-                notebookRef={notebookRef}
-              />
-              <ParentsSidebarMemoized
-                title={
-                  nodeBookState.choosingNode?.type === "Parent"
-                    ? "Parents to Link"
-                    : nodeBookState.choosingNode?.type === "Child"
-                    ? "Children to Link"
-                    : "Nodes to Improve"
-                }
-                open={
-                  nodeBookState.choosingNode?.type === "Parent" ||
-                  nodeBookState.choosingNode?.type === "Child" ||
-                  nodeBookState.choosingNode?.type === "Improvement"
-                }
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-                setQueryParentChildren={setQueryParentChildren}
-                queryParentChildren={queryParentChildren}
-                username={""}
-              />
-            </Box>
-          )}
+                <MemoizedNotificationSidebar
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={openSidebar === "NOTIFICATION_SIDEBAR"}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                />
+                <MemoizedPendingProposalSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  tagId={user.tagId}
+                  open={openSidebar === "PENDING_PROPOSALS"}
+                  onClose={() => onCloseSidebar()}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  // innerWidth={windowWith}
+                />
+                <MemoizedUserInfoSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={openSidebar === "USER_INFO"}
+                  onClose={() => setOpenSidebar(null)}
+                  selectedUser={nodeBookState.selectedUser}
+                />
 
-          <MemoizedCommunityLeaderboard
-            userTagId={user?.tagId ?? ""}
-            pendingProposalsLoaded={pendingProposalsLoaded}
-            comLeaderboardOpen={comLeaderboardOpen}
-            setComLeaderboardOpen={setComLeaderboardOpen}
-          />
+                <MemoizedProposalsSidebar
+                  theme={settings.theme}
+                  open={
+                    openSidebar === "PROPOSALS" &&
+                    !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "")
+                  }
+                  onClose={() => onCloseSidebar()}
+                  clearInitialProposal={clearInitialProposal}
+                  initialProposal={nodeBookState.initialProposal}
+                  nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  fetchProposals={fetchProposals}
+                  selectedNode={nodeBookState.selectedNode}
+                  rateProposal={rateProposal}
+                  ratingProposale={ratingProposale}
+                  selectProposal={onSelectProposal}
+                  deleteProposal={deleteProposal}
+                  proposeNewChild={proposeNewChild}
+                  openProposal={selectedProposalId}
+                  db={db}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  username={user.uname}
+                />
 
-          <MemoizedToolbox
-            expanded={toolboxExpanded}
-            setExpanded={setToolboxExpanded}
-            isLoading={isQueueWorking}
-            sx={{
-              position: "absolute",
-              right: { xs: "8px", sm: "8px" },
-              top: {
-                xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
-                sm: "7px!important",
-              },
-            }}
-          >
-            <>
-              {" "}
-              {instructor && user?.role === "INSTRUCTOR" && (
-                <Tooltip title="Create a new Parent Node" placement="bottom">
+                <MemoizedUserSettingsSidebar
+                  notebookRef={notebookRef}
+                  openLinkedNode={openLinkedNode}
+                  theme={settings.theme}
+                  open={openSidebar === "USER_SETTINGS"}
+                  onClose={() => setOpenSidebar(null)}
+                  dispatch={dispatch}
+                  nodeBookDispatch={nodeBookDispatch}
+                  nodeBookState={nodeBookState}
+                  userReputation={reputation}
+                  user={user}
+                  scrollToNode={scrollToNode}
+                  settings={settings}
+                  selectedNotebookId={selectedNotebookId}
+                  onChangeNotebook={onChangeNotebook}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  notebookOwner={selectedNotebook?.owner ?? ""}
+                />
+                {nodeBookState.selectedNode && (
+                  <CitationsSidebar
+                    open={openSidebar === "CITATIONS"}
+                    onClose={() => setOpenSidebar(null)}
+                    openLinkedNode={openLinkedNode}
+                    identifier={nodeBookState.selectedNode}
+                    sidebarWidth={sidebarWidth()}
+                    innerHeight={innerHeight}
+                    innerWidth={windowWith}
+                  />
+                )}
+
+                <ReferencesSidebarMemoized
+                  open={nodeBookState.choosingNode?.type === "Reference"}
+                  username={user.uname}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                />
+
+                <TagsSidebarMemoized
+                  open={nodeBookState.choosingNode?.type === "Tag"}
+                  username={user.uname}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                  notebookRef={notebookRef}
+                />
+                <ParentsSidebarMemoized
+                  title={
+                    nodeBookState.choosingNode?.type === "Parent"
+                      ? "Parents to Link"
+                      : nodeBookState.choosingNode?.type === "Child"
+                      ? "Children to Link"
+                      : "Nodes to Improve"
+                  }
+                  open={
+                    nodeBookState.choosingNode?.type === "Parent" ||
+                    nodeBookState.choosingNode?.type === "Child" ||
+                    nodeBookState.choosingNode?.type === "Improvement"
+                  }
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                  setQueryParentChildren={setQueryParentChildren}
+                  queryParentChildren={queryParentChildren}
+                  username={""}
+                />
+              </Box>
+            )}
+
+            <MemoizedCommunityLeaderboard
+              userTagId={user?.tagId ?? ""}
+              pendingProposalsLoaded={pendingProposalsLoaded}
+              comLeaderboardOpen={comLeaderboardOpen}
+              setComLeaderboardOpen={setComLeaderboardOpen}
+            />
+
+            <MemoizedToolbox
+              expanded={toolboxExpanded}
+              setExpanded={setToolboxExpanded}
+              isLoading={isQueueWorking}
+              sx={{
+                position: "fixed",
+                right: "8px",
+                top: {
+                  xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
+                  sm: "7px!important",
+                },
+              }}
+            >
+              <>
+                {" "}
+                {instructor && user?.role === "INSTRUCTOR" && (
+                  <Tooltip title="Create a new Parent Node" placement="bottom">
+                    <IconButton
+                      id="toolbox-scroll-to-node"
+                      color="secondary"
+                      onClick={(e: any) => proposeNewParent(e, "Concept", true)}
+                      // disabled={!nodeBookState.selectedNode ? true : false}
+                      sx={{
+                        ":hover": {
+                          background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                        },
+                        padding: { xs: "2px", sm: "8px" },
+                      }}
+                    >
+                      <AddIcon
+                        sx={{
+                          color: theme =>
+                            theme.palette.mode === "dark"
+                              ? theme.palette.common.notebookG100
+                              : theme.palette.common.gray500,
+                        }}
+                      />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                <Tooltip title="Scroll to last Selected Node" placement="bottom">
                   <IconButton
                     id="toolbox-scroll-to-node"
                     color="secondary"
-                    onClick={(e: any) => proposeNewParent(e, "Concept", true)}
-                    // disabled={!nodeBookState.selectedNode ? true : false}
+                    onClick={onScrollToLastNode}
+                    disabled={!nodeBookState.selectedNode ? true : false}
                     sx={{
                       ":hover": {
                         background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
                       },
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
                       padding: { xs: "2px", sm: "8px" },
                     }}
                   >
-                    <AddIcon
+                    <MyLocationIcon
                       sx={{
                         color: theme =>
                           theme.palette.mode === "dark"
@@ -7520,677 +7763,663 @@ const Notebook = ({}: NotebookProps) => {
                     />
                   </IconButton>
                 </Tooltip>
-              )}
-              <Tooltip title="Scroll to last Selected Node" placement="bottom">
-                <IconButton
-                  id="toolbox-scroll-to-node"
-                  color="secondary"
-                  onClick={onScrollToLastNode}
-                  disabled={!nodeBookState.selectedNode ? true : false}
+                <Tooltip
+                  title="Redraw graph"
+                  placement="bottom"
                   sx={{
                     ":hover": {
                       background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      // borderRadius: "8px",
                     },
-                    opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
                     padding: { xs: "2px", sm: "8px" },
                   }}
                 >
-                  <MyLocationIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                title="Redraw graph"
-                placement="bottom"
-                sx={{
-                  ":hover": {
-                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    // borderRadius: "8px",
-                  },
-                  padding: { xs: "2px", sm: "8px" },
-                }}
-              >
-                <IconButton id="toolbox-redraw-graph" color="secondary" onClick={() => onRedrawGraph()}>
-                  <AutoFixHighIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                title="Start tutorial"
-                placement="bottom"
-                sx={{
-                  ":hover": {
-                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    // borderRadius: "8px",
-                  },
-                  padding: { xs: "2px", sm: "8px" },
-                }}
-              >
-                <IconButton
-                  id="toolbox-table-of-contents"
-                  color="error"
-                  onClick={() => {
-                    setOpenProgressBar(prev => !prev);
-                  }}
-                >
-                  <HelpCenterIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                title="Focused view for selected node"
-                placement="bottom"
-                sx={{
-                  ":hover": {
-                    background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
-                    borderRadius: "8px",
-                  },
-                  padding: { xs: "2px", sm: "8px" },
-                }}
-              >
-                <IconButton
-                  id="toolbox-focus-mode"
-                  color="secondary"
-                  onClick={() => {
-                    setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
-                    setOpenProgressBar(false);
-                  }}
-                  disabled={!nodeBookState.selectedNode ? true : false}
-                  sx={{
-                    opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
-                  }}
-                >
-                  <CenterFocusStrongIcon
-                    sx={{
-                      color: theme =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.notebookG100
-                          : theme.palette.common.gray500,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-            </>
-          </MemoizedToolbox>
-
-          {/* end Data from map */}
-
-          {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
-            <MemoizedRelativeLivelinessBar
-              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
-              onlineUsers={onlineUsers}
-              open={openLivelinessBar}
-              openUserInfoSidebar={openUserInfoSidebar}
-              user={user}
-              variant="relativeInteractions"
-            />
-          )}
-
-          {window.innerHeight > 399 && user?.livelinessBar === "relativeReputations" && (
-            <MemoizedRelativeLivelinessBar
-              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
-              onlineUsers={onlineUsers}
-              open={openLivelinessBar}
-              openUserInfoSidebar={openUserInfoSidebar}
-              user={user}
-              variant="relativeReputations"
-            />
-          )}
-
-          {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
-            <MemoizedLivelinessBar
-              authEmail={user?.email}
-              openUserInfoSidebar={openUserInfoSidebar}
-              open={openLivelinessBar}
-              onlineUsers={onlineUsers}
-              variant="absoluteInteractions"
-              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
-            />
-          )}
-
-          {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
-            <MemoizedLivelinessBar
-              authEmail={user?.email}
-              openUserInfoSidebar={openUserInfoSidebar}
-              onlineUsers={onlineUsers}
-              open={openLivelinessBar}
-              variant="absoluteReputations"
-              onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
-            />
-          )}
-
-          {focusView.isEnabled && (
-            <MemoizedFocusedNotebook
-              setSelectedNode={setSelectedNode}
-              db={db}
-              graph={graph}
-              onCloseFocusMode={() => setFocusView({ isEnabled: false, selectedNode: "" })}
-              focusedNode={focusView.selectedNode}
-              openLinkedNode={openLinkedNode}
-            />
-          )}
-
-          {settings.view === "Graph" && (
-            <Box
-              id="MapContent"
-              className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
-              onMouseOver={mapContentMouseOver}
-              onTouchStart={mapContentMouseOver}
-              onMouseUp={onMouseClick}
-            >
-              <MapInteractionCSS
-                textIsHovered={mapHovered}
-                /*identifier={'xdf'}*/
-                value={mapInteractionValue}
-                onChange={navigateWhenNotScrolling}
-              >
-                {/* origin used to measure the the relative position of each node to the ViewPort */}
-                {/* used in onNodeInViewport Callback */}
-                <Box
-                  id="map-interaction-origin"
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                ></Box>
-                {!currentStep?.anchor && tutorial && (
-                  <TooltipTutorial
-                    tutorial={tutorial}
-                    tutorialStep={currentStep}
-                    targetClientRect={targetClientRect}
-                    // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
-                    onSkip={onSkipTutorial}
-                    onFinalize={onFinalizeTutorial}
-                    onNextStep={onNextTutorialStep}
-                    onPreviousStep={onPreviousTutorialStep}
-                    stepsLength={tutorial.steps.length}
-                    node={graph.nodes[dynamicTargetId]}
-                    forcedTutorial={forcedTutorial}
-                    groupTutorials={tutorialGroup}
-                    onForceTutorial={setForcedTutorial}
-                    parent={graph.nodes[pathway.parent]}
-                    child={graph.nodes[pathway.child]}
-                    tutorialProgress={tutorialProgress}
-                    showNextTutorialStep={showNextTutorialStep}
-                    setShowNextTutorialStep={setShowNextTutorialStep}
-                  />
-                )}
-                {settings.showClusterOptions && settings.showClusters && (
-                  <MemoizedClustersList clusterNodes={clusterNodes} />
-                )}
-                <MemoizedLinksList
-                  edgeIds={edgeIds}
-                  edges={graph.edges}
-                  onForceRecalculateGraph={onForceRecalculateGraph}
-                />
-                <MemoizedNodeList
-                  nodeUpdates={nodeUpdates}
-                  notebookRef={notebookRef}
-                  setNodeUpdates={setNodeUpdates}
-                  setFocusView={setFocusView}
-                  nodes={graph.nodes}
-                  bookmark={bookmark}
-                  markStudied={markStudied}
-                  chosenNodeChanged={chosenNodeChanged}
-                  referenceLabelChange={referenceLabelChange}
-                  deleteLink={deleteLink}
-                  cleanEditorLink={cleanEditorLink}
-                  openLinkedNode={openLinkedNode}
-                  openAllChildren={openAllChildren}
-                  openAllParent={openAllParent}
-                  hideNodeHandler={hideNodeHandler}
-                  hideDescendants={hideDescendants}
-                  toggleNode={toggleNode}
-                  openNodePart={openNodePart}
-                  onNodeShare={onNodeShare}
-                  selectNode={onSelectNode}
-                  correctNode={correctNode}
-                  wrongNode={wrongNode}
-                  uploadNodeImage={uploadNodeImage}
-                  removeImage={removeImage}
-                  setOpenMedia={(imgUrl: string) => {
-                    setOpenMedia(imgUrl);
-                  }}
-                  changeNodeHight={changeNodeHight}
-                  changeChoice={changeChoice}
-                  changeFeedback={changeFeedback}
-                  switchChoice={switchChoice}
-                  deleteChoice={deleteChoice}
-                  addChoice={addChoice}
-                  onNodeTitleBlur={onNodeTitleBlur}
-                  // setOpenSearch={setOpenSearch}
-                  saveProposedChildNode={saveProposedChildNode}
-                  saveProposedParentNode={saveProposedParentNode}
-                  saveProposedImprovement={saveProposedImprovement}
-                  closeSideBar={closeSideBar}
-                  reloadPermanentGraph={revertNodesOnGraph}
-                  setNodeParts={setNodeParts}
-                  citations={citations}
-                  setOpenSideBar={setOpenSidebar}
-                  proposeNodeImprovement={proposeNodeImprovement}
-                  proposeNewChild={proposeNewChild}
-                  proposeNewParent={proposeNewParent}
-                  scrollToNode={scrollToNode}
-                  openSidebar={openSidebar}
-                  setOperation={setOperation}
-                  openUserInfoSidebar={openUserInfoSidebar}
-                  disabledNodes={[]}
-                  enableChildElements={[]}
-                  // showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
-                  // setCurrentTutorial={setCurrentTutorial}
-                  ableToPropose={ableToPropose}
-                  setAbleToPropose={setAbleToPropose}
-                  setOpenPart={onChangeNodePart}
-                  // selectedNotebookId={selectedNotebookId}
-                  hideNode={hideNodeContent}
-                  setAssistantSelectNode={setAssistantSelectNode}
-                  assistantSelectNode={assistantSelectNode}
-                  onForceRecalculateGraph={onForceRecalculateGraph}
-                  setSelectedProposalId={setSelectedProposalId}
-                  onChangeChosenNode={onChangeChosenNode}
-                  editingModeNode={editingModeNode}
-                  setEditingModeNode={setEditingModeNode}
-                  displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
-                />
-              </MapInteractionCSS>
-
-              {showRegion && (
-                <Box
-                  id="region-stn"
-                  sx={{
-                    position: "absolute",
-                    top: windowInnerTop,
-                    bottom: windowInnerBottom,
-                    left: windowInnerLeft,
-                    right: windowInnerRight,
-                    background: "rgba(255,255,255,.125)",
-                    pointerEvents: "none",
-                    borderRadius: "4px",
-                    border: "dashed 4px #f09816",
-                  }}
-                ></Box>
-              )}
-
-              <Suspense fallback={<div></div>}>
-                <Modal
-                  open={Boolean(openMedia)}
-                  onClose={() => setOpenMedia("")}
-                  aria-labelledby="modal-modal-title"
-                  aria-describedby="modal-modal-description"
-                >
-                  <>
-                    <CloseIcon
-                      sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
-                      onClick={() => setOpenMedia("")}
+                  <IconButton id="toolbox-redraw-graph" color="secondary" onClick={() => onRedrawGraph()}>
+                    <AutoFixHighIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
                     />
-                    <MapInteractionCSS>
-                      <Paper
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "100vh",
-                          width: "100vw",
-                          background: "transparent",
-                        }}
-                      >
-                        <Image
-                          src={openMedia}
-                          alt="Node image"
-                          className="responsive-img"
-                          layout="fill"
-                          objectFit="contain"
-                        />
-                      </Paper>
-                    </MapInteractionCSS>
-                  </>
-                </Modal>
-                {(isSubmitting || (!queueFinished && firstLoading)) && (
-                  <div className="CenterredLoadingImageContainer">
-                    <Image
-                      className="CenterredLoadingImage"
-                      loading="lazy"
-                      src={LoadingImg}
-                      alt="Loading"
-                      width={250}
-                      height={250}
+                  </IconButton>
+                </Tooltip>
+                <Tooltip
+                  title="Start tutorial"
+                  placement="bottom"
+                  sx={{
+                    ":hover": {
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      // borderRadius: "8px",
+                    },
+                    padding: { xs: "2px", sm: "8px" },
+                  }}
+                >
+                  <IconButton
+                    id="toolbox-table-of-contents"
+                    color="error"
+                    onClick={() => {
+                      setOpenProgressBar(prev => !prev);
+                    }}
+                  >
+                    <HelpCenterIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
                     />
-                  </div>
+                  </IconButton>
+                </Tooltip>
+                <Tooltip
+                  title="Focused view for selected node"
+                  placement="bottom"
+                  sx={{
+                    ":hover": {
+                      background: theme.palette.mode === "dark" ? "#404040" : "#EAECF0",
+                      borderRadius: "8px",
+                    },
+                    padding: { xs: "2px", sm: "8px" },
+                  }}
+                >
+                  <IconButton
+                    id="toolbox-focus-mode"
+                    color="secondary"
+                    onClick={() => {
+                      setFocusView({ isEnabled: true, selectedNode: nodeBookState.selectedNode || "" });
+                      setOpenProgressBar(false);
+                    }}
+                    disabled={!nodeBookState.selectedNode ? true : false}
+                    sx={{
+                      opacity: !nodeBookState.selectedNode ? 0.5 : undefined,
+                    }}
+                  >
+                    <CenterFocusStrongIcon
+                      sx={{
+                        color: theme =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.notebookG100
+                            : theme.palette.common.gray500,
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+              </>
+            </MemoizedToolbox>
+
+            {/* end Data from map */}
+
+            {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
+              <MemoizedRelativeLivelinessBar
+                onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+                onlineUsers={onlineUsers}
+                open={openLivelinessBar}
+                openUserInfoSidebar={openUserInfoSidebar}
+                user={user}
+                variant="relativeInteractions"
+              />
+            )}
+
+            {window.innerHeight > 399 && user?.livelinessBar === "relativeReputations" && (
+              <MemoizedRelativeLivelinessBar
+                onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+                onlineUsers={onlineUsers}
+                open={openLivelinessBar}
+                openUserInfoSidebar={openUserInfoSidebar}
+                user={user}
+                variant="relativeReputations"
+              />
+            )}
+
+            {window.innerHeight > 399 && user?.livelinessBar === "interaction" && (
+              <MemoizedLivelinessBar
+                authEmail={user?.email}
+                openUserInfoSidebar={openUserInfoSidebar}
+                open={openLivelinessBar}
+                onlineUsers={onlineUsers}
+                variant="absoluteInteractions"
+                onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+              />
+            )}
+
+            {window.innerHeight > 399 && user?.livelinessBar === "reputation" && (
+              <MemoizedLivelinessBar
+                authEmail={user?.email}
+                openUserInfoSidebar={openUserInfoSidebar}
+                onlineUsers={onlineUsers}
+                open={openLivelinessBar}
+                variant="absoluteReputations"
+                onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
+              />
+            )}
+
+            {focusView.isEnabled && (
+              <MemoizedFocusedNotebook
+                setSelectedNode={setSelectedNode}
+                db={db}
+                graph={graph}
+                onCloseFocusMode={() => setFocusView({ isEnabled: false, selectedNode: "" })}
+                focusedNode={focusView.selectedNode}
+                openLinkedNode={openLinkedNode}
+              />
+            )}
+
+            {settings.view === "Graph" && (
+              <Box
+                id="MapContent"
+                className={scrollToNodeInitialized.current ? "ScrollToNode" : undefined}
+                onMouseOver={mapContentMouseOver}
+                onTouchStart={mapContentMouseOver}
+                onMouseUp={onMouseClick}
+              >
+                <MapInteractionCSS
+                  textIsHovered={mapHovered}
+                  /*identifier={'xdf'}*/
+                  value={mapInteractionValue}
+                  onChange={navigateWhenNotScrolling}
+                >
+                  {/* origin used to measure the the relative position of each node to the ViewPort */}
+                  {/* used in onNodeInViewport Callback */}
+                  <Box
+                    id="map-interaction-origin"
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                    }}
+                  ></Box>
+                  {!currentStep?.anchor && tutorial && (
+                    <TooltipTutorial
+                      tutorial={tutorial}
+                      tutorialStep={currentStep}
+                      targetClientRect={targetClientRect}
+                      // handleCloseProgressBarMenu={handleCloseProgressBarMenu}
+                      onSkip={onSkipTutorial}
+                      onFinalize={onFinalizeTutorial}
+                      onNextStep={onNextTutorialStep}
+                      onPreviousStep={onPreviousTutorialStep}
+                      stepsLength={tutorial.steps.length}
+                      node={graph.nodes[dynamicTargetId]}
+                      forcedTutorial={forcedTutorial}
+                      groupTutorials={tutorialGroup}
+                      onForceTutorial={setForcedTutorial}
+                      parent={graph.nodes[pathway.parent]}
+                      child={graph.nodes[pathway.child]}
+                      tutorialProgress={tutorialProgress}
+                      showNextTutorialStep={showNextTutorialStep}
+                      setShowNextTutorialStep={setShowNextTutorialStep}
+                    />
+                  )}
+                  {settings.showClusterOptions && settings.showClusters && (
+                    <MemoizedClustersList clusterNodes={clusterNodes} />
+                  )}
+                  <MemoizedLinksList
+                    edgeIds={edgeIds}
+                    edges={graph.edges}
+                    onForceRecalculateGraph={onForceRecalculateGraph}
+                  />
+                  <MemoizedNodeList
+                    nodeUpdates={nodeUpdates}
+                    notebookRef={notebookRef}
+                    setNodeUpdates={setNodeUpdates}
+                    setFocusView={setFocusView}
+                    nodes={graph.nodes}
+                    bookmark={bookmark}
+                    markStudied={markStudied}
+                    chosenNodeChanged={chosenNodeChanged}
+                    referenceLabelChange={referenceLabelChange}
+                    deleteLink={deleteLink}
+                    cleanEditorLink={cleanEditorLink}
+                    openLinkedNode={openLinkedNode}
+                    openAllChildren={openAllChildren}
+                    openAllParent={openAllParent}
+                    hideNodeHandler={hideNodeHandler}
+                    hideDescendants={hideDescendants}
+                    toggleNode={toggleNode}
+                    openNodePart={openNodePart}
+                    onNodeShare={onNodeShare}
+                    selectNode={onSelectNode}
+                    correctNode={correctNode}
+                    wrongNode={wrongNode}
+                    uploadNodeImage={uploadNodeImage}
+                    removeImage={removeImage}
+                    setOpenMedia={(imgUrl: string) => {
+                      setOpenMedia(imgUrl);
+                    }}
+                    changeNodeHight={changeNodeHight}
+                    changeChoice={changeChoice}
+                    changeFeedback={changeFeedback}
+                    switchChoice={switchChoice}
+                    deleteChoice={deleteChoice}
+                    addChoice={addChoice}
+                    onNodeTitleBlur={onNodeTitleBlur}
+                    // setOpenSearch={setOpenSearch}
+                    saveProposedChildNode={saveProposedChildNode}
+                    saveProposedParentNode={saveProposedParentNode}
+                    saveProposedImprovement={saveProposedImprovement}
+                    closeSideBar={closeSideBar}
+                    reloadPermanentGraph={revertNodesOnGraph}
+                    setNodeParts={setNodeParts}
+                    citations={citations}
+                    setOpenSideBar={setOpenSidebar}
+                    proposeNodeImprovement={proposeNodeImprovement}
+                    proposeNewChild={proposeNewChild}
+                    proposeNewParent={proposeNewParent}
+                    scrollToNode={scrollToNode}
+                    openSidebar={openSidebar}
+                    setOperation={setOperation}
+                    openUserInfoSidebar={openUserInfoSidebar}
+                    disabledNodes={[]}
+                    enableChildElements={[]}
+                    // showProposeTutorial={!(userTutorial.proposal.done || userTutorial.proposal.skipped)}
+                    // setCurrentTutorial={setCurrentTutorial}
+                    ableToPropose={ableToPropose}
+                    setAbleToPropose={setAbleToPropose}
+                    setOpenPart={onChangeNodePart}
+                    // selectedNotebookId={selectedNotebookId}
+                    hideNode={hideNodeContent}
+                    setAssistantSelectNode={setAssistantSelectNode}
+                    assistantSelectNode={assistantSelectNode}
+                    onForceRecalculateGraph={onForceRecalculateGraph}
+                    setSelectedProposalId={setSelectedProposalId}
+                    onChangeChosenNode={onChangeChosenNode}
+                    editingModeNode={editingModeNode}
+                    setEditingModeNode={setEditingModeNode}
+                    displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
+                  />
+                </MapInteractionCSS>
+
+                {showRegion && (
+                  <Box
+                    id="region-stn"
+                    sx={{
+                      position: "absolute",
+                      top: windowInnerTop,
+                      bottom: windowInnerBottom,
+                      left: windowInnerLeft,
+                      right: windowInnerRight,
+                      background: "rgba(255,255,255,.125)",
+                      pointerEvents: "none",
+                      borderRadius: "4px",
+                      border: "dashed 4px #f09816",
+                    }}
+                  ></Box>
                 )}
-              </Suspense>
-            </Box>
-          )}
 
-          <MemoizedTutorialTableOfContent
-            open={openProgressBar}
-            reloadPermanentGraph={revertNodesOnGraph}
-            handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={tutorialGroup}
-            userTutorialState={userTutorial}
-            onCancelTutorial={onCancelTutorial}
-            onForceTutorial={tutorialKey => {
-              setForcedTutorial(tutorialKey);
-              tutorialStateWasSetUpRef.current = false;
-            }}
-            tutorialProgress={tutorialProgress}
-          />
-        </Box>
+                <Suspense fallback={<div></div>}>
+                  <Modal
+                    open={Boolean(openMedia)}
+                    onClose={() => setOpenMedia("")}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                  >
+                    <>
+                      <CloseIcon
+                        sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+                        onClick={() => setOpenMedia("")}
+                      />
+                      <MapInteractionCSS>
+                        <Paper
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "100vh",
+                            width: "100vw",
+                            background: "transparent",
+                          }}
+                        >
+                          <Image
+                            src={openMedia}
+                            alt="Node image"
+                            className="responsive-img"
+                            layout="fill"
+                            objectFit="contain"
+                          />
+                        </Paper>
+                      </MapInteractionCSS>
+                    </>
+                  </Modal>
+                  {(isSubmitting || (!queueFinished && firstLoading)) && (
+                    <div className="CenterredLoadingImageContainer">
+                      <Image
+                        className="CenterredLoadingImage"
+                        loading="lazy"
+                        src={LoadingImg}
+                        alt="Loading"
+                        width={250}
+                        height={250}
+                      />
+                    </div>
+                  )}
+                </Suspense>
+              </Box>
+            )}
 
-        {/*
+            <MemoizedTutorialTableOfContent
+              open={openProgressBar}
+              reloadPermanentGraph={revertNodesOnGraph}
+              handleCloseProgressBar={onCloseTableOfContent}
+              groupTutorials={tutorialGroup}
+              userTutorialState={userTutorial}
+              onCancelTutorial={onCancelTutorial}
+              onForceTutorial={tutorialKey => {
+                setForcedTutorial(tutorialKey);
+                tutorialStateWasSetUpRef.current = false;
+              }}
+              tutorialProgress={tutorialProgress}
+            />
+          </Box>
+
+          {/*
         ------------------------------------->
         ABSOLUTE ELEMENTS
         <-------------------------------------
         */}
 
-        {/* stop voice assistant button */}
-        {voiceAssistant.questionNode && !startPractice && (
-          <Tooltip title="Stop the voice interactions" placement="left">
-            <IconButton
-              onClick={() => setVoiceAssistant(prev => ({ ...prev, questionNode: null }))}
-              sx={{
-                position: "absolute",
-                right: "8px",
-                zIndex: 999,
-                top: "76px",
-                width: "60px",
-                height: "60px",
-                color: DESIGN_SYSTEM_COLORS.primary600,
-                borderRadius: "8px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-                ":hover": {
+          {/* stop voice assistant button */}
+          {voiceAssistant.questionNode && !startPractice && (
+            <Tooltip title="Stop the voice interactions" placement="left">
+              <IconButton
+                onClick={() => setVoiceAssistant(prev => ({ ...prev, questionNode: null }))}
+                sx={{
+                  position: "absolute",
+                  right: "8px",
+                  zIndex: 999,
+                  top: "76px",
+                  width: "60px",
+                  height: "60px",
+                  color: DESIGN_SYSTEM_COLORS.primary600,
+                  borderRadius: "8px",
                   backgroundColor: theme =>
                     theme.palette.mode === "dark"
                       ? DESIGN_SYSTEM_COLORS.notebookMainBlack
                       : DESIGN_SYSTEM_COLORS.gray50,
-                },
-              }}
-            >
-              <VolumeUpIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+                  ":hover": {
+                    backgroundColor: theme =>
+                      theme.palette.mode === "dark"
+                        ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                        : DESIGN_SYSTEM_COLORS.gray50,
+                  },
+                }}
+              >
+                <VolumeUpIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
-        {/* instructor/student dashboard */}
-        {user && displayDashboard && (
-          <DashboardWrapper
-            ref={assistantRef}
-            voiceAssistant={voiceAssistant}
-            setVoiceAssistant={setVoiceAssistant}
-            // voiceAssistantRef={voiceAssistantRef.current}
-            user={user}
-            onClose={() => {
-              setDisplayDashboard(false);
-              setRootQuery(undefined);
-              router.replace(router.pathname);
-              setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
-            }}
-            openNodeHandler={openLinkedNode}
-            sx={{ position: "absolute", inset: "0px", zIndex: Z_INDEX["dashboard"] }}
-            root={rootQuery}
-            startPractice={startPractice}
-            setStartPractice={setStartPractice}
-            setDisplayRightSidebar={setDisplaySidebar}
-            setUserIsAnsweringPractice={setUserIsAnsweringPractice}
-          />
-        )}
-
-        {/* assistant */}
-        {voiceAssistant.tagId && (
-          <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: Z_INDEX["dashboard"] }}>
-            <Assistant
+          {/* instructor/student dashboard */}
+          {user && displayDashboard && (
+            <DashboardWrapper
+              ref={assistantRef}
               voiceAssistant={voiceAssistant}
-              assistantRef={assistantRef}
-              openNodesOnNotebook={openNodesOnNotebook}
-              scrollToNode={scrollToNode}
-              selectedNotebookId={selectedNotebookId}
-              setDisplayDashboard={setDisplayDashboard}
-              setRootQuery={setRootQuery}
               setVoiceAssistant={setVoiceAssistant}
+              // voiceAssistantRef={voiceAssistantRef.current}
+              user={user}
+              onClose={() => {
+                setDisplayDashboard(false);
+                setRootQuery(undefined);
+                router.replace(router.pathname);
+                setVoiceAssistant(prev => ({ ...prev, questionNode: null }));
+              }}
+              openNodeHandler={openLinkedNode}
+              sx={{ position: "absolute", inset: "0px", zIndex: Z_INDEX["dashboard"] }}
+              root={rootQuery}
               startPractice={startPractice}
-              uname={user?.uname ?? ""}
-              userIsAnsweringPractice={userIsAnsweringPractice}
+              setStartPractice={setStartPractice}
+              setDisplayRightSidebar={setDisplaySidebar}
+              setUserIsAnsweringPractice={setUserIsAnsweringPractice}
             />
-          </Box>
-        )}
+          )}
 
-        {user && voiceAssistant.tagId && (
-          <>
-            {/* leaderBoard */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "350px",
-                top: "0px",
-                bottom: "0px",
-                right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-                borderRadius: "16px 0px 0px 0px",
-                transition: "right 0.4s",
-                zIndex: Z_INDEX["dashboard"],
-              }}
-            >
-              <IconButton
+          {/* assistant */}
+          {voiceAssistant.tagId && (
+            <Box sx={{ position: "absolute", bottom: "10px", right: "50px", zIndex: Z_INDEX["dashboard"] }}>
+              <Assistant
+                voiceAssistant={voiceAssistant}
+                assistantRef={assistantRef}
+                openNodesOnNotebook={openNodesOnNotebook}
+                scrollToNode={scrollToNode}
+                selectedNotebookId={selectedNotebookId}
+                setDisplayDashboard={setDisplayDashboard}
+                setRootQuery={setRootQuery}
+                setVoiceAssistant={setVoiceAssistant}
+                startPractice={startPractice}
+                uname={user?.uname ?? ""}
+                userIsAnsweringPractice={userIsAnsweringPractice}
+              />
+            </Box>
+          )}
+
+          {user && voiceAssistant.tagId && (
+            <>
+              {/* leaderBoard */}
+              <Box
                 sx={{
                   position: "absolute",
-                  top: "17px",
-                  right: "17px",
-                  p: "4px",
-                  color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
-                }}
-                onClick={() => {
-                  setDisplaySidebar(null);
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-              <Leaderboard semesterId={voiceAssistant.tagId} />
-            </Box>
-
-            {/* userStatus */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "350px",
-                top: "0px",
-                bottom: "0px",
-                right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookMainBlack : DESIGN_SYSTEM_COLORS.gray50,
-                borderRadius: "16px 0px 0px 0px",
-                transition: "right 0.4s",
-                zIndex: Z_INDEX["dashboard"],
-              }}
-            >
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  top: "17px",
-                  right: "17px",
-                  p: "4px",
-                  color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
-                }}
-                onClick={() => {
-                  setDisplaySidebar(null);
+                  width: "350px",
+                  top: "0px",
+                  bottom: "0px",
+                  right: displaySidebar === "LEADERBOARD" ? "0px" : "-350px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                  borderRadius: "16px 0px 0px 0px",
+                  transition: "right 0.4s",
+                  zIndex: Z_INDEX["dashboard"],
                 }}
               >
-                <CloseIcon />
-              </IconButton>
-              <UserStatus semesterId={voiceAssistant.tagId} user={user} />
-            </Box>
-          </>
-        )}
-
-        {process.env.NODE_ENV === "development" && (
-          <Tooltip title={"Watch geek data"} placement="bottom">
-            <IconButton
-              onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}
-              sx={{
-                padding: { xs: "2px", sm: "8px" },
-                position: "absolute",
-                bottom: "12px",
-                left: "70px",
-                color: "white",
-                background: "royalBlue",
-                zIndex: Z_INDEX["devtools"],
-                ":hover": {
-                  background: "#3352af",
-                  // borderRadius: "8px",
-                },
-              }}
-            >
-              <CodeIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-
-        {/* Develop sidebar: don't REMOVE, add in required section a button if you need to print console */}
-        {openDeveloperMenu && (
-          <ClickAwayListener onClickAway={() => setOpenDeveloperMenu(false)}>
-            <Box
-              sx={{
-                position: "absolute",
-                top: "0px",
-                bottom: "0px",
-                right: "0px",
-                maxWidth: "300px",
-                p: "10px",
-                display: "grid",
-                rowGap: "20px",
-                overflowY: "auto",
-                backgroundColor: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseBlack : DESIGN_SYSTEM_COLORS.baseWhite,
-                zIndex: Z_INDEX["devtools"],
-              }}
-            >
-              <Box>
-                User: <b>{user?.uname}</b> with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
-                <b>{notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"}</b> with Id:{" "}
-                <b>{selectedNotebookId}</b>
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    top: "17px",
+                    right: "17px",
+                    p: "4px",
+                    color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
+                  }}
+                  onClick={() => {
+                    setDisplaySidebar(null);
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+                <Leaderboard semesterId={voiceAssistant.tagId} />
               </Box>
 
-              <Paper>
-                <Divider>Global states</Divider>
-                <Button onClick={() => console.info(nodeBookState)}>nodeBookState</Button>
-                <Button onClick={() => console.info(graph.nodes)}>nodes</Button>
-                <Button onClick={() => console.info(graph.edges)}>edges</Button>
-                <Button onClick={() => console.info("DAGGER", g)}>Dagre</Button>
-                <Button onClick={() => console.info(allTags)}>allTags</Button>
-                <Button onClick={() => console.info(notebookRef)}>notebookRef</Button>
-                <Divider />
-                <Button onClick={() => console.info(user)}>user</Button>
-                <Button onClick={() => console.info(settings)}>setting</Button>
-                <Button onClick={() => console.info(reputation)}>reputation</Button>
-              </Paper>
-
-              <Paper>
-                <Divider>Local states</Divider>
-                <Button onClick={() => console.info(selectedNotebookId)}>selectedNotebookId</Button>
-                <Button onClick={() => console.info(selectedPreviousNotebookIdRef.current)}>
-                  selectedPreviousNotebookIdRef
-                </Button>
-                <Button onClick={() => console.info(preLoadedNodesRef.current)}>Pre Loaded Nodes</Button>
-                <Button onClick={() => console.info(citations)}>citations</Button>
-                <Button onClick={() => console.info(clusterNodes)}>clusterNodes</Button>
-                <Button onClick={() => console.info(graph.nodes[nodeBookState.selectedNode ?? ""])}>
-                  SelectedNode
-                </Button>
-                <Button onClick={() => console.info({ lastOperation: lastNodeOperation.current })}>
-                  lastNodeOperation
-                </Button>
-                <Button onClick={() => console.info(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
-                <Button onClick={() => console.info(openSidebar)}>openSidebar</Button>
-                <Button onClick={() => console.info(displaySidebar)}>displaySidebar</Button>
-                <Button onClick={() => console.info(selectedProposalId)}>openProposal</Button>
-              </Paper>
-
-              <Paper>
-                <Divider>Proposals</Divider>
-                <Button onClick={() => console.info(tempNodes)}>tempNodes</Button>
-                <Button onClick={() => console.info({ ...changedNodes })}>changedNodes</Button>
-                <Button onClick={() => console.info({ updatedLinks: updatedLinksRef.current })}>updatedLinks</Button>
-              </Paper>
-
-              <Paper>
-                <Divider>Render</Divider>
-                <Button onClick={() => console.info(nodeChanges)}>node changes</Button>
-                <Button onClick={() => console.info(mapRendered)}>map rendered</Button>
-                <Button onClick={() => console.info(userNodeChanges)}>user node changes</Button>
-              </Paper>
-
-              <Paper>
-                <Divider>Reputation</Divider>
-                <Button
-                  onClick={() => setReputationSignal([{ uname: "1man", reputation: 1, type: ["All Time", "Weekly"] }])}
+              {/* userStatus */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  width: "350px",
+                  top: "0px",
+                  bottom: "0px",
+                  right: displaySidebar === "USER_STATUS" ? "0px" : "-350px",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark"
+                      ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                      : DESIGN_SYSTEM_COLORS.gray50,
+                  borderRadius: "16px 0px 0px 0px",
+                  transition: "right 0.4s",
+                  zIndex: Z_INDEX["dashboard"],
+                }}
+              >
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    top: "17px",
+                    right: "17px",
+                    p: "4px",
+                    color: theme => (theme.palette.mode === "dark" ? undefined : DESIGN_SYSTEM_COLORS.notebookG200),
+                  }}
+                  onClick={() => {
+                    setDisplaySidebar(null);
+                  }}
                 >
-                  Test Increment Reputation
-                </Button>
-                <Button
-                  onClick={() => setReputationSignal([{ uname: "1man", reputation: -1, type: ["All Time", "Weekly"] }])}
-                >
-                  Test Decrement Reputation
-                </Button>
-              </Paper>
+                  <CloseIcon />
+                </IconButton>
+                <UserStatus semesterId={voiceAssistant.tagId} user={user} />
+              </Box>
+            </>
+          )}
 
-              <Paper>
-                <Divider>Assistant</Divider>
-                <Button onClick={() => console.info({ voiceAssistant })}>voiceAssistant</Button>
-                <Button onClick={() => console.info({ startPractice })}>startPractice</Button>
-              </Paper>
+          {process.env.NODE_ENV === "development" && (
+            <Tooltip title={"Watch geek data"} placement="bottom">
+              <IconButton
+                onClick={() => setOpenDeveloperMenu(!openDeveloperMenu)}
+                sx={{
+                  padding: { xs: "2px", sm: "8px" },
+                  position: "absolute",
+                  bottom: "12px",
+                  left: "70px",
+                  color: "white",
+                  background: "royalBlue",
+                  zIndex: Z_INDEX["devtools"],
+                  ":hover": {
+                    background: "#3352af",
+                    // borderRadius: "8px",
+                  },
+                }}
+              >
+                <CodeIcon />
+              </IconButton>
+            </Tooltip>
+          )}
 
-              <Paper>
-                <Divider>Tutorial</Divider>
-                <Button onClick={() => console.info(tutorial)}>Tutorial</Button>
-                <Button onClick={() => console.info(userTutorial)}>userTutorial</Button>
-                <Button onClick={() => console.info({ currentStep })}>currentStep</Button>
-                <Button onClick={() => console.info(dynamicTargetId)}>dynamicTargetId</Button>
-                <Button onClick={() => console.info(tutorialTargetId)}>tutorialTargetId</Button>
-                <Button onClick={() => console.info(forcedTutorial)}>forcedTutorial</Button>
-                <Button onClick={() => console.info({ tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current })}>
-                  tutorialStateWasSetUpRef
-                </Button>
-              </Paper>
+          {/* Develop sidebar: don't REMOVE, add in required section a button if you need to print console */}
+          {openDeveloperMenu && (
+            <ClickAwayListener onClickAway={() => setOpenDeveloperMenu(false)}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "0px",
+                  bottom: "0px",
+                  right: "0px",
+                  maxWidth: "300px",
+                  p: "10px",
+                  display: "grid",
+                  rowGap: "20px",
+                  overflowY: "auto",
+                  backgroundColor: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseBlack : DESIGN_SYSTEM_COLORS.baseWhite,
+                  zIndex: Z_INDEX["devtools"],
+                }}
+              >
+                <Box>
+                  User: <b>{user?.uname}</b> with [{Object.entries(graph.nodes).length}] Nodes in Notebook:
+                  <b>{notebooks.find(c => c.id === selectedNotebookId)?.title ?? "--"}</b> with Id:{" "}
+                  <b>{selectedNotebookId}</b>
+                </Box>
 
-              <Paper>
-                <Divider>Functions</Divider>
-                <Button onClick={() => console.info(parentWithMostChildren())}>Most Parent</Button>
-                <Button onClick={() => console.info(parentWithChildren("r98BjyFDCe4YyLA3U8ZE"))}>hisParent</Button>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Toggle Open proposals
-                </Button>
-                <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
-                  Open Proposal
-                </Button>
-                <OpenNode onOpenNode={openNodeHandler} />
-                <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
-                <Button onClick={() => console.info({ openSidebar })}>Open Sidebar</Button>
-              </Paper>
-            </Box>
-          </ClickAwayListener>
-        )}
-        {ConfirmDialog}
-      </Box>
-    </div>
+                <Paper>
+                  <Divider>Global states</Divider>
+                  <Button onClick={() => console.info(nodeBookState)}>nodeBookState</Button>
+                  <Button onClick={() => console.info(graph.nodes)}>nodes</Button>
+                  <Button onClick={() => console.info(graph.edges)}>edges</Button>
+                  <Button onClick={() => console.info("DAGGER", g)}>Dagre</Button>
+                  <Button onClick={() => console.info(allTags)}>allTags</Button>
+                  <Button onClick={() => console.info(notebookRef)}>notebookRef</Button>
+                  <Divider />
+                  <Button onClick={() => console.info(user)}>user</Button>
+                  <Button onClick={() => console.info(settings)}>setting</Button>
+                  <Button onClick={() => console.info(reputation)}>reputation</Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Local states</Divider>
+                  <Button onClick={() => console.info(selectedNotebookId)}>selectedNotebookId</Button>
+                  <Button onClick={() => console.info(selectedPreviousNotebookIdRef.current)}>
+                    selectedPreviousNotebookIdRef
+                  </Button>
+                  <Button onClick={() => console.info(preLoadedNodesRef.current)}>Pre Loaded Nodes</Button>
+                  <Button onClick={() => console.info(citations)}>citations</Button>
+                  <Button onClick={() => console.info(clusterNodes)}>clusterNodes</Button>
+                  <Button onClick={() => console.info(graph.nodes[nodeBookState.selectedNode ?? ""])}>
+                    SelectedNode
+                  </Button>
+                  <Button onClick={() => console.info({ lastOperation: lastNodeOperation.current })}>
+                    lastNodeOperation
+                  </Button>
+                  <Button onClick={() => console.info(isWritingOnDBRef.current)}>isWritingOnDBRef</Button>
+                  <Button onClick={() => console.info(openSidebar)}>openSidebar</Button>
+                  <Button onClick={() => console.info(displaySidebar)}>displaySidebar</Button>
+                  <Button onClick={() => console.info(selectedProposalId)}>openProposal</Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Proposals</Divider>
+                  <Button onClick={() => console.info(tempNodes)}>tempNodes</Button>
+                  <Button onClick={() => console.info({ ...changedNodes })}>changedNodes</Button>
+                  <Button onClick={() => console.info({ updatedLinks: updatedLinksRef.current })}>updatedLinks</Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Render</Divider>
+                  <Button onClick={() => console.info(nodeChanges)}>node changes</Button>
+                  <Button onClick={() => console.info(mapRendered)}>map rendered</Button>
+                  <Button onClick={() => console.info(userNodeChanges)}>user node changes</Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Reputation</Divider>
+                  <Button
+                    onClick={() =>
+                      setReputationSignal([{ uname: "1man", reputation: 1, type: ["All Time", "Weekly"] }])
+                    }
+                  >
+                    Test Increment Reputation
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      setReputationSignal([{ uname: "1man", reputation: -1, type: ["All Time", "Weekly"] }])
+                    }
+                  >
+                    Test Decrement Reputation
+                  </Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Assistant</Divider>
+                  <Button onClick={() => console.info({ voiceAssistant })}>voiceAssistant</Button>
+                  <Button onClick={() => console.info({ startPractice })}>startPractice</Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Tutorial</Divider>
+                  <Button onClick={() => console.info(tutorial)}>Tutorial</Button>
+                  <Button onClick={() => console.info(userTutorial)}>userTutorial</Button>
+                  <Button onClick={() => console.info({ currentStep })}>currentStep</Button>
+                  <Button onClick={() => console.info(dynamicTargetId)}>dynamicTargetId</Button>
+                  <Button onClick={() => console.info(tutorialTargetId)}>tutorialTargetId</Button>
+                  <Button onClick={() => console.info(forcedTutorial)}>forcedTutorial</Button>
+                  <Button onClick={() => console.info({ tutorialStateWasSetUpRef: tutorialStateWasSetUpRef.current })}>
+                    tutorialStateWasSetUpRef
+                  </Button>
+                </Paper>
+
+                <Paper>
+                  <Divider>Functions</Divider>
+                  <Button onClick={() => console.info(parentWithMostChildren())}>Most Parent</Button>
+                  <Button onClick={() => console.info(parentWithChildren("r98BjyFDCe4YyLA3U8ZE"))}>hisParent</Button>
+                  <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                    Toggle Open proposals
+                  </Button>
+                  <Button onClick={() => nodeBookDispatch({ type: "setSelectionType", payload: "Proposals" })}>
+                    Open Proposal
+                  </Button>
+                  <OpenNode onOpenNode={openNodeHandler} />
+                  <Button onClick={() => setShowRegion(prev => !prev)}>Show Region</Button>
+                  <Button onClick={() => console.info({ openSidebar })}>Open Sidebar</Button>
+                </Paper>
+              </Box>
+            </ClickAwayListener>
+          )}
+          {ConfirmDialog}
+        </Box>
+      </div>
+    </>
   );
 };
 
