@@ -238,51 +238,15 @@ const ContentComp: React.FC<Props> = ({
         ]}
         sx={{ mb: 2 }}
       /> */}
-      
-      {!open && (
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={selectedArticle?.id || 0}
-          onChange={handleChange}
-          sx={{
-            zIndex: 9999,
-            width: "200px",
-            height: "36px",
-            position: "absolute",
-            right: "190px",
-            top: "78.5px",
-          }}
-        >
-          <MenuItem onClick={() => setOpen(true)} value={0}>
-            Create New Article
-          </MenuItem>
-          <Divider variant="fullWidth" sx={{ my: "10px" }} />
-          {userArticles.map((article: any, index: number) => (
-            <MenuItem key={index} value={article.id}>
-              {article?.title}
-            </MenuItem>
-          ))}
-        </Select>
-      )}
-      {open && (
-        <TextField
-          placeholder="Enter Article Title"
-          sx={{
-            position: "absolute",
-            right: "190px",
-            top: "78.5px",
-          }}
-          value={articleTitle}
-          onChange={handleInputChange}
-          variant="outlined"
-          onKeyDown={(event: any) => {
-            if (event.key === "Enter") {
-              saveAndAnalyze();
-            }
-          }}
-          InputProps={{
-            sx: {
+      <Box mt={2}>
+        {!open && (
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={selectedArticle?.id || 0}
+            onChange={handleChange}
+            sx={{
+              zIndex: 9999,
               width: "200px",
               height: "36px",
               position: "absolute",
@@ -301,6 +265,7 @@ const ContentComp: React.FC<Props> = ({
             ))}
           </Select>
         )}
+
         {open && (
           <TextField
             placeholder="Enter Article Title"
