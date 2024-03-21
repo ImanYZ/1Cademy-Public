@@ -66,7 +66,7 @@ const ContentComp: React.FC<Props> = ({
         setContent(selectedArticle.content);
         await delay(1000);
         if (selectedArticle.content) {
-          setArticleandDOM();
+          setArticleAndDOM();
         }
       }
     })();
@@ -81,7 +81,7 @@ const ContentComp: React.FC<Props> = ({
     } catch (error) {}
   };
 
-  const setArticleandDOM = useCallback(() => {
+  const setArticleAndDOM = useCallback(() => {
     if (!quillRef) return;
     const quillEditor = quillRef.current.getEditor();
     const editorDOMs = document.getElementsByClassName("ql-editor");
@@ -92,7 +92,7 @@ const ContentComp: React.FC<Props> = ({
 
   const saveAndAnalyze = useCallback(async () => {
     if (selectedArticle?.id) {
-      setArticleandDOM();
+      setArticleAndDOM();
       await updateDoc(doc(db, "articles", selectedArticle.id), {
         content,
         updatedAt: new Date(),
@@ -238,15 +238,51 @@ const ContentComp: React.FC<Props> = ({
         ]}
         sx={{ mb: 2 }}
       /> */}
-      <Box mt={2}>
-        {!open && (
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={selectedArticle?.id || 0}
-            onChange={handleChange}
-            sx={{
-              zIndex: 9999,
+      
+      {!open && (
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={selectedArticle?.id || 0}
+          onChange={handleChange}
+          sx={{
+            zIndex: 9999,
+            width: "200px",
+            height: "36px",
+            position: "absolute",
+            right: "190px",
+            top: "78.5px",
+          }}
+        >
+          <MenuItem onClick={() => setOpen(true)} value={0}>
+            Create New Article
+          </MenuItem>
+          <Divider variant="fullWidth" sx={{ my: "10px" }} />
+          {userArticles.map((article: any, index: number) => (
+            <MenuItem key={index} value={article.id}>
+              {article?.title}
+            </MenuItem>
+          ))}
+        </Select>
+      )}
+      {open && (
+        <TextField
+          placeholder="Enter Article Title"
+          sx={{
+            position: "absolute",
+            right: "190px",
+            top: "78.5px",
+          }}
+          value={articleTitle}
+          onChange={handleInputChange}
+          variant="outlined"
+          onKeyDown={(event: any) => {
+            if (event.key === "Enter") {
+              saveAndAnalyze();
+            }
+          }}
+          InputProps={{
+            sx: {
               width: "200px",
               height: "36px",
               position: "absolute",
