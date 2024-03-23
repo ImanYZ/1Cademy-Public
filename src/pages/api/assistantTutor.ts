@@ -18,10 +18,10 @@ type Message = {
 };
 const saveLogs = async (logs: { [key: string]: any }) => {
   const newLogRef = db.collection("logs").doc();
-  await newLogRef.set({
-    ...logs,
-    createdAt: new Date(),
-  });
+  // await newLogRef.set({
+  //   ...logs,
+  //   createdAt: new Date(),
+  // });
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
@@ -745,7 +745,13 @@ const PROMPT = (
     +"If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
     `${techniques}\n` +
     "You should make your messages very short.\n" +
-    `Always separate your response to the student's last message from your next question using "\n~~~~~~~~\n".`;
+    `Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
+    {
+      "evaluation":"A number between 0 to 10 indicating the quality of my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question.",
+      "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy", "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers,
+      "inform_instructor": "Yes" if the instructor should be informed about my response to your last message. "No" if there is no reason to take the instructor's time about my last message to you.
+    }
+    Do not print anything other than this JSON object.`;
   return instructions;
 };
 
