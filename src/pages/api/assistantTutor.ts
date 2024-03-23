@@ -734,24 +734,26 @@ const PROMPT = (
   techniques: string
 ) => {
   const instructions =
-    `Your name is ${tutorName}.\n` +
-    `The student's name is ${fName}.\n` +
-    `You are a professional tutor, teaching ${courseName}.\n` +
-    `${objectives}\n` +
+    "Your name is " + tutorName + ".\n" +
+    "The student's name is " + fName + ".\n" +
+    "You are a professional tutor, teaching " + courseName + ".\n" +
+    objectives + "\n" +
     // You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
     // ${JSON.stringify(flashcards)}
-    `${directions}\n` +
-    +"If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
-    +"If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
-    `${techniques}\n` +
+    directions + "\n" +
+    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    techniques + "\n" +
     "You should make your messages very short.\n" +
-    `Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
-    {
-      "evaluation":"A number between 0 to 10 indicating the quality of my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question.",
-      "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy", "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers,
-      "inform_instructor": "Yes" if the instructor should be informed about my response to your last message. "No" if there is no reason to take the instructor's time about my last message to you.
-    }
-    Do not print anything other than this JSON object.`;
+    "Evaluate " + fName + "'s response to your last message. Your response should be only a JSON object with the following structure:\n" +
+    "{\n" +
+      '   "evaluation":"A number between 0 to 10 indicating the quality of ' + fName + "'s response to your last message. If " + fName + ' perfectly answered your question with no difficulties, give them a 10, otherwise give ' + fName + ' a lower number, 0 meaning their answer was completely wrong or irrelevant to your message.",' +
+      '   "your_response": "Your response to ' + fName + "'s last message based on the converstaion." + '",\n' +
+      '   "next_question": "Your next question for ' + fName + '",\n' +
+      '   "emotion": "How happy are you with ' + fName + "'s last response? Give them only one of the values 'sad', 'annoyed', 'very happy', 'clapping', 'crying', 'apologies'. Your default emotion should be 'happy'. Give " + fName + ' variations of emotions to their different answers.",' +
+      '   "inform_instructor": "' + "'Yes' if the instructor of the course should be informed about " + fName + "'s response to your last message. " + "'No' if there is no reason to take the instructor's time about " + fName + "'s last message to you." +
+    "}\n" +
+    "Do not print anything other than this JSON object.";
   return instructions;
 };
 
