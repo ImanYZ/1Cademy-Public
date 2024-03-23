@@ -5,7 +5,7 @@ export const extractArray = (arrayString: string) => {
   const start = arrayString.indexOf("[");
   const end = arrayString.lastIndexOf("]");
   if (start === -1 || end === -1) {
-    return "[]";
+    return null;
   }
   const jsonArrayString = arrayString.slice(start, end + 1);
   return jsonArrayString;
@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<string[]>) {
 
     console.log({ gptResponse });
 
-    const responseArray = JSON.parse(extractArray(gptResponse));
+    const responseArray = JSON.parse(extractArray(gptResponse) || "[]");
 
     return res.status(200).json(responseArray);
   } catch (error) {
