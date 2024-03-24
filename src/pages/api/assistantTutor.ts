@@ -23,14 +23,24 @@ const saveLogs = async (logs: { [key: string]: any }) => {
     createdAt: new Date(),
   });
 };
-
+const getId = () => {
+  return db.collection("tutorConversations").doc().id;
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo } = req.body;
+  let {
+    url,
+    cardsModel,
+    furtherExplain,
+    message,
+    removeAdditionalInfo,
+    anotherTopic,
+    answerQuestion,
+    clarifyQuestion,
+  } = req.body;
   let conversationId = "";
-  let deviating: boolean = false;
+  let deviating: boolean = anotherTopic;
   let relevanceResponse: boolean = true;
-  let detectedSections: { section: string; url: string }[] = [];
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
@@ -117,6 +127,49 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         content: systemPrompt,
       });
     }
+    if (clarifyQuestion) {
+      const clarifiedQuestion = await clarifyTheQuestion(
+        conversationData.messages,
+        fName,
+        tutorName,
+        courseName,
+        objectives,
+        directions,
+        techniques,
+        res
+      );
+      conversationData.messages.push({
+        content: "Clarify the question",
+        role: "user",
+        sentAt: new Date(),
+        mid: getId(),
+        ignoreMessage: true,
+      });
+      conversationData.messages.push({
+        content: clarifiedQuestion,
+        role: "assistant",
+        sentAt: new Date(),
+        mid: getId(),
+        default_message,
+        ignoreMessage: true,
+      });
+      await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      await saveLogs({
+        course,
+        url,
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        conversationId,
+        clarifyQuestion,
+        question: conversationData.messages.at(-1),
+        action: "clarify question",
+        project: "1Tutor",
+      });
+      console.log(conversationId);
+      res.end();
+      return;
+    }
     conversationId = newConversationRef.id;
     let questionMessage = null;
     if (!message) {
@@ -168,29 +221,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       role: "user",
       content: message,
       sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
+      mid: getId(),
       default_message,
       nextFlashcard: nextFlashcard?.id || "",
       extraInfoPrompt,
       furtherExplainPrompt,
     });
     const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
+    console.log(mergedMessages);
+    // const instructorLastMessage = mergedMessages.at(-2) || {};
+    // if (!default_message && !instructorLastMessage.hasOwnProperty("question")) {
+    //   // const exposedParagraphsIds = getExposedParagraphs(concepts, [
+    //   //   ...conversationData.usedFlashcards,
+    //   //   nextFlashcard?.id || "",
+    //   // ]);
 
-    console.log("deviating");
-
-    if (!default_message) {
-      // const exposedParagraphsIds = getExposedParagraphs(concepts, [
-      //   ...conversationData.usedFlashcards,
-      //   nextFlashcard?.id || "",
-      // ]);
-      const { deviating: _deviating, sections } = await checkIfUserIsDeviating(message, courseName, unitTitle, [
-        ...conversationData.messages,
-      ]);
-      deviating = _deviating;
-      detectedSections = sections;
-    }
+    //   deviating = _deviating;
+    //   detectedSections = sections;
+    // }
     console.log({ deviating });
     if (deviating) {
+      const { sections }: any = await getChapterRelatedToResponse(
+        [...conversationData.messages],
+        courseName,
+        unitTitle
+      );
+
+      console.log("deviating");
       await handleDeviating(
         res,
         conversationData,
@@ -202,7 +259,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         false,
         uname,
         cardsModel,
-        detectedSections
+        sections
       );
       await saveLogs({
         course,
@@ -230,29 +287,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         role: "assistant",
         content: doneMessage,
         sentAt,
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
       });
       conversationData.done = true;
     }
-    const { completeMessage, answer, question } = await streamMainResponse({
+    const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = await streamMainResponse({
       res,
       deviating,
       mergedMessages,
       scroll_flashcard_next,
       conversationData,
       furtherExplain,
-      removeAdditionalInfo,
-      default_message,
     });
 
     // save the response from GPT in the db
-    const divideId = db.collection("tutorConversations").doc().id;
+    const divideId = getId();
     conversationData.messages.push({
       role: "assistant",
       content: !answer ? completeMessage : answer,
+      completeMessage,
       divided: !!answer ? divideId : false,
       sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
+      mid: getId(),
     });
 
     if (!!question) {
@@ -262,7 +318,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         divided: !!answer ? divideId : false,
         question: true,
         sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
       });
     } else if (questionMessage) {
       conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
@@ -274,7 +330,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         divided: !!answer ? divideId : false,
         question: true,
         sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
       });
     }
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
@@ -284,18 +340,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       content: !answer ? completeMessage : answer,
       divided: !!answer ? divideId : false,
       sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
+      mid: getId(),
     });
 
-    const lateResponse = await getEvaluation({
-      mergedMessages,
-      furtherExplain,
-      scroll_flashcard_next,
-      conversationData,
-      uname,
-      concepts,
-      default_message,
-    });
+    // const lateResponse = await getEvaluation({
+    //   mergedMessages,
+    //   furtherExplain,
+    //   scroll_flashcard_next,
+    //   conversationData,
+    //   uname,
+    //   concepts,
+    //   default_message,
+    // });
+    const lateResponse = {
+      emotion,
+      inform_instructor,
+      evaluation,
+    };
 
     if (conversationData.messages.length === 2) {
       lateResponse.emotion = "";
@@ -355,6 +416,56 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
 export default fbAuth(handler);
 
+const clarifyTheQuestion = async (
+  messages: any,
+  fName: string,
+  tutorName: string,
+  courseName: string,
+  objectives: string,
+  directions: string,
+  techniques: string,
+  res: any
+) => {
+  try {
+    const systemPrompt = PROMPT(fName, tutorName, courseName, objectives, directions, techniques, true);
+    const userPrompt =
+      "Please clarify your question by rephrasing it, explaining it further, and provide examples if possible.";
+    messages[0].content = systemPrompt;
+    const messagesSet = new Set();
+    const messagesSimplified = messages
+      .filter((m: any) => {
+        const messageExist = messagesSet.has(m.content);
+        messagesSet.add(m.content);
+        return !m.ignoreMessage && !m.deviatingMessage && !messageExist;
+      })
+      .map((message: any) => ({
+        role: message.role,
+        content: message.content,
+      }));
+    messagesSimplified.push({
+      role: "user",
+      content: userPrompt,
+    });
+    console.log(messagesSimplified);
+    const response = await openai.chat.completions.create({
+      messages: messagesSimplified,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+      stream: true,
+    });
+    let clarifiedQuestion = "";
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        const resultText = result.choices[0].delta.content;
+        clarifiedQuestion = clarifiedQuestion + resultText;
+        res.write(resultText);
+      }
+    }
+    return clarifiedQuestion;
+  } catch (error) {
+    console.log(error);
+  }
+};
 const getEvaluation = async ({
   mergedMessages,
   furtherExplain,
@@ -479,8 +590,6 @@ const streamMainResponse = async ({
   scroll_flashcard_next,
   conversationData,
   furtherExplain,
-  removeAdditionalInfo,
-  default_message,
 }: {
   res: NextApiResponse<any>;
   deviating: boolean;
@@ -488,9 +597,8 @@ const streamMainResponse = async ({
   scroll_flashcard_next: string;
   conversationData: any;
   furtherExplain: boolean;
-  removeAdditionalInfo: boolean;
-  default_message: boolean;
 }) => {
+  console.log("===> streamMainResponse");
   let completeMessage = "";
 
   console.log({ deviatingResponse: deviating });
@@ -501,67 +609,72 @@ const streamMainResponse = async ({
     stream: true,
   });
   // stream the main response to the user
-  let stopStreaming = false;
-  let question = "";
   let answer = "";
   let scrolled = false;
-  const regex = /~{2,}/g;
   for await (const result of response) {
     if (result.choices[0].delta.content) {
+      const resultText = result.choices[0].delta.content;
       console.log(result.choices[0].delta.content);
-      if (!stopStreaming) {
-        const streamText = result.choices[0].delta.content.replace(/~{2,}/g, "");
-        res.write(`${streamText}`);
-        answer += `${streamText}`;
-      } else {
-        question += `${result.choices[0].delta.content}`;
+      if (!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) {
+        res.write(resultText);
       }
-      const matches = result.choices[0].delta.content.match(regex);
-      if (matches) {
-        stopStreaming = true;
-        if (!scrolled) {
-          console.log({ scroll_flashcard_next });
-          if (scroll_flashcard_next) {
-            conversationData.usedFlashcards.push(scroll_flashcard_next);
-            res.write(`flashcard_id: "${scroll_flashcard_next}"`);
-          }
-          if (furtherExplain) {
-            const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
-            res.write(`flashcard_id: "${scroll_to}"`);
-          }
-          scrolled = true;
+      completeMessage = completeMessage + resultText;
+      if (completeMessage.includes(`evaluation`) && !scrolled) {
+        if (scroll_flashcard_next) {
+          conversationData.usedFlashcards.push(scroll_flashcard_next);
+          res.write(`flashcard_id: "${scroll_flashcard_next}"`);
         }
+        if (furtherExplain) {
+          const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+          res.write(`flashcard_id: "${scroll_to}"`);
+        }
+        scrolled = true;
       }
-      completeMessage = completeMessage + result.choices[0].delta.content;
     }
   }
-  if (default_message && removeAdditionalInfo) {
-    answer +=
-      "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
-  }
-  completeMessage = completeMessage.replace(/~{2,}/g, "");
+  // if (default_message && removeAdditionalInfo) {
+  //   answer +=
+  //     "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
+  // }
+  res.end();
+  // console.log(completeMessage);
+  const response_object = extractJSON(completeMessage);
+  console.log(response_object);
   return {
     completeMessage,
-    answer,
-    question,
+    answer: response_object.your_response,
+    question: response_object.next_question,
+    emotion: response_object.emotion,
+    inform_instructor: response_object.inform_instructor,
+    evaluation: response_object.evaluation,
   };
 };
 
 const getExtraInfo = (fName: string, nextFlashcard: any) => {
   let prompt =
-    `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their` +
-    `questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
-    `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".`;
+    "\n" +
+    fName +
+    " can't see this PS:If " +
+    fName +
+    " asked any questions, you should answer their\n" +
+    "questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.";
   // if there a next Flashcard add this
   if (nextFlashcard) {
     prompt +=
-      `Respond to ${fName} and then ask them a question about the following concept:
-    {
-      title: "${nextFlashcard.title}",
-      content: "${nextFlashcard.content}"
-    }
-    Note that you can repeat asking the same question about a concept that the student previously had difficulties with.` +
-      ` Also ${fName} has not read the concept yet. They will read the concept only after answering your question.`;
+      "Respond to " +
+      fName +
+      " and then ask them a question about the following concept:" +
+      "{" +
+      "title: " +
+      nextFlashcard.title +
+      ",\n" +
+      "content:" +
+      nextFlashcard.content +
+      "\n}\n" +
+      "Note that you can repeat asking the same question about a concept that the student previously had difficulties with.\n" +
+      "Also " +
+      fName +
+      " has not read the concept yet. They will read the concept only after answering your question.";
   }
   return prompt;
 };
@@ -602,17 +715,17 @@ const handleDeviating = async (
 
   if (relevanceResponse) {
     //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
-    const messDev =
-      "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
-    res.write(`${messDev}keepLoading`);
-    conversationData.messages.push({
-      role: "assistant",
-      content: messDev,
-      sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
-      concepts: featuredConcepts,
-      deviatingMessage: true,
-    });
+    // const messDev =
+    //   "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
+    // res.write(`${messDev}keepLoading`);
+    // conversationData.messages.push({
+    //   role: "assistant",
+    //   content: messDev,
+    //   sentAt: new Date(),
+    //   mid: getId(),
+    //   concepts: featuredConcepts,
+    //   deviatingMessage: true,
+    // });
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
 
@@ -624,19 +737,25 @@ const handleDeviating = async (
         role: "assistant",
         content: messDev,
         sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
         concepts: featuredConcepts,
         deviatingMessage: true,
       });
-      const prompt = `Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.  
-  ${JSON.stringify(paragraphs)}
-  Always respond a JSON object with the following structure:
-  {
-  "message": "Your concise message to the student's last message based on the sentences.",
-  "sentences": [An array of the sentences that you used to respond to the student's last message.],
-  "paragraphs": [An array of the paragraphs ids that you used to respond to the student's last message]
-  }
-  Your response should be only a complete and syntactically correct JSON object.`;
+      const prompt =
+        "Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.\n" +
+        JSON.stringify(paragraphs) +
+        "\n" +
+        "Always respond a JSON object with the following structure:\n" +
+        "{\n" +
+        '"message": "Your concise message to the student' +
+        "'s last message based on the sentences." +
+        '",\n' +
+        '"sentences": [An array of the sentences that you used to respond to the student' +
+        "'s last message.],\n" +
+        '"paragraphs": [An array of the paragraphs ids that you used to respond to the student' +
+        "'s last message]\n" +
+        "}\n" +
+        "Your response should be only a complete and syntactically correct JSON object.";
       console.log(prompt);
       const response2 = await openai.chat.completions.create({
         messages: [
@@ -665,13 +784,6 @@ const handleDeviating = async (
         }
         fullMessage += result.choices[0].delta.content;
       }
-      // Extract the object from the fullMessage
-      /* {
-    "response": "Your response to the question based on the sentences.",
-    "sentences": [An array of the sentences that you used to answer the question.],
-    "paragraphs": [An array of paragraphs that you used to answer the question]
-  } */
-      //
 
       const responseJson = JSON.parse(fullMessage);
       const sentences = responseJson.sentences;
@@ -701,7 +813,7 @@ const handleDeviating = async (
     role: "assistant",
     content: answer,
     sentAt: new Date(),
-    mid: db.collection("tutorConversations").doc().id,
+    mid: getId(),
     concepts: featuredConcepts,
     deviatingMessage: true,
   };
@@ -713,6 +825,7 @@ const handleDeviating = async (
     conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
   }
   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+  res.end();
 };
 
 export type IAssistantRequestPayload = {
@@ -724,29 +837,88 @@ export type IAssistantRequestPayload = {
 };
 
 const PROMPT = (
-  flashcards: any,
-  title: string,
   fName: string,
   tutorName: string,
   courseName: string,
   objectives: string,
   directions: string,
-  techniques: string
+  techniques: string,
+  clarifyQuestion = false
 ) => {
   const instructions =
-    `Your name is ${tutorName}.\n` +
-    `The student's name is ${fName}.\n` +
-    `You are a professional tutor, teaching ${courseName}.\n` +
-    `${objectives}\n` +
+    "Your name is " +
+    tutorName +
+    ".\n" +
+    "The student's name is " +
+    fName +
+    ".\n" +
+    "You are a professional tutor, teaching " +
+    courseName +
+    ".\n" +
+    objectives +
+    "\n" +
     // You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
     // ${JSON.stringify(flashcards)}
-    `${directions}\n` +
-    +"If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
-    +"If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
-    `${techniques}\n` +
+    directions +
+    "\n" +
+    "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
+    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    techniques +
+    "\n" +
     "You should make your messages very short.\n" +
-    `Always separate your response to the student's last message from your next question using "\n~~~~~~~~\n".`;
-  return instructions;
+    "Evaluate " +
+    fName +
+    "'s response to your last message. Your response should be only a JSON object with the following structure:\n" +
+    "{\n" +
+    '   "your_response": "Your response to ' +
+    fName +
+    "'s last message based on the conversation." +
+    '",\n' +
+    '   "evaluation":"A number between 0 to 10 indicating the quality of ' +
+    fName +
+    "'s response to your last message. If " +
+    fName +
+    " perfectly answered your question with no difficulties, give them a 10, otherwise give " +
+    fName +
+    ' a lower number, 0 meaning their answer was completely wrong or irrelevant to your message.",' +
+    '   "next_question": "Your next question for ' +
+    fName +
+    '",\n' +
+    '   "emotion": "How happy are you with ' +
+    fName +
+    "'s last response? Give them only one of the values 'sad', 'annoyed', 'very happy', 'clapping', 'crying', 'apologies'. Your default emotion should be 'happy'. Give " +
+    fName +
+    ' variations of emotions to their different answers.",' +
+    '   "inform_instructor": "' +
+    "'Yes' if the instructor of the course should be informed about " +
+    fName +
+    "'s response to your last message. " +
+    "'No' if there is no reason to take the instructor's time about " +
+    fName +
+    "'s last message to you." +
+    "}\n" +
+    "Do not print anything other than this JSON object.";
+
+  const clarify_question_instructions =
+    "Your name is " +
+    tutorName +
+    ".\n" +
+    "The student's name is " +
+    fName +
+    ".\n" +
+    "You are a professional tutor, teaching " +
+    courseName +
+    ".\n" +
+    objectives +
+    "\n" +
+    directions +
+    "\n" +
+    "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
+    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    techniques;
+  return clarifyQuestion ? clarify_question_instructions : instructions;
 };
 
 const generateSystemPrompt = async (
@@ -776,16 +948,16 @@ const generateSystemPrompt = async (
           id: f.id,
         })
     );
-  return PROMPT(copy_flashcards, title, fName, tutorName, courseName, objectives, directions, techniques);
+  return PROMPT(fName, tutorName, courseName, objectives, directions, techniques);
 };
 
 const extractJSON = (text: string) => {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
-    // if (end !== -1 || start !== -1) {
-    //   return null;
-    // }
+    if (end === -1 || start === -1) {
+      return null;
+    }
     const jsonArrayString = text.slice(start, end + 1);
     return JSON.parse(jsonArrayString);
   } catch (error) {
@@ -878,37 +1050,21 @@ const replaceExtraPhrase = (messageContent: string) => {
 const mergeDividedMessages = (messages: any) => {
   console.log("mergeDividedMessages");
   const mergedMessages = [];
-  let currentDivideId = null;
-  let mergedMessage = null;
-  const filteredMessages = messages.filter((m: any) => !m.ignoreMessage && !m.deviatingMessage);
+
+  const filteredMessages = messages.filter(
+    (m: any) => !m.ignoreMessage && !m.deviatingMessage && !m.hasOwnProperty("question") && !!m?.content.trim()
+  );
   for (const message of filteredMessages) {
-    if (!message?.content) continue;
     if ("divided" in message) {
-      if (message.divided !== currentDivideId) {
-        if (mergedMessage) {
-          mergedMessages.push(mergedMessage);
-        }
-        currentDivideId = message.divided;
-        mergedMessage = { ...message };
-      } else {
-        if (!mergedMessage.content.includes(message?.content)) {
-          mergedMessage.content += "\n~~~~~~~~\n" + (message?.content || "").trim();
-        }
-      }
-    } else {
-      if (mergedMessage) {
-        mergedMessages.push(mergedMessage);
-        mergedMessage = null;
-        currentDivideId = null;
-      }
-      mergedMessages.push({ ...message });
+      mergedMessages.push({
+        ...message,
+        content: message.completeMessage,
+      });
+    }
+    if (!message.hasOwnProperty("divided")) {
+      mergedMessages.push(message);
     }
   }
-
-  if (mergedMessage) {
-    mergedMessages.push(mergedMessage);
-  }
-
   return {
     mergedMessagesMinusFurtherExplain: mergedMessages,
     mergedMessages: mergedMessages.map((message: any) => ({
@@ -1047,9 +1203,6 @@ const streamPrompt = async (messages: any): Promise<any> => {
           const deviatingTopic = deviation_match[1];
           console.log(deviatingTopic);
           deviating = deviatingTopic.toLowerCase().includes("yes");
-          if (!deviating) {
-            break;
-          }
           console.log("=== sections_match ===>", sections_array);
           if (sections_array) {
             sections = JSON.parse(sections_array);
