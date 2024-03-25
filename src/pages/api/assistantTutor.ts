@@ -23,14 +23,24 @@ const saveLogs = async (logs: { [key: string]: any }) => {
     createdAt: new Date(),
   });
 };
-
+const getId = () => {
+  return db.collection("tutorConversations").doc().id;
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo } = req.body;
+  let {
+    url,
+    cardsModel,
+    furtherExplain,
+    message,
+    removeAdditionalInfo,
+    anotherTopic,
+    answerQuestion,
+    clarifyQuestion,
+  } = req.body;
   let conversationId = "";
-  let deviating: boolean = false;
+  let deviating: boolean = anotherTopic;
   let relevanceResponse: boolean = true;
-  let detectedSections: { section: string; url: string }[] = [];
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
@@ -117,6 +127,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         content: systemPrompt,
       });
     }
+    if (clarifyQuestion) {
+      const clarifiedQuestion = await clarifyTheQuestion(
+        conversationData.messages,
+        fName,
+        tutorName,
+        courseName,
+        objectives,
+        directions,
+        techniques,
+        res
+      );
+      conversationData.messages.push({
+        content: "Clarify the question",
+        role: "user",
+        sentAt: new Date(),
+        mid: getId(),
+        ignoreMessage: true,
+      });
+      conversationData.messages.push({
+        content: clarifiedQuestion,
+        role: "assistant",
+        clarifiedQuestion: true,
+        sentAt: new Date(),
+        mid: getId(),
+        default_message,
+        ignoreMessage: true,
+      });
+      await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      await saveLogs({
+        course,
+        url,
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        conversationId: newConversationRef.id,
+        clarifyQuestion,
+        question: conversationData.messages.at(-1),
+        action: "clarify question",
+        project: "1Tutor",
+      });
+      console.log(newConversationRef.id);
+      res.end();
+      return;
+    }
     conversationId = newConversationRef.id;
     let questionMessage = null;
     if (!message) {
@@ -168,29 +222,33 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       role: "user",
       content: message,
       sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
+      mid: getId(),
       default_message,
       nextFlashcard: nextFlashcard?.id || "",
       extraInfoPrompt,
       furtherExplainPrompt,
     });
     const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
+    console.log(mergedMessages);
+    // const instructorLastMessage = mergedMessages.at(-2) || {};
+    // if (!default_message && !instructorLastMessage.hasOwnProperty("question")) {
+    //   // const exposedParagraphsIds = getExposedParagraphs(concepts, [
+    //   //   ...conversationData.usedFlashcards,
+    //   //   nextFlashcard?.id || "",
+    //   // ]);
 
-    console.log("deviating");
-
-    if (!default_message) {
-      // const exposedParagraphsIds = getExposedParagraphs(concepts, [
-      //   ...conversationData.usedFlashcards,
-      //   nextFlashcard?.id || "",
-      // ]);
-      const { deviating: _deviating, sections } = await checkIfUserIsDeviating(message, courseName, unitTitle, [
-        ...conversationData.messages,
-      ]);
-      deviating = _deviating;
-      detectedSections = sections;
-    }
+    //   deviating = _deviating;
+    //   detectedSections = sections;
+    // }
     console.log({ deviating });
     if (deviating) {
+      const { sections }: any = await getChapterRelatedToResponse(
+        [...conversationData.messages],
+        courseName,
+        unitTitle
+      );
+
+      console.log("deviating");
       await handleDeviating(
         res,
         conversationData,
@@ -202,7 +260,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         false,
         uname,
         cardsModel,
-        detectedSections
+        sections
       );
       await saveLogs({
         course,
@@ -230,29 +288,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         role: "assistant",
         content: doneMessage,
         sentAt,
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
       });
       conversationData.done = true;
     }
-    const { completeMessage, answer, question } = await streamMainResponse({
+    const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = await streamMainResponse({
       res,
       deviating,
       mergedMessages,
       scroll_flashcard_next,
       conversationData,
       furtherExplain,
-      removeAdditionalInfo,
-      default_message,
     });
 
     // save the response from GPT in the db
-    const divideId = db.collection("tutorConversations").doc().id;
+    const divideId = getId();
     conversationData.messages.push({
       role: "assistant",
       content: !answer ? completeMessage : answer,
+      completeMessage,
       divided: !!answer ? divideId : false,
       sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
+      mid: getId(),
     });
 
     if (!!question) {
@@ -262,7 +319,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         divided: !!answer ? divideId : false,
         question: true,
         sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
       });
     } else if (questionMessage) {
       conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
@@ -274,7 +331,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         divided: !!answer ? divideId : false,
         question: true,
         sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
       });
     }
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
@@ -284,18 +341,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       content: !answer ? completeMessage : answer,
       divided: !!answer ? divideId : false,
       sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
+      mid: getId(),
     });
 
-    const lateResponse = await getEvaluation({
-      mergedMessages,
-      furtherExplain,
-      scroll_flashcard_next,
-      conversationData,
-      uname,
-      concepts,
-      default_message,
-    });
+    // const lateResponse = await getEvaluation({
+    //   mergedMessages,
+    //   furtherExplain,
+    //   scroll_flashcard_next,
+    //   conversationData,
+    //   uname,
+    //   concepts,
+    //   default_message,
+    // });
+    const lateResponse = {
+      emotion,
+      inform_instructor,
+      evaluation,
+    };
 
     if (conversationData.messages.length === 2) {
       lateResponse.emotion = "";
@@ -313,7 +375,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done", conversationId);
-
+    res.end();
     await saveLogs({
       course,
       url,
@@ -355,6 +417,56 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
 export default fbAuth(handler);
 
+const clarifyTheQuestion = async (
+  messages: any,
+  fName: string,
+  tutorName: string,
+  courseName: string,
+  objectives: string,
+  directions: string,
+  techniques: string,
+  res: any
+) => {
+  try {
+    const systemPrompt = PROMPT(fName, tutorName, courseName, objectives, directions, techniques, true);
+    const userPrompt =
+      "Please clarify your question by rephrasing it, explaining it further, and provide examples if possible.";
+    messages[0].content = systemPrompt;
+    const messagesSet = new Set();
+    const messagesSimplified = messages
+      .filter((m: any) => {
+        const messageExist = messagesSet.has(m.content);
+        messagesSet.add(m.content);
+        return !m.ignoreMessage && !m.deviatingMessage && !messageExist;
+      })
+      .map((message: any) => ({
+        role: message.role,
+        content: message.content,
+      }));
+    messagesSimplified.push({
+      role: "user",
+      content: userPrompt,
+    });
+    console.log(messagesSimplified);
+    const response = await openai.chat.completions.create({
+      messages: messagesSimplified,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+      stream: true,
+    });
+    let clarifiedQuestion = "";
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        const resultText = result.choices[0].delta.content;
+        clarifiedQuestion = clarifiedQuestion + resultText;
+        res.write(resultText);
+      }
+    }
+    return clarifiedQuestion;
+  } catch (error) {
+    console.log(error);
+  }
+};
 const getEvaluation = async ({
   mergedMessages,
   furtherExplain,
@@ -479,8 +591,6 @@ const streamMainResponse = async ({
   scroll_flashcard_next,
   conversationData,
   furtherExplain,
-  removeAdditionalInfo,
-  default_message,
 }: {
   res: NextApiResponse<any>;
   deviating: boolean;
@@ -488,9 +598,8 @@ const streamMainResponse = async ({
   scroll_flashcard_next: string;
   conversationData: any;
   furtherExplain: boolean;
-  removeAdditionalInfo: boolean;
-  default_message: boolean;
 }) => {
+  console.log("===> streamMainResponse");
   let completeMessage = "";
 
   console.log({ deviatingResponse: deviating });
@@ -501,66 +610,72 @@ const streamMainResponse = async ({
     stream: true,
   });
   // stream the main response to the user
-  let stopStreaming = false;
-  let question = "";
   let answer = "";
   let scrolled = false;
-  const regex = /~{2,}/g;
   for await (const result of response) {
     if (result.choices[0].delta.content) {
-      if (!stopStreaming) {
-        const streamText = result.choices[0].delta.content.replace(/~{2,}/g, "");
-        res.write(`${streamText}`);
-        answer += `${streamText}`;
-      } else {
-        question += `${result.choices[0].delta.content}`;
+      const resultText = result.choices[0].delta.content;
+      console.log(result.choices[0].delta.content);
+      if (!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) {
+        res.write(resultText);
       }
-      const matches = result.choices[0].delta.content.match(regex);
-      if (matches) {
-        stopStreaming = true;
-        if (!scrolled) {
-          console.log({ scroll_flashcard_next });
-          if (scroll_flashcard_next) {
-            conversationData.usedFlashcards.push(scroll_flashcard_next);
-            res.write(`flashcard_id: "${scroll_flashcard_next}"`);
-          }
-          if (furtherExplain) {
-            const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
-            res.write(`flashcard_id: "${scroll_to}"`);
-          }
-          scrolled = true;
+      completeMessage = completeMessage + resultText;
+      if (completeMessage.includes(`evaluation`) && !scrolled) {
+        if (scroll_flashcard_next) {
+          conversationData.usedFlashcards.push(scroll_flashcard_next);
+          res.write(`flashcard_id: "${scroll_flashcard_next}"`);
         }
+        if (furtherExplain) {
+          const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+          res.write(`flashcard_id: "${scroll_to}"`);
+        }
+        scrolled = true;
       }
-      completeMessage = completeMessage + result.choices[0].delta.content;
     }
   }
-  if (default_message && removeAdditionalInfo) {
-    answer +=
-      "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
-  }
-  completeMessage = completeMessage.replace(/~{2,}/g, "");
+  // if (default_message && removeAdditionalInfo) {
+  //   answer +=
+  //     "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
+  // }
+
+  // console.log(completeMessage);
+  const response_object = extractJSON(completeMessage);
+  console.log(response_object);
   return {
     completeMessage,
-    answer,
-    question,
+    answer: response_object?.your_response || "",
+    question: response_object?.next_questio || "",
+    emotion: response_object?.emotion || "",
+    inform_instructor: response_object?.inform_instructor || "",
+    evaluation: response_object?.evaluation || "",
   };
 };
 
 const getExtraInfo = (fName: string, nextFlashcard: any) => {
   let prompt =
-    `\n${fName} can't see this PS:If ${fName} asked any questions, you should answer their` +
-    `questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.` +
-    `Always separate your response to ${fName}'s last message from your next question using "\n~~~~~~~~\n".`;
+    "\n" +
+    fName +
+    " can't see this PS:If " +
+    fName +
+    " asked any questions, you should answer their\n" +
+    "questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.";
   // if there a next Flashcard add this
   if (nextFlashcard) {
     prompt +=
-      `Respond to ${fName} and then ask them a question about the following concept:
-    {
-      title: "${nextFlashcard.title}",
-      content: "${nextFlashcard.content}"
-    }
-    Note that you can repeat asking the same question about a concept that the student previously had difficulties with.` +
-      ` Also ${fName} has not read the concept yet. They will read the concept only after answering your question.`;
+      "Respond to " +
+      fName +
+      " and then ask them a question about the following concept:" +
+      "{" +
+      "title: " +
+      nextFlashcard.title +
+      ",\n" +
+      "content:" +
+      nextFlashcard.content +
+      "\n}\n" +
+      "Note that you can repeat asking the same question about a concept that the student previously had difficulties with.\n" +
+      "Also " +
+      fName +
+      " has not read the concept yet. They will read the concept only after answering your question.";
   }
   return prompt;
 };
@@ -601,17 +716,17 @@ const handleDeviating = async (
 
   if (relevanceResponse) {
     //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
-    const messDev =
-      "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
-    res.write(`${messDev}keepLoading`);
-    conversationData.messages.push({
-      role: "assistant",
-      content: messDev,
-      sentAt: new Date(),
-      mid: db.collection("tutorConversations").doc().id,
-      concepts: featuredConcepts,
-      deviatingMessage: true,
-    });
+    // const messDev =
+    //   "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
+    // res.write(`${messDev}keepLoading`);
+    // conversationData.messages.push({
+    //   role: "assistant",
+    //   content: messDev,
+    //   sentAt: new Date(),
+    //   mid: getId(),
+    //   concepts: featuredConcepts,
+    //   deviatingMessage: true,
+    // });
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
 
@@ -623,19 +738,25 @@ const handleDeviating = async (
         role: "assistant",
         content: messDev,
         sentAt: new Date(),
-        mid: db.collection("tutorConversations").doc().id,
+        mid: getId(),
         concepts: featuredConcepts,
         deviatingMessage: true,
       });
-      const prompt = `Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.  
-  ${JSON.stringify(paragraphs)}
-  Always respond a JSON object with the following structure:
-  {
-  "message": "Your concise message to the student's last message based on the sentences.",
-  "sentences": [An array of the sentences that you used to respond to the student's last message.],
-  "paragraphs": [An array of the paragraphs ids that you used to respond to the student's last message]
-  }
-  Your response should be only a complete and syntactically correct JSON object.`;
+      const prompt =
+        "Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.\n" +
+        JSON.stringify(paragraphs) +
+        "\n" +
+        "Always respond a JSON object with the following structure:\n" +
+        "{\n" +
+        '"message": "Your concise message to the student' +
+        "'s last message based on the sentences." +
+        '",\n' +
+        '"sentences": [An array of the sentences that you used to respond to the student' +
+        "'s last message.],\n" +
+        '"paragraphs": [An array of the paragraphs ids that you used to respond to the student' +
+        "'s last message]\n" +
+        "}\n" +
+        "Your response should be only a complete and syntactically correct JSON object.";
       console.log(prompt);
       const response2 = await openai.chat.completions.create({
         messages: [
@@ -664,16 +785,10 @@ const handleDeviating = async (
         }
         fullMessage += result.choices[0].delta.content;
       }
-      // Extract the object from the fullMessage
-      /* {
-    "response": "Your response to the question based on the sentences.",
-    "sentences": [An array of the sentences that you used to answer the question.],
-    "paragraphs": [An array of paragraphs that you used to answer the question]
-  } */
-      //
 
       const responseJson = JSON.parse(fullMessage);
       const sentences = responseJson.sentences;
+
       const paragraph: { text: string; ids: string[] } = searchParagraphs(allParagraphs, sentences);
       console.log(paragraph);
       if (paragraph.text) {
@@ -699,7 +814,7 @@ const handleDeviating = async (
     role: "assistant",
     content: answer,
     sentAt: new Date(),
-    mid: db.collection("tutorConversations").doc().id,
+    mid: getId(),
     concepts: featuredConcepts,
     deviatingMessage: true,
   };
@@ -711,6 +826,7 @@ const handleDeviating = async (
     conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
   }
   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+  res.end();
 };
 
 export type IAssistantRequestPayload = {
@@ -722,27 +838,88 @@ export type IAssistantRequestPayload = {
 };
 
 const PROMPT = (
-  flashcards: any,
-  title: string,
   fName: string,
   tutorName: string,
   courseName: string,
   objectives: string,
   directions: string,
-  techniques: string
+  techniques: string,
+  clarifyQuestion = false
 ) => {
   const instructions =
-    `Your name is ${tutorName}.
-  The student's name is ${fName}.
-  You are a professional tutor, teaching ${courseName}.
-  ${objectives}` +
+    "Your name is " +
+    tutorName +
+    ".\n" +
+    "The student's name is " +
+    fName +
+    ".\n" +
+    "You are a professional tutor, teaching " +
+    courseName +
+    ".\n" +
+    objectives +
+    "\n" +
     // You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
     // ${JSON.stringify(flashcards)}
-    `${directions}
-  ${techniques}
-  You should make your messages very short.
-  Always separate your response to the student's last message from your next question using "\n~~~~~~~~\n".`;
-  return instructions;
+    directions +
+    "\n" +
+    "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
+    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    techniques +
+    "\n" +
+    "You should make your messages very short.\n" +
+    "Evaluate " +
+    fName +
+    "'s response to your last message. Your response should be only a JSON object with the following structure:\n" +
+    "{\n" +
+    '   "your_response": "Your response to ' +
+    fName +
+    "'s last message based on the conversation. do not ask the user any questions here." +
+    '",\n' +
+    '   "evaluation":"A number between 0 to 10 indicating the quality of ' +
+    fName +
+    "'s response to your last message. If " +
+    fName +
+    " perfectly answered your question with no difficulties, give them a 10, otherwise give " +
+    fName +
+    ' a lower number, 0 meaning their answer was completely wrong or irrelevant to your message.",' +
+    '   "next_question": "Your next question for ' +
+    fName +
+    '",\n' +
+    '   "emotion": "How happy are you with ' +
+    fName +
+    "'s last response? Give them only one of the values 'sad', 'annoyed', 'very happy', 'clapping', 'crying', 'apologies'. Your default emotion should be 'happy'. Give " +
+    fName +
+    ' variations of emotions to their different answers.",' +
+    '   "inform_instructor": "' +
+    "'Yes' if the instructor of the course should be informed about " +
+    fName +
+    "'s response to your last message. " +
+    "'No' if there is no reason to take the instructor's time about " +
+    fName +
+    "'s last message to you." +
+    "}\n" +
+    "Do not print anything other than this JSON object.";
+
+  const clarify_question_instructions =
+    "Your name is " +
+    tutorName +
+    ".\n" +
+    "The student's name is " +
+    fName +
+    ".\n" +
+    "You are a professional tutor, teaching " +
+    courseName +
+    ".\n" +
+    objectives +
+    "\n" +
+    directions +
+    "\n" +
+    "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
+    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    techniques;
+  return clarifyQuestion ? clarify_question_instructions : instructions;
 };
 
 const generateSystemPrompt = async (
@@ -772,16 +949,16 @@ const generateSystemPrompt = async (
           id: f.id,
         })
     );
-  return PROMPT(copy_flashcards, title, fName, tutorName, courseName, objectives, directions, techniques);
+  return PROMPT(fName, tutorName, courseName, objectives, directions, techniques);
 };
 
 const extractJSON = (text: string) => {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
-    // if (end !== -1 || start !== -1) {
-    //   return null;
-    // }
+    if (end === -1 || start === -1) {
+      return null;
+    }
     const jsonArrayString = text.slice(start, end + 1);
     return JSON.parse(jsonArrayString);
   } catch (error) {
@@ -874,37 +1051,21 @@ const replaceExtraPhrase = (messageContent: string) => {
 const mergeDividedMessages = (messages: any) => {
   console.log("mergeDividedMessages");
   const mergedMessages = [];
-  let currentDivideId = null;
-  let mergedMessage = null;
-  const filteredMessages = messages.filter((m: any) => !m.ignoreMessage && !m.deviatingMessage);
+
+  const filteredMessages = messages.filter(
+    (m: any) => !m.ignoreMessage && !m.deviatingMessage && !m.hasOwnProperty("question") && !!m?.content.trim()
+  );
   for (const message of filteredMessages) {
-    if (!message?.content) continue;
     if ("divided" in message) {
-      if (message.divided !== currentDivideId) {
-        if (mergedMessage) {
-          mergedMessages.push(mergedMessage);
-        }
-        currentDivideId = message.divided;
-        mergedMessage = { ...message };
-      } else {
-        if (!mergedMessage.content.includes(message?.content)) {
-          mergedMessage.content += "\n~~~~~~~~\n" + (message?.content || "").trim();
-        }
-      }
-    } else {
-      if (mergedMessage) {
-        mergedMessages.push(mergedMessage);
-        mergedMessage = null;
-        currentDivideId = null;
-      }
-      mergedMessages.push({ ...message });
+      mergedMessages.push({
+        ...message,
+        content: message.completeMessage,
+      });
+    }
+    if (!message.hasOwnProperty("divided")) {
+      mergedMessages.push(message);
     }
   }
-
-  if (mergedMessage) {
-    mergedMessages.push(mergedMessage);
-  }
-
   return {
     mergedMessagesMinusFurtherExplain: mergedMessages,
     mergedMessages: mergedMessages.map((message: any) => ({
@@ -1020,7 +1181,7 @@ const generateListMessagesText = (messages: any) => {
   return messagesText;
 };
 
-const streamPrompt = async (messages: any) => {
+const streamPrompt = async (messages: any): Promise<any> => {
   try {
     const response = await openai.chat.completions.create({
       messages,
@@ -1030,23 +1191,30 @@ const streamPrompt = async (messages: any) => {
     });
     let completeMessage = "";
     let deviating = false;
+    let sections = [];
     for await (const result of response) {
       if (result.choices[0].delta.content) {
         completeMessage += result.choices[0].delta.content;
-        const regex = /"deviating_topic": "(\w+)",/;
+        const regex = /"deviating": "(\w+)",/;
+        const sections_regex = /"relevant_sub_sections"\s*:\s*\[.*?\]/;
         console.log(completeMessage);
-        const match = regex.exec(completeMessage);
-        if (match) {
-          const deviatingTopic = match[1];
+        const deviation_match = regex.exec(completeMessage);
+        const sections_array = extractArray(completeMessage);
+        if (deviation_match) {
+          const deviatingTopic = deviation_match[1];
           console.log(deviatingTopic);
           deviating = deviatingTopic.toLowerCase().includes("yes");
-          break;
+          console.log("=== sections_match ===>", sections_array);
+          if (sections_array) {
+            sections = JSON.parse(sections_array);
+            break;
+          }
         } else {
           console.log("No match found.");
         }
       }
     }
-    return deviating;
+    return { deviating, sections };
   } catch (error) {
     console.log(error);
   }
@@ -1169,78 +1337,212 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       `The last message that the instructor sent to the student is: '''${tutorLastMessage}'''\n` +
       `The student's last message is: '''${studentLastMessage}'''`;
      */
-    const userPrompt =
+
+    const systemPrompt =
       `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student, your task is to evaluate the student's last message for its relevance to the course material. The table of contents is as follows:    
-      ${JSON.stringify(chapterMap)}\n \n` +
-      "\n" +
-      "The last message sent by the instructor to the student is:\n" +
-      `'''${tutorLastMessage}'''\n` +
-      "\n" +
-      "The student's last response is:\n" +
-      `'''${studentLastMessage}'''\n` +
-      "\n" +
-      "Based on the student's last message, determine whether the student is staying on topic with the course material or deviating from it. When evaluating the student's response, consider the following:\n" +
+    ${JSON.stringify(chapterMap)}\n \n` +
+      "Based on the student's message, determine whether the student is staying on topic with the course material or deviating from it. When evaluating the student's response, consider the following:\n" +
       "- Direct answers to the instructor's questions, even if incorrect, should not be considered a deviation.\n" +
-      `- Responses indicating uncertainty or a request for clarification ("I don't know", "Could you explain...?", "I have no ideas", "tell me", ...) are part of the learning process and should not automatically be classified as deviation.\n` +
-      "- Determine the relevance of the student's response by identifying any connections to the course material, even if these are not explicitly mentioned.\n" +
-      "\n" +
-      "Provide a brief explanation for your determination. If the student is staying on topic, identify any specific sub-sections from the book that directly relate to their query or discussion point. If the student is deviating, suggest a polite reminder or guidance to steer them back towards relevant course content.\n" +
+      `- Responses indicating uncertainty or a request for clarification ("I don't know", "Could you explain...?", "I have no ideas", "tell me", ...) are part of the learning process and should not be classified as deviation.\n` +
+      "- Determine the relevance of the student's response by identifying any connections to the course material, even if the connections are loose.\n" +
+      "- Direct questions from the student should be considered a deviation in case the student is avoiding to answer the current question from the instructor or the question isn't related to the instructor's message.\n" +
+      "- Student's responses that are directly related to the instructor's previous message or follow-up questions seeking clarification on the instructor's last point should not be considered a deviation, even if they do not directly reference the course material.\n" +
+      "- Make sure to include the correct sub sections the user needs to look into for a correct answer.\n" +
       "\n" +
       "Your response should be structured as a json object as follows:\n" +
       "{\n" +
-      '  "relevant_sub_sections": [{section:"Sub-section title 1", url:"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (this should never be an empty array),\n' +
       '  "deviating": "Yes" or "No",\n' +
-      '  "explanation": "Your brief explanation here.",\n' +
-      `  "guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)\n` +
-      "}\n" +
-      `examples:[{
-        tutor:"What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",
-        user:"i don't know" or "tell me" or "i have no idea" or anything close to this",
-        response:{
-          "relevant_sub_sections": [{
-            url: "01-prosperity-inequality-07-malthusian-trap.html",
-            section: "1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"
-           }],
-           "deviating": "NO",
-           "explanation": "",
-           "guidance": ""
-        }
-      }, {
-        tutor:"How did socio-economic disparities within nations compare to the disparities between different regions several centuries ago?",
-        user:"tell me",
-        response:{
-          "relevant_sub_sections": [{
-            url: "01-prosperity-inequality-01-ibn-battuta.html",
-            section: "1.1 Ibn Battuta’s fourteenth-century travels in a flat world"
-           }],
-           "deviating": "NO",
-           "explanation": "",
-           "guidance": ""
-        }
-      }]`;
-    console.log(userPrompt);
-    console.log("waiting for response from GPT: deviating prompt");
-    const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
+      '  "relevant_sub_sections": [{section:"Sub-section title 1", "url":"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (this should never be an empty array, only focus on the student message when searching for relevant_sub_sections),\n' +
+      '  "explanation": "Your brief explanation here."\n' +
+      "}\n";
+    const userPrompt =
+      `"Instructor's message": "${tutorLastMessage}"\n` + `"Student's response": "${studentLastMessage}"`;
+
+    const prompt_messages = [
+      {
+        role: "system",
+        content: systemPrompt,
+      },
+      {
+        role: "user",
+        content:
+          `"instructor's message": "Why is data collection important in the field of economics, according to renowned economists like Thomas Piketty and James Heckman?"` +
+          `"student's response": "what's GDP?"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{" +
+          '"deviating": "YES",' +
+          '"relevant_sub_sections": [{"section":"1.2 History’s hockey stick",  "url": "01-prosperity-inequality-02-historys-hockey-stick.html" }],' +
+          '"explanation": "because the user is asking a question different than what the tutor is talking about",' +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?"` +
+          `"student's response": "i don't know"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "NO",\n' +
+          '"relevant_sub_sections": [{\n' +
+          '"url": "01-prosperity-inequality-07-malthusian-trap.html",\n' +
+          '"section": "1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"\n' +
+          "}],\n" +
+          '"explanation":""' +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",` +
+          `"student's response": "i have no idea"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "NO",\n' +
+          '"relevant_sub_sections": [{\n' +
+          '"url": "01-prosperity-inequality-07-malthusian-trap.html",\n' +
+          '"section": "1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"' +
+          "}],\n" +
+          '"explanation":""' +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"instructor's message": "How did socio-economic disparities within nations compare to the disparities between different regions several centuries ago?",` +
+          `"student's response": "tell me"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "NO",\n' +
+          '"relevant_sub_sections": [{\n' +
+          '"url": "01-prosperity-inequality-01-ibn-battuta.html",\n' +
+          '"section": "1.1 Ibn Battuta’s fourteenth-century travels in a flat world"\n' +
+          "}],\n" +
+          '"explanation":""\n' +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?",` +
+          `"student's response": "tell me about socialism"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "YES",\n' +
+          '"relevant_sub_sections": [{\n' +
+          '"url": "01-prosperity-inequality-12-capitalism-varieties.html",\n' +
+          '"section": "1.12 Varieties of capitalism: Institutions, government, and politics"\n' +
+          "}],\n" +
+          `"explanation":"the user wan't to talk about a different topic than what the instructor is asking a question about"\n` +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?"` +
+          `"student's response": "Ibn Battuta, the 14th-century Moroccan scholar, traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences in his renowned travelogue."`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "NO",\n' +
+          '"relevant_sub_sections": [{\n' +
+          '"url": "01-prosperity-inequality-01-ibn-battuta.html",\n' +
+          '"section": "1.1 Ibn Battuta’s fourteenth-century travels in a flat world"\n' +
+          "}],\n" +
+          '"explanation":"the user is not deviating because he is trying to answer the question of the instructor"' +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"Instructor's message": "Please explain the concept of GDP and its importance in understanding economic growth."` +
+          `"Student's response": "What does GDP stand for?"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "No",\n' +
+          `"relevant_sub_sections": [{"section":"1.2 History’s hockey stick", "url":"01-prosperity-inequality-02-historys-hockey-stick.html"}],\n` +
+          `"explanation": "The student is asking for clarification on a term directly related to the instructor's question, which is relevant to the course material."\n` +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"Instructor's message": "Discuss the impact of the Industrial Revolution on agricultural productivity."` +
+          `"Student's response": "Why is the sky blue?"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{\n" +
+          '"deviating": "Yes",\n' +
+          `"relevant_sub_sections": [{"section":"1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour", "url":"01-prosperity-inequality-07-malthusian-trap.html"}],\n` +
+          `"explanation": "The student's question is completely unrelated to the course material and the instructor's question, indicating a deviation."\n` +
+          "}",
+      },
+      {
+        role: "user",
+        content:
+          `"Instructor's message": "How did British colonization affect India's economy?"` +
+          `"Student's response": "Did the colonization lead to any technological advancements in India?"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{" +
+          '"deviating": "No",' +
+          `"relevant_sub_sections": [{"section":"1.11 Application: Did the British colonization of India reduce Indian living standards?", "url":"01-prosperity-inequality-11-british-colonization-india.html"}],` +
+          `"explanation": "The student's question is directly related to the topic being discussed and seeks further information on a specific aspect of the colonization's impact."` +
+          +"}",
+      },
+      {
+        role: "user",
+        content:
+          `"Instructor's message": "What types of resources were abundant in small villages centuries ago?"` +
+          `"Student's response": "rice"`,
+      },
+      {
+        role: "assistant",
+        content:
+          "{" +
+          '"deviating": "No",' +
+          `"relevant_sub_sections": [{"section":"1.1 Ibn Battuta’s fourteenth-century travels in a flat world", "url":"01-prosperity-inequality-11-british-colonization-india.html"}],` +
+          `"explanation": "the student is directly answering the instructor's question."` +
+          +"}",
+      },
       {
         role: "user",
         content: userPrompt,
       },
-    ]);
-    console.log("=== getChapterRelatedToResponse ===>", response);
-    let sections = [];
-    let deviating = false;
-    if (response) {
-      try {
-        sections = JSON.parse(response).relevant_sub_sections;
-        deviating = JSON.parse(response).deviating.trim().toLowerCase() === "yes";
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    const sectionsTitles = sections.map((s: { section: string; url: string }) => s.section);
-    if (sections.length > 0) {
-      deviating = !checkIncludes(unitTitle, sectionsTitles);
-    }
+    ];
+
+    console.log(userPrompt);
+    console.log("waiting for response from GPT: deviating prompt");
+    console.log(prompt_messages);
+    const { deviating, sections } = await streamPrompt(prompt_messages);
+    //-----
+
+    // if (sections.length > 0 ) {
+    //   deviating = !checkIncludes(unitTitle, sectionsTitles);
+    // }
 
     return { sections, deviating };
   } catch (error) {
@@ -1308,8 +1610,10 @@ const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: stri
     ids: [""],
   };
   let maxCose = 0;
+  console.log(allParagraphs);
   for (let paragraph of allParagraphs) {
-    if (!paragraph?.text) continue;
+    const key = paragraph.ids[0];
+    if (!paragraph?.text || key.includes("figure") || key.includes("image") || key.includes("youtube")) continue;
     const paragraphSentences = (paragraph?.text || "").split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
     let cosSimilarityParagraph = 0;
     for (let sentence1 of paragraphSentences) {
@@ -1367,3 +1671,49 @@ const checkIncludes = (searchString: string, arrayString: string[]) => {
   }
   return false;
 };
+
+/* 
+1-Guide me:
+	-Get Started:
+		- Adrian asked a question:
+			- student answers the question
+				- next question
+     					GO BACK TO ( Adrian asked a question)
+				- tell me more
+				- switch to review mode
+				- student send a new message
+			- student ask a question about a different topic:
+				- next question
+				- switch to review mode
+				- student send a new message
+				- student asks another question about a different topic
+			- student asks about the answer to the question
+				- next question
+				- tell me more
+				- switch to review mode
+        - Tell me more       
+        - Switch to review mode 
+2-I’ll review first:
+	  - I’m ready to review
+		- Adrian asks a question
+			- Student answers the question
+				- next question
+					GO BACK TO ( Adrian asked a question)
+				- tell me more
+				- switch to guided mode
+				- student send a new message
+			- Student ask a question about a different topic
+				- next question
+				- switch to guided mode
+				- student send a new message 
+				- student asks another question about a different topic
+			- Student asks about the answer to the question
+				- next question
+				- tell me more
+				-switch to guided mode
+
+	  - Switch to guided mode
+
+3-student send a new message:
+	the tutor gives an answer the student.
+*/
