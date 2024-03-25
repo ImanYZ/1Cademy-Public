@@ -616,7 +616,7 @@ const streamMainResponse = async ({
     if (result.choices[0].delta.content) {
       const resultText = result.choices[0].delta.content;
       console.log(result.choices[0].delta.content);
-      if (!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) {
+      if (!completeMessage.includes(`next_question`) && completeMessage.includes(`"your_response":`)) {
         res.write(resultText);
       }
       completeMessage = completeMessage + resultText;
@@ -874,7 +874,10 @@ const PROMPT = (
     "{\n" +
     '   "your_response": "Your response to ' +
     fName +
-    "'s last message based on the conversation. do not ask the user any questions here." +
+    "'s last message based on the conversation. Do not ask the user any questions here." +
+    '",\n' +
+    '   "next_question": "Your next question for ' +
+    fName +
     '",\n' +
     '   "evaluation":"A number between 0 to 10 indicating the quality of ' +
     fName +
@@ -883,9 +886,6 @@ const PROMPT = (
     " perfectly answered your question with no difficulties, give them a 10, otherwise give " +
     fName +
     ' a lower number, 0 meaning their answer was completely wrong or irrelevant to your message.",' +
-    '   "next_question": "Your next question for ' +
-    fName +
-    '",\n' +
     '   "emotion": "How happy are you with ' +
     fName +
     "'s last response? Give them only one of the values 'sad', 'annoyed', 'very happy', 'clapping', 'crying', 'apologies'. Your default emotion should be 'happy'. Give " +
