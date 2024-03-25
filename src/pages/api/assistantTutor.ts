@@ -148,6 +148,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.messages.push({
         content: clarifiedQuestion,
         role: "assistant",
+        clarifiedQuestion: true,
         sentAt: new Date(),
         mid: getId(),
         default_message,
@@ -160,13 +161,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         uname: uname || "",
         severity: "default",
         where: "assistant tutor endpoint",
-        conversationId,
+        conversationId: newConversationRef.id,
         clarifyQuestion,
         question: conversationData.messages.at(-1),
         action: "clarify question",
         project: "1Tutor",
       });
-      console.log(conversationId);
+      console.log(newConversationRef.id);
       res.end();
       return;
     }
@@ -642,11 +643,11 @@ const streamMainResponse = async ({
   console.log(response_object);
   return {
     completeMessage,
-    answer: response_object.your_response,
-    question: response_object.next_question,
-    emotion: response_object.emotion,
-    inform_instructor: response_object.inform_instructor,
-    evaluation: response_object.evaluation,
+    answer: response_object?.your_response || "",
+    question: response_object?.next_questio || "",
+    emotion: response_object?.emotion || "",
+    inform_instructor: response_object?.inform_instructor || "",
+    evaluation: response_object?.evaluation || "",
   };
 };
 
