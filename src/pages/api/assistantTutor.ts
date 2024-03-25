@@ -375,7 +375,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done", conversationId);
-
+    res.end();
     await saveLogs({
       course,
       url,
@@ -637,7 +637,7 @@ const streamMainResponse = async ({
   //   answer +=
   //     "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
   // }
-  res.end();
+
   // console.log(completeMessage);
   const response_object = extractJSON(completeMessage);
   console.log(response_object);
@@ -874,7 +874,7 @@ const PROMPT = (
     "{\n" +
     '   "your_response": "Your response to ' +
     fName +
-    "'s last message based on the conversation." +
+    "'s last message based on the conversation. do not ask the user any questions here." +
     '",\n' +
     '   "evaluation":"A number between 0 to 10 indicating the quality of ' +
     fName +
