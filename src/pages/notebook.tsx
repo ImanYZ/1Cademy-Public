@@ -332,8 +332,6 @@ const Notebook = ({}: NotebookProps) => {
     showContributors: false,
   });
 
-  const [openBook, setOpenBook] = useState<string | null>(null);
-
   // scale and translation of the viewport over the map for the map interactions module
   const [mapInteractionValue, setMapInteractionValue] = useState({
     scale: 1,
@@ -6719,20 +6717,6 @@ const Notebook = ({}: NotebookProps) => {
     }
   }, [graph.nodes, setDynamicTargetId, dynamicTargetId, tutorial]);
 
-  useEffect(() => {
-    const fetchHtml = async () => {
-      try {
-        let url = `core-econ/microeconomics/pages/01-prosperity-inequality-01-ibn-battuta.html`;
-        const response = await fetch(url);
-        const html = await response.text();
-        setHtmlContent(html);
-      } catch (error) {
-        console.error("Error loading HTML:", error);
-      }
-    };
-    fetchHtml();
-  }, []);
-
   const tutorialGroup = useMemo(() => {
     return getGroupTutorials({ livelinessBar: (user?.livelinessBar as LivelinessBar) ?? null });
   }, [user?.livelinessBar]);
@@ -7126,7 +7110,7 @@ const Notebook = ({}: NotebookProps) => {
 
   return (
     <>
-      {openBook && (
+      {htmlContent && (
         <ResizeContainer
           columnResizerRef={columnResizerRef}
           beforeApplyResizer={beforeApplyResizer}
@@ -7536,7 +7520,6 @@ const Notebook = ({}: NotebookProps) => {
                   openUserInfoSidebar={openUserInfoSidebar}
                 />
                 <MemoizedBooksSidebar
-                  setOpenBook={setOpenBook}
                   theme={settings.theme}
                   openLinkedNode={openLinkedNode}
                   username={user.uname}
@@ -7545,6 +7528,7 @@ const Notebook = ({}: NotebookProps) => {
                   onClose={() => onCloseSidebar()}
                   sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
+                  setHtmlContent={setHtmlContent}
                 />
 
                 <MemoizedSearcherSidebar
