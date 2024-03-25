@@ -310,6 +310,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       divided: !!answer ? divideId : false,
       sentAt: new Date(),
       mid: getId(),
+      emotion: default_message ? "" : emotion,
+      inform_instructor: inform_instructor,
+      prior_evaluation: evaluation,
     });
 
     if (!!question) {
@@ -344,34 +347,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       mid: getId(),
     });
 
-    // const lateResponse = await getEvaluation({
-    //   mergedMessages,
-    //   furtherExplain,
-    //   scroll_flashcard_next,
-    //   conversationData,
-    //   uname,
-    //   concepts,
-    //   default_message,
-    // });
-    const lateResponse = {
-      emotion,
-      inform_instructor,
-      evaluation,
-    };
-
-    if (conversationData.messages.length === 2) {
-      lateResponse.emotion = "";
-    }
-    let messageIdx = conversationData.messages.length - 1;
-    if (!!answer && !!question) {
-      messageIdx = conversationData.messages.length - 2;
-    }
-    conversationData.messages[messageIdx] = {
-      ...conversationData.messages[messageIdx],
-      inform_instructor: lateResponse.inform_instructor,
-      prior_evaluation: lateResponse.evaluation,
-      emotion: lateResponse.emotion,
-    };
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done", conversationId);
@@ -653,23 +628,22 @@ const streamMainResponse = async ({
 
 const getExtraInfo = (fName: string, nextFlashcard: any) => {
   let prompt =
-    "\n" +
     fName +
-    " can't see this PS:If " +
+    " can't see this PS: If " +
     fName +
-    " asked any questions, you should answer their\n" +
+    " asked any questions, you should answer their " +
     "questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.";
   // if there a next Flashcard add this
   if (nextFlashcard) {
     prompt +=
-      "Respond to " +
+      " Respond to " +
       fName +
-      " and then ask them a question about the following concept:" +
-      "{" +
+      " and then ask them a question about the following concept:\n" +
+      "{\n" +
       "title: " +
       nextFlashcard.title +
       ",\n" +
-      "content:" +
+      "content: " +
       nextFlashcard.content +
       "\n}\n" +
       "Note that you can repeat asking the same question about a concept that the student previously had difficulties with.\n" +
