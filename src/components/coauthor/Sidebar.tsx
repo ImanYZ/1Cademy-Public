@@ -97,7 +97,7 @@ const SideBar: React.FC<Props> = ({
               margin: "10px",
             }}
           >
-            <Accordion>
+            <Accordion expanded={articleTypePath.length > 0}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
                 Stages
               </AccordionSummary>
@@ -119,7 +119,7 @@ const SideBar: React.FC<Props> = ({
                 </Box>
               </AccordionDetails>
             </Accordion>
-            <Accordion>
+            <Accordion expanded={recommendedSteps.length > 0}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
                 Issues
               </AccordionSummary>
@@ -140,78 +140,59 @@ const SideBar: React.FC<Props> = ({
                 )}
               </AccordionDetails>
             </Accordion>
-            <Accordion>
+            <Accordion expanded={issues.length > 0}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
                 Collabrations
               </AccordionSummary>
               <AccordionDetails>
                 <Box>
-                  <>
-                    {/* <Box id="guide-steps">
-                  {articleContent.trim() && (
-                    <>
-                      {articleTypePath.length > 0 && (
-                        <>
-                          <GuideStepComp
-                            allContent={articleContent}
-                            articleTypePath={articleTypePath}
-                            recommendedSteps={recommendedSteps}
-                            setRecommendedSteps={setRecommendedSteps}
-                          />
-                          <Divider variant="fullWidth" sx={{ my: "10px" }} />
-                        </>
-                      )}
-                    </>
+                  <Tabs
+                    variant="fullWidth"
+                    value={selectedTab}
+                    onChange={handleTabChange}
+                    aria-label="1CoAuthor Tabs"
+                    style={{ marginBottom: "19px" }}
+                  >
+                    <Tab label="Brainstorm" value={0} />
+                    <Tab label="Draft" value={1} />
+                    <Tab label="Improve" value={2} />
+                    {/* <Tab label="Grade" value={3} /> */}
+                  </Tabs>
+                  {selectedTab === 0 ? (
+                    <ChatBoxComp
+                      theme={theme}
+                      allContent={articleContent}
+                      selectedArticle={selectedArticle}
+                      articleTypePath={articleTypePath}
+                      recommendedSteps={recommendedSteps}
+                      sideBarWidth={sideBarWidth}
+                      findScrollAndSelect={findScrollAndSelect}
+                      user={user}
+                    />
+                  ) : selectedTab === 1 ? (
+                    <DraftComp
+                      theme={theme}
+                      articleTypePath={articleTypePath}
+                      recommendedSteps={recommendedSteps}
+                      allContent={articleContent}
+                      findScrollAndSelect={findScrollAndSelect}
+                      quillRef={quillRef}
+                      sideBarWidth={sideBarWidth}
+                      selection={selection}
+                    />
+                  ) : selectedTab === 2 ? (
+                    <ImproveComp
+                      theme={theme}
+                      articleTypePath={articleTypePath}
+                      recommendedSteps={recommendedSteps}
+                      selectedArticle={selectedArticle}
+                      allContent={articleContent}
+                      findScrollAndSelect={findScrollAndSelect}
+                      issues={issues}
+                    />
+                  ) : (
+                    selectedTab === 3 && <GradeComp />
                   )}
-                </Box> */}
-                    <Tabs
-                      variant="fullWidth"
-                      value={selectedTab}
-                      onChange={handleTabChange}
-                      aria-label="1CoAuthor Tabs"
-                      style={{ marginBottom: "19px" }}
-                    >
-                      <Tab label="Brainstorm" value={0} />
-                      <Tab label="Draft" value={1} />
-                      <Tab label="Improve" value={2} />
-                      {/* <Tab label="Grade" value={3} /> */}
-                    </Tabs>
-                    {selectedTab === 0 ? (
-                      <ChatBoxComp
-                        theme={theme}
-                        allContent={articleContent}
-                        selectedArticle={selectedArticle}
-                        articleTypePath={articleTypePath}
-                        recommendedSteps={recommendedSteps}
-                        sideBarWidth={sideBarWidth}
-                        findScrollAndSelect={findScrollAndSelect}
-                        user={user}
-                      />
-                    ) : selectedTab === 1 ? (
-                      <DraftComp
-                        theme={theme}
-                        articleTypePath={articleTypePath}
-                        recommendedSteps={recommendedSteps}
-                        allContent={articleContent}
-                        findScrollAndSelect={findScrollAndSelect}
-                        quillRef={quillRef}
-                        sideBarWidth={sideBarWidth}
-                        selection={selection}
-                      />
-                    ) : selectedTab === 2 ? (
-                      <ImproveComp
-                        theme={theme}
-                        articleTypePath={articleTypePath}
-                        recommendedSteps={recommendedSteps}
-                        selectedArticle={selectedArticle}
-                        allContent={articleContent}
-                        findScrollAndSelect={findScrollAndSelect}
-                        issues={issues}
-                      />
-                    ) : (
-                      selectedTab === 3 && <GradeComp />
-                    )}
-                  </>
                 </Box>
               </AccordionDetails>
             </Accordion>
