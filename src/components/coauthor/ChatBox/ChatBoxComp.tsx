@@ -1,12 +1,14 @@
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import SchoolIcon from "@mui/icons-material/School";
+import { Badge } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
+import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
-import { addDoc, collection, doc, getFirestore,onSnapshot, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import moment from "moment";
-import React, { useEffect,useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { User } from "src/knowledgeTypes";
 
@@ -37,6 +39,37 @@ interface Props {
   findScrollAndSelect: (text: string) => Promise<void> | Promise<HTMLElement>;
   user: User | null;
 }
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    backgroundColor: "#44b700",
+    color: "#44b700",
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    bottom: "30%",
+    right: "30%",
+    "&::after": {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      animation: "ripple 1.2s infinite ease-in-out",
+      border: "1px solid currentColor",
+      content: '""',
+    },
+  },
+  "@keyframes ripple": {
+    "0%": {
+      transform: "scale(.8)",
+      opacity: 1,
+    },
+    "100%": {
+      transform: "scale(2.4)",
+      opacity: 0,
+    },
+  },
+}));
 
 const ChatBoxComp: React.FC<Props> = ({
   theme,
@@ -302,14 +335,20 @@ If the value of the field 'improvement' is {}, it means that your response to th
                       imageSx={{ width: "40px", height: "40px" }}
                     />
                   ) : (
-                    <OptimizedAvatar
-                      name={message.user?.fullname || ""}
-                      imageUrl={message?.user?.imageUrl || ""}
-                      sx={{ border: "none" }}
-                      imageSx={{ width: "40px", height: "40px" }}
-                    />
+                    <StyledBadge
+                      overlap="circular"
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                      variant="dot"
+                    >
+                      <OptimizedAvatar
+                        name={message.user?.fullname || ""}
+                        imageUrl={message?.user?.imageUrl || ""}
+                        sx={{ border: "none" }}
+                        imageSx={{ width: "40px", height: "40px" }}
+                      />
+                    </StyledBadge>
                   )}
-                  <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
+                  {/* <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" /> */}
                 </Box>
 
                 <Box sx={{ width: "90%" }}>
