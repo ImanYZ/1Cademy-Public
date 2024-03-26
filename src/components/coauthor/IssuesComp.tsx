@@ -1,6 +1,6 @@
 import { Box, List, ListItem } from "@mui/material";
 import LinearProgress from "@mui/material/LinearProgress";
-import React, { useEffect,useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { sendMessageToChatGPT } from "../../services/openai";
 
@@ -9,11 +9,19 @@ interface Props {
   articleTypePath: string[];
   recommendedSteps: string[];
   selectedStep: string | null;
+  issues: string[];
+  setIssues: Dispatch<SetStateAction<string[]>>;
 }
 
-const IssuesComp: React.FC<Props> = ({ allContent, articleTypePath, recommendedSteps, selectedStep }) => {
+const IssuesComp: React.FC<Props> = ({
+  allContent,
+  articleTypePath,
+  recommendedSteps,
+  selectedStep,
+  issues,
+  setIssues,
+}) => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [issues, setIssues] = useState<string[]>([]);
   useEffect(() => {
     const fetchInstructions = async () => {
       try {

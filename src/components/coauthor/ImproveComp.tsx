@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -14,12 +16,10 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import React, { useEffect,useState } from "react";
 
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ImproveItemComp from "./ImproveItemComp";
 import { sendMessageToChatGPT } from "../../services/openai";
+import ImproveItemComp from "./ImproveItemComp";
 
 interface Improvement {
   id?: string;
@@ -36,6 +36,7 @@ interface Props {
   selectedArticle: any;
   allContent: string;
   findScrollAndSelect: (text: string) => Promise<void> | Promise<HTMLElement>;
+  issues: string[];
 }
 
 const ImproveComp: React.FC<Props> = ({
@@ -45,6 +46,7 @@ const ImproveComp: React.FC<Props> = ({
   selectedArticle,
   allContent,
   findScrollAndSelect,
+  //issues
 }) => {
   const db = getFirestore();
   const [suggestionsModifications, setSuggestionsModifications] = useState<Improvement[]>([]);

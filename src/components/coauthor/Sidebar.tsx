@@ -3,10 +3,10 @@ import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import React, { Dispatch, SetStateAction,useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { User } from "src/knowledgeTypes";
 
-import { calculateCosineSimilarity,tokenizeAndCount } from "../../utils/cosineSimilarity";
+import { calculateCosineSimilarity, tokenizeAndCount } from "../../utils/cosineSimilarity";
 import ChatBoxComp from "./ChatBox/ChatBoxComp";
 import DraftComp from "./DraftComp";
 import GradeComp from "./GenerateInstructionsComp";
@@ -45,6 +45,7 @@ const SideBar: React.FC<Props> = ({
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [recommendedSteps, setRecommendedSteps] = useState<string[]>([]);
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
+  const [issues, setIssues] = useState<string[]>([]);
 
   const findScrollAndSelect = async (text: string) => {
     let matchingElement: any = null;
@@ -131,6 +132,8 @@ const SideBar: React.FC<Props> = ({
                         articleTypePath={articleTypePath}
                         recommendedSteps={recommendedSteps}
                         selectedStep={selectedStep}
+                        issues={issues}
+                        setIssues={setIssues}
                       />
                     )}
                   </>
@@ -203,6 +206,7 @@ const SideBar: React.FC<Props> = ({
                         selectedArticle={selectedArticle}
                         allContent={articleContent}
                         findScrollAndSelect={findScrollAndSelect}
+                        issues={issues}
                       />
                     ) : (
                       selectedTab === 3 && <GradeComp />
