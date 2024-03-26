@@ -1,16 +1,18 @@
-import React, { useState, Dispatch, SetStateAction } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import Divider from "@mui/material/Divider";
-//import SettingsComp from "./SettingsComp";
-import ImproveComp from "./ImproveComp";
-import GradeComp from "./GenerateInstructionsComp";
-import ChatBoxComp from "./ChatBox/ChatBoxComp";
-import GuideStepComp from "./GuideStepComp";
-import DraftComp from "./DraftComp";
-import { tokenizeAndCount, calculateCosineSimilarity } from "../../utils/cosineSimilarity";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { User } from "src/knowledgeTypes";
+
+import { calculateCosineSimilarity, tokenizeAndCount } from "../../utils/cosineSimilarity";
+import ChatBoxComp from "./ChatBox/ChatBoxComp";
+import DraftComp from "./DraftComp";
+import GradeComp from "./GenerateInstructionsComp";
+import GuideStepComp from "./GuideStepComp";
+import ImproveComp from "./ImproveComp";
+import IssuesComp from "./IssuesComp";
 
 interface Props {
   theme: any;
@@ -42,6 +44,8 @@ const SideBar: React.FC<Props> = ({
 }) => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [recommendedSteps, setRecommendedSteps] = useState<string[]>([]);
+  const [selectedStep, setSelectedStep] = useState<string | null>(null);
+  const [issues, setIssues] = useState<string[]>([]);
 
   const findScrollAndSelect = async (text: string) => {
     let matchingElement: any = null;
@@ -93,73 +97,105 @@ const SideBar: React.FC<Props> = ({
               margin: "10px",
             }}
           >
-            <Box>
-              <>
+            <Accordion expanded={articleTypePath.length > 0}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
+                Stages
+              </AccordionSummary>
+              <AccordionDetails>
                 <Box id="guide-steps">
                   {articleContent.trim() && (
                     <>
                       {articleTypePath.length > 0 && (
-                        <>
-                          <GuideStepComp
-                            allContent={articleContent}
-                            articleTypePath={articleTypePath}
-                            recommendedSteps={recommendedSteps}
-                            setRecommendedSteps={setRecommendedSteps}
-                          />
-                          <Divider variant="fullWidth" sx={{ my: "10px" }} />
-                        </>
+                        <GuideStepComp
+                          allContent={articleContent}
+                          articleTypePath={articleTypePath}
+                          recommendedSteps={recommendedSteps}
+                          setRecommendedSteps={setRecommendedSteps}
+                          setSelectedStep={setSelectedStep}
+                        />
                       )}
                     </>
                   )}
                 </Box>
-                <Tabs
-                  variant="fullWidth"
-                  value={selectedTab}
-                  onChange={handleTabChange}
-                  aria-label="1CoAuthor Tabs"
-                  style={{ marginBottom: "19px" }}
-                >
-                  <Tab label="Brainstorm" value={0} />
-                  <Tab label="Draft" value={1} />
-                  <Tab label="Improve" value={2} />
-                  {/* <Tab label="Grade" value={3} /> */}
-                </Tabs>
-                {selectedTab === 0 ? (
-                  <ChatBoxComp
-                    theme={theme}
-                    allContent={articleContent}
-                    selectedArticle={selectedArticle}
-                    articleTypePath={articleTypePath}
-                    recommendedSteps={recommendedSteps}
-                    sideBarWidth={sideBarWidth}
-                    findScrollAndSelect={findScrollAndSelect}
-                    user={user}
-                  />
-                ) : selectedTab === 1 ? (
-                  <DraftComp
-                    theme={theme}
-                    articleTypePath={articleTypePath}
-                    recommendedSteps={recommendedSteps}
-                    allContent={articleContent}
-                    findScrollAndSelect={findScrollAndSelect}
-                    quillRef={quillRef}
-                    sideBarWidth={sideBarWidth}
-                    selection={selection}
-                  />
-                ) : selectedTab === 2 ? (
-                  <ImproveComp
-                    theme={theme}
-                    articleTypePath={articleTypePath}
-                    recommendedSteps={recommendedSteps}
-                    selectedArticle={selectedArticle}
-                    allContent={articleContent}
-                    findScrollAndSelect={findScrollAndSelect}
-                  />
-                ) : (
-                  selectedTab === 3 && <GradeComp />
+              </AccordionDetails>
+            </Accordion>
+            <Accordion expanded={recommendedSteps.length > 0}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
+                Issues
+              </AccordionSummary>
+              <AccordionDetails>
+                {articleContent.trim() && (selectedStep || recommendedSteps) && (
+                  <>
+                    {articleTypePath.length > 0 && (
+                      <IssuesComp
+                        allContent={articleContent}
+                        articleTypePath={articleTypePath}
+                        recommendedSteps={recommendedSteps}
+                        selectedStep={selectedStep}
+                        issues={issues}
+                        setIssues={setIssues}
+                      />
+                    )}
+                  </>
                 )}
-              </>
-            </Box>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion expanded={issues.length > 0}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
+                Collabrations
+              </AccordionSummary>
+              <AccordionDetails>
+                <Box>
+                  <Tabs
+                    variant="fullWidth"
+                    value={selectedTab}
+                    onChange={handleTabChange}
+                    aria-label="1CoAuthor Tabs"
+                    style={{ marginBottom: "19px" }}
+                  >
+                    <Tab label="Brainstorm" value={0} />
+                    <Tab label="Draft" value={1} />
+                    <Tab label="Improve" value={2} />
+                    {/* <Tab label="Grade" value={3} /> */}
+                  </Tabs>
+                  {selectedTab === 0 ? (
+                    <ChatBoxComp
+                      theme={theme}
+                      allContent={articleContent}
+                      selectedArticle={selectedArticle}
+                      articleTypePath={articleTypePath}
+                      recommendedSteps={recommendedSteps}
+                      sideBarWidth={sideBarWidth}
+                      findScrollAndSelect={findScrollAndSelect}
+                      user={user}
+                    />
+                  ) : selectedTab === 1 ? (
+                    <DraftComp
+                      theme={theme}
+                      articleTypePath={articleTypePath}
+                      recommendedSteps={recommendedSteps}
+                      allContent={articleContent}
+                      findScrollAndSelect={findScrollAndSelect}
+                      quillRef={quillRef}
+                      sideBarWidth={sideBarWidth}
+                      selection={selection}
+                    />
+                  ) : selectedTab === 2 ? (
+                    <ImproveComp
+                      theme={theme}
+                      articleTypePath={articleTypePath}
+                      recommendedSteps={recommendedSteps}
+                      selectedArticle={selectedArticle}
+                      allContent={articleContent}
+                      findScrollAndSelect={findScrollAndSelect}
+                      issues={issues}
+                    />
+                  ) : (
+                    selectedTab === 3 && <GradeComp />
+                  )}
+                </Box>
+              </AccordionDetails>
+            </Accordion>
           </Box>
         )}
       </Box>
