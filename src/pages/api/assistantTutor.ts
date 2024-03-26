@@ -188,14 +188,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       // message = `Hello My name is ${fName}.`;
       default_message = true;
       conversationData.usedFlashcards = [];
-    } else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
+    } /* else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
       furtherExplain = true;
       questionMessage = conversationData.messages.pop();
-    }
+    } */
 
     let scroll_flashcard_next = "";
     let nextFlashcard = null;
-    if (!furtherExplain) {
+    if (!furtherExplain && !deviating) {
       scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
       console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
       if (scroll_flashcard_next) {
@@ -365,7 +365,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           conversationData,
           furtherExplain,
         });
-
+    console.log({ completeMessage, answer, question, emotion, inform_instructor, evaluation });
     // save the response from GPT in the db
     const divideId = getId();
     conversationData.messages.push({
@@ -380,7 +380,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       prior_evaluation: evaluation,
     });
 
-    if (!!question) {
+    if (typeof question === "string" && !!question) {
       conversationData.messages.push({
         role: "assistant",
         content: question,
@@ -389,16 +389,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         sentAt: new Date(),
         mid: getId(),
       });
-    } else if (questionMessage) {
-      conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
     } else if (!!nextFlashcard) {
       const question = await getTheNextQuestion(nextFlashcard);
       conversationData.messages[conversationData.messages.length - 1].completeMessage =
         "{\n" +
-        `  "your_response": ${defaultAnswer},\n` +
-        '  "evaluation": 0,\n' +
-        '  "emotion": "happy",\n' +
-        '  "inform_instructor": "No",\n' +
+        `  "your_response": ${answer},\n` +
+        `  "evaluation": ${evaluation},\n` +
+        `  "emotion": ${emotion},\n` +
+        `  "inform_instructor": ${inform_instructor},\n` +
         `  "next_question": "${question}\n" ` +
         "}";
       conversationData.messages.push({
@@ -695,7 +693,7 @@ const streamMainResponse = async ({
   return {
     completeMessage,
     answer: response_object?.your_response || "",
-    question: response_object?.next_questio || "",
+    question: response_object?.next_question || "",
     emotion: response_object?.emotion || "",
     inform_instructor: response_object?.inform_instructor || "",
     evaluation: response_object?.evaluation || "",
@@ -1198,44 +1196,44 @@ const generateListMessagesText = (messages: any) => {
   return messagesText;
 };
 
-const streamPrompt = async (messages: any): Promise<any> => {
-  try {
-    const response = await openai.chat.completions.create({
-      messages,
-      model: "gpt-4-0125-preview",
-      temperature: 0,
-      stream: true,
-    });
-    let completeMessage = "";
-    let deviating = false;
-    let sections = [];
-    for await (const result of response) {
-      if (result.choices[0].delta.content) {
-        completeMessage += result.choices[0].delta.content;
-        const regex = /"deviating": "(\w+)",/;
-        const sections_regex = /"relevant_sub_sections"\s*:\s*\[.*?\]/;
-        console.log(completeMessage);
-        const deviation_match = regex.exec(completeMessage);
-        const sections_array = extractArray(completeMessage);
-        if (deviation_match) {
-          const deviatingTopic = deviation_match[1];
-          console.log(deviatingTopic);
-          deviating = deviatingTopic.toLowerCase().includes("yes");
-          console.log("=== sections_match ===>", sections_array);
-          if (sections_array) {
-            sections = JSON.parse(sections_array);
-            break;
-          }
-        } else {
-          console.log("No match found.");
-        }
-      }
-    }
-    return { deviating, sections };
-  } catch (error) {
-    console.log(error);
-  }
-};
+// const streamPrompt = async (messages: any): Promise<any> => {
+//   try {
+//     const response = await openai.chat.completions.create({
+//       messages,
+//       model: "gpt-4-0125-preview",
+//       temperature: 0,
+//       stream: true,
+//     });
+//     let completeMessage = "";
+//     let deviating = false;
+//     let sections = [];
+//     for await (const result of response) {
+//       if (result.choices[0].delta.content) {
+//         completeMessage += result.choices[0].delta.content;
+//         const regex = /"deviating": "(\w+)",/;
+//         const sections_regex = /"relevant_sub_sections"\s*:\s*\[.*?\]/;
+//         console.log(completeMessage);
+//         const deviation_match = regex.exec(completeMessage);
+//         const sections_array = extractArray(completeMessage);
+//         if (deviation_match) {
+//           const deviatingTopic = deviation_match[1];
+//           console.log(deviatingTopic);
+//           deviating = deviatingTopic.toLowerCase().includes("yes");
+//           console.log("=== sections_match ===>", sections_array);
+//           if (sections_array) {
+//             sections = JSON.parse(sections_array);
+//             break;
+//           }
+//         } else {
+//           console.log("No match found.");
+//         }
+//       }
+//     }
+//     return { deviating, sections };
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
 
 const checkIfUserIsDeviating = async (
   message: any,
@@ -1340,7 +1338,6 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
         }
       }
     }
-    const tutorLastMessage = messagesHistory[messagesHistory.length - 2].content;
     const studentLastMessage = messagesHistory[messagesHistory.length - 1].content;
     /* 
         `You are an expert on ${courseName}.\n` +
@@ -1355,213 +1352,42 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       `The student's last message is: '''${studentLastMessage}'''`;
      */
 
-    const systemPrompt =
-      `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, and considering the ongoing conversation between an instructor and a student, your task is to evaluate the student's last message for its relevance to the course material. The table of contents is as follows:    
+    const getChaptersPrompt =
+      `Given the table of contents of the book for the course titled ${courseName}, which includes chapters and sub-chapters, The table of contents is as follows:    
     ${JSON.stringify(chapterMap)}\n \n` +
-      "Based on the student's message, determine whether the student is staying on topic with the course material or deviating from it. When evaluating the student's response, consider the following:\n" +
-      "- Direct answers to the instructor's questions, even if incorrect, should not be considered a deviation.\n" +
-      `- Responses indicating uncertainty or a request for clarification ("I don't know", "Could you explain...?", "I have no ideas", "tell me", ...) are part of the learning process and should not be classified as deviation.\n` +
-      "- Determine the relevance of the student's response by identifying any connections to the course material, even if the connections are loose.\n" +
-      "- Direct questions from the student should be considered a deviation in case the student is avoiding to answer the current question from the instructor or the question isn't related to the instructor's message.\n" +
-      "- Student's responses that are directly related to the instructor's previous message or follow-up questions seeking clarification on the instructor's last point should not be considered a deviation, even if they do not directly reference the course material.\n" +
-      "- Make sure to include the correct sub sections the user needs to look into for a correct answer.\n" +
       "\n" +
+      "detect the sub-sections that are relevant to the Student's response:" +
+      studentLastMessage +
       "Your response should be structured as a json object as follows:\n" +
       "{\n" +
-      '  "deviating": "Yes" or "No",\n' +
       '  "relevant_sub_sections": [{section:"Sub-section title 1", "url":"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (this should never be an empty array, only focus on the student message when searching for relevant_sub_sections),\n' +
-      '  "explanation": "Your brief explanation here."\n' +
       "}\n";
-    const userPrompt =
-      `"Instructor's message": "${tutorLastMessage}"\n` + `"Student's response": "${studentLastMessage}"`;
-
-    const prompt_messages = [
-      {
-        role: "system",
-        content: systemPrompt,
-      },
-      {
-        role: "user",
-        content:
-          `"instructor's message": "Why is data collection important in the field of economics, according to renowned economists like Thomas Piketty and James Heckman?"\n` +
-          `"student's response": "what's GDP?"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{" +
-          '"deviating": "YES",' +
-          '"relevant_sub_sections": [{"section":"1.2 History’s hockey stick",  "url": "01-prosperity-inequality-02-historys-hockey-stick.html" }],' +
-          '"explanation": "because the user is asking a question different than what the tutor is talking about",' +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?"\n` +
-          `"student's response": "i don't know"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "NO",\n' +
-          '"relevant_sub_sections": [{\n' +
-          '"url": "01-prosperity-inequality-07-malthusian-trap.html",\n' +
-          '"section": "1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"\n' +
-          "}],\n" +
-          '"explanation":""' +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",\n` +
-          `"student's response": "i have no idea"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "NO",\n' +
-          '"relevant_sub_sections": [{\n' +
-          '"url": "01-prosperity-inequality-07-malthusian-trap.html",\n' +
-          '"section": "1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour"' +
-          "}],\n" +
-          '"explanation":""' +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"instructor's message": "How did socio-economic disparities within nations compare to the disparities between different regions several centuries ago?",\n` +
-          `"student's response": "tell me"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "NO",\n' +
-          '"relevant_sub_sections": [{\n' +
-          '"url": "01-prosperity-inequality-01-ibn-battuta.html",\n' +
-          '"section": "1.1 Ibn Battuta’s fourteenth-century travels in a flat world"\n' +
-          "}],\n" +
-          '"explanation":""\n' +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?",\n` +
-          `"student's response": "tell me about socialism"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "YES",\n' +
-          '"relevant_sub_sections": [{\n' +
-          '"url": "01-prosperity-inequality-12-capitalism-varieties.html",\n' +
-          '"section": "1.12 Varieties of capitalism: Institutions, government, and politics"\n' +
-          "}],\n" +
-          `"explanation":"the user wan't to talk about a different topic than what the instructor is asking a question about"\n` +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?",\n` +
-          `"student's response": "Ibn Battuta, the 14th-century Moroccan scholar, traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences in his renowned travelogue."`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "NO",\n' +
-          '"relevant_sub_sections": [{\n' +
-          '"url": "01-prosperity-inequality-01-ibn-battuta.html",\n' +
-          '"section": "1.1 Ibn Battuta’s fourteenth-century travels in a flat world"\n' +
-          "}],\n" +
-          '"explanation":"the user is not deviating because he is trying to answer the question of the instructor"' +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"Instructor's message": "Please explain the concept of GDP and its importance in understanding economic growth.",\n` +
-          `"Student's response": "What does GDP stand for?"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "No",\n' +
-          `"relevant_sub_sections": [{"section":"1.2 History’s hockey stick", "url":"01-prosperity-inequality-02-historys-hockey-stick.html"}],\n` +
-          `"explanation": "The student is asking for clarification on a term directly related to the instructor's question, which is relevant to the course material."\n` +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"Instructor's message": "Discuss the impact of the Industrial Revolution on agricultural productivity.",\n` +
-          `"Student's response": "Why is the sky blue?"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{\n" +
-          '"deviating": "Yes",\n' +
-          `"relevant_sub_sections": [{"section":"1.7 Explaining the flat part of the hockey stick: The Malthusian trap, population, and the average product of labour", "url":"01-prosperity-inequality-07-malthusian-trap.html"}],\n` +
-          `"explanation": "The student's question is completely unrelated to the course material and the instructor's question, indicating a deviation."\n` +
-          "}",
-      },
-      {
-        role: "user",
-        content:
-          `"Instructor's message": "How did British colonization affect India's economy?"` +
-          `"Student's response": "Did the colonization lead to any technological advancements in India?"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{" +
-          '"deviating": "No",' +
-          `"relevant_sub_sections": [{"section":"1.11 Application: Did the British colonization of India reduce Indian living standards?", "url":"01-prosperity-inequality-11-british-colonization-india.html"}],` +
-          `"explanation": "The student's question is directly related to the topic being discussed and seeks further information on a specific aspect of the colonization's impact."` +
-          +"}",
-      },
-      {
-        role: "user",
-        content:
-          `"Instructor's message": "What types of resources were abundant in small villages centuries ago?",\n` +
-          `"Student's response": "rice"`,
-      },
-      {
-        role: "assistant",
-        content:
-          "{" +
-          '"deviating": "No",' +
-          `"relevant_sub_sections": [{"section":"1.1 Ibn Battuta’s fourteenth-century travels in a flat world", "url":"01-prosperity-inequality-11-british-colonization-india.html"}],` +
-          `"explanation": "the student is directly answering the instructor's question."` +
-          +"}",
-      },
-      {
-        role: "user",
-        content: userPrompt,
-      },
-    ];
+    const userPrompt = `"Student's response": "${studentLastMessage}"`;
 
     console.log(userPrompt);
     console.log("waiting for response from GPT: deviating prompt");
-    console.log(prompt_messages);
-    const { deviating, sections } = await streamPrompt(prompt_messages);
+
+    const prompt_messages = [
+      {
+        role: "user",
+        content: getChaptersPrompt,
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      messages: prompt_messages,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+    });
+    const response_sections = response.choices[0].message.content;
+    const sections = JSON.parse(extractArray(response_sections) || "[]");
     //-----
 
     // if (sections.length > 0 ) {
     //   deviating = !checkIncludes(unitTitle, sectionsTitles);
     // }
 
-    return { sections, deviating };
+    return { sections };
   } catch (error) {
     console.log(error);
   }
