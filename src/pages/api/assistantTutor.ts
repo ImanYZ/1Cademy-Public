@@ -704,7 +704,7 @@ const handleDeviating = async (
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
 
-    let sectionsString = sections.map(s => `- [${s.section}](https://1cademy.com/core-econ/${s.url})\n`).join("");
+    let sectionsString = sections.map(s => `- [${s.section}](/core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
       const messDev = `I'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
       res.write(`${messDev} keepLoading`);
