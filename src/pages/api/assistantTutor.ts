@@ -72,7 +72,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const unitTitle = concepts[0]?.sectionTitle || "";
     console.log(concepts.length);
     if (!concepts.length) {
-      throw new Error("Flashcards don't exist in this page.");
+      await saveLogs({
+        course,
+        url,
+        uname: uname || "",
+        severity: "default",
+        where: "assistant tutor endpoint",
+        error: "Flashcards don't exist in this page.",
+        clarifyQuestion,
+        action: "clarify question",
+        project: "1Tutor",
+      });
+      return;
+      // throw new Error("Flashcards don't exist in this page.");
     }
     const systemPrompt = await generateSystemPrompt(
       unit,
