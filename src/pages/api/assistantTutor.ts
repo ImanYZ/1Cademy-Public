@@ -627,8 +627,8 @@ const streamMainResponse = async ({
 };
 
 const getExtraInfo = (fName: string, nextFlashcard: any) => {
-  let prompt =
-    fName +
+  let prompt = "\n";
+  fName +
     " can't see this PS: If " +
     fName +
     " asked any questions, you should answer their " +
@@ -1341,7 +1341,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"instructor's message": "Why is data collection important in the field of economics, according to renowned economists like Thomas Piketty and James Heckman?"` +
+          `"instructor's message": "Why is data collection important in the field of economics, according to renowned economists like Thomas Piketty and James Heckman?"\n` +
           `"student's response": "what's GDP?"`,
       },
       {
@@ -1356,7 +1356,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?"` +
+          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?"\n` +
           `"student's response": "i don't know"`,
       },
       {
@@ -1374,7 +1374,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",` +
+          `"instructor's message": "What does the Malthusian population model suggest happens to population size as agricultural productivity improves?",\n` +
           `"student's response": "i have no idea"`,
       },
       {
@@ -1392,7 +1392,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"instructor's message": "How did socio-economic disparities within nations compare to the disparities between different regions several centuries ago?",` +
+          `"instructor's message": "How did socio-economic disparities within nations compare to the disparities between different regions several centuries ago?",\n` +
           `"student's response": "tell me"`,
       },
       {
@@ -1410,7 +1410,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?",` +
+          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?",\n` +
           `"student's response": "tell me about socialism"`,
       },
       {
@@ -1428,7 +1428,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?"` +
+          `"instructor's message": "Can you guess which 14th-century Moroccan scholar traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences?",\n` +
           `"student's response": "Ibn Battuta, the 14th-century Moroccan scholar, traveled extensively across Africa, Europe, central Asia, and China, documenting his experiences in his renowned travelogue."`,
       },
       {
@@ -1446,7 +1446,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"Instructor's message": "Please explain the concept of GDP and its importance in understanding economic growth."` +
+          `"Instructor's message": "Please explain the concept of GDP and its importance in understanding economic growth.",\n` +
           `"Student's response": "What does GDP stand for?"`,
       },
       {
@@ -1461,7 +1461,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"Instructor's message": "Discuss the impact of the Industrial Revolution on agricultural productivity."` +
+          `"Instructor's message": "Discuss the impact of the Industrial Revolution on agricultural productivity.",\n` +
           `"Student's response": "Why is the sky blue?"`,
       },
       {
@@ -1491,7 +1491,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       {
         role: "user",
         content:
-          `"Instructor's message": "What types of resources were abundant in small villages centuries ago?"` +
+          `"Instructor's message": "What types of resources were abundant in small villages centuries ago?",\n` +
           `"Student's response": "rice"`,
       },
       {
