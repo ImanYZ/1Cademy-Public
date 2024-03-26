@@ -1,4 +1,4 @@
-import { Box, List, ListItem } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import LinearProgress from "@mui/material/LinearProgress";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
@@ -22,6 +22,7 @@ const IssuesComp: React.FC<Props> = ({
   setIssues,
 }) => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [expandedIssue, setExpandedIssue] = useState<number | null>(null);
   useEffect(() => {
     const fetchInstructions = async () => {
       try {
@@ -61,15 +62,21 @@ Respond a JSON object with the following structure:
     <LinearProgress color="secondary" />
   ) : (
     <Box>
-      <List>
-        {issues.map((issue, index) => {
-          return (
-            <ListItem key={index}>
-              {index + 1}- {issue}
-            </ListItem>
-          );
-        })}
-      </List>
+      {issues.map((issue, index) => {
+        return (
+          <Button
+            sx={{
+              color: "white",
+              textAlign: "start",
+              textTransform: "none",
+            }}
+            key={index}
+            onClick={() => setExpandedIssue(index)}
+          >
+            {expandedIssue === index ? issue : issue.substring(0, 100) + "..."}
+          </Button>
+        );
+      })}
     </Box>
   );
 };
