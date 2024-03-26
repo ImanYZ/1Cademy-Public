@@ -46,7 +46,7 @@ const ImproveComp: React.FC<Props> = ({
   selectedArticle,
   allContent,
   findScrollAndSelect,
-  //issues
+  issues
 }) => {
   const db = getFirestore();
   const [suggestionsModifications, setSuggestionsModifications] = useState<Improvement[]>([]);
@@ -135,22 +135,27 @@ const ImproveComp: React.FC<Props> = ({
 '''
 ${allContent}
 '''
-We're currently trying to do the following:
+We're currently at the following stage:
 '''
 ${JSON.stringify(recommendedSteps)}
 '''
+We're currently working on the following issues:
+'''
+${issues.map((issue: string) => "- " + issue).join("\n")}
+'''          
 Help us significantly improve this ${articleTypePath
-          .slice(2)
-          .reverse()
-          .join(
-            " of "
-          )}. Note that the flow and brevity and very important. For this purpose, generate a JSON response with the structure {'response': [array]}. 
+  .slice(2)
+  .reverse()
+  .join(
+    " of "
+  )}. Note that the flow and brevity are very important.
+For this purpose, generate a JSON response with the structure {'response': [array]}. 
 The [array] should include objects, each being about only one of the sentences from our paper and have the following structure:
 {
-"reasoning": "Your reasoning for this improvement",
-"action": Can take one of the values of 'delete', 'add', or 'modify',
-"sentence": "If the action you suggest us is to delete a sentence, specify the 'sentence' that you want us to delete. If the action is to modify a sentence, it should take the exact sentence that you'd like to help us improve. If the action is to add a sentence, you should specify the previous sentence that we should add your suggested new sentence after this.",
-"new_sentence": "If the action you suggest us is to delete a sentence, this field should be ''. If the action is modify a sentence, it should take the new sentence that you'd like us to write instead of the original sentence. If the action is add a sentence, it should take the new sentence."
+   "reasoning": "Your reasoning for this improvement",
+   "action": Can take one of the values of 'delete', 'add', or 'modify',
+   "sentence": "If the action you suggest us is to delete a sentence, specify the 'sentence' that you want us to delete. If the action is to modify a sentence, it should take the exact sentence that you'd like to help us improve. If the action is to add a sentence, you should specify the previous sentence that we should add your suggested new sentence after this.",
+   "new_sentence": "If the action you suggest us is to delete a sentence, this field should be ''. If the action is modify a sentence, it should take the new sentence that you'd like us to write instead of the original sentence. If the action is add a sentence, it should take the new sentence."
 }
 If the [array] is [], it means that you don't have any suggestions for us.`,
       },
