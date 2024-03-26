@@ -591,7 +591,7 @@ const streamMainResponse = async ({
     if (result.choices[0].delta.content) {
       const resultText = result.choices[0].delta.content;
       console.log(result.choices[0].delta.content);
-      if (!completeMessage.includes(`next_question`) && completeMessage.includes(`"your_response":`)) {
+      if (!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) {
         res.write(resultText);
       }
       completeMessage = completeMessage + resultText;
