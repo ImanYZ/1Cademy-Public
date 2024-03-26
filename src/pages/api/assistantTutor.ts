@@ -34,16 +34,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     furtherExplain,
     message,
     removeAdditionalInfo,
-    anotherTopic,
+    relatedTopic,
+    unRelatedTopic,
     answerQuestion,
     clarifyQuestion,
   } = req.body;
   let conversationId = "";
-  let deviating: boolean = anotherTopic;
+  let deviating: boolean = unRelatedTopic || relatedTopic;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
+    console.log({
+      relatedTopic,
+      unRelatedTopic,
+    });
 
     let default_message = false;
     let selectedModel = "";
@@ -86,16 +91,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       return;
       // throw new Error("Flashcards don't exist in this page.");
     }
-    const systemPrompt = await generateSystemPrompt(
-      unit,
-      concepts || [],
-      fName,
-      tutorName,
-      courseName,
-      objectives,
-      directions,
-      techniques
-    );
+    const systemPrompt = PROMPT(fName, tutorName, courseName, objectives, techniques, {
+      title: "",
+      content: "",
+    });
 
     const conversationDocs = await db
       .collection("tutorConversations")
@@ -186,7 +185,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     conversationId = newConversationRef.id;
     let questionMessage = null;
     if (!message) {
-      message = `Hello My name is ${fName}.`;
+      // message = `Hello My name is ${fName}.`;
       default_message = true;
       conversationData.usedFlashcards = [];
     } else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
@@ -218,9 +217,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     console.log({ nextFlashcard });
+    //update the system prompt  to add the next flashcard that gpt need to ask a question about
+    if (nextFlashcard) {
+      systemPrompt;
+      conversationData.messages[0].content = PROMPT(
+        fName,
+        tutorName,
+        courseName,
+        objectives,
+        techniques,
+        nextFlashcard
+      );
+      console.log(conversationData.messages);
+    }
+
     // add the extra PS to the message of the user
     // we ignore it afterward when saving the conversation in the db
-    const extraInfoPrompt = getExtraInfo(fName, nextFlashcard);
+
     let furtherExplainPrompt = "";
     if (furtherExplain && conversationData.previousFlashcard) {
       furtherExplainPrompt = `Further explain the content of the following concept:{
@@ -230,16 +243,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
       /*  */
     }
-    conversationData.messages.push({
-      role: "user",
-      content: message,
-      sentAt: new Date(),
-      mid: getId(),
-      default_message,
-      nextFlashcard: nextFlashcard?.id || "",
-      extraInfoPrompt,
-      furtherExplainPrompt,
-    });
+    if (!!message.trim()) {
+      conversationData.messages.push({
+        role: "user",
+        content: message,
+        sentAt: new Date(),
+        mid: getId(),
+        default_message,
+        nextFlashcard: nextFlashcard?.id || "",
+        furtherExplainPrompt,
+        deviating,
+      });
+    }
+
     const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
     console.log(mergedMessages);
     // const instructorLastMessage = mergedMessages.at(-2) || {};
@@ -254,26 +270,53 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // }
     console.log({ deviating });
     if (deviating) {
-      const { sections }: any = await getChapterRelatedToResponse(
-        [...conversationData.messages],
-        courseName,
-        unitTitle
-      );
+      if (relatedTopic) {
+        const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
+        const response = await handleRelatedTopic([...conversationData.messages], systemPrompt, res);
+        conversationData.messages.push({
+          content: response,
+          role: "assistant",
+          sentAt: new Date(),
+          mid: getId(),
+          default_message,
+          ignoreMessage: true,
+        });
+        conversationData.messages.map((m: any) => {
+          if (m.deviating) {
+            m.ignoreMessage = true;
+            delete m.deviating;
+          }
+        });
+        if (!questionMessage) {
+          questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+        }
+        if (!!questionMessage) {
+          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+        }
+        await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      } else {
+        const { sections }: any = await getChapterRelatedToResponse(
+          [...conversationData.messages],
+          courseName,
+          unitTitle
+        );
 
-      console.log("deviating");
-      await handleDeviating(
-        res,
-        conversationData,
-        relevanceResponse,
-        message,
-        courseName,
-        questionMessage,
-        newConversationRef,
-        false,
-        uname,
-        cardsModel,
-        sections
-      );
+        console.log("deviating");
+        await handleDeviating(
+          res,
+          conversationData,
+          relevanceResponse,
+          message,
+          courseName,
+          questionMessage,
+          newConversationRef,
+          false,
+          uname,
+          cardsModel,
+          sections
+        );
+      }
+      res.end();
       await saveLogs({
         course,
         url,
@@ -304,14 +347,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
       conversationData.done = true;
     }
-    const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = await streamMainResponse({
-      res,
-      deviating,
-      mergedMessages,
-      scroll_flashcard_next,
-      conversationData,
-      furtherExplain,
-    });
+    const defaultAnswer = `Hello ${fName}, on this page you will learn about the ${unitTitle}. Would you like me to guide you through the material or would you rather review on your own and then have me check your understanding?`;
+    const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = default_message
+      ? {
+          completeMessage: defaultAnswer,
+          answer: defaultAnswer,
+          question: "",
+          emotion: "",
+          inform_instructor: "",
+          evaluation: 0,
+        }
+      : await streamMainResponse({
+          res,
+          deviating,
+          mergedMessages,
+          scroll_flashcard_next,
+          conversationData,
+          furtherExplain,
+        });
 
     // save the response from GPT in the db
     const divideId = getId();
@@ -340,6 +393,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       conversationData.messages.push({ ...questionMessage, sentAt: new Date() });
     } else if (!!nextFlashcard) {
       const question = await getTheNextQuestion(nextFlashcard);
+      conversationData.messages[conversationData.messages.length - 1].completeMessage =
+        "{\n" +
+        `  "your_response": ${defaultAnswer},\n` +
+        '  "evaluation": 0,\n' +
+        '  "emotion": "happy",\n' +
+        '  "inform_instructor": "No",\n' +
+        `  "next_question": "${question}\n" ` +
+        "}";
       conversationData.messages.push({
         role: "assistant",
         content: question,
@@ -415,7 +476,7 @@ const clarifyTheQuestion = async (
   res: any
 ) => {
   try {
-    const systemPrompt = PROMPT(fName, tutorName, courseName, objectives, directions, techniques, true);
+    const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
     const userPrompt =
       "Please clarify your question by rephrasing it, explaining it further, and provide examples if possible.";
     messages[0].content = systemPrompt;
@@ -590,6 +651,9 @@ const streamMainResponse = async ({
   let completeMessage = "";
 
   console.log({ deviatingResponse: deviating });
+
+  if (furtherExplain) mergedMessages.shift(); //remove the system prompt from the history of messages if the user is asking for further explanation
+  /*  */
   const response = await openai.chat.completions.create({
     messages: mergedMessages,
     model: "gpt-4-0125-preview",
@@ -638,33 +702,6 @@ const streamMainResponse = async ({
   };
 };
 
-const getExtraInfo = (fName: string, nextFlashcard: any) => {
-  let prompt = "\n";
-  fName +
-    " can't see this PS: If " +
-    fName +
-    " asked any questions, you should answer their " +
-    "questions only based on the concepts discussed in this conversation. Do not answer any question that is irrelevant.";
-  // if there a next Flashcard add this
-  if (nextFlashcard) {
-    prompt +=
-      " Respond to " +
-      fName +
-      " and then ask them a question about the following concept:\n" +
-      "{\n" +
-      "title: " +
-      nextFlashcard.title +
-      ",\n" +
-      "content: " +
-      nextFlashcard.content +
-      "\n}\n" +
-      "Note that you can repeat asking the same question about a concept that the student previously had difficulties with.\n" +
-      "Also " +
-      fName +
-      " has not read the concept yet. They will read the concept only after answering your question.";
-  }
-  return prompt;
-};
 const handleDeviating = async (
   res: NextApiResponse<any>,
   conversationData: any,
@@ -822,15 +859,45 @@ export type IAssistantRequestPayload = {
   url?: string;
   // notebookId?: string;
 };
-
-const PROMPT = (
+const ClarifyPROMPT = (
   fName: string,
   tutorName: string,
   courseName: string,
   objectives: string,
   directions: string,
+  techniques: string
+) => {
+  const clarify_question_instructions =
+    "Your name is " +
+    tutorName +
+    ".\n" +
+    "The student's name is " +
+    fName +
+    ".\n" +
+    "You are a professional tutor, teaching " +
+    courseName +
+    ".\n" +
+    objectives +
+    "\n" +
+    directions +
+    "\n" +
+    "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
+    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    techniques;
+
+  return clarify_question_instructions;
+};
+const PROMPT = (
+  fName: string,
+  tutorName: string,
+  courseName: string,
+  objectives: string,
   techniques: string,
-  clarifyQuestion = false
+  nextFlashcard: {
+    title: string;
+    content: string;
+  }
 ) => {
   const instructions =
     "Your name is " +
@@ -843,24 +910,28 @@ const PROMPT = (
     courseName +
     ".\n" +
     objectives +
-    "\n" +
     // You should motivate and help the student learn all the concept cards in the following JSON array of objects ${title}:
     // ${JSON.stringify(flashcards)}
-    directions +
     "\n" +
     "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
     "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
-    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
     techniques +
     "\n" +
-    "You should make your messages very short.\n" +
     "Evaluate " +
     fName +
-    "'s response to your last message. Your response should be only a JSON object with the following structure:\n" +
+    "'s response to your last message and give them constructive feedback. Your message should be only a JSON object with the following structure:\n" +
     "{\n" +
-    '   "your_response": "Your response to ' +
+    '"your_response": "Your response to ' +
     fName +
-    "'s last message based on the conversation. Do not ask the user any questions here." +
+    "'s last message based on the conversation, which should be as short as possible. Do not explain what you do or anything else. Only answer the question or give feedback to " +
+    fName +
+    "'s answer. If " +
+    fName +
+    " has answered your last question, give them constructive feedback to their answer. If " +
+    fName +
+    " does not know the answer (indicated by responses like 'I do not know', 'I have no ideas', 'Help me learn the answer', 'Explain it to me', 'Tell me the answer', ...), just give them a concise answer without any further explanation. Never ask any question or seek" +
+    fName +
+    "'s opinion or preference about anything." +
     '",\n' +
     '   "evaluation":"A number between 0 to 10 indicating the quality of ' +
     fName +
@@ -884,59 +955,18 @@ const PROMPT = (
     '",\n' +
     '   "next_question": "Your next question for ' +
     fName +
-    '"' +
+    ", which should be about the following concept:\n" +
+    "{\n" +
+    "title: " +
+    nextFlashcard.title +
+    ",\n" +
+    "content: " +
+    nextFlashcard.content +
+    "\n}\n" +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
-  const clarify_question_instructions =
-    "Your name is " +
-    tutorName +
-    ".\n" +
-    "The student's name is " +
-    fName +
-    ".\n" +
-    "You are a professional tutor, teaching " +
-    courseName +
-    ".\n" +
-    objectives +
-    "\n" +
-    directions +
-    "\n" +
-    "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
-    "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
-    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
-    techniques;
-  return clarifyQuestion ? clarify_question_instructions : instructions;
-};
-
-const generateSystemPrompt = async (
-  url: string,
-  concepts: any,
-  fName: string,
-  tutorName: string,
-  courseName: string,
-  objectives: string,
-  directions: string,
-  techniques: string
-) => {
-  let booksQuery = db.collection("chaptersBook").where("url", "==", url);
-  const booksDocs = await booksQuery.get();
-  const bookData = booksDocs.docs[0].data();
-  let title = "";
-  if (bookData.sectionTitle) {
-    title = `from a unit titled ${bookData.sectionTitle}`;
-  }
-  const copy_flashcards = concepts
-    .filter((f: any) => f.paragraphs.length > 0)
-    .map(
-      (f: any) =>
-        (f = {
-          title: f.title,
-          content: f.content,
-          id: f.id,
-        })
-    );
-  return PROMPT(fName, tutorName, courseName, objectives, directions, techniques);
+  return instructions;
 };
 
 const extractJSON = (text: string) => {
@@ -1657,6 +1687,41 @@ const checkIncludes = (searchString: string, arrayString: string[]) => {
     }
   }
   return false;
+};
+const handleRelatedTopic = async (messages: any, systemPrompt: string, res: any) => {
+  try {
+    messages[0].content = systemPrompt;
+    const messagesSet = new Set();
+    const messagesSimplified = messages
+      .filter((m: any) => {
+        const messageExist = messagesSet.has(m.content);
+        messagesSet.add(m.content);
+        return !m.ignoreMessage && !m.deviatingMessage && !messageExist;
+      })
+      .map((message: any) => ({
+        role: message.role,
+        content: message.content,
+      }));
+
+    console.log(messagesSimplified);
+    const response = await openai.chat.completions.create({
+      messages: messagesSimplified,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+      stream: true,
+    });
+    let responseToQuestion = "";
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        const resultText = result.choices[0].delta.content;
+        responseToQuestion = responseToQuestion + resultText;
+        res.write(resultText);
+      }
+    }
+    return responseToQuestion;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 /* 
