@@ -704,7 +704,7 @@ const handleDeviating = async (
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
 
-    let sectionsString = sections.map(s => `- [${s.section}](core-econ/${s.url})\n`).join("");
+    let sectionsString = sections.map(s => `- [${s.section}](https://1cademy.com/core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
       const messDev = `I'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
       res.write(`${messDev} keepLoading`);
@@ -850,21 +850,18 @@ const PROMPT = (
     fName +
     "'s last message based on the conversation. Do not ask the user any questions here." +
     '",\n' +
-    '   "next_question": "Your next question for ' +
-    fName +
-    '",\n' +
     '   "evaluation":"A number between 0 to 10 indicating the quality of ' +
     fName +
     "'s response to your last message. If " +
     fName +
     " perfectly answered your question with no difficulties, give them a 10, otherwise give " +
     fName +
-    ' a lower number, 0 meaning their answer was completely wrong or irrelevant to your message.",' +
+    ' a lower number, 0 meaning their answer was completely wrong or irrelevant to your message.",\n' +
     '   "emotion": "How happy are you with ' +
     fName +
     "'s last response? Give them only one of the values 'sad', 'annoyed', 'very happy', 'clapping', 'crying', 'apologies'. Your default emotion should be 'happy'. Give " +
     fName +
-    ' variations of emotions to their different answers.",' +
+    ' variations of emotions to their different answers.",\n' +
     '   "inform_instructor": "' +
     "'Yes' if the instructor of the course should be informed about " +
     fName +
@@ -872,6 +869,10 @@ const PROMPT = (
     "'No' if there is no reason to take the instructor's time about " +
     fName +
     "'s last message to you." +
+    '",\n' +
+    '   "next_question": "Your next question for ' +
+    fName +
+    '"' +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
