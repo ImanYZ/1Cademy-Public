@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { TreeView, TreeItem } from "@mui/x-tree-view";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LinearProgress from "@mui/material/LinearProgress";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
-import LinearProgress from "@mui/material/LinearProgress";
+import { TreeItem,TreeView } from "@mui/x-tree-view";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
+import React, { useEffect,useState } from "react";
+
 import { sendMessageToChatGPT } from "../../services/openai";
 
 interface Step {
@@ -20,9 +21,16 @@ interface Props {
   articleTypePath: string[];
   recommendedSteps: string[];
   setRecommendedSteps: (path: string[]) => void;
+  setSelectedStep: any;
 }
 
-const GuideStepComp: React.FC<Props> = ({ allContent, articleTypePath, recommendedSteps, setRecommendedSteps }) => {
+const GuideStepComp: React.FC<Props> = ({
+  allContent,
+  articleTypePath,
+  recommendedSteps,
+  setRecommendedSteps,
+  setSelectedStep,
+}) => {
   const db = getFirestore();
   const [data, setData] = useState<Step[]>([]);
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
@@ -175,6 +183,7 @@ Respond only a JSON object with the structure: {"names": [an array of only the n
     event.preventDefault(); // Prevent TreeItem expansion
     setAnchorEl(event.currentTarget);
     setPopoverText(node.description);
+    setSelectedStep(node.name);
   };
 
   const open = Boolean(anchorEl);

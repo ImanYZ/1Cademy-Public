@@ -2981,8 +2981,7 @@ right: 5px; */
 }
 
 #comment-section::-webkit-scrollbar-thumb {
-  background: rgba(117, 117, 117, 0.453);
-  border-radius: 4px;
+  display: none;
 }
 
 .ql-editor p,
@@ -2998,4 +2997,3 @@ polygon {
 .ql-header span {
   color: black;
 }
-
