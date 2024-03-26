@@ -3,7 +3,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { User } from "src/knowledgeTypes";
 
 import { calculateCosineSimilarity, tokenizeAndCount } from "../../utils/cosineSimilarity";
@@ -46,6 +46,25 @@ const SideBar: React.FC<Props> = ({
   const [recommendedSteps, setRecommendedSteps] = useState<string[]>([]);
   const [selectedStep, setSelectedStep] = useState<string | null>(null);
   const [issues, setIssues] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (articleTypePath.length && !recommendedSteps.length && !issues.length) {
+      setExpanded([...expanded, "Stages"]);
+    } else if (articleTypePath.length && recommendedSteps.length && !issues.length) {
+      setExpanded([...expanded, "Issues"]);
+    } else if (issues.length) {
+      setExpanded([...expanded, "Collaboration"]);
+    }
+  }, [articleTypePath, recommendedSteps, issues]);
+
+  const handleAccordions = (type: string) => {
+    if (expanded.includes(type)) {
+      setExpanded(expanded.filter(expand => expand != type));
+    } else {
+      setExpanded([...expanded, type]);
+    }
+  };
 
   const findScrollAndSelect = async (text: string) => {
     let matchingElement: any = null;
@@ -97,8 +116,13 @@ const SideBar: React.FC<Props> = ({
               margin: "10px",
             }}
           >
-            <Accordion expanded={articleTypePath.length > 0}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
+            <Accordion expanded={expanded.includes("Stages")}>
+              <AccordionSummary
+                onClick={() => handleAccordions("Stages")}
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1-content"
+                id="panel1-header"
+              >
                 Stages
               </AccordionSummary>
               <AccordionDetails>
@@ -119,8 +143,13 @@ const SideBar: React.FC<Props> = ({
                 </Box>
               </AccordionDetails>
             </Accordion>
-            <Accordion expanded={recommendedSteps.length > 0}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
+            <Accordion expanded={expanded.includes("Issues")}>
+              <AccordionSummary
+                onClick={() => handleAccordions("Issues")}
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1-content"
+                id="panel1-header"
+              >
                 Issues
               </AccordionSummary>
               <AccordionDetails>
@@ -140,9 +169,14 @@ const SideBar: React.FC<Props> = ({
                 )}
               </AccordionDetails>
             </Accordion>
-            <Accordion expanded={issues.length > 0}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
-                Collabrations
+            <Accordion expanded={expanded.includes("Collaboration")}>
+              <AccordionSummary
+                onClick={() => handleAccordions("Collaboration")}
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1-content"
+                id="panel1-header"
+              >
+                Collaboration
               </AccordionSummary>
               <AccordionDetails>
                 <Box>
