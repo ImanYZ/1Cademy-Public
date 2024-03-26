@@ -34,16 +34,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     furtherExplain,
     message,
     removeAdditionalInfo,
-    anotherTopic,
+    relatedTopic,
+    unRelatedTopic,
     answerQuestion,
     clarifyQuestion,
   } = req.body;
   let conversationId = "";
-  let deviating: boolean = anotherTopic;
+  let deviating: boolean = unRelatedTopic || relatedTopic;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
+    console.log({
+      relatedTopic,
+      unRelatedTopic,
+    });
 
     let default_message = false;
     let selectedModel = "";
@@ -247,6 +252,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         default_message,
         nextFlashcard: nextFlashcard?.id || "",
         furtherExplainPrompt,
+        deviating,
       });
     }
 
@@ -264,26 +270,53 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // }
     console.log({ deviating });
     if (deviating) {
-      const { sections }: any = await getChapterRelatedToResponse(
-        [...conversationData.messages],
-        courseName,
-        unitTitle
-      );
+      if (relatedTopic) {
+        const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
+        const response = await handleRelatedTopic([...conversationData.messages], systemPrompt, res);
+        conversationData.messages.push({
+          content: response,
+          role: "assistant",
+          sentAt: new Date(),
+          mid: getId(),
+          default_message,
+          ignoreMessage: true,
+        });
+        conversationData.messages.map((m: any) => {
+          if (m.deviating) {
+            m.ignoreMessage = true;
+            delete m.deviating;
+          }
+        });
+        if (!questionMessage) {
+          questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+        }
+        if (!!questionMessage) {
+          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+        }
+        await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      } else {
+        const { sections }: any = await getChapterRelatedToResponse(
+          [...conversationData.messages],
+          courseName,
+          unitTitle
+        );
 
-      console.log("deviating");
-      await handleDeviating(
-        res,
-        conversationData,
-        relevanceResponse,
-        message,
-        courseName,
-        questionMessage,
-        newConversationRef,
-        false,
-        uname,
-        cardsModel,
-        sections
-      );
+        console.log("deviating");
+        await handleDeviating(
+          res,
+          conversationData,
+          relevanceResponse,
+          message,
+          courseName,
+          questionMessage,
+          newConversationRef,
+          false,
+          uname,
+          cardsModel,
+          sections
+        );
+      }
+      res.end();
       await saveLogs({
         course,
         url,
@@ -1654,6 +1687,41 @@ const checkIncludes = (searchString: string, arrayString: string[]) => {
     }
   }
   return false;
+};
+const handleRelatedTopic = async (messages: any, systemPrompt: string, res: any) => {
+  try {
+    messages[0].content = systemPrompt;
+    const messagesSet = new Set();
+    const messagesSimplified = messages
+      .filter((m: any) => {
+        const messageExist = messagesSet.has(m.content);
+        messagesSet.add(m.content);
+        return !m.ignoreMessage && !m.deviatingMessage && !messageExist;
+      })
+      .map((message: any) => ({
+        role: message.role,
+        content: message.content,
+      }));
+
+    console.log(messagesSimplified);
+    const response = await openai.chat.completions.create({
+      messages: messagesSimplified,
+      model: "gpt-4-0125-preview",
+      temperature: 0,
+      stream: true,
+    });
+    let responseToQuestion = "";
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        const resultText = result.choices[0].delta.content;
+        responseToQuestion = responseToQuestion + resultText;
+        res.write(resultText);
+      }
+    }
+    return responseToQuestion;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 /* 
