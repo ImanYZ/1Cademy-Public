@@ -951,16 +951,16 @@ const PROMPT = (
     fName +
     "'s last message to you." +
     '",\n' +
-    '   "next_question": "Your next question for ' +
+    '   "next_question": "Generate a question for ' +
     fName +
-    ", which should be about the following concept:\n" +
+    " only based on the following concept card:" +
     "{\n" +
     "title: " +
     nextFlashcard.title +
     ",\n" +
     "content: " +
     nextFlashcard.content +
-    "\n}\n" +
+    "\n}\nDo not involve any information beyond the concept card in this question.\n" +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
