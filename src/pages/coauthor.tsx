@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import React, { useEffect, useRef,useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 const ContentComp = dynamic(() => import("../components/coauthor/ContentComp"), { ssr: false });
 import { Bar, Container, Resizer, Section } from "@column-resizer/react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -8,7 +8,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { createTheme,ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
 
@@ -77,6 +77,13 @@ const App = () => {
         ...(doc.data() as any),
       }));
       articlesData = articlesData.filter(article => !article.deleted);
+      if (articlesData.length === 0) {
+        const element = document.getElementById("loader-overlay") as HTMLElement;
+        if (element) {
+          element.style.display = "none";
+        }
+        return;
+      }
       setUserArticles(articlesData);
       const latestArticle = articlesData.reduce((prev, current) => {
         const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);

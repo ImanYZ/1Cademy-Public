@@ -80,6 +80,11 @@ const saveMessageAssistant = async (audioUrl: string, message: any, uid: string)
     });
   }
 };
+const divideIntoSentences = (input: string) => {
+  input = input.replace(/[\u{1F600}-\u{1F6FF}]/gu, "");
+  return input.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/).filter((str: string) => !!str.trim());
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     let { message, audioType } = req.body;
@@ -92,7 +97,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let input = message.content;
 
     // Divide the input into chunk of sentences
-    let chunks = input.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
+    let chunks = divideIntoSentences(input);
     console.log(chunks);
     for (let chunk of chunks) {
       if (!chunk) continue;

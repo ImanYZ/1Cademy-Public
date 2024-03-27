@@ -1,7 +1,8 @@
 import "react-quill/dist/quill.snow.css";
 
-import { Box, Button, Divider, MenuItem, Select, TextField } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Divider, IconButton, MenuItem, Select, TextField } from "@mui/material";
+import { addDoc, collection, deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
@@ -181,6 +182,12 @@ const ContentComp: React.FC<Props> = ({
     },
     [articleTitle, selectedArticle]
   );
+  const deleteArticle = async (event: any, articleId: string) => {
+    event.stopPropagation();
+    if (confirm("Are you sure to delete article")) {
+      await deleteDoc(doc(db, "articles", articleId));
+    }
+  };
 
   return (
     <Box sx={{ m: "16px 10px" }}>
@@ -254,13 +261,24 @@ const ContentComp: React.FC<Props> = ({
               top: "59.5px",
             }}
           >
-            <MenuItem onClick={() => setOpen(true)} value={0}>
+            <MenuItem
+              onClick={() => {
+                setSelectedArticle(null);
+                setOpen(true);
+              }}
+              value={0}
+            >
               Create New Article
             </MenuItem>
             <Divider variant="fullWidth" sx={{ my: "10px" }} />
             {userArticles.map((article: any, index: number) => (
-              <MenuItem key={index} value={article.id}>
+              <MenuItem sx={{ display: "flex", justifyContent: "space-between" }} key={index} value={article.id}>
                 {article?.title}
+                {selectedArticle?.id !== article.id && (
+                  <IconButton onClick={e => deleteArticle(e, article.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                )}
               </MenuItem>
             ))}
           </Select>
