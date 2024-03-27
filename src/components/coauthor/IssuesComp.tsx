@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import LinearProgress from "@mui/material/LinearProgress";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
@@ -61,20 +61,32 @@ Respond a JSON object with the following structure:
   return loading ? (
     <LinearProgress color="secondary" />
   ) : (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {issues.map((issue, index) => {
         return (
-          <Button
-            sx={{
-              color: "white",
-              textAlign: "start",
-              textTransform: "none",
-            }}
+          <Paper
             key={index}
             onClick={() => setExpandedIssue(index)}
+            elevation={3}
+            className="CollapsedProposal collection-item avatar"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              padding: { xs: "5px 10px", sm: "15px" },
+              borderRadius: "8px",
+              boxShadow: theme =>
+                theme.palette.mode === "light"
+                  ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
+                  : undefined,
+              cursor: "auto!important",
+              background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+              ":hover": {
+                background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+              },
+            }}
           >
             {expandedIssue === index ? issue : issue.substring(0, 100) + "..."}
-          </Button>
+          </Paper>
         );
       })}
     </Box>
