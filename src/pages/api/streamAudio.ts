@@ -86,7 +86,10 @@ const divideIntoSentences = (input: string) => {
     /[\u{1F600}-\u{1F64F}|[\u{1F300}-\u{1F5FF}|[\u{1F680}-\u{1F6FF}|[\u{1F1E0}-\u{1F1FF}|[\u{2600}-\u{26FF}]|\u{2705}/gu,
     ""
   );
-  return input.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/).map((str: string) => str.trim());
+  return input
+    .split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)/)
+    .map((str: string) => str.trim())
+    .filter(str => !!str);
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
