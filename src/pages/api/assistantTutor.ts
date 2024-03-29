@@ -28,27 +28,13 @@ const getId = () => {
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let {
-    url,
-    cardsModel,
-    furtherExplain,
-    message,
-    removeAdditionalInfo,
-    relatedTopic,
-    unRelatedTopic,
-    answerQuestion,
-    clarifyQuestion,
-  } = req.body;
+  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion } = req.body;
   let conversationId = "";
-  let deviating: boolean = unRelatedTopic || relatedTopic;
+  let deviating: boolean = false;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
   try {
     console.log("assistant Tutor", uname);
-    console.log({
-      relatedTopic,
-      unRelatedTopic,
-    });
 
     let default_message = false;
     let selectedModel = "";
@@ -116,6 +102,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       usedFlashcards: [],
       cardsModel: selectedModel,
       deleted: false,
+      guidedStudy: true,
+      selfStudy: false,
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
@@ -138,7 +126,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         content: systemPrompt,
       });
     }
-    if (clarifyQuestion) {
+    const instructorMessage = conversationData.messages
+      .filter((m: any) => !m.ignoreMessage && !m.deviatingMessage && !!m?.content.trim())
+      .at(-1);
+    const studentMessage = message;
+    const { questions, questionAnswer, clarificationRequest, continueLearning, clarify }: any = default_message
+      ? { questions: [], questionAnswer: "", clarificationRequest: "", continueLearning: "", clarify: "" }
+      : instructorMessage.hasOwnProperty("question")
+      ? await getQuestionsAfterQuestion(instructorMessage.content, message)
+      : await getQuestionsAfterAnswer(instructorMessage.content, studentMessage);
+    console.log({ questions, questionAnswer, clarificationRequest, continueLearning, clarify });
+    //
+    //after extracting the questions and the answer
+    if (questions.length > 0) {
+      deviating = true;
+    }
+    if (clarify) {
+      furtherExplain = true;
+    }
+
+    console.log("questions", questions);
+    if (!!clarificationRequest) {
       const clarifiedQuestion = await clarifyTheQuestion(
         conversationData.messages,
         fName,
@@ -150,7 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         res
       );
       conversationData.messages.push({
-        content: "Clarify the question",
+        content: clarificationRequest /* "Clarify the question" */,
         role: "user",
         sentAt: new Date(),
         mid: getId(),
@@ -195,7 +203,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     let scroll_flashcard_next = "";
     let nextFlashcard = null;
-    if (!furtherExplain && !deviating) {
+    if ((!furtherExplain && !deviating) || !questionAnswer) {
       scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
       console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
       if (scroll_flashcard_next) {
@@ -216,7 +224,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       }
     }
 
-    console.log({ nextFlashcard });
     //update the system prompt  to add the next flashcard that gpt need to ask a question about
     if (nextFlashcard) {
       systemPrompt;
@@ -228,7 +235,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         techniques,
         nextFlashcard
       );
-      console.log(conversationData.messages);
     }
 
     // add the extra PS to the message of the user
@@ -243,10 +249,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
       /*  */
     }
-    if (!!message.trim()) {
+    if (!!message && !!questionAnswer.trim()) {
       conversationData.messages.push({
         role: "user",
-        content: message,
+        content: questionAnswer,
         sentAt: new Date(),
         mid: getId(),
         default_message,
@@ -269,8 +275,100 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //   detectedSections = sections;
     // }
     console.log({ deviating });
+
+    if (questionAnswer || default_message) {
+      if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
+        await delay(2000);
+        const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
+        res.write(doneMessage);
+        const sentAt = new Date(new Date());
+        sentAt.setSeconds(sentAt.getSeconds() + 20);
+        conversationData.messages.push({
+          role: "assistant",
+          content: doneMessage,
+          sentAt,
+          mid: getId(),
+        });
+        conversationData.done = true;
+      }
+      const defaultAnswer = `Hello ${fName}, on this page you will learn about ${unitTitle.replace(
+        /^\d+(\.\d+)?\s+/,
+        ""
+      )}. I'm here to guide you through it. Prefer to study first? Use the switch above to toggle, and I'll assess your learning afterward.`;
+      const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = default_message
+        ? {
+            completeMessage: defaultAnswer,
+            answer: defaultAnswer,
+            question: "",
+            emotion: "",
+            inform_instructor: "",
+            evaluation: 0,
+          }
+        : await streamMainResponse({
+            res,
+            deviating,
+            mergedMessages,
+            scroll_flashcard_next,
+            conversationData,
+            furtherExplain,
+          });
+      // console.log({ completeMessage, answer, question, emotion, inform_instructor, evaluation });
+      // save the response from GPT in the db
+      const divideId = getId();
+      conversationData.messages[conversationData.messages.length - 1].content = message;
+      conversationData.messages.push({
+        role: "assistant",
+        content: !answer ? completeMessage : answer,
+        completeMessage,
+        divided: !!answer ? divideId : false,
+        sentAt: new Date(),
+        mid: getId(),
+        emotion: default_message ? "" : emotion,
+        inform_instructor: inform_instructor,
+        prior_evaluation: evaluation,
+      });
+
+      if (typeof question === "string" && !!question) {
+        conversationData.messages.push({
+          role: "assistant",
+          content: question,
+          divided: !!answer ? divideId : false,
+          question: true,
+          sentAt: new Date(),
+          mid: getId(),
+        });
+      } else if (!!nextFlashcard) {
+        const question = await getTheNextQuestion(nextFlashcard);
+        conversationData.messages[conversationData.messages.length - 1].completeMessage =
+          "{\n" +
+          `  "your_response": "${answer}",\n` +
+          `  "evaluation": "${evaluation}",\n` +
+          `  "emotion": "${emotion}",\n` +
+          `  "inform_instructor": "${inform_instructor}",\n` +
+          `  "next_question": "${question}"\n` +
+          "}";
+        conversationData.messages.push({
+          role: "assistant",
+          content: question,
+          divided: !!answer ? divideId : false,
+          question: true,
+          sentAt: new Date(),
+          mid: getId(),
+        });
+      }
+      await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+
+      mergedMessagesMinusFurtherExplain.push({
+        role: "assistant",
+        content: !answer ? completeMessage : answer,
+        divided: !!answer ? divideId : false,
+        sentAt: new Date(),
+        mid: getId(),
+      });
+    }
+
     if (deviating) {
-      if (relatedTopic) {
+      /*  if (relatedTopic) {
         const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
         const response = await handleRelatedTopic([...conversationData.messages], systemPrompt, res);
         conversationData.messages.push({
@@ -294,29 +392,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
         }
         await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
-      } else {
-        const { sections }: any = await getChapterRelatedToResponse(
-          [...conversationData.messages],
-          courseName,
-          unitTitle
-        );
-
+      } else { */
+      for (let question of questions) {
+        const { sections }: any = await getChapterRelatedToResponse(question, courseName, unitTitle);
         console.log("deviating");
         await handleDeviating(
           res,
           conversationData,
           relevanceResponse,
-          message,
-          courseName,
-          questionMessage,
+          question,
           newConversationRef,
-          false,
           uname,
           cardsModel,
           sections
         );
       }
-      res.end();
+      // if(questionAnswer || default_message){
+
+      // }
+      if (!questionMessage) {
+        questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+      }
+      if (!!questionMessage) {
+        conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+      }
+      /* } */
       await saveLogs({
         course,
         url,
@@ -330,94 +430,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         project: "1Tutor",
       });
       console.log("conversationId", conversationId);
-      return;
     }
-
-    if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
-      await delay(2000);
-      const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
-      res.write(doneMessage);
-      const sentAt = new Date(new Date());
-      sentAt.setSeconds(sentAt.getSeconds() + 20);
-      conversationData.messages.push({
-        role: "assistant",
-        content: doneMessage,
-        sentAt,
-        mid: getId(),
-      });
-      conversationData.done = true;
-    }
-    const defaultAnswer = `Hello ${fName}, on this page you will learn about the ${unitTitle}. Would you like me to guide you through the material or would you rather review on your own and then have me check your understanding?`;
-    const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = default_message
-      ? {
-          completeMessage: defaultAnswer,
-          answer: defaultAnswer,
-          question: "",
-          emotion: "",
-          inform_instructor: "",
-          evaluation: 0,
-        }
-      : await streamMainResponse({
-          res,
-          deviating,
-          mergedMessages,
-          scroll_flashcard_next,
-          conversationData,
-          furtherExplain,
-        });
-    console.log({ completeMessage, answer, question, emotion, inform_instructor, evaluation });
-    // save the response from GPT in the db
-    const divideId = getId();
-    conversationData.messages.push({
-      role: "assistant",
-      content: !answer ? completeMessage : answer,
-      completeMessage,
-      divided: !!answer ? divideId : false,
-      sentAt: new Date(),
-      mid: getId(),
-      emotion: default_message ? "" : emotion,
-      inform_instructor: inform_instructor,
-      prior_evaluation: evaluation,
-    });
-
-    if (typeof question === "string" && !!question) {
-      conversationData.messages.push({
-        role: "assistant",
-        content: question,
-        divided: !!answer ? divideId : false,
-        question: true,
-        sentAt: new Date(),
-        mid: getId(),
-      });
-    } else if (!!nextFlashcard) {
-      const question = await getTheNextQuestion(nextFlashcard);
-      conversationData.messages[conversationData.messages.length - 1].completeMessage =
-        "{\n" +
-        `  "your_response": ${answer},\n` +
-        `  "evaluation": ${evaluation},\n` +
-        `  "emotion": ${emotion},\n` +
-        `  "inform_instructor": ${inform_instructor},\n` +
-        `  "next_question": "${question}\n" ` +
-        "}";
-      conversationData.messages.push({
-        role: "assistant",
-        content: question,
-        divided: !!answer ? divideId : false,
-        question: true,
-        sentAt: new Date(),
-        mid: getId(),
-      });
-    }
-    await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
-
-    mergedMessagesMinusFurtherExplain.push({
-      role: "assistant",
-      content: !answer ? completeMessage : answer,
-      divided: !!answer ? divideId : false,
-      sentAt: new Date(),
-      mid: getId(),
-    });
-
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     console.log("Done", conversationId);
@@ -463,6 +476,84 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
 export default fbAuth(handler);
 
+/* instructor last message is not a question */
+const getQuestionsAfterAnswer = async (
+  instructorMessage: string,
+  studentMessage: string
+): Promise<{ questions: string[]; continueLearning: string; clarify: string }> => {
+  const prompt = `
+    We are processing a conversation between an instructor and a student.
+    The instructor sent the following triple-quoted message:
+    '''
+    ${instructorMessage}
+    '''
+    The student responded the following triple-quoted message:
+    '''
+    ${studentMessage}
+    '''
+    Analyze the student's response based on the following rules:
+    - If the student asked for further explanation/clarification of the instructor's message, identify it as "clarify".
+    - If the student asked to continue with the next topic/question, identify it as "continue".
+    - If the student asked additional questions or makes requests that are not directly related to the instructor's message, identify these as "deviate".
+    Given this, respond with a JSON object structured as follows:
+    {
+       "clarify": "If the student asked for further explanation/clarification of the instructor's message, assign their request as a string to this field. If there is no clarification request, the value should be an empty string.",
+       "continue": "If the student asked to continue with the next topic/question, assign their request as a string to this field. If there is nothing indicating their willingness to continue, the value should be an empty string.",
+       "deviate": ["If there are questions or requests included in any part of the student's message that are not related to the instructor's message, assign each as a string to this array. If there are no questions or requests irrelevant to the instructor's message, the value should be []."]
+    }`;
+  const response: any = await sendGPTPrompt("gpt-4-0125-preview", [
+    {
+      role: "user",
+      content: prompt,
+    },
+  ]);
+
+  const objectResponse = extractJSON(response);
+  const questions: string[] = objectResponse.deviate || [];
+  const continueLearning: string = objectResponse.continue || "";
+  const clarify: string = objectResponse.clarify || "";
+  return { questions, continueLearning, clarify };
+};
+/* instructor last message is a question */
+const getQuestionsAfterQuestion = async (
+  instructorMessage: string,
+  studentMessage: string
+): Promise<{ questions: string[]; questionAnswer: string; clarificationRequest: string }> => {
+  const prompt = `
+We are processing a conversation between an instructor and a student.
+The instructor sent the following question:
+'''
+${instructorMessage}
+'''
+The student responded the following triple-quoted message:
+'''
+${studentMessage}
+'''
+Analyze the student's response based on the following rules:
+- If the student provides information directly related to the instructor's question, classify this as part of their answer.
+- If the student asks for the answer or expresses uncertainty or a lack of knowledge about the question (e.g., "I don't know", "tell me", "I have no ideas", "answer it", "solve it"), consider this as their answer indicating they cannot provide the requested information. Treat such expressions as valid responses to the instructor's question.
+- If the student asks additional questions or makes requests that are not directly related to answering the instructor's question (e.g., "What is GDP?"), identify these as separate questions or requests.
+Given this, respond with a JSON object structured as follows:
+{
+   "questionsOrRequests": ["If there are questions or requests included in any part of the student's message that are not in response to the instructor's question, assign each as a string to this array. If there are no questions or requests irrelevant to the instructor's question, the value should be []."],
+   "answer": "Only if there are parts of the student's message that respond to the instructor's question, merge them into one message and assign it as a string to this field. If the student's response is an expression of uncertainty or a lack of knowledge, include this as their answer. If neither of these exist, the value should be an empty string.",
+   "clarificationRequest": "If the student is asking the instructor to clarify the question, assign this request as a string to this field. If there is no clarification request, the value should be an empty string."
+}`;
+  const response: any = await sendGPTPrompt("gpt-4-0125-preview", [
+    {
+      role: "user",
+      content: prompt,
+    },
+  ]);
+
+  const objectResponse = extractJSON(response);
+  console.log("objectResponse =====>", objectResponse);
+  const questions: string[] = objectResponse.questionsOrRequests || [];
+  const questionAnswer: string = objectResponse.answer || "";
+  const clarificationRequest: string = objectResponse.clarificationRequest || "";
+  return { questions, questionAnswer, clarificationRequest };
+};
+
 const clarifyTheQuestion = async (
   messages: any,
   fName: string,
@@ -493,7 +584,7 @@ const clarifyTheQuestion = async (
       role: "user",
       content: userPrompt,
     });
-    console.log(messagesSimplified);
+
     const response = await openai.chat.completions.create({
       messages: messagesSimplified,
       model: "gpt-4-0125-preview",
@@ -586,7 +677,7 @@ const getEvaluation = async ({
         learning_summary: "",
       };
     }
-    console.log(lateResponse, "lateResponse");
+
     /* we calculate the progress of the user in this unit
      */
 
@@ -601,10 +692,7 @@ const getEvaluation = async ({
         };
       }
     }
-    console.log(
-      "calculateProgress(conversationData.flashcardsScores):",
-      calculateProgress(conversationData.flashcardsScores)
-    );
+
     if (conversationData.progress < 1) {
       conversationData.progress = roundNum(
         calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
@@ -664,7 +752,7 @@ const streamMainResponse = async ({
   for await (const result of response) {
     if (result.choices[0].delta.content) {
       const resultText = result.choices[0].delta.content;
-      console.log(result.choices[0].delta.content);
+
       if (!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) {
         res.write(resultText);
       }
@@ -682,12 +770,8 @@ const streamMainResponse = async ({
       }
     }
   }
-  // if (default_message && removeAdditionalInfo) {
-  //   answer +=
-  //     "\n\n You can either study the page on your own and review it with me, or I can walk you through the page.";
-  // }
 
-  // console.log(completeMessage);
+  console.log(completeMessage);
   const response_object = extractJSON(completeMessage);
   console.log(response_object);
   return {
@@ -704,11 +788,8 @@ const handleDeviating = async (
   res: NextApiResponse<any>,
   conversationData: any,
   relevanceResponse: boolean,
-  message: string,
-  courseName: string,
-  questionMessage: any,
+  question: string,
   newConversationRef: any,
-  secondPrompt: boolean,
   uname: string,
   cardsModel: string,
   sections: { section: string; url: string }[]
@@ -717,23 +798,6 @@ const handleDeviating = async (
 
   let featuredConcepts: any = [];
   let answer = "";
-  if (secondPrompt) {
-    conversationData.messages.pop();
-  }
-
-  let lastDeviatingMessageIndex = -1;
-  for (let i = conversationData.messages.length - 1; i >= 0; i--) {
-    if (conversationData.messages[i].content === message) {
-      lastDeviatingMessageIndex = i;
-      break;
-    }
-  }
-  if (lastDeviatingMessageIndex !== -1) {
-    conversationData.messages[lastDeviatingMessageIndex].deviatingMessage = true;
-    if (secondPrompt) {
-      conversationData.messages[lastDeviatingMessageIndex + 1].deviatingMessage = true;
-    }
-  }
 
   if (relevanceResponse) {
     //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
@@ -753,7 +817,7 @@ const handleDeviating = async (
 
     let sectionsString = sections.map(s => `- [${s.section}](/core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
-      const messDev = `I'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
+      const messDev = `For your question: ${question}\n\nI'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
       res.write(`${messDev} keepLoading`);
       conversationData.messages.push({
         role: "assistant",
@@ -778,7 +842,7 @@ const handleDeviating = async (
         "'s last message]\n" +
         "}\n" +
         "Your response should be only a complete and syntactically correct JSON object.";
-      console.log(prompt);
+
       const response2 = await openai.chat.completions.create({
         messages: [
           {
@@ -787,7 +851,7 @@ const handleDeviating = async (
           },
           {
             role: "user",
-            content: message,
+            content: question,
           },
         ],
         model: "gpt-4-0125-preview",
@@ -802,7 +866,6 @@ const handleDeviating = async (
           let cleanText = result.choices[0].delta.content;
           res.write(cleanText);
           answer += cleanText;
-          console.log(result.choices[0].delta.content);
         }
         fullMessage += result.choices[0].delta.content;
       }
@@ -811,7 +874,7 @@ const handleDeviating = async (
       const sentences = responseJson.sentences;
 
       const paragraph: { text: string; ids: string[] } = searchParagraphs(allParagraphs, sentences);
-      console.log(paragraph);
+
       if (paragraph.text) {
         featuredConcepts = await extractFlashcards(paragraph, sections, uname, cardsModel);
       }
@@ -840,14 +903,7 @@ const handleDeviating = async (
     deviatingMessage: true,
   };
   conversationData.messages.push(responseMessage);
-  if (!questionMessage) {
-    questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-  }
-  if (!!questionMessage) {
-    conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
-  }
   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
-  res.end();
 };
 
 export type IAssistantRequestPayload = {
@@ -951,16 +1007,13 @@ const PROMPT = (
     fName +
     "'s last message to you." +
     '",\n' +
-    '   "next_question": "Generate a question for ' +
+    '   "next_question": "Generate a question to assess ' +
     fName +
-    " only based on the following concept card:" +
-    "{\n" +
-    "title: " +
+    "'s learning of the following concept:" +
     nextFlashcard.title +
-    ",\n" +
-    "content: " +
+    ":\n" +
     nextFlashcard.content +
-    "\n}\nDo not involve any information beyond the concept card in this question.\n" +
+    "\nDo not involve any information beyond this concept.\n" +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
@@ -1242,7 +1295,6 @@ const checkIfUserIsDeviating = async (
   messages: any
 ): Promise<{ deviating: boolean; sections: { section: string; url: string }[] }> => {
   const { sections, deviating }: any = await getChapterRelatedToResponse(messages, courseName, unitTitle);
-  console.log(sections, unitTitle);
 
   return { deviating, sections };
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
@@ -1305,9 +1357,8 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
   return gptResponse;
 };
 
-const getChapterRelatedToResponse = async (messages: any, courseName: string, unitTitle: string) => {
+const getChapterRelatedToResponse = async (studentLastMessage: string, courseName: string, unitTitle: string) => {
   try {
-    const messagesHistory = [...messages].filter(m => !m.ignoreMessage && !m.deviatingMessage && !m.question);
     // let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
     let chapterMap = chaptersMapCoreEcon;
     if (courseName == "Mission Corporation") {
@@ -1338,7 +1389,7 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
         }
       }
     }
-    const studentLastMessage = messagesHistory[messagesHistory.length - 1].content;
+
     /* 
         `You are an expert on ${courseName}.\n` +
       `The following is the table of contents, including the titles of chapters and sub-chapters within the book ${courseName}:\n` +
@@ -1363,9 +1414,6 @@ const getChapterRelatedToResponse = async (messages: any, courseName: string, un
       '  "relevant_sub_sections": [{section:"Sub-section title 1", "url":"Sub-section url 1"}, {section:"Sub-section title 2", url:"Sub-section url 2"}, ...}] (this should never be an empty array, only focus on the student message when searching for relevant_sub_sections),\n' +
       "}\n";
     const userPrompt = `"Student's response": "${studentLastMessage}"`;
-
-    console.log(userPrompt);
-    console.log("waiting for response from GPT: deviating prompt");
 
     const prompt_messages = [
       {
@@ -1453,7 +1501,7 @@ const searchParagraphs = (allParagraphs: any, sentences: string[]): { text: stri
     ids: [""],
   };
   let maxCose = 0;
-  console.log(allParagraphs);
+
   for (let paragraph of allParagraphs) {
     const key = paragraph.ids[0];
     if (!paragraph?.text || key.includes("figure") || key.includes("image") || key.includes("youtube")) continue;
@@ -1529,7 +1577,6 @@ const handleRelatedTopic = async (messages: any, systemPrompt: string, res: any)
         content: message.content,
       }));
 
-    console.log(messagesSimplified);
     const response = await openai.chat.completions.create({
       messages: messagesSimplified,
       model: "gpt-4-0125-preview",
