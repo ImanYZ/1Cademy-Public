@@ -37,6 +37,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     console.log("assistant Tutor", uname);
 
     let default_message = false;
+    if (!message) {
+      default_message = true;
+    }
     let selectedModel = "";
     console.log({ cardsModel, customClaims });
     const isInstructor = customClaims.instructor;
@@ -61,6 +64,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
     const unitTitle = concepts[0]?.sectionTitle || "";
+    const defaultAnswer = `Hello ${fName}, on this page you will learn about ${unitTitle.replace(
+      /^\d+(\.\d+)?\s+/,
+      ""
+    )}. I'm here to guide you through it. Prefer to study first? Use the switch above to toggle, and I'll assess your learning afterward.`;
+    if (default_message) {
+      res.write(defaultAnswer);
+    }
     console.log(concepts.length);
     if (!concepts.length) {
       await saveLogs({
@@ -194,7 +204,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let questionMessage = null;
     if (!message) {
       // message = `Hello My name is ${fName}.`;
-      default_message = true;
+
       conversationData.usedFlashcards = [];
     } /* else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
       furtherExplain = true;
@@ -291,10 +301,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
         conversationData.done = true;
       }
-      const defaultAnswer = `Hello ${fName}, on this page you will learn about ${unitTitle.replace(
-        /^\d+(\.\d+)?\s+/,
-        ""
-      )}. I'm here to guide you through it. Prefer to study first? Use the switch above to toggle, and I'll assess your learning afterward.`;
+
       const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = default_message
         ? {
             completeMessage: defaultAnswer,
@@ -327,6 +334,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         inform_instructor: inform_instructor,
         prior_evaluation: evaluation,
       });
+      // if (default_message) {
+      //   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      // }
 
       if (typeof question === "string" && !!question) {
         conversationData.messages.push({
