@@ -72,11 +72,11 @@ const AssistantFooter = ({ sx }: AppFooterProps) => {
               <Typography sx={{ fontSize: "14px", fontWeight: 600, color, mb: "16px" }}>Contact Us</Typography>
 
               <Stack direction={"row"} alignItems="center" spacing={"8px"}>
-                <IconButton href="mailto:onecademy@umich.edu" aria-label="Mail us" sx={{ p: "0" }}>
+                <IconButton href="mailto:community@1cademy.com" aria-label="Mail us" sx={{ p: "0" }}>
                   <EmailIcon sx={{ color: "#98A2B3" }} fontSize="medium" />
                 </IconButton>
                 <Typography color={color} sx={{ textDecorationLine: "underline", fontWeight: 600 }}>
-                  onecademy@umich.edu
+                  community@1cademy.com
                 </Typography>
               </Stack>
             </Box>

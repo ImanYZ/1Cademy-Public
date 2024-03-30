@@ -24,7 +24,7 @@ export const allCommunities = [
       {
         name: "Iman YeckehZaare",
         image: "Iman_YeckehZaare.jpg",
-        about: `I am a Ph.D. Candidate at the University of Michigan School of Information.`,
+        about: `I am a Ph.D. from the University of Michigan School of Information.`,
         websites: [
           {
             name: "LinkedIn",
@@ -137,7 +137,6 @@ export const allCommunities = [
       `Fluency in writing and reading in English`,
     ],
     responsibilities: [
-      `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
       `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
       `Conduct several experiment sessions and guide participants through the session.`,
       `Thematically code the qualitative data collected throughout our experiments.`,
@@ -527,7 +526,7 @@ export const allCommunities = [
       {
         name: "Iman YeckehZaare",
         image: "Iman_YeckehZaare.jpg",
-        about: `I am a Ph.D. Candidate at the University of Michigan School of Information.`,
+        about: `I am a Ph.D. from the University of Michigan School of Information.`,
         websites: [
           {
             name: "LinkedIn",
@@ -558,7 +557,6 @@ export const allCommunities = [
       `Fluency in writing and reading in English`,
     ],
     responsibilities: [
-      `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
       `Dedicate approximately 10-15+ hours a week to engage in all aspects of the research projects.`,
       `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
       `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
@@ -584,7 +582,7 @@ export const allCommunities = [
       {
         name: "Iman YeckehZaare",
         image: "Iman_YeckehZaare.jpg",
-        about: `I am a Ph.D. Candidate at the University of Michigan School of Information.`,
+        about: `I am a Ph.D. from the University of Michigan School of Information.`,
         websites: [
           {
             name: "LinkedIn",
@@ -772,7 +770,7 @@ export const allCommunities = [
       {
         name: "Lee Pavelle",
         image: "Lee_Pavelle.jpeg",
-        about: `I am a Ph.D. Candidate at the University of Michigan School of Information.`,
+        about: `I am a Ph.D. from the University of Michigan School of Information.`,
         websites: [
           {
             name: "LinkedIn",
@@ -1376,7 +1374,7 @@ export const allCommunities = [
   //     {
   //       name: "Iman YeckehZaare",
   //       image: "Iman_YeckehZaare.jpg",
-  //       about: `I am a Ph.D. Candidate at the University of Michigan School of Information.`,
+  //       about: `I am a Ph.D. from the University of Michigan School of Information.`,
   //       websites: [
   //         {
   //           name: "LinkedIn",
@@ -1516,7 +1514,6 @@ export const allCommunities = [
   //     `Fluency in writing and reading in English`,
   //   ],
   //   responsibilities: [
-  //     `Complete the University of Michigan Program for the Education and Evaluation in Responsible Conduct of Research (PEERRS) before engaging in the research.`,
   //     `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
   //     `Conduct several experiment sessions and guide participants through the session.`,
   //     `Thematically code the qualitative data collected throughout our experiments.`,
