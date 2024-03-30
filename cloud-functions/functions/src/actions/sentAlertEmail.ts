@@ -1,22 +1,33 @@
 const nodemailer = require("nodemailer");
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAILPASS,
-  },
+import { google } from "googleapis";
+
+const oAuth2Client = new google.auth.OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET, process.env.REDIRECT_URI);
+
+oAuth2Client.setCredentials({
+  refresh_token: process.env.REFRESH_TOKEN,
 });
-const transporter2 = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL2,
-    pass: process.env.EMAILPASS2,
-  },
-});
+
+const sendMail = async (mailOptions: any) => {
+  try {
+    const accessToken = await oAuth2Client.getAccessToken();
+    const transport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: process.env.EMAIL,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN,
+        accessToken: accessToken,
+      },
+    });
+
+    const result = transport.sendMail(mailOptions);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
 export const sentAlertEmail = async (logData: any, error: boolean) => {
   try {
     let details = "";
@@ -35,20 +46,13 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
       html: `Details:\n\n<ul>${details}</ul>`,
     };
     if (error) {
-      transporter.sendMail(mailOptions, async (error: any, data: any) => {
-        if (error) {
-          console.log(error);
-        }
-      });
+      const result = sendMail(mailOptions);
+      console.log(result);
     } else {
-      mailOptions.from = process.env.EMAIL2;
       mailOptions.to = ["ouhrac@gmail.com"];
-      (mailOptions.subject = `Info ${logData.project || "1Cademy"}`),
-        transporter2.sendMail(mailOptions, async (error: any, data: any) => {
-          if (error) {
-            console.log(error);
-          }
-        });
+      mailOptions.subject = `Info ${logData.project || "1Cademy"}`;
+      const result = sendMail(mailOptions);
+      console.log(result);
     }
   } catch (error) {
     console.log(error);
