@@ -46,7 +46,7 @@ const whyItems: TWhyItem[] = [
   },
   {
     name: "An AI Assistant for Free!!!",
-    body: "You can use all the capabilities of your AI assistant without paying a penny for as long as you wish. We are a research group at the University of Michigan and Honor Education. \nOur only intentions are to improve human life and education. Our research is done using anonymous data and we do not share your personal data with any third parties.",
+    body: "You can use all the capabilities of your AI assistant without paying a penny for as long as you wish. We are a research group at Honor Education. \nOur only intentions are to improve human life and education. Our research is done using anonymous data and we do not share your personal data with any third parties.",
     image: "assistant/5-ai-assistant.svg",
     imageDark: "assistant/5-ai-assistant-dark.svg",
     padding: "4px 40px 0px 40px",

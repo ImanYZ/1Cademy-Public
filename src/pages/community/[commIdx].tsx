@@ -599,7 +599,7 @@ const Communities = (props: Props) => {
                         <IconButton
                           component="a"
                           href={
-                            "mailto:onecademy@umich.edu?subject=" + community.title + " Question for " + leader.name
+                            "mailto:community@1cademy.com?subject=" + community.title + " Question for " + leader.name
                           }
                           target="_blank"
                           aria-label="email"
