@@ -432,7 +432,7 @@ const JoinUs = (props: JoinUsProps) => {
           . We DO NOT sponsor CPT or OPT for international students. If you have any questions regarding this community,
           contact{" "}
           <a
-            href={"mailto:onecademy@umich.edu?subject=" + props.community.title + " - Question"}
+            href={"mailto:community@1cademy.com?subject=" + props.community.title + " - Question"}
             aria-label="email"
             target="_blank"
             rel="noreferrer"

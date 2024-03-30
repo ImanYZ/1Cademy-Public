@@ -210,7 +210,7 @@ export const SignUpBasicInfo = ({ formikProps }: SignUpBasicInformationProps) =>
           <Box>
             <Typography>
               I acknowledge and agree that any data generated from my use of 1Cademy may be utilized for research
-              purposes by the investigators at 1Cademy, the University of Michigan School of Information.
+              purposes by the investigators at 1Cademy.
             </Typography>
           </Box>
           {Boolean(errors.signUpAgreement) && Boolean(touched.signUpAgreement) && (
