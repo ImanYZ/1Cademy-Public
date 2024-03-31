@@ -164,17 +164,17 @@ export const TrendPlot = ({
         >
           <VictoryAxis
             scale={scaleX}
-            style={{
-              axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
+            // style={{
+            //   axis: { size: 0, strokeWidth: 1, stroke: DESIGN_SYSTEM_COLORS.notebookG200 },
 
-              tickLabels: {
-                fontSize: 13,
-                fill: theme === "Dark" ? "white" : "#454545",
-              },
-              grid: {
-                stroke: theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray300,
-              },
-            }}
+            //   tickLabels: {
+            //     fontSize: 13,
+            //     fill: theme === "Dark" ? "white" : "#454545",
+            //   },
+            //   grid: {
+            //     stroke: theme === "Dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : DESIGN_SYSTEM_COLORS.gray300,
+            //   },
+            // }}
           />
           <VictoryBar
             barWidth={2}
