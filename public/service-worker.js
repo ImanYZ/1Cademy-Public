@@ -17,8 +17,8 @@
  * increase the SERVICE_WORKER_VERSION
  * ex: when update the the web worker
  */
-const SERVICE_WORKER_VERSION = "v1.0.0";
-const CACHE_NAME = "v1";
+const SERVICE_WORKER_VERSION = "v1.0.1";
+const CACHE_NAME = "v1-static-assets-cache";
 
 const start = () => {
   self.skipWaiting();
