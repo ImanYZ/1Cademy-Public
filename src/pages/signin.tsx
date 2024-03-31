@@ -1,5 +1,7 @@
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { LoadingButton } from "@mui/lab";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { useFormik } from "formik";
 import NextLink from "next/link";
@@ -12,7 +14,6 @@ import { useAuth } from "@/context/AuthContext";
 import { signIn } from "@/lib/firestoreClient/auth";
 import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
-
 interface SignInFormValues {
   email: string;
   password: string;
@@ -21,6 +22,7 @@ interface SignInFormValues {
 const SignInPage: NextPageWithLayout = () => {
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const initialValues: SignInFormValues = {
     email: "",
@@ -74,7 +76,7 @@ const SignInPage: NextPageWithLayout = () => {
           id="password"
           name="password"
           label="Password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={formik.values.password}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -82,6 +84,42 @@ const SignInPage: NextPageWithLayout = () => {
           error={Boolean(formik.errors.password) && Boolean(formik.touched.password)}
           helperText={formik.errors.password}
           fullWidth
+          InputProps={{
+            sx: {
+              color: "white",
+            },
+            endAdornment: (
+              <InputAdornment position="end">
+                {formik.values.password.trim() ? (
+                  !showPassword ? (
+                    <VisibilityOffIcon
+                      onClick={() => {
+                        setShowPassword(prev => !prev);
+                      }}
+                      sx={{
+                        cursor: "pointer",
+                        color: "white",
+                        fontSize: "20px",
+                      }}
+                    />
+                  ) : (
+                    <VisibilityIcon
+                      onClick={() => {
+                        setShowPassword(prev => !prev);
+                      }}
+                      sx={{
+                        cursor: "pointer",
+                        color: "white",
+                        fontSize: "20px",
+                      }}
+                    />
+                  )
+                ) : (
+                  <></>
+                )}
+              </InputAdornment>
+            ),
+          }}
         />
         <Box sx={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", my: "32px" }}>
           <LoadingButton
