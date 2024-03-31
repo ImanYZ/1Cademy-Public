@@ -98,35 +98,39 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
           <VictoryAxis
             // scale={{ x: props.scaleX }}
             scale={props.scaleX}
-            style={{
-              axis: { stroke: "transparent", size: 0 },
-              ticks: { size: 0 },
-              tickLabels: {
-                fontSize: 12,
-                fill: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
-              },
+            style={
+              {
+                axis: { stroke: "transparent", size: 0 },
+                ticks: { size: 0 },
+                tickLabels: {
+                  fontSize: 12,
+                  fill: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
+                },
 
-              grid: {
-                stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
-                strokeDasharray: null,
-              },
-            }}
+                grid: {
+                  stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+                  strokeDasharray: null,
+                },
+              } as any
+            }
           />
           <VictoryAxis
             dependentAxis
             scale={props.scaleY}
-            style={{
-              axis: { stroke: "transparent" },
-              tickLabels: {
-                fontSize: 12,
-                fill: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
-              },
-              ticks: { size: 0 },
-              grid: {
-                stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
-                strokeDasharray: null,
-              },
-            }}
+            style={
+              {
+                axis: { stroke: "transparent" },
+                tickLabels: {
+                  fontSize: 12,
+                  fill: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
+                },
+                ticks: { size: 0 },
+                grid: {
+                  stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+                  strokeDasharray: null,
+                },
+              } as any
+            }
           />
           <VictoryBar
             barWidth={4}
@@ -167,18 +171,20 @@ const TrendsPlotRow = (props: TrendsPlotRowProps) => {
         >
           <VictoryAxis
             scale={props.scaleX}
-            style={{
-              axis: { stroke: "transparent" },
-              tickLabels: {
-                fontSize: 12,
-                fill: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
-              },
-              ticks: { size: 0 },
-              grid: {
-                stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
-                strokeDasharray: null,
-              },
-            }}
+            style={
+              {
+                axis: { stroke: "transparent" },
+                tickLabels: {
+                  fontSize: 12,
+                  fill: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray800,
+                },
+                ticks: { size: 0 },
+                grid: {
+                  stroke: props.theme === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300,
+                  strokeDasharray: null,
+                },
+              } as any
+            }
           />
           <VictoryBar
             barWidth={2}
