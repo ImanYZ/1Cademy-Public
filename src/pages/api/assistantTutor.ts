@@ -112,8 +112,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       usedFlashcards: [],
       cardsModel: selectedModel,
       deleted: false,
-      guidedStudy: true,
-      selfStudy: false,
     };
     //new reference to the "tutorConversations" collection
     let newConversationRef = db.collection("tutorConversations").doc();
