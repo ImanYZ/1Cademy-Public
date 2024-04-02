@@ -64,10 +64,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
     const unitTitle = concepts[0]?.sectionTitle || "";
-    const defaultAnswer = `Hello ${fName}, on this page you will learn about ${unitTitle.replace(
+    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. Lets start with, how familiar are you with ${unitTitle.replace(
       /^\d+(\.\d+)?\s+/,
       ""
-    )}. I'm here to guide you through it. Prefer to study first? Use the switch above to toggle, and I'll assess your learning afterward.`;
+    )}?`;
     if (default_message) {
       res.write(defaultAnswer);
     }
@@ -333,6 +333,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         emotion: default_message ? "" : emotion,
         inform_instructor: inform_instructor,
         prior_evaluation: evaluation,
+        concept: scroll_flashcard_next,
       });
       // if (default_message) {
       //   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
