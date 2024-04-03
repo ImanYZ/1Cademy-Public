@@ -28,17 +28,23 @@ const getId = () => {
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion } = req.body;
+  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion, unitTitle } = req.body;
   let conversationId = "";
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
   try {
-    console.log("assistant Tutor", uname);
+    console.log("assistant Tutor", uname, unitTitle);
 
     let default_message = false;
+    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. Lets start with, how familiar are you with 
+    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
     if (!message) {
       default_message = true;
+      for (let word of defaultAnswer.split(" ")) {
+        await delay(100);
+        res.write(word + " ");
+      }
     }
     let selectedModel = "";
     console.log({ cardsModel, customClaims });
@@ -63,14 +69,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       await getPromptInstructions(course, uname, isInstructor);
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
-    const unitTitle = concepts[0]?.sectionTitle || "";
-    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. Lets start with, how familiar are you with ${unitTitle.replace(
-      /^\d+(\.\d+)?\s+/,
-      ""
-    )}?`;
-    if (default_message) {
-      res.write(defaultAnswer);
-    }
+    unitTitle = concepts[0]?.sectionTitle || "";
+
     console.log(concepts.length);
     if (!concepts.length) {
       await saveLogs({
