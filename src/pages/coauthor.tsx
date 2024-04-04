@@ -47,6 +47,24 @@ const App = () => {
   const quillRef: any = useRef(false);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+    if (mediaQuery?.matches) {
+      document.body.classList.add("LightTheme");
+    }
+
+    const handleChange = (e: any) => {
+      if (e?.matches) {
+        document.body.classList.add("LightTheme");
+      }
+    };
+    mediaQuery.addListener(handleChange);
+
+    return () => {
+      mediaQuery.removeListener(handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
     setTimeout(() => {
       const element = document.getElementById("loader-overlay") as HTMLElement;
       if (element) {
