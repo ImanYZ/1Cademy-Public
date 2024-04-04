@@ -34,22 +34,17 @@ const streamAnswer = async (res: any, answer: string) => {
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
-  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion } = req.body;
+  let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion, unitTitle } = req.body;
   let conversationId = "";
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
-  let unitTitle = "";
+
   try {
     console.log("assistant Tutor", uname);
 
     let default_message = false;
-    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. Lets start with, how familiar are you with 
-    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
-    if (!message) {
-      default_message = true;
-      streamAnswer(res, defaultAnswer);
-    }
+
     let selectedModel = "";
     console.log({ cardsModel, customClaims });
     const isInstructor = customClaims.instructor;
@@ -74,7 +69,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
     unitTitle = concepts[0]?.sectionTitle || "";
-
+    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. How familiar are you with 
+    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
+    if (!message) {
+      default_message = true;
+      streamAnswer(res, defaultAnswer);
+    }
     console.log(concepts.length);
     if (!concepts.length) {
       await saveLogs({
@@ -286,7 +286,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //   deviating = _deviating;
     //   detectedSections = sections;
     // }
-    console.log({ deviating });
+    console.log({ deviating, questionAnswer });
 
     if (questionAnswer || default_message) {
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
@@ -1035,7 +1035,9 @@ const PROMPT = (
     nextFlashcard.title +
     ":\n" +
     nextFlashcard.content +
-    "\nDo not involve any information beyond this concept.\n" +
+    "\nNote that " +
+    fName +
+    " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n" +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
