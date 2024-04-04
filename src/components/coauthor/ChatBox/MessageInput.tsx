@@ -1,10 +1,11 @@
-import { Box, Button, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
-import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import MicIcon from "@mui/icons-material/Mic";
 import SettingsVoiceIcon from "@mui/icons-material/SettingsVoice";
+import { Box, Button, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
+import React from "react";
 import { Mention, MentionsInput } from "react-mentions";
+
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type MessageInputProps = {

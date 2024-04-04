@@ -31,6 +31,7 @@ const sendMail = async (mailOptions: any) => {
 export const sentAlertEmail = async (logData: any, error: boolean) => {
   try {
     let details = "";
+    if (logData.uname === "ouhrac") return;
     for (let key in logData) {
       if (key === "createdAt") {
         const date = logData.createdAt.toDate();
@@ -42,7 +43,7 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
     let mailOptions = {
       from: process.env.EMAIL,
       to: ["ouhrac@gmail.com", "oneweb@umich.edu"],
-      subject: `Error Alert ${logData.project || "1Cademy"}`,
+      subject: `Error Alert ${logData.project || "1Cademy"} from ${logData.uname}`,
       html: `Details:\n\n<ul>${details}</ul>`,
     };
     if (error) {
@@ -50,7 +51,7 @@ export const sentAlertEmail = async (logData: any, error: boolean) => {
       console.log(result);
     } else {
       mailOptions.to = ["ouhrac@gmail.com"];
-      mailOptions.subject = `Info ${logData.project || "1Cademy"}`;
+      mailOptions.subject = `Info ${logData.project || "1Cademy"} from ${logData.uname}`;
       const result = sendMail(mailOptions);
       console.log(result);
     }

@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next/types";
 
 import fbAuth from "src/middlewares/fbAuth";
 
-const trigerNotifications = async (newMessage: any) => {
+const triggerNotifications = async (newMessage: any) => {
   try {
     const { channelId, roomType, sender, message } = newMessage;
     const fcmTokensHash: { [key: string]: string } = {};
@@ -83,7 +83,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       throw new Error("");
     }
     console.log({ newMessage, roomType });
-    await trigerNotifications({ ...newMessage, roomType });
+    await triggerNotifications({ ...newMessage, roomType });
     return res.status(200).send({});
   } catch (error) {
     console.log(error);

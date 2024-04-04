@@ -26,6 +26,12 @@ const saveLogs = async (logs: { [key: string]: any }) => {
 const getId = () => {
   return db.collection("tutorConversations").doc().id;
 };
+const streamAnswer = async (res: any, answer: string) => {
+  for (let word of answer.split(" ")) {
+    await delay(100);
+    res.write(word + " ");
+  }
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion } = req.body;
@@ -33,12 +39,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
+  let unitTitle = "";
   try {
     console.log("assistant Tutor", uname);
 
     let default_message = false;
+    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. Lets start with, how familiar are you with 
+    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
     if (!message) {
       default_message = true;
+      streamAnswer(req, defaultAnswer);
     }
     let selectedModel = "";
     console.log({ cardsModel, customClaims });
@@ -63,14 +73,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       await getPromptInstructions(course, uname, isInstructor);
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
-    const unitTitle = concepts[0]?.sectionTitle || "";
-    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. Lets start with, how familiar are you with ${unitTitle.replace(
-      /^\d+(\.\d+)?\s+/,
-      ""
-    )}?`;
-    if (default_message) {
-      res.write(defaultAnswer);
-    }
+    unitTitle = concepts[0]?.sectionTitle || "";
+
     console.log(concepts.length);
     if (!concepts.length) {
       await saveLogs({
@@ -288,7 +292,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
         await delay(2000);
         const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
-        res.write(doneMessage);
+        streamAnswer(req, doneMessage);
         const sentAt = new Date(new Date());
         sentAt.setSeconds(sentAt.getSeconds() + 20);
         conversationData.messages.push({
@@ -317,7 +321,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             conversationData,
             furtherExplain,
           });
-      // console.log({ completeMessage, answer, question, emotion, inform_instructor, evaluation });
+      if (!default_message && !conversationData.guidedStudy) {
+        const evaluations: number[] = Object.values(conversationData.flashcardsScores || {});
+        if (evaluations.filter((item: number) => item < 5).length >= 3) {
+          conversationData.guidedStudy = true;
+          conversationData.selfStudy = false;
+        }
+      }
       // save the response from GPT in the db
       const divideId = getId();
       conversationData.messages[conversationData.messages.length - 1].content = message;
@@ -827,7 +837,8 @@ const handleDeviating = async (
     let sectionsString = sections.map(s => `- [${s.section}](/core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
       const messDev = `For your question: ${question}\n\nI'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
-      res.write(`${messDev} keepLoading`);
+      // res.write(`${messDev} keepLoading`);
+      streamAnswer(res, `${messDev} keepLoading`);
       conversationData.messages.push({
         role: "assistant",
         content: messDev,
@@ -890,13 +901,15 @@ const handleDeviating = async (
     } else {
       const _answer =
         "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
-      res.write(_answer);
+      // res.write(_answer);
+      streamAnswer(res, _answer);
       answer = _answer;
     }
   } else {
     const _answer =
       "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
-    res.write(_answer);
+    // res.write(_answer);
+    streamAnswer(res, _answer);
     answer = _answer;
   }
   answer = answer.replace(`{ "message":`, "");
