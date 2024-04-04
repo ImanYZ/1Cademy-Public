@@ -48,7 +48,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
     if (!message) {
       default_message = true;
-      streamAnswer(req, defaultAnswer);
+      streamAnswer(res, defaultAnswer);
     }
     let selectedModel = "";
     console.log({ cardsModel, customClaims });
@@ -292,7 +292,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
         await delay(2000);
         const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
-        streamAnswer(req, doneMessage);
+        streamAnswer(res, doneMessage);
         const sentAt = new Date(new Date());
         sentAt.setSeconds(sentAt.getSeconds() + 20);
         conversationData.messages.push({
