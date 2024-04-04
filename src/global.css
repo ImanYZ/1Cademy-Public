@@ -2986,14 +2986,63 @@ right: 5px; */
 
 .ql-editor p,
 span,
-h1 {
+h1,
+h2,
+h3 {
   color: white !important;
+}
+.ql-picker-options span {
+  color: black !important;
 }
 .ql-toolbar path,
 line,
 polygon {
   stroke: white !important; /* Change this to the color you desire */
 }
-.ql-header span {
-  color: black;
+.ql-header .ql-picker-label {
+  color: white !important;
+}
+
+.LightTheme .ql-editor p {
+  color: black !important;
+}
+
+.LightTheme .ql-editor span {
+  color: black !important;
+}
+
+.LightTheme .ql-picker-options span {
+  color: black !important;
+}
+
+.LightTheme .ql-editor h1 {
+  color: black !important;
+}
+
+.LightTheme .ql-editor h2 {
+  color: black !important;
+}
+
+.LightTheme .ql-editor h3 {
+  color: black !important;
+}
+
+.LightTheme .ql-toolbar path {
+  stroke: black !important;
+}
+
+.LightTheme .ql-toolbar line {
+  stroke: black !important;
+}
+
+.LightTheme .ql-picker-label {
+  color: black !important;
+}
+
+.LightTheme .ql-toolbar polygon {
+  stroke: black !important;
+}
+
+.LightTheme #co-author-input {
+  background-color: transparent !important;
 }

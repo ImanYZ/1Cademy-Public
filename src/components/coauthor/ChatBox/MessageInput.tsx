@@ -58,6 +58,7 @@ const MessageInput = ({
 }: MessageInputProps) => {
   return (
     <Box
+      id="co-author-input"
       sx={{
         border: `solid 1px ${mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG500}`,
         borderRadius: "10px",
