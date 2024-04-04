@@ -286,7 +286,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //   deviating = _deviating;
     //   detectedSections = sections;
     // }
-    console.log({ deviating });
+    console.log({ deviating, questionAnswer });
 
     if (questionAnswer || default_message) {
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
@@ -1035,7 +1035,9 @@ const PROMPT = (
     nextFlashcard.title +
     ":\n" +
     nextFlashcard.content +
-    "\nDo not involve any information beyond this concept.\n" +
+    "\nNote that " +
+    fName +
+    " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n" +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
