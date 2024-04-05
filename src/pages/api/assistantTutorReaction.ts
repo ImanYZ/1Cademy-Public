@@ -2,10 +2,12 @@ import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
+import { saveLogs } from "./assistantTutor";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { reaction, concept, conversationId, messageId } = req.body;
+    const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
     console.log({
       reaction,
     });
@@ -34,11 +36,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const messageIdx = messages.findIndex((m: any) => m.mid === messageId);
       console.log(messageIdx, conversationId);
       messages[messageIdx].reactionFeedback = response;
-      conversationDoc.ref.update({
+      await conversationDoc.ref.update({
         messages,
       });
+      console.log(response);
+      console.log({
+        doer: uname,
+        severity: "default",
+        where: "assistantTutorReaction",
+        action: "request feedback for reaction on concept",
+        messageId,
+        conversationId,
+        reaction,
+      });
+      await saveLogs({
+        doer: uname,
+        severity: "default",
+        where: "assistantTutorReaction",
+        action: "request feedback for reaction on concept",
+        messageId,
+        conversationId,
+        reaction,
+      });
     }
-    console.log(response);
+
     return res.status(200).json({ response });
   } catch (error) {}
 }
