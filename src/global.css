@@ -3003,6 +3003,10 @@ polygon {
   color: white !important;
 }
 
+#coauthor-articles-select {
+  color: white !important;
+}
+
 .LightTheme .ql-editor p {
   color: black !important;
 }
@@ -3050,5 +3054,9 @@ polygon {
   color: black !important;
 }
 .LightTheme .coauthor-chat-username {
+  color: black !important;
+}
+
+.LightTheme #coauthor-articles-select {
   color: black !important;
 }
