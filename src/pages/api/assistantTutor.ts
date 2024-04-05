@@ -16,7 +16,7 @@ type Message = {
   sentAt: Timestamp;
   mid: string;
 };
-const saveLogs = async (logs: { [key: string]: any }) => {
+export const saveLogs = async (logs: { [key: string]: any }) => {
   const newLogRef = db.collection("logs").doc();
   await newLogRef.set({
     ...logs,
@@ -28,7 +28,7 @@ const getId = () => {
 };
 const streamAnswer = async (res: any, answer: string) => {
   for (let word of answer.split(" ")) {
-    await delay(100);
+    await delay(300);
     res.write(word + " ");
   }
 };
@@ -39,6 +39,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   let deviating: boolean = false;
   let relevanceResponse: boolean = true;
   let course = "the-economy/microeconomics";
+  console.log({ cardsModel, customClaims });
 
   try {
     console.log("assistant Tutor", uname);
@@ -46,7 +47,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let default_message = false;
 
     let selectedModel = "";
-    console.log({ cardsModel, customClaims });
     const isInstructor = customClaims.instructor;
     if (!!cardsModel) {
       selectedModel = cardsModel;
@@ -73,7 +73,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
     if (!message) {
       default_message = true;
-      streamAnswer(res, defaultAnswer);
+      await streamAnswer(res, defaultAnswer);
     }
     console.log(concepts.length);
     if (!concepts.length) {
@@ -385,70 +385,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         mid: getId(),
       });
     }
-
     if (deviating) {
-      /*  if (relatedTopic) {
-        const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
-        const response = await handleRelatedTopic([...conversationData.messages], systemPrompt, res);
-        conversationData.messages.push({
-          content: response,
-          role: "assistant",
-          sentAt: new Date(),
-          mid: getId(),
-          default_message,
-          ignoreMessage: true,
-        });
-        conversationData.messages.map((m: any) => {
-          if (m.deviating) {
-            m.ignoreMessage = true;
-            delete m.deviating;
-          }
-        });
-        if (!questionMessage) {
-          questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-        }
-        if (!!questionMessage) {
-          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
-        }
-        await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
-      } else { */
-      for (let question of questions) {
-        const { sections }: any = await getChapterRelatedToResponse(question, courseName, unitTitle);
-        console.log("deviating");
-        await handleDeviating(
-          res,
-          conversationData,
-          relevanceResponse,
-          question,
-          newConversationRef,
-          uname,
-          cardsModel,
-          sections
-        );
-      }
-      // if(questionAnswer || default_message){
-
-      // }
-      if (!questionMessage) {
-        questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-      }
-      if (!!questionMessage) {
-        conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
-      }
-      /* } */
-      await saveLogs({
-        course,
-        url,
-        uname: uname || "",
-        severity: "default",
-        where: "assistant tutor endpoint",
-        conversationId,
-        deviating,
-        relevanceResponse,
-        message,
-        project: "1Tutor",
-      });
-      console.log("conversationId", conversationId);
+      const deviatingMessage = `Your question${
+        questions.length > 2 ? "s are" : " is"
+      } covered in other parts of this material. Would you like to deviate from our current topic to explore it?`;
+      await streamAnswer(res, deviatingMessage);
+      const message = {
+        role: "assistant",
+        content: deviatingMessage,
+        deviated: true,
+        sentAt: new Date(),
+        mid: getId(),
+        questions,
+      };
+      conversationData.messages.push(message);
     }
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
@@ -803,7 +753,7 @@ const streamMainResponse = async ({
   };
 };
 
-const handleDeviating = async (
+export const handleDeviating = async (
   res: NextApiResponse<any>,
   conversationData: any,
   relevanceResponse: boolean,
@@ -817,7 +767,7 @@ const handleDeviating = async (
 
   let featuredConcepts: any = [];
   let answer = "";
-
+  let used_sections_message = "";
   if (relevanceResponse) {
     //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
     // const messDev =
@@ -834,19 +784,29 @@ const handleDeviating = async (
     // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
 
+    conversationData.messages.push({
+      role: "user",
+      content: "Yes, Let Go",
+      sentAt: new Date(),
+      mid: getId(),
+      concepts: featuredConcepts,
+      deviatingMessage: true,
+    });
+
     let sectionsString = sections.map(s => `- [${s.section}](/core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
-      const messDev = `For your question: ${question}\n\nI'm going to respond to you based on the following sections:\n\n ${sectionsString}`;
+      used_sections_message = `For your question: ${question}\n\nI'm going to respond to you based on the following sections:\n\n ${sectionsString}\n`;
+
       // res.write(`${messDev} keepLoading`);
-      streamAnswer(res, `${messDev} keepLoading`);
-      conversationData.messages.push({
-        role: "assistant",
-        content: messDev,
-        sentAt: new Date(),
-        mid: getId(),
-        concepts: featuredConcepts,
-        deviatingMessage: true,
-      });
+      await streamAnswer(res, `${used_sections_message}`);
+      // conversationData.messages.push({
+      //   role: "assistant",
+      //   content: messDev,
+      //   sentAt: new Date(),
+      //   mid: getId(),
+      //   concepts: featuredConcepts,
+      //   deviatingMessage: true,
+      // });
       const prompt =
         "Concisely respond to the student (user)'s last message based on the following JSON array of paragraphs.\n" +
         JSON.stringify(paragraphs) +
@@ -918,7 +878,7 @@ const handleDeviating = async (
   answer = answer.replace(`"`, "");
   const responseMessage = {
     role: "assistant",
-    content: answer,
+    content: used_sections_message + answer,
     sentAt: new Date(),
     mid: getId(),
     concepts: featuredConcepts,
@@ -1090,7 +1050,7 @@ const getNextFlashcard = async (concepts: any, usedFlashcards: string[], flashca
   return nextFlashcard;
 };
 
-const getPromptInstructions = async (course: string, uname: string, isInstructor: boolean) => {
+export const getPromptInstructions = async (course: string, uname: string, isInstructor: boolean) => {
   if (isInstructor) {
     let promptDocs = await db
       .collection("courseSettings")
@@ -1318,7 +1278,7 @@ const checkIfUserIsDeviating = async (
   unitTitle: string,
   messages: any
 ): Promise<{ deviating: boolean; sections: { section: string; url: string }[] }> => {
-  const { sections, deviating }: any = await getChapterRelatedToResponse(messages, courseName, unitTitle);
+  const { sections, deviating }: any = await getChapterRelatedToResponse(messages, courseName);
 
   return { deviating, sections };
   // const chaptersDoc = await db.collection("chaptersBook").where("url", "==", unit).get();
@@ -1381,7 +1341,7 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
   return gptResponse;
 };
 
-const getChapterRelatedToResponse = async (studentLastMessage: string, courseName: string, unitTitle: string) => {
+export const getChapterRelatedToResponse = async (studentLastMessage: string, courseName: string) => {
   try {
     // let chaptersBookQuery = db.collection("chaptersBook").where("chapter", "in", ["01", "02", "03", "04"]);
     let chapterMap = chaptersMapCoreEcon;
