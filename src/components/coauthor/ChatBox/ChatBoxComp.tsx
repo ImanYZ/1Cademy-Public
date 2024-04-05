@@ -361,6 +361,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
                   >
                     <Box sx={{ display: "flex" }}>
                       <Typography
+                        className="coauthor-chat-username"
                         sx={{
                           fontSize: "16px",
                           fontWeight: "500",
