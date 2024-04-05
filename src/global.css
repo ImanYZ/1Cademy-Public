@@ -3044,5 +3044,11 @@ polygon {
 }
 
 .LightTheme #co-author-input {
-  background-color: transparent !important;
+  background-color: #ffffff !important;
+}
+.LightTheme #co-author-input textarea {
+  color: black !important;
+}
+.LightTheme .coauthor-chat-username {
+  color: black !important;
 }
