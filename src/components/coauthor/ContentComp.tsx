@@ -2,7 +2,7 @@ import "react-quill/dist/quill.snow.css";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Button, Divider, IconButton, MenuItem, Select, TextField } from "@mui/material";
-import { addDoc, collection, deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
@@ -64,9 +64,11 @@ const ContentComp: React.FC<Props> = ({
   useEffect(() => {
     (async () => {
       if (selectedArticle) {
+        const quillEditor = quillRef.current.getEditor();
         setContent(selectedArticle.content);
         await delay(1000);
-        if (selectedArticle.content) {
+        const content = quillEditor.getText();
+        if (content.trim()) {
           setArticleAndDOM();
         }
       }
@@ -106,6 +108,16 @@ const ContentComp: React.FC<Props> = ({
         cursorPosition: lastClickPosition,
       });
     } else {
+      const q = query(
+        collection(db, "articles"),
+        where("title", "==", articleTitle),
+        where("user", "==", user?.userId)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        alert("An article with the provided title already exists.");
+        return;
+      }
       const docRef = await addDoc(collection(db, "articles"), {
         title: articleTitle,
         content,
@@ -151,7 +163,7 @@ const ContentComp: React.FC<Props> = ({
   const handleBlur = useCallback(() => {
     const quill = quillRef.current.getEditor();
     if (selection && selection.length > 0) {
-      quill.formatText(selection.index, selection.length, "background", "#573800");
+      quill.formatText(selection.index, selection.length, "background", "#BD7A00");
     } else {
       quill.insertText(lastClickPosition, "|", "color", "red");
     }
@@ -248,8 +260,8 @@ const ContentComp: React.FC<Props> = ({
       <Box mt={2}>
         {!open && (
           <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
+            labelId="coauthor-articles-select"
+            id="coauthor-articles-select"
             value={selectedArticle?.id || 0}
             onChange={handleChange}
             sx={{
