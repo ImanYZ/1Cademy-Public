@@ -1,6 +1,8 @@
 import { db } from "@/lib/firestoreServer/admin";
 import moment from "moment";
 import { uploadFileToStorage } from "../STT";
+import { NextApiResponse } from "next";
+import { delay } from "@/lib/utils/utils";
 
 const OpenAI = require("openai");
 
@@ -210,7 +212,30 @@ export const createThread = async (bookId: string) => {
 
   return newThread.id;
 };
+export const streamMainResponse = async ({
+  res,
+  messages,
+}: {
+  res: NextApiResponse<any>;
+  messages: { role: string; content: string }[];
+}) => {
+  const response2 = await openai.chat.completions.create({
+    messages,
+    model: "gpt-4-0125-preview",
+    temperature: 0,
+    stream: true,
+  });
+  let fullMessage = "";
 
+  for await (const result of response2) {
+    if (!result.choices[0].delta.content) continue;
+    let cleanText = result.choices[0].delta.content;
+    await delay(100);
+    res.write(cleanText);
+    fullMessage += cleanText;
+  }
+  return fullMessage;
+};
 export const chaptersMapCoreEcon = [
   {
     chapter: "Prosperity, inequality, and planetary limits",
