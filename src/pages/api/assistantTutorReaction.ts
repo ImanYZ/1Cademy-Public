@@ -14,15 +14,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
 
     const prompt =
-      "I find the following concept " +
+      'I find the following concept "' +
       reaction +
-      ":\n" +
+      '":\n' +
       "title: " +
       concept.title +
       "\n" +
       "content: " +
       concept.content +
-      "Respond to the student to encourage them to express more of their thoughts about the concepts of the course, but do not as them any questions about anything. Only in one sentence.";
+      '\n Do you think others also feel like this concept is "' +
+      reaction +
+      '"? Tell me your thoughts about it, but do not ask me any questions. Make your message very short, but encourage me to keep thinking about the course concepts.';
+
+    console.log(prompt);
     const response: any = await streamMainResponse({
       res,
       messages: [
@@ -33,8 +37,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       ],
     });
     const conversationDoc = await db.collection("tutorConversations").doc(conversationId).get();
+    const conversationData: any = conversationDoc.data();
 
-    const conversationData = conversationDoc.data();
     if (conversationData) {
       const messages = conversationData.messages;
       const messageIdx = messages.findIndex((m: any) => m.mid === messageId);
