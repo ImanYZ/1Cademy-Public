@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
 import { saveLogs } from "./assistantTutor";
+import { streamMainResponse } from "./openAI/helpers";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -22,12 +23,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       "content: " +
       concept.content +
       "Respond to the student to encourage them to express more of their thoughts about the concepts of the course, but do not as them any questions about anything. Only in one sentence.";
-    const response: any = await sendGPTPrompt("gpt-4-0125-preview", [
-      {
-        role: "user",
-        content: prompt,
-      },
-    ]);
+    const response: any = await streamMainResponse({
+      res,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
     const conversationDoc = await db.collection("tutorConversations").doc(conversationId).get();
 
     const conversationData = conversationDoc.data();
@@ -40,17 +44,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         messages,
       });
       console.log(response);
-      console.log({
-        doer: uname,
-        severity: "default",
-        where: "assistantTutorReaction",
-        action: "request feedback for reaction on concept",
-        messageId,
-        conversationId,
-        reaction,
-      });
       await saveLogs({
-        doer: uname,
+        uname: uname || "",
         severity: "default",
         where: "assistantTutorReaction",
         action: "request feedback for reaction on concept",
@@ -59,7 +54,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         reaction,
       });
     }
-
+    res.end();
     return res.status(200).json({ response });
   } catch (error) {}
 }

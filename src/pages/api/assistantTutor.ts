@@ -28,7 +28,7 @@ const getId = () => {
 };
 const streamAnswer = async (res: any, answer: string) => {
   for (let word of answer.split(" ")) {
-    await delay(300);
+    await delay(180);
     res.write(word + " ");
   }
 };
