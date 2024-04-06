@@ -89,7 +89,14 @@ const SideBar: React.FC<Props> = ({
         behavior: "smooth",
         block: "center",
       });
-      matchingElement.style.backgroundColor = "#573800";
+      const quill = quillRef.current.getEditor();
+      const index = quill.getText().indexOf(text);
+      if (index > -1) {
+        quill.formatText(0, articleContent.length, {
+          background: false,
+        });
+        quill.formatText(index, text.length, "background", "#BD7A00");
+      }
       return matchingElement;
     }
   };

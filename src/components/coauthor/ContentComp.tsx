@@ -68,7 +68,7 @@ const ContentComp: React.FC<Props> = ({
         setContent(selectedArticle.content);
         await delay(1000);
         const content = quillEditor.getText();
-        if (content.trim()) {
+        if (content.trim()?.length > 0) {
           setArticleAndDOM();
         }
       }
