@@ -375,6 +375,44 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           mid: getId(),
         });
       }
+      if (!furtherExplain && !default_message) {
+        /* we calculate the progress of the user in this unit
+         */
+        const parsedEvaluation = isNaN(evaluation) ? 0 : parseFloat(evaluation);
+
+        if (scroll_flashcard_next && !furtherExplain) {
+          if (conversationData.hasOwnProperty("flashcardsScores")) {
+            conversationData.flashcardsScores[scroll_flashcard_next] = parsedEvaluation;
+          } else {
+            conversationData.flashcardsScores = {
+              [scroll_flashcard_next]: parsedEvaluation,
+            };
+          }
+        }
+
+        if (conversationData.progress < 1) {
+          conversationData.progress = roundNum(
+            calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
+          );
+        }
+        await addScoreToSavedCard(parsedEvaluation, scroll_flashcard_next, uname);
+
+        if (conversationData.hasOwnProperty("scores")) {
+          conversationData.scores.push({
+            score: evaluation,
+            date: new Date(),
+            flashcard: scroll_flashcard_next,
+          });
+        } else {
+          conversationData.scores = [
+            {
+              score: evaluation,
+              date: new Date(),
+            },
+          ];
+        }
+      }
+
       await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
 
       mergedMessagesMinusFurtherExplain.push({
