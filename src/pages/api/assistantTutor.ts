@@ -378,7 +378,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       if (!furtherExplain && !default_message) {
         /* we calculate the progress of the user in this unit
          */
-        const parsedEvaluation = isNaN(evaluation) ? 0 : parseFloat(evaluation);
+        const parsedEvaluation = parseFloat(evaluation) || 0;
 
         if (scroll_flashcard_next && !furtherExplain) {
           if (conversationData.hasOwnProperty("flashcardsScores")) {
@@ -390,7 +390,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           }
         }
 
-        if (conversationData.progress < 1) {
+        if ((conversationData.progress || 0) < 1) {
           conversationData.progress = roundNum(
             calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
           );
@@ -787,7 +787,7 @@ const streamMainResponse = async ({
     question: response_object?.next_question || "",
     emotion: response_object?.emotion || "",
     inform_instructor: response_object?.inform_instructor || "",
-    evaluation: response_object?.evaluation || "",
+    evaluation: response_object?.evaluation || 0,
   };
 };
 
@@ -1359,8 +1359,8 @@ const checkIfUserIsDeviating = async (
   //   return !!deviating;
 };
 const calculateProgress = (flashcardsScores: { [key: string]: number }) => {
-  const scores = Object.values(flashcardsScores);
-  const sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+  const scores = Object.values(flashcardsScores).filter(num => !isNaN(num));
+  const sum = scores.reduce((accumulator, currentValue) => (accumulator || 0) + (currentValue || 0), 0);
   return sum;
 };
 const getTheNextQuestion = async (nextFlashcard: { title: string; content: string }) => {
