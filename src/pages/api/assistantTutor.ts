@@ -526,38 +526,49 @@ const getQuestionsAfterQuestion = async (
   instructorMessage: string,
   studentMessage: string
 ): Promise<{ questions: string[]; questionAnswer: string; clarificationRequest: string }> => {
-  const prompt = `
-We are processing a conversation between an instructor and a student.
-The instructor sent the following question:
-'''
-${instructorMessage}
-'''
-The student responded the following triple-quoted message:
-'''
-${studentMessage}
-'''
-Analyze the student's response based on the following rules:
-- If the student provides information directly related to the instructor's question, classify this as part of their answer.
-- If the student asks for the answer or expresses uncertainty or a lack of knowledge about the question (e.g., "I don't know", "tell me", "I have no ideas", "answer it", "solve it"), consider this as their answer indicating they cannot provide the requested information. Treat such expressions as valid responses to the instructor's question.
-- If the student asks additional questions or makes requests that are not directly related to answering the instructor's question (e.g., "What is GDP?"), identify these as separate questions or requests.
-Given this, respond with a JSON object structured as follows:
-{
-   "questionsOrRequests": ["If there are questions or requests included in any part of the student's message that are not in response to the instructor's question, assign each as a string to this array. If there are no questions or requests irrelevant to the instructor's question, the value should be []."],
-   "answer": "Only if there are parts of the student's message that respond to the instructor's question, merge them into one message and assign it as a string to this field. If the student's response is an expression of uncertainty or a lack of knowledge, include this as their answer. If neither of these exist, the value should be an empty string.",
-   "clarificationRequest": "If the student is asking the instructor to clarify the question, assign this request as a string to this field. If there is no clarification request, the value should be an empty string."
-}`;
-  const response: any = await sendGPTPrompt("gpt-4-0125-preview", [
+  let questions: string[] = [];
+  let questionAnswer: string = "";
+  let clarificationRequest: string = "";
+  let tries = 0;
+  while (!questions.length && !questionAnswer && !clarificationRequest) {
+    if (tries++ > 3) {
+      questionAnswer = studentMessage;
+      break;
+    }
+    const prompt = `
+    We are processing a conversation between an instructor and a student.
+    The instructor sent the following question:
+    '''
+    ${instructorMessage}
+    '''
+    The student responded the following triple-quoted message:
+    '''
+    ${studentMessage}
+    '''
+    Analyze the student's response based on the following rules:
+    - If the student provides information directly related to the instructor's question, classify this as part of their answer.
+    - If the student asks for the answer or expresses uncertainty or a lack of knowledge about the question (e.g., "I don't know", "tell me", "I have no ideas", "answer it", "solve it"), consider this as their answer indicating they cannot provide the requested information. Treat such expressions as valid responses to the instructor's question.
+    - If the student asks additional questions or makes requests that are not directly related to answering the instructor's question (e.g., "What is GDP?"), identify these as separate questions or requests.
+    Given this, respond with a JSON object structured as follows:
     {
-      role: "user",
-      content: prompt,
-    },
-  ]);
+       "questionsOrRequests": ["If there are questions or requests included in any part of the student's message that are not in response to the instructor's question, assign each as a string to this array. If there are no questions or requests irrelevant to the instructor's question, the value should be []."],
+       "answer": "Only if there are parts of the student's message that respond to the instructor's question, merge them into one message and assign it as a string to this field. If the student's response is an expression of uncertainty or a lack of knowledge, include this as their answer. If neither of these exist, the value should be an empty string.",
+       "clarificationRequest": "If the student is asking the instructor to clarify the question, assign this request as a string to this field. If there is no clarification request, the value should be an empty string."
+    }`;
 
-  const objectResponse = extractJSON(response);
-  console.log("objectResponse =====>", objectResponse);
-  const questions: string[] = objectResponse.questionsOrRequests || [];
-  const questionAnswer: string = objectResponse.answer || "";
-  const clarificationRequest: string = objectResponse.clarificationRequest || "";
+    const response: any = await sendGPTPrompt("gpt-4-0125-preview", [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ]);
+    const objectResponse = extractJSON(response);
+    console.log("objectResponse =====>", objectResponse);
+    questions = objectResponse.questionsOrRequests || [];
+    questionAnswer = objectResponse.answer || "";
+    clarificationRequest = objectResponse.clarificationRequest || "";
+  }
+
   return { questions, questionAnswer, clarificationRequest };
 };
 
