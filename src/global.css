@@ -2984,13 +2984,26 @@ right: 5px; */
   display: none;
 }
 
-.ql-editor p,
-span,
-h1,
-h2,
-h3 {
+.ql-editor p {
   color: white !important;
 }
+
+.ql-editor span {
+  color: white !important;
+}
+
+.ql-editor h1 {
+  color: white !important;
+}
+
+.ql-editor h2 {
+  color: white !important;
+}
+
+.ql-editor h3 {
+  color: white !important;
+}
+
 .ql-picker-options span {
   color: black !important;
 }
