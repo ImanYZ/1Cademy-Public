@@ -139,8 +139,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
     const instructorMessage = conversationData.messages
-      .filter((m: any) => !m.ignoreMessage && !m.deviatingMessage && !!m?.content.trim())
+      .filter(
+        (m: any) =>
+          !m.ignoreMessage &&
+          !m.deviatingMessage &&
+          !!m?.content.trim() &&
+          (!m?.hasOwnProperty("question") || !m?.question)
+      )
       .at(-1);
+    console.log(">=== instructorMessage ===>", instructorMessage);
     const studentMessage = message;
     const { questions, questionAnswer, clarificationRequest, continueLearning, clarify }: any = default_message
       ? { questions: [], questionAnswer: "", clarificationRequest: "", continueLearning: "", clarify: "" }
@@ -203,15 +210,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       return;
     }
     conversationId = newConversationRef.id;
-    let questionMessage = null;
+
     if (!message) {
       // message = `Hello My name is ${fName}.`;
-
       conversationData.usedFlashcards = [];
-    } /* else if (!!conversationData.messages[conversationData.messages.length - 1].question) {
-      furtherExplain = true;
-      questionMessage = conversationData.messages.pop();
-    } */
+    }
 
     let scroll_flashcard_next = "";
     let nextFlashcard = null;
@@ -261,7 +264,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
       /*  */
     }
-    if (!!message && !!questionAnswer.trim()) {
+
+    console.log("furtherExplainPrompt", furtherExplainPrompt);
+    if (!!message && !!(questionAnswer || "").trim()) {
       conversationData.messages.push({
         role: "user",
         content: questionAnswer,
@@ -269,7 +274,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         mid: getId(),
         default_message,
         nextFlashcard: nextFlashcard?.id || "",
+        deviating,
+      });
+    }
+    if (furtherExplainPrompt.trim()) {
+      conversationData.messages.push({
+        role: "user",
+        content: message,
         furtherExplainPrompt,
+        sentAt: new Date(),
+        mid: getId(),
+        default_message,
+        nextFlashcard: nextFlashcard?.id || "",
         deviating,
       });
     }
@@ -288,7 +304,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // }
     console.log({ deviating, questionAnswer });
 
-    if (questionAnswer || default_message) {
+    if (questionAnswer || default_message || furtherExplain) {
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
         await delay(2000);
         const doneMessage = `Congrats! You have completed studying all the concepts in this unit.`;
@@ -341,8 +357,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         emotion: default_message ? "" : emotion,
         inform_instructor: inform_instructor,
         prior_evaluation: evaluation,
-        concept: scroll_flashcard_next,
+        concept: furtherExplain ? "" : scroll_flashcard_next,
       });
+
       // if (default_message) {
       //   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
       // }
@@ -791,7 +808,7 @@ const streamMainResponse = async ({
 
   console.log(completeMessage);
   const response_object = extractJSON(completeMessage);
-  console.log(response_object);
+  console.log("response_object", response_object);
   return {
     completeMessage,
     answer: response_object?.your_response || "",
