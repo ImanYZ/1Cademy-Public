@@ -807,7 +807,7 @@ const streamMainResponse = async ({
   }
 
   console.log(completeMessage);
-  const response_object = extractJSON(completeMessage);
+  const response_object = extractJSON(completeMessage, furtherExplain);
   console.log("response_object", response_object);
   return {
     completeMessage,
@@ -1070,7 +1070,7 @@ const PROMPT = (
   return instructions;
 };
 
-const extractJSON = (text: string) => {
+const extractJSON = (text: string, regex = false) => {
   try {
     const start = text.indexOf("{");
     const end = text.lastIndexOf("}");
@@ -1080,7 +1080,16 @@ const extractJSON = (text: string) => {
     const jsonArrayString = text.slice(start, end + 1);
     return JSON.parse(jsonArrayString);
   } catch (error) {
-    return null;
+    if (regex) {
+      const regex = /"your_response":\s*"([^"]*)"/;
+      const match = text.match(regex);
+      if (!match) {
+        return null;
+      }
+      return match[1];
+    } else {
+      return null;
+    }
   }
 };
 
