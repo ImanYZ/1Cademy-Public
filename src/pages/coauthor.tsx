@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import React, { useEffect, useRef, useState } from "react";
 const ContentComp = dynamic(() => import("../components/coauthor/ContentComp"), { ssr: false });
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { Bar, Container, Resizer, Section } from "@column-resizer/react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Bar, Container, Resizer, Section } from "@column-resizer/react";
-import SideBar from "../components/coauthor/Sidebar";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CircularProgress } from "@mui/material";
-import NavbarComp from "../components/coauthor/NavbarComp";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+
+import SideBar from "../components/coauthor/Sidebar";
 import { useAuth } from "../context/AuthContext";
 if (typeof window !== "undefined") {
   const Popper = require("popper.js").default;
@@ -47,6 +47,24 @@ const App = () => {
   const quillRef: any = useRef(false);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+    if (mediaQuery?.matches) {
+      document.body.classList.add("LightTheme");
+    }
+
+    const handleChange = (e: any) => {
+      if (e?.matches) {
+        document.body.classList.add("LightTheme");
+      }
+    };
+    mediaQuery.addListener(handleChange);
+
+    return () => {
+      mediaQuery.removeListener(handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
     setTimeout(() => {
       const element = document.getElementById("loader-overlay") as HTMLElement;
       if (element) {
@@ -77,6 +95,13 @@ const App = () => {
         ...(doc.data() as any),
       }));
       articlesData = articlesData.filter(article => !article.deleted);
+      if (articlesData.length === 0) {
+        const element = document.getElementById("loader-overlay") as HTMLElement;
+        if (element) {
+          element.style.display = "none";
+        }
+        return;
+      }
       setUserArticles(articlesData);
       const latestArticle = articlesData.reduce((prev, current) => {
         const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
@@ -130,9 +155,9 @@ const App = () => {
     handleResize(sectionSize);
   };
 
-  const changeOpenSettings = () => {
-    setOpenSettings(previourValue => !previourValue);
-  };
+  // const changeOpenSettings = () => {
+  //   setOpenSettings(previourValue => !previourValue);
+  // };
 
   return (
     <ThemeProvider theme={theme}>
@@ -163,7 +188,7 @@ const App = () => {
           <CircularProgress color="secondary" size={100} thickness={4} />
         </Box>
       </Box>
-      <NavbarComp
+      {/* <NavbarComp
         email={email}
         userProfile={userProfile}
         openSettings={openSettings}
@@ -171,12 +196,11 @@ const App = () => {
         articleContent={articleContent}
         articleTypePath={articleTypePath}
         setArticleTypePath={setArticleTypePath}
-      />
+      /> */}
       <Container
         columnResizerRef={columnResizerRef}
         beforeApplyResizer={beforeApplyResizer}
         style={{
-          paddingTop: "60px",
           height: "100vh",
           width: "100%",
           zIndex: 0,
@@ -276,6 +300,9 @@ const App = () => {
             quillRef={quillRef}
             selection={selection}
             setSelection={setSelection}
+            articleContent={articleContent}
+            articleTypePath={articleTypePath}
+            setArticleTypePath={setArticleTypePath}
           />
         </Section>
       </Container>

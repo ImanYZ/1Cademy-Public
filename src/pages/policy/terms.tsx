@@ -111,7 +111,7 @@ const TermPolicy = () => {
           Additionally, you agree that 1Cademy does not have any commitment to your content and can remove it at any
           time if it deems it necessary, in accordance with its policies and terms of use. If you believe that your
           content has been used in a manner that constitutes copyright infringement, please contact 1Cademy's designated
-          copyright agent at onecademy@umich.edu.
+          copyright agent at community@1cademy.com.
         </Typography>
         <Typography>
           In the event that 1Cademy receives a notice of claimed copyright infringement, it may remove or disable access

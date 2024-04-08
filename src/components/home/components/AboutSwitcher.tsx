@@ -18,11 +18,10 @@ const TEAM_ITEMS = [
           fontSize={"16px"}
           color={theme => (theme.palette.mode === "light" ? "#475467" : "#EAECF0")}
         >
-          Iman YeckehZaare is the founder and architect of 1Cademy. He is currently pursuing his Ph.D. at the University
-          of Michigan, School of Information. He has a Master of Science Degree in Information Science with two
-          specializations in Human-Computer Interaction (HCI) and Information Economics for Management (IEM) from the
-          same institution. Additionally, Iman holds two Bachelor of Engineering Degrees in Computer Science and
-          Information Technology.
+          Iman YeckehZaare is the founder and architect of 1Cademy. He has a Ph.D. and a Master of Science Degree in
+          Information Science with two specializations in Human-Computer Interaction (HCI) and Information Economics for
+          Management (IEM) from the same institution. Additionally, Iman holds two Bachelor of Engineering Degrees in
+          Computer Science and Information Technology.
         </Typography>
         <Typography
           sx={{ p: "8px", pt: "0" }}

@@ -6,6 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { getJSON, openai } from "./openAI/helpers";
 import { saveLogs } from "./booksAssistant";
+import { delay } from "@/lib/utils/utils";
 // import {app} from ""
 
 export async function uploadToCloudStorage(sourceBuffer: any) {
@@ -80,6 +81,17 @@ const saveMessageAssistant = async (audioUrl: string, message: any, uid: string)
     });
   }
 };
+const divideIntoSentences = (input: string) => {
+  input = input.replace(
+    /[\u{1F600}-\u{1F64F}|[\u{1F300}-\u{1F5FF}|[\u{1F680}-\u{1F6FF}|[\u{1F1E0}-\u{1F1FF}|[\u{2600}-\u{26FF}]|\u{2705}/gu,
+    ""
+  );
+  return input
+    .split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)/)
+    .map((str: string) => str.trim())
+    .filter(str => !!str);
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     let { message, audioType } = req.body;
@@ -89,10 +101,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       audioType = "alloy";
     }
     //TO-DO restrict use cases
-    let input = message.content;
+    let input = !!message?.questionExtra ? message.questionExtra + message.content : message.content;
 
     // Divide the input into chunk of sentences
-    let chunks = input.split(/(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/);
+    let chunks = divideIntoSentences(input);
     console.log(chunks);
     for (let chunk of chunks) {
       if (!chunk) continue;

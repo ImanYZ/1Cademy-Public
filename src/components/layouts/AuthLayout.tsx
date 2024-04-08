@@ -11,7 +11,6 @@ import darkModeLibraryImage from "../../../public/darkModeLibraryBackground.jpg"
 import lightModeLibraryImage from "../../../public/lightModeLibraryBackground.png";
 import logoGoogleCloud from "../../../public/logo-google-cloud.svg";
 import logoHonor from "../../../public/logo-honor.jpeg";
-import logoSchoolOfInformation from "../../../public/logo-school-of-information.png";
 // import { use1AcademyTheme } from "../../context/ThemeContext";
 import { AppBackground, AuthLayoutActions } from "../../knowledgeTypes";
 import ROUTES from "../../lib/utils/routes";
@@ -136,7 +135,7 @@ const AuthLayout: FC<Props> = ({ children }) => {
               )}
               <Box
                 sx={{
-                  width: "200px",
+                  width: "100px",
                   height: "40px",
                   position: "absolute",
                   bottom: "15px",
@@ -146,14 +145,6 @@ const AuthLayout: FC<Props> = ({ children }) => {
                   justifyContent: "space-between",
                 }}
               >
-                <a
-                  rel="noreferrer"
-                  target="_blank"
-                  href="https://www.si.umich.edu/"
-                  aria-label="Go to School of information"
-                >
-                  <Image src={logoSchoolOfInformation} alt="School of Information" height={41} width={47} />
-                </a>
                 <a
                   rel="noreferrer"
                   target="_blank"

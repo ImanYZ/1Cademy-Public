@@ -16,7 +16,7 @@ const ConsentDocument = () => {
       <Box sx={{ m: 4 }}>
         <Typography variant="h4">Principal Investigator</Typography>
         <Typography>
-          <strong>Iman YeckehZaare</strong>, Ph.D. Candidate, University of Michigan, School of Information
+          <strong>Iman YeckehZaare</strong>, Ph.D., University of Michigan, School of Information
         </Typography>
       </Box>
       <Box sx={{ m: 4 }}>

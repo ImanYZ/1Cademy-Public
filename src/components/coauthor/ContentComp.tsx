@@ -1,12 +1,14 @@
 import "react-quill/dist/quill.snow.css";
 
-import { Box, Button, Divider, MenuItem, Select, TextField } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Divider, IconButton, MenuItem, Select, TextField } from "@mui/material";
+import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
 
 import { delay } from "../../lib/utils/utils";
+import DisciplinesComp from "./DisciplinesComp";
 
 interface Props {
   selectedArticle: any;
@@ -18,6 +20,9 @@ interface Props {
   quillRef: any;
   selection: any;
   setSelection: any;
+  articleContent: any;
+  articleTypePath: any;
+  setArticleTypePath: any;
 }
 
 const ContentComp: React.FC<Props> = ({
@@ -30,6 +35,9 @@ const ContentComp: React.FC<Props> = ({
   quillRef,
   selection,
   setSelection,
+  articleContent,
+  articleTypePath,
+  setArticleTypePath,
 }) => {
   const db = getFirestore();
   const [content, setContent] = useState(selectedArticle?.content);
@@ -56,9 +64,11 @@ const ContentComp: React.FC<Props> = ({
   useEffect(() => {
     (async () => {
       if (selectedArticle) {
+        const quillEditor = quillRef.current.getEditor();
         setContent(selectedArticle.content);
         await delay(1000);
-        if (selectedArticle.content) {
+        const content = quillEditor.getText();
+        if (content.trim()?.length > 0) {
           setArticleAndDOM();
         }
       }
@@ -98,6 +108,16 @@ const ContentComp: React.FC<Props> = ({
         cursorPosition: lastClickPosition,
       });
     } else {
+      const q = query(
+        collection(db, "articles"),
+        where("title", "==", articleTitle),
+        where("user", "==", user?.userId)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        alert("An article with the provided title already exists.");
+        return;
+      }
       const docRef = await addDoc(collection(db, "articles"), {
         title: articleTitle,
         content,
@@ -143,7 +163,7 @@ const ContentComp: React.FC<Props> = ({
   const handleBlur = useCallback(() => {
     const quill = quillRef.current.getEditor();
     if (selection && selection.length > 0) {
-      quill.formatText(selection.index, selection.length, "background", "#573800");
+      quill.formatText(selection.index, selection.length, "background", "#BD7A00");
     } else {
       quill.insertText(lastClickPosition, "|", "color", "red");
     }
@@ -174,96 +194,170 @@ const ContentComp: React.FC<Props> = ({
     },
     [articleTitle, selectedArticle]
   );
+  const deleteArticle = async (event: any, articleId: string) => {
+    event.stopPropagation();
+    if (confirm("Are you sure to delete article")) {
+      await deleteDoc(doc(db, "articles", articleId));
+    }
+  };
 
   return (
     <Box sx={{ m: "16px 10px" }}>
-      {!open && (
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={selectedArticle?.id || 0}
-          onChange={handleChange}
-          sx={{
-            zIndex: 9999,
-            width: "200px",
-            height: "36px",
-            position: "absolute",
-            right: "190px",
-            top: "78.5px",
-          }}
-        >
-          <MenuItem onClick={() => setOpen(true)} value={0}>
-            Create New Article
-          </MenuItem>
-          <Divider variant="fullWidth" sx={{ my: "10px" }} />
-          {userArticles.map((article: any, index: number) => (
-            <MenuItem key={index} value={article.id}>
-              {article?.title}
-            </MenuItem>
-          ))}
-        </Select>
-      )}
-      {open && (
-        <TextField
-          placeholder="Enter Article Title"
-          sx={{
-            position: "absolute",
-            right: "190px",
-            top: "78.5px",
-          }}
-          value={articleTitle}
-          onChange={handleInputChange}
-          variant="outlined"
-          onKeyDown={(event: any) => {
-            if (event.key === "Enter") {
-              saveAndAnalyze();
-            }
-          }}
-          InputProps={{
-            sx: {
+      <Box sx={{ height: "24px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        {articleContent.trim() && (
+          <DisciplinesComp
+            allContent={articleContent}
+            articleTypePath={articleTypePath}
+            setArticleTypePath={setArticleTypePath}
+          />
+        )}
+      </Box>
+      {/* <ContributorComp
+        users={[
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
+            score: 10,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
+            score: 8,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
+            score: 10,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
+            score: 8,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
+            score: 10,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
+            score: 8,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
+            score: 10,
+          },
+          {
+            imageUrl:
+              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
+            score: 8,
+          },
+        ]}
+        sx={{ mb: 2 }}
+      /> */}
+      <Box mt={2}>
+        {!open && (
+          <Select
+            labelId="coauthor-articles-select"
+            id="coauthor-articles-select"
+            value={selectedArticle?.id || 0}
+            onChange={handleChange}
+            sx={{
+              zIndex: 9999,
               width: "200px",
               height: "36px",
-            },
-          }}
-        />
-      )}
-      <ReactQuill
-        style={{ height: "calc(100vh - 130px)" }}
-        ref={quillRef}
-        value={content}
-        onChange={setContent}
-        onBlur={() => handleBlur()}
-        onFocus={() => handleFocus()}
-        onChangeSelection={(range: any) => handleSelectionChange(range)}
-      />
+              position: "absolute",
+              right: "190px",
+              top: "59.5px",
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                setSelectedArticle(null);
+                setOpen(true);
+              }}
+              value={0}
+            >
+              Create New Article
+            </MenuItem>
+            <Divider variant="fullWidth" sx={{ my: "10px" }} />
+            {userArticles.map((article: any, index: number) => (
+              <MenuItem sx={{ display: "flex", justifyContent: "space-between" }} key={index} value={article.id}>
+                {article?.title}
+                {selectedArticle?.id !== article.id && (
+                  <IconButton onClick={e => deleteArticle(e, article.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
 
-      {open && (
+        {open && (
+          <TextField
+            placeholder="Enter Article Title"
+            sx={{
+              position: "absolute",
+              right: "190px",
+              top: "59.5px",
+            }}
+            value={articleTitle}
+            onChange={handleInputChange}
+            variant="outlined"
+            onKeyDown={(event: any) => {
+              if (event.key === "Enter") {
+                saveAndAnalyze();
+              }
+            }}
+            InputProps={{
+              sx: {
+                width: "200px",
+                height: "36px",
+              },
+            }}
+          />
+        )}
+        <ReactQuill
+          style={{ height: "calc(100vh - 110px)" }}
+          ref={quillRef}
+          value={content}
+          onChange={setContent}
+          onBlur={() => handleBlur()}
+          onFocus={() => handleFocus()}
+          onChangeSelection={(range: any) => handleSelectionChange(range)}
+        />
+
+        {open && (
+          <Button
+            variant="contained"
+            color="error"
+            style={{ position: "absolute", right: "90px", top: "59.5px" }}
+            onClick={() => {
+              setOpen(false);
+              const latestArticle = userArticles.reduce((prev: any, current: any) => {
+                const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
+                const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
+                return currentTimestamp > prevTimestamp ? current : prev;
+              }, userArticles[0]);
+              setSelectedArticle(latestArticle);
+            }}
+          >
+            Cancel
+          </Button>
+        )}
+
         <Button
           variant="contained"
-          color="error"
-          style={{ position: "absolute", right: "90px", top: "78.5px" }}
-          onClick={() => {
-            setOpen(false);
-            const latestArticle = userArticles.reduce((prev: any, current: any) => {
-              const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
-              const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
-              return currentTimestamp > prevTimestamp ? current : prev;
-            }, userArticles[0]);
-            setSelectedArticle(latestArticle);
-          }}
+          color="success"
+          style={{ position: "absolute", right: "13px", top: "59.5px" }}
+          onClick={() => saveAndAnalyze()}
         >
-          Cancel
+          {open ? "Save" : "Save and Analyze"}
         </Button>
-      )}
-
-      <Button
-        variant="contained"
-        color="success"
-        style={{ position: "absolute", right: "13px", top: "78.5px" }}
-        onClick={() => saveAndAnalyze()}
-      >
-        {open ? "Save" : "Save and Analyze"}
-      </Button>
+      </Box>
     </Box>
   );
 };

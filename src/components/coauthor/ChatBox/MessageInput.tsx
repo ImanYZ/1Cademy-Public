@@ -1,10 +1,11 @@
-import { Box, Button, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
-import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import MicIcon from "@mui/icons-material/Mic";
 import SettingsVoiceIcon from "@mui/icons-material/SettingsVoice";
+import { Box, Button, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
+import React from "react";
 import { Mention, MentionsInput } from "react-mentions";
+
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type MessageInputProps = {
@@ -57,6 +58,7 @@ const MessageInput = ({
 }: MessageInputProps) => {
   return (
     <Box
+      id="co-author-input"
       sx={{
         border: `solid 1px ${mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG500}`,
         borderRadius: "10px",

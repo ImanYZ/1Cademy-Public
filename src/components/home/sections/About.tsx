@@ -6,7 +6,7 @@ import Team from "../components/AboutSwitcher";
 
 const ABOUT_ITEMS = [
   {
-    id: "item-3",
+    id: "item-1",
     title: "Supported by Honor Education",
     subtitle: "Honor Education",
     image: "home/about/logo-honor.jpg",
@@ -14,15 +14,7 @@ const ABOUT_ITEMS = [
     link: "https://www.honor.education/",
   },
   {
-    id: "item-4",
-    title: "Supported by University of Michigan",
-    subtitle: "School of Information",
-    image: "home/about/logo-school-of-information.jpg",
-    description: "",
-    link: "https://www.si.umich.edu/",
-  },
-  {
-    id: "item-5",
+    id: "item-2",
     title: "Supported by Google",
     subtitle: "Google Cloud",
     image: "home/about/logo-google-cloud.png",
