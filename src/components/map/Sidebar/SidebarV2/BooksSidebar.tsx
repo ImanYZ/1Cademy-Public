@@ -3,14 +3,16 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { TreeItem, TreeView } from "@mui/lab";
 import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useState } from "react";
-import { UserTheme } from "src/knowledgeTypes";
-import { chapters } from "../../../../data/chapters";
-import { SidebarWrapper } from "./SidebarWrapper";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import Image from "next/image";
+import React, { useState } from "react";
+import { UserTheme } from "src/knowledgeTypes";
+
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { chapters } from "../../../../data/chapters";
+import { SidebarWrapper } from "./SidebarWrapper";
 
 type BooksSidebarProps = {
   open: boolean;
@@ -60,7 +62,7 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
 
   const renderContent = () => {
     return (
-      <>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {pageContent.map((content: any, idx: number) => (
           <Paper
             key={idx}
@@ -92,7 +94,7 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
             )}
           </Paper>
         ))}
-      </>
+      </Box>
     );
   };
 
