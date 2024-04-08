@@ -441,19 +441,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
     if (deviating) {
+      conversationData.messages.push({
+        role: "user",
+        content: message,
+        deviated: true,
+        sentAt: new Date(),
+        mid: getId(),
+        questions,
+      });
       const deviatingMessage = `Your question${
         questions.length > 2 ? "s are" : " is"
       } covered in other parts of this material. Would you like to deviate from our current topic to explore it?`;
       await streamAnswer(res, deviatingMessage);
-      const message = {
+
+      conversationData.messages.push({
         role: "assistant",
         content: deviatingMessage,
         deviated: true,
         sentAt: new Date(),
         mid: getId(),
         questions,
-      };
-      conversationData.messages.push(message);
+      });
     }
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });

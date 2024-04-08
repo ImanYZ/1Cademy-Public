@@ -31,7 +31,7 @@ const sendMail = async (mailOptions: any) => {
 export const sentAlertEmail = async (logData: any, error: boolean) => {
   try {
     let details = "";
-    if (logData.uname === "ouhrac") return;
+    if (logData.uname === "ouhrac" || logData.uname === "haroon21") return;
     for (let key in logData) {
       if (key === "createdAt") {
         const date = logData.createdAt.toDate();
