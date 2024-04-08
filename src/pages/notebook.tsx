@@ -69,6 +69,7 @@ import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedBooksSidebar } from "@/components/map/Sidebar/SidebarV2/BooksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -226,6 +227,7 @@ export type OpenLeftSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | "CHAT"
+  | "BOOK"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -454,7 +456,6 @@ const Notebook = ({}: NotebookProps) => {
 
   //last interaction date from the user
   const [lastInteractionDate, setLastInteractionDate] = useState<Date>(new Date(Date.now()));
-
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
       setNotebooks(prev => {
@@ -7066,7 +7067,7 @@ const Notebook = ({}: NotebookProps) => {
   }, [lastInteractionDate]);
 
   return (
-    <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
+    <div id="map-container" className="MapContainer" style={{ overflow: "hidden", position: "relative" }}>
       {currentStep?.anchor && (
         <Portal anchor="portal">
           {tutorial && (
@@ -7330,6 +7331,17 @@ const Notebook = ({}: NotebookProps) => {
                 notifications={notificationsMessages}
                 openUserInfoSidebar={openUserInfoSidebar}
               />
+              <MemoizedBooksSidebar
+                theme={settings.theme}
+                openLinkedNode={openLinkedNode}
+                username={user.uname}
+                tagId={user.tagId}
+                open={openSidebar === "BOOK"}
+                onClose={() => onCloseSidebar()}
+                sidebarWidth={sidebarWidth()}
+                innerHeight={innerHeight}
+              />
+
               <MemoizedSearcherSidebar
                 notebookRef={notebookRef}
                 openLinkedNode={openLinkedNode}
@@ -7341,6 +7353,7 @@ const Notebook = ({}: NotebookProps) => {
                 enableElements={[]}
                 preLoadNodes={onPreLoadNodes}
               />
+
               <MemoizedNotificationSidebar
                 openLinkedNode={openLinkedNode}
                 username={user.uname}
@@ -7486,8 +7499,8 @@ const Notebook = ({}: NotebookProps) => {
             setExpanded={setToolboxExpanded}
             isLoading={isQueueWorking}
             sx={{
-              position: "absolute",
-              right: { xs: "8px", sm: "8px" },
+              position: "fixed",
+              right: "8px",
               top: {
                 xs: openSidebar ? `${innerHeight * 0.25 + 7}px!important` : "7px!important",
                 sm: "7px!important",

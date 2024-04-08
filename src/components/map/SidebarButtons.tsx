@@ -8,7 +8,7 @@ import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 type SidebarButtonsProps = {
   id: string;
   onClick: (e: any) => void;
-  iconSrc: any;
+  iconSrc?: any;
   icon?: ReactNode;
   text: string;
   toolbarIsOpen: boolean;
