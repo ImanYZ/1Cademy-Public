@@ -82,7 +82,7 @@ const BooksSidebar = ({
 
   const renderContent = () => {
     return (
-      <>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {pageContent.map((paragraph: any, idx: number) => (
           <Paper
             key={idx}
@@ -114,7 +114,7 @@ const BooksSidebar = ({
             )}
           </Paper>
         ))}
-      </>
+      </Box>
     );
   };
 
