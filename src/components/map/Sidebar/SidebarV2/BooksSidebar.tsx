@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { chapters } from "../../../../data/chapters";
@@ -23,6 +24,8 @@ type BooksSidebarProps = {
   tagId: string | undefined;
   sidebarWidth: number;
   innerHeight?: number;
+  activeProposals: any;
+  setActiveProposal: any;
 };
 interface Step {
   name: string;
@@ -30,7 +33,14 @@ interface Step {
   steps?: Step[];
 }
 
-const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebarProps) => {
+const BooksSidebar = ({
+  open,
+  onClose,
+  sidebarWidth,
+  innerHeight,
+  // activeProposals,
+  setActiveProposal,
+}: BooksSidebarProps) => {
   const db = getFirestore();
   const [pageContent, setPageContent] = useState<any>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -58,17 +68,27 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
     }
   };
 
-  //const proposeContent = (content: any) => {};
+  const proposeContent = async (paragraph: any, paragraphIdx: number) => {
+    try {
+      const startIndex = Math.max(0, paragraphIdx - 2); // Ensure we don't go before the beginning of the array
+      const endIndex = Math.min(paragraphIdx, pageContent.length); // Ensure we don't go beyond the end of the array
+      const paragraphs = [...[...pageContent].slice(startIndex, endIndex), paragraph];
+      const response: any = await Post("/onecademyAgent", { paragraphs });
+      setActiveProposal(response.child_nodes);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const renderContent = () => {
     return (
       <>
-        {pageContent.map((content: any, idx: number) => (
+        {pageContent.map((paragraph: any, idx: number) => (
           <Paper
             key={idx}
-            // onClick={() => {
-            //   proposeContent(content);
-            // }}
+            onClick={() => {
+              proposeContent(paragraph, idx);
+            }}
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -85,12 +105,12 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
               },
             }}
           >
-            {content.storageLink ? (
-              <Image src={content.storageLink} alt={content.text} width={300} height={300} />
-            ) : content?.youtubeId || content?.link ? (
-              <YoutubeEmbed embedId={content?.youtubeId || content?.link} />
+            {paragraph.storageLink ? (
+              <Image src={paragraph.storageLink} alt={paragraph.text} width={300} height={300} />
+            ) : paragraph?.youtubeId || paragraph?.link ? (
+              <YoutubeEmbed embedId={paragraph?.youtubeId || paragraph?.link} />
             ) : (
-              <Typography>{content.text}</Typography>
+              <Typography>{paragraph.text}</Typography>
             )}
           </Paper>
         ))}
