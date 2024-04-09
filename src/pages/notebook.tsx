@@ -458,7 +458,6 @@ const Notebook = ({}: NotebookProps) => {
   const [lastInteractionDate, setLastInteractionDate] = useState<Date>(new Date(Date.now()));
 
   //STATES FOR THE 1CADEMY AGENT
-  const [activeProposals, setActiveProposals] = useState([]);
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
       setNotebooks(prev => {
@@ -7343,8 +7342,6 @@ const Notebook = ({}: NotebookProps) => {
                 onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
-                activeProposals={activeProposals}
-                setActiveProposal={setActiveProposals}
               />
 
               <MemoizedSearcherSidebar
