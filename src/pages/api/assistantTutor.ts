@@ -70,7 +70,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
     unitTitle = concepts[0]?.sectionTitle || "";
     const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. How familiar are you with 
-    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
+    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}${unitTitle.endsWith("?") ? "" : "?"}`;
     if (!message) {
       default_message = true;
       await streamAnswer(res, defaultAnswer);
@@ -1214,15 +1214,24 @@ const mergeDividedMessages = (messages: any) => {
 };
 //
 //
-const sortConcepts = (concepts: any, cardsModel: string) => {
-  return concepts
-    .filter((f: any) => f.model === cardsModel)
-    .sort((a: any, b: any) => {
-      const numA = parseInt(a.paragraphs[0]?.split("-")[1] || 0);
-      const numB = parseInt(b.paragraphs[0]?.split("-")[1] || 0);
-      return numA - numB;
-    });
+const sortConcepts = (concepts: any) => {
+  return concepts.sort((a: any, b: any) => {
+    const numA = parseInt(a.paragraphs[0]?.split("-")[1] || 0);
+    const numB = parseInt(b.paragraphs[0]?.split("-")[1] || 0);
+
+    const isYouTubeA = a.paragraphs[0]?.startsWith("youtube");
+    if (isYouTubeA) {
+      return 1;
+    }
+    const isYouTubeB = b.paragraphs[0]?.startsWith("youtube");
+    if (isYouTubeB) {
+      return -1;
+    }
+
+    return numA - numB;
+  });
 };
+
 const getConcepts = async (
   unit: string,
   uname: string,
@@ -1236,6 +1245,7 @@ const getConcepts = async (
       .collection("flashcards")
       .where("url", "==", unit)
       .where("instructor", "==", uname)
+      .where("model", "==", selectedModel)
       .get();
 
     flashcardsDocs.docs.forEach(doc => {
@@ -1245,7 +1255,7 @@ const getConcepts = async (
       }
     });
 
-    return sortConcepts(concepts, selectedModel);
+    return sortConcepts(concepts);
   } else {
     let promptDocs = await db
       .collection("courseSettings")
@@ -1259,6 +1269,7 @@ const getConcepts = async (
         .collection("flashcards")
         .where("url", "==", unit)
         .where("instructor", "==", instructorForStudent)
+        .where("model", "==", selectedModel)
         .get();
 
       flashcardsDocs.docs.forEach(doc => {
@@ -1267,7 +1278,7 @@ const getConcepts = async (
           concepts.push(concept);
         }
       });
-      return sortConcepts(concepts, selectedModel);
+      return sortConcepts(concepts);
     } else {
       throw new Error("You are not a student in this course!");
     }
