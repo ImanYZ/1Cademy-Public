@@ -157,9 +157,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     console.log({ questions, questionAnswer, clarificationRequest, continueLearning, clarify });
     //
     //after extracting the questions and the answer
-    if (questions.length > 0) {
-      deviating = true;
-    }
+
+    deviating = questions.length > 0;
     if (clarify) {
       furtherExplain = true;
     }
@@ -449,19 +448,47 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         mid: getId(),
         questions,
       });
-      const deviatingMessage = `Your question${
-        questions.length > 2 ? "s are" : " is"
-      } covered in other parts of this material. Would you like to deviate from our current topic to explore it?`;
-      await streamAnswer(res, deviatingMessage);
+      let outOfContext = true;
+      for (let question of questions) {
+        const { sections }: any = await getChapterRelatedToResponse(question, courseName);
+        const { paragraphs } = await getParagraphs(sections);
+        if (paragraphs.length > 0) {
+          outOfContext = false;
+          break;
+        }
+      }
 
-      conversationData.messages.push({
-        role: "assistant",
-        content: deviatingMessage,
-        deviated: true,
-        sentAt: new Date(),
-        mid: getId(),
-        questions,
-      });
+      if (outOfContext) {
+        const deviatingMessage =
+          "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+        await streamAnswer(res, deviatingMessage);
+        conversationData.messages.push({
+          role: "assistant",
+          content: deviatingMessage,
+          deviatingMessage: true,
+          sentAt: new Date(),
+          mid: getId(),
+          questions,
+        });
+        const questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+        if (!!questionMessage) {
+          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+        }
+      } else {
+        const deviatingMessage = `Your question${
+          questions.length > 1 ? "s are" : " is"
+        } covered in other parts of this material. Would you like to deviate from our current topic to explore it?`;
+        await streamAnswer(res, deviatingMessage);
+
+        conversationData.messages.push({
+          role: "assistant",
+          content: deviatingMessage,
+          deviated: true,
+          sentAt: new Date(),
+          mid: getId(),
+          questions,
+        });
+      }
     }
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
@@ -837,27 +864,11 @@ export const handleDeviating = async (
   cardsModel: string,
   sections: { section: string; url: string }[]
 ) => {
-  // relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
-
   let featuredConcepts: any = [];
   let answer = "";
   let used_sections_message = "";
   if (relevanceResponse) {
-    //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
-    // const messDev =
-    //   "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
-    // res.write(`${messDev}keepLoading`);
-    // conversationData.messages.push({
-    //   role: "assistant",
-    //   content: messDev,
-    //   sentAt: new Date(),
-    //   mid: getId(),
-    //   concepts: featuredConcepts,
-    //   deviatingMessage: true,
-    // });
-    // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
-
     conversationData.messages.push({
       role: "user",
       content: "Yes, Let Go",
