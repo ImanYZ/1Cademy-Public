@@ -69,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
     unitTitle = concepts[0]?.sectionTitle || "";
-    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. How familiar are you with 
+    const defaultAnswer = `Hello. I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. How familiar are you with 
     ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}${unitTitle.endsWith("?") ? "" : "?"}`;
     if (!message) {
       default_message = true;
