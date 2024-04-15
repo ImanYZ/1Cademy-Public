@@ -3795,7 +3795,6 @@ const Notebook = ({}: NotebookProps) => {
         const { nodes: oldNodes, edges } = graph;
         const selectedNodeId = notebookRef.current.selectedNode!;
         if (!selectedNodeId) return graph; // CHECK: I added this to validate
-
         if (!(selectedNodeId in changedNodes)) {
           changedNodes[selectedNodeId] = copyNode(oldNodes[selectedNodeId]);
         }
@@ -7342,6 +7341,9 @@ const Notebook = ({}: NotebookProps) => {
                 onClose={() => onCloseSidebar()}
                 sidebarWidth={sidebarWidth()}
                 innerHeight={innerHeight}
+                proposeNewChild={proposeNewChild}
+                notebookRef={notebookRef}
+                graph={graph}
               />
 
               <MemoizedSearcherSidebar

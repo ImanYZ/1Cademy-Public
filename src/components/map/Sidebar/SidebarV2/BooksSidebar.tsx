@@ -7,7 +7,7 @@ import { Button, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
 import YoutubeEmbed from "@/components/home/components/YoutubeEmbed";
@@ -18,14 +18,17 @@ import { chapters } from "../../../../data/chapters";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 type BooksSidebarProps = {
+  notebookRef: any;
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
   openLinkedNode: any;
+  proposeNewChild: any;
   username: string;
   tagId: string | undefined;
   sidebarWidth: number;
   innerHeight?: number;
+  graph: any;
 };
 interface Step {
   name: string;
@@ -33,7 +36,16 @@ interface Step {
   steps?: Step[];
 }
 
-const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebarProps) => {
+const BooksSidebar = ({
+  notebookRef,
+  open,
+  onClose,
+  sidebarWidth,
+  innerHeight,
+  openLinkedNode,
+  proposeNewChild,
+  graph,
+}: BooksSidebarProps) => {
   const db = getFirestore();
   const [pageContent, setPageContent] = useState<any>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -45,11 +57,11 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
       nodeType: "Concept",
       parents: [
         {
-          node: "EconomicSystems",
+          node: "T1QovvXLitCRPAnc0QXT",
           title: "Economic Systems",
         },
         {
-          node: "Capitalism",
+          node: "roElg59jhD4coFSgypIm",
           title: "Capitalism",
         },
       ],
@@ -64,12 +76,12 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
       nodeType: "Concept",
       parents: [
         {
-          node: "Economics",
-          title: "Economics",
+          node: "T1QovvXLitCRPAnc0QXT",
+          title: "Economic Systems",
         },
         {
-          node: "EconomicSystems",
-          title: "Economic Systems",
+          node: "roElg59jhD4coFSgypIm",
+          title: "Capitalism",
         },
       ],
       reasoning:
@@ -122,6 +134,23 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
     setCurrentIdx(prev => Math.min(proposals.length - 1, prev + 1));
   };
 
+  useEffect(() => {
+    const selectedNodeId = notebookRef.current.selectedNode!;
+    const parents = proposals[currentIdx]?.parents.filter((parent: any) => parent.node === selectedNodeId);
+    if (parents.length > 0 && selectedParagraphIdx !== null && graph.nodes[selectedNodeId]) {
+      proposeNewChild(null, "Concept");
+    }
+  }, [graph, selectedParagraphIdx, notebookRef]);
+
+  const openNodesOnNotebook = async () => {
+    const parents = proposals[currentIdx]?.parents || [];
+    if (parents.length > 0) {
+      for (const parent of parents) {
+        openLinkedNode(parent.node);
+      }
+    }
+  };
+
   const renderProposals = () => {
     return (
       <Box>
@@ -143,6 +172,7 @@ const BooksSidebar = ({ open, onClose, sidebarWidth, innerHeight }: BooksSidebar
                 background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
               },
             }}
+            onClick={() => openNodesOnNotebook()}
           >
             <Typography variant="h3">{proposals[currentIdx]?.title}</Typography>
             <Typography variant="body1">{proposals[currentIdx]?.content}</Typography>
