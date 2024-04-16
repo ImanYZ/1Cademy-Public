@@ -332,7 +332,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             res,
             deviating,
             mergedMessages,
-            scroll_flashcard_next,
+            scroll_flashcard: conversationData?.previousFlashcard?.id || "",
             conversationData,
             furtherExplain,
           });
@@ -792,14 +792,14 @@ const streamMainResponse = async ({
   res,
   deviating,
   mergedMessages,
-  scroll_flashcard_next,
+  scroll_flashcard,
   conversationData,
   furtherExplain,
 }: {
   res: NextApiResponse<any>;
   deviating: boolean;
   mergedMessages: any;
-  scroll_flashcard_next: string;
+  scroll_flashcard: string;
   conversationData: any;
   furtherExplain: boolean;
 }) => {
@@ -828,9 +828,9 @@ const streamMainResponse = async ({
       }
       completeMessage = completeMessage + resultText;
       if (completeMessage.includes(`evaluation`) && !scrolled) {
-        if (scroll_flashcard_next) {
-          conversationData.usedFlashcards.push(scroll_flashcard_next);
-          res.write(`flashcard_id: "${scroll_flashcard_next}"`);
+        if (scroll_flashcard) {
+          conversationData.usedFlashcards.push(scroll_flashcard);
+          res.write(`flashcard_id: "${scroll_flashcard}"`);
         }
         if (furtherExplain) {
           const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
