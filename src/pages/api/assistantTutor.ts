@@ -34,7 +34,7 @@ const streamAnswer = async (res: any, answer: string) => {
 };
 const getScrollToFlashcard = (messages: any) => {
   const lastQuestion = messages.filter((m: any) => m.hasOwnProperty("question")).at(-1);
-  const scroll_flashcard = lastQuestion.concept || {};
+  const scroll_flashcard = lastQuestion?.concept || {};
   return scroll_flashcard?.id || "";
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
@@ -372,6 +372,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           question: true,
           sentAt: new Date(),
           mid: getId(),
+          concept: {
+            title: nextFlashcard.title,
+            content: nextFlashcard.content,
+            id: nextFlashcard.id,
+          },
         });
       } else if (!!nextFlashcard) {
         const question = await getTheNextQuestion(nextFlashcard);
