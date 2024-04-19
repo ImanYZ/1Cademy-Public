@@ -14,7 +14,7 @@ const openai = new OpenAI({
 
 const checkLimit = async () => {
   const logsDocs = await db.collection("openAICalls").where("date", "==", moment().format("MM/DD/YYYY")).get();
-  const logData: any = logsDocs.docs[0].data();
+  const logData: any = logsDocs.docs[0]?.data() || 0;
   return (logData?.numRequests || 0) > MAX_REQUESTS;
 };
 const updateRequestTrack = async () => {
