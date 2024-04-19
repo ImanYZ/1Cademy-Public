@@ -1105,7 +1105,9 @@ const extractJSON = (text: string, regex = false) => {
       if (!match) {
         return null;
       }
-      return match[1];
+      return {
+        your_response: match[1],
+      };
     } else {
       return null;
     }
