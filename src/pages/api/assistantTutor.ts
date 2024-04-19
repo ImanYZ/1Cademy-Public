@@ -32,6 +32,11 @@ const streamAnswer = async (res: any, answer: string) => {
     res.write(word + " ");
   }
 };
+const getScrollToFlashcard = (messages: any) => {
+  const lastQuestion = messages.filter((m: any) => m.hasOwnProperty("question")).at(-1);
+  const scroll_flashcard = lastQuestion?.concept || {};
+  return scroll_flashcard?.id || "";
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion, unitTitle } = req.body;
@@ -211,14 +216,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     conversationId = newConversationRef.id;
 
     if (!message) {
-      // message = `Hello My name is ${fName}.`;
       conversationData.usedFlashcards = [];
     }
 
     let scroll_flashcard_next = "";
     let nextFlashcard = null;
     if ((!furtherExplain && !deviating) || !questionAnswer) {
-      scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
+      scroll_flashcard_next = getScrollToFlashcard(conversationData.messages);
       console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
       if (scroll_flashcard_next) {
         conversationData.usedFlashcards.push(scroll_flashcard_next);
@@ -231,7 +235,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         selfStudy
       );
       if (nextFlashcard) {
-        conversationData.previousFlashcard = conversationData.nextFlashcard;
         conversationData.nextFlashcard = nextFlashcard;
       } else {
         delete conversationData.nextFlashcard;
@@ -272,7 +275,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         sentAt: new Date(),
         mid: getId(),
         default_message,
-        nextFlashcard: nextFlashcard?.id || "",
         deviating,
       });
     }
@@ -284,7 +286,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         sentAt: new Date(),
         mid: getId(),
         default_message,
-        nextFlashcard: nextFlashcard?.id || "",
         deviating,
       });
     }
@@ -371,6 +372,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           question: true,
           sentAt: new Date(),
           mid: getId(),
+          concept: {
+            title: nextFlashcard.title,
+            content: nextFlashcard.content,
+            id: nextFlashcard.id,
+          },
         });
       } else if (!!nextFlashcard) {
         const question = await getTheNextQuestion(nextFlashcard);
@@ -389,6 +395,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           question: true,
           sentAt: new Date(),
           mid: getId(),
+          concept: {
+            title: nextFlashcard.title,
+            content: nextFlashcard.content,
+            id: nextFlashcard.id,
+          },
         });
       }
       if (!furtherExplain && !default_message) {
