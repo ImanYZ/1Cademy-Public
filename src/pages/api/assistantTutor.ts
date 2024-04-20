@@ -37,6 +37,12 @@ const getScrollToFlashcard = (messages: any) => {
   const scroll_flashcard = lastQuestion?.concept || {};
   return scroll_flashcard?.id || "";
 };
+const getFurtherExplainConcept = (messages: any) => {
+  const lastQuestion = messages.filter((m: any) => m.hasOwnProperty("question") && !m.question).at(-1);
+  const furtherExplainConcept = lastQuestion?.concept;
+  return furtherExplainConcept;
+};
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion, unitTitle } = req.body;
@@ -258,12 +264,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     // we ignore it afterward when saving the conversation in the db
 
     let furtherExplainPrompt = "";
-    if (furtherExplain && conversationData.previousFlashcard) {
+    if (furtherExplain && !!getFurtherExplainConcept(conversationData.messages)) {
+      const furtherExplainConcept = getFurtherExplainConcept(conversationData.messages);
       furtherExplainPrompt = `Further explain the content of the following concept:{
-    title: "${conversationData?.previousFlashcard?.title || ""}",
-    content: "${conversationData?.previousFlashcard?.content || ""}"
-  }`;
-
+      title: "${furtherExplainConcept.title || ""}",
+      content: "${furtherExplainConcept.content || ""}"
+      }`;
       /*  */
     }
 
@@ -372,11 +378,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           question: true,
           sentAt: new Date(),
           mid: getId(),
-          concept: {
-            title: nextFlashcard.title,
-            content: nextFlashcard.content,
-            id: nextFlashcard.id,
-          },
+          ...(!!nextFlashcard && {
+            concept: {
+              title: nextFlashcard.title,
+              content: nextFlashcard.content,
+              id: nextFlashcard.id,
+            },
+          }),
         });
       } else if (!!nextFlashcard) {
         const question = await getTheNextQuestion(nextFlashcard);
@@ -395,11 +403,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           question: true,
           sentAt: new Date(),
           mid: getId(),
-          concept: {
-            title: nextFlashcard.title,
-            content: nextFlashcard.content,
-            id: nextFlashcard.id,
-          },
+          ...(!!nextFlashcard && {
+            concept: {
+              title: nextFlashcard.title,
+              content: nextFlashcard.content,
+              id: nextFlashcard.id,
+            },
+          }),
         });
       }
       if (!furtherExplain && !default_message) {
@@ -1085,17 +1095,17 @@ const PROMPT = (
     fName +
     "'s last message to you." +
     '",\n' +
-    '   "next_question": "Generate a question to assess ' +
-    fName +
-    "'s learning of the following concept:" +
-    nextFlashcard.title +
-    ":\n" +
-    nextFlashcard.content +
-    "\nNote that " +
-    fName +
-    " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n" +
-    "}\n" +
-    "Do not print anything other than this JSON object.";
+    !!nextFlashcard
+      ? '   "next_question": "Generate a question to assess ' +
+        fName +
+        "'s learning of the following concept:" +
+        nextFlashcard.title +
+        ":\n" +
+        nextFlashcard.content +
+        "\nNote that " +
+        fName +
+        " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n"
+      : "" + "}\n" + "Do not print anything other than this JSON object.";
 
   return instructions;
 };
