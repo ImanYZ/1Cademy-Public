@@ -1041,6 +1041,17 @@ const PROMPT = (
     content: string;
   }
 ) => {
+  const nextQuestionPrompt = !!nextFlashcard
+    ? '   "next_question": "Generate a question to assess ' +
+      fName +
+      "'s learning of the following concept:" +
+      nextFlashcard.title +
+      ":\n" +
+      nextFlashcard.content +
+      "\nNote that " +
+      fName +
+      " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n"
+    : "";
   const instructions =
     "Your name is " +
     tutorName +
@@ -1095,17 +1106,9 @@ const PROMPT = (
     fName +
     "'s last message to you." +
     '",\n' +
-    !!nextFlashcard
-      ? '   "next_question": "Generate a question to assess ' +
-        fName +
-        "'s learning of the following concept:" +
-        nextFlashcard.title +
-        ":\n" +
-        nextFlashcard.content +
-        "\nNote that " +
-        fName +
-        " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n"
-      : "" + "}\n" + "Do not print anything other than this JSON object.";
+    nextQuestionPrompt +
+    "}\n" +
+    "Do not print anything other than this JSON object.";
 
   return instructions;
 };
