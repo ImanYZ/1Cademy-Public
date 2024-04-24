@@ -38,6 +38,7 @@ interface Props {
   sideBarWidth: number;
   findScrollAndSelect: (text: string) => Promise<void> | Promise<HTMLElement>;
   user: User | null;
+  quillRef: any;
 }
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -80,6 +81,7 @@ const ChatBoxComp: React.FC<Props> = ({
   sideBarWidth,
   findScrollAndSelect,
   user,
+  quillRef,
 }) => {
   const db = getFirestore();
   const [messages, setMessages] = useState<any>([]);
@@ -486,6 +488,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             </Button>
                           </Box>
                           <ImproveItemComp
+                            quillRef={quillRef}
                             improvement={improvement}
                             theme={theme}
                             findScrollAndSelect={findScrollAndSelect}

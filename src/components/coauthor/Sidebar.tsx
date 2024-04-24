@@ -209,6 +209,7 @@ const SideBar: React.FC<Props> = ({
                       sideBarWidth={sideBarWidth}
                       findScrollAndSelect={findScrollAndSelect}
                       user={user}
+                      quillRef={quillRef}
                     />
                   ) : selectedTab === 1 ? (
                     <DraftComp
