@@ -230,6 +230,7 @@ const SideBar: React.FC<Props> = ({
                       allContent={articleContent}
                       findScrollAndSelect={findScrollAndSelect}
                       issues={issues}
+                      quillRef={quillRef}
                     />
                   ) : (
                     selectedTab === 3 && <GradeComp />

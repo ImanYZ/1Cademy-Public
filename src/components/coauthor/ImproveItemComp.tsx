@@ -1,12 +1,11 @@
-import React from "react";
-import Paper from "@mui/material/Paper";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import QuestionMarkIcon from "@mui/icons-material/HelpOutline";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import QuestionMarkIcon from "@mui/icons-material/HelpOutline";
+import Paper from "@mui/material/Paper";
+import React from "react";
 
 interface Improvement {
   id?: string;
@@ -21,26 +20,36 @@ interface Props {
   theme: any;
   findScrollAndSelect: (text: string) => Promise<void> | Promise<HTMLElement>;
   excludeCurrentModification?: (id: string) => null | void;
+  quillRef: any;
 }
 
-const ImproveItemComp: React.FC<Props> = ({ improvement, theme, findScrollAndSelect, excludeCurrentModification }) => {
+const ImproveItemComp: React.FC<Props> = ({
+  quillRef,
+  improvement,
+  theme,
+  findScrollAndSelect,
+  excludeCurrentModification,
+}) => {
   const implementAction = async (
     improvement: Improvement,
     excludeCurrentModification: (id: string) => null | void = () => null
   ) => {
-    const matchedElement: HTMLElement = (await findScrollAndSelect(improvement?.sentence)) as HTMLElement;
+    const matchedElement: any = (await findScrollAndSelect(improvement?.sentence)) as HTMLElement;
     if (matchedElement) {
+      const quill = quillRef.current.getEditor();
+      const index = quill.getText().indexOf(improvement?.sentence);
       if (improvement?.action === "modify") {
         if (improvement?.new_sentence) {
-          matchedElement.innerHTML = improvement.new_sentence;
+          quill.deleteText(index, improvement?.sentence.length);
+          quill.insertText(index, improvement?.new_sentence);
         }
       } else if (improvement?.action === "add") {
         if (improvement?.new_sentence) {
-          matchedElement.innerHTML += " " + improvement.new_sentence;
+          quill.insertText(index + improvement?.sentence.length, improvement?.new_sentence);
         }
       } else if (improvement?.action === "delete") {
         if (matchedElement) {
-          matchedElement.innerHTML = "";
+          quill.deleteText(index, improvement?.sentence.length);
         }
       }
       excludeCurrentModification(improvement.id || "");
