@@ -429,7 +429,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
         if ((conversationData.progress || 0) < 1) {
           conversationData.progress = roundNum(
-            calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
+            calculateProgress(conversationData.flashcardsScores || {}) / (concepts.length * 10)
           );
         }
         await addScoreToSavedCard(parsedEvaluation, scroll_flashcard_next, uname);
@@ -695,119 +695,7 @@ const clarifyTheQuestion = async (
     console.log(error);
   }
 };
-const getEvaluation = async ({
-  mergedMessages,
-  furtherExplain,
-  scroll_flashcard_next,
-  conversationData,
-  uname,
-  concepts,
-  default_message,
-}: {
-  mergedMessages: any;
-  furtherExplain: boolean;
-  scroll_flashcard_next: string;
-  conversationData: any;
-  uname: string;
-  concepts: any;
-  default_message: boolean;
-}) => {
-  console.log("getEvaluation");
-  let lateResponse: {
-    evaluation: any;
-    emotion: string;
-    progress: string;
-    inform_instructor: string;
-    learning_summary: string;
-  } = {
-    evaluation: "0",
-    emotion: "",
-    progress: "0",
-    inform_instructor: "",
-    learning_summary: "",
-  };
-  let gpt_response = false;
-  let tries = 0;
 
-  if (!furtherExplain && !default_message) {
-    while (!gpt_response && tries < 5) {
-      try {
-        tries = tries + 1;
-        const _messages = mergedMessages;
-        _messages.push({
-          role: "user",
-          content: `
-          Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
-          {
-            "evaluation":"A number between 0 to 10 indicating the quality of my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question.",
-            "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy", "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers,
-            "inform_instructor": "Yes" if the instructor should be informed about my response to your last message. "No" if there is no reason to take the instructor's time about my last message to you.
-          }
-          Do not print anything other than this JSON object.`,
-        });
-        // "progress": A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
-
-        const response = await openai.chat.completions.create({
-          messages: _messages,
-          model: "gpt-4-0125-preview",
-          temperature: 0,
-        });
-        const responseText = response.choices[0].message.content;
-        lateResponse = extractJSON(responseText);
-        gpt_response = true;
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    if (!lateResponse) {
-      lateResponse = {
-        evaluation: "0",
-        emotion: "",
-        progress: "0",
-        inform_instructor: "",
-        learning_summary: "",
-      };
-    }
-
-    /* we calculate the progress of the user in this unit
-     */
-
-    const evaluation = isNaN(lateResponse.evaluation) ? 0 : parseFloat(lateResponse.evaluation);
-
-    if (scroll_flashcard_next && !furtherExplain) {
-      if (conversationData.hasOwnProperty("flashcardsScores")) {
-        conversationData.flashcardsScores[scroll_flashcard_next] = evaluation;
-      } else {
-        conversationData.flashcardsScores = {
-          [scroll_flashcard_next]: evaluation,
-        };
-      }
-    }
-
-    if (conversationData.progress < 1) {
-      conversationData.progress = roundNum(
-        calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
-      );
-    }
-    await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
-
-    if (conversationData.hasOwnProperty("scores")) {
-      conversationData.scores.push({
-        score: evaluation,
-        date: new Date(),
-        flashcard: scroll_flashcard_next,
-      });
-    } else {
-      conversationData.scores = [
-        {
-          score: evaluation,
-          date: new Date(),
-        },
-      ];
-    }
-  }
-  return lateResponse;
-};
 /*  */
 const streamMainResponse = async ({
   res,
@@ -1255,11 +1143,6 @@ const sortConcepts = (concepts: any) => {
   return concepts.sort((a: any, b: any) => {
     const numA = parseInt(a.paragraphs[0]?.split("-")[1] || 0);
     const numB = parseInt(b.paragraphs[0]?.split("-")[1] || 0);
-
-    const isYouTubeA = a.paragraphs[0]?.startsWith("youtube");
-    if (isYouTubeA) {
-      return 1;
-    }
     const isYouTubeB = b.paragraphs[0]?.startsWith("youtube");
     if (isYouTubeB) {
       return -1;
