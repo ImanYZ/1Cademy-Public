@@ -160,11 +160,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       .at(-1);
     console.log(">=== instructorMessage ===>", instructorMessage);
     const studentMessage = message;
-    const { questions, questionAnswer, clarificationRequest, continueLearning, clarify }: any = default_message
-      ? { questions: [], questionAnswer: "", clarificationRequest: "", continueLearning: "", clarify: "" }
-      : instructorMessage.hasOwnProperty("question")
-      ? await getQuestionsAfterQuestion(instructorMessage.content, message)
-      : await getQuestionsAfterAnswer(instructorMessage.content, studentMessage);
+    const { questions, questionAnswer, clarificationRequest, continueLearning, clarify, unrelatedMessage }: any =
+      default_message
+        ? { questions: [], questionAnswer: "", clarificationRequest: "", continueLearning: "", clarify: "" }
+        : instructorMessage.hasOwnProperty("question")
+        ? await getQuestionsAfterQuestion(instructorMessage.content, message)
+        : await getQuestionsAfterAnswer(instructorMessage.content, studentMessage);
     console.log({ questions, questionAnswer, clarificationRequest, continueLearning, clarify });
     //
     //after extracting the questions and the answer
@@ -172,6 +173,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     deviating = questions.length > 0;
     if (clarify) {
       furtherExplain = true;
+    }
+    if (unrelatedMessage) {
+      const responseMessage = `I'm sorry, but I'm not sure how to respond to "${studentMessage}". Could you please provide more context or clarify your question?`;
+      await streamAnswer(res, responseMessage);
+      conversationData.messages.push({
+        role: "assistant",
+        content: responseMessage,
+        deviatingMessage: true,
+        sentAt: new Date(),
+        mid: getId(),
+        questions,
+      });
+      const questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+      if (!!questionMessage) {
+        conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+      }
+      await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      res.end();
+      return;
     }
 
     console.log("questions", questions);
@@ -598,7 +618,12 @@ const getQuestionsAfterAnswer = async (
 const getQuestionsAfterQuestion = async (
   instructorMessage: string,
   studentMessage: string
-): Promise<{ questions: string[]; questionAnswer: string; clarificationRequest: string }> => {
+): Promise<{
+  questions: string[];
+  questionAnswer: string;
+  clarificationRequest: string;
+  unrelatedMessage: boolean;
+}> => {
   let questions: string[] = [];
   let questionAnswer: string = "";
   let clarificationRequest: string = "";
@@ -641,8 +666,8 @@ const getQuestionsAfterQuestion = async (
     questionAnswer = objectResponse.answer || "";
     clarificationRequest = objectResponse.clarificationRequest || "";
   }
-
-  return { questions, questionAnswer, clarificationRequest };
+  const unrelatedMessage = !questions.length && !questionAnswer && !clarificationRequest;
+  return { questions, questionAnswer, clarificationRequest, unrelatedMessage };
 };
 
 const clarifyTheQuestion = async (
