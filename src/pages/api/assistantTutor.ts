@@ -359,7 +359,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             res,
             deviating,
             mergedMessages,
-            scroll_flashcard: conversationData?.previousFlashcard?.id || "",
+            scroll_flashcard: scroll_flashcard_next,
             conversationData,
             furtherExplain,
           });
@@ -761,23 +761,22 @@ const streamMainResponse = async ({
         res.write(resultText);
       }
       completeMessage = completeMessage + resultText;
-      if (completeMessage.includes(`evaluation`) && !scrolled) {
-        if (scroll_flashcard) {
-          conversationData.usedFlashcards.push(scroll_flashcard);
-          res.write(`flashcard_id: "${scroll_flashcard}"`);
-        }
-        if (furtherExplain) {
-          const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
-          res.write(`flashcard_id: "${scroll_to}"`);
-        }
-        scrolled = true;
-      }
     }
   }
 
   console.log(completeMessage);
   const response_object = extractJSON(completeMessage, furtherExplain);
-  console.log("response_object", response_object);
+  console.log("response_object", response_object, "scroll_flashcard=>", scroll_flashcard);
+  const responseEvaluation = response_object.evaluation;
+  if (scroll_flashcard) {
+    conversationData.usedFlashcards.push(scroll_flashcard);
+    res.write(`{"flashcard_id": "${scroll_flashcard}", "evaluation":"${responseEvaluation}"}`);
+  }
+  if (furtherExplain) {
+    const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+    res.write(`{"flashcard_id": "${scroll_to}", "evaluation":"${responseEvaluation}"}`);
+  }
+
   return {
     completeMessage,
     answer: response_object?.your_response || "",
@@ -1138,7 +1137,8 @@ const mergeDividedMessages = (messages: any) => {
   const mergedMessages = [];
 
   const filteredMessages = messages.filter(
-    (m: any) => !m.ignoreMessage && !m.deviatingMessage && !m.hasOwnProperty("question") && !!m?.content.trim()
+    (m: any) =>
+      !m.ignoreMessage && !m.deviatingMessage && !m.deviated && !m.hasOwnProperty("question") && !!m?.content.trim()
   );
   for (const message of filteredMessages) {
     if ("divided" in message) {
