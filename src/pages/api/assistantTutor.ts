@@ -1137,7 +1137,8 @@ const mergeDividedMessages = (messages: any) => {
   const mergedMessages = [];
 
   const filteredMessages = messages.filter(
-    (m: any) => !m.ignoreMessage && !m.deviatingMessage && !m.hasOwnProperty("question") && !!m?.content.trim()
+    (m: any) =>
+      !m.ignoreMessage && !m.deviatingMessage && !m.deviated && !m.hasOwnProperty("question") && !!m?.content.trim()
   );
   for (const message of filteredMessages) {
     if ("divided" in message) {
