@@ -95,7 +95,6 @@ const divideIntoSentences = (input: string) => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     let { message, audioType } = req.body;
-    res.setHeader("Transfer-Encoding", "chunked");
 
     if (!audioType) {
       audioType = "shimmer";
@@ -103,21 +102,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     console.log(message);
     //TO-DO restrict use cases
     let input = !!message?.questionExtra ? message.questionExtra + message.content : message.content;
-
-    // Divide the input into chunk of sentences
-    // let chunks = divideIntoSentences(input);
-    // console.log(chunks);
-    // for (let chunk of chunks) {
-    // if (!input) continue;
     const mp3 = await openai.audio.speech.create({
       model: "tts-1-hd",
       voice: audioType,
       input,
     });
+    const newID = db.collection("newId").doc().id;
     const buffer = Buffer.from(await mp3.arrayBuffer());
-    console.log(buffer);
-    // }
-    return res.status(200).json({ buffer });
+    const audioURL = await uploadFileToStorage(buffer, "TextToSpeech", `${newID}.mp3`);
+    console.log(audioURL);
+    return res.status(200).json({ audioURL });
   } catch (error) {
     console.error(error);
     return res.status(500).send({
