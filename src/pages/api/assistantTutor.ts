@@ -8,6 +8,7 @@ import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
 import { extractArray } from "./assignment/generateRubrics";
+import { uploadFileToStorage } from "./streamAudio";
 type Message = {
   role: string;
   content: string;
@@ -43,6 +44,17 @@ const getFurtherExplainConcept = (messages: any) => {
   return furtherExplainConcept;
 };
 
+const getQuestionAudio = async (question: string) => {
+  const mp3 = await openai.audio.speech.create({
+    model: "tts-1-hd",
+    voice: "shimmer",
+    input: question,
+  });
+  const newID = db.collection("newId").doc().id;
+  const buffer = Buffer.from(await mp3.arrayBuffer());
+  const audioURL = await uploadFileToStorage(buffer, "TextToSpeech", `${newID}.mp3`);
+  return audioURL;
+};
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
   let { url, cardsModel, furtherExplain, message, removeAdditionalInfo, clarifyQuestion, unitTitle } = req.body;
@@ -346,23 +358,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         conversationData.done = true;
       }
 
-      const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = default_message
-        ? {
-            completeMessage: defaultAnswer,
-            answer: defaultAnswer,
-            question: "",
-            emotion: "",
-            inform_instructor: "",
-            evaluation: 0,
-          }
-        : await streamMainResponse({
-            res,
-            deviating,
-            mergedMessages,
-            scroll_flashcard: scroll_flashcard_next,
-            conversationData,
-            furtherExplain,
-          });
+      const { completeMessage, answer, question, emotion, inform_instructor, evaluation, audioQuestion } =
+        default_message
+          ? {
+              completeMessage: defaultAnswer,
+              answer: defaultAnswer,
+              question: "",
+              emotion: "",
+              inform_instructor: "",
+              evaluation: 0,
+              audioQuestion: "",
+            }
+          : await streamMainResponse({
+              res,
+              deviating,
+              mergedMessages,
+              scroll_flashcard: scroll_flashcard_next,
+              conversationData,
+              furtherExplain,
+            });
       if (!default_message && !conversationData.guidedStudy) {
         const evaluations: number[] = Object.values(conversationData.flashcardsScores || {});
         if (evaluations.filter((item: number) => item < 5).length >= 3) {
@@ -397,6 +411,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           divided: !!answer ? divideId : false,
           question: true,
           sentAt: new Date(),
+          audioQuestion: audioQuestion || "",
           mid: getId(),
           ...(!!nextFlashcard && {
             concept: {
@@ -776,7 +791,10 @@ const streamMainResponse = async ({
     const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
     res.write(`{"flashcard_id": "${scroll_to}", "evaluation":"${responseEvaluation}"}`);
   }
-
+  let audioQuestion = "";
+  if (!!response_object?.next_question.trim()) {
+    audioQuestion = await getQuestionAudio(response_object?.next_question);
+  }
   return {
     completeMessage,
     answer: response_object?.your_response || "",
@@ -784,6 +802,7 @@ const streamMainResponse = async ({
     emotion: response_object?.emotion || "",
     inform_instructor: response_object?.inform_instructor || "",
     evaluation: response_object?.evaluation || 0,
+    audioQuestion,
   };
 };
 
