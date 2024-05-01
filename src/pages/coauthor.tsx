@@ -35,7 +35,6 @@ const App = () => {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const [email, setEmail] = useState("");
   const [page, setPage] = useState("Main");
-  const [userProfile, setUserProfile] = useState<any>({});
   const [openSettings, setOpenSettings] = useState<boolean>(false);
   const [articleTypePath, setArticleTypePath] = useState<string[]>([]);
   const [selectedArticle, setSelectedArticle] = useState({
@@ -44,6 +43,7 @@ const App = () => {
   });
   const [userArticles, setUserArticles] = useState<any>([]);
   const [selection, setSelection] = useState<any>(null);
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const quillRef: any = useRef(false);
 
   useEffect(() => {
@@ -78,40 +78,57 @@ const App = () => {
       if (user) {
         setPage("Main");
         setEmail(user.email);
-        setUserProfile(user);
       } else {
         setPage("Login");
         setEmail("");
-        setUserProfile({});
         setOpenSettings(false);
       }
     })();
   }, [user]);
   useEffect(() => {
     if (!user?.userId) return;
-    const unsubscribe = onSnapshot(query(collection(db, "articles"), where("user", "==", user?.userId)), snapshot => {
-      let articlesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...(doc.data() as any),
-      }));
-      articlesData = articlesData.filter(article => !article.deleted);
-      if (articlesData.length === 0) {
-        const element = document.getElementById("loader-overlay") as HTMLElement;
-        if (element) {
-          element.style.display = "none";
+    const unsubscribe = onSnapshot(
+      query(collection(db, "articles"), where("editors", "array-contains", user?.uname)),
+      snapshot => {
+        let articlesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...(doc.data() as any),
+        }));
+
+        articlesData = articlesData.filter(article => !article.deleted);
+        if (articlesData.length === 0) {
+          const element = document.getElementById("loader-overlay") as HTMLElement;
+          if (element) {
+            element.style.display = "none";
+          }
+          return;
         }
-        return;
+        setUserArticles(articlesData);
+        const docChanges = snapshot.docChanges();
+        for (let change of docChanges) {
+          const changeData: any = change.doc.data();
+          if (change.type === "modified") {
+            if (selectedArticle?.id == change.doc.id) {
+              setSelectedArticle({ ...changeData, id: change.doc.id });
+            }
+            return;
+          }
+        }
+        if (firstLoad) {
+          const latestArticle = articlesData
+            .filter(article => article.user == user?.uname)
+            .reduce((prev, current) => {
+              const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
+              const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
+              return currentTimestamp > prevTimestamp ? current : prev;
+            }, articlesData.filter(article => article.user == user?.uname)[0]);
+          setSelectedArticle(latestArticle);
+          setFirstLoad(false);
+        }
       }
-      setUserArticles(articlesData);
-      const latestArticle = articlesData.reduce((prev, current) => {
-        const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
-        const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
-        return currentTimestamp > prevTimestamp ? current : prev;
-      }, articlesData[0]);
-      setSelectedArticle(latestArticle);
-    });
+    );
     return () => unsubscribe();
-  }, [db, userProfile]);
+  }, [db, user, firstLoad, selectedArticle]);
 
   const theme = createTheme({
     palette: {
