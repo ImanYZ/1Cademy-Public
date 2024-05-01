@@ -36,29 +36,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         },
       ],
     });
-    const conversationDoc = await db.collection("tutorConversations").doc(conversationId).get();
-    const conversationData: any = conversationDoc.data();
-
-    if (conversationData) {
-      const messages = conversationData.messages;
-      const messageIdx = messages.findIndex((m: any) => m.mid === messageId);
-      console.log(messageIdx, conversationId);
-      messages[messageIdx].reactionFeedback = response;
-      await conversationDoc.ref.update({
-        messages,
-      });
-      console.log(response);
-      await saveLogs({
-        uname: uname || "",
-        severity: "default",
-        where: "assistantTutorReaction",
-        action: "request feedback for reaction on concept",
-        messageId,
-        conversationId,
-        reaction,
-      });
-    }
     res.end();
+    await saveLogs({
+      uname: uname || "",
+      severity: "default",
+      where: "assistantTutorReaction",
+      action: "request feedback for reaction on concept",
+      messageId,
+      conversationId,
+      reaction,
+    });
+
     return res.status(200).json({ response });
   } catch (error) {}
 }
