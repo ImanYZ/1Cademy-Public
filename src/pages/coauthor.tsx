@@ -114,6 +114,7 @@ const App = () => {
         return currentTimestamp > prevTimestamp ? current : prev;
       }, articlesData[0]);
       setSelectedArticle(latestArticle);
+      setArticleTypePath(latestArticle?.path || []);
     });
     return () => unsubscribe();
   }, [db, userProfile]);
