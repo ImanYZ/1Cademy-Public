@@ -1,6 +1,8 @@
 import "react-quill/dist/quill.snow.css";
 
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Box,
   Button,
@@ -12,7 +14,11 @@ import {
   MenuItem,
   Modal,
   Select,
+  Tab,
+  Tabs,
+  Typography,
 } from "@mui/material";
+import { TreeItem, TreeView } from "@mui/x-tree-view";
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
@@ -38,6 +44,10 @@ interface Props {
   setArticleTypePath: any;
   articleTypes: any;
 }
+
+type AcademicArticleCategory = {
+  [key: string]: AcademicArticleCategory | string[];
+};
 
 const validate = (values: any) => {
   const errors: any = {};
@@ -69,6 +79,15 @@ const stopLoader = () => {
   }
 };
 
+const camelCaseToSpaces = (text: string): string => {
+  return text
+    .replace(/([A-Z])/g, " $1")
+    .trim()
+    .replace(/^./, function (str) {
+      return str.toUpperCase();
+    });
+};
+
 const ContentComp: React.FC<Props> = ({
   selectedArticle,
   setSelectedArticle,
@@ -88,6 +107,11 @@ const ContentComp: React.FC<Props> = ({
   const [content, setContent] = useState(selectedArticle?.content);
   const [open, setOpen] = useState(false);
   const [lastClickPosition, setLastClickPosition] = useState(0);
+  const [selectedTab, setSelectedTab] = useState<number>(0);
+  const [modalSection, setModalSection] = useState<number>(0);
+  const [path, setPath] = useState<string[]>([]);
+  const [draft, setDraft] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     const editor = quillRef.current.editor;
@@ -112,10 +136,7 @@ const ContentComp: React.FC<Props> = ({
         setContent(selectedArticle.content);
         await delay(1000);
         const content = quillEditor.getText();
-        if (!selectedArticle?.updatedAt) {
-          setArticleTypePath([]);
-        }
-        if (content.trim()?.length > 0 && selectedArticle?.updatedAt) {
+        if (content.trim()?.length > 0) {
           setArticleAndDOM();
         }
       }
@@ -139,7 +160,9 @@ const ContentComp: React.FC<Props> = ({
         return;
       }
       setOpen(false);
-      const prompt = `I need to write about ${values.title}.
+      let GPTResponse: any = {};
+      if (selectedTab === 0) {
+        const prompt = `I need to write about ${values.title}.
       ${values.objective ? "My writing has the following objectives:" + values.objective : ""}
       ${values.idea ? "I have already thought about it and my ideas are as follows:" + values.idea : ""}
       ${
@@ -153,46 +176,71 @@ const ContentComp: React.FC<Props> = ({
         "outline": "The writing outline as a long string in HTML format.",
         "instructions": "Step by step instructions to continue writing this article based on your generated outline. This should be an object where each key indicates a step and its value explains the step instructions. This object should have the following structure: {'step 1:': 'Step 1 instructions', 'step 2:': 'Step 2 instructions', ...}"
      }`;
-      const instructions = await sendMessageToChatGPT([
-        {
-          role: "user",
-          content: prompt,
-        },
-      ]);
-      const docRef = await addDoc(collection(db, "articles"), {
-        title: values.title,
-        content: instructions.outline,
-        user: user?.userId,
-        createdAt: new Date(),
-      });
-      let text = "";
-      for (const key in instructions.instructions) {
-        if (instructions.instructions.hasOwnProperty(key)) {
-          const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-          text += `${capitalizedKey} ${instructions.instructions[key]}\n\n`;
+
+        GPTResponse = await sendMessageToChatGPT([
+          {
+            role: "user",
+            content: prompt,
+          },
+        ]);
+
+        const docRef = await addDoc(collection(db, "articles"), {
+          title: values.title,
+          content: GPTResponse.outline,
+          path,
+          user: user?.userId,
+          createdAt: new Date(),
+        });
+        let text = "";
+        for (const key in GPTResponse.instructions) {
+          if (GPTResponse.instructions.hasOwnProperty(key)) {
+            const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+            text += `${capitalizedKey} ${GPTResponse.instructions[key]}\n\n`;
+          }
         }
+
+        await addDoc(collection(db, "articleMessages"), {
+          text: text,
+          improvement: null,
+          type: "assistant",
+          user: {
+            uid: "",
+            fullname: "1CoAuthor",
+            imageUrl: "images/icon-8x.png",
+          },
+          articleId: docRef.id,
+          createdAt: new Date(),
+        });
+
+        await saveLogs({
+          doer: user?.uname,
+          action: "Created New Article",
+          articleId: docRef.id,
+          title: values.title,
+          cursorPosition: lastClickPosition,
+        });
+      } else {
+        const articleData: any = {
+          title: values.title,
+          path,
+          user: user?.userId,
+          createdAt: new Date(),
+        };
+        if (draft) {
+          articleData["content"] = draft;
+        }
+        const docRef = await addDoc(collection(db, "articles"), articleData);
+        await saveLogs({
+          doer: user?.uname,
+          action: "Created New Article",
+          articleId: docRef.id,
+          title: values.title,
+          cursorPosition: lastClickPosition,
+        });
       }
-
-      await addDoc(collection(db, "articleMessages"), {
-        text: text,
-        improvement: null,
-        type: "assistant",
-        user: {
-          uid: "",
-          fullname: "1CoAuthor",
-          imageUrl: "images/icon-8x.png",
-        },
-        articleId: docRef.id,
-        createdAt: new Date(),
-      });
-
-      await saveLogs({
-        doer: user?.uname,
-        action: "Created New Article",
-        articleId: docRef.id,
-        title: values.title,
-        cursorPosition: lastClickPosition,
-      });
+      setError("");
+      setModalSection(0);
+      setSelectedTab(0);
       stopLoader();
     },
   });
@@ -283,6 +331,10 @@ const ContentComp: React.FC<Props> = ({
     setOpen(false);
   }, [selectedArticle]);
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
   const deleteArticle = async (event: any, articleId: string) => {
     event.stopPropagation();
     if (confirm("Are you sure to delete article")) {
@@ -290,10 +342,41 @@ const ContentComp: React.FC<Props> = ({
     }
   };
 
+  const handleTreeItemClick = (path: string[]) => {
+    setPath(path);
+  };
+
+  const renderTree = (node: AcademicArticleCategory | string[], nodeId: string, path: string[]): JSX.Element => {
+    if (Array.isArray(node)) {
+      return (
+        <>
+          {node.map((item, index) => (
+            <TreeItem
+              key={`${nodeId}-${index}`}
+              nodeId={`${nodeId}-${index}`}
+              label={camelCaseToSpaces(item)}
+              onClick={() => handleTreeItemClick([...path, item])}
+            />
+          ))}
+        </>
+      );
+    } else {
+      return (
+        <>
+          {Object.keys(node).map((key, index) => (
+            <TreeItem key={`${nodeId}-${index}`} nodeId={`${nodeId}-${index}`} label={camelCaseToSpaces(key)}>
+              {renderTree(node[key], `${nodeId}-${index}`, [...path, key])}
+            </TreeItem>
+          ))}
+        </>
+      );
+    }
+  };
+
   return (
     <Box sx={{ m: "16px 10px" }}>
       <Box sx={{ height: "24px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        {articleContent.trim() && (
+        {articleTypePath.length > 0 && (
           <DisciplinesComp
             allContent={articleContent}
             articleTypePath={articleTypePath}
@@ -415,7 +498,7 @@ const ContentComp: React.FC<Props> = ({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 500,
+            width: 700,
             bgcolor: "background.paper",
             border: "2px solid #000",
             boxShadow: 24,
@@ -425,65 +508,133 @@ const ContentComp: React.FC<Props> = ({
           }}
         >
           <form onSubmit={formik.handleSubmit}>
-            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-              <InputLabel htmlFor="standard-adornment-amount">What is the title of your writing?</InputLabel>
-              <Input
-                name="title"
-                value={formik.values.title}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.title && Boolean(formik.errors.title)}
-                id="standard-adornment-amount"
-              />
-            </FormControl>
-            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-              <InputLabel htmlFor="standard-adornment-amount">What is the writing objective?</InputLabel>
-              <Input
-                name="objective"
-                value={formik.values.objective}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                id="standard-adornment-amount"
-              />
-            </FormControl>
-            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-              <InputLabel htmlFor="standard-adornment-amount">What do you have in mind?</InputLabel>
-              <Input
-                name="idea"
-                value={formik.values.idea}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                id="standard-adornment-amount"
-              />
-            </FormControl>
-            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-              <InputLabel htmlFor="standard-adornment-amount">
-                Copy the pieces of information that you have already collected in the following box.
-              </InputLabel>
-              <Input
-                name="information"
-                value={formik.values.information}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                id="standard-adornment-amount"
-              />
-            </FormControl>
-            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-              <InputLabel htmlFor="standard-adornment-amountIf">
-                If you have already outlined your writing copy the outline bellow.
-              </InputLabel>
-              <Input
-                name="outlined"
-                value={formik.values.outlined}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                id="standard-adornment-amount"
-              />
-            </FormControl>
-            <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-              <Button type="submit" variant="outlined">
-                Outline
-              </Button>
+            {modalSection == 0 && (
+              <Box>
+                <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                  <InputLabel htmlFor="standard-adornment-amount">What is the title of your writing?</InputLabel>
+                  <Input
+                    name="title"
+                    value={formik.values.title}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.title && Boolean(formik.errors.title)}
+                    id="standard-adornment-amount"
+                  />
+                </FormControl>
+
+                <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                  {error && <Typography color={"red"}>{error}</Typography>}
+                  <Typography>
+                    Please enter the type of your writing by expanding the branches of the following tree-view:
+                  </Typography>
+                  <TreeView
+                    defaultCollapseIcon={<ExpandMoreIcon />}
+                    defaultExpandIcon={<ChevronRightIcon />}
+                    style={{ maxHeight: 400, overflowY: "auto", padding: "10px" }}
+                  >
+                    {renderTree(articleTypes, "0", [])}
+                  </TreeView>
+                </FormControl>
+              </Box>
+            )}
+
+            {modalSection == 1 && (
+              <Box>
+                <Tabs
+                  variant="fullWidth"
+                  value={selectedTab}
+                  onChange={handleTabChange}
+                  aria-label="1CoAuthor Tabs"
+                  style={{ marginBottom: "19px" }}
+                >
+                  <Tab label="Help me outline" value={0} />
+                  <Tab label="I'd like to draft" value={1} />
+                </Tabs>
+
+                {selectedTab === 0 ? (
+                  <>
+                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                      <InputLabel htmlFor="standard-adornment-amount">What is the writing objective?</InputLabel>
+                      <Input
+                        name="objective"
+                        value={formik.values.objective}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        id="standard-adornment-amount"
+                      />
+                    </FormControl>
+                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                      <InputLabel htmlFor="standard-adornment-amount">What do you have in mind?</InputLabel>
+                      <Input
+                        name="idea"
+                        value={formik.values.idea}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        id="standard-adornment-amount"
+                      />
+                    </FormControl>
+                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                      <InputLabel htmlFor="standard-adornment-amount">
+                        Copy the pieces of information that you have already collected in the following box.
+                      </InputLabel>
+                      <Input
+                        name="information"
+                        value={formik.values.information}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        id="standard-adornment-amount"
+                      />
+                    </FormControl>
+                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                      <InputLabel htmlFor="standard-adornment-amountIf">
+                        If you have already outlined your writing copy the outline bellow.
+                      </InputLabel>
+                      <Input
+                        name="outlined"
+                        value={formik.values.outlined}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        id="standard-adornment-amount"
+                      />
+                    </FormControl>
+                  </>
+                ) : (
+                  selectedTab === 1 && <ReactQuill style={{ height: "auto" }} value={draft} onChange={setDraft} />
+                )}
+              </Box>
+            )}
+
+            <Box mt={2} sx={{ display: "flex", justifyContent: "center", gap: "5px" }}>
+              {modalSection == 0 && (
+                <Button
+                  onClick={() => {
+                    if (path.length === 0) {
+                      setError("Please select the path from tree-view.");
+                      return;
+                    }
+                    setModalSection(1);
+                  }}
+                  variant="outlined"
+                >
+                  Next
+                </Button>
+              )}
+              {modalSection == 1 && (
+                <Button onClick={() => setModalSection(0)} variant="outlined">
+                  Back
+                </Button>
+              )}
+
+              {modalSection == 1 && selectedTab === 0 && (
+                <Button type="submit" variant="outlined">
+                  Outline
+                </Button>
+              )}
+              {selectedTab === 1 && (
+                <Button type="submit" variant="outlined">
+                  Create
+                </Button>
+              )}
             </Box>
           </form>
         </Box>
