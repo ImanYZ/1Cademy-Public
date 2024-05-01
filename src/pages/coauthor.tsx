@@ -11,6 +11,9 @@ import Button from "@mui/material/Button";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { collection, getFirestore, onSnapshot, query, where } from "firebase/firestore";
+import { useQuery } from "react-query";
+
+import { getArticleTypes } from "@/lib/coauthor";
 
 import SideBar from "../components/coauthor/Sidebar";
 import { useAuth } from "../context/AuthContext";
@@ -38,6 +41,7 @@ const App = () => {
   const [userProfile, setUserProfile] = useState<any>({});
   const [openSettings, setOpenSettings] = useState<boolean>(false);
   const [articleTypePath, setArticleTypePath] = useState<string[]>([]);
+  const [articleTypes, setArticleTypes] = useState<any>({});
   const [selectedArticle, setSelectedArticle] = useState({
     id: "",
     content: "",
@@ -45,6 +49,7 @@ const App = () => {
   const [userArticles, setUserArticles] = useState<any>([]);
   const [selection, setSelection] = useState<any>(null);
   const quillRef: any = useRef(false);
+  const { data } = useQuery("articleTypes", getArticleTypes);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
@@ -112,6 +117,12 @@ const App = () => {
     });
     return () => unsubscribe();
   }, [db, userProfile]);
+
+  useEffect(() => {
+    if (data) {
+      setArticleTypes(data);
+    }
+  }, [data]);
 
   const theme = createTheme({
     palette: {
@@ -303,6 +314,7 @@ const App = () => {
             articleContent={articleContent}
             articleTypePath={articleTypePath}
             setArticleTypePath={setArticleTypePath}
+            articleTypes={articleTypes}
           />
         </Section>
       </Container>

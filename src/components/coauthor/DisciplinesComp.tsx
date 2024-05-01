@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
-import Popover from "@mui/material/Popover";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Typography from "@mui/material/Typography";
-import { TreeView, TreeItem } from "@mui/x-tree-view";
-import LinearProgress from "@mui/material/LinearProgress";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { sendMessageToChatGPT } from "../../services/openai";
-import { articleTypes } from "../../data/articleTypes";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+//import { articleTypes } from "../../data/articleTypes";
 import { Box } from "@mui/material";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import LinearProgress from "@mui/material/LinearProgress";
+import Popover from "@mui/material/Popover";
+import Typography from "@mui/material/Typography";
+import { TreeItem, TreeView } from "@mui/x-tree-view";
+import React, { useEffect, useState } from "react";
+
+import { sendMessageToChatGPT } from "../../services/openai";
+//import { arraysAreEqual } from "@/lib/utils/utils";
 
 type AcademicArticleCategory = {
   [key: string]: AcademicArticleCategory | string[];
@@ -24,7 +26,7 @@ const camelCaseToSpaces = (text: string): string => {
     });
 };
 
-const getPathFromArticleTypesObj = (responsePath: string[]) => {
+const getPathFromArticleTypesObj = (responsePath: string[], articleTypes: any) => {
   function findPath(obj: any, path: any) {
     for (const key in obj) {
       if (typeof obj[key] === "object") {
@@ -53,13 +55,46 @@ type DisciplinesCompProps = {
   allContent: string;
   articleTypePath: string[];
   setArticleTypePath: (path: string[]) => void;
+  articleTypes: any;
 };
 
-const DisciplinesComp: React.FC<DisciplinesCompProps> = ({ allContent, articleTypePath, setArticleTypePath }) => {
+const DisciplinesComp: React.FC<DisciplinesCompProps> = ({
+  allContent,
+  articleTypePath,
+  setArticleTypePath,
+  articleTypes,
+}) => {
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // const compareResponsesOfGPRPrompts = async (prevResponse: any, newResponse: any, responses: any = []) => {
+  //   if (responses.length === 4) return;
+  //   responses = [...responses, prevResponse];
+  //   const revisionPrompt = `I've written the following triple-quoted piece:
+  //     '''
+  //     ${allContent}
+  //     '''
+  //     Among the types of writing listed below, is "${newResponse}" the most appropriate type characterizing my written one?
+  //     ${articleTypes}
+  //     Respond only a JSON object with the path of the specific type of writing as an array: {"path": [an array of categories and sub-categories that end up with the chosen one]}.
+  //     For example, if the writing is a "Research Article" in the "Computer Science" category under "Applied Sciences" under "Academic Articles", the response would be {"path": ["Academic Articles", "Applied Sciences", "Computer Science", "Research Article"]}
+  //     If you think "${newResponse}" is the best type that characterizes my writing, respond the same path, otherwise respond the writing type path that best characterizes my writing.`;
+  //   const revisionPromptResponse = await sendMessageToChatGPT([
+  //     {
+  //       role: "user",
+  //       content: revisionPrompt,
+  //     },
+  //   ]);
+  //   for (const prevResponse of responses) {
+  //     if (arraysAreEqual(prevResponse, revisionPromptResponse.path)) {
+  //       return revisionPromptResponse;
+  //     }
+  //   }
+  //   await compareResponsesOfGPRPrompts(newResponse, revisionPromptResponse.path, responses);
+  // };
+
   useEffect(() => {
+    if (Object.keys(articleTypes).length === 0) return;
     const specifyArticleType = async () => {
       setLoading(true);
       const chatGPTMessages = [
@@ -72,12 +107,31 @@ ${allContent}
 Which of the following types of articles is this?
 ${JSON.stringify(articleTypes, null, 2)}
 Respond only a JSON object with the path of the specific type of article as an array: {"path": [an array of categories and sub-categories that end up with the chosen one]}.
-For example, if the article is a "ResearchArticle" in the "ComputerScience" category under "AppliedSciences" under "AcademicArticles", the response would be {"path": ["AcademicArticles", "AppliedSciences", "ComputerScience", "ResearchArticle"]}`,
+For example, if the article is a "Research Article" in the "Computer Science" category under "Applied Sciences" under "Academic Articles", the response would be {"path": ["Academic Articles", "Applied Sciences", "Computer Science", "Research Article"]}`,
         },
       ];
-      const articleTypePath = await sendMessageToChatGPT(chatGPTMessages);
+      let articleTypePath = await sendMessageToChatGPT(chatGPTMessages);
       if (articleTypePath.path && articleTypePath.path.length > 0) {
-        const path = getPathFromArticleTypesObj(articleTypePath.path);
+        // const revisionPrompt = `I've written the following triple-quoted piece:
+        // '''
+        // ${allContent}
+        // '''
+        // Among the types of writing listed below, is "${articleTypePath.path}" the most appropriate type characterizing my written one?
+        // ${articleTypes}
+        // Respond only a JSON object with the path of the specific type of writing as an array: {"path": [an array of categories and sub-categories that end up with the chosen one]}.
+        // For example, if the writing is a "Research Article" in the "Computer Science" category under "Applied Sciences" under "Academic Articles", the response would be {"path": ["Academic Articles", "Applied Sciences", "Computer Science", "Research Article"]}
+        // If you think "${articleTypePath.path}" is the best type that characterizes my writing, respond the same path, otherwise respond the writing type path that best characterizes my writing.`;
+        // const revisionPromptResponse = await sendMessageToChatGPT([
+        //   {
+        //     role: "user",
+        //     content: revisionPrompt,
+        //   },
+        // ]);
+        // if (!arraysAreEqual(articleTypePath.path, revisionPromptResponse.path)) {
+        //   articleTypePath = await compareResponsesOfGPRPrompts(articleTypePath.path, revisionPromptResponse.path);
+        // }
+        //if (articleTypePath?.length === 0) console.error("GPT doesn't give the correct path");
+        const path = getPathFromArticleTypesObj(articleTypePath.path, articleTypes);
         if (path.length === 0) specifyArticleType();
         setArticleTypePath(path);
       } else {
@@ -89,7 +143,7 @@ For example, if the article is a "ResearchArticle" in the "ComputerScience" cate
       setLoading(false);
     };
     specifyArticleType();
-  }, [allContent]);
+  }, [allContent, articleTypes]);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
