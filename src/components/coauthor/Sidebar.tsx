@@ -56,7 +56,12 @@ const SideBar: React.FC<Props> = ({
     } else if (issues.length) {
       setExpanded([...expanded, "Collaboration"]);
     }
-  }, [articleTypePath, recommendedSteps, issues]);
+    if (!selectedArticle?.updatedAt) {
+      setRecommendedSteps([]);
+      setIssues([]);
+      setExpanded(["Collaboration"]);
+    }
+  }, [articleTypePath, recommendedSteps, issues, selectedArticle]);
 
   const handleAccordions = (type: string) => {
     if (expanded.includes(type)) {
