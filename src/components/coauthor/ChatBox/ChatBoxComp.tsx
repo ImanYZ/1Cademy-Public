@@ -17,6 +17,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { sendMessageToChatGPT } from "../../../services/openai";
 import ImproveItemComp from "../ImproveItemComp";
+import MarkdownRender from "../Markdown/MarkdownRender";
 import OptimizedAvatar from "../OptimizedAvatar";
 import MessageButtons from "./MessageButtons";
 import MessageInput from "./MessageInput";
@@ -416,7 +417,8 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             lineHeight: "24px",
                           }}
                         >
-                          <Typography
+                          <MarkdownRender text={messageText} />
+                          {/* <Typography
                             display="block"
                             sx={{
                               fontSize: "16px",
@@ -425,7 +427,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             }}
                           >
                             {messageText}
-                          </Typography>
+                          </Typography> */}
 
                           <Box
                             sx={{

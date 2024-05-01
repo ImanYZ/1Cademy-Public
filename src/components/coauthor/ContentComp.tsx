@@ -150,7 +150,7 @@ const ContentComp: React.FC<Props> = ({
       ${values.outlined ? " I have already outlined my writing and the outline is as follows:" + values.outlined : ""}
       Generate only a JSON object with the following structure:
       {
-        "outline": "The writing outline as a long string with each line break as '\n'.",
+        "outline": "The writing outline as a long string in HTML format.",
         "instructions": "Step by step instructions to continue writing this article based on your generated outline. This should be an object where each key indicates a step and its value explains the step instructions. This object should have the following structure: {'step 1:': 'Step 1 instructions', 'step 2:': 'Step 2 instructions', ...}"
      }`;
       const instructions = await sendMessageToChatGPT([
@@ -168,7 +168,8 @@ const ContentComp: React.FC<Props> = ({
       let text = "";
       for (const key in instructions.instructions) {
         if (instructions.instructions.hasOwnProperty(key)) {
-          text += `${key} ${instructions.instructions[key]}\n\n`;
+          const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+          text += `${capitalizedKey} ${instructions.instructions[key]}\n\n`;
         }
       }
 
