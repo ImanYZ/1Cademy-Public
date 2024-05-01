@@ -698,7 +698,7 @@ const clarifyTheQuestion = async (
   try {
     const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
     const userPrompt =
-      "Please clarify your question by rephrasing it, explaining it further, and provide examples if possible.";
+      "Please clarify your question by rephrasing it, explaining it further, and providing examples if possible. Conclude your clarification with restating the question and encouraging the student to answer it.";
     messages[0].content = systemPrompt;
     const messagesSet = new Set();
     const messagesSimplified = messages
@@ -956,7 +956,7 @@ const ClarifyPROMPT = (
     "\n" +
     "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
     "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
-    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer, but conclude your explanation with restating the question and encouraging the student to answer it.\n" +
     techniques;
 
   return clarify_question_instructions;
