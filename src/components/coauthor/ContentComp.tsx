@@ -1,11 +1,24 @@
 import "react-quill/dist/quill.snow.css";
 
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, Divider, IconButton, MenuItem, Select, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  IconButton,
+  Input,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+} from "@mui/material";
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { useFormik } from "formik";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
+import { sendMessageToChatGPT } from "src/services/openai";
 
 import { delay } from "../../lib/utils/utils";
 import DisciplinesComp from "./DisciplinesComp";
@@ -26,6 +39,36 @@ interface Props {
   articleTypes: any;
 }
 
+const validate = (values: any) => {
+  const errors: any = {};
+  if (!values.title) {
+    errors.title = "Required";
+  }
+  return errors;
+};
+
+const initialValues = {
+  title: "",
+  objective: "",
+  idea: "",
+  information: "",
+  outlined: "",
+};
+
+const startLoader = () => {
+  const element = document.getElementById("loader-overlay") as HTMLElement;
+  if (element) {
+    element.style.display = "flex";
+  }
+};
+
+const stopLoader = () => {
+  const element = document.getElementById("loader-overlay") as HTMLElement;
+  if (element) {
+    element.style.display = "none";
+  }
+};
+
 const ContentComp: React.FC<Props> = ({
   selectedArticle,
   setSelectedArticle,
@@ -45,7 +88,6 @@ const ContentComp: React.FC<Props> = ({
   const [content, setContent] = useState(selectedArticle?.content);
   const [open, setOpen] = useState(false);
   const [lastClickPosition, setLastClickPosition] = useState(0);
-  const [articleTitle, setArticleTitle] = useState("");
 
   useEffect(() => {
     const editor = quillRef.current.editor;
@@ -70,12 +112,89 @@ const ContentComp: React.FC<Props> = ({
         setContent(selectedArticle.content);
         await delay(1000);
         const content = quillEditor.getText();
-        if (content.trim()?.length > 0) {
+        if (!selectedArticle?.updatedAt) {
+          setArticleTypePath([]);
+        }
+        if (content.trim()?.length > 0 && selectedArticle?.updatedAt) {
           setArticleAndDOM();
         }
       }
     })();
   }, [selectedArticle]);
+
+  const formik = useFormik({
+    initialValues,
+    validate,
+    onSubmit: async values => {
+      startLoader();
+      const q = query(
+        collection(db, "articles"),
+        where("title", "==", values.title),
+        where("user", "==", user?.userId)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        alert("An article with the provided title already exists.");
+        stopLoader();
+        return;
+      }
+      setOpen(false);
+      const prompt = `I need to write about ${values.title}.
+      ${values.objective ? "My writing has the following objectives:" + values.objective : ""}
+      ${values.idea ? "I have already thought about it and my ideas are as follows:" + values.idea : ""}
+      ${
+        values.information
+          ? "I have already collected some pieces of information about it and they are as follows:" + values.information
+          : ""
+      }
+      ${values.outlined ? " I have already outlined my writing and the outline is as follows:" + values.outlined : ""}
+      Generate only a JSON object with the following structure:
+      {
+        "outline": "The writing outline as a long string with each line break as '\n'.",
+        "instructions": "Step by step instructions to continue writing this article based on your generated outline. This should be an object where each key indicates a step and its value explains the step instructions. This object should have the following structure: {'step 1:': 'Step 1 instructions', 'step 2:': 'Step 2 instructions', ...}"
+     }`;
+      const instructions = await sendMessageToChatGPT([
+        {
+          role: "user",
+          content: prompt,
+        },
+      ]);
+      const docRef = await addDoc(collection(db, "articles"), {
+        title: values.title,
+        content: instructions.outline,
+        user: user?.userId,
+        createdAt: new Date(),
+      });
+      let text = "";
+      for (const key in instructions.instructions) {
+        if (instructions.instructions.hasOwnProperty(key)) {
+          text += `${key} ${instructions.instructions[key]}\n\n`;
+        }
+      }
+
+      await addDoc(collection(db, "articleMessages"), {
+        text: text,
+        improvement: null,
+        type: "assistant",
+        user: {
+          uid: "",
+          fullname: "1CoAuthor",
+          imageUrl: "images/icon-8x.png",
+        },
+        articleId: docRef.id,
+        createdAt: new Date(),
+      });
+
+      await saveLogs({
+        doer: user?.uname,
+        action: "Created New Article",
+        articleId: docRef.id,
+        title: values.title,
+        cursorPosition: lastClickPosition,
+      });
+      stopLoader();
+    },
+  });
 
   const saveLogs = async (logs: any) => {
     try {
@@ -109,35 +228,8 @@ const ContentComp: React.FC<Props> = ({
         content: content,
         cursorPosition: lastClickPosition,
       });
-    } else {
-      const q = query(
-        collection(db, "articles"),
-        where("title", "==", articleTitle),
-        where("user", "==", user?.userId)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        alert("An article with the provided title already exists.");
-        return;
-      }
-      const docRef = await addDoc(collection(db, "articles"), {
-        title: articleTitle,
-        content,
-        user: user?.userId,
-        createdAt: new Date(),
-      });
-      await saveLogs({
-        doer: user?.uname,
-        action: "Created New Article",
-        articleId: docRef.id,
-        title: articleTitle,
-        cursorPosition: lastClickPosition,
-      });
     }
-
-    setArticleTitle("");
-    setOpen(false);
-  }, [user, content, selectedArticle, articleTitle]);
+  }, [user, content, selectedArticle]);
   const handleChange = useCallback(
     (e: any) => {
       if (!e.target.value) {
@@ -190,12 +282,6 @@ const ContentComp: React.FC<Props> = ({
     setOpen(false);
   }, [selectedArticle]);
 
-  const handleInputChange = useCallback(
-    (event: any) => {
-      setArticleTitle(event.target.value);
-    },
-    [articleTitle, selectedArticle]
-  );
   const deleteArticle = async (event: any, articleId: string) => {
     event.stopPropagation();
     if (confirm("Are you sure to delete article")) {
@@ -261,68 +347,42 @@ const ContentComp: React.FC<Props> = ({
         sx={{ mb: 2 }}
       /> */}
       <Box mt={2}>
-        {!open && (
-          <Select
-            labelId="coauthor-articles-select"
-            id="coauthor-articles-select"
-            value={selectedArticle?.id || 0}
-            onChange={handleChange}
-            sx={{
-              zIndex: 9999,
-              width: "200px",
-              height: "36px",
-              position: "absolute",
-              right: "190px",
-              top: "59.5px",
+        <Select
+          labelId="coauthor-articles-select"
+          id="coauthor-articles-select"
+          value={selectedArticle?.id || 0}
+          onChange={handleChange}
+          sx={{
+            zIndex: 9999,
+            width: "200px",
+            height: "36px",
+            position: "absolute",
+            right: "190px",
+            top: "59.5px",
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              setSelectedArticle(null);
+              setOpen(true);
             }}
+            value={0}
           >
-            <MenuItem
-              onClick={() => {
-                setSelectedArticle(null);
-                setOpen(true);
-              }}
-              value={0}
-            >
-              Create New Article
+            Create New Article
+          </MenuItem>
+          <Divider variant="fullWidth" sx={{ my: "10px" }} />
+          {userArticles.map((article: any, index: number) => (
+            <MenuItem sx={{ display: "flex", justifyContent: "space-between" }} key={index} value={article.id}>
+              {article?.title}
+              {selectedArticle?.id !== article.id && (
+                <IconButton onClick={e => deleteArticle(e, article.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              )}
             </MenuItem>
-            <Divider variant="fullWidth" sx={{ my: "10px" }} />
-            {userArticles.map((article: any, index: number) => (
-              <MenuItem sx={{ display: "flex", justifyContent: "space-between" }} key={index} value={article.id}>
-                {article?.title}
-                {selectedArticle?.id !== article.id && (
-                  <IconButton onClick={e => deleteArticle(e, article.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                )}
-              </MenuItem>
-            ))}
-          </Select>
-        )}
+          ))}
+        </Select>
 
-        {open && (
-          <TextField
-            placeholder="Enter Article Title"
-            sx={{
-              position: "absolute",
-              right: "190px",
-              top: "59.5px",
-            }}
-            value={articleTitle}
-            onChange={handleInputChange}
-            variant="outlined"
-            onKeyDown={(event: any) => {
-              if (event.key === "Enter") {
-                saveAndAnalyze();
-              }
-            }}
-            InputProps={{
-              sx: {
-                width: "200px",
-                height: "36px",
-              },
-            }}
-          />
-        )}
         <ReactQuill
           style={{ height: "calc(100vh - 110px)" }}
           ref={quillRef}
@@ -333,34 +393,100 @@ const ContentComp: React.FC<Props> = ({
           onChangeSelection={(range: any) => handleSelectionChange(range)}
         />
 
-        {open && (
-          <Button
-            variant="contained"
-            color="error"
-            style={{ position: "absolute", right: "90px", top: "59.5px" }}
-            onClick={() => {
-              setOpen(false);
-              const latestArticle = userArticles.reduce((prev: any, current: any) => {
-                const prevTimestamp = Math.max(prev.createdAt, prev.updatedAt || 0);
-                const currentTimestamp = Math.max(current.createdAt, current.updatedAt || 0);
-                return currentTimestamp > prevTimestamp ? current : prev;
-              }, userArticles[0]);
-              setSelectedArticle(latestArticle);
-            }}
-          >
-            Cancel
-          </Button>
-        )}
-
         <Button
           variant="contained"
           color="success"
           style={{ position: "absolute", right: "13px", top: "59.5px" }}
           onClick={() => saveAndAnalyze()}
         >
-          {open ? "Save" : "Save and Analyze"}
+          Save and Analyze
         </Button>
       </Box>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute" as "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 500,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            pt: 2,
+            px: 4,
+            pb: 3,
+          }}
+        >
+          <form onSubmit={formik.handleSubmit}>
+            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+              <InputLabel htmlFor="standard-adornment-amount">What is the title of your writing?</InputLabel>
+              <Input
+                name="title"
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.title && Boolean(formik.errors.title)}
+                id="standard-adornment-amount"
+              />
+            </FormControl>
+            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+              <InputLabel htmlFor="standard-adornment-amount">What is the writing objective?</InputLabel>
+              <Input
+                name="objective"
+                value={formik.values.objective}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                id="standard-adornment-amount"
+              />
+            </FormControl>
+            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+              <InputLabel htmlFor="standard-adornment-amount">What do you have in mind?</InputLabel>
+              <Input
+                name="idea"
+                value={formik.values.idea}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                id="standard-adornment-amount"
+              />
+            </FormControl>
+            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+              <InputLabel htmlFor="standard-adornment-amount">
+                Copy the pieces of information that you have already collected in the following box.
+              </InputLabel>
+              <Input
+                name="information"
+                value={formik.values.information}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                id="standard-adornment-amount"
+              />
+            </FormControl>
+            <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+              <InputLabel htmlFor="standard-adornment-amountIf">
+                If you have already outlined your writing copy the outline bellow.
+              </InputLabel>
+              <Input
+                name="outlined"
+                value={formik.values.outlined}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                id="standard-adornment-amount"
+              />
+            </FormControl>
+            <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+              <Button type="submit" variant="outlined">
+                Outline
+              </Button>
+            </Box>
+          </form>
+        </Box>
+      </Modal>
     </Box>
   );
 };
