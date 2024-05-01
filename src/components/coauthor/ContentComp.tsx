@@ -23,6 +23,7 @@ interface Props {
   articleContent: any;
   articleTypePath: any;
   setArticleTypePath: any;
+  articleTypes: any;
 }
 
 const ContentComp: React.FC<Props> = ({
@@ -38,6 +39,7 @@ const ContentComp: React.FC<Props> = ({
   articleContent,
   articleTypePath,
   setArticleTypePath,
+  articleTypes,
 }) => {
   const db = getFirestore();
   const [content, setContent] = useState(selectedArticle?.content);
@@ -209,6 +211,7 @@ const ContentComp: React.FC<Props> = ({
             allContent={articleContent}
             articleTypePath={articleTypePath}
             setArticleTypePath={setArticleTypePath}
+            articleTypes={articleTypes}
           />
         )}
       </Box>
