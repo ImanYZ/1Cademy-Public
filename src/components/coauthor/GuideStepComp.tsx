@@ -3,9 +3,11 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinearProgress from "@mui/material/LinearProgress";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
-import { TreeItem,TreeView } from "@mui/x-tree-view";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
-import React, { useEffect,useState } from "react";
+import { TreeItem, TreeView } from "@mui/x-tree-view";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+
+import { getArticleSteps } from "@/lib/coauthor";
 
 import { sendMessageToChatGPT } from "../../services/openai";
 
@@ -31,27 +33,20 @@ const GuideStepComp: React.FC<Props> = ({
   setRecommendedSteps,
   setSelectedStep,
 }) => {
-  const db = getFirestore();
   const [data, setData] = useState<Step[]>([]);
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [popoverText, setPopoverText] = useState("");
   const [loading, setLoading] = useState<boolean>(true);
+  const { data: steps } = useQuery(["articleSteps", articleTypePath[articleTypePath.length - 1]], getArticleSteps);
 
   useEffect(() => {
+    if (!steps) return;
     let isMounted = true;
     const fetchInstructions = async () => {
       try {
         setLoading(true);
-        let docPath = articleTypePath.join("/");
-        if (articleTypePath.length % 2 === 0) {
-          const lastIndex = docPath.lastIndexOf("/");
-          docPath = docPath.substring(0, lastIndex) + "-" + docPath.substring(lastIndex + 1);
-        }
-        const docRef = doc(db, "instructions", docPath);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists() && isMounted) {
-          const theSteps = docSnap.data().steps;
+        if (isMounted) {
+          const theSteps = steps;
           const docDescriptivePath = articleTypePath.slice(2).reverse().join(" of ");
 
           const chatGPTMessages = [
@@ -80,8 +75,6 @@ Respond only a JSON object with the structure: {"names": [an array of only the n
               }
             }
           }
-        } else if (!docSnap.exists()) {
-          console.error("No such document!");
         }
       } catch (error) {
         console.error("Failed to fetch or process instructions:", error);
@@ -94,7 +87,7 @@ Respond only a JSON object with the structure: {"names": [an array of only the n
     return () => {
       isMounted = false; // Cleanup to prevent setting state on unmounted component
     };
-  }, [allContent, articleTypePath]);
+  }, [allContent, articleTypePath, steps]);
 
   const specifyAccomplishments = (theSteps: Step[], names: string[]): Step[] => {
     return theSteps.map(step => {
