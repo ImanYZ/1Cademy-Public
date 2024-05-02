@@ -112,6 +112,7 @@ const ContentComp: React.FC<Props> = ({
   const [path, setPath] = useState<string[]>([]);
   const [draft, setDraft] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [inputFieldErrors, setInputFieldErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const editor = quillRef.current.editor;
@@ -517,7 +518,7 @@ const ContentComp: React.FC<Props> = ({
                     value={formik.values.title}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    error={formik.touched.title && Boolean(formik.errors.title)}
+                    error={Boolean(inputFieldErrors?.title)}
                     id="standard-adornment-amount"
                   />
                 </FormControl>
@@ -608,6 +609,11 @@ const ContentComp: React.FC<Props> = ({
               {modalSection == 0 && (
                 <Button
                   onClick={() => {
+                    if (!formik.values.title) {
+                      setInputFieldErrors({ title: "Title is required." });
+                      return;
+                    }
+                    setInputFieldErrors({});
                     if (path.length === 0) {
                       setError("Please select the path from tree-view.");
                       return;
