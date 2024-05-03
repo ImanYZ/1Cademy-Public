@@ -11,23 +11,30 @@ import {
   IconButton,
   Input,
   InputLabel,
+  List,
+  ListItem,
+  ListItemText,
   MenuItem,
   Modal,
+  Paper,
+  Popper,
   Select,
   Tab,
   Tabs,
+  TextField,
   Typography,
 } from "@mui/material";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { useFormik } from "formik";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
 import { sendMessageToChatGPT } from "src/services/openai";
 
 import { delay } from "../../lib/utils/utils";
 import DisciplinesComp from "./DisciplinesComp";
+import OptimizedAvatar from "./OptimizedAvatar";
 
 interface Props {
   selectedArticle: any;
@@ -113,6 +120,29 @@ const ContentComp: React.FC<Props> = ({
   const [draft, setDraft] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [inputFieldErrors, setInputFieldErrors] = useState<{ [key: string]: string }>({});
+  const [openModal, setOpenModal] = React.useState(false);
+  const [users, setUsers] = React.useState<any>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const popperRef = useRef<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      const q = query(collection(db, "users"));
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length > 0) {
+        let usersData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          fName: doc.data()?.fName,
+          lName: doc.data()?.lName,
+          uname: doc.data()?.uname,
+          imageUrl: doc.data()?.imageUrl,
+          email: doc.data()?.email,
+        }));
+        setUsers(usersData);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const editor = quillRef.current.editor;
@@ -189,7 +219,17 @@ const ContentComp: React.FC<Props> = ({
           title: values.title,
           content: GPTResponse.outline,
           path,
-          user: user?.userId,
+          editors: [user?.uname],
+          editorsData: {
+            [user?.uname || ""]: {
+              fName: user?.fName,
+              lName: user?.lName,
+              uname: user?.uname,
+              imageUrl: user?.imageUrl,
+              email: user?.email,
+            },
+          },
+          user: user?.uname,
           createdAt: new Date(),
         });
         let text = "";
@@ -224,7 +264,17 @@ const ContentComp: React.FC<Props> = ({
         const articleData: any = {
           title: values.title,
           path,
-          user: user?.userId,
+          editors: [user?.uname],
+          editorsData: {
+            [user?.uname || ""]: {
+              fName: user?.fName,
+              lName: user?.lName,
+              uname: user?.uname,
+              imageUrl: user?.imageUrl,
+              email: user?.email,
+            },
+          },
+          user: user?.uname,
           createdAt: new Date(),
         };
         if (draft) {
@@ -291,7 +341,7 @@ const ContentComp: React.FC<Props> = ({
         setSelectedArticle(selectedArticle[0]);
       }
     },
-    [selectedArticle]
+    [selectedArticle, userArticles]
   );
 
   const handleSelectionChange = useCallback(
@@ -374,8 +424,162 @@ const ContentComp: React.FC<Props> = ({
     }
   };
 
+  const handleModalOpen = () => {
+    setSearchTerm("");
+    setOpenModal(true);
+  };
+  const handleModalClose = () => setOpenModal(false);
+
+  const handleSelection = async (value: any) => {
+    if (!value) return;
+    const existingEditors = selectedArticle?.editors || [];
+    const currentExistingEditor = existingEditors.indexOf(value.uname);
+    if (currentExistingEditor == -1) {
+      await updateDoc(doc(db, "articles", selectedArticle.id), {
+        editors: [...existingEditors, value.uname],
+        editorsData: {
+          ...(selectedArticle?.editorsData || {}),
+          [value?.uname || ""]: {
+            fName: value?.fName,
+            lName: value?.lName,
+            uname: value?.uname,
+            email: value?.email,
+            imageUrl: value?.imageUrl,
+          },
+        },
+        updatedAt: new Date(),
+      });
+      setSearchTerm("");
+    }
+  };
+
+  const removeSharedUser = async (value: any) => {
+    if (!value) return;
+    const existingEditors = selectedArticle?.editors || [];
+    const currentExistingEditor = existingEditors.indexOf(value.uname);
+    if (currentExistingEditor != -1) {
+      const editorsData = selectedArticle?.editorsData;
+      delete editorsData[value?.uname];
+      existingEditors.splice(currentExistingEditor, 1);
+      await updateDoc(doc(db, "articles", selectedArticle.id), {
+        editors: existingEditors,
+        editorsData,
+        updatedAt: new Date(),
+      });
+    }
+  };
+
+  const handleSuggestionChange = (event: any) => {
+    setSearchTerm(event.target.value);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const filteredUsers = useMemo(() => {
+    return users.filter((user: any) => user.email.toLowerCase() === searchTerm.toLowerCase());
+  }, [searchTerm, users]);
+
+  const handleClickOutside = (event: any) => {
+    if (popperRef.current && !popperRef.current.contains(event.target)) {
+      setAnchorEl(null);
+    }
+  };
+
+  useEffect(() => {
+    document.body.addEventListener("click", handleClickOutside);
+    return () => {
+      document.body.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
   return (
     <Box sx={{ m: "16px 10px" }}>
+      {selectedArticle && selectedArticle?.user === user?.uname && (
+        <Button onClick={handleModalOpen} variant="outlined" sx={{ position: "absolute", right: "10px", top: "10px" }}>
+          Share
+        </Button>
+      )}
+      <Modal
+        open={openModal}
+        onClose={handleModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute" as "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <TextField
+            sx={{ width: "100%" }}
+            label="Search for a user"
+            variant="outlined"
+            onChange={handleSuggestionChange}
+            value={searchTerm}
+          />
+          <Popper
+            sx={{ zIndex: 999999, width: "300px" }}
+            open={!!searchTerm && filteredUsers?.length > 0}
+            anchorEl={anchorEl}
+            ref={popperRef}
+          >
+            <Paper>
+              <List>
+                {filteredUsers?.map((user: any) => (
+                  <ListItem button onClick={() => handleSelection(user)} key={user.userId}>
+                    <Box sx={{ display: "flex", flexDirection: "column" }}>
+                      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <OptimizedAvatar
+                          name={user?.fName || ""}
+                          imageUrl={user?.imageUrl || ""}
+                          sx={{ border: "none" }}
+                          imageSx={{ width: "40px", height: "40px" }}
+                        />
+                        <ListItemText primary={`${user.fName} ${user.lName}`} />
+                      </Box>
+                      <Typography variant="subtitle1">{user.email}</Typography>
+                    </Box>
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Popper>
+          {selectedArticle?.editorsData && (
+            <Box mt={3}>
+              {Object.keys(selectedArticle?.editorsData).map((editor: any, key: number) => {
+                if (selectedArticle?.editorsData[editor]?.uname != user?.uname) {
+                  return (
+                    <Box
+                      key={key}
+                      sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: "10px" }}
+                    >
+                      <OptimizedAvatar
+                        name={selectedArticle?.editorsData[editor]?.fName || ""}
+                        imageUrl={selectedArticle?.editorsData[editor]?.imageUrl || ""}
+                        sx={{ border: "none" }}
+                        imageSx={{ width: "40px", height: "40px" }}
+                      />
+                      <Typography>
+                        {selectedArticle?.editorsData[editor]?.email || selectedArticle?.editorsData[editor]?.label}{" "}
+                      </Typography>
+                      <Button onClick={() => removeSharedUser(selectedArticle?.editorsData[editor])}>
+                        <DeleteIcon />
+                      </Button>
+                    </Box>
+                  );
+                }
+              })}
+            </Box>
+          )}
+        </Box>
+      </Modal>
       <Box sx={{ height: "24px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
         {articleTypePath.length > 0 && (
           <DisciplinesComp
@@ -386,51 +590,6 @@ const ContentComp: React.FC<Props> = ({
           />
         )}
       </Box>
-      {/* <ContributorComp
-        users={[
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FHaroon-Waheed?alt=media&token=c41cc4b3-d0be-424e-8805-5a574d59b373",
-            score: 10,
-          },
-          {
-            imageUrl:
-              "https://firebasestorage.googleapis.com/v0/b/coauthor-1a236.appspot.com/o/profilePictures%2FIman-Yeckehzaare?alt=media&token=ec82eac8-0cee-4151-82df-7fd434c38edd",
-            score: 8,
-          },
-        ]}
-        sx={{ mb: 2 }}
-      /> */}
       <Box mt={2}>
         <Select
           labelId="coauthor-articles-select"
@@ -459,7 +618,7 @@ const ContentComp: React.FC<Props> = ({
           {userArticles.map((article: any, index: number) => (
             <MenuItem sx={{ display: "flex", justifyContent: "space-between" }} key={index} value={article.id}>
               {article?.title}
-              {selectedArticle?.id !== article.id && (
+              {selectedArticle?.id !== article.id && article.user == user?.uname && (
                 <IconButton onClick={e => deleteArticle(e, article.id)}>
                   <DeleteIcon />
                 </IconButton>
@@ -467,7 +626,6 @@ const ContentComp: React.FC<Props> = ({
             </MenuItem>
           ))}
         </Select>
-
         <ReactQuill
           style={{ height: "calc(100vh - 110px)" }}
           ref={quillRef}
@@ -614,10 +772,11 @@ const ContentComp: React.FC<Props> = ({
                       return;
                     }
                     setInputFieldErrors({});
-                    if (path.length === 0) {
-                      setError("Please select the path from tree-view.");
-                      return;
-                    }
+
+                    // if (path.length === 0) {
+                    //   setError("Please select the path from tree-view.");
+                    //   return;
+                    // }
                     setModalSection(1);
                   }}
                   variant="outlined"
