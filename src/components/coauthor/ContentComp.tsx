@@ -773,10 +773,10 @@ const ContentComp: React.FC<Props> = ({
                     }
                     setInputFieldErrors({});
 
-                    // if (path.length === 0) {
-                    //   setError("Please select the path from tree-view.");
-                    //   return;
-                    // }
+                    if (path.length === 0) {
+                      setError("Please select the path from tree-view.");
+                      return;
+                    }
                     setModalSection(1);
                   }}
                   variant="outlined"
