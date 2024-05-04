@@ -124,6 +124,7 @@ const ContentComp: React.FC<Props> = ({
   const [users, setUsers] = React.useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
+  const [editable, setEditable] = useState<boolean>(false);
   const popperRef = useRef<any>(null);
 
   useEffect(() => {
@@ -219,6 +220,12 @@ const ContentComp: React.FC<Props> = ({
           title: values.title,
           content: GPTResponse.outline,
           path,
+          outline: {
+            outlined: values.outlined,
+            idea: values.idea,
+            information: values.information,
+            objective: values.objective,
+          },
           editors: [user?.uname],
           editorsData: {
             [user?.uname || ""]: {
@@ -236,13 +243,14 @@ const ContentComp: React.FC<Props> = ({
         for (const key in GPTResponse.instructions) {
           if (GPTResponse.instructions.hasOwnProperty(key)) {
             const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-            text += `${capitalizedKey} ${GPTResponse.instructions[key]}\n\n`;
+            text += `${capitalizedKey} ${GPTResponse.instructions[key]}\n\n <hr>`;
           }
         }
 
         await addDoc(collection(db, "articleMessages"), {
           text: text,
           improvement: null,
+          initial: true,
           type: "assistant",
           user: {
             uid: "",
@@ -264,6 +272,12 @@ const ContentComp: React.FC<Props> = ({
         const articleData: any = {
           title: values.title,
           path,
+          outline: {
+            outlined: values.outlined,
+            idea: values.idea,
+            information: values.information,
+            objective: values.objective,
+          },
           editors: [user?.uname],
           editorsData: {
             [user?.uname || ""]: {
@@ -295,6 +309,126 @@ const ContentComp: React.FC<Props> = ({
       stopLoader();
     },
   });
+
+  const editArticleOutline = async () => {
+    startLoader();
+    if (formik.values.title != selectedArticle?.title) {
+      const q = query(
+        collection(db, "articles"),
+        where("title", "==", formik.values.title),
+        where("user", "==", user?.userId)
+      );
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        alert("An article with the provided title already exists.");
+        stopLoader();
+        return;
+      }
+    }
+    setOpen(false);
+    let GPTResponse: any = {};
+    if (selectedTab === 0) {
+      const prompt = `I need to write about ${formik.values.title}.
+    ${formik.values.objective ? "My writing has the following objectives:" + formik.values.objective : ""}
+    ${formik.values.idea ? "I have already thought about it and my ideas are as follows:" + formik.values.idea : ""}
+    ${
+      formik.values.information
+        ? "I have already collected some pieces of information about it and they are as follows:" +
+          formik.values.information
+        : ""
+    }
+    ${
+      formik.values.outlined
+        ? " I have already outlined my writing and the outline is as follows:" + formik.values.outlined
+        : ""
+    }
+    Generate only a JSON object with the following structure:
+    {
+      "outline": "The writing outline as a long string in HTML format.",
+      "instructions": "Step by step instructions to continue writing this article based on your generated outline. This should be an object where each key indicates a step and its value explains the step instructions. This object should have the following structure: {'step 1:': 'Step 1 instructions', 'step 2:': 'Step 2 instructions', ...}"
+   }`;
+
+      GPTResponse = await sendMessageToChatGPT([
+        {
+          role: "user",
+          content: prompt,
+        },
+      ]);
+
+      await updateDoc(doc(db, "articles", selectedArticle.id), {
+        title: formik.values.title,
+        content: GPTResponse.outline,
+        path,
+        outline: {
+          outlined: formik.values.outlined,
+          idea: formik.values.idea,
+          information: formik.values.information,
+          objective: formik.values.objective,
+        },
+        updatedAt: new Date(),
+      });
+      let text = "";
+      for (const key in GPTResponse.instructions) {
+        if (GPTResponse.instructions.hasOwnProperty(key)) {
+          const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+          text += `${capitalizedKey} ${GPTResponse.instructions[key]}\n\n <hr>`;
+        }
+      }
+
+      const articleMessageQuery = query(
+        collection(db, "articleMessages"),
+        where("initial", "==", true),
+        where("articleId", "==", selectedArticle?.id)
+      );
+      const articleMessageDocs = await getDocs(articleMessageQuery);
+      for (const doc of articleMessageDocs.docs) {
+        if (doc.exists()) {
+          await updateDoc(doc.ref, {
+            text: text,
+            updatedAt: new Date(),
+          });
+          break;
+        }
+      }
+
+      await saveLogs({
+        doer: user?.uname,
+        action: "Updated Article",
+        articleId: selectedArticle?.id,
+        title: formik.values.title,
+        cursorPosition: lastClickPosition,
+      });
+    } else {
+      const articleData: any = {
+        title: formik.values.title,
+        content: GPTResponse.outline,
+        path,
+        outline: {
+          outlined: formik.values.outlined,
+          idea: formik.values.idea,
+          information: formik.values.information,
+          objective: formik.values.objective,
+        },
+        updatedAt: new Date(),
+      };
+      if (draft) {
+        articleData["content"] = draft;
+      }
+      await updateDoc(doc(db, "articles", selectedArticle.id), articleData);
+      await saveLogs({
+        doer: user?.uname,
+        action: "Updated Article",
+        articleId: selectedArticle?.id,
+        title: formik.values.title,
+        cursorPosition: lastClickPosition,
+      });
+    }
+    setError("");
+    setModalSection(0);
+    setSelectedTab(0);
+    stopLoader();
+    setEditable(false);
+  };
 
   const saveLogs = async (logs: any) => {
     try {
@@ -339,6 +473,7 @@ const ContentComp: React.FC<Props> = ({
         handleClose();
         const selectedArticle = userArticles.filter((article: any) => article.id === e.target.value);
         setSelectedArticle(selectedArticle[0]);
+        setArticleTypePath(selectedArticle[0]?.path || []);
       }
     },
     [selectedArticle, userArticles]
@@ -491,6 +626,17 @@ const ContentComp: React.FC<Props> = ({
     };
   }, []);
 
+  const changeOutline = () => {
+    setOpen(true);
+    setEditable(true);
+    setPath(selectedArticle?.path || []);
+    formik.setFieldValue("title", selectedArticle?.title);
+    formik.setFieldValue("objective", selectedArticle?.outline?.objective);
+    formik.setFieldValue("idea", selectedArticle?.outline?.idea);
+    formik.setFieldValue("information", selectedArticle?.outline?.information);
+    formik.setFieldValue("outlined", selectedArticle?.outline?.outlined);
+  };
+
   return (
     <Box sx={{ m: "16px 10px" }}>
       {selectedArticle && selectedArticle?.user === user?.uname && (
@@ -601,7 +747,7 @@ const ContentComp: React.FC<Props> = ({
             width: "200px",
             height: "36px",
             position: "absolute",
-            right: "190px",
+            right: "355px",
             top: "59.5px",
           }}
         >
@@ -635,6 +781,14 @@ const ContentComp: React.FC<Props> = ({
           onFocus={() => handleFocus()}
           onChangeSelection={(range: any) => handleSelectionChange(range)}
         />
+
+        <Button
+          variant="outlined"
+          style={{ position: "absolute", right: "190px", top: "59.5px" }}
+          onClick={() => changeOutline()}
+        >
+          Change Outline
+        </Button>
 
         <Button
           variant="contained"
@@ -791,14 +945,32 @@ const ContentComp: React.FC<Props> = ({
               )}
 
               {modalSection == 1 && selectedTab === 0 && (
-                <Button type="submit" variant="outlined">
-                  Outline
-                </Button>
+                <>
+                  {!editable && (
+                    <Button type="submit" variant="outlined">
+                      Outline
+                    </Button>
+                  )}
+                  {editable && (
+                    <Button onClick={() => editArticleOutline()} variant="outlined">
+                      Outline
+                    </Button>
+                  )}
+                </>
               )}
               {selectedTab === 1 && (
-                <Button type="submit" variant="outlined">
-                  Create
-                </Button>
+                <>
+                  {!editable && (
+                    <Button type="submit" variant="outlined">
+                      Create
+                    </Button>
+                  )}
+                  {editable && (
+                    <Button onClick={() => editArticleOutline()} variant="outlined">
+                      Create
+                    </Button>
+                  )}
+                </>
               )}
             </Box>
           </form>
