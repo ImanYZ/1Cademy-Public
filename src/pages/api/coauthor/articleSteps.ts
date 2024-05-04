@@ -4,7 +4,7 @@ import { db } from "@/lib/firestoreServer/admin";
 
 const replacePartOfTitle = (title: string) => {
   if (title?.includes(":")) {
-    title = title.split(":")[1].trim();
+    title = title.split(":")[title.split(":").length - 1].trim();
   }
   return title.trim();
 };
