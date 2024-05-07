@@ -4,6 +4,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 
@@ -24,6 +25,7 @@ interface Props {
   recommendedSteps: string[];
   setRecommendedSteps: (path: string[]) => void;
   setSelectedStep: any;
+  selectedArticle: any;
 }
 
 const GuideStepComp: React.FC<Props> = ({
@@ -32,7 +34,9 @@ const GuideStepComp: React.FC<Props> = ({
   recommendedSteps,
   setRecommendedSteps,
   setSelectedStep,
+  selectedArticle,
 }) => {
+  const db = getFirestore();
   const [data, setData] = useState<Step[]>([]);
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [popoverText, setPopoverText] = useState("");
@@ -41,39 +45,21 @@ const GuideStepComp: React.FC<Props> = ({
 
   useEffect(() => {
     if (!steps) return;
-    let isMounted = true;
+    const theSteps = steps;
     const fetchInstructions = async () => {
       try {
         setLoading(true);
-        if (isMounted) {
-          const theSteps = steps;
-          const docDescriptivePath = articleTypePath.slice(2).reverse().join(" of ");
-
-          const chatGPTMessages = [
-            {
-              role: "user",
-              content: `The following is the content of a ${docDescriptivePath} I've written:
-'''
-${allContent}
-'''
-Which of the following steps and sub-steps in writing the ${docDescriptivePath} have I already accomplished?
-${JSON.stringify(theSteps, null, 2)}
-Note that before accomplishing any step/sub-steps, I'm supposed to accomplish all its previous steps/sub-steps. So, don't include a step/sub-steps if I haven't accomplished all its previous steps/sub-steps.
-Each step also has some sub-steps. If I've accomplished a step, I've also accomplished all its sub-steps. If I haven't accomplished some sub-steps of a step, I haven't accomplished the step either.
-Respond only a JSON object with the structure: {"names": [an array of only the names of the steps/sub-steps I've already accomplished]}.`,
-            },
-          ];
-          const aSteps = await sendMessageToChatGPT(chatGPTMessages);
-          if (isMounted) {
-            if (aSteps.names && aSteps.names.length > 0) {
-              const updatedSteps = specifyAccomplishments(theSteps, aSteps.names);
-              setData(updatedSteps);
-              setRecommendedSteps(specifyRecommendations(updatedSteps));
-              const element = document.getElementById("loader-overlay") as HTMLElement;
-              if (element) {
-                element.style.display = "none";
-              }
-            }
+        let aSteps: any = selectedArticle?.aSteps;
+        if (!aSteps) {
+          aSteps = await getAccomplishments();
+        }
+        if (aSteps.names && aSteps.names.length > 0) {
+          const updatedSteps = specifyAccomplishments(theSteps, aSteps.names);
+          setData(updatedSteps);
+          setRecommendedSteps(specifyRecommendations(updatedSteps));
+          const element = document.getElementById("loader-overlay") as HTMLElement;
+          if (element) {
+            element.style.display = "none";
           }
         }
       } catch (error) {
@@ -83,11 +69,30 @@ Respond only a JSON object with the structure: {"names": [an array of only the n
     };
 
     fetchInstructions();
-
-    return () => {
-      isMounted = false; // Cleanup to prevent setting state on unmounted component
-    };
   }, [allContent, articleTypePath, steps]);
+
+  const getAccomplishments = async () => {
+    const theSteps = steps;
+    const docDescriptivePath = articleTypePath.slice(2).reverse().join(" of ");
+
+    const chatGPTMessages = [
+      {
+        role: "user",
+        content: `The following is the content of a ${docDescriptivePath} I've written:
+'''
+${allContent}
+'''
+Which of the following steps and sub-steps in writing the ${docDescriptivePath} have I already accomplished?
+${JSON.stringify(theSteps, null, 2)}
+Note that before accomplishing any step/sub-steps, I'm supposed to accomplish all its previous steps/sub-steps. So, don't include a step/sub-steps if I haven't accomplished all its previous steps/sub-steps.
+Each step also has some sub-steps. If I've accomplished a step, I've also accomplished all its sub-steps. If I haven't accomplished some sub-steps of a step, I haven't accomplished the step either.
+Respond only a JSON object with the structure: {"names": [an array of only the names of the steps/sub-steps I've already accomplished]}.`,
+      },
+    ];
+    const aSteps = await sendMessageToChatGPT(chatGPTMessages);
+    await updateDoc(doc(db, "articles", selectedArticle.id), { aSteps });
+    return aSteps;
+  };
 
   const specifyAccomplishments = (theSteps: Step[], names: string[]): Step[] => {
     return theSteps.map(step => {
