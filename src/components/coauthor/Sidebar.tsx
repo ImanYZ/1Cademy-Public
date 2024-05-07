@@ -143,6 +143,7 @@ const SideBar: React.FC<Props> = ({
                           recommendedSteps={recommendedSteps}
                           setRecommendedSteps={setRecommendedSteps}
                           setSelectedStep={setSelectedStep}
+                          selectedArticle={selectedArticle}
                         />
                       )}
                     </>
@@ -170,6 +171,7 @@ const SideBar: React.FC<Props> = ({
                         selectedStep={selectedStep}
                         issues={issues}
                         setIssues={setIssues}
+                        selectedArticle={selectedArticle}
                       />
                     )}
                   </>

@@ -1,5 +1,6 @@
 import { Box, Paper } from "@mui/material";
 import LinearProgress from "@mui/material/LinearProgress";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { sendMessageToChatGPT } from "../../services/openai";
@@ -11,6 +12,7 @@ interface Props {
   selectedStep: string | null;
   issues: string[];
   setIssues: Dispatch<SetStateAction<string[]>>;
+  selectedArticle: any;
 }
 
 const IssuesComp: React.FC<Props> = ({
@@ -20,34 +22,20 @@ const IssuesComp: React.FC<Props> = ({
   selectedStep,
   issues,
   setIssues,
+  selectedArticle,
 }) => {
+  const db = getFirestore();
   const [loading, setLoading] = useState<boolean>(true);
   const [expandedIssue, setExpandedIssue] = useState<number | null>(null);
   useEffect(() => {
     const fetchInstructions = async () => {
+      if (!selectedArticle?.aSteps) return;
       try {
         setLoading(true);
-        const chatGPTMessages = [
-          {
-            role: "user",
-            content: `The following is the content of our ${articleTypePath.slice(2).reverse().join(" of ")}:
-'''
-${allContent}
-'''
-We're currently at the following stage:
-'''
-${JSON.stringify(recommendedSteps)}
-'''
-${selectedStep || recommendedSteps.join(",")}
-You are one of the coauthors. We need your help to identify the issues in the article. Please read the article and identify all possible issues that you see in the article. Each issue should be a long string about a single issue with detailed explanations.
-Respond a JSON object with the following structure:
-{
-   "issues": [An array of all possible issues that you see in the article. Each array element should be a long string about a single issue with detailed explanation.],
-   "message": "Your message to the other coauthors in the team."
-}`,
-          },
-        ];
-        const issues = await sendMessageToChatGPT(chatGPTMessages);
+        let issues: any = selectedArticle?.issues;
+        if (!issues) {
+          issues = await getIssues();
+        }
         setIssues(issues.issues);
       } catch (error) {
         console.error("Failed to fetch or process instructions:", error);
@@ -57,6 +45,39 @@ Respond a JSON object with the following structure:
 
     fetchInstructions();
   }, [allContent, articleTypePath, selectedStep]);
+
+  const getIssues = async () => {
+    const chatGPTMessages = [
+      {
+        role: "user",
+        content: `The following is the content of our ${articleTypePath.slice(2).reverse().join(" of ")}:
+        '''
+        ${allContent}
+        '''
+        We're currently at the following stage:
+        '''
+        ${JSON.stringify(recommendedSteps)}
+        '''
+        You are one of the coauthors.
+        ${
+          selectedArticle?.priorReviews
+            ? "We have received the following reviews:\n'''\n" +
+              selectedArticle?.priorReviews +
+              "\n'''\n We need your help to synthesize and classify the issues discussed in these reviews, in addition to all other possible issues that you see in our writing. "
+            : "We need your help to identify the issues in our writing. Please read it carefully and identify all possible issues that you see in our writing. "
+        }
+        Respond a JSON object with the following structure:
+        {
+        "issues": [An array of all possible issues that you see in the article. Each array element should be a long string about a single issue with detailed explanation.],
+        "message": "Your message to the other coauthors in the team."
+        }`,
+      },
+    ];
+
+    const issues = await sendMessageToChatGPT(chatGPTMessages);
+    await updateDoc(doc(db, "articles", selectedArticle.id), { issues });
+    return issues;
+  };
 
   return loading ? (
     <LinearProgress color="secondary" />
