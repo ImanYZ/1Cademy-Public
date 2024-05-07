@@ -21,16 +21,20 @@ import {
   Select,
   Tab,
   Tabs,
+  TextareaAutosize,
   TextField,
   Typography,
 } from "@mui/material";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
 import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { useFormik } from "formik";
+import Fuse from "fuse.js";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
 import { sendMessageToChatGPT } from "src/services/openai";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { delay } from "../../lib/utils/utils";
 import DisciplinesComp from "./DisciplinesComp";
@@ -126,6 +130,21 @@ const ContentComp: React.FC<Props> = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const [editable, setEditable] = useState<boolean>(false);
   const popperRef = useRef<any>(null);
+  const [fuseInstance, setFuseInstance] = useState<any>(null);
+  const [priorReviews, setPriorReviews] = useState<string>("");
+
+  useEffect(() => {
+    if (users.length === 0) return;
+    if (!fuseInstance) {
+      const fuse = new Fuse(users, {
+        keys: ["email", "fName", "lName"],
+        isCaseSensitive: true,
+        includeMatches: true,
+        findAllMatches: false,
+      });
+      setFuseInstance(fuse);
+    }
+  }, [users, fuseInstance]);
 
   useEffect(() => {
     (async () => {
@@ -164,6 +183,7 @@ const ContentComp: React.FC<Props> = ({
   useEffect(() => {
     (async () => {
       if (selectedArticle) {
+        setPriorReviews(selectedArticle?.priorReviews || "");
         const quillEditor = quillRef.current.getEditor();
         setContent(selectedArticle.content);
         await delay(1000);
@@ -294,6 +314,9 @@ const ContentComp: React.FC<Props> = ({
         if (draft) {
           articleData["content"] = draft;
         }
+        if (priorReviews) {
+          articleData["priorReviews"] = priorReviews;
+        }
         const docRef = await addDoc(collection(db, "articles"), articleData);
         await saveLogs({
           doer: user?.uname,
@@ -316,7 +339,7 @@ const ContentComp: React.FC<Props> = ({
       const q = query(
         collection(db, "articles"),
         where("title", "==", formik.values.title),
-        where("user", "==", user?.userId)
+        where("user", "==", user?.uname)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
@@ -365,6 +388,8 @@ const ContentComp: React.FC<Props> = ({
           information: formik.values.information,
           objective: formik.values.objective,
         },
+        issues: null,
+        aSteps: null,
         updatedAt: new Date(),
       });
       let text = "";
@@ -401,7 +426,6 @@ const ContentComp: React.FC<Props> = ({
     } else {
       const articleData: any = {
         title: formik.values.title,
-        content: GPTResponse.outline,
         path,
         outline: {
           outlined: formik.values.outlined,
@@ -409,10 +433,15 @@ const ContentComp: React.FC<Props> = ({
           information: formik.values.information,
           objective: formik.values.objective,
         },
+        issues: null,
+        aSteps: null,
         updatedAt: new Date(),
       };
       if (draft) {
         articleData["content"] = draft;
+      }
+      if (priorReviews) {
+        articleData["priorReviews"] = priorReviews;
       }
       await updateDoc(doc(db, "articles", selectedArticle.id), articleData);
       await saveLogs({
@@ -452,6 +481,8 @@ const ContentComp: React.FC<Props> = ({
     if (selectedArticle?.id) {
       setArticleAndDOM();
       await updateDoc(doc(db, "articles", selectedArticle.id), {
+        issues: null,
+        aSteps: null,
         content,
         updatedAt: new Date(),
       });
@@ -471,9 +502,9 @@ const ContentComp: React.FC<Props> = ({
         setContent("");
       } else {
         handleClose();
-        const selectedArticle = userArticles.filter((article: any) => article.id === e.target.value);
-        setSelectedArticle(selectedArticle[0]);
-        setArticleTypePath(selectedArticle[0]?.path || []);
+        const selectedArticle = userArticles.find((article: any) => article.id === e.target.value);
+        setSelectedArticle(selectedArticle);
+        setArticleTypePath(selectedArticle?.path || []);
       }
     },
     [selectedArticle, userArticles]
@@ -610,7 +641,13 @@ const ContentComp: React.FC<Props> = ({
   };
 
   const filteredUsers = useMemo(() => {
-    return users.filter((user: any) => user.email.toLowerCase() === searchTerm.toLowerCase());
+    if (!fuseInstance) return;
+    const results = fuseInstance
+      .search(searchTerm)
+      ?.map((result: any) => result.item)
+      ?.splice(0, 10);
+
+    return results;
   }, [searchTerm, users]);
 
   const handleClickOutside = (event: any) => {
@@ -671,7 +708,7 @@ const ContentComp: React.FC<Props> = ({
             value={searchTerm}
           />
           <Popper
-            sx={{ zIndex: 999999, width: "300px" }}
+            sx={{ zIndex: 999999, width: "300px", height: "350px", overflowY: "auto" }}
             open={!!searchTerm && filteredUsers?.length > 0}
             anchorEl={anchorEl}
             ref={popperRef}
@@ -688,9 +725,11 @@ const ContentComp: React.FC<Props> = ({
                           sx={{ border: "none" }}
                           imageSx={{ width: "40px", height: "40px" }}
                         />
-                        <ListItemText primary={`${user.fName} ${user.lName}`} />
+                        <Box>
+                          <ListItemText primary={`${user.fName} ${user.lName}`} />
+                          <Typography variant="subtitle2">{user.email}</Typography>
+                        </Box>
                       </Box>
-                      <Typography variant="subtitle1">{user.email}</Typography>
                     </Box>
                   </ListItem>
                 ))}
@@ -912,7 +951,29 @@ const ContentComp: React.FC<Props> = ({
                     </FormControl>
                   </>
                 ) : (
-                  selectedTab === 1 && <ReactQuill style={{ height: "auto" }} value={draft} onChange={setDraft} />
+                  selectedTab === 1 && (
+                    <>
+                      <ReactQuill style={{ height: "200px" }} value={draft} onChange={setDraft} />
+                      <Box mt={8}>
+                        <TextareaAutosize
+                          minRows={4}
+                          placeholder="Copy the reviews that you have already received below:"
+                          style={{
+                            width: "100%",
+                            fontSize: 16,
+                            border: "none",
+                            outline: "none",
+                            padding: "15px",
+                            fontFamily: "system-ui",
+                            background: DESIGN_SYSTEM_COLORS.notebookG700,
+                            color: "white",
+                          }}
+                          value={priorReviews}
+                          onChange={e => setPriorReviews(e.target.value)}
+                        />
+                      </Box>
+                    </>
+                  )
                 )}
               </Box>
             )}

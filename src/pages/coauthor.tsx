@@ -128,6 +128,7 @@ const App = () => {
                 return prev;
               }
             });
+            return;
           }
         }
         if (firstLoad) {
