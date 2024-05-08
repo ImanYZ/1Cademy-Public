@@ -3,10 +3,10 @@ import "react-quill/dist/quill.snow.css";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import HomeIcon from "@mui/icons-material/Home";
 import {
   Box,
   Button,
-  Divider,
   FormControl,
   IconButton,
   Input,
@@ -14,11 +14,9 @@ import {
   List,
   ListItem,
   ListItemText,
-  MenuItem,
   Modal,
   Paper,
   Popper,
-  Select,
   Tab,
   Tabs,
   TextareaAutosize,
@@ -26,9 +24,10 @@ import {
   Typography,
 } from "@mui/material";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
-import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { useFormik } from "formik";
 import Fuse from "fuse.js";
+import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
@@ -42,9 +41,7 @@ import OptimizedAvatar from "./OptimizedAvatar";
 
 interface Props {
   selectedArticle: any;
-  setSelectedArticle: any;
   user: User | null;
-  userArticles: any;
   setArticleContent: any;
   setArticleDOM: any;
   quillRef: any;
@@ -101,8 +98,6 @@ const camelCaseToSpaces = (text: string): string => {
 
 const ContentComp: React.FC<Props> = ({
   selectedArticle,
-  setSelectedArticle,
-  userArticles,
   user,
   setArticleContent,
   setArticleDOM,
@@ -115,6 +110,7 @@ const ContentComp: React.FC<Props> = ({
   articleTypes,
 }) => {
   const db = getFirestore();
+  const router = useRouter();
   const [content, setContent] = useState(selectedArticle?.content);
   const [open, setOpen] = useState(false);
   const [lastClickPosition, setLastClickPosition] = useState(0);
@@ -495,20 +491,20 @@ const ContentComp: React.FC<Props> = ({
       });
     }
   }, [user, content, selectedArticle]);
-  const handleChange = useCallback(
-    (e: any) => {
-      if (!e.target.value) {
-        setSelectedArticle(null);
-        setContent("");
-      } else {
-        handleClose();
-        const selectedArticle = userArticles.find((article: any) => article.id === e.target.value);
-        setSelectedArticle(selectedArticle);
-        setArticleTypePath(selectedArticle?.path || []);
-      }
-    },
-    [selectedArticle, userArticles]
-  );
+  // const handleChange = useCallback(
+  //   (e: any) => {
+  //     if (!e.target.value) {
+  //       setSelectedArticle(null);
+  //       setContent("");
+  //     } else {
+  //       handleClose();
+  //       const selectedArticle = userArticles.find((article: any) => article.id === e.target.value);
+  //       setSelectedArticle(selectedArticle);
+  //       setArticleTypePath(selectedArticle?.path || []);
+  //     }
+  //   },
+  //   [selectedArticle, userArticles]
+  // );
 
   const handleSelectionChange = useCallback(
     (range: any) => {
@@ -552,12 +548,12 @@ const ContentComp: React.FC<Props> = ({
     setSelectedTab(newValue);
   };
 
-  const deleteArticle = async (event: any, articleId: string) => {
-    event.stopPropagation();
-    if (confirm("Are you sure to delete article")) {
-      await deleteDoc(doc(db, "articles", articleId));
-    }
-  };
+  // const deleteArticle = async (event: any, articleId: string) => {
+  //   event.stopPropagation();
+  //   if (confirm("Are you sure to delete article")) {
+  //     await deleteDoc(doc(db, "articles", articleId));
+  //   }
+  // };
 
   const handleTreeItemClick = (path: string[]) => {
     setPath(path);
@@ -776,7 +772,15 @@ const ContentComp: React.FC<Props> = ({
         )}
       </Box>
       <Box mt={2}>
-        <Select
+        <IconButton
+          sx={{ position: "absolute", right: "355px", top: "59px" }}
+          onClick={() => {
+            router.push("/coauthor");
+          }}
+        >
+          <HomeIcon />
+        </IconButton>
+        {/* <Select
           labelId="coauthor-articles-select"
           id="coauthor-articles-select"
           value={selectedArticle?.id || 0}
@@ -810,7 +814,7 @@ const ContentComp: React.FC<Props> = ({
               )}
             </MenuItem>
           ))}
-        </Select>
+        </Select> */}
         <ReactQuill
           style={{ height: "calc(100vh - 110px)" }}
           ref={quillRef}
