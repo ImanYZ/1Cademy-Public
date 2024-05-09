@@ -135,7 +135,7 @@ MessageInputProps) => {
   };
 
   const sendMessage = useCallback(
-    async (imageUrls: string[], important = false) => {
+    async (imageUrls: string[], important = false, inputValue: string) => {
       try {
         if (sendMessageType === "edit") {
           saveMessageEdit(inputValue);
@@ -178,7 +178,6 @@ MessageInputProps) => {
             roomType,
           });
         }
-        setInputValue("");
       } catch (error) {
         console.error(error);
       }
@@ -236,7 +235,8 @@ MessageInputProps) => {
   );
 
   const handleSendMessage = () => {
-    sendMessage(imageUrls, important);
+    sendMessage(imageUrls, important, inputValue);
+    setInputValue("");
     setImageUrls([]);
     setImportant(false);
   };
