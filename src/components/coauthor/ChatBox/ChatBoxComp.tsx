@@ -13,6 +13,7 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { User } from "src/knowledgeTypes";
 
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { sendMessageToChatGPT } from "../../../services/openai";
@@ -38,6 +39,7 @@ interface Props {
   sideBarWidth: number;
   findScrollAndSelect: (text: string) => Promise<void> | Promise<HTMLElement>;
   user: User | null;
+  quillRef: any;
 }
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -77,9 +79,10 @@ const ChatBoxComp: React.FC<Props> = ({
   selectedArticle,
   articleTypePath,
   recommendedSteps,
-  sideBarWidth,
+  //sideBarWidth,
   findScrollAndSelect,
   user,
+  quillRef,
 }) => {
   const db = getFirestore();
   const [messages, setMessages] = useState<any>([]);
@@ -414,7 +417,8 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             lineHeight: "24px",
                           }}
                         >
-                          <Typography
+                          <MarkdownRender text={messageText} />
+                          {/* <Typography
                             display="block"
                             sx={{
                               fontSize: "16px",
@@ -423,7 +427,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             }}
                           >
                             {messageText}
-                          </Typography>
+                          </Typography> */}
 
                           <Box
                             sx={{
@@ -486,6 +490,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             </Button>
                           </Box>
                           <ImproveItemComp
+                            quillRef={quillRef}
                             improvement={improvement}
                             theme={theme}
                             findScrollAndSelect={findScrollAndSelect}
@@ -516,7 +521,6 @@ If the value of the field 'improvement' is {}, it means that your response to th
         overflowX: "hidden",
         listStyle: "none",
         transition: "box-shadow 0.3s",
-        pb: "120px",
       }}
     >
       <Box
@@ -533,10 +537,9 @@ If the value of the field 'improvement' is {}, it means that your response to th
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          height: "90%",
         }}
       >
-        <Box id="comments-section" sx={{ height: "calc(100vh - 300px)" }}>
+        <Box id="comments-section">
           {messages.length === 0 ? (
             <Box
               sx={{
@@ -573,10 +576,7 @@ If the value of the field 'improvement' is {}, it means that your response to th
         <Box
           id="comment-input"
           sx={{
-            position: "fixed",
-            bottom: "10px",
-            left: "7px",
-            width: `${sideBarWidth - 19}px`,
+            mt: "20px",
           }}
         >
           <MessageInput

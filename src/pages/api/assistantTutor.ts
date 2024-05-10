@@ -8,6 +8,7 @@ import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
 import { extractArray } from "./assignment/generateRubrics";
+import { uploadFileToStorage } from "./streamAudio";
 type Message = {
   role: string;
   content: string;
@@ -27,10 +28,41 @@ const getId = () => {
   return db.collection("tutorConversations").doc().id;
 };
 const streamAnswer = async (res: any, answer: string) => {
+  if (
+    answer ===
+    "It sounds like your message is not relevant to this course. I can only help you within the scope of this course."
+  ) {
+    res.write(
+      `{"audio":"https://storage.googleapis.com/visualexp-5d2c6.appspot.com/TextToSpeech/uStfkcAJhJaQ82G7Fm4d.mp3",
+        "chunk":"${answer}"}`
+    );
+  }
   for (let word of answer.split(" ")) {
     await delay(180);
     res.write(word + " ");
   }
+};
+const getScrollToFlashcard = (messages: any) => {
+  const lastQuestion = messages.filter((m: any) => m.hasOwnProperty("question")).at(-1);
+  const scroll_flashcard = lastQuestion?.concept || {};
+  return scroll_flashcard?.id || "";
+};
+const getFurtherExplainConcept = (messages: any) => {
+  const lastQuestion = messages.filter((m: any) => m.hasOwnProperty("question") && !m.question).at(-1);
+  const furtherExplainConcept = lastQuestion?.concept;
+  return furtherExplainConcept;
+};
+
+const getQuestionAudio = async (question: string) => {
+  const mp3 = await openai.audio.speech.create({
+    model: "tts-1-hd",
+    voice: "shimmer",
+    input: question,
+  });
+  const newID = db.collection("newId").doc().id;
+  const buffer = Buffer.from(await mp3.arrayBuffer());
+  const audioURL = await uploadFileToStorage(buffer, "TextToSpeech", `${newID}.mp3`);
+  return audioURL;
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { uid, uname, fName, customClaims } = req.body?.data?.user?.userData;
@@ -43,21 +75,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
   try {
     console.log("assistant Tutor", uname);
-
     let default_message = false;
-
     let selectedModel = "";
     const isInstructor = customClaims.instructor;
     if (!!cardsModel) {
       selectedModel = cardsModel;
     }
     /*  */
-
     /*  */
     console.log({ url });
     const unit = (url.split("/").pop() || "").split("#")[0];
     console.log({ unit });
-
     if (url.includes("the-mission-corporation")) {
       course = "the-mission-corporation-4R-trimmed.html";
     }
@@ -66,11 +94,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
       await getPromptInstructions(course, uname, isInstructor);
-
     const concepts = await getConcepts(unit, uname, cardsModel, isInstructor, course);
     unitTitle = concepts[0]?.sectionTitle || "";
-    const defaultAnswer = `Hello I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. How familiar are you with 
-    ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}?`;
+    const defaultAnswer = `Hello. I’m Adrian and I’m here to guide your learning by asking questions and providing feedback based on your responses. How familiar are you with
+      ${unitTitle ? unitTitle.replace(/^\d+(\.\d+)?\s+/, "") : ""}${unitTitle.endsWith("?") ? "" : "?"}`;
     if (!message) {
       default_message = true;
       await streamAnswer(res, defaultAnswer);
@@ -95,7 +122,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       title: "",
       content: "",
     });
-
     const conversationDocs = await db
       .collection("tutorConversations")
       .where("unit", "==", unit)
@@ -103,7 +129,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       .where("cardsModel", "==", selectedModel)
       .where("deleted", "==", false)
       .get();
-
     let conversationData: any = {
       messages: [],
       unit,
@@ -125,7 +150,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       return;
     }
     /*  if the conversation associated with this unit already exist we continue the conversation from there
-       otherwise we initialize a new one  */
+         otherwise we initialize a new one  */
     if (conversationDocs.docs.length > 0) {
       const conversationDoc = conversationDocs.docs[0];
       conversationData = conversationDoc.data();
@@ -149,21 +174,38 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       .at(-1);
     console.log(">=== instructorMessage ===>", instructorMessage);
     const studentMessage = message;
-    const { questions, questionAnswer, clarificationRequest, continueLearning, clarify }: any = default_message
-      ? { questions: [], questionAnswer: "", clarificationRequest: "", continueLearning: "", clarify: "" }
-      : instructorMessage.hasOwnProperty("question")
-      ? await getQuestionsAfterQuestion(instructorMessage.content, message)
-      : await getQuestionsAfterAnswer(instructorMessage.content, studentMessage);
+    const { questions, questionAnswer, clarificationRequest, continueLearning, clarify, unrelatedMessage }: any =
+      default_message
+        ? { questions: [], questionAnswer: "", clarificationRequest: "", continueLearning: "", clarify: "" }
+        : instructorMessage.hasOwnProperty("question")
+        ? await getQuestionsAfterQuestion(instructorMessage.content, message)
+        : await getQuestionsAfterAnswer(instructorMessage.content, studentMessage);
     console.log({ questions, questionAnswer, clarificationRequest, continueLearning, clarify });
     //
     //after extracting the questions and the answer
-    if (questions.length > 0) {
-      deviating = true;
-    }
+    deviating = questions.length > 0;
     if (clarify) {
       furtherExplain = true;
     }
-
+    if (unrelatedMessage) {
+      const responseMessage = `I'm sorry, but I'm not sure how to respond to "${studentMessage}". Could you please provide more context or clarify your question?`;
+      await streamAnswer(res, responseMessage);
+      conversationData.messages.push({
+        role: "assistant",
+        content: responseMessage,
+        deviatingMessage: true,
+        sentAt: new Date(),
+        mid: getId(),
+        questions,
+      });
+      const questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+      if (!!questionMessage) {
+        conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+      }
+      await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
+      res.end();
+      return;
+    }
     console.log("questions", questions);
     if (!!clarificationRequest) {
       const clarifiedQuestion = await clarifyTheQuestion(
@@ -210,16 +252,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       return;
     }
     conversationId = newConversationRef.id;
-
     if (!message) {
-      // message = `Hello My name is ${fName}.`;
       conversationData.usedFlashcards = [];
     }
-
     let scroll_flashcard_next = "";
     let nextFlashcard = null;
     if ((!furtherExplain && !deviating) || !questionAnswer) {
-      scroll_flashcard_next = conversationData?.nextFlashcard?.id || "";
+      scroll_flashcard_next = getScrollToFlashcard(conversationData.messages);
       console.log("conversationData.usedFlashcards", conversationData.usedFlashcards);
       if (scroll_flashcard_next) {
         conversationData.usedFlashcards.push(scroll_flashcard_next);
@@ -232,13 +271,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         selfStudy
       );
       if (nextFlashcard) {
-        conversationData.previousFlashcard = conversationData.nextFlashcard;
         conversationData.nextFlashcard = nextFlashcard;
       } else {
         delete conversationData.nextFlashcard;
       }
     }
-
     //update the system prompt  to add the next flashcard that gpt need to ask a question about
     if (nextFlashcard) {
       systemPrompt;
@@ -251,20 +288,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         nextFlashcard
       );
     }
-
     // add the extra PS to the message of the user
     // we ignore it afterward when saving the conversation in the db
-
     let furtherExplainPrompt = "";
-    if (furtherExplain && conversationData.previousFlashcard) {
+    if (furtherExplain && !!getFurtherExplainConcept(conversationData.messages)) {
+      const furtherExplainConcept = getFurtherExplainConcept(conversationData.messages);
       furtherExplainPrompt = `Further explain the content of the following concept:{
-    title: "${conversationData?.previousFlashcard?.title || ""}",
-    content: "${conversationData?.previousFlashcard?.content || ""}"
-  }`;
-
+        title: "${furtherExplainConcept.title || ""}",
+        content: "${furtherExplainConcept.content || ""}"
+        }`;
       /*  */
     }
-
     console.log("furtherExplainPrompt", furtherExplainPrompt);
     if (!!message && !!(questionAnswer || "").trim()) {
       conversationData.messages.push({
@@ -273,7 +307,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         sentAt: new Date(),
         mid: getId(),
         default_message,
-        nextFlashcard: nextFlashcard?.id || "",
         deviating,
       });
     }
@@ -285,11 +318,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         sentAt: new Date(),
         mid: getId(),
         default_message,
-        nextFlashcard: nextFlashcard?.id || "",
         deviating,
+        ignoreMessage: true,
       });
     }
-
     const { mergedMessages, mergedMessagesMinusFurtherExplain } = mergeDividedMessages([...conversationData.messages]);
     console.log(mergedMessages);
     // const instructorLastMessage = mergedMessages.at(-2) || {};
@@ -298,12 +330,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //   //   ...conversationData.usedFlashcards,
     //   //   nextFlashcard?.id || "",
     //   // ]);
-
     //   deviating = _deviating;
     //   detectedSections = sections;
     // }
     console.log({ deviating, questionAnswer });
-
     if (questionAnswer || default_message || furtherExplain) {
       if (!nextFlashcard && !conversationData.done && conversationData.progress >= (passingThreshold || 91) / 100) {
         await delay(2000);
@@ -319,24 +349,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         });
         conversationData.done = true;
       }
-
-      const { completeMessage, answer, question, emotion, inform_instructor, evaluation } = default_message
-        ? {
-            completeMessage: defaultAnswer,
-            answer: defaultAnswer,
-            question: "",
-            emotion: "",
-            inform_instructor: "",
-            evaluation: 0,
-          }
-        : await streamMainResponse({
-            res,
-            deviating,
-            mergedMessages,
-            scroll_flashcard_next,
-            conversationData,
-            furtherExplain,
-          });
+      const { completeMessage, answer, question, emotion, inform_instructor, evaluation, audioQuestion } =
+        default_message
+          ? {
+              completeMessage: defaultAnswer,
+              answer: defaultAnswer,
+              question: "",
+              emotion: "",
+              inform_instructor: "",
+              evaluation: 0,
+              audioQuestion: "",
+            }
+          : await streamMainResponse({
+              res,
+              deviating,
+              mergedMessages,
+              scroll_flashcard: scroll_flashcard_next,
+              conversationData,
+              furtherExplain,
+            });
       if (!default_message && !conversationData.guidedStudy) {
         const evaluations: number[] = Object.values(conversationData.flashcardsScores || {});
         if (evaluations.filter((item: number) => item < 5).length >= 3) {
@@ -358,12 +389,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         inform_instructor: inform_instructor,
         prior_evaluation: evaluation,
         concept: furtherExplain ? "" : scroll_flashcard_next,
+        ignoreMessage: furtherExplain,
       });
-
       // if (default_message) {
       //   await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
       // }
-
       if (typeof question === "string" && !!question) {
         conversationData.messages.push({
           role: "assistant",
@@ -371,10 +401,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           divided: !!answer ? divideId : false,
           question: true,
           sentAt: new Date(),
+          audioQuestion: audioQuestion || "",
           mid: getId(),
+          ...(!!nextFlashcard && {
+            concept: {
+              title: nextFlashcard.title,
+              content: nextFlashcard.content,
+              id: nextFlashcard.id,
+            },
+          }),
         });
       } else if (!!nextFlashcard) {
-        const question = await getTheNextQuestion(nextFlashcard);
+        const { question, audioQuestion } = await getTheNextQuestion(nextFlashcard);
         conversationData.messages[conversationData.messages.length - 1].completeMessage =
           "{\n" +
           `  "your_response": "${answer}",\n` +
@@ -390,13 +428,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           question: true,
           sentAt: new Date(),
           mid: getId(),
+          audioQuestion,
+          ...(!!nextFlashcard && {
+            concept: {
+              title: nextFlashcard.title,
+              content: nextFlashcard.content,
+              id: nextFlashcard.id,
+            },
+          }),
         });
       }
       if (!furtherExplain && !default_message) {
         /* we calculate the progress of the user in this unit
          */
         const parsedEvaluation = parseFloat(evaluation) || 0;
-
         if (scroll_flashcard_next && !furtherExplain) {
           if (conversationData.hasOwnProperty("flashcardsScores")) {
             conversationData.flashcardsScores[scroll_flashcard_next] = parsedEvaluation;
@@ -406,14 +451,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             };
           }
         }
-
         if ((conversationData.progress || 0) < 1) {
           conversationData.progress = roundNum(
-            calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
+            calculateProgress(conversationData.flashcardsScores || {}) / (concepts.length * 10)
           );
         }
         await addScoreToSavedCard(parsedEvaluation, scroll_flashcard_next, uname);
-
         if (conversationData.hasOwnProperty("scores")) {
           conversationData.scores.push({
             score: evaluation,
@@ -429,9 +472,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           ];
         }
       }
-
       await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
-
       mergedMessagesMinusFurtherExplain.push({
         role: "assistant",
         content: !answer ? completeMessage : answer,
@@ -441,19 +482,59 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       });
     }
     if (deviating) {
-      const deviatingMessage = `Your question${
-        questions.length > 2 ? "s are" : " is"
-      } covered in other parts of this material. Would you like to deviate from our current topic to explore it?`;
-      await streamAnswer(res, deviatingMessage);
-      const message = {
-        role: "assistant",
-        content: deviatingMessage,
+      conversationData.messages.push({
+        role: "user",
+        content: message,
         deviated: true,
         sentAt: new Date(),
         mid: getId(),
         questions,
-      };
-      conversationData.messages.push(message);
+      });
+      let outOfContext = true;
+      for (let question of questions) {
+        const { sections }: any = await getChapterRelatedToResponse(question, courseName);
+        const { paragraphs } = await getParagraphs(sections);
+        if (paragraphs.length > 0) {
+          outOfContext = false;
+          break;
+        }
+      }
+      if (outOfContext) {
+        const deviatingMessage =
+          "It sounds like your message is not relevant to this course. I can only help you within the scope of this course.";
+        await streamAnswer(res, deviatingMessage);
+        conversationData.messages.push({
+          role: "assistant",
+          content: deviatingMessage,
+          deviatingMessage: true,
+          sentAt: new Date(),
+          mid: getId(),
+          questions,
+        });
+        const questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
+        if (!!questionMessage) {
+          conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
+        }
+      } else {
+        const deviatingMessage = `Your question${
+          questions.length > 1 ? "s are" : " is"
+        } covered in other parts of this material. Would you like to deviate from our current topic to explore it?`;
+        res.write(
+          `{"audio":"https://storage.googleapis.com/visualexp-5d2c6.appspot.com/TextToSpeech/${
+            questions.length > 1 ? "OJbxVphwGdVNVy5tp7kI" : "OnkhNLuIScshKokf3gqA"
+          }.mp3",
+            "chunk":"${deviatingMessage}"}`
+        );
+        await streamAnswer(res, deviatingMessage);
+        conversationData.messages.push({
+          role: "assistant",
+          content: deviatingMessage,
+          deviated: true,
+          sentAt: new Date(),
+          mid: getId(),
+          questions,
+        });
+      }
     }
     conversationData.usedFlashcards = Array.from(new Set(conversationData.usedFlashcards));
     await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
@@ -542,7 +623,12 @@ const getQuestionsAfterAnswer = async (
 const getQuestionsAfterQuestion = async (
   instructorMessage: string,
   studentMessage: string
-): Promise<{ questions: string[]; questionAnswer: string; clarificationRequest: string }> => {
+): Promise<{
+  questions: string[];
+  questionAnswer: string;
+  clarificationRequest: string;
+  unrelatedMessage: boolean;
+}> => {
   let questions: string[] = [];
   let questionAnswer: string = "";
   let clarificationRequest: string = "";
@@ -585,8 +671,8 @@ const getQuestionsAfterQuestion = async (
     questionAnswer = objectResponse.answer || "";
     clarificationRequest = objectResponse.clarificationRequest || "";
   }
-
-  return { questions, questionAnswer, clarificationRequest };
+  const unrelatedMessage = !questions.length && !questionAnswer && !clarificationRequest;
+  return { questions, questionAnswer, clarificationRequest, unrelatedMessage };
 };
 
 const clarifyTheQuestion = async (
@@ -602,7 +688,7 @@ const clarifyTheQuestion = async (
   try {
     const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
     const userPrompt =
-      "Please clarify your question by rephrasing it, explaining it further, and provide examples if possible.";
+      "Please clarify your question by rephrasing it, explaining it further, and providing examples if possible. Conclude your clarification with restating the question and encouraging the student to answer it.";
     messages[0].content = systemPrompt;
     const messagesSet = new Set();
     const messagesSimplified = messages
@@ -639,136 +725,24 @@ const clarifyTheQuestion = async (
     console.log(error);
   }
 };
-const getEvaluation = async ({
-  mergedMessages,
-  furtherExplain,
-  scroll_flashcard_next,
-  conversationData,
-  uname,
-  concepts,
-  default_message,
-}: {
-  mergedMessages: any;
-  furtherExplain: boolean;
-  scroll_flashcard_next: string;
-  conversationData: any;
-  uname: string;
-  concepts: any;
-  default_message: boolean;
-}) => {
-  console.log("getEvaluation");
-  let lateResponse: {
-    evaluation: any;
-    emotion: string;
-    progress: string;
-    inform_instructor: string;
-    learning_summary: string;
-  } = {
-    evaluation: "0",
-    emotion: "",
-    progress: "0",
-    inform_instructor: "",
-    learning_summary: "",
-  };
-  let gpt_response = false;
-  let tries = 0;
 
-  if (!furtherExplain && !default_message) {
-    while (!gpt_response && tries < 5) {
-      try {
-        tries = tries + 1;
-        const _messages = mergedMessages;
-        _messages.push({
-          role: "user",
-          content: `
-          Evaluate my answer to your last question. Your response should be a JSON object with the following structure:
-          {
-            "evaluation":"A number between 0 to 10 indicating the quality of my answer to your last question. If I perfectly answered your question with no difficulties, give me a 10, otherwise give me a lower number, 0 meaning my answer was completely wrong or irrelevant to the question.",
-            "emotion": How happy are you with my last response? Give me only one of the values "sad", "annoyed", "very happy", "clapping", "crying", "apologies". Your default emotion should be "happy". Give me variations of emotions to my different answers,
-            "inform_instructor": "Yes" if the instructor should be informed about my response to your last message. "No" if there is no reason to take the instructor's time about my last message to you.
-          }
-          Do not print anything other than this JSON object.`,
-        });
-        // "progress": A number between 0 to 100 indicating the percentage of the concept cards in this unit that I've already learned, based on the correctness of all my answers to your questions so far. These numbers should not indicate the number of concept cards that I have studied. You should calculate it based on my responses to your questions, indicating the proportion of the concepts cards in this page that I've learned and correctly answered the corresponding questions. This number should be cumulative and it should monotonically and slowly increase.
-
-        const response = await openai.chat.completions.create({
-          messages: _messages,
-          model: "gpt-4-0125-preview",
-          temperature: 0,
-        });
-        const responseText = response.choices[0].message.content;
-        lateResponse = extractJSON(responseText);
-        gpt_response = true;
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    if (!lateResponse) {
-      lateResponse = {
-        evaluation: "0",
-        emotion: "",
-        progress: "0",
-        inform_instructor: "",
-        learning_summary: "",
-      };
-    }
-
-    /* we calculate the progress of the user in this unit
-     */
-
-    const evaluation = isNaN(lateResponse.evaluation) ? 0 : parseFloat(lateResponse.evaluation);
-
-    if (scroll_flashcard_next && !furtherExplain) {
-      if (conversationData.hasOwnProperty("flashcardsScores")) {
-        conversationData.flashcardsScores[scroll_flashcard_next] = evaluation;
-      } else {
-        conversationData.flashcardsScores = {
-          [scroll_flashcard_next]: evaluation,
-        };
-      }
-    }
-
-    if (conversationData.progress < 1) {
-      conversationData.progress = roundNum(
-        calculateProgress(conversationData.flashcardsScores) / (concepts.length * 10)
-      );
-    }
-    await addScoreToSavedCard(evaluation, scroll_flashcard_next, uname);
-
-    if (conversationData.hasOwnProperty("scores")) {
-      conversationData.scores.push({
-        score: evaluation,
-        date: new Date(),
-        flashcard: scroll_flashcard_next,
-      });
-    } else {
-      conversationData.scores = [
-        {
-          score: evaluation,
-          date: new Date(),
-        },
-      ];
-    }
-  }
-  return lateResponse;
-};
 /*  */
 const streamMainResponse = async ({
   res,
   deviating,
   mergedMessages,
-  scroll_flashcard_next,
+  scroll_flashcard,
   conversationData,
   furtherExplain,
 }: {
   res: NextApiResponse<any>;
   deviating: boolean;
   mergedMessages: any;
-  scroll_flashcard_next: string;
+  scroll_flashcard: string;
   conversationData: any;
   furtherExplain: boolean;
 }) => {
-  console.log("===> streamMainResponse");
+  console.log("===> streamMainResponse", { furtherExplain });
   let completeMessage = "";
 
   console.log({ deviatingResponse: deviating });
@@ -787,28 +761,32 @@ const streamMainResponse = async ({
   for await (const result of response) {
     if (result.choices[0].delta.content) {
       const resultText = result.choices[0].delta.content;
-
-      if (!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) {
+      if ((!completeMessage.includes(`evaluation`) && completeMessage.includes(`"your_response":`)) || furtherExplain) {
         res.write(resultText);
       }
       completeMessage = completeMessage + resultText;
-      if (completeMessage.includes(`evaluation`) && !scrolled) {
-        if (scroll_flashcard_next) {
-          conversationData.usedFlashcards.push(scroll_flashcard_next);
-          res.write(`flashcard_id: "${scroll_flashcard_next}"`);
-        }
-        if (furtherExplain) {
-          const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
-          res.write(`flashcard_id: "${scroll_to}"`);
-        }
-        scrolled = true;
-      }
     }
   }
 
   console.log(completeMessage);
   const response_object = extractJSON(completeMessage, furtherExplain);
-  console.log("response_object", response_object);
+  console.log("response_object", response_object, "scroll_flashcard=>", scroll_flashcard);
+  const responseEvaluation = response_object?.evaluation || 0;
+  if (scroll_flashcard && !furtherExplain) {
+    conversationData.usedFlashcards.push(scroll_flashcard);
+    res.write(`{"flashcard_id": "${scroll_flashcard}", "evaluation":"${responseEvaluation}"}`);
+  }
+  // if (furtherExplain) {
+  //   const scroll_to = conversationData.usedFlashcards[conversationData.usedFlashcards.length - 1];
+  //   res.write(`{"flashcard_id": "${scroll_to}", "evaluation":"${responseEvaluation}"}`);
+  // }
+  let audioQuestion = "";
+  if (!!response_object?.next_question.trim()) {
+    audioQuestion = await getQuestionAudio(response_object?.next_question);
+  }
+  if (furtherExplain) {
+    res.write("done");
+  }
   return {
     completeMessage,
     answer: response_object?.your_response || "",
@@ -816,6 +794,7 @@ const streamMainResponse = async ({
     emotion: response_object?.emotion || "",
     inform_instructor: response_object?.inform_instructor || "",
     evaluation: response_object?.evaluation || 0,
+    audioQuestion,
   };
 };
 
@@ -829,27 +808,11 @@ export const handleDeviating = async (
   cardsModel: string,
   sections: { section: string; url: string }[]
 ) => {
-  // relevanceResponse = await checkIfTheMessageIsRelevant(mergedMessagesMinusFurtherExplain, courseName);
-
   let featuredConcepts: any = [];
   let answer = "";
   let used_sections_message = "";
   if (relevanceResponse) {
-    //we have keepLoading at the end of the stream message to keep the front-end loading until we receive the full response.
-    // const messDev =
-    //   "You're deviating from the topic of the current session. For a thoughtful response, I need to take some time to find relevant parts of the course.";
-    // res.write(`${messDev}keepLoading`);
-    // conversationData.messages.push({
-    //   role: "assistant",
-    //   content: messDev,
-    //   sentAt: new Date(),
-    //   mid: getId(),
-    //   concepts: featuredConcepts,
-    //   deviatingMessage: true,
-    // });
-    // call other agent to respond
     const { paragraphs, allParagraphs } = await getParagraphs(sections);
-
     conversationData.messages.push({
       role: "user",
       content: "Yes, Let Go",
@@ -985,7 +948,7 @@ const ClarifyPROMPT = (
     "\n" +
     "Do not include any citations in your responses, unless the student explicitly asks for citations.\n" +
     "If the student asked you to further explain anything, further explain it to make sure they learn the concept.\n" +
-    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer.\n" +
+    "If the student asked you to further explain a question that you previously asked, further explain the question to make sure they well-understand it to answer, but conclude your explanation with restating the question and encouraging the student to answer it.\n" +
     techniques;
 
   return clarify_question_instructions;
@@ -1001,6 +964,17 @@ const PROMPT = (
     content: string;
   }
 ) => {
+  const nextQuestionPrompt = !!nextFlashcard
+    ? '   "next_question": "Generate a question to assess ' +
+      fName +
+      "'s learning of the following concept:" +
+      nextFlashcard.title +
+      ":\n" +
+      nextFlashcard.content +
+      "\nNote that " +
+      fName +
+      " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n"
+    : "";
   const instructions =
     "Your name is " +
     tutorName +
@@ -1055,15 +1029,7 @@ const PROMPT = (
     fName +
     "'s last message to you." +
     '",\n' +
-    '   "next_question": "Generate a question to assess ' +
-    fName +
-    "'s learning of the following concept:" +
-    nextFlashcard.title +
-    ":\n" +
-    nextFlashcard.content +
-    "\nNote that " +
-    fName +
-    " does not have access to the concept card. So your generated question should not refer to any parts of the concept card. Do not involve any information beyond this concept.\n" +
+    nextQuestionPrompt +
     "}\n" +
     "Do not print anything other than this JSON object.";
 
@@ -1086,7 +1052,9 @@ const extractJSON = (text: string, regex = false) => {
       if (!match) {
         return null;
       }
-      return match[1];
+      return {
+        your_response: match[1],
+      };
     } else {
       return null;
     }
@@ -1180,7 +1148,8 @@ const mergeDividedMessages = (messages: any) => {
   const mergedMessages = [];
 
   const filteredMessages = messages.filter(
-    (m: any) => !m.ignoreMessage && !m.deviatingMessage && !m.hasOwnProperty("question") && !!m?.content.trim()
+    (m: any) =>
+      !m.ignoreMessage && !m.deviatingMessage && !m.deviated && !m.hasOwnProperty("question") && !!m?.content.trim()
   );
   for (const message of filteredMessages) {
     if ("divided" in message) {
@@ -1206,15 +1175,19 @@ const mergeDividedMessages = (messages: any) => {
 };
 //
 //
-const sortConcepts = (concepts: any, cardsModel: string) => {
-  return concepts
-    .filter((f: any) => f.model === cardsModel)
-    .sort((a: any, b: any) => {
-      const numA = parseInt(a.paragraphs[0]?.split("-")[1] || 0);
-      const numB = parseInt(b.paragraphs[0]?.split("-")[1] || 0);
-      return numA - numB;
-    });
+const sortConcepts = (concepts: any) => {
+  return concepts.sort((a: any, b: any) => {
+    const numA = parseInt(a.paragraphs[0]?.split("-")[1] || 0);
+    const numB = parseInt(b.paragraphs[0]?.split("-")[1] || 0);
+    const isYouTubeB = b.paragraphs[0]?.startsWith("youtube");
+    if (isYouTubeB) {
+      return -1;
+    }
+
+    return numA - numB;
+  });
 };
+
 const getConcepts = async (
   unit: string,
   uname: string,
@@ -1228,6 +1201,7 @@ const getConcepts = async (
       .collection("flashcards")
       .where("url", "==", unit)
       .where("instructor", "==", uname)
+      .where("model", "==", selectedModel)
       .get();
 
     flashcardsDocs.docs.forEach(doc => {
@@ -1237,7 +1211,7 @@ const getConcepts = async (
       }
     });
 
-    return sortConcepts(concepts, selectedModel);
+    return sortConcepts(concepts);
   } else {
     let promptDocs = await db
       .collection("courseSettings")
@@ -1251,6 +1225,7 @@ const getConcepts = async (
         .collection("flashcards")
         .where("url", "==", unit)
         .where("instructor", "==", instructorForStudent)
+        .where("model", "==", selectedModel)
         .get();
 
       flashcardsDocs.docs.forEach(doc => {
@@ -1259,7 +1234,7 @@ const getConcepts = async (
           concepts.push(concept);
         }
       });
-      return sortConcepts(concepts, selectedModel);
+      return sortConcepts(concepts);
     } else {
       throw new Error("You are not a student in this course!");
     }
@@ -1412,8 +1387,12 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
       role: "user",
     },
   ];
-  const gptResponse = await sendGPTPrompt("gpt-4-0125-preview", context);
-  return gptResponse;
+  const question = await sendGPTPrompt("gpt-4-0125-preview", context);
+  let audioQuestion = "";
+  if (question) {
+    audioQuestion = await getQuestionAudio(question);
+  }
+  return { question, audioQuestion };
 };
 
 export const getChapterRelatedToResponse = async (studentLastMessage: string, courseName: string) => {

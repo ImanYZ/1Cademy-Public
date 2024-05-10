@@ -143,6 +143,7 @@ const SideBar: React.FC<Props> = ({
                           recommendedSteps={recommendedSteps}
                           setRecommendedSteps={setRecommendedSteps}
                           setSelectedStep={setSelectedStep}
+                          selectedArticle={selectedArticle}
                         />
                       )}
                     </>
@@ -170,6 +171,7 @@ const SideBar: React.FC<Props> = ({
                         selectedStep={selectedStep}
                         issues={issues}
                         setIssues={setIssues}
+                        selectedArticle={selectedArticle}
                       />
                     )}
                   </>
@@ -209,6 +211,7 @@ const SideBar: React.FC<Props> = ({
                       sideBarWidth={sideBarWidth}
                       findScrollAndSelect={findScrollAndSelect}
                       user={user}
+                      quillRef={quillRef}
                     />
                   ) : selectedTab === 1 ? (
                     <DraftComp
@@ -230,6 +233,7 @@ const SideBar: React.FC<Props> = ({
                       allContent={articleContent}
                       findScrollAndSelect={findScrollAndSelect}
                       issues={issues}
+                      quillRef={quillRef}
                     />
                   ) : (
                     selectedTab === 3 && <GradeComp />

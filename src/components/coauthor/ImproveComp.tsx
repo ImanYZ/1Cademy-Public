@@ -16,7 +16,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { sendMessageToChatGPT } from "../../services/openai";
 import ImproveItemComp from "./ImproveItemComp";
@@ -37,6 +37,7 @@ interface Props {
   allContent: string;
   findScrollAndSelect: (text: string) => Promise<void> | Promise<HTMLElement>;
   issues: string[];
+  quillRef: any;
 }
 
 const ImproveComp: React.FC<Props> = ({
@@ -46,7 +47,8 @@ const ImproveComp: React.FC<Props> = ({
   selectedArticle,
   allContent,
   findScrollAndSelect,
-  issues
+  issues,
+  quillRef,
 }) => {
   const db = getFirestore();
   const [suggestionsModifications, setSuggestionsModifications] = useState<Improvement[]>([]);
@@ -144,11 +146,9 @@ We're currently working on the following issues:
 ${issues.map((issue: string) => "- " + issue).join("\n")}
 '''          
 Help us significantly improve this ${articleTypePath
-  .slice(2)
-  .reverse()
-  .join(
-    " of "
-  )}. Note that the flow and brevity are very important.
+          .slice(2)
+          .reverse()
+          .join(" of ")}. Note that the flow and brevity are very important.
 For this purpose, generate a JSON response with the structure {'response': [array]}. 
 The [array] should include objects, each being about only one of the sentences from our paper and have the following structure:
 {
@@ -238,6 +238,7 @@ If the [array] is [], it means that you don't have any suggestions for us.`,
             Recommendations:
           </Box>
           <ImproveItemComp
+            quillRef={quillRef}
             improvement={suggestionsModifications[currentIdx]}
             theme={theme}
             findScrollAndSelect={findScrollAndSelect}

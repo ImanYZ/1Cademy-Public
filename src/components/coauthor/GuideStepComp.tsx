@@ -3,9 +3,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinearProgress from "@mui/material/LinearProgress";
 import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
-import { TreeItem,TreeView } from "@mui/x-tree-view";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
-import React, { useEffect,useState } from "react";
+import { TreeItem, TreeView } from "@mui/x-tree-view";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+
+import { getArticleSteps } from "@/lib/coauthor";
 
 import { sendMessageToChatGPT } from "../../services/openai";
 
@@ -22,6 +25,7 @@ interface Props {
   recommendedSteps: string[];
   setRecommendedSteps: (path: string[]) => void;
   setSelectedStep: any;
+  selectedArticle: any;
 }
 
 const GuideStepComp: React.FC<Props> = ({
@@ -30,58 +34,33 @@ const GuideStepComp: React.FC<Props> = ({
   recommendedSteps,
   setRecommendedSteps,
   setSelectedStep,
+  selectedArticle,
 }) => {
   const db = getFirestore();
   const [data, setData] = useState<Step[]>([]);
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [popoverText, setPopoverText] = useState("");
   const [loading, setLoading] = useState<boolean>(true);
+  const { data: steps } = useQuery(["articleSteps", articleTypePath[articleTypePath.length - 1]], getArticleSteps);
 
   useEffect(() => {
-    let isMounted = true;
+    if (!steps) return;
+    const theSteps = steps;
     const fetchInstructions = async () => {
       try {
         setLoading(true);
-        let docPath = articleTypePath.join("/");
-        if (articleTypePath.length % 2 === 0) {
-          const lastIndex = docPath.lastIndexOf("/");
-          docPath = docPath.substring(0, lastIndex) + "-" + docPath.substring(lastIndex + 1);
+        let aSteps: any = selectedArticle?.aSteps;
+        if (!aSteps) {
+          aSteps = await getAccomplishments();
         }
-        const docRef = doc(db, "instructions", docPath);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists() && isMounted) {
-          const theSteps = docSnap.data().steps;
-          const docDescriptivePath = articleTypePath.slice(2).reverse().join(" of ");
-
-          const chatGPTMessages = [
-            {
-              role: "user",
-              content: `The following is the content of a ${docDescriptivePath} I've written:
-'''
-${allContent}
-'''
-Which of the following steps and sub-steps in writing the ${docDescriptivePath} have I already accomplished?
-${JSON.stringify(theSteps, null, 2)}
-Note that before accomplishing any step/sub-steps, I'm supposed to accomplish all its previous steps/sub-steps. So, don't include a step/sub-steps if I haven't accomplished all its previous steps/sub-steps.
-Each step also has some sub-steps. If I've accomplished a step, I've also accomplished all its sub-steps. If I haven't accomplished some sub-steps of a step, I haven't accomplished the step either.
-Respond only a JSON object with the structure: {"names": [an array of only the names of the steps/sub-steps I've already accomplished]}.`,
-            },
-          ];
-          const aSteps = await sendMessageToChatGPT(chatGPTMessages);
-          if (isMounted) {
-            if (aSteps.names && aSteps.names.length > 0) {
-              const updatedSteps = specifyAccomplishments(theSteps, aSteps.names);
-              setData(updatedSteps);
-              setRecommendedSteps(specifyRecommendations(updatedSteps));
-              const element = document.getElementById("loader-overlay") as HTMLElement;
-              if (element) {
-                element.style.display = "none";
-              }
-            }
+        if (aSteps.names && aSteps.names.length > 0) {
+          const updatedSteps = specifyAccomplishments(theSteps, aSteps.names);
+          setData(updatedSteps);
+          setRecommendedSteps(specifyRecommendations(updatedSteps));
+          const element = document.getElementById("loader-overlay") as HTMLElement;
+          if (element) {
+            element.style.display = "none";
           }
-        } else if (!docSnap.exists()) {
-          console.error("No such document!");
         }
       } catch (error) {
         console.error("Failed to fetch or process instructions:", error);
@@ -90,11 +69,30 @@ Respond only a JSON object with the structure: {"names": [an array of only the n
     };
 
     fetchInstructions();
+  }, [allContent, articleTypePath, steps]);
 
-    return () => {
-      isMounted = false; // Cleanup to prevent setting state on unmounted component
-    };
-  }, [allContent, articleTypePath]);
+  const getAccomplishments = async () => {
+    const theSteps = steps;
+    const docDescriptivePath = articleTypePath.slice(2).reverse().join(" of ");
+
+    const chatGPTMessages = [
+      {
+        role: "user",
+        content: `The following is the content of a ${docDescriptivePath} I've written:
+'''
+${allContent}
+'''
+Which of the following steps and sub-steps in writing the ${docDescriptivePath} have I already accomplished?
+${JSON.stringify(theSteps, null, 2)}
+Note that before accomplishing any step/sub-steps, I'm supposed to accomplish all its previous steps/sub-steps. So, don't include a step/sub-steps if I haven't accomplished all its previous steps/sub-steps.
+Each step also has some sub-steps. If I've accomplished a step, I've also accomplished all its sub-steps. If I haven't accomplished some sub-steps of a step, I haven't accomplished the step either.
+Respond only a JSON object with the structure: {"names": [an array of only the names of the steps/sub-steps I've already accomplished]}.`,
+      },
+    ];
+    const aSteps = await sendMessageToChatGPT(chatGPTMessages);
+    await updateDoc(doc(db, "articles", selectedArticle.id), { aSteps });
+    return aSteps;
+  };
 
   const specifyAccomplishments = (theSteps: Step[], names: string[]): Step[] => {
     return theSteps.map(step => {

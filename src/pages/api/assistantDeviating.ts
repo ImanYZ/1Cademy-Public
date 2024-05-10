@@ -22,13 +22,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
     let conversationData: any = {};
     let newConversationRef = null;
-    if (conversationDocs.docs.length > 0) {
-      const conversationDoc = conversationDocs.docs[0];
-      conversationData = conversationDoc.data();
-      newConversationRef = conversationDoc.ref;
-    } else {
+    if (conversationDocs.docs.length <= 0) {
       return;
     }
+    const conversationDoc = conversationDocs.docs[0];
+    conversationData = conversationDoc.data();
+    newConversationRef = conversationDoc.ref;
     const relevanceResponse = true;
     const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
       await getPromptInstructions(course, uname, isInstructor);
@@ -36,6 +35,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     for (let question of questions) {
       const { sections }: any = await getChapterRelatedToResponse(question, courseName);
       console.log("deviating");
+
       await handleDeviating(
         res,
         conversationData,

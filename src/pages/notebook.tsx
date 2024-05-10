@@ -7030,6 +7030,7 @@ const Notebook = ({}: NotebookProps) => {
 
   useEffect(() => {
     onMessage(messaging, (message: any) => {
+      console.info("message received", message);
       setTimeout(() => {
         new Notification(message.notification.title, { body: message.notification.body });
       }, 500);
