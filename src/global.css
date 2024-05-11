@@ -2996,6 +2996,10 @@ right: 5px; */
   color: white !important;
 }
 
+.ql-editor {
+  white-space: normal !important;
+}
+
 .ql-editor h2 {
   color: white !important;
 }
@@ -3072,4 +3076,7 @@ polygon {
 
 .LightTheme #coauthor-articles-select {
   color: black !important;
+}
+.ql-container {
+  height: unset;
 }
