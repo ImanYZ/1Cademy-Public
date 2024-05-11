@@ -28,6 +28,8 @@ interface Props {
   quillRef: any;
   selection: any;
   user: User | null;
+  expandedIssue: any;
+  setExpandedIssue: any;
 }
 
 const SideBar: React.FC<Props> = ({
@@ -41,6 +43,8 @@ const SideBar: React.FC<Props> = ({
   quillRef,
   selection,
   user,
+  expandedIssue,
+  setExpandedIssue,
 }) => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [recommendedSteps, setRecommendedSteps] = useState<string[]>([]);
@@ -172,6 +176,8 @@ const SideBar: React.FC<Props> = ({
                         issues={issues}
                         setIssues={setIssues}
                         selectedArticle={selectedArticle}
+                        expandedIssue={expandedIssue}
+                        setExpandedIssue={setExpandedIssue}
                       />
                     )}
                   </>
