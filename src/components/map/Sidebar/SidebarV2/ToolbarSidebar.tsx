@@ -68,7 +68,7 @@ import { DESIGN_SYSTEM_COLORS } from "../../../../lib/theme/colors";
 import { NO_USER_IMAGE } from "../../../../lib/utils/constants";
 import { UsersStatus, UserTutorials } from "../../../../nodeBookTypes";
 import { OpenLeftSidebar } from "../../../../pages/notebook";
-import { Notebook, NotebookDocument } from "../../../../types";
+import { INotebook, NotebookDocument } from "../../../../types";
 import { Portal } from "../../../Portal";
 import { CustomBadge, CustomSmallBadge } from "../../CustomBudge";
 // import Modal from "../../Modal/Modal";
@@ -108,8 +108,8 @@ type MainSidebarProps = {
   enabledToolbarElements?: string[];
   userTutorial: UserTutorials;
   dispatch: React.Dispatch<DispatchAuthActions>;
-  notebooks: Notebook[];
-  setNotebooks: Dispatch<SetStateAction<Notebook[]>>;
+  notebooks: INotebook[];
+  setNotebooks: Dispatch<SetStateAction<INotebook[]>>;
   onChangeNotebook: (notebookId: string) => void;
   selectedNotebook: string;
   openNodesOnNotebook: (notebookId: string, nodeIds: string[]) => Promise<void>;
@@ -170,7 +170,7 @@ export const ToolbarSidebar = ({
   const [displayConversation, setDisplayConversation] = useState(false);
 
   const [isCreatingNotebook, setIsCreatingNotebook] = useState(false);
-  const [editableNotebook, setEditableNotebook] = useState<Notebook | null>(null);
+  const [editableNotebook, setEditableNotebook] = useState<INotebook | null>(null);
   const createNotebookButtonRef = useRef<any>(null);
   const { height } = useWindowSize();
   const [notebookTitleIsEditable, setNotebookTitleEditable] = useState(false);

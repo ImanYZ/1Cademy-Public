@@ -349,7 +349,9 @@ const PracticeTool = forwardRef<PracticeToolRef, PracticeToolProps>((props, ref)
       <PracticeQuestionMemoized
         question={questionData?.question ?? null}
         practiceIsCompleted={practiceIsCompleted}
-        onClose={onClose}
+        onClose={() => {
+          setStartPractice(false);
+        }}
         onViewNodeOnNodeBook={onViewNodeOnNodeBook}
         onGetNextQuestion={getPracticeQuestion}
         onSaveAnswer={onSubmitAnswer}

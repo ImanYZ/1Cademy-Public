@@ -170,7 +170,7 @@ import {
   UserTutorials,
   VoiceAssistant,
 } from "../nodeBookTypes";
-import { NodeType, Notebook, NotebookDocument, SimpleNode2 } from "../types";
+import { INotebook, NodeType, NotebookDocument, SimpleNode2 } from "../types";
 import {
   childrenParentsDifferences,
   doNeedToDeleteNode,
@@ -435,7 +435,7 @@ const Notebook = ({}: NotebookProps) => {
   } = useInteractiveTutorial({ user });
 
   // const pathwayRef = useRef({ node: "", parent: "", child: "" });
-  const [notebooks, setNotebooks] = useState<Notebook[]>([]);
+  const [notebooks, setNotebooks] = useState<INotebook[]>([]);
   const [selectedNotebookId, setSelectedNotebookId] = useState(user?.sNotebook || "");
   const selectedPreviousNotebookIdRef = useRef("");
   const [userIsAnsweringPractice, setUserIsAnsweringPractice] = useState<{ result: boolean }>({ result: true }); // this is used to trigger assistant sleep animation
@@ -462,7 +462,7 @@ const Notebook = ({}: NotebookProps) => {
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
       setNotebooks(prev => {
         return prev.map(
-          (cur): Notebook =>
+          (cur): INotebook =>
             cur.id === notebookId
               ? { ...cur, defaultTagId: data.defaultTagId, defaultTagName: data.defaultTagName }
               : cur
@@ -1249,12 +1249,12 @@ const Notebook = ({}: NotebookProps) => {
       const docChanges = snapshot.docChanges();
 
       const newNotebooks = docChanges.map(change => {
-        const userNodeData = change.doc.data() as Notebook;
+        const userNodeData = change.doc.data() as INotebook;
         return { type: change.type, id: change.doc.id, data: userNodeData };
       });
 
       setNotebooks(prevNotebooks => {
-        const notesBooksMerged = newNotebooks.reduce((acu: Notebook[], cur) => {
+        const notesBooksMerged = newNotebooks.reduce((acu: INotebook[], cur) => {
           if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
           if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
           return acu.filter(c => c.id !== cur.id);
@@ -6735,7 +6735,7 @@ const Notebook = ({}: NotebookProps) => {
       if (!nb) return;
       if (!user) return;
 
-      const userNotebooks: Notebook[] = [];
+      const userNotebooks: INotebook[] = [];
       const q = query(collection(db, "notebooks"), where("owner", "==", user.uname));
       const queryDocs = await getDocs(q);
       queryDocs.forEach(c => userNotebooks.push({ id: c.id, ...(c.data() as NotebookDocument) }));

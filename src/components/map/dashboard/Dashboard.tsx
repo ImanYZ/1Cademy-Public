@@ -211,7 +211,7 @@ export const Dashboard = ({ user, currentSemester }: DashboardProps) => {
       for (let change of docChanges) {
         const _semesterStudentSankey: SemesterStudentSankeys = change.doc.data() as SemesterStudentSankeys;
         if (change.type === "added") {
-          for (const interaction of _semesterStudentSankey.interactions) {
+          for (const interaction of _semesterStudentSankey.interactions || []) {
             _sankeyData.push({
               source: studentNameByUname[_semesterStudentSankey.uname],
               target: studentNameByUname[interaction.uname],
