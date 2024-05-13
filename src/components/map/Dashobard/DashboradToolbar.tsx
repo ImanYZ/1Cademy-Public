@@ -168,17 +168,15 @@ export const DashboardToolbar = ({
             onChangeToolbarView={() => onChangeToolbarView("DASHBOARD")}
             isCollapsed={isCollapsed}
           />
-          {user.role === "STUDENT" && (
-            <>
-              <DashboardToolbarViewButton
-                name="Practice"
-                view="PRACTICE"
-                active={view === "PRACTICE"}
-                IconButton={<InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
-                onChangeToolbarView={() => onChangeToolbarView("PRACTICE")}
-                isCollapsed={isCollapsed}
-              />
-            </>
+          {(user.role === "STUDENT" || user.role === "INSTRUCTOR") && (
+            <DashboardToolbarViewButton
+              name="Practice"
+              view="PRACTICE"
+              active={view === "PRACTICE"}
+              IconButton={<InsightsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
+              onChangeToolbarView={() => onChangeToolbarView("PRACTICE")}
+              isCollapsed={isCollapsed}
+            />
           )}
           {user.role === "INSTRUCTOR" && (
             <>

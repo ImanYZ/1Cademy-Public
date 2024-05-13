@@ -56,9 +56,12 @@ const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailPr
     };
     getCourseDetails();
   }, []);
-
   useEffect(() => {
-    const q = query(collection(db, "practice"), where("tagId", "==", currentSemester.tagId));
+    const q = query(
+      collection(db, "practice"),
+      where("tagId", "==", currentSemester.tagId),
+      where("user", "==", user.uname)
+    );
 
     const unsub = onSnapshot(q, snapshot => {
       if (snapshot.empty) return;
@@ -220,6 +223,7 @@ const CourseDetail = ({ user, currentSemester, onStartPractice }: CourseDetailPr
                 <Button
                   variant="contained"
                   onClick={onStartPractice}
+                  disabled={!semesterNodes.size}
                   sx={{
                     backgroundColor: theme =>
                       theme.palette.mode === "dark" ? theme.palette.common.primary800 : theme.palette.common.primary600,
