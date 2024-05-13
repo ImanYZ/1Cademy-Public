@@ -121,7 +121,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
           const semesters = await getSemesterByIds(db, semestersIds);
           const coursesResult = semesters.reduce((acu: CoursesResult, cur: Semester) => {
             const tmpValues = acu[cur.tagId] ?? [];
-            return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle}`] };
+            return { ...acu, [cur.tagId]: [...tmpValues, `${cur.cTitle} ${cur.pTitle || ""}`] };
           }, {});
 
           // const semester = allSemesters.map(cur => cur.title);
