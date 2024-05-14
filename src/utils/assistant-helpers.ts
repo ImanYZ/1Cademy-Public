@@ -285,7 +285,7 @@ export const sendMessageToGPT4V2 = async (
 };
 
 export const sendGPTPrompt = async (
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
+  model: "gpt-4o" | "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
   messages: any[]
 ) => {
   const config = {
@@ -304,7 +304,7 @@ export const sendGPTPrompt = async (
   return response.choices[0].message.content;
 };
 export const sendGPTPromptJSON = async (
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
+  model: "gpt-4o" | "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
   messages: any[]
 ) => {
   const config = {
