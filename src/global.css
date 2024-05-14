@@ -2989,7 +2989,7 @@ right: 5px; */
 }
 
 .ql-editor span {
-  color: white !important;
+  color: white;
 }
 
 .ql-editor h1 {
@@ -3029,7 +3029,7 @@ polygon {
 }
 
 .LightTheme .ql-editor span {
-  color: black !important;
+  color: black;
 }
 
 .LightTheme .ql-picker-options span {
