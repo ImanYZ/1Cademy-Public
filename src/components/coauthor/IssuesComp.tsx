@@ -3,6 +3,8 @@ import LinearProgress from "@mui/material/LinearProgress";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
 import { sendMessageToChatGPT } from "../../services/openai";
 
 interface Props {
@@ -117,6 +119,7 @@ const IssuesComp: React.FC<Props> = ({
                   ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
                   : undefined,
               cursor: "auto!important",
+              border: expandedIssue === index ? `solid 1px ${DESIGN_SYSTEM_COLORS.orange300}` : undefined,
               background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
