@@ -256,6 +256,7 @@ const CreateModalComp = ({ open, setOpen }: Props) => {
         <>
           {node.map((item, index) => (
             <TreeItem
+              sx={{ color: theme => (theme.palette.mode === "dark" ? "inherit" : "black") }}
               key={`${nodeId}-${index}`}
               nodeId={`${nodeId}-${index}`}
               label={camelCaseToSpaces(item)}
@@ -268,7 +269,12 @@ const CreateModalComp = ({ open, setOpen }: Props) => {
       return (
         <>
           {Object.keys(node).map((key, index) => (
-            <TreeItem key={`${nodeId}-${index}`} nodeId={`${nodeId}-${index}`} label={camelCaseToSpaces(key)}>
+            <TreeItem
+              sx={{ color: theme => (theme.palette.mode === "dark" ? "inherit" : "black") }}
+              key={`${nodeId}-${index}`}
+              nodeId={`${nodeId}-${index}`}
+              label={camelCaseToSpaces(key)}
+            >
               {renderTree(node[key], `${nodeId}-${index}`, [...path, key])}
             </TreeItem>
           ))}
@@ -317,7 +323,7 @@ const CreateModalComp = ({ open, setOpen }: Props) => {
 
                 <FormControl fullWidth sx={{ m: 1 }} variant="standard">
                   {error && <Typography color={"red"}>{error}</Typography>}
-                  <Typography>
+                  <Typography sx={{ color: theme => (theme.palette.mode === "dark" ? "inherit" : "black") }}>
                     Please enter the type of your writing by expanding the branches of the following tree-view:
                   </Typography>
                   <TreeView

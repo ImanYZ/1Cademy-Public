@@ -201,45 +201,50 @@ const ContentComp: React.FC<Props> = ({
     initialValues,
     validate,
     onSubmit: async values => {
-      if (!values.title) {
-        setInputFieldErrors({ title: "Title is required." });
-        return;
-      }
-      setInputFieldErrors({});
-
-      if (path.length === 0) {
-        setError("Please select the path from tree-view.");
-        return;
-      }
-      startLoader();
-      if (formik.values.title != selectedArticle?.title) {
-        const q = query(
-          collection(db, "articles"),
-          where("title", "==", values.title),
-          where("user", "==", user?.uname)
-        );
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          alert("An article with the provided title already exists.");
-          stopLoader();
+      try {
+        if (!values.title) {
+          setInputFieldErrors({ title: "Title is required." });
           return;
         }
+        setInputFieldErrors({});
+
+        if (path.length === 0) {
+          setError("Please select the path from tree-view.");
+          return;
+        }
+        startLoader();
+        if (formik.values.title != selectedArticle?.title) {
+          const q = query(
+            collection(db, "articles"),
+            where("title", "==", values.title),
+            where("user", "==", user?.uname)
+          );
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            alert("An article with the provided title already exists.");
+            stopLoader();
+            return;
+          }
+        }
+        setOpen(false);
+        await updateDoc(doc(db, "articles", selectedArticle.id), {
+          title: values.title,
+          path,
+          updatedAt: new Date(),
+        });
+        await saveLogs({
+          doer: user?.uname,
+          action: "Updated Article",
+          articleId: selectedArticle?.id,
+          title: values.title,
+          cursorPosition: lastClickPosition,
+        });
+        setError("");
+        stopLoader();
+      } catch (err) {
+        console.error(err);
+        stopLoader();
       }
-      setOpen(false);
-      await updateDoc(doc(db, "articles", selectedArticle.id), {
-        title: values.title,
-        path,
-        updatedAt: new Date(),
-      });
-      await saveLogs({
-        doer: user?.uname,
-        action: "Updated Article",
-        articleId: selectedArticle?.id,
-        title: values.title,
-        cursorPosition: lastClickPosition,
-      });
-      setError("");
-      stopLoader();
     },
   });
 
@@ -304,8 +309,22 @@ const ContentComp: React.FC<Props> = ({
   const handleSelectionChange = useCallback(
     (range: any) => {
       if (range && range.length > 0) {
-        const selection = quillRef.current.getEditor().getSelection();
+        const quill = quillRef.current.getEditor();
+        const selection = quill.getSelection();
         setSelection(selection);
+        // if (quill) {
+        //   const index = selection.index;
+        //   const length = selection.length;
+
+        //   // Delete the selected text
+        //   //quill.deleteText(index, length);
+
+        //   // Insert a custom container element with the background color
+        //   quill.formatLine(index, 1, "background", "#BD7A00");
+
+        //   // Set selection inside the newly created container
+        //   quill.setSelection(index + 1, 0);
+        // }
       }
     },
     [content, selectedArticle]
@@ -314,9 +333,20 @@ const ContentComp: React.FC<Props> = ({
   const handleBlur = useCallback(() => {
     const quill = quillRef.current.getEditor();
     if (selection && selection.length > 0) {
+      // console.log(selection, "selection--selection");
+      // const startIndex = selection.index;
+      // const endIndex = selection.index + selection.length;
+      // const delta = quill.getContents(startIndex, endIndex);
+      // delta.ops.forEach((op: any) => {
+      //   if (op.insert) {
+      //     op.attributes = { background: "#3B3D41", ...op.attributes };
+      //   }
+      // });
+      // quill.updateContents(delta);
+      //quill.setSelection(selection);
       quill.formatText(selection.index, selection.length, "background", "#3B3D41");
     } else {
-      quill.insertText(lastClickPosition, "|", { color: "red", class: "red-text-ql" });
+      quill.insertText(lastClickPosition, "|", "color", "red");
     }
   }, [selection, lastClickPosition]);
 
@@ -328,7 +358,6 @@ const ContentComp: React.FC<Props> = ({
       });
       setSelection(null);
     }
-
     const redBars = document.querySelectorAll('span[style="color: red;"]');
     redBars.forEach((redBar: any) => {
       redBar.parentNode.removeChild(redBar);
@@ -349,6 +378,9 @@ const ContentComp: React.FC<Props> = ({
         <>
           {node.map((item, index) => (
             <TreeItem
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "inherit" : "black"),
+              }}
               key={`${nodeId}-${index}`}
               nodeId={`${nodeId}-${index}`}
               label={camelCaseToSpaces(item)}
@@ -361,7 +393,14 @@ const ContentComp: React.FC<Props> = ({
       return (
         <>
           {Object.keys(node).map((key, index) => (
-            <TreeItem key={`${nodeId}-${index}`} nodeId={`${nodeId}-${index}`} label={camelCaseToSpaces(key)}>
+            <TreeItem
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "inherit" : "black"),
+              }}
+              key={`${nodeId}-${index}`}
+              nodeId={`${nodeId}-${index}`}
+              label={camelCaseToSpaces(key)}
+            >
               {renderTree(node[key], `${nodeId}-${index}`, [...path, key])}
             </TreeItem>
           ))}
@@ -725,17 +764,19 @@ const ContentComp: React.FC<Props> = ({
           id="priorReviewsEditor"
           contentEditable
           sx={{
+            display: !isReviewsOpen ? "none" : undefined,
             width: "100%",
-            height: isReviewsOpen ? "250px" : "0px",
+            height: "250px",
             maxHeight: "250px",
             fontSize: 16,
-            border: "none",
+            border: "solid 1px",
             outline: "none",
             padding: "15px",
             fontFamily: "system-ui",
             fontStyle: "italic",
-            background: DESIGN_SYSTEM_COLORS.notebookG700,
-            color: "white",
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : theme.palette.common.white,
+            color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
             whiteSpace: "pre-wrap",
             overflowY: "auto",
           }}
@@ -780,7 +821,11 @@ const ContentComp: React.FC<Props> = ({
 
               <FormControl fullWidth sx={{ m: 1 }} variant="standard">
                 {error && <Typography color={"red"}>{error}</Typography>}
-                <Typography>
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "inherit" : "black"),
+                  }}
+                >
                   Please enter the type of your writing by expanding the branches of the following tree-view:
                 </Typography>
                 <TreeView
