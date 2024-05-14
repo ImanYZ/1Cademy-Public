@@ -42,12 +42,12 @@ import {
 } from "../../../lib/utils/nodesSyncronization.utils";
 import ROUTES from "../../../lib/utils/routes";
 import { FullNodeData, FullNodesData, OpenPart, SelectedUser, TNodeUpdates } from "../../../nodeBookTypes";
-import { Notebook } from "../../../types";
+import { INotebook } from "../../../types";
 import { onForceRecalculateGraphInput } from "../../notebook";
 import { Graph } from "../../notebook";
 
 type Props = {
-  notebook: Notebook;
+  notebook: INotebook;
   //   updatedStr: string;
   //   createdStr: string;
 };
