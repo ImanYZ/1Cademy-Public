@@ -120,7 +120,8 @@ const IssuesComp: React.FC<Props> = ({
                   : undefined,
               cursor: "auto!important",
               border: expandedIssue === index ? `solid 1px ${DESIGN_SYSTEM_COLORS.orange300}` : undefined,
-              background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
               ":hover": {
                 background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
               },

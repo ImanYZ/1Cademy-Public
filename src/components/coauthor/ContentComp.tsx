@@ -22,6 +22,7 @@ import {
   Popper,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
 import { addDoc, collection, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
@@ -111,6 +112,7 @@ const ContentComp: React.FC<Props> = ({
   expandedIssue,
 }) => {
   const db = getFirestore();
+  const theme = useTheme();
   const router = useRouter();
   const [content, setContent] = useState(selectedArticle?.content);
   const [open, setOpen] = useState(false);
@@ -320,7 +322,12 @@ const ContentComp: React.FC<Props> = ({
   const handleBlur = useCallback(() => {
     const quill = quillRef.current.getEditor();
     if (selection && selection.length > 0) {
-      quill.formatText(selection.index, selection.length, "background", "#3B3D41");
+      quill.formatText(
+        selection.index,
+        selection.length,
+        "background",
+        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.gray300
+      );
     } else {
       quill.insertText(lastClickPosition, "|", "color", "red");
     }
@@ -475,7 +482,9 @@ const ContentComp: React.FC<Props> = ({
     }, 1000);
   };
 
-  const handleUpdateContent = async (content: any) => {
+  const handleUpdateContent = async () => {
+    const quill = quillRef.current.getEditor();
+    const content = quill.root.innerHTML;
     clearTimeout(contentTimeoutRef?.current);
     contentTimeoutRef.current = setTimeout(async () => {
       await updateDoc(doc(db, "articles", selectedArticle.id), {
@@ -669,7 +678,7 @@ const ContentComp: React.FC<Props> = ({
           style={{ height: `calc(100vh - ${isReviewsOpen ? "400" : "170"}px)` }}
           ref={quillRef}
           value={content}
-          onChange={handleUpdateContent}
+          onKeyUp={handleUpdateContent}
           onBlur={() => handleBlur()}
           onFocus={() => handleFocus()}
           onChangeSelection={(range: any) => handleSelectionChange(range)}
