@@ -407,7 +407,10 @@ If the value of the field 'improvement' is {}, it means that your response to th
                           p: "10px 14px",
                           borderRadius: "9px",
                           border: message?.user?.isInstructor ? "solid 2px orange" : undefined,
-                          background: mode === "dark" ? "#48444A" : "#FFFFFF",
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG600
+                              : DESIGN_SYSTEM_COLORS.gray200,
                         }}
                       >
                         <Box
@@ -417,7 +420,10 @@ If the value of the field 'improvement' is {}, it means that your response to th
                             lineHeight: "24px",
                           }}
                         >
-                          <MarkdownRender text={messageText} />
+                          <MarkdownRender
+                            sx={{ color: theme => (theme.palette.mode === "dark" ? "white" : "black") }}
+                            text={messageText}
+                          />
                           {/* <Typography
                             display="block"
                             sx={{
