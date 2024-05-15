@@ -1153,7 +1153,7 @@ export const generateQuestionNode = async (
 export const generateFlashcard = async (
   passages: string[],
   context: any[],
-  model: "gpt-4-0125-preview" | "gpt-4-0613"
+  model: string
 ): Promise<{
   Stem: string;
   Choices: {
