@@ -312,19 +312,6 @@ const ContentComp: React.FC<Props> = ({
         const quill = quillRef.current.getEditor();
         const selection = quill.getSelection();
         setSelection(selection);
-        // if (quill) {
-        //   const index = selection.index;
-        //   const length = selection.length;
-
-        //   // Delete the selected text
-        //   //quill.deleteText(index, length);
-
-        //   // Insert a custom container element with the background color
-        //   quill.formatLine(index, 1, "background", "#BD7A00");
-
-        //   // Set selection inside the newly created container
-        //   quill.setSelection(index + 1, 0);
-        // }
       }
     },
     [content, selectedArticle]
@@ -333,17 +320,6 @@ const ContentComp: React.FC<Props> = ({
   const handleBlur = useCallback(() => {
     const quill = quillRef.current.getEditor();
     if (selection && selection.length > 0) {
-      // console.log(selection, "selection--selection");
-      // const startIndex = selection.index;
-      // const endIndex = selection.index + selection.length;
-      // const delta = quill.getContents(startIndex, endIndex);
-      // delta.ops.forEach((op: any) => {
-      //   if (op.insert) {
-      //     op.attributes = { background: "#3B3D41", ...op.attributes };
-      //   }
-      // });
-      // quill.updateContents(delta);
-      //quill.setSelection(selection);
       quill.formatText(selection.index, selection.length, "background", "#3B3D41");
     } else {
       quill.insertText(lastClickPosition, "|", "color", "red");
@@ -690,7 +666,7 @@ const ContentComp: React.FC<Props> = ({
             },
           }}
           preserveWhitespace={false}
-          style={{ height: `calc(100vh - ${isReviewsOpen ? "400" : "110"}px)` }}
+          style={{ height: `calc(100vh - ${isReviewsOpen ? "400" : "170"}px)` }}
           ref={quillRef}
           value={content}
           onChange={handleUpdateContent}
@@ -717,28 +693,31 @@ const ContentComp: React.FC<Props> = ({
           </Button>
         </Box>
       </Box>
-      <Box mt={isReviewsOpen ? 7 : 1}>
-        <Box sx={{ display: "flex", alignItems: "end", justifyContent: isReviewsOpen ? "space-between" : "center" }}>
-          {isReviewsOpen && <Typography variant="subtitle1">Reviews:</Typography>}
+      <Box mt={isReviewsOpen ? 7 : 6}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderTop: "solid 1px",
+            borderLeft: "solid 1px",
+            borderRight: "solid 1px",
+            borderBottom: !isReviewsOpen ? "solid 1px" : undefined,
+            pl: "10px",
+            pr: "2px",
+            py: "2.5px",
+          }}
+        >
+          <Typography variant="subtitle1">Reviews:</Typography>
           <IconButton
             sx={{
-              background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.notebookG50,
-              display: "flex",
-
               width: "25px",
               height: "20px",
               color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
 
-              alignItems: "center",
-              justifyContent: "center",
               fontSize: "16px",
-              borderRadius: "6px 6px 0px 0px",
+
               cursor: "pointer",
-              ":hover": {
-                background: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.notebookG50,
-              },
             }}
             onClick={() => setIsReviewOpen(!isReviewsOpen)}
           >
@@ -749,16 +728,15 @@ const ContentComp: React.FC<Props> = ({
               }}
             />
           </IconButton>
-          {isReviewsOpen && (
-            <Button
-              sx={{ px: "6px", mb: "5px" }}
-              variant="contained"
-              color="success"
-              onClick={() => saveAndAnalyze("reviews")}
-            >
-              Analyze
-            </Button>
-          )}
+
+          <Button
+            disabled={!isReviewsOpen}
+            variant="contained"
+            color="success"
+            onClick={() => saveAndAnalyze("reviews")}
+          >
+            Analyze
+          </Button>
         </Box>
         <Box
           id="priorReviewsEditor"
