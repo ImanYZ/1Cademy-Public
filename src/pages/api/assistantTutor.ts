@@ -27,7 +27,7 @@ export const saveLogs = async (logs: { [key: string]: any }) => {
 const getId = () => {
   return db.collection("tutorConversations").doc().id;
 };
-const streamAnswer = async (res: any, answer: string) => {
+const streamAnswer = async (res: NextApiResponse<any>, answer: string) => {
   if (
     answer ===
     "It sounds like your message is not relevant to this course. I can only help you within the scope of this course."
@@ -270,11 +270,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         conversationData.flashcardsScores || {},
         selfStudy
       );
-      if (nextFlashcard) {
-        conversationData.nextFlashcard = nextFlashcard;
-      } else {
-        delete conversationData.nextFlashcard;
-      }
     }
     //update the system prompt  to add the next flashcard that gpt need to ask a question about
     if (nextFlashcard) {
@@ -822,12 +817,23 @@ export const handleDeviating = async (
       deviatingMessage: true,
     });
 
-    let sectionsString = sections.map(s => `- [${s.section}](/core-econ/${s.url})\n`).join("");
     if (paragraphs.length > 0) {
-      used_sections_message = `For your question: ${question}\n\nI'm going to respond to you based on the following sections:\n\n ${sectionsString}\n`;
+      used_sections_message = `For your question: ${question}\n\nI'm going to respond to you based on the following sections:\n\n`;
 
       // res.write(`${messDev} keepLoading`);
       await streamAnswer(res, `${used_sections_message}`);
+      // stream each section to the user with a delay in between
+      await delay(1000);
+      for (let s of sections) {
+        const sectionString = `{"narrateSection":"${s.section.replace(/^\d+(\.\d+)?\s/, "")}","url":"- [${
+          s.section
+        }](/core-econ/${s.url})"}`;
+        res.write(sectionString);
+        used_sections_message += `- [${s.section}](/core-econ/${s.url})\n`;
+        await delay(2000);
+      }
+
+      used_sections_message += "\n";
       // conversationData.messages.push({
       //   role: "assistant",
       //   content: messDev,
