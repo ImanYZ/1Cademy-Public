@@ -131,6 +131,7 @@ const ContentComp: React.FC<Props> = ({
   const [keyPressed, setKeyPressed] = useState(false);
   const priorReviewsTimeoutRef = useRef<any>(null);
   const contentTimeoutRef = useRef<any>(null);
+  const reviewsQuillRef = useRef<any>(null);
 
   useEffect(() => {
     if (selectedArticle?.priorReviews) {
@@ -472,15 +473,18 @@ const ContentComp: React.FC<Props> = ({
     formik.setFieldValue("title", selectedArticle?.title);
   };
 
-  const handleUpdatePriorReviews = async (event: any) => {
-    const priorReviews = event.target.innerHTML;
-    clearTimeout(priorReviewsTimeoutRef?.current);
-    priorReviewsTimeoutRef.current = setTimeout(async () => {
-      await updateDoc(doc(db, "articles", selectedArticle.id), {
-        priorReviews,
-        updatedAt: new Date(),
-      });
-    }, 1000);
+  const handleUpdatePriorReviews = async (priorReviews: any, source: any) => {
+    if (source === "user" && keyPressed) {
+      clearTimeout(priorReviewsTimeoutRef?.current);
+      priorReviewsTimeoutRef.current = setTimeout(async () => {
+        await updateDoc(doc(db, "articles", selectedArticle.id), {
+          priorReviews,
+          updatedAt: new Date(),
+        });
+      }, 1000);
+      setPriorReviews(priorReviews);
+      setKeyPressed(false);
+    }
   };
 
   const handleUpdateContent = async (content: string, source: any) => {
@@ -504,24 +508,25 @@ const ContentComp: React.FC<Props> = ({
     const filteredIssue = issues[expandedIssue];
     if (filteredIssue instanceof Object) {
       const sentences = filteredIssue.sentences;
-      const htmlElements = document.getElementById("priorReviewsEditor");
-      highlightSentences(htmlElements, sentences);
+      highlightSentences(sentences);
     }
   }, [expandedIssue]);
 
-  const highlightSentences = (htmlElement: any, sentencesToFind: any) => {
-    const elements = htmlElement.querySelectorAll("*");
-    elements.forEach((element: any) => {
-      if (element.style.backgroundColor === "gray") {
-        element.style.backgroundColor = "";
-      }
+  const highlightSentences = (sentencesToFind: any) => {
+    const quill = reviewsQuillRef.current.getEditor();
+    quill.formatText(0, articleContent.length, {
+      background: false,
     });
     sentencesToFind.forEach((sentence: any) => {
-      elements.forEach((element: any) => {
-        if (element.textContent === sentence) {
-          element.style.backgroundColor = "gray";
-        }
-      });
+      const index = quill.getText().indexOf(sentence);
+      if (index > -1) {
+        quill.formatText(
+          index,
+          sentence.length,
+          "background",
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.gray300
+        );
+      }
     });
   };
   return (
@@ -712,10 +717,10 @@ const ContentComp: React.FC<Props> = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderTop: "solid 1px",
-            borderLeft: "solid 1px",
-            borderRight: "solid 1px",
-            borderBottom: !isReviewsOpen ? "solid 1px" : undefined,
+            borderTop: "solid 1px #CCCCCC",
+            borderLeft: "solid 1px #CCCCCC",
+            borderRight: "solid 1px #CCCCCC",
+            borderBottom: !isReviewsOpen ? "solid 1px #CCCCCC" : undefined,
             pl: "10px",
             pr: "2px",
             py: "2.5px",
@@ -751,28 +756,19 @@ const ContentComp: React.FC<Props> = ({
             Analyze
           </Button>
         </Box>
-        <Box
-          id="priorReviewsEditor"
-          contentEditable
-          sx={{
-            display: !isReviewsOpen ? "none" : undefined,
-            width: "100%",
-            height: "250px",
-            maxHeight: "250px",
-            fontSize: 16,
-            border: "solid 1px",
-            outline: "none",
-            padding: "15px",
-            fontFamily: "system-ui",
-            fontStyle: "italic",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : theme.palette.common.white,
-            color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-            whiteSpace: "pre-wrap",
-            overflowY: "auto",
+        <ReactQuill
+          ref={reviewsQuillRef}
+          modules={{
+            clipboard: {
+              matchVisual: false,
+            },
+            toolbar: false,
           }}
-          onInput={async (e: any) => handleUpdatePriorReviews(e)}
-          dangerouslySetInnerHTML={{ __html: priorReviews }}
+          preserveWhitespace={false}
+          style={{ display: !isReviewsOpen ? "none" : undefined, height: "225px" }}
+          value={priorReviews}
+          onChange={(content, {}, source) => handleUpdatePriorReviews(content, source)}
+          onKeyDown={() => setKeyPressed(true)}
         />
       </Box>
       <Modal
