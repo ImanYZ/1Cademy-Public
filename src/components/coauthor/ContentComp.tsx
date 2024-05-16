@@ -128,6 +128,7 @@ const ContentComp: React.FC<Props> = ({
   const [fuseInstance, setFuseInstance] = useState<any>(null);
   const [priorReviews, setPriorReviews] = useState<string>("");
   const [isReviewsOpen, setIsReviewOpen] = useState<boolean>(false);
+  const [keyPressed, setKeyPressed] = useState(false);
   const priorReviewsTimeoutRef = useRef<any>(null);
   const contentTimeoutRef = useRef<any>(null);
 
@@ -482,17 +483,19 @@ const ContentComp: React.FC<Props> = ({
     }, 1000);
   };
 
-  const handleUpdateContent = async () => {
-    const quill = quillRef.current.getEditor();
-    const content = quill.root.innerHTML;
-    clearTimeout(contentTimeoutRef?.current);
-    contentTimeoutRef.current = setTimeout(async () => {
-      await updateDoc(doc(db, "articles", selectedArticle.id), {
-        content,
-        updatedAt: new Date(),
-      });
-    }, 1000);
-    setContent(content);
+  const handleUpdateContent = async (content: string, source: any) => {
+    if (source === "user" && keyPressed) {
+      clearTimeout(contentTimeoutRef?.current);
+      contentTimeoutRef.current = setTimeout(async () => {
+        await updateDoc(doc(db, "articles", selectedArticle.id), {
+          content,
+          updatedAt: new Date(),
+        });
+      }, 1000);
+
+      setContent(content);
+      setKeyPressed(false);
+    }
   };
 
   useEffect(() => {
@@ -678,7 +681,8 @@ const ContentComp: React.FC<Props> = ({
           style={{ height: `calc(100vh - ${isReviewsOpen ? "400" : "170"}px)` }}
           ref={quillRef}
           value={content}
-          onKeyUp={handleUpdateContent}
+          onChange={(content, {}, source) => handleUpdateContent(content, source)}
+          onKeyDown={() => setKeyPressed(true)}
           onBlur={() => handleBlur()}
           onFocus={() => handleFocus()}
           onChangeSelection={(range: any) => handleSelectionChange(range)}
