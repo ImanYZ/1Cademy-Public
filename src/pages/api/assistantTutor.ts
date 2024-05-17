@@ -9,6 +9,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
 import { extractArray } from "./assignment/generateRubrics";
 import { uploadFileToStorage } from "./streamAudio";
+import { MODEL } from "@/lib/utils/constants";
 type Message = {
   role: string;
   content: string;
@@ -601,7 +602,7 @@ const getQuestionsAfterAnswer = async (
        "continue": "If the student asked to continue with the next topic/question, assign their request as a string to this field. If there is nothing indicating their willingness to continue, the value should be an empty string.",
        "deviate": ["If there are questions or requests included in any part of the student's message that are not related to the instructor's message, assign each as a string to this array. If there are no questions or requests irrelevant to the instructor's message, the value should be []."]
     }`;
-  const response: any = await sendGPTPrompt("gpt-4o", [
+  const response: any = await sendGPTPrompt([
     {
       role: "user",
       content: prompt,
@@ -654,7 +655,7 @@ const getQuestionsAfterQuestion = async (
        "clarificationRequest": "If the student is asking the instructor to clarify the question, assign this request as a string to this field. If there is no clarification request, the value should be an empty string."
     }`;
 
-    const response: any = await sendGPTPrompt("gpt-4o", [
+    const response: any = await sendGPTPrompt([
       {
         role: "user",
         content: prompt,
@@ -703,7 +704,7 @@ const clarifyTheQuestion = async (
 
     const response = await openai.chat.completions.create({
       messages: messagesSimplified,
-      model: "gpt-4o",
+      model: MODEL,
       temperature: 0,
       stream: true,
     });
@@ -746,7 +747,7 @@ const streamMainResponse = async ({
   /*  */
   const response = await openai.chat.completions.create({
     messages: mergedMessages,
-    model: "gpt-4o",
+    model: MODEL,
     temperature: 0,
     stream: true,
   });
@@ -869,7 +870,7 @@ export const handleDeviating = async (
             content: question,
           },
         ],
-        model: "gpt-4o",
+        model: MODEL,
         temperature: 0,
         stream: true,
       });
@@ -1293,7 +1294,7 @@ const generateListMessagesText = (messages: any) => {
 //   try {
 //     const response = await openai.chat.completions.create({
 //       messages,
-//       model: "gpt-4o",
+//       model: MODEL,
 //       temperature: 0,
 //       stream: true,
 //     });
@@ -1393,7 +1394,7 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
       role: "user",
     },
   ];
-  const question = await sendGPTPrompt("gpt-4o", context);
+  const question = await sendGPTPrompt(context);
   let audioQuestion = "";
   if (question) {
     audioQuestion = await getQuestionAudio(question);
@@ -1468,7 +1469,7 @@ export const getChapterRelatedToResponse = async (studentLastMessage: string, co
 
     const response = await openai.chat.completions.create({
       messages: prompt_messages,
-      model: "gpt-4o",
+      model: MODEL,
       temperature: 0,
     });
     const response_sections = response.choices[0].message.content;
@@ -1623,7 +1624,7 @@ const handleRelatedTopic = async (messages: any, systemPrompt: string, res: any)
 
     const response = await openai.chat.completions.create({
       messages: messagesSimplified,
-      model: "gpt-4o",
+      model: MODEL,
       temperature: 0,
       stream: true,
     });

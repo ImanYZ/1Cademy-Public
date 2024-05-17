@@ -66,7 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         if (numRequests++ > 3) {
           break;
         }
-        const completion = await sendGPTPrompt("gpt-4", [
+        const completion = await sendGPTPrompt([
           {
             content: prompt,
             role: "user",

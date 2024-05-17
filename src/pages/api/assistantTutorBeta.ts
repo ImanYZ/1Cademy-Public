@@ -8,6 +8,7 @@ import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
 import { Timestamp } from "firebase-admin/firestore";
 import { roundNum } from "src/utils/common.utils";
 import { extractArray } from "./assignment/generateRubrics";
+import { MODEL } from "@/lib/utils/constants";
 type Message = {
   role: string;
   content: string;
@@ -411,7 +412,7 @@ const getEvaluation = async ({
 
         const response = await openai.chat.completions.create({
           messages: _messages,
-          model: "gpt-4-0125-preview",
+          model: MODEL,
           temperature: 0,
         });
         const responseText = response.choices[0].message.content;
@@ -490,7 +491,7 @@ const streamMainResponse = async ({
   console.log({ deviatingResponse: deviating });
   const response = await openai.chat.completions.create({
     messages: mergedMessages,
-    model: "gpt-4-0125-preview",
+    model: MODEL,
     temperature: 0,
     stream: true,
   });
@@ -630,7 +631,7 @@ const handleDeviating = async (
             content: message,
           },
         ],
-        model: "gpt-4-0125-preview",
+        model: MODEL,
         temperature: 0,
         stream: true,
       });
@@ -1006,7 +1007,7 @@ const streamPrompt = async (messages: any) => {
   try {
     const response = await openai.chat.completions.create({
       messages,
-      model: "gpt-4-0125-preview",
+      model: MODEL,
       temperature: 0,
       stream: true,
     });
@@ -1100,7 +1101,7 @@ const getTheNextQuestion = async (nextFlashcard: { title: string; content: strin
       role: "user",
     },
   ];
-  const gptResponse = await sendGPTPrompt("gpt-4-0125-preview", context);
+  const gptResponse = await sendGPTPrompt(context);
   return gptResponse;
 };
 
@@ -1173,7 +1174,7 @@ const getChapterRelatedToResponse = async (mergedMessages: any, courseName: stri
       `"guidance": "Your suggestion to redirect the student's focus back to the course material." (If the student is deviating)}`;
 
     console.log(userPrompt);
-    const response = await sendGPTPromptJSON("gpt-4-turbo-preview", [
+    const response = await sendGPTPromptJSON([
       {
         role: "user",
         content: userPrompt,
