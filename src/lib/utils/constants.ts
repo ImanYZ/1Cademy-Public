@@ -233,3 +233,4 @@ export const ANSWERING_ERROR =
 export const CONFIRM_ERROR = "Please only tell me yes or correct.";
 export const NEXT_ACTION_ERROR = "Please only tell me Next or Open Notebook.";
 export const OPEN_PRACTICE_ERROR = "Please only tell me continue practicing.";
+export const MODEL = "gpt-4o";
