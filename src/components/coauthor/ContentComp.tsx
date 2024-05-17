@@ -254,7 +254,7 @@ const ContentComp: React.FC<Props> = ({
 
   const saveLogs = async (logs: any) => {
     try {
-      addDoc(collection(db, "articleLogs"), {
+      await addDoc(collection(db, "articleLogs"), {
         ...logs,
         createdAt: new Date(),
       });
@@ -484,6 +484,13 @@ const ContentComp: React.FC<Props> = ({
       }, 1000);
       setPriorReviews(priorReviews);
       setKeyPressed(false);
+      await saveLogs({
+        doer: user?.uname,
+        action: "Updated Article Reviews",
+        articleId: selectedArticle?.id,
+        priorReviews,
+        cursorPosition: lastClickPosition,
+      });
     }
   };
 
@@ -499,6 +506,13 @@ const ContentComp: React.FC<Props> = ({
 
       setContent(content);
       setKeyPressed(false);
+      await saveLogs({
+        doer: user?.uname,
+        action: "Updated Article Content",
+        articleId: selectedArticle?.id,
+        content,
+        cursorPosition: lastClickPosition,
+      });
     }
   };
 
@@ -687,7 +701,12 @@ const ContentComp: React.FC<Props> = ({
           ref={quillRef}
           value={content}
           onChange={(content, {}, source) => handleUpdateContent(content, source)}
-          onKeyDown={() => setKeyPressed(true)}
+          onKeyDown={(event: any) => {
+            if ((event.metaKey || event.ctrlKey) && (event.key === "c" || event.key === "v")) {
+              setSelection(null);
+            }
+            setKeyPressed(true);
+          }}
           onBlur={() => handleBlur()}
           onFocus={() => handleFocus()}
           onChangeSelection={(range: any) => handleSelectionChange(range)}
