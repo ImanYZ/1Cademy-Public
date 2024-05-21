@@ -85,7 +85,7 @@ MessageInputProps) => {
         const nodeDoc = await getDoc(nodeRef);
         if (!nodeDoc.exists()) return null;
         const nodeData = nodeDoc.data();
-        sendMessage([], false, {
+        sendMessage(imageUrls, important, inputValue, {
           id: nodeDoc.id,
           title: nodeData?.title,
           content: nodeData?.content,
@@ -159,7 +159,7 @@ MessageInputProps) => {
   };
 
   const sendMessage = useCallback(
-    async (imageUrls: string[], important = false, node = {}) => {
+    async (imageUrls: string[], important = false, inputValue: string, node = {}) => {
       try {
         if (sendMessageType === "edit") {
           saveMessageEdit(inputValue);
