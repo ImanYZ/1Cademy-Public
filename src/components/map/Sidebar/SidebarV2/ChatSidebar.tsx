@@ -501,6 +501,8 @@ export const ChatSidebar = ({
                 />
               ) : (
                 <Message
+                  notebookRef={notebookRef}
+                  nodeBookDispatch={nodeBookDispatch}
                   roomType={roomType}
                   theme={theme}
                   selectedChannel={selectedChannel}
@@ -515,6 +517,8 @@ export const ChatSidebar = ({
                   getMessageRef={getMessageRef}
                   leading={leading}
                   sidebarWidth={sidebarWidth}
+                  openLinkedNode={openLinkedNode}
+                  onlineUsers={onlineUsers}
                 />
               )}
             </>

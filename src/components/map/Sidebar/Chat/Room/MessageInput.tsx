@@ -1,15 +1,17 @@
+import AddLinkIcon from "@mui/icons-material/AddLink";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
-import { arrayUnion, collection, doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import NextImage from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
+import { useNodeBook } from "@/context/NodeBookContext";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -18,6 +20,8 @@ import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
 type MessageInputProps = {
+  notebookRef: any;
+  nodeBookDispatch: any;
   db: any;
   theme: string;
   channelUsers: { id: string; display: string }[];
@@ -38,6 +42,8 @@ type MessageInputProps = {
   setMessages?: any;
 };
 export const MessageInput = ({
+  notebookRef,
+  nodeBookDispatch,
   db,
   theme,
   channelUsers,
@@ -59,6 +65,7 @@ export const MessageInput = ({
 }: // roomType,
 MessageInputProps) => {
   const storage = getStorage();
+  const { nodeBookState } = useNodeBook();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -70,6 +77,23 @@ MessageInputProps) => {
       setInputValue(editingMessage.message);
     }
   }, [editingMessage]);
+
+  useEffect(() => {
+    (async () => {
+      if (nodeBookState?.chatNode) {
+        const nodeRef = doc(db, "nodes", nodeBookState?.chatNode?.id);
+        const nodeDoc = await getDoc(nodeRef);
+        if (!nodeDoc.exists()) return null;
+        const nodeData = nodeDoc.data();
+        sendMessage(imageUrls, important, inputValue, {
+          id: nodeDoc.id,
+          title: nodeData?.title,
+          content: nodeData?.content,
+        });
+        nodeBookDispatch({ type: "setChatNode", payload: null });
+      }
+    })();
+  }, [nodeBookState?.chatNode]);
 
   const sendReplyOnMessage = useCallback(
     async (curMessage: IChannelMessage, inputMessage: string, imageUrls: string[] = [], important = false) => {
@@ -135,7 +159,7 @@ MessageInputProps) => {
   };
 
   const sendMessage = useCallback(
-    async (imageUrls: string[], important = false, inputValue: string) => {
+    async (imageUrls: string[], important = false, inputValue: string, node = {}) => {
       try {
         if (sendMessageType === "edit") {
           saveMessageEdit(inputValue);
@@ -157,7 +181,7 @@ MessageInputProps) => {
             read_by: [],
             edited: false,
             message: inputValue,
-            node: {},
+            node,
             createdAt: new Date(),
             replies: [],
             sender: user.uname,
@@ -239,6 +263,15 @@ MessageInputProps) => {
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
+  };
+
+  const choosingNewLinkedNode = () => {
+    notebookRef.current.choosingNode = { id: "", type: "Node", impact: "node" };
+    notebookRef.current.selectedNode = "";
+    notebookRef.current.chosenNode = null;
+    nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: "Node" } });
+    nodeBookDispatch({ type: "setSelectedNode", payload: "" });
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
   };
 
   return (
@@ -366,6 +399,11 @@ MessageInputProps) => {
                 </IconButton>
               </Tooltip>
             )}
+            <Tooltip title={"Upload a node from notebook"}>
+              <IconButton onClick={() => choosingNewLinkedNode()}>
+                <AddLinkIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
         {!editingMessage ? (
