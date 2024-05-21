@@ -15,10 +15,13 @@ import { Forward } from "../List/Forward";
 import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
+import { NodeLink } from "./NodeLink";
 import { Reply } from "./Reply";
 
 dayjs.extend(relativeTime);
 type MessageProps = {
+  notebookRef: any;
+  nodeBookDispatch: any;
   roomType: string;
   theme: UserTheme;
   selectedChannel: any;
@@ -33,9 +36,13 @@ type MessageProps = {
   getMessageRef: any;
   leading: boolean;
   sidebarWidth: number;
+  openLinkedNode: any;
+  onlineUsers: any;
 };
 
 export const Message = ({
+  notebookRef,
+  nodeBookDispatch,
   roomType,
   theme,
   selectedChannel,
@@ -50,6 +57,8 @@ export const Message = ({
   getMessageRef,
   leading,
   sidebarWidth,
+  openLinkedNode,
+  onlineUsers,
 }: MessageProps) => {
   const db = getFirestore();
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
@@ -112,7 +121,6 @@ export const Message = ({
     },
     [setSelectedMessage, setForward]
   );
-
   // const scroll = () => {
   //   if (messageBoxRef.current && messages.length > 2) {
   //     messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
@@ -229,6 +237,8 @@ export const Message = ({
                   <Box key={message.id}>
                     {roomType === "news" && (
                       <NewsCard
+                        notebookRef={notebookRef}
+                        nodeBookDispatch={nodeBookDispatch}
                         db={db}
                         user={user}
                         message={message}
@@ -246,29 +256,44 @@ export const Message = ({
                         leading={leading}
                         getMessageRef={getMessageRef}
                         selectedChannel={selectedChannel}
+                        onlineUsers={onlineUsers}
                       />
                     )}
                     {roomType !== "news" && (
-                      <MessageLeft
-                        selectedMessage={selectedMessage}
-                        message={message}
-                        toggleEmojiPicker={toggleEmojiPicker}
-                        toggleReaction={toggleReaction}
-                        membersInfo={selectedChannel.membersInfo}
-                        forwardMessage={forwardMessage}
-                        replyOnMessage={replyOnMessage}
-                        setReplyOnMessage={setReplyOnMessage}
-                        channelUsers={channelUsers}
-                        user={user}
-                        db={db}
-                        editingMessage={editingMessage}
-                        setEditingMessage={setEditingMessage}
-                        roomType={roomType}
-                        leading={leading}
-                        getMessageRef={getMessageRef}
-                        selectedChannel={selectedChannel}
-                        setMessages={setMessages}
-                      />
+                      <>
+                        {message?.node?.id ? (
+                          <NodeLink
+                            message={message}
+                            membersInfo={selectedChannel.membersInfo}
+                            openLinkedNode={openLinkedNode}
+                            onlineUsers={onlineUsers}
+                          />
+                        ) : (
+                          <MessageLeft
+                            notebookRef={notebookRef}
+                            nodeBookDispatch={nodeBookDispatch}
+                            selectedMessage={selectedMessage}
+                            message={message}
+                            toggleEmojiPicker={toggleEmojiPicker}
+                            toggleReaction={toggleReaction}
+                            membersInfo={selectedChannel.membersInfo}
+                            forwardMessage={forwardMessage}
+                            replyOnMessage={replyOnMessage}
+                            setReplyOnMessage={setReplyOnMessage}
+                            channelUsers={channelUsers}
+                            user={user}
+                            db={db}
+                            editingMessage={editingMessage}
+                            setEditingMessage={setEditingMessage}
+                            roomType={roomType}
+                            leading={leading}
+                            getMessageRef={getMessageRef}
+                            selectedChannel={selectedChannel}
+                            setMessages={setMessages}
+                            onlineUsers={onlineUsers}
+                          />
+                        )}
+                      </>
                     )}
                   </Box>
                 ))}
@@ -299,6 +324,8 @@ export const Message = ({
             )}
           </Paper>
           <MessageInput
+            notebookRef={notebookRef}
+            nodeBookDispatch={nodeBookDispatch}
             theme={theme}
             setReplyOnMessage={setReplyOnMessage}
             getMessageRef={getMessageRef}

@@ -17,6 +17,8 @@ import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
 type MessageLeftProps = {
+  notebookRef: any;
+  nodeBookDispatch: any;
   selectedMessage: any;
   message: IChannelMessage;
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
@@ -35,8 +37,11 @@ type MessageLeftProps = {
   getMessageRef: any;
   selectedChannel: any;
   setMessages?: any;
+  onlineUsers: any;
 };
 export const MessageLeft = ({
+  notebookRef,
+  nodeBookDispatch,
   selectedMessage,
   message,
   toggleEmojiPicker,
@@ -55,6 +60,7 @@ export const MessageLeft = ({
   getMessageRef,
   selectedChannel,
   setMessages,
+  onlineUsers,
 }: MessageLeftProps) => {
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [openReplies, setOpenReplies] = useState<boolean>(false);
@@ -135,7 +141,9 @@ export const MessageLeft = ({
           size={!message.parentMessage ? 40 : 30}
           sx={{ border: "none" }}
         />
-        <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
+        {onlineUsers.includes(membersInfo[message.sender]?.uname) && (
+          <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
+        )}
       </Box>
 
       <Box sx={{ width: "90%" }}>
@@ -180,6 +188,8 @@ export const MessageLeft = ({
             <Box>
               {" "}
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
@@ -260,6 +270,8 @@ export const MessageLeft = ({
             {(message.replies || []).map((reply: any, idx: number) => (
               <MessageLeft
                 key={idx}
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 selectedMessage={selectedMessage}
                 message={reply}
                 toggleEmojiPicker={toggleEmojiPicker}
@@ -277,10 +289,13 @@ export const MessageLeft = ({
                 leading={leading}
                 getMessageRef={getMessageRef}
                 selectedChannel={selectedChannel}
+                onlineUsers={onlineUsers}
               />
             ))}
             <Box sx={{ ml: "37px", mt: 2 }}>
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
