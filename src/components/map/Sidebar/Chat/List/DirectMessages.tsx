@@ -34,9 +34,7 @@ export const DirectMessagesList = ({
   const [{ user }] = useAuth();
   const [users, setUsers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-
   const fuse = new Fuse(users, { keys: ["uname"] });
-
   const [notificationHash, setNotificationHash] = useState<any>({});
 
   useEffect(() => {
@@ -55,14 +53,19 @@ export const DirectMessagesList = ({
     const name = [];
     let more = 0;
     for (let mId in members) {
+      if (Object.keys(members).length === 1) {
+        name.push(members[mId].fullname);
+        break;
+      }
       if (name.length > 3) {
         more++;
       }
-      if (mId !== user?.uname) name.push(members[mId].fullname + "");
+      if (mId !== user?.uname) name.push((name.length > 0 ? ", " : "") + members[mId].fullname);
     }
     if (more > 2) {
       name.push(`...`);
     }
+
     return name.join("");
   };
   const OverlappingAvatars = ({ members }: any) => {

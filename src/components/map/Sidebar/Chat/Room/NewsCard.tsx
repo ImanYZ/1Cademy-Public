@@ -76,6 +76,13 @@ export const NewsCard = ({
     >
       <Box sx={{ pt: 1 }}>
         <Avatar src={membersInfo[message.sender]?.imageUrl} />
+        <Box
+          sx={{
+            background: onlineUsers.includes(membersInfo[message.sender]?.uname) ? "#12B76A" : "grey",
+            fontSize: "1px",
+          }}
+          className="UserStatusOnlineIcon"
+        />
       </Box>
 
       <Box sx={{ width: "90%" }}>

@@ -80,7 +80,7 @@ export const SidebarWrapper = ({
 
   const AvatarUser = ({ members }: any) => {
     const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
-    const userInfo = members[otherUser];
+    const userInfo = members[otherUser] || members[user?.uname];
     return (
       <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
         <Box

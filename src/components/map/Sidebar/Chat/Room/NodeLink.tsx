@@ -55,9 +55,14 @@ export const NodeLink = ({ message, membersInfo, openLinkedNode, onlineUsers }: 
             size={!message.parentMessage ? 40 : 30}
             sx={{ border: "none" }}
           />
-          {onlineUsers.includes(membersInfo[message.sender]?.uname) && (
-            <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
-          )}
+
+          <Box
+            sx={{
+              background: onlineUsers.includes(membersInfo[message.sender]?.uname) ? "#12B76A" : "grey",
+              fontSize: "1px",
+            }}
+            className="UserStatusOnlineIcon"
+          />
         </Box>
         <Box>
           <Typography
