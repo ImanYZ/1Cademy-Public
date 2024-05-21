@@ -15,6 +15,8 @@ import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 
 type NewsCardProps = {
+  notebookRef: any;
+  nodeBookDispatch: any;
   message: IChannelMessage;
   membersInfo: any;
   toggleEmojiPicker: any;
@@ -32,8 +34,11 @@ type NewsCardProps = {
   leading: boolean;
   getMessageRef: any;
   selectedChannel: any;
+  onlineUsers: any;
 };
 export const NewsCard = ({
+  notebookRef,
+  nodeBookDispatch,
   message,
   membersInfo,
   toggleEmojiPicker,
@@ -51,6 +56,7 @@ export const NewsCard = ({
   replyOnMessage,
   getMessageRef,
   selectedChannel,
+  onlineUsers,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -116,6 +122,8 @@ export const NewsCard = ({
             <Box>
               {" "}
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 user={user}
                 theme={"Dark"}
@@ -196,6 +204,8 @@ export const NewsCard = ({
           >
             {(message.replies || []).map((reply: any, idx: number) => (
               <MessageLeft
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 key={idx}
                 selectedMessage={selectedMessage}
                 message={reply}
@@ -214,11 +224,14 @@ export const NewsCard = ({
                 leading={leading}
                 selectedChannel={selectedChannel}
                 getMessageRef={getMessageRef}
+                onlineUsers={onlineUsers}
               />
             ))}
 
             <Box sx={{ ml: "37px", mt: "13px" }}>
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 user={user}
                 theme={"Dark"}
