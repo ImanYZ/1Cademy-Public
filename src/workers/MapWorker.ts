@@ -124,6 +124,7 @@ const layoutHandler = (
       //  if the distance between the new edge and old edge is >= constant value MIN_CHANGE
       //  update the map's width and mapChangedFlag accordingly
       // console.log(thisNode, n, JSON.parse(JSON.stringify(thisNode)));
+      if (!thisNode) return null;
       if (
         !("left" in thisNode) ||
         !("top" in thisNode) ||
