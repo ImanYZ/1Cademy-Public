@@ -359,6 +359,7 @@ export const ChatSidebar = ({
     openChatInfo,
     notifications,
     theme,
+    onlineUsers,
   ]);
 
   useEffect(() => {

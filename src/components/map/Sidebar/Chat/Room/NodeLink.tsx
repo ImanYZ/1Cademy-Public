@@ -3,6 +3,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 type MessageRightProps = {
@@ -125,7 +126,7 @@ export const NodeLink = ({ message, membersInfo, openLinkedNode, onlineUsers }: 
                 {message?.node?.title.length > 40 ? "..." : ""}
               </Typography>
             </Box>
-            {message?.node?.content}
+            <MarkdownRender text={message?.node?.content} />
           </Typography>
         </Box>
       </Box>
