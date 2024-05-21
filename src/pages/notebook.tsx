@@ -320,6 +320,7 @@ const Notebook = ({}: NotebookProps) => {
     lastOperation: "CancelProposals",
     contributorsNodeId: null,
     showContributors: false,
+    chatNode: null,
   });
 
   // scale and translation of the viewport over the map for the map interactions module
@@ -1482,7 +1483,6 @@ const Notebook = ({}: NotebookProps) => {
 
     const notificationNumsCol = collection(db, "notificationNums");
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
-
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
       if (!snapshot.docs.length) {
         const notificationNumRef = collection(db, "notificationNums");
@@ -1902,6 +1902,14 @@ const Notebook = ({}: NotebookProps) => {
     async ({ nodeId, title }: OnChangeChosenNode) => {
       if (!notebookRef.current.choosingNode) return;
       if (notebookRef.current.choosingNode.id === nodeId) return;
+      if (notebookRef.current.choosingNode.type === "Node") {
+        nodeBookDispatch({ type: "setChatNode", payload: { id: nodeId, title } });
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
+        return;
+      }
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
       if (notebookRef.current.choosingNode.id === "Tag") return;
@@ -7458,6 +7466,7 @@ const Notebook = ({}: NotebookProps) => {
                 open={
                   nodeBookState.choosingNode?.type === "Parent" ||
                   nodeBookState.choosingNode?.type === "Child" ||
+                  nodeBookState.choosingNode?.type === "Node" ||
                   nodeBookState.choosingNode?.type === "Improvement"
                 }
                 onClose={() => {

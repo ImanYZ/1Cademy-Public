@@ -1782,6 +1782,8 @@ const NodeFooter = ({
               ? "Link it"
               : choosingNode?.type === "Parent"
               ? "Link it"
+              : choosingNode?.type === "Node"
+              ? "Link it"
               : choosingNode?.type === "Improvement"
               ? "Choose to improve"
               : null}
