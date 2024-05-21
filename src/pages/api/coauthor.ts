@@ -1,3 +1,4 @@
+import { MODEL } from "@/lib/utils/constants";
 import OpenAI from "openai";
 import fbAuth from "src/middlewares/fbAuth";
 
@@ -29,7 +30,7 @@ const handler = async (req: any, res: any) => {
 
     while (!response || !response.trim()) {
       const messagePayload = {
-        model: "gpt-4-turbo-preview",
+        model: MODEL,
         messages,
         response_format: { type: "json_object" },
         temperature: 0,

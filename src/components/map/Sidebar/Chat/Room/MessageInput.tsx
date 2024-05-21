@@ -202,7 +202,6 @@ MessageInputProps) => {
             roomType,
           });
         }
-        setInputValue("");
       } catch (error) {
         console.error(error);
       }
@@ -260,7 +259,8 @@ MessageInputProps) => {
   );
 
   const handleSendMessage = () => {
-    sendMessage(imageUrls, important);
+    sendMessage(imageUrls, important, inputValue);
+    setInputValue("");
     setImageUrls([]);
     setImportant(false);
   };

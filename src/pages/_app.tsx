@@ -59,7 +59,7 @@ const App = (props: AppPropsWithLayout) => {
           console.info("Registration successful, scope is:", registration.scope);
         })
         .catch(function (err) {
-          console.info("Service worker registration failed, error:", err);
+          console.error("Service worker registration failed, error:", err);
         });
     }
   }, []);

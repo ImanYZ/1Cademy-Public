@@ -36,9 +36,9 @@ const updateRequestTrack = async () => {
 };
 
 export const callOpenAI = async (args: any) => {
-  if (await checkLimit()) {
-    throw new Error("limit exceeded");
-  }
+  // if (await checkLimit()) {
+  //   throw new Error("limit exceeded");
+  // }
   const response = await openai.chat.completions.create(args);
   await saveLogs({
     action: "openai-call",

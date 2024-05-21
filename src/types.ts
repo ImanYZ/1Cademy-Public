@@ -61,7 +61,7 @@ export type NotebookDocument = {
   conversation?: string;
 };
 
-export type Notebook = NotebookDocument & {
+export type INotebook = NotebookDocument & {
   id: string;
 };
 

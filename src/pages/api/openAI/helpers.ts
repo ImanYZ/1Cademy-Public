@@ -3,6 +3,7 @@ import moment from "moment";
 import { uploadFileToStorage } from "../STT";
 import { NextApiResponse } from "next";
 import { delay } from "@/lib/utils/utils";
+import { MODEL } from "@/lib/utils/constants";
 
 const OpenAI = require("openai");
 
@@ -221,7 +222,7 @@ export const streamMainResponse = async ({
 }) => {
   const response2 = await openai.chat.completions.create({
     messages,
-    model: "gpt-4-0125-preview",
+    model: MODEL,
     temperature: 0,
     stream: true,
   });
