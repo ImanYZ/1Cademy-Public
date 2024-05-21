@@ -237,6 +237,8 @@ export const Message = ({
                   <Box key={message.id}>
                     {roomType === "news" && (
                       <NewsCard
+                        notebookRef={notebookRef}
+                        nodeBookDispatch={nodeBookDispatch}
                         db={db}
                         user={user}
                         message={message}
@@ -254,6 +256,7 @@ export const Message = ({
                         leading={leading}
                         getMessageRef={getMessageRef}
                         selectedChannel={selectedChannel}
+                        onlineUsers={onlineUsers}
                       />
                     )}
                     {roomType !== "news" && (
