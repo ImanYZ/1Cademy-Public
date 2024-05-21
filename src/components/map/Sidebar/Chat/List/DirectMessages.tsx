@@ -68,7 +68,7 @@ export const DirectMessagesList = ({
   const OverlappingAvatars = ({ members }: any) => {
     if (!user?.uname) return <></>;
     const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
-    const userInfo = members[otherUser];
+    const userInfo = members[otherUser] || members[user?.uname];
     return (
       <Box
         sx={{
@@ -94,9 +94,9 @@ export const DirectMessagesList = ({
           },
         }}
       >
-        <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={40} sx={{ border: "none" }} />
+        <OptimizedAvatar2 alt={userInfo?.fullname} imageUrl={userInfo?.imageUrl} size={40} sx={{ border: "none" }} />
         <Box
-          sx={{ background: onlineUsers.includes(userInfo.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
+          sx={{ background: onlineUsers.includes(userInfo?.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
           className="UserStatusOnlineIcon"
         />
       </Box>
