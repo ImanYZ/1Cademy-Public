@@ -61,7 +61,7 @@ export const Members = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
-      {!newMemberSection && (
+      {!newMemberSection && roomType === "direct" && (
         <Paper
           onClick={() => setNewMemberSection(true)}
           elevation={3}
