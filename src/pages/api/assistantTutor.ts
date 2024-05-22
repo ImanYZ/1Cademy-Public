@@ -216,6 +216,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const responseMessage = `I'm sorry, but I'm not sure how to respond to "${studentMessage}". Could you please provide more context or clarify your question?`;
       await streamAnswer(res, responseMessage);
       await pushNewMessage(conversationRef, {
+        role: "user",
+        content: studentMessage,
+        ignoreMessage: true,
+        sentAt: new Date(),
+        mid: getId(),
+        questions: deviateQuestions,
+      });
+      await pushNewMessage(conversationRef, {
         role: "assistant",
         content: responseMessage,
         deviatingMessage: true,
@@ -710,6 +718,10 @@ const clarifyTheQuestion = async (
 ): Promise<string> => {
   try {
     const systemPrompt = ClarifyPROMPT(fName, tutorName, courseName, objectives, directions, techniques);
+    messages.unshift({
+      role: "system",
+      content: systemPrompt,
+    });
     const userPrompt =
       "Please clarify your question by rephrasing it, explaining it further, and providing examples if possible. Conclude your clarification with restating the question and encouraging the student to answer it.";
     messages[0].content = systemPrompt;
