@@ -31,9 +31,11 @@ const start = () => {
     console.log("activatedx");
     event.waitUntil(
       caches.open(CACHE_NAME).then(cache => {
-        cache.delete("/_next/static/chunks/src_workers_MapWorker_ts.js");
+        if (cache) {
+          cache.delete("/_next/static/chunks/src_workers_MapWorker_ts.js");
 
-        return cache.addAll(["/_next/static/chunks/src_workers_MapWorker_ts.js"]);
+          return cache.addAll(["/_next/static/chunks/src_workers_MapWorker_ts.js"]);
+        }
       })
     );
   });
