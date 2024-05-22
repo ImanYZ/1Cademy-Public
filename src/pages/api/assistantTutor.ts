@@ -80,17 +80,21 @@ const getMessages = async (
     for (const messageDoc of messagesDocs.docs) {
       const messageData = messageDoc.data();
       let content = messageData.content;
-      if ("completeMessage" in messageData) {
-        content = messageData.completeMessage;
-      }
+      // if ("completeMessage" in messageData) {
+      //   content = messageData.completeMessage;
+      // }
       messages.push({
         role: messageData.role,
-        content: !!messageData.furtherExplainPrompt
-          ? messageData.furtherExplainPrompt
-          : replaceExtraPhrase(content || "") + (messageData.extraInfoPrompt || ""),
+        content: content,
+        sentAt: messageData.sentAt,
       });
     }
-    return messages;
+    return messages
+      .sort((a, b) => a.sentAt.toMillis() - b.sentAt.toMillis())
+      .map(m => {
+        delete m.sentAt;
+        return m;
+      });
   } catch (error) {
     console.log(error);
   }
@@ -237,7 +241,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     }
 
     if (!!clarificationRequest) {
-      const clarifiedQuestion: string = await clarifyTheQuestion(
+      const clarifiedQuestionResponse: string = await clarifyTheQuestion(
         messages,
         fName,
         tutorName,
@@ -247,7 +251,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         techniques,
         res
       );
-      if (!clarifiedQuestion.trim()) return;
+      if (!clarifiedQuestionResponse.trim()) return;
       await pushNewMessage(conversationRef, {
         role: "user",
         content: clarificationRequest,
@@ -257,7 +261,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         questions: deviateQuestions,
       });
       await pushNewMessage(conversationRef, {
-        content: clarifiedQuestion,
+        content: clarifiedQuestionResponse,
         role: "assistant",
         sentAt: new Date(),
         mid: getId(),
@@ -273,7 +277,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         where: "assistant tutor endpoint",
         conversationId: conversationRef.id,
         clarifyQuestion,
-        question: conversationData.messages.at(-1),
+        studentMessage,
         action: "clarify question",
         project: "1Tutor",
       });
@@ -306,35 +310,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       role: "system",
       content: PROMPT(fName, tutorName, courseName, objectives, techniques, nextFlashcard),
     });
-    // console.log(messages);
-    // add the extra PS to the message of the user
-    // we ignore it afterward when saving the conversation in the db
-    let furtherExplainPrompt = "";
+
+    /*   3 cases  */
+    //user asking to further explain
     if (furtherExplain) {
-      const furtherExplainConcept = {
-        title: "",
-        content: "",
-      };
-      furtherExplainPrompt = `Further explain the content of the following concept:{
+      const furtherExplainConcept = conversationData.furtherExplainConcept;
+      console.log("furtherExplainConcept", furtherExplainConcept);
+      const furtherExplainPrompt = `Further explain the content of the following concept:{
         title: "${furtherExplainConcept.title || ""}",
         content: "${furtherExplainConcept.content || ""}"
         }`;
       /*  */
-    }
-    console.log("furtherExplainPrompt", furtherExplainPrompt);
-    if (!!(questionAnswer || "").trim()) {
-      messages.push({
-        role: "user",
-        content: questionAnswer,
-      });
-    }
-    if (furtherExplainPrompt.trim()) {
       messages.push({
         role: "user",
         content: studentMessage + furtherExplainPrompt,
       });
+      const response = await furtherExplainResponse({
+        res,
+        messages,
+      });
+      await pushNewMessage(conversationRef, {
+        role: "user",
+        content: studentMessage,
+        sentAt: new Date(),
+        ignoreMessage: true,
+      });
+      await pushNewMessage(conversationRef, {
+        role: "assistant",
+        content: response,
+        sentAt: new Date(),
+        ignoreMessage: true,
+        actions: [
+          {
+            title: "Next Question",
+            type: "next_question",
+          },
+        ],
+      });
     }
-    if (questionAnswer || furtherExplain) {
+    // this handles the user response if they tried to answer Assistant question
+    if (questionAnswer) {
+      messages.push({
+        role: "user",
+        content: questionAnswer + " Do not  ask me any question.",
+      });
       pushNewMessage(conversationRef, {
         role: "user",
         content: studentMessage,
@@ -357,11 +376,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const { completeMessage, answer, question, emotion, inform_instructor, evaluation, audioQuestion } =
         await streamMainResponse({
           res,
-          deviating,
           messages,
           scroll_flashcard: scroll_flashcard_next,
           conversationData,
-          furtherExplain,
         });
       // Switch to guidedStudy didn't get the last three questions right
       if (!conversationData.guidedStudy) {
@@ -389,21 +406,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           },
         ],
       });
-
+      let nextQuestion = null;
       if (typeof question === "string" && !!question) {
         if (!!nextFlashcard) {
-          conversationData.nextQuestion = {
-            role: "assistant",
-            content: question,
-            audioQuestion: audioQuestion || "",
-            mid: getId(),
-            concept: {
-              title: nextFlashcard.title,
-              content: nextFlashcard.content,
-              id: nextFlashcard.id,
-              paragraphs: nextFlashcard?.paragraphs || [],
-            },
-          };
+          nextQuestion = { content: question, audioQuestion };
         }
       } else if (!!nextFlashcard) {
         const { question, audioQuestion } = await getTheNextQuestion(nextFlashcard);
@@ -415,54 +421,64 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           `  "inform_instructor": "${inform_instructor}",\n` +
           `  "next_question": "${question}"\n` +
           "}";
-        conversationData.nextQuestion = {
-          role: "assistant",
+        nextQuestion = {
           content: question,
           audioQuestion: audioQuestion || "",
+        };
+      }
+      conversationData.furtherExplainConcept = conversationData.nextQuestion.concept;
+      if (nextQuestion) {
+        conversationData.nextQuestion = {
+          role: "assistant",
+          ...nextQuestion,
           mid: getId(),
           concept: {
             title: nextFlashcard.title,
             content: nextFlashcard.content,
             id: nextFlashcard.id,
+            paragraphs: nextFlashcard?.paragraphs || [],
           },
         };
       }
-      if (!furtherExplain) {
-        /* we calculate the progress of the user in this unit
-         */
-        const parsedEvaluation = parseFloat(evaluation) || 0;
-        if (scroll_flashcard_next && !furtherExplain) {
-          if (conversationData.hasOwnProperty("flashcardsScores")) {
-            conversationData.flashcardsScores[scroll_flashcard_next] = parsedEvaluation;
-          } else {
-            conversationData.flashcardsScores = {
-              [scroll_flashcard_next]: parsedEvaluation,
-            };
-          }
-        }
-        if ((conversationData.progress || 0) < 1) {
-          conversationData.progress = roundNum(
-            calculateProgress(conversationData.flashcardsScores || {}) / (concepts.length * 10)
-          );
-        }
-        await addScoreToSavedCard(parsedEvaluation, scroll_flashcard_next, uname);
-        if (conversationData.hasOwnProperty("scores")) {
-          conversationData.scores.push({
-            score: evaluation,
-            date: new Date(),
-            flashcard: scroll_flashcard_next,
-          });
+
+      /* we calculate the progress of the user in this unit
+       */
+      const parsedEvaluation = parseFloat(evaluation) || 0;
+      if (scroll_flashcard_next && !furtherExplain) {
+        if (conversationData.hasOwnProperty("flashcardsScores")) {
+          conversationData.flashcardsScores[scroll_flashcard_next] = parsedEvaluation;
         } else {
-          conversationData.scores = [
-            {
-              score: evaluation,
-              date: new Date(),
-            },
-          ];
+          conversationData.flashcardsScores = {
+            [scroll_flashcard_next]: parsedEvaluation,
+          };
         }
       }
+      if ((conversationData.progress || 0) < 1) {
+        conversationData.progress = roundNum(
+          calculateProgress(conversationData.flashcardsScores || {}) / (concepts.length * 10)
+        );
+      }
+      await addScoreToSavedCard(parsedEvaluation, scroll_flashcard_next, uname);
+      if (conversationData.hasOwnProperty("scores")) {
+        conversationData.scores.push({
+          score: evaluation,
+          date: new Date(),
+          flashcard: scroll_flashcard_next,
+        });
+      } else {
+        conversationData.scores = [
+          {
+            score: evaluation,
+            date: new Date(),
+          },
+        ];
+      }
+      conversationData.instructorMessage = {
+        content: !answer ? completeMessage : answer,
+      };
       await conversationRef.set({ ...conversationData, updatedAt: new Date() });
     }
+    // this handles the deviating user response
     if (deviating) {
       let outOfContext = true;
       for (let question of deviateQuestions) {
@@ -727,25 +743,12 @@ const clarifyTheQuestion = async (
     });
     const userPrompt =
       "Please clarify your question by rephrasing it, explaining it further, and providing examples if possible. Conclude your clarification with restating the question and encouraging the student to answer it.";
-    messages[0].content = systemPrompt;
-    const messagesSet = new Set();
-    const messagesSimplified = messages
-      .filter((m: any) => {
-        const messageExist = messagesSet.has(m.content);
-        messagesSet.add(m.content);
-        return !m.ignoreMessage && !m.deviatingMessage && !messageExist;
-      })
-      .map((message: any) => ({
-        role: message.role,
-        content: message.content,
-      }));
-    messagesSimplified.push({
+    messages.push({
       role: "user",
       content: userPrompt,
     });
-
     const response = await openai.chat.completions.create({
-      messages: messagesSimplified,
+      messages,
       model: MODEL,
       temperature: 0,
       stream: true,
@@ -815,24 +818,49 @@ const clarifyAnswer = async (
   }
 };
 
+const furtherExplainResponse = async ({ res, messages }: { res: NextApiResponse<any>; messages: any[] }) => {
+  try {
+    const messagesTrimmed = messages.slice(-3);
+    const response = await openai.chat.completions.create({
+      messages: messagesTrimmed,
+      model: MODEL,
+      temperature: 0,
+      stream: true,
+    });
+    // stream the main response to the user
+    let completeMessage = "";
+    for await (const result of response) {
+      if (result.choices[0].delta.content) {
+        const resultText = result.choices[0].delta.content;
+        res.write(resultText);
+        completeMessage = completeMessage + resultText;
+      }
+    }
+    return completeMessage;
+  } catch (error: any) {
+    saveLogs({
+      at: "furtherExplainResponse",
+      error: {
+        message: error.message,
+        stack: error.stack,
+      },
+    });
+  }
+};
+
 /*  */
 const streamMainResponse = async ({
   res,
-  deviating,
   messages,
   scroll_flashcard,
   conversationData,
-  furtherExplain,
 }: {
   res: NextApiResponse<any>;
-  deviating: boolean;
   messages: any;
   scroll_flashcard: string;
   conversationData: any;
-  furtherExplain: boolean;
 }) => {
   let completeMessage = "";
-  if (furtherExplain) messages.shift(); //remove the system prompt from the history of messages if the user is asking for further explanation
   /*  */
   console.log(messages);
   const response = await openai.chat.completions.create({
@@ -858,7 +886,7 @@ const streamMainResponse = async ({
   const response_object = extractJSON(completeMessage);
   console.log("response_object", response_object, "scroll_flashcard=>", scroll_flashcard);
   const responseEvaluation = response_object?.evaluation || 0;
-  if (scroll_flashcard && !furtherExplain) {
+  if (scroll_flashcard) {
     conversationData.usedFlashcards.push(scroll_flashcard);
     res.write(`{"flashcard_id": "${scroll_flashcard}", "evaluation":"${responseEvaluation}"}`);
   }
@@ -869,9 +897,6 @@ const streamMainResponse = async ({
   let audioQuestion = "";
   if (!!response_object?.next_question.trim()) {
     audioQuestion = await getQuestionAudio(response_object?.next_question);
-  }
-  if (furtherExplain) {
-    res.write("done");
   }
   return {
     completeMessage,
@@ -1102,13 +1127,13 @@ const PROMPT = (
     "{\n" +
     '"your_response": "Your response to ' +
     fName +
-    "'s last message based on the conversation, which should be as short as possible. Do not explain what you do or anything else. Only answer the question or give feedback to " +
+    "'s last message based on the conversation, which should be as short as possible. Do not ask any follow up questions or explain what you do or anything else. Only answer the question or give feedback to " +
     fName +
     "'s answer. If " +
     fName +
     " has answered your last question, give them constructive feedback to their answer. If " +
     fName +
-    " does not know the answer (indicated by responses like 'I do not know', 'I have no ideas', 'Help me learn the answer', 'Explain it to me', 'Tell me the answer', ...), just give them a concise answer without any further explanation. Never ask any question or seek" +
+    " does not know the answer (indicated by responses like 'I do not know', 'I have no ideas', 'Help me learn the answer', 'Explain it to me', 'Tell me the answer', ...), just give them a concise answer without any further explanation. Never ask any question or seek " +
     fName +
     "'s opinion or preference about anything." +
     '",\n' +
