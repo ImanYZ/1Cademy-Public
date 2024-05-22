@@ -1,127 +1,180 @@
-import { Button, Paper, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import { Button, Drawer, IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { doc, DocumentData, DocumentReference, Firestore, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
+import { AddMember } from "./AddMember";
+
 dayjs.extend(relativeTime);
 
 type MemberProps = {
+  db: Firestore;
+  user: any;
   selectedChannel: any;
   openUserInfoSidebar: any;
   onlineUsers: any;
   leading: boolean;
+  roomType: string;
+  sidebarWidth: number;
 };
-export const Members = ({ selectedChannel, openUserInfoSidebar, onlineUsers, leading }: MemberProps) => {
+export const Members = ({
+  db,
+  user,
+  selectedChannel,
+  openUserInfoSidebar,
+  onlineUsers,
+  leading,
+  roomType,
+  sidebarWidth,
+}: MemberProps) => {
   const [openActions, setOpenActions] = useState<any>(null);
+  const [newMemberSection, setNewMemberSection] = useState(false);
+
+  const removeMember = (member: any) => {
+    const membersInfo = selectedChannel.membersInfo;
+    const members = selectedChannel.members;
+    const filteredMembers = members.filter((member: any) => member !== member?.uname);
+    delete membersInfo[member?.uname];
+    const channelRef = getChannelRef(selectedChannel?.id);
+    updateDoc(channelRef, {
+      members: filteredMembers,
+      membersInfo,
+    });
+  };
+
+  const getChannelRef = (channelId: string): DocumentReference<DocumentData> => {
+    let channelRef = doc(db, "channels", channelId);
+    if (roomType === "direct") {
+      channelRef = doc(db, "conversations", channelId);
+    } else if (roomType === "news") {
+      channelRef = doc(db, "announcementsMessages", channelId);
+    }
+    return channelRef;
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
-      {/* <Paper
-        onClick={() => {}}
-        elevation={3}
-        className="CollapsedProposal collection-item"
-        sx={{
-          display: "flex",
-          gap: "15px",
-          padding: "12px 16px 10px 16px",
-          borderRadius: "8px",
-          boxShadow: theme =>
-            theme.palette.mode === "light" ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)" : "none",
-          background: theme =>
-            theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
-          cursor: "pointer",
-          ":hover": {
+      {!newMemberSection && roomType === "direct" && (
+        <Paper
+          onClick={() => setNewMemberSection(true)}
+          elevation={3}
+          className="CollapsedProposal collection-item"
+          sx={{
+            display: "flex",
+            gap: "15px",
+            padding: "12px 16px 10px 16px",
+            borderRadius: "8px",
+            boxShadow: theme =>
+              theme.palette.mode === "light"
+                ? "0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1)"
+                : "none",
             background: theme =>
-              theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray200,
+              theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
+            cursor: "pointer",
+            ":hover": {
+              background: theme =>
+                theme.palette.mode === "dark" ? theme.palette.common.notebookG600 : theme.palette.common.gray200,
+            },
+          }}
+        >
+          <PersonAddIcon />
+          <Typography>Add a member</Typography>
+        </Paper>
+      )}
+      {newMemberSection && (
+        <Box sx={{ position: "relative", pt: "14px" }}>
+          <AddMember
+            db={db}
+            onlineUsers={onlineUsers}
+            selectedChannel={selectedChannel}
+            getChannelRef={getChannelRef}
+          />
+          <IconButton
+            onClick={() => setNewMemberSection(false)}
+            sx={{ position: "absolute", right: "0px", top: "0px" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      )}
+
+      <Drawer
+        anchor={"bottom"}
+        open={openActions}
+        onClose={() => setOpenActions(null)}
+        sx={{
+          "&.MuiDrawer-root > .MuiPaper-root": {
+            width: sidebarWidth,
           },
         }}
       >
-        <PersonAddIcon />
-        <Typography>Add a member</Typography>
-      </Paper> */}
-      {openActions && (
-        <Box
+        {leading && openActions?.uname !== user?.uname && Object.keys(selectedChannel.membersInfo).length > 2 && (
+          <Button
+            sx={{
+              height: "46px",
+              borderRadius: "15px",
+              color: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+              },
+            }}
+            onClick={() => removeMember(openActions)}
+          >
+            Remove member from chat
+          </Button>
+        )}
+        <Button
+          onClick={() => {
+            openUserInfoSidebar(openActions.uname, openActions.imageUrl, openActions.fullname, openActions.chooseUname);
+            setOpenActions(null);
+          }}
           sx={{
-            position: "fixed",
-            width: "23.8%",
-            bottom: "0px",
-            display: "flex",
-            gap: "10px",
-            flexDirection: "column",
-            alignItems: "center",
-            py: "10px",
+            height: "46px",
+            borderRadius: "15px",
+            color: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+            ":hover": {
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+            },
           }}
         >
-          {leading && (
-            <Button
-              sx={{
-                width: "80%",
-                height: "46px",
-                borderRadius: "15px",
-                color: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
-                background: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
-                ":hover": {
-                  background: theme =>
-                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
-                },
-              }}
-            >
-              Remove member from chat
-            </Button>
-          )}
-          <Button
-            onClick={() => {
-              openUserInfoSidebar(
-                openActions.uname,
-                openActions.imageUrl,
-                openActions.fullname,
-                openActions.chooseUname
-              );
-              setOpenActions(null);
-            }}
-            sx={{
-              width: "80%",
-              height: "46px",
-              borderRadius: "15px",
-              color: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+          View Profile
+        </Button>
+        <Button
+          onClick={() => {
+            setOpenActions(null);
+          }}
+          sx={{
+            height: "46px",
+            borderRadius: "15px",
+            color: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+            ":hover": {
               background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
-              ":hover": {
-                background: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
-              },
-            }}
-          >
-            View Profile
-          </Button>
-          <Button
-            onClick={() => {
-              setOpenActions(null);
-            }}
-            sx={{
-              width: "80%",
-              height: "46px",
-              borderRadius: "15px",
-              color: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.gray900,
-              background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
-              ":hover": {
-                background: theme =>
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
-              },
-            }}
-          >
-            Cancel
-          </Button>
-        </Box>
-      )}
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray200,
+            },
+          }}
+        >
+          Cancel
+        </Button>
+      </Drawer>
+
       {Object.keys(selectedChannel.membersInfo).map((member: any, idx: number) => (
         <Paper
           onClick={() => {

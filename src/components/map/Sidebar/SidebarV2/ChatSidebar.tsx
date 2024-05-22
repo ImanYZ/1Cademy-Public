@@ -7,6 +7,7 @@ import {
   doc,
   DocumentData,
   DocumentReference,
+  getDoc,
   getDocs,
   getFirestore,
   query,
@@ -393,34 +394,58 @@ export const ChatSidebar = ({
       openRoom("direct", { ...conversationData, id: findConversation.docs[0].id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
-      const conversationData = {
-        title: "",
-        members: [user2.uname, user?.uname],
-        membersInfo: {
-          [user2.uname]: {
-            uname: user2.uname,
-            imageUrl: user2.imageUrl,
-            chooseUname: !!user2.chooseUname,
-            fullname: `${user2.fName} ${user2.lName}`,
-            role: "",
-            uid: user2.userId,
-          },
-          [user?.uname]: {
-            uname: user?.uname,
-            imageUrl: user.imageUrl,
-            chooseUname: !!user.chooseUname,
-            fullname: `${user.fName} ${user.lName}`,
-            role: "",
-            uid: user?.userId,
-          },
+      const membersInfo = {
+        [user2.uname]: {
+          uname: user2.uname,
+          imageUrl: user2.imageUrl,
+          chooseUname: !!user2.chooseUname,
+          fullname: `${user2.fName} ${user2.lName}`,
+          role: "",
+          uid: user2.userId,
         },
+        [user?.uname]: {
+          uname: user?.uname,
+          imageUrl: user.imageUrl,
+          chooseUname: !!user.chooseUname,
+          fullname: `${user.fName} ${user.lName}`,
+          role: "",
+          uid: user?.userId,
+        },
+      };
+      const conversationData = {
+        title: generateChannelName(membersInfo),
+        members: [user2.uname, user?.uname],
+        membersInfo,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       await setDoc(converstionRef, conversationData);
+      const docSnap = await getDoc(converstionRef);
+      Post(`/chat/createChannelLeader`, { channelId: docSnap.id });
       openRoom("direct", { ...conversationData, id: converstionRef.id });
     }
   };
+
+  const generateChannelName = (members: any) => {
+    const name = [];
+    let more = 0;
+    for (let mId in members) {
+      if (Object.keys(members).length === 1) {
+        name.push(members[mId].fullname);
+        break;
+      }
+      if (name.length > 3) {
+        more++;
+      }
+      if (mId !== user?.uname) name.push((name.length > 0 ? ", " : "") + members[mId].fullname);
+    }
+    if (more > 2) {
+      name.push(`...`);
+    }
+
+    return name.join("");
+  };
+
   const clearNotifications = (notifications: any) => {
     for (let notif of notifications) {
       const notifRef = doc(collection(db, "notifications"), notif.id);
@@ -499,6 +524,7 @@ export const ChatSidebar = ({
                   setOpenChatRoom={setOpenChatRoom}
                   onlineUsers={onlineUsers}
                   user={user}
+                  sidebarWidth={sidebarWidth}
                 />
               ) : (
                 <Message
