@@ -679,9 +679,9 @@ const handleRequestsAfterQuestion = async (
     objectResponse = extractJSON(response);
     if (
       objectResponse &&
-      (objectResponse.questionsOrRequests || []).length > 0 &&
-      !!objectResponse.answer &&
-      !!objectResponse.clarificationRequest
+      ((objectResponse.questionsOrRequests || []).length > 0 ||
+        !!objectResponse.answer ||
+        !!objectResponse.clarificationRequest)
     ) {
       break;
     }
@@ -689,9 +689,9 @@ const handleRequestsAfterQuestion = async (
       objectResponse = await rectifyTheJSONResponse(response);
       if (
         objectResponse &&
-        (objectResponse.questionsOrRequests || []).length > 0 &&
-        !!objectResponse.answer &&
-        !!objectResponse.clarificationRequest
+        ((objectResponse.questionsOrRequests || []).length > 0 ||
+          !!objectResponse.answer ||
+          !!objectResponse.clarificationRequest)
       ) {
         break;
       }
