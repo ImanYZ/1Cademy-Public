@@ -306,7 +306,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       role: "system",
       content: PROMPT(fName, tutorName, courseName, objectives, techniques, nextFlashcard),
     });
-    console.log(messages);
+    // console.log(messages);
     // add the extra PS to the message of the user
     // we ignore it afterward when saving the conversation in the db
     let furtherExplainPrompt = "";
@@ -401,6 +401,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
               title: nextFlashcard.title,
               content: nextFlashcard.content,
               id: nextFlashcard.id,
+              paragraphs: nextFlashcard.paragraphs,
             },
           };
         }
@@ -833,6 +834,7 @@ const streamMainResponse = async ({
   let completeMessage = "";
   if (furtherExplain) messages.shift(); //remove the system prompt from the history of messages if the user is asking for further explanation
   /*  */
+  console.log(messages);
   const response = await openai.chat.completions.create({
     messages: messages,
     model: MODEL,
