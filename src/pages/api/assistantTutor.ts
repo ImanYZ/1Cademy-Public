@@ -298,6 +298,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         selfStudy
       );
     }
+    console.log("scroll_flashcard_next", scroll_flashcard_next);
+    console.log("nextFlashcard", nextFlashcard);
     //update the system prompt  to add the next flashcard that gpt need to ask a question about
 
     messages.unshift({
@@ -549,24 +551,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     });
   } catch (error: any) {
     console.log(error);
-    // try {
-    //   await saveLogs({
-    //     course,
-    //     unit,
-    //     uname: uname || "",
-    //     severity: "error",
-    //     where: "assistant tutor endpoint",
-    //     error: {
-    //       message: error.message,
-    //       stack: error.stack,
-    //     },
-    //     conversationId,
-    //     project: "1Tutor",
-    //     createdAt: new Date(),
-    //   });
-    // } catch (error) {
-    //   console.log("error saving the log", error);
-    // }
+    try {
+      await saveLogs({
+        course,
+        unit,
+        uname: uname || "",
+        severity: "error",
+        where: "assistant tutor endpoint",
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+        conversationId,
+        project: "1Tutor",
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      console.log("error saving the log", error);
+    }
     return res
       .status(500)
       .send("Sorry, something went wrong! Please try again! If the issue persists, contact iman@honor.education");
