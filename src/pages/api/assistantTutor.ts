@@ -401,7 +401,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
               title: nextFlashcard.title,
               content: nextFlashcard.content,
               id: nextFlashcard.id,
-              paragraphs: nextFlashcard.paragraphs,
+              paragraphs: nextFlashcard?.paragraphs || [],
             },
           };
         }
