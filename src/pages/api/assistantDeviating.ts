@@ -13,7 +13,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       .collection("tutorConversations")
       .where("unit", "==", unit)
       .where("uid", "==", uid)
-      .where("cardsModel", "==", cardsModel)
+      .where("model", "==", cardsModel)
       .where("deleted", "==", false)
       .get();
     let course = "the-economy/microeconomics";
@@ -21,37 +21,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       course = "the-mission-corporation-4R-trimmed.html";
     }
     let conversationData: any = {};
-    let newConversationRef = null;
+    let conversationRef = null;
     if (conversationDocs.docs.length <= 0) {
       return;
     }
     const conversationDoc = conversationDocs.docs[0];
     conversationData = conversationDoc.data();
-    newConversationRef = conversationDoc.ref;
+    conversationRef = conversationDoc.ref;
     const relevanceResponse = true;
     const { tutorName, courseName, objectives, directions, techniques, assistantSecondAgent, passingThreshold } =
       await getPromptInstructions(course, uname, isInstructor);
-
+    console.log("questions", questions);
     for (let question of questions) {
       const { sections }: any = await getChapterRelatedToResponse(question, courseName);
       console.log("deviating");
-
       await handleDeviating(
         res,
         conversationData,
         relevanceResponse,
         question,
-        newConversationRef,
+        conversationRef,
         uname,
         cardsModel,
         sections
       );
     }
-    const questionMessage = conversationData.messages.filter((m: any) => m.hasOwnProperty("question")).reverse()[0];
-    if (!!questionMessage) {
-      conversationData.messages.push({ ...questionMessage, question: true, sentAt: new Date() });
-    }
-    await newConversationRef.set({ ...conversationData, updatedAt: new Date() });
     res.end();
     await saveLogs({
       course,
