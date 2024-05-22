@@ -32,6 +32,7 @@ type SummaryProps = {
   moveBack: any;
   onlineUsers: any;
   user: any;
+  sidebarWidth: number;
 };
 export const Summary = ({
   theme,
@@ -44,6 +45,7 @@ export const Summary = ({
   setOpenChatRoom,
   onlineUsers,
   user,
+  sidebarWidth,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -296,10 +298,14 @@ export const Summary = ({
       <Box sx={{ width: "100%", px: "10px" }}>
         {value === 0 && (
           <Members
+            db={db}
+            user={user}
             selectedChannel={selectedChannel}
             openUserInfoSidebar={openUserInfoSidebar}
             onlineUsers={onlineUsers}
             leading={leading}
+            roomType={roomType}
+            sidebarWidth={sidebarWidth}
           />
         )}
         {value === 1 && (
