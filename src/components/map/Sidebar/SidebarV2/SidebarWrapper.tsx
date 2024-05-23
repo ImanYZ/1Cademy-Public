@@ -3,6 +3,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/Info";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
@@ -33,9 +34,11 @@ type SidebarWrapperProps = {
   selectedChannel?: any;
   setDisplayTagSearcher?: any;
   openChatInfoPage?: any;
+  setNewMemberSection?: any;
   onlineUsers?: any;
   user?: any;
   openChatInfo?: boolean;
+  leading: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -63,9 +66,11 @@ export const SidebarWrapper = ({
   selectedChannel = null,
   // setDisplayTagSearcher,
   openChatInfoPage,
+  setNewMemberSection,
   onlineUsers,
   user,
   openChatInfo,
+  leading,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -159,27 +164,59 @@ export const SidebarWrapper = ({
               </IconButton>
             </Tooltip>
           )}
-          <Typography variant="h6" sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              ml: 2,
+              p: 3,
+              pb: 0,
+              fontWeight: "bold",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              maxWidth: "60%",
+              whiteSpace: "nowrap",
+            }}
+          >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography>
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
-            <Tooltip title={"More Info"}>
-              <IconButton
-                sx={{
-                  width: "2px",
-                  mt: 3,
-                  ":hover": {
-                    background: "transparent",
-                    color: "grey",
-                  },
-                  ml: "5px",
-                }}
-                onClick={() => openChatInfoPage()}
-              >
-                <InfoIcon sx={{ color: "inherit" }} />
-              </IconButton>
-            </Tooltip>
+            <Box sx={{ display: "flex", gap: "10px" }}>
+              <Tooltip title={"More Info"}>
+                <IconButton
+                  sx={{
+                    width: "2px",
+                    mt: 3,
+                    ":hover": {
+                      background: "transparent",
+                      color: "grey",
+                    },
+                    ml: "5px",
+                  }}
+                  onClick={() => openChatInfoPage()}
+                >
+                  <InfoIcon sx={{ color: "inherit" }} />
+                </IconButton>
+              </Tooltip>
+              {leading && (
+                <Tooltip title={"Add New Member"}>
+                  <IconButton
+                    sx={{
+                      width: "2px",
+                      mt: 3,
+                      ":hover": {
+                        background: "transparent",
+                        color: "grey",
+                      },
+                      ml: "5px",
+                    }}
+                    onClick={() => setNewMemberSection(true)}
+                  >
+                    <PersonAddIcon sx={{ color: "inherit" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
           )}
         </Box>
       )}

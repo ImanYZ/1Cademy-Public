@@ -6,20 +6,23 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, Firestore, getDocs, query, updateDoc } from "firebase/firestore";
 import Fuse from "fuse.js";
 import { useEffect, useState } from "react";
+import { IUser } from "src/types/IUser";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+import { generateChannelName } from "@/lib/utils/chat";
 
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
   db: Firestore;
+  user: IUser;
   onlineUsers: any;
   selectedChannel: any;
   getChannelRef: any;
 };
-export const AddMember = ({ db, onlineUsers, selectedChannel, getChannelRef }: DirectMessageProps) => {
+export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRef }: DirectMessageProps) => {
   const [users, setUsers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-  const fuse = new Fuse(users, { keys: ["uname"] });
+  const fuse = new Fuse(users, { keys: ["fullname"] });
 
   useEffect(() => {
     const getUsers = async () => {
@@ -27,7 +30,11 @@ export const AddMember = ({ db, onlineUsers, selectedChannel, getChannelRef }: D
       const usersDocs = await getDocs(usersQuery);
       const _users: any = [];
       usersDocs.docs.forEach((userDoc: any) => {
-        _users.push({ ...userDoc.data(), fullname: `${userDoc.data().fName} ${userDoc.data().lName}`, id: userDoc.id });
+        _users.push({
+          ...userDoc.data(),
+          fullname: `${userDoc.data().fName} ${userDoc.data().lName}`,
+          id: userDoc.id,
+        });
       });
       setUsers(_users);
     };
@@ -45,6 +52,9 @@ export const AddMember = ({ db, onlineUsers, selectedChannel, getChannelRef }: D
   };
 
   const addNewMember = (member: any) => {
+    setSearchValue("");
+    if (selectedChannel.members?.includes(member?.uname)) return;
+
     const membersInfo = {
       ...selectedChannel.membersInfo,
       [member.uname]: {
@@ -59,6 +69,7 @@ export const AddMember = ({ db, onlineUsers, selectedChannel, getChannelRef }: D
     const members = [...selectedChannel.members, member?.uname];
     const channelRef = getChannelRef(selectedChannel?.id);
     updateDoc(channelRef, {
+      title: generateChannelName(membersInfo, user),
       members,
       membersInfo,
     });
