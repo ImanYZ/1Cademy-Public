@@ -38,7 +38,7 @@ type SidebarWrapperProps = {
   onlineUsers?: any;
   user?: any;
   openChatInfo?: boolean;
-  leading: boolean;
+  leading?: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
