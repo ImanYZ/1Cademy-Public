@@ -1,16 +1,13 @@
-import CloseIcon from "@mui/icons-material/Close";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import { Button, Drawer, IconButton, Paper, Typography } from "@mui/material";
+import { Button, Drawer, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { doc, DocumentData, DocumentReference, Firestore, updateDoc } from "firebase/firestore";
+import { Firestore, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-
-import { AddMember } from "./AddMember";
+import { generateChannelName } from "@/lib/utils/chat";
 
 dayjs.extend(relativeTime);
 
@@ -21,47 +18,37 @@ type MemberProps = {
   openUserInfoSidebar: any;
   onlineUsers: any;
   leading: boolean;
-  roomType: string;
   sidebarWidth: number;
+  getChannelRef: any;
 };
 export const Members = ({
-  db,
   user,
   selectedChannel,
   openUserInfoSidebar,
   onlineUsers,
   leading,
-  roomType,
   sidebarWidth,
+  getChannelRef,
 }: MemberProps) => {
   const [openActions, setOpenActions] = useState<any>(null);
-  const [newMemberSection, setNewMemberSection] = useState(false);
 
   const removeMember = (member: any) => {
     const membersInfo = selectedChannel.membersInfo;
     const members = selectedChannel.members;
-    const filteredMembers = members.filter((member: any) => member !== member?.uname);
+    const filteredMembers = members.filter((mber: any) => mber !== member?.uname);
     delete membersInfo[member?.uname];
     const channelRef = getChannelRef(selectedChannel?.id);
     updateDoc(channelRef, {
+      title: generateChannelName(membersInfo, user),
       members: filteredMembers,
       membersInfo,
     });
-  };
-
-  const getChannelRef = (channelId: string): DocumentReference<DocumentData> => {
-    let channelRef = doc(db, "channels", channelId);
-    if (roomType === "direct") {
-      channelRef = doc(db, "conversations", channelId);
-    } else if (roomType === "news") {
-      channelRef = doc(db, "announcementsMessages", channelId);
-    }
-    return channelRef;
+    setOpenActions(null);
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "9px", marginTop: "9px" }}>
-      {!newMemberSection && roomType === "direct" && (
+      {/* {!newMemberSection && roomType === "direct" && (
         <Paper
           onClick={() => setNewMemberSection(true)}
           elevation={3}
@@ -87,23 +74,7 @@ export const Members = ({
           <PersonAddIcon />
           <Typography>Add a member</Typography>
         </Paper>
-      )}
-      {newMemberSection && (
-        <Box sx={{ position: "relative", pt: "14px" }}>
-          <AddMember
-            db={db}
-            onlineUsers={onlineUsers}
-            selectedChannel={selectedChannel}
-            getChannelRef={getChannelRef}
-          />
-          <IconButton
-            onClick={() => setNewMemberSection(false)}
-            sx={{ position: "absolute", right: "0px", top: "0px" }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      )}
+      )} */}
 
       <Drawer
         anchor={"bottom"}
