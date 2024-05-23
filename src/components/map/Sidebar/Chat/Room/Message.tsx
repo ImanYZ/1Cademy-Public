@@ -1,4 +1,5 @@
-import { Paper } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton, Paper } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -11,6 +12,7 @@ import { UserTheme } from "src/knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { NotFoundNotification } from "../../SidebarV2/NotificationSidebar";
+import { AddMember } from "../List/AddMember";
 import { Forward } from "../List/Forward";
 import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
@@ -38,6 +40,9 @@ type MessageProps = {
   sidebarWidth: number;
   openLinkedNode: any;
   onlineUsers: any;
+  newMemberSection: any;
+  setNewMemberSection: any;
+  getChannelRef: any;
 };
 
 export const Message = ({
@@ -59,6 +64,9 @@ export const Message = ({
   sidebarWidth,
   openLinkedNode,
   onlineUsers,
+  newMemberSection,
+  setNewMemberSection,
+  getChannelRef,
 }: MessageProps) => {
   const db = getFirestore();
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
@@ -197,6 +205,23 @@ export const Message = ({
         overflow: "auto",
       }}
     >
+      {newMemberSection && (
+        <Box sx={{ position: "relative", pt: "14px" }}>
+          <AddMember
+            db={db}
+            user={user}
+            onlineUsers={onlineUsers}
+            selectedChannel={selectedChannel}
+            getChannelRef={getChannelRef}
+          />
+          <IconButton
+            onClick={() => setNewMemberSection(false)}
+            sx={{ position: "absolute", right: "0px", top: "0px" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      )}
       {forward ? (
         <Forward />
       ) : (

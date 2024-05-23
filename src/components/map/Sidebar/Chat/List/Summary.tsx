@@ -2,7 +2,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
 // import SearchIcon from "@mui/icons-material/Search";
-import { Tab, Tabs, Typography } from "@mui/material";
+import { Avatar, AvatarGroup, Tab, Tabs, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -33,6 +33,7 @@ type SummaryProps = {
   onlineUsers: any;
   user: any;
   sidebarWidth: number;
+  getChannelRef: any;
 };
 export const Summary = ({
   theme,
@@ -46,6 +47,7 @@ export const Summary = ({
   onlineUsers,
   user,
   sidebarWidth,
+  getChannelRef,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -135,25 +137,23 @@ export const Summary = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
-      <Box
-        sx={{
-          width: "70px",
-          height: "70px",
-          borderRadius: "200px",
+      <AvatarGroup total={Object.keys(selectedChannel.membersInfo)?.length}>
+        {Object.keys(selectedChannel.membersInfo)
+          .splice(0, 5)
+          .map((member: any, index: number) => {
+            return (
+              <Avatar
+                key={index}
+                alt={selectedChannel.membersInfo[member]?.fullname}
+                src={selectedChannel.membersInfo[member]?.imageUrl}
+              />
+            );
+          })}
 
-          background: "linear-gradient(to right, #FDC830, #F37335)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {selectedChannel.title
-          .split(" ")
-          .slice(0, 2)
-          .map((word: string) => word[0])
-          .join(" ")}
-      </Box>
-      <Typography sx={{ fontWeight: "500", fontSize: "17px" }}>{selectedChannel.title}</Typography>
+        <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
+        <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
+        <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" />
+      </AvatarGroup>
       <Box
         sx={{
           display: "flex",
@@ -304,8 +304,8 @@ export const Summary = ({
             openUserInfoSidebar={openUserInfoSidebar}
             onlineUsers={onlineUsers}
             leading={leading}
-            roomType={roomType}
             sidebarWidth={sidebarWidth}
+            getChannelRef={getChannelRef}
           />
         )}
         {value === 1 && (
