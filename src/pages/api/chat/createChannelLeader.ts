@@ -16,6 +16,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     const leading = customClaims.leading || [];
     leading.push(channelId);
     await auth.setCustomUserClaims(uid, {
+      ...customClaims,
       leading,
     });
     return res.status(200).send({});
