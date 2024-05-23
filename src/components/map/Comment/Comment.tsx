@@ -1,17 +1,17 @@
-import CloseIcon from "@mui/icons-material/Close";
+//import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
 import { Box, Button, Typography } from "@mui/material";
-import { addDoc, collection, deleteDoc,doc, getFirestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import moment from "moment";
-import React, { useCallback,useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+//import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import CommentButtons from "./CommentButtons";
@@ -19,27 +19,13 @@ import CommentInput from "./CommentInput";
 
 type CommentProps = {
   concept: any;
-  mode: string;
   user: any;
   confirmIt: any;
   comments: any;
-  setSelectConceptForComment: any;
-  expanded: any;
-  accordionHeight: number;
   users: any;
 };
 
-const Comment = ({
-  user,
-  concept,
-  mode,
-  confirmIt,
-  comments,
-  setSelectConceptForComment,
-  expanded,
-  accordionHeight,
-  users,
-}: CommentProps) => {
+const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) => {
   const db = getFirestore();
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -259,7 +245,6 @@ const Comment = ({
               percentageUploaded={percentageUploaded}
               uploadImageClicked={uploadImageClicked}
               onUploadImage={onUploadImage}
-              mode={mode}
               type="reply"
               value={editReplyText || reply.text}
               setAction={setEditReplyText}
@@ -288,7 +273,6 @@ const Comment = ({
                 p: "10px 14px",
                 borderRadius: "9px",
                 border: reply.user.isInstructor ? "solid 2px orange" : undefined,
-                background: mode === "dark" ? "#48444A" : "#FFFFFF",
               }}
             >
               <Box
@@ -340,7 +324,6 @@ const Comment = ({
                   }}
                   handleDeleteMessage={() => deleteReply(commentId, index)}
                   user={user}
-                  mode={mode}
                   sx={{
                     background: "transparent",
                     position: "initial",
@@ -437,7 +420,6 @@ const Comment = ({
                     percentageUploaded={percentageUploaded}
                     uploadImageClicked={uploadImageClicked}
                     onUploadImage={onUploadImage}
-                    mode={mode}
                     type="comment"
                     value={editCommentText || comment.text}
                     setAction={setEditCommentText}
@@ -466,7 +448,6 @@ const Comment = ({
                       p: "10px 14px",
                       borderRadius: "9px",
                       border: comment.user.isInstructor ? "solid 2px orange" : undefined,
-                      background: mode === "dark" ? "#48444A" : "#FFFFFF",
                     }}
                   >
                     <Box
@@ -515,7 +496,6 @@ const Comment = ({
                         }}
                         handleDeleteMessage={() => deleteComment(comment.id)}
                         user={user}
-                        mode={mode}
                         sx={{
                           background: "transparent",
                           bottom: "5px",
@@ -542,7 +522,6 @@ const Comment = ({
                       percentageUploaded={percentageUploaded}
                       uploadImageClicked={uploadImageClicked}
                       onUploadImage={onUploadImage}
-                      mode={mode}
                       type="reply"
                       message={comment}
                       value={replyInput}
@@ -579,54 +558,8 @@ const Comment = ({
         overflow: "auto",
         listStyle: "none",
         transition: "box-shadow 0.3s",
-        boxShadow:
-          mode === "dark"
-            ? "0px 1px 1px rgba(16, 24, 40, 0.005), 0px 0px 0px 1px #808080"
-            : "0px 1px 1px rgba(84, 83, 82, 0.005), 0px 0px 0px 1px #545352",
-        // padding: '4px 10px!important',
-        backgroundColor: mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG600,
       }}
     >
-      <Box
-        sx={{
-          position: "sticky",
-          top: "0",
-          left: "0",
-          width: "100%",
-          backgroundColor: mode === "light" ? DESIGN_SYSTEM_COLORS.gray200 : DESIGN_SYSTEM_COLORS.notebookG600,
-        }}
-      >
-        <CloseIcon
-          onClick={() => {
-            setSelectConceptForComment(null);
-          }}
-          sx={{
-            position: "absolute",
-            right: "5px",
-            top: "2px",
-            color: mode === "light" ? "black" : "white",
-            transition: "color 0.3s",
-            ":hover": {
-              color: "orange",
-              backgroundColor: "grey",
-              borderRadius: "50%",
-            },
-            cursor: "pointer",
-          }}
-        />
-
-        <Typography
-          sx={{
-            fontWeight: 600,
-            textAlign: "center",
-            fontSize: "17px",
-            mt: "5px",
-            mb: "15px",
-          }}
-        >
-          Comments
-        </Typography>
-      </Box>
       <Box
         sx={{
           display: "flex",
@@ -650,7 +583,7 @@ const Comment = ({
             height: "70vh",
             overflow: "auto",
             pb: "60px",
-            mt: expanded === concept?.id ? `${160 + accordionHeight}px` : "160px",
+            mt: "160px",
           }}
         >
           {comments.length === 0 ? (
@@ -701,7 +634,6 @@ const Comment = ({
             percentageUploaded={percentageUploaded}
             uploadImageClicked={uploadImageClicked}
             onUploadImage={onUploadImage}
-            mode={mode}
             type="comment"
             value={commentInput}
             setAction={setCommentInput}

@@ -2,7 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import MicIcon from "@mui/icons-material/Mic";
 import SettingsVoiceIcon from "@mui/icons-material/SettingsVoice";
-import { Box, Button, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, SxProps, Theme, Tooltip, useTheme } from "@mui/material";
 import React from "react";
 import { Mention, MentionsInput } from "react-mentions";
 
@@ -16,7 +16,6 @@ type CommentInputProps = {
   percentageUploaded: any;
   uploadImageClicked: any;
   onUploadImage: any;
-  mode: string;
   type: string;
   value: string;
   message?: any;
@@ -41,7 +40,6 @@ const CommentInput = ({
   percentageUploaded,
   uploadImageClicked,
   onUploadImage,
-  mode,
   type,
   value,
   setAction,
@@ -59,14 +57,19 @@ const CommentInput = ({
   recordingType,
   users,
 }: CommentInputProps) => {
+  const theme = useTheme();
   if (!isAuthenticated) return <></>;
   return (
     <Box
       sx={{
         mt: "10px",
-        border: `solid 1px ${mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG500}`,
+        border: theme =>
+          `solid 1px ${
+            theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG500
+          }`,
         borderRadius: "20px",
-        backgroundColor: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+        backgroundColor: theme =>
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
         ...sx,
       }}
     >
@@ -87,14 +90,15 @@ const CommentInput = ({
             border: "none",
             outline: "none",
             width: "100%",
-            color: mode === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
+            color: theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
             padding: "15px",
             overFlow: "auto",
             fontFamily: "system-ui",
           },
           suggestions: {
             list: {
-              background: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+              background:
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
 
               padding: "2px",
               fontSize: 16,
@@ -127,7 +131,7 @@ const CommentInput = ({
           displayTransform={(id, display) => {
             return `@${display}`;
           }}
-          renderSuggestion={(suggestion: any) => <MentionUser mode={mode} user={suggestion} />}
+          renderSuggestion={(suggestion: any) => <MentionUser user={suggestion} />}
         />
       </MentionsInput>
 
@@ -241,7 +245,8 @@ const CommentInput = ({
             ) : (
               <MicIcon
                 sx={{
-                  color: mode === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray500,
+                  color: theme =>
+                    theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.gray50 : DESIGN_SYSTEM_COLORS.gray500,
                   cursor: "pointer",
                 }}
                 onClick={() => startListening(type)}
@@ -267,7 +272,8 @@ const CommentInput = ({
                     <IconButton onClick={uploadImageClicked}>
                       <CollectionsIcon
                         sx={{
-                          color: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined,
+                          color: theme =>
+                            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined,
                         }}
                       />
                     </IconButton>

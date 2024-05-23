@@ -13,9 +13,8 @@ type CommentButtonsProps = {
   setInputMessage?: any;
   handleDeleteMessage?: any;
   user: IUser;
-  mode: string;
 };
-const CommentButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, user, mode }: CommentButtonsProps) => {
+const CommentButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, user }: CommentButtonsProps) => {
   const isSender = user.uname === message.user.uname;
   const editMessage = () => {
     handleEditMessage();
@@ -38,7 +37,7 @@ const CommentButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, u
             <IconButton onClick={editMessage}>
               <EditIcon
                 sx={{
-                  color: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined,
+                  color: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined),
                 }}
               />
             </IconButton>
@@ -49,7 +48,7 @@ const CommentButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, u
             <IconButton onClick={handleDeleteMessage}>
               <DeleteIcon
                 sx={{
-                  color: mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined,
+                  color: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined),
                 }}
               />
             </IconButton>

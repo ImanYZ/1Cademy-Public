@@ -6,7 +6,6 @@ import OptimizedAvatar from "@/components/OptimizedAvatar";
 
 type UsersTagProps = {
   user: any;
-  mode?: string;
 };
 export const MentionUser = ({ user }: UsersTagProps) => {
   return (

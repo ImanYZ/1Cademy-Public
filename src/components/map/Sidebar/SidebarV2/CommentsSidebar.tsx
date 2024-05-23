@@ -2,31 +2,23 @@ import { Box } from "@mui/material";
 import React from "react";
 import { UserTheme } from "src/knowledgeTypes";
 
+import useDialog from "@/hooks/useConfirmDialog";
+
+import Comment from "../../Comment/Comment";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 type CommentsSidebarProps = {
   user: any;
-  settings: any;
   onlineUsers: any;
   open: boolean;
   onClose: () => void;
   theme: UserTheme;
-  openLinkedNode: any;
-  username: string;
   sidebarWidth: number;
   innerHeight?: number;
   innerWidth: number;
-  bookmark: any;
   notebookRef: any;
   nodeBookDispatch: any;
   nodeBookState: any;
-  notebooks: any;
-  onChangeNotebook: any;
-  selectedNotebook: any;
-  dispatch: any;
-  onChangeTagOfNotebookById: any;
-  notifications: any;
-  openUserInfoSidebar: any;
 };
 
 export const CommentsSidebar = ({
@@ -37,10 +29,12 @@ export const CommentsSidebar = ({
   innerHeight,
   onlineUsers,
 }: CommentsSidebarProps) => {
+  const { confirmIt } = useDialog();
+  //const [commentType, setCommentType] = useState<string>("")
   return (
     <SidebarWrapper
-      id="chat"
-      title={""}
+      id="comment"
+      title={"Comments"}
       open={open}
       onClose={onClose}
       width={sidebarWidth}
@@ -51,12 +45,15 @@ export const CommentsSidebar = ({
       }}
       showScrollUpButton={false}
       contentSignalState={() => {}}
-      sidebarType={"chat"}
       onlineUsers={onlineUsers}
       user={user}
-      SidebarContent={<Box sx={{ marginTop: "22px" }}></Box>}
+      SidebarContent={
+        <Box sx={{ marginTop: "22px" }}>
+          <Comment user={user} concept={""} confirmIt={confirmIt} comments={[]} users={[]} />
+        </Box>
+      }
     />
   );
 };
 
-export const MemoizedChatSidebar = React.memo(CommentsSidebar);
+export const MemoizedCommentsSidebar = React.memo(CommentsSidebar);
