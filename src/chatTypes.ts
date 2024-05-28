@@ -3,6 +3,7 @@ import { Timestamp } from "firebase-admin/firestore";
 type Node = {
   id: string;
   title: string;
+  content: string;
   type: string;
   image?: string;
   video?: string;
@@ -25,7 +26,7 @@ type MemberInfo = {
   role?: string;
 };
 
-type MembersInfo = {
+export type MembersInfo = {
   [uname: string]: MemberInfo;
 };
 
@@ -66,6 +67,7 @@ export type IChannelMessage = {
   updatedAt?: Timestamp;
   deleted: boolean;
   important: boolean;
+  notVisible?: boolean;
 };
 
 export type IAnnouncement = {
