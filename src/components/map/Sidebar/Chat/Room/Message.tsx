@@ -424,7 +424,7 @@ export const Message = ({
           />
           <IconButton
             onClick={() => setNewMemberSection(false)}
-            sx={{ position: "absolute", right: "0px", top: "0px" }}
+            sx={{ position: "absolute", right: "0px", top: "-10px" }}
           >
             <CloseIcon />
           </IconButton>

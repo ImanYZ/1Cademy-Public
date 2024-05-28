@@ -47,4 +47,5 @@ export type IUser = {
   reason: string;
   createdAt: Date | Timestamp;
   updatedAt: Date | Timestamp;
+  fullName?: string;
 };
