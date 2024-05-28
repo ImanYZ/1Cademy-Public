@@ -35,7 +35,17 @@ export const DirectMessagesList = ({
   const [{ user }] = useAuth();
   const [users, setUsers] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-  const fuse = new Fuse(users, { keys: ["fullname"] });
+  const fuse = new Fuse(users, {
+    isCaseSensitive: false,
+    includeScore: true,
+    includeMatches: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+    threshold: 0.4,
+    location: 0,
+    distance: 100,
+    keys: ["fullname"],
+  });
   const [notificationHash, setNotificationHash] = useState<any>({});
 
   useEffect(() => {

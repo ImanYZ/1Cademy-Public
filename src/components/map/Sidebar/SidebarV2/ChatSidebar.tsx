@@ -35,9 +35,7 @@ import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/DirectMessages";
 import { NewsList } from "../Chat/List/News";
 import { Summary } from "../Chat/List/Summary";
-//import { NodeLink } from "../Chat/Room/NodeLink";
 import { Message } from "../Chat/Room/Message";
-//import { NewsCard } from "../Chat/Room/NewsCard";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const DynamicMemoEmojiPicker = dynamic(() => import("../Chat/Common/EmojiPicker"), {
