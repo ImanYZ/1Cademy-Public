@@ -35,6 +35,8 @@ type NewsCardProps = {
   getMessageRef: any;
   selectedChannel: any;
   onlineUsers: any;
+  sendMessage: any;
+  sendReplyOnMessage: any;
 };
 export const NewsCard = ({
   notebookRef,
@@ -57,6 +59,8 @@ export const NewsCard = ({
   getMessageRef,
   selectedChannel,
   onlineUsers,
+  sendMessage,
+  sendReplyOnMessage,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -145,6 +149,8 @@ export const NewsCard = ({
                 setReplyOnMessage={setReplyOnMessage}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
               />
             </Box>
           ) : (
@@ -232,6 +238,8 @@ export const NewsCard = ({
                 selectedChannel={selectedChannel}
                 getMessageRef={getMessageRef}
                 onlineUsers={onlineUsers}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
               />
             ))}
 
@@ -251,6 +259,8 @@ export const NewsCard = ({
                 selectedChannel={selectedChannel}
                 replyOnMessage={message}
                 setReplyOnMessage={setReplyOnMessage}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
               />
             </Box>
           </Box>

@@ -11,6 +11,8 @@ import { ReactNode, useCallback, useMemo, useRef } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
+import GroupAvatar from "../Chat/Common/GroupAvatar";
+
 type SidebarWrapperProps = {
   id?: string;
   title: string;
@@ -156,15 +158,15 @@ export const SidebarWrapper = ({
       }}
     >
       {sidebarType === "chat" && (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "start" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "start", gap: "10px", mt: 2 }}>
           {moveBack && (
             <Tooltip title={"Go Back"}>
-              <IconButton onClick={() => moveBack()} sx={{ mt: 2, ml: 2 }}>
+              <IconButton onClick={() => moveBack()} sx={{ ml: 2 }}>
                 <ArrowBackIcon />
               </IconButton>
             </Tooltip>
           )}
-          <Typography
+          {/* <Typography
             variant="h6"
             sx={{
               ml: 2,
@@ -178,15 +180,15 @@ export const SidebarWrapper = ({
             }}
           >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
-          </Typography>
+          </Typography> */}
+          {!!selectedChannel && <GroupAvatar membersInfo={selectedChannel?.membersInfo} />}
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
-            <Box sx={{ display: "flex", gap: "10px" }}>
+            <Box sx={{ display: "flex", gap: "5px" }}>
               <Tooltip title={"More Info"}>
                 <IconButton
                   sx={{
                     width: "2px",
-                    mt: 3,
                     ":hover": {
                       background: "transparent",
                       color: "grey",
@@ -203,7 +205,6 @@ export const SidebarWrapper = ({
                   <IconButton
                     sx={{
                       width: "2px",
-                      mt: 3,
                       ":hover": {
                         background: "transparent",
                         color: "grey",

@@ -1,8 +1,7 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
-// import SearchIcon from "@mui/icons-material/Search";
-import { Avatar, AvatarGroup, Tab, Tabs, Typography } from "@mui/material";
+import { Tab, Tabs, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
@@ -16,6 +15,7 @@ import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import TagIcon from "../../../../../../public/tag.svg";
+import GroupAvatar from "../Common/GroupAvatar";
 import { Media } from "./Media";
 import { Members } from "./Members";
 import { Nodes } from "./Nodes";
@@ -137,23 +137,7 @@ export const Summary = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
-      <AvatarGroup total={Object.keys(selectedChannel.membersInfo)?.length}>
-        {Object.keys(selectedChannel.membersInfo)
-          .splice(0, 5)
-          .map((member: any, index: number) => {
-            return (
-              <Avatar
-                key={index}
-                alt={selectedChannel.membersInfo[member]?.fullname}
-                src={selectedChannel.membersInfo[member]?.imageUrl}
-              />
-            );
-          })}
-
-        <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
-        <Avatar alt="Agnes Walker" src="/static/images/avatar/4.jpg" />
-        <Avatar alt="Trevor Henderson" src="/static/images/avatar/5.jpg" />
-      </AvatarGroup>
+      <GroupAvatar membersInfo={selectedChannel.membersInfo} size={40} />
       <Box
         sx={{
           display: "flex",
