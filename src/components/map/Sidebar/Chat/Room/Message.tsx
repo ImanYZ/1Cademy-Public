@@ -183,7 +183,6 @@ export const Message = ({
   useEffect(() => {
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
-
       setTimeout(() => {
         if (firstLoad) {
           setFirstLoad(false);
@@ -197,7 +196,7 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [db]);
+  }, [db, firstLoad]);
 
   const scrollToBottom = () => {
     if (scrolling.current) {
@@ -344,7 +343,7 @@ export const Message = ({
         console.error(error);
       }
     },
-    [getMessageRef, setReplyOnMessage, updateDoc, newId, db, user.uname, selectedChannel?.id]
+    [getMessageRef, editingMessage, setReplyOnMessage, updateDoc, newId, db, user.uname, selectedChannel?.id]
   );
 
   const sendMessage = useCallback(
@@ -394,7 +393,7 @@ export const Message = ({
         console.error(error);
       }
     },
-    [messages, replyOnMessage]
+    [messages, editingMessage, replyOnMessage]
   );
 
   if (!selectedChannel) return <></>;
