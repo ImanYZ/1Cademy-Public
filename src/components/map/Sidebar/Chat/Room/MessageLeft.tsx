@@ -44,6 +44,7 @@ type MessageLeftProps = {
   isDeleting?: IChannelMessage | null;
   sendMessage: any;
   sendReplyOnMessage: any;
+  isLoadingReaction: IChannelMessage | null;
 };
 export const MessageLeft = ({
   type,
@@ -75,6 +76,7 @@ export const MessageLeft = ({
   isDeleting,
   sendMessage,
   sendReplyOnMessage,
+  isLoadingReaction,
 }: MessageLeftProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
@@ -250,6 +252,7 @@ export const MessageLeft = ({
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   user={user}
+                  isLoadingReaction={isLoadingReaction}
                 />
               </Box>
             </>
@@ -295,6 +298,7 @@ export const MessageLeft = ({
                     setMessages={setMessages}
                     selectedMessage={selectedMessage}
                     handleDeleteMessage={handleDeleteMessage}
+                    isLoadingReaction={isLoadingReaction}
                   />
                 ) : (
                   <MessageLeft
@@ -326,6 +330,7 @@ export const MessageLeft = ({
                     isDeleting={isDeleting}
                     sendMessage={sendMessage}
                     sendReplyOnMessage={sendReplyOnMessage}
+                    isLoadingReaction={isLoadingReaction}
                   />
                 )}
               </>

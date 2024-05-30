@@ -389,7 +389,6 @@ const Node = ({
   });
 
   const [toBeEligible, setToBeEligible] = useState(false);
-
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
   const disableWhy = disabled && !enableChildElements.includes(`${identifier}-node-why`);
@@ -962,7 +961,7 @@ const Node = ({
       )}
 
       <Box sx={{ float: "right" }}>
-        {!editable && !unaccepted && !simulated && !notebookRef.current.choosingNode && (
+        {!editable && !unaccepted && !simulated && (
           <MemoizedNodeHeader
             id={identifier}
             open={open}
