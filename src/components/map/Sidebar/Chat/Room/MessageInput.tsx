@@ -234,7 +234,12 @@ export const MessageInput = ({
       }
       const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
       let imageFileName = new Date().toUTCString();
-      uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
+      uploadImage({ event, path, imageFileName }).then(url => {
+        setImageUrls((prev: string[]) => [...prev, url]);
+        if (!!parentMessage && sendMessageType === "reply") {
+          setReplyOnMessage({ ...parentMessage, notVisible: true });
+        }
+      });
     },
     [setImageUrls]
   );

@@ -48,6 +48,7 @@ type MessageProps = {
   newMemberSection: any;
   setNewMemberSection: any;
   getChannelRef: any;
+  isLoadingReaction: IChannelMessage | null;
 };
 
 export const Message = ({
@@ -72,6 +73,7 @@ export const Message = ({
   newMemberSection,
   setNewMemberSection,
   getChannelRef,
+  isLoadingReaction,
 }: MessageProps) => {
   const db = getFirestore();
   const { nodeBookState } = useNodeBook();
@@ -353,7 +355,7 @@ export const Message = ({
           saveMessageEdit(inputValue);
         } else if (!!replyOnMessage || sendMessageType === "reply") {
           if (!inputValue.trim() && !imageUrls.length) return;
-          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
+          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
           return;
         } else {
           let channelRef = doc(db, "channelMessages", selectedChannel?.id);
@@ -491,6 +493,7 @@ export const Message = ({
                         onlineUsers={onlineUsers}
                         sendMessage={sendMessage}
                         sendReplyOnMessage={sendReplyOnMessage}
+                        isLoadingReaction={isLoadingReaction}
                       />
                     )}
                     {roomType !== "news" && (
@@ -524,6 +527,7 @@ export const Message = ({
                             setMessages={setMessages}
                             selectedMessage={selectedMessage}
                             handleDeleteMessage={handleDeleteMessage}
+                            isLoadingReaction={isLoadingReaction}
                           />
                         ) : (
                           <MessageLeft
@@ -555,6 +559,7 @@ export const Message = ({
                             isDeleting={isDeleting}
                             sendMessage={sendMessage}
                             sendReplyOnMessage={sendReplyOnMessage}
+                            isLoadingReaction={isLoadingReaction}
                           />
                         )}
                       </>

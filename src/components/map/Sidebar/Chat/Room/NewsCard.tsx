@@ -37,6 +37,7 @@ type NewsCardProps = {
   onlineUsers: any;
   sendMessage: any;
   sendReplyOnMessage: any;
+  isLoadingReaction: IChannelMessage | null;
 };
 export const NewsCard = ({
   notebookRef,
@@ -61,6 +62,7 @@ export const NewsCard = ({
   onlineUsers,
   sendMessage,
   sendReplyOnMessage,
+  isLoadingReaction,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -197,6 +199,7 @@ export const NewsCard = ({
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   user={user}
+                  isLoadingReaction={isLoadingReaction}
                 />
               </Box>
             </>
@@ -240,6 +243,7 @@ export const NewsCard = ({
                 onlineUsers={onlineUsers}
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
+                isLoadingReaction={isLoadingReaction}
               />
             ))}
 

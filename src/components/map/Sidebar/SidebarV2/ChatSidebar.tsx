@@ -117,6 +117,7 @@ export const ChatSidebar = ({
   const [leading, setLeading] = useState<any>(user.claims?.leading || []);
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
   const [newMemberSection, setNewMemberSection] = useState(false);
+  const [isLoadingReaction, setIsLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -254,7 +255,7 @@ export const ChatSidebar = ({
   };
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
-
+    setIsLoadingReaction(message);
     if (message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
@@ -275,6 +276,7 @@ export const ChatSidebar = ({
     } else {
       await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
     }
+    setIsLoadingReaction(null);
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {
@@ -373,6 +375,7 @@ export const ChatSidebar = ({
     onlineUsers,
     newMemberSection,
     leading,
+    isLoadingReaction,
   ]);
 
   useEffect(() => {
@@ -545,6 +548,7 @@ export const ChatSidebar = ({
                   newMemberSection={newMemberSection}
                   setNewMemberSection={setNewMemberSection}
                   getChannelRef={getChannelRef}
+                  isLoadingReaction={isLoadingReaction}
                 />
               )}
             </>
