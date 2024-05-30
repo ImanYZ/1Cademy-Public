@@ -48,6 +48,7 @@ type MessageRightProps = {
   setMessages: any;
   selectedMessage: { id: string | null; message: string | null } | {};
   handleDeleteMessage: (message: IChannelMessage) => void;
+  isLoadingReaction: IChannelMessage | null;
 };
 export const NodeLink = ({
   db,
@@ -79,6 +80,7 @@ export const NodeLink = ({
   selectedMessage,
   handleDeleteMessage,
   isDeleting,
+  isLoadingReaction,
 }: MessageRightProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
@@ -217,6 +219,7 @@ export const NodeLink = ({
                 toggleEmojiPicker={toggleEmojiPicker}
                 toggleReaction={toggleReaction}
                 user={user}
+                isLoadingReaction={isLoadingReaction}
               />
             </Box>
             {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
@@ -279,6 +282,7 @@ export const NodeLink = ({
                       setMessages={setMessages}
                       selectedMessage={selectedMessage}
                       handleDeleteMessage={handleDeleteMessage}
+                      isLoadingReaction={isLoadingReaction}
                     />
                   ) : (
                     <MessageLeft
@@ -310,6 +314,7 @@ export const NodeLink = ({
                       isDeleting={isDeleting}
                       sendMessage={sendMessage}
                       sendReplyOnMessage={sendReplyOnMessage}
+                      isLoadingReaction={isLoadingReaction}
                     />
                   )}
                 </>

@@ -7395,7 +7395,10 @@ const Notebook = ({}: NotebookProps) => {
                   <MemoizedProposalsSidebar
                     theme={settings.theme}
                     open={true}
-                    onClose={() => onCloseSidebar()}
+                    onClose={() => {
+                      onCloseSidebar();
+                      setEditingModeNode(false);
+                    }}
                     clearInitialProposal={clearInitialProposal}
                     initialProposal={nodeBookState.initialProposal}
                     nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
@@ -7908,19 +7911,21 @@ const Notebook = ({}: NotebookProps) => {
             </Box>
           )}
 
-          <MemoizedTutorialTableOfContent
-            open={openProgressBar}
-            reloadPermanentGraph={revertNodesOnGraph}
-            handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={tutorialGroup}
-            userTutorialState={userTutorial}
-            onCancelTutorial={onCancelTutorial}
-            onForceTutorial={tutorialKey => {
-              setForcedTutorial(tutorialKey);
-              tutorialStateWasSetUpRef.current = false;
-            }}
-            tutorialProgress={tutorialProgress}
-          />
+          {openProgressBar && (
+            <MemoizedTutorialTableOfContent
+              open={openProgressBar}
+              reloadPermanentGraph={revertNodesOnGraph}
+              handleCloseProgressBar={onCloseTableOfContent}
+              groupTutorials={tutorialGroup}
+              userTutorialState={userTutorial}
+              onCancelTutorial={onCancelTutorial}
+              onForceTutorial={tutorialKey => {
+                setForcedTutorial(tutorialKey);
+                tutorialStateWasSetUpRef.current = false;
+              }}
+              tutorialProgress={tutorialProgress}
+            />
+          )}
         </Box>
 
         {/*
