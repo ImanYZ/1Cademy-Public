@@ -1,8 +1,6 @@
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { collection, doc, updateDoc } from "firebase/firestore";
 import moment from "moment";
 import NextImage from "next/image";
 import React, { useState } from "react";
@@ -10,14 +8,18 @@ import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
-import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
+import { NodeLink } from "./NodeLink";
 type MessageLeftProps = {
+  type?: string;
+  notebookRef: any;
+  nodeBookDispatch: any;
   selectedMessage: any;
+  parentMessage?: IChannelMessage;
   message: IChannelMessage;
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   toggleReaction: (message: IChannelMessage, emoji: string) => void;
@@ -35,9 +37,21 @@ type MessageLeftProps = {
   getMessageRef: any;
   selectedChannel: any;
   setMessages?: any;
+  onlineUsers: any;
+  openLinkedNode?: any;
+  handleDeleteMessage?: any;
+  handleDeleteReply?: any;
+  isDeleting?: IChannelMessage | null;
+  sendMessage: any;
+  sendReplyOnMessage: any;
+  isLoadingReaction: IChannelMessage | null;
 };
 export const MessageLeft = ({
+  type,
+  notebookRef,
+  nodeBookDispatch,
   selectedMessage,
+  parentMessage,
   message,
   toggleEmojiPicker,
   toggleReaction,
@@ -55,45 +69,23 @@ export const MessageLeft = ({
   getMessageRef,
   selectedChannel,
   setMessages,
+  onlineUsers,
+  openLinkedNode,
+  handleDeleteMessage,
+  handleDeleteReply,
+  isDeleting,
+  sendMessage,
+  sendReplyOnMessage,
+  isLoadingReaction,
 }: MessageLeftProps) => {
-  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
   const handleReplyMessage = () => {
     setReplyOnMessage(message);
   };
 
-  const handleOpenReplies = () => setOpenReplies(prev => !prev);
-  const handleDeleteMessage = async () => {
-    if (
-      await confirmIt(
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            gap: "10px",
-          }}
-        >
-          <DeleteForeverIcon />
-          <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this message?</Typography>
-          <Typography>Deleting a message will permanently remove it from this chat.</Typography>
-        </Box>,
-        "Delete Message",
-        "Keep Message"
-      )
-    ) {
-      let channelRef = doc(db, "channelMessages", message?.channelId);
-      if (roomType === "direct") {
-        channelRef = doc(db, "conversationMessages", message?.channelId);
-      }
-      const messageRef = doc(collection(channelRef, "messages"), message.id);
-      await updateDoc(messageRef, {
-        deleted: true,
-      });
-    }
+  const handleOpenReplies = () => {
+    setOpenReplies(prev => !prev);
   };
 
   return (
@@ -103,6 +95,7 @@ export const MessageLeft = ({
         gap: "5px",
         pb: 4,
         pt: 2,
+        opacity: isDeleting?.id === message?.id ? 0.5 : undefined,
       }}
     >
       <Box
@@ -135,7 +128,14 @@ export const MessageLeft = ({
           size={!message.parentMessage ? 40 : 30}
           sx={{ border: "none" }}
         />
-        <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
+
+        <Box
+          sx={{
+            background: onlineUsers.includes(membersInfo[message.sender]?.uname) ? "#12B76A" : "grey",
+            fontSize: "1px",
+          }}
+          className="UserStatusOnlineIcon"
+        />
       </Box>
 
       <Box sx={{ width: "90%" }}>
@@ -180,6 +180,8 @@ export const MessageLeft = ({
             <Box>
               {" "}
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
@@ -194,6 +196,9 @@ export const MessageLeft = ({
                 replyOnMessage={replyOnMessage}
                 setReplyOnMessage={setReplyOnMessage}
                 user={user}
+                parentMessage={parentMessage}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
               />
             </Box>
           ) : (
@@ -234,7 +239,9 @@ export const MessageLeft = ({
                   replyMessage={handleReplyMessage}
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
-                  handleDeleteMessage={handleDeleteMessage}
+                  handleDeleteMessage={() =>
+                    type === "reply" ? handleDeleteReply(parentMessage, message) : handleDeleteMessage(message)
+                  }
                   user={user}
                 />
               </Box>
@@ -245,6 +252,7 @@ export const MessageLeft = ({
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   user={user}
+                  isLoadingReaction={isLoadingReaction}
                 />
               </Box>
             </>
@@ -258,29 +266,79 @@ export const MessageLeft = ({
             }}
           >
             {(message.replies || []).map((reply: any, idx: number) => (
-              <MessageLeft
-                key={idx}
-                selectedMessage={selectedMessage}
-                message={reply}
-                toggleEmojiPicker={toggleEmojiPicker}
-                toggleReaction={toggleReaction}
-                forwardMessage={forwardMessage}
-                membersInfo={membersInfo}
-                user={user}
-                setReplyOnMessage={setReplyOnMessage}
-                channelUsers={channelUsers}
-                replyOnMessage={replyOnMessage}
-                db={db}
-                editingMessage={editingMessage}
-                setEditingMessage={setEditingMessage}
-                roomType={roomType}
-                leading={leading}
-                getMessageRef={getMessageRef}
-                selectedChannel={selectedChannel}
-              />
+              <>
+                {reply?.node?.id ? (
+                  <NodeLink
+                    db={db}
+                    type="reply"
+                    notebookRef={notebookRef}
+                    nodeBookDispatch={nodeBookDispatch}
+                    replyOnMessage={replyOnMessage}
+                    forwardMessage={forwardMessage}
+                    user={user}
+                    parentMessage={message}
+                    message={reply}
+                    membersInfo={selectedChannel.membersInfo}
+                    openLinkedNode={openLinkedNode}
+                    onlineUsers={onlineUsers}
+                    toggleEmojiPicker={toggleEmojiPicker}
+                    toggleReaction={toggleReaction}
+                    roomType={roomType}
+                    selectedChannel={selectedChannel}
+                    channelUsers={channelUsers}
+                    editingMessage={editingMessage}
+                    setEditingMessage={setEditingMessage}
+                    leading={leading}
+                    getMessageRef={getMessageRef}
+                    handleDeleteReply={handleDeleteReply}
+                    isDeleting={isDeleting}
+                    sendMessage={sendMessage}
+                    sendReplyOnMessage={sendReplyOnMessage}
+                    setReplyOnMessage={setReplyOnMessage}
+                    setMessages={setMessages}
+                    selectedMessage={selectedMessage}
+                    handleDeleteMessage={handleDeleteMessage}
+                    isLoadingReaction={isLoadingReaction}
+                  />
+                ) : (
+                  <MessageLeft
+                    key={idx}
+                    type={"reply"}
+                    notebookRef={notebookRef}
+                    nodeBookDispatch={nodeBookDispatch}
+                    selectedMessage={selectedMessage}
+                    parentMessage={message}
+                    message={reply}
+                    toggleEmojiPicker={toggleEmojiPicker}
+                    toggleReaction={toggleReaction}
+                    forwardMessage={forwardMessage}
+                    membersInfo={membersInfo}
+                    user={user}
+                    setReplyOnMessage={setReplyOnMessage}
+                    channelUsers={channelUsers}
+                    replyOnMessage={replyOnMessage}
+                    db={db}
+                    editingMessage={editingMessage}
+                    setEditingMessage={setEditingMessage}
+                    roomType={roomType}
+                    leading={leading}
+                    getMessageRef={getMessageRef}
+                    selectedChannel={selectedChannel}
+                    onlineUsers={onlineUsers}
+                    handleDeleteMessage={handleDeleteMessage}
+                    handleDeleteReply={handleDeleteReply}
+                    isDeleting={isDeleting}
+                    sendMessage={sendMessage}
+                    sendReplyOnMessage={sendReplyOnMessage}
+                    isLoadingReaction={isLoadingReaction}
+                  />
+                )}
+              </>
             ))}
             <Box sx={{ ml: "37px", mt: 2 }}>
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
@@ -294,12 +352,15 @@ export const MessageLeft = ({
                 setReplyOnMessage={setReplyOnMessage}
                 user={user}
                 setMessages={setMessages}
+                roomType={roomType}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
+                parentMessage={message}
               />
             </Box>
           </Box>
         )}
       </Box>
-      {ConfirmDialog}
     </Box>
   );
 };

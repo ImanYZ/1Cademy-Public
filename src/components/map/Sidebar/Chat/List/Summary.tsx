@@ -1,7 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
-// import SearchIcon from "@mui/icons-material/Search";
 import { Tab, Tabs, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
@@ -16,6 +15,7 @@ import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import TagIcon from "../../../../../../public/tag.svg";
+import GroupAvatar from "../Common/GroupAvatar";
 import { Media } from "./Media";
 import { Members } from "./Members";
 import { Nodes } from "./Nodes";
@@ -32,6 +32,8 @@ type SummaryProps = {
   moveBack: any;
   onlineUsers: any;
   user: any;
+  sidebarWidth: number;
+  getChannelRef: any;
 };
 export const Summary = ({
   theme,
@@ -44,6 +46,8 @@ export const Summary = ({
   setOpenChatRoom,
   onlineUsers,
   user,
+  sidebarWidth,
+  getChannelRef,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -133,25 +137,7 @@ export const Summary = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
-      <Box
-        sx={{
-          width: "70px",
-          height: "70px",
-          borderRadius: "200px",
-
-          background: "linear-gradient(to right, #FDC830, #F37335)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {selectedChannel.title
-          .split(" ")
-          .slice(0, 2)
-          .map((word: string) => word[0])
-          .join(" ")}
-      </Box>
-      <Typography sx={{ fontWeight: "500", fontSize: "17px" }}>{selectedChannel.title}</Typography>
+      <GroupAvatar membersInfo={selectedChannel.membersInfo} size={40} />
       <Box
         sx={{
           display: "flex",
@@ -296,10 +282,14 @@ export const Summary = ({
       <Box sx={{ width: "100%", px: "10px" }}>
         {value === 0 && (
           <Members
+            db={db}
+            user={user}
             selectedChannel={selectedChannel}
             openUserInfoSidebar={openUserInfoSidebar}
             onlineUsers={onlineUsers}
             leading={leading}
+            sidebarWidth={sidebarWidth}
+            getChannelRef={getChannelRef}
           />
         )}
         {value === 1 && (

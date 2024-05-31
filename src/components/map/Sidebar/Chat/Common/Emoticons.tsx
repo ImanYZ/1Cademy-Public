@@ -1,5 +1,5 @@
 import AddReactionIcon from "@mui/icons-material/AddReaction";
-import { Button, IconButton } from "@mui/material";
+import { Button, CircularProgress, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { IChannelMessage, Reaction } from "src/chatTypes";
@@ -13,8 +13,16 @@ type EmoticonsProps = {
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   toggleReaction: (message: IChannelMessage, emoji: string) => void;
   user: any;
+  isLoadingReaction: IChannelMessage | null;
 };
-export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReaction, user }: EmoticonsProps) => {
+export const Emoticons = ({
+  message,
+  reactionsMap,
+  toggleEmojiPicker,
+  toggleReaction,
+  user,
+  isLoadingReaction,
+}: EmoticonsProps) => {
   const [reactions, setReactions] = useState<any>({});
   useEffect(() => {
     setReactions(
@@ -55,6 +63,7 @@ export const Emoticons = ({ message, reactionsMap, toggleEmojiPicker, toggleReac
           </span>
         </Button>
       ))}
+      {isLoadingReaction?.id === message?.id && <CircularProgress size={25} />}
       {Object.keys(reactions)?.length > 0 && (
         <IconButton onClick={handleAddReaction}>
           <AddReactionIcon color="secondary" />

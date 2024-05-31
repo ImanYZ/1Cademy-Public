@@ -1,12 +1,13 @@
-import React, { Dispatch, SetStateAction } from "react";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import CloseIcon from "@mui/icons-material/Close";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import Avatar from "@mui/material/Avatar";
-import CloseIcon from "@mui/icons-material/Close";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import DisciplinesComp from "./DisciplinesComp";
-import ROUTES from "@/lib/utils/routes";
 import NextLink from "next/link";
+import React, { Dispatch, SetStateAction } from "react";
+
+//import DisciplinesComp from "./DisciplinesComp";
+import ROUTES from "@/lib/utils/routes";
 
 interface NavbarCompProps {
   email: string;
@@ -32,9 +33,9 @@ const NavbarComp: React.FC<NavbarCompProps> = ({
   userProfile,
   openSettings,
   changeOpenSettings,
-  articleContent,
-  articleTypePath,
-  setArticleTypePath,
+  // articleContent,
+  // articleTypePath,
+  // setArticleTypePath,
 }) => {
   return (
     <Box
@@ -53,13 +54,13 @@ const NavbarComp: React.FC<NavbarCompProps> = ({
         <img src={imageUrl} alt="Logo" height={56} width={160} />
       </NextLink>
 
-      {articleContent.trim() && (
+      {/* {articleContent.trim() && (
         <DisciplinesComp
           allContent={articleContent}
           articleTypePath={articleTypePath}
           setArticleTypePath={setArticleTypePath}
         />
-      )}
+      )} */}
       {email && (
         <IconButton onClick={changeOpenSettings}>
           {openSettings ? (

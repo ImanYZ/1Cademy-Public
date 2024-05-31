@@ -15,6 +15,8 @@ import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 
 type NewsCardProps = {
+  notebookRef: any;
+  nodeBookDispatch: any;
   message: IChannelMessage;
   membersInfo: any;
   toggleEmojiPicker: any;
@@ -32,8 +34,14 @@ type NewsCardProps = {
   leading: boolean;
   getMessageRef: any;
   selectedChannel: any;
+  onlineUsers: any;
+  sendMessage: any;
+  sendReplyOnMessage: any;
+  isLoadingReaction: IChannelMessage | null;
 };
 export const NewsCard = ({
+  notebookRef,
+  nodeBookDispatch,
   message,
   membersInfo,
   toggleEmojiPicker,
@@ -51,6 +59,10 @@ export const NewsCard = ({
   replyOnMessage,
   getMessageRef,
   selectedChannel,
+  onlineUsers,
+  sendMessage,
+  sendReplyOnMessage,
+  isLoadingReaction,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -70,6 +82,13 @@ export const NewsCard = ({
     >
       <Box sx={{ pt: 1 }}>
         <Avatar src={membersInfo[message.sender]?.imageUrl} />
+        <Box
+          sx={{
+            background: onlineUsers.includes(membersInfo[message.sender]?.uname) ? "#12B76A" : "grey",
+            fontSize: "1px",
+          }}
+          className="UserStatusOnlineIcon"
+        />
       </Box>
 
       <Box sx={{ width: "90%" }}>
@@ -116,6 +135,8 @@ export const NewsCard = ({
             <Box>
               {" "}
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 user={user}
                 theme={"Dark"}
@@ -130,6 +151,8 @@ export const NewsCard = ({
                 setReplyOnMessage={setReplyOnMessage}
                 editingMessage={editingMessage}
                 setEditingMessage={setEditingMessage}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
               />
             </Box>
           ) : (
@@ -176,6 +199,7 @@ export const NewsCard = ({
                   toggleEmojiPicker={toggleEmojiPicker}
                   toggleReaction={toggleReaction}
                   user={user}
+                  isLoadingReaction={isLoadingReaction}
                 />
               </Box>
             </>
@@ -196,6 +220,8 @@ export const NewsCard = ({
           >
             {(message.replies || []).map((reply: any, idx: number) => (
               <MessageLeft
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 key={idx}
                 selectedMessage={selectedMessage}
                 message={reply}
@@ -214,11 +240,17 @@ export const NewsCard = ({
                 leading={leading}
                 selectedChannel={selectedChannel}
                 getMessageRef={getMessageRef}
+                onlineUsers={onlineUsers}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
+                isLoadingReaction={isLoadingReaction}
               />
             ))}
 
             <Box sx={{ ml: "37px", mt: "13px" }}>
               <MessageInput
+                notebookRef={notebookRef}
+                nodeBookDispatch={nodeBookDispatch}
                 db={db}
                 user={user}
                 theme={"Dark"}
@@ -231,6 +263,8 @@ export const NewsCard = ({
                 selectedChannel={selectedChannel}
                 replyOnMessage={message}
                 setReplyOnMessage={setReplyOnMessage}
+                sendMessage={sendMessage}
+                sendReplyOnMessage={sendReplyOnMessage}
               />
             </Box>
           </Box>

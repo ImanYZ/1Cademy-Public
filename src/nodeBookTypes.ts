@@ -8,7 +8,7 @@ import { Flashcard } from "./types/IAssitantConversation";
 
 export type OpenPart = "LinkingWords" | "Tags" | "References" | undefined;
 
-export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | "Improvement" | null;
+export type ChoosingType = "Reference" | "Tag" | "Parent" | "Child" | "Improvement" | "Node" | null;
 
 export type ChoosingNode = {
   id: string;
@@ -48,6 +48,7 @@ export interface NodeBookState {
   readonly isSubmitting: boolean;
   readonly choosingNode: ChoosingNode | null;
   readonly previousNode: any;
+  readonly chatNode: any;
   readonly chosenNode: ChosenNode | null;
   readonly selectedNode: string | null;
   readonly initialProposal: string | null;
@@ -87,6 +88,7 @@ export type TNodeBookState = {
   lastOperation: LastOperation;
   contributorsNodeId: any;
   showContributors: any;
+  chatNode: any;
 };
 
 export type SetSNodeAction = {
@@ -102,6 +104,11 @@ export type SetIsSubmittingAction = {
 export type SetChoosingNodeAction = {
   type: "setChoosingNode";
   payload: ChoosingNode | null;
+};
+
+export type SetChatNodeAction = {
+  type: "setChatNode";
+  payload: any;
 };
 
 export type SetPreviousNode = {
@@ -187,6 +194,7 @@ export type DispatchNodeBookActions =
   | SetIsSubmittingAction
   | SetChoosingNodeAction
   | SetPreviousNode
+  | SetChatNodeAction
   | SetChosenNodeAction
   | SetSelectedNodeAction
   | SetSelectionTypeAction

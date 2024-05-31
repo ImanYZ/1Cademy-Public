@@ -28,6 +28,8 @@ interface Props {
   quillRef: any;
   selection: any;
   user: User | null;
+  expandedIssue: any;
+  setExpandedIssue: any;
 }
 
 const SideBar: React.FC<Props> = ({
@@ -41,6 +43,8 @@ const SideBar: React.FC<Props> = ({
   quillRef,
   selection,
   user,
+  expandedIssue,
+  setExpandedIssue,
 }) => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [recommendedSteps, setRecommendedSteps] = useState<string[]>([]);
@@ -89,7 +93,14 @@ const SideBar: React.FC<Props> = ({
         behavior: "smooth",
         block: "center",
       });
-      matchingElement.style.backgroundColor = "#573800";
+      const quill = quillRef.current.getEditor();
+      const index = quill.getText().indexOf(text);
+      if (index > -1) {
+        quill.formatText(0, articleContent.length, {
+          background: false,
+        });
+        quill.formatText(index, text.length, "background", "#BD7A00");
+      }
       return matchingElement;
     }
   };
@@ -136,6 +147,7 @@ const SideBar: React.FC<Props> = ({
                           recommendedSteps={recommendedSteps}
                           setRecommendedSteps={setRecommendedSteps}
                           setSelectedStep={setSelectedStep}
+                          selectedArticle={selectedArticle}
                         />
                       )}
                     </>
@@ -163,6 +175,9 @@ const SideBar: React.FC<Props> = ({
                         selectedStep={selectedStep}
                         issues={issues}
                         setIssues={setIssues}
+                        selectedArticle={selectedArticle}
+                        expandedIssue={expandedIssue}
+                        setExpandedIssue={setExpandedIssue}
                       />
                     )}
                   </>
@@ -202,6 +217,7 @@ const SideBar: React.FC<Props> = ({
                       sideBarWidth={sideBarWidth}
                       findScrollAndSelect={findScrollAndSelect}
                       user={user}
+                      quillRef={quillRef}
                     />
                   ) : selectedTab === 1 ? (
                     <DraftComp
@@ -223,6 +239,7 @@ const SideBar: React.FC<Props> = ({
                       allContent={articleContent}
                       findScrollAndSelect={findScrollAndSelect}
                       issues={issues}
+                      quillRef={quillRef}
                     />
                   ) : (
                     selectedTab === 3 && <GradeComp />

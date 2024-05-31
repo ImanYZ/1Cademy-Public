@@ -1,4 +1,4 @@
-import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Tab, Tabs, Typography } from "@mui/material";
 import {
   collection,
   doc,
@@ -60,6 +60,7 @@ const NotificationSidebar = ({
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
   const [uncheckedNotifications, setUncheckedNotifications] = useState<Notification[]>([]);
   const [notebookRequests, setNotebookRequests] = useState<NotebookRequest[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const db = getFirestore();
 
   const snapshot = useCallback((q: Query<DocumentData>) => {
@@ -150,6 +151,7 @@ const NotificationSidebar = ({
         const newValues = uncheckedNotificationsTemp;
         return [...validValues, ...newValues].sort((n1, n2) => (n1.createdAt < n2.createdAt ? 1 : -1));
       });
+      setIsLoading(false);
     });
     return () => notificationsSnapshot();
   }, []);
@@ -333,7 +335,16 @@ const NotificationSidebar = ({
         </Box>
       }
       contentSignalState={contentSignalState}
-      SidebarContent={open ? <Box sx={{ height: "100%", py: "10px" }}>{tabItems[value].content}</Box> : null}
+      SidebarContent={
+        <Box sx={{ height: "100%", py: "10px" }}>
+          {isLoading && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+              <CircularProgress size={46} />
+            </Box>
+          )}
+          {tabItems[value].content}
+        </Box>
+      }
     />
   );
 };

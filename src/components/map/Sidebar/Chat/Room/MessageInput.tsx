@@ -1,9 +1,9 @@
+import AddLinkIcon from "@mui/icons-material/AddLink";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
-import { arrayUnion, collection, doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import NextImage from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -11,13 +11,13 @@ import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { newId } from "@/lib/utils/newFirestoreId";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
 type MessageInputProps = {
+  notebookRef: any;
+  nodeBookDispatch: any;
   db: any;
   theme: string;
   channelUsers: { id: string; display: string }[];
@@ -36,28 +36,24 @@ type MessageInputProps = {
   scrollToBottom?: any;
   sendMessageType?: string;
   setMessages?: any;
+  sendMessage: any;
+  sendReplyOnMessage: any;
+  parentMessage?: IChannelMessage;
 };
 export const MessageInput = ({
-  db,
+  notebookRef,
+  nodeBookDispatch,
   theme,
   channelUsers,
-  // toggleEmojiPicker,
   placeholder,
   editingMessage,
   setEditingMessage,
   leading,
-  getMessageRef,
-  replyOnMessage,
   setReplyOnMessage,
-  user,
-  selectedChannel,
-  roomType,
-  messages,
-  scrollToBottom,
   sendMessageType,
-  setMessages,
-}: // roomType,
-MessageInputProps) => {
+  sendMessage,
+  parentMessage,
+}: MessageInputProps) => {
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
@@ -71,119 +67,128 @@ MessageInputProps) => {
     }
   }, [editingMessage]);
 
-  const sendReplyOnMessage = useCallback(
-    async (curMessage: IChannelMessage, inputMessage: string, imageUrls: string[] = [], important = false) => {
-      try {
-        setInputValue("");
-        setReplyOnMessage(null);
-        const reply = {
-          id: newId(db),
-          parentMessage: curMessage.id,
-          pinned: false,
-          read_by: [],
-          edited: false,
-          message: inputMessage,
-          node: {},
-          createdAt: Timestamp.fromDate(new Date()),
-          replies: [],
-          sender: user.uname,
-          mentions: [],
-          imageUrls,
-          editedAt: Timestamp.fromDate(new Date()),
-          reactions: [],
-          channelId: selectedChannel?.id,
-          important,
-        };
-        setMessages((prevMessages: any) => {
-          const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage.id);
-          prevMessages[messageIdx].replies.push(reply);
-          return prevMessages;
-        });
-        await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [getMessageRef, setInputValue, setReplyOnMessage, updateDoc, arrayUnion, newId, db, user.uname, selectedChannel?.id]
-  );
+  // const sendReplyOnMessage = useCallback(
+  //   async (
+  //     curMessage: IChannelMessage,
+  //     inputMessage: string,
+  //     imageUrls: string[] = [],
+  //     important = false,
+  //     node = {}
+  //   ) => {
+  //     try {
+  //       setInputValue("");
+  //       setReplyOnMessage(null);
+  //       const reply = {
+  //         id: newId(db),
+  //         parentMessage: curMessage.id,
+  //         pinned: false,
+  //         read_by: [],
+  //         edited: false,
+  //         message: inputMessage,
+  //         node,
+  //         createdAt: Timestamp.fromDate(new Date()),
+  //         replies: [],
+  //         sender: user.uname,
+  //         mentions: [],
+  //         imageUrls,
+  //         editedAt: Timestamp.fromDate(new Date()),
+  //         reactions: [],
+  //         channelId: selectedChannel?.id,
+  //         important,
+  //       };
+  //       setMessages((prevMessages: any) => {
+  //         const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage.id);
+  //         prevMessages[messageIdx].replies.push(reply);
+  //         return prevMessages;
+  //       });
+  //       console.log(roomType, "roomType--roomType");
+  //       await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   },
+  //   [getMessageRef, setInputValue, setReplyOnMessage, updateDoc, arrayUnion, newId, db, user.uname, selectedChannel?.id]
+  // );
 
-  const saveMessageEdit = async (newMessage: string) => {
-    if (!editingMessage?.channelId) return;
-    if (editingMessage.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
-      parentMessage.replies[replyIdx] = {
-        ...parentMessage.replies[replyIdx],
-        message: newMessage,
-        edited: true,
-        editedAt: new Date(),
-      };
-      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
-      await updateDoc(messageRef, {
-        replies: parentMessage.replies,
-      });
-    } else {
-      const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
+  // const saveMessageEdit = async (newMessage: string) => {
+  //   if (!editingMessage?.channelId) return;
+  //   if (editingMessage.parentMessage) {
+  //     const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+  //     const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+  //     parentMessage.replies[replyIdx] = {
+  //       ...parentMessage.replies[replyIdx],
+  //       message: newMessage,
+  //       edited: true,
+  //       editedAt: new Date(),
+  //     };
+  //     const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+  //     await updateDoc(messageRef, {
+  //       replies: parentMessage.replies,
+  //     });
+  //   } else {
+  //     const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
 
-      await updateDoc(messageRef, {
-        message: newMessage,
-        edited: true,
-        editedAt: new Date(),
-      });
-    }
-    setEditingMessage(null);
-  };
+  //     await updateDoc(messageRef, {
+  //       message: newMessage,
+  //       edited: true,
+  //       editedAt: new Date(),
+  //     });
+  //   }
+  //   setEditingMessage(null);
+  // };
 
-  const sendMessage = useCallback(
-    async (imageUrls: string[], important = false, inputValue: string) => {
-      try {
-        if (sendMessageType === "edit") {
-          saveMessageEdit(inputValue);
-        } else if (!!replyOnMessage || sendMessageType === "reply") {
-          if (!inputValue.trim() && !imageUrls.length) return;
-          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
-          return;
-        } else {
-          //setLastVisible(null);
-          let channelRef = doc(db, "channelMessages", selectedChannel?.id);
-          if (roomType === "direct") {
-            channelRef = doc(db, "conversationMessages", selectedChannel?.id);
-          } else if (roomType === "news") {
-            channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
-          }
-          const messageRef = doc(collection(channelRef, "messages"));
-          const newMessage = {
-            pinned: false,
-            read_by: [],
-            edited: false,
-            message: inputValue,
-            node: {},
-            createdAt: new Date(),
-            replies: [],
-            sender: user.uname,
-            mentions: [],
-            imageUrls,
-            reactions: [],
-            channelId: selectedChannel?.id,
-            important,
-          };
-          // await updateDoc(channelRef, {
-          //   updatedAt: new Date(),
-          // });
-          await setDoc(messageRef, newMessage);
+  // const sendMessage = useCallback(
+  //   async (imageUrls: string[], important = false, inputValue: string, node = {}) => {
+  //     try {
+  //       if (sendMessageType === "edit") {
+  //         saveMessageEdit(inputValue);
+  //       } else if (!!replyOnMessage || sendMessageType === "reply") {
+  //         if (!inputValue.trim() && !imageUrls.length) return;
+  //         sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
+  //         return;
+  //       } else {
+  //         //setLastVisible(null);
+  //         let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+  //         if (roomType === "direct") {
+  //           channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+  //         } else if (roomType === "news") {
+  //           channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
+  //         }
+  //         const messageRef = doc(collection(channelRef, "messages"));
+  //         const newMessage = {
+  //           pinned: false,
+  //           read_by: [],
+  //           edited: false,
+  //           message: inputValue,
+  //           node,
+  //           createdAt: new Date(),
+  //           replies: [],
+  //           sender: user.uname,
+  //           mentions: [],
+  //           imageUrls,
+  //           reactions: [],
+  //           channelId: selectedChannel?.id,
+  //           important,
+  //         };
+  //         console.log(messageRef, "messageRef--messageRef");
+  //         // await updateDoc(channelRef, {
+  //         //   updatedAt: new Date(),
+  //         // });
+  //         console.log(messageRef, "messageRef--messageRef");
+  //         await setDoc(messageRef, newMessage);
 
-          scrollToBottom();
-          await Post("/chat/sendNotification", {
-            newMessage,
-            roomType,
-          });
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [inputValue, messages]
-  );
+  //         scrollToBottom();
+  //         await Post("/chat/sendNotification", {
+  //           newMessage,
+  //           roomType,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   },
+  //   [inputValue, messages]
+  // );
 
   const cancel = useCallback(() => {
     setEditingMessage(null);
@@ -229,16 +234,39 @@ MessageInputProps) => {
       }
       const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
       let imageFileName = new Date().toUTCString();
-      uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
+      uploadImage({ event, path, imageFileName }).then(url => {
+        setImageUrls((prev: string[]) => [...prev, url]);
+        if (!!parentMessage && sendMessageType === "reply") {
+          setReplyOnMessage({ ...parentMessage, notVisible: true });
+        }
+      });
     },
     [setImageUrls]
   );
 
   const handleSendMessage = () => {
-    sendMessage(imageUrls, important, inputValue);
+    sendMessage(imageUrls, important, sendMessageType, inputValue);
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
+  };
+
+  const handleBlur = () => {
+    if (!!parentMessage && sendMessageType === "reply") {
+      setReplyOnMessage({ ...parentMessage, notVisible: true });
+    }
+  };
+
+  const choosingNewLinkedNode = () => {
+    notebookRef.current.choosingNode = { id: "", type: "Node", impact: "node" };
+    notebookRef.current.selectedNode = "";
+    notebookRef.current.chosenNode = null;
+    nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: "Node" } });
+    nodeBookDispatch({ type: "setSelectedNode", payload: "" });
+    nodeBookDispatch({ type: "setChosenNode", payload: null });
+    if (!!parentMessage && sendMessageType === "reply") {
+      setReplyOnMessage({ ...parentMessage, notVisible: true });
+    }
   };
 
   return (
@@ -290,6 +318,7 @@ MessageInputProps) => {
         singleLine={false}
         onChange={handleTyping}
         onKeyDown={handleKeyPress}
+        onFocus={handleBlur}
       >
         <Mention
           trigger="@"
@@ -366,6 +395,11 @@ MessageInputProps) => {
                 </IconButton>
               </Tooltip>
             )}
+            <Tooltip title={"Upload a node from notebook"}>
+              <IconButton onClick={() => choosingNewLinkedNode()}>
+                <AddLinkIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
         {!editingMessage ? (
