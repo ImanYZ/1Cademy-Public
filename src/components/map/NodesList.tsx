@@ -72,6 +72,8 @@ type NodeListProps = {
   editingModeNode: boolean;
   setEditingModeNode: (newValue: boolean) => void;
   displayParentOptions: boolean;
+  findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
+  findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
 };
 
 const NodesList = ({
@@ -137,6 +139,8 @@ const NodesList = ({
   editingModeNode,
   setEditingModeNode,
   displayParentOptions,
+  findDescendantNodes,
+  findAncestorNodes,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -285,6 +289,8 @@ const NodesList = ({
             editingModeNode={editingModeNode}
             setEditingModeNode={setEditingModeNode}
             displayParentOptions={displayParentOptions}
+            findDescendantNodes={findDescendantNodes}
+            findAncestorNodes={findAncestorNodes}
           />
         );
       })}

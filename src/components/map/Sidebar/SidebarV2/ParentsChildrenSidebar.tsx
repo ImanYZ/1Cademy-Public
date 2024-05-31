@@ -4,11 +4,11 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { getFirestore } from "firebase/firestore";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
+import { FullNodeData, SortDirection, SortValues, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -30,6 +30,7 @@ import { SidebarWrapper2 } from "./SidebarWrapper2";
 dayjs.extend(relativeTime);
 
 type ParentsChildrenSidebarProps = {
+  notebookRef: MutableRefObject<TNodeBookState>;
   title: string;
   username: string;
   open: boolean;
@@ -39,9 +40,12 @@ type ParentsChildrenSidebarProps = {
   linkMessage: string;
   queryParentChildren: QuerySideBarSearch;
   setQueryParentChildren: (q: QuerySideBarSearch) => void;
+  findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
+  findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
 };
 
 const ParentsChildrenSidebar = ({
+  notebookRef,
   title,
   open,
   username,
@@ -51,6 +55,8 @@ const ParentsChildrenSidebar = ({
   linkMessage,
   queryParentChildren,
   setQueryParentChildren,
+  findDescendantNodes,
+  findAncestorNodes,
 }: ParentsChildrenSidebarProps) => {
   const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
@@ -184,6 +190,14 @@ const ParentsChildrenSidebar = ({
   );
 
   const parents: SimpleNode2[] = useMemo(() => {
+    if (linkMessage === "Link it") {
+      return searchResults.data.filter(
+        cur =>
+          cur.id !== notebookRef.current.choosingNode?.id &&
+          !findDescendantNodes(notebookRef.current.choosingNode?.id || "", cur.id) &&
+          !findAncestorNodes(notebookRef.current.choosingNode?.id || "", cur.id)
+      );
+    }
     return searchResults.data;
   }, [searchResults.data]);
 
