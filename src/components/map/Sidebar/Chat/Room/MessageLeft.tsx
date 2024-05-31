@@ -2,7 +2,6 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import NextImage from "next/image";
 import React, { useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
@@ -209,12 +208,11 @@ export const MessageLeft = ({
             >
               <MarkdownRender text={message.message || ""} />
               <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
-              <Box sx={{ pt: 1, display: "flex", gap: "5px" }}>
+              <Box sx={{ pt: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
                 {(message.imageUrls || []).map(imageUrl => (
-                  <NextImage
-                    width={"200px"}
-                    height={"200px"}
-                    style={{ borderRadius: "8px" }}
+                  <img
+                    width={"100%"}
+                    style={{ borderRadius: "8px", objectFit: "contain" }}
                     src={imageUrl}
                     alt="news image"
                     key={imageUrl}

@@ -5,7 +5,6 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
 import { getStorage } from "firebase/storage";
-import NextImage from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
@@ -356,8 +355,13 @@ export const MessageInput = ({
                 onClick={() => setImageUrls((prev: string[]) => prev.filter(image => image !== imageUrl))}
               />
             </Tooltip>
-
-            <NextImage width={"90px"} height={"90px"} style={{ borderRadius: "8px" }} src={imageUrl} alt="" />
+            <img
+              width={"120px"}
+              style={{ borderRadius: "8px", objectFit: "contain" }}
+              src={imageUrl}
+              alt=""
+              key={imageUrl}
+            />
           </Box>
         ))}
       </Box>
