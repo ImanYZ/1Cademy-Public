@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import { styled } from "@mui/system";
 import { collection, Firestore, getDocs, query } from "firebase/firestore";
 import Fuse from "fuse.js";
-import React, { ChangeEvent,useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { IUser } from "src/types/IUser";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
