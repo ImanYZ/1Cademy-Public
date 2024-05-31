@@ -53,17 +53,17 @@ const getThreadsIds = async (conversationId: string): Promise<any> => {
   try {
     const conversationDoc = await db.collection("tutorConversations").doc(conversationId).get();
     const conversationData: any = conversationDoc.data();
-    let { johnThreadId, maryThreadId } = conversationData;
-    if (!johnThreadId || !maryThreadId) {
+    let { threadId1, threadId2 } = conversationData;
+    if (!threadId1 || !threadId2) {
       console.log("threads not found");
-      johnThreadId = (await openai.beta.threads.create()).id;
-      maryThreadId = (await openai.beta.threads.create()).id;
+      threadId1 = (await openai.beta.threads.create()).id;
+      threadId2 = (await openai.beta.threads.create()).id;
     }
     conversationDoc.ref.update({
-      johnThreadId,
-      maryThreadId,
+      threadId1,
+      threadId2,
     });
-    return { johnThreadId, maryThreadId };
+    return { steveThreadId: threadId1, katyThreadId: threadId2 };
   } catch (error) {
     console.log(error);
   }
@@ -81,45 +81,53 @@ const getInstructions = (instructor: string, course: string, fName: string, conc
     You can also provide additional information to help ${fName} understand the topic better.
     ${fName} thinks this topic is ${reaction}, but may decide not to participate in the ${conversationType} or join it late. Do not assume any message from ${fName} and do not send any message on ${fName} 's behalf. If ${fName} sends a message, you would see it in the thread of ${conversationType}.
     You should start every one of your messages with your name and a colon, like this: ${instructor}: Hello, how are you?
-    ${otherInstructor} and ${fName} would also start their messages with their names and a colon, like this: ${fName}: Hello, how are you?`;
+    ${otherInstructor} and ${fName} would also start their messages with their names and a colon, like this: ${fName}: Hello, how are you?
+    Each message should be only from one single person (instructor or student).`;
 };
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { fName, uname } = req.body?.data?.user?.userData;
     const { concept, course, images, lastMessage, conversationId, reaction } = req.body;
     console.log("concept=>", { concept, course, images, lastMessage, conversationId, reaction });
-    const instructionsJohn = concept ? getInstructions("Steve", course, fName, concept, reaction) : "";
-    const instructionsMary = concept ? getInstructions("Katy", course, fName, concept, reaction) : "";
+    const instructionsSteve = concept ? getInstructions("Steve", course, fName, concept, reaction) : "";
+    const instructionsKaty = concept ? getInstructions("Katy", course, fName, concept, reaction) : "";
     //===
 
     //
-    const { johnThreadId, maryThreadId } = await getThreadsIds(conversationId);
+    const { steveThreadId, katyThreadId } = await getThreadsIds(conversationId);
     console.log("lastMessage==>", lastMessage);
-    let threadId = johnThreadId;
+    let threadId = steveThreadId;
     console.log("lastMessage.name ===>", lastMessage.name);
-    if (lastMessage.name.toLowerCase() === "Steve") {
-      threadId = maryThreadId;
+    if (lastMessage.name.toLowerCase() === "steve") {
+      threadId = katyThreadId;
       if (lastMessage.content) {
         if (lastMessage.role === "user") {
-          await openai.beta.threads.messages.create(maryThreadId, {
+          await openai.beta.threads.messages.create(katyThreadId, {
             role: "user",
             content: `${fName}: ` + lastMessage.content,
           });
         } else {
-          await openai.beta.threads.messages.create(maryThreadId, {
+          await openai.beta.threads.messages.create(katyThreadId, {
             role: "assistant",
             content: "Steve: " + lastMessage.content,
           });
         }
       }
     } else if (!!(lastMessage.content || "").trim()) {
-      await openai.beta.threads.messages.create(johnThreadId, {
-        role: "assistant",
-        content: "Katy: " + lastMessage.content,
-      });
+      if (lastMessage.role === "user") {
+        await openai.beta.threads.messages.create(steveThreadId, {
+          role: "user",
+          content: `${fName}: ` + lastMessage.content,
+        });
+      } else {
+        await openai.beta.threads.messages.create(steveThreadId, {
+          role: "assistant",
+          content: "Katy: " + lastMessage.content,
+        });
+      }
     }
-    const assistantJohnId = await createAssistant(instructionsJohn, "Steve", uname);
-    const assistantMaryId = await createAssistant(instructionsMary, "Katy", uname);
+    const assistantJohnId = await createAssistant(instructionsSteve, "Steve", uname);
+    const assistantMaryId = await createAssistant(instructionsKaty, "Katy", uname);
     const assistantId = lastMessage.name === "Steve" ? assistantMaryId : assistantJohnId;
     await fetchCompilation(res, threadId, assistantId);
     res.end();
