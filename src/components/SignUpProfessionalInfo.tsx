@@ -2,7 +2,7 @@ import { Autocomplete, createFilterOptions, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { collection, getDocs, getFirestore, query } from "firebase/firestore";
 import { FormikProps } from "formik";
-import { HTMLAttributes, useEffect, useState } from "react";
+import { HTMLAttributes, useEffect, useMemo, useState } from "react";
 import { Institution, Major, SignUpFormValues } from "src/knowledgeTypes";
 
 import { EDUCATION_VALUES } from "../lib/utils/constants";
@@ -46,12 +46,9 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
       querySnapshot.forEach(doc => {
         institutions.push({ id: doc.id, ...doc.data() } as Institution);
       });
-
-      const institutionSorted = institutions
-        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
-        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
-      //setAllInstitutions(institutionSorted);
-
+      const institutionSorted = institutions.sort((l1, l2) =>
+        l1.country === "United States" ? -1 : l2.country === "United States" ? 1 : 0
+      );
       setInstitutions(institutionSorted);
     };
     retrieveInstitutions();
@@ -63,6 +60,12 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
     if (!foundInstitution) return null;
     return foundInstitution;
   };
+  const orderedInstitution = useMemo(() => {
+    if (!values.institution) return institutions;
+    return institutions.sort((l1, l2) =>
+      l1.name === values.institution ? -1 : l2.name === values.institution ? 1 : 0
+    );
+  }, [institutions, values.institution]);
   // const onChangeInstitution = (value: string) => {
   //   const foundInstitution: Institution[] = allInstitutions.reduce((acu: Institution[], cur) => {
   //     if (acu.length < 10) {
@@ -122,7 +125,7 @@ export const SignUpProfessionalInfo = ({ formikProps }: SignUpBasicInformationPr
         //   onChangeInstitution(value);
         // }}
         onBlur={() => setTouched({ ...touched, institution: true })}
-        options={institutions}
+        options={orderedInstitution}
         getOptionLabel={option => option.name}
         renderInput={params => (
           <TextField
