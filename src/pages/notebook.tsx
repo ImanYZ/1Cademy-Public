@@ -57,6 +57,7 @@ import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
+import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 /* eslint-enable */
@@ -7074,6 +7075,42 @@ const Notebook = ({}: NotebookProps) => {
     return () => clearInterval(intervalId);
   }, [lastInteractionDate]);
 
+  const findDescendantNodes = useCallback(
+    (selectedNode: string, searchNode: string) => {
+      const node = graph.nodes[selectedNode] as INode;
+      if (node?.children?.some(child => child.node === searchNode)) {
+        return true;
+      }
+
+      for (const child of node?.children || []) {
+        if (findDescendantNodes(child.node, searchNode)) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [graph.nodes]
+  );
+
+  const findAncestorNodes = useCallback(
+    (selectedNode: string, searchNode: string) => {
+      const node = graph.nodes[selectedNode] as INode;
+      if (node?.parents?.some(parent => parent.node === searchNode)) {
+        return true;
+      }
+
+      for (const parent of node?.parents || []) {
+        if (findAncestorNodes(parent.node, searchNode)) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [graph.nodes]
+  );
+
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -7482,6 +7519,7 @@ const Notebook = ({}: NotebookProps) => {
                 nodeBookState.choosingNode?.type === "Node" ||
                 nodeBookState.choosingNode?.type === "Improvement") && (
                 <ParentsSidebarMemoized
+                  notebookRef={notebookRef}
                   title={
                     nodeBookState.choosingNode?.type === "Parent"
                       ? "Parents to Link"
@@ -7500,6 +7538,8 @@ const Notebook = ({}: NotebookProps) => {
                   setQueryParentChildren={setQueryParentChildren}
                   queryParentChildren={queryParentChildren}
                   username={""}
+                  findAncestorNodes={findAncestorNodes}
+                  findDescendantNodes={findDescendantNodes}
                 />
               )}
             </Box>
@@ -7841,6 +7881,8 @@ const Notebook = ({}: NotebookProps) => {
                   editingModeNode={editingModeNode}
                   setEditingModeNode={setEditingModeNode}
                   displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
+                  findDescendantNodes={findDescendantNodes}
+                  findAncestorNodes={findAncestorNodes}
                 />
               </MapInteractionCSS>
 

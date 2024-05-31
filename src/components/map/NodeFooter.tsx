@@ -128,6 +128,8 @@ type NodeFooterProps = {
   setAbleToPropose: any;
   choosingNode: any;
   onChangeChosenNode: () => void;
+  findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
+  findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
 };
 
 const NodeFooter = ({
@@ -195,6 +197,8 @@ const NodeFooter = ({
   setAbleToPropose,
   choosingNode,
   onChangeChosenNode,
+  findDescendantNodes,
+  findAncestorNodes,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -1763,8 +1767,8 @@ const NodeFooter = ({
         {choosingNode &&
           choosingNode?.type &&
           choosingNode?.id !== identifier &&
-          !parents?.find((parent: any) => parent?.node === choosingNode?.id) &&
-          !nodesChildren?.find((child: any) => child?.node === choosingNode?.id) && (
+          !findDescendantNodes(choosingNode?.id, identifier) &&
+          !findAncestorNodes(choosingNode?.id, identifier) && (
             <Button
               variant="contained"
               onClick={onChangeChosenNode}
