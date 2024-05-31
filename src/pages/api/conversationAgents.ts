@@ -23,18 +23,19 @@ export const fetchCompilation = async (res: NextApiResponse, threadId: string, a
   });
 };
 
-const createAssistant = async (instructions: string, name: string) => {
+const createAssistant = async (instructions: string, name: string, uname: string) => {
   const myAssistants = await openai.beta.assistants.list({
     order: "desc",
   });
-
-  const findAssistantIdx = myAssistants.data.findIndex((assistant: any) => assistant.name === name);
+  const findAssistantIdx = myAssistants.data.findIndex(
+    (assistant: any) => assistant.name === name && assistant.metadata.uname === uname
+  );
   if (findAssistantIdx !== -1) {
     console.log("Assistant found");
     const assistantId = myAssistants.data[findAssistantIdx].id;
-    // await openai.beta.assistants.update(assistantId, {
-    //   instructions,
-    // });
+    await openai.beta.assistants.update(assistantId, {
+      instructions,
+    });
     return myAssistants.data[findAssistantIdx].id;
   } else {
     //create a new Assistant
@@ -43,6 +44,7 @@ const createAssistant = async (instructions: string, name: string) => {
       instructions,
       tools: [{ type: "code_interpreter" }],
       model: MODEL,
+      metadata: { uname },
     });
     return assistant.id;
   }
@@ -83,7 +85,7 @@ const getInstructions = (instructor: string, course: string, fName: string, conc
 };
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { fName } = req.body?.data?.user?.userData;
+    const { fName, uname } = req.body?.data?.user?.userData;
     const { concept, course, images, lastMessage, conversationId, reaction } = req.body;
     console.log("concept=>", { concept, course, images, lastMessage, conversationId, reaction });
     const instructionsJohn = concept ? getInstructions("Steve", course, fName, concept, reaction) : "";
@@ -116,8 +118,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         content: "Katy: " + lastMessage.content,
       });
     }
-    const assistantJohnId = await createAssistant(instructionsJohn, "Steve");
-    const assistantMaryId = await createAssistant(instructionsMary, "Katy");
+    const assistantJohnId = await createAssistant(instructionsJohn, "Steve", uname);
+    const assistantMaryId = await createAssistant(instructionsMary, "Katy", uname);
     const assistantId = lastMessage.name === "Steve" ? assistantMaryId : assistantJohnId;
     await fetchCompilation(res, threadId, assistantId);
     res.end();
