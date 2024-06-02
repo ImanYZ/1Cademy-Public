@@ -41,7 +41,6 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { getMessaging, onMessage } from "firebase/messaging";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -86,6 +85,7 @@ import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { saveMessagingDeviceToken } from "@/lib/firestoreClient/messaging";
 // import { UploadConfirmation, useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
@@ -268,7 +268,6 @@ const Notebook = ({}: NotebookProps) => {
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
   const db = getFirestore();
-  const messaging = getMessaging();
   // const storage = getStorage();
   const theme = useTheme();
   const router = useRouter();
@@ -497,6 +496,10 @@ const Notebook = ({}: NotebookProps) => {
     },
     [mapInteractionValue.scale, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
+  useEffect(() => {
+    if (!user) return;
+    saveMessagingDeviceToken(user.userId);
+  }, [user]);
 
   //check if the user is instructor
   useEffect(() => {
@@ -7034,15 +7037,6 @@ const Notebook = ({}: NotebookProps) => {
     const killSnapshot = getchatNotificationsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
   }, [db, user]);
-
-  useEffect(() => {
-    onMessage(messaging, (message: any) => {
-      console.info("message received", message);
-      setTimeout(() => {
-        new Notification(message.notification.title, { body: message.notification.body });
-      }, 500);
-    });
-  }, [messaging]);
 
   useEffect(() => {
     const handleUserActivity = () => {

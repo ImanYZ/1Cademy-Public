@@ -45,11 +45,12 @@ const triggerNotifications = async (newMessage: any) => {
         };
         const notificationRef = db.collection("notifications").doc();
         try {
+          const token = fcmTokensHash[channelData.membersInfo[member].uid];
           const payload = {
-            token: fcmTokensHash[channelData.membersInfo[member].uid],
+            token,
             notification: {
-              title: `${newMessage.sender}`,
-              body: newMessage.message,
+              title: "Expense Tracker: Your expense has been processed",
+              body: message,
             },
           };
           console.log(admin.messaging());
@@ -58,7 +59,7 @@ const triggerNotifications = async (newMessage: any) => {
             .messaging()
             .send(payload)
             .then((response: any) => {
-              console.log(response);
+              console.log("Successfully sent message: ", response);
             })
             .catch((error: any) => {
               console.log("error: ", error);
