@@ -49,7 +49,7 @@ const triggerNotifications = async (newMessage: any) => {
           const payload = {
             token,
             notification: {
-              title: "Expense Tracker: Your expense has been processed",
+              title: `New Message from sender ${sender}`,
               body: message,
             },
           };
