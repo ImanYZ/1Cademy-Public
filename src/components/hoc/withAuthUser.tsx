@@ -26,7 +26,7 @@ const withAuthUser =
       }, [router]);
 
       useEffect(() => {
-        if (shouldRedirectToHomeIfAuthenticated && isAuthenticated && isAuthInitialized) {
+        if (shouldRedirectToHomeIfAuthenticated && !isAuthenticated && isAuthInitialized) {
           redirectToHome();
         }
       }, [isAuthInitialized, isAuthenticated, redirectToHome]);

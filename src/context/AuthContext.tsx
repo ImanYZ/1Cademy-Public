@@ -4,7 +4,6 @@ import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useRe
 import { AuthActions, AuthState, ErrorOptions, UserRole } from "src/knowledgeTypes";
 
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
-import { saveMessagingDeviceToken } from "@/lib/firestoreClient/messaging";
 import authReducer, { INITIAL_STATE } from "@/lib/reducers/auth";
 
 const AuthStateContext = createContext<AuthState | undefined>(undefined);
@@ -70,7 +69,6 @@ const AuthProvider: FC<Props> = ({ children, store }) => {
         const res: any = await user.getIdTokenResult(true);
         const role: UserRole = res.claims["instructor"] ? "INSTRUCTOR" : res.claims["student"] ? "STUDENT" : null;
         //sign in
-        saveMessagingDeviceToken(user.uid);
         loadUser(user.uid, role, res.claims);
       } else {
         //sign out
