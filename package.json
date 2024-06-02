@@ -55,7 +55,7 @@
     "diff": "^5.1.0",
     "dotenv": "^16.0.1",
     "emoji-picker-react": "^4.5.16",
-    "firebase": "^9.9.0",
+    "firebase": "^9.6.11",
     "firebase-admin": "^11.0.0",
     "formik": "^2.2.9",
     "fuse.js": "^7.0.0",

@@ -386,10 +386,6 @@ export const Message = ({
           await setDoc(messageRef, newMessage);
 
           //scrollToBottom();
-          await Post("/chat/sendNotification", {
-            newMessage,
-            roomType,
-          });
         }
       } catch (error) {
         console.error(error);
