@@ -7,6 +7,7 @@ import {
   doc,
   DocumentData,
   DocumentReference,
+  getDoc,
   getDocs,
   getFirestore,
   query,
@@ -27,15 +28,14 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
 import { Post } from "@/lib/mapApi";
+import { generateChannelName } from "@/lib/utils/chat";
 
 import { CustomBadge } from "../../CustomBudge";
 import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/DirectMessages";
 import { NewsList } from "../Chat/List/News";
 import { Summary } from "../Chat/List/Summary";
-//import { NodeLink } from "../Chat/Room/NodeLink";
 import { Message } from "../Chat/Room/Message";
-//import { NewsCard } from "../Chat/Room/NewsCard";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const DynamicMemoEmojiPicker = dynamic(() => import("../Chat/Common/EmojiPicker"), {
@@ -114,8 +114,10 @@ export const ChatSidebar = ({
   const openPicker = Boolean(anchorEl);
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [openChatInfo, setOpenChatInfo] = useState<boolean>(false);
+  const [leading, setLeading] = useState<any>(user.claims?.leading || []);
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
-  const leading = (user.claims?.leading || []).includes(selectedChannel?.id);
+  const [newMemberSection, setNewMemberSection] = useState(false);
+  const [isLoadingReaction, setIsLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -253,7 +255,7 @@ export const ChatSidebar = ({
   };
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
-
+    setIsLoadingReaction(message);
     if (message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
@@ -274,6 +276,7 @@ export const ChatSidebar = ({
     } else {
       await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
     }
+    setIsLoadingReaction(null);
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {
@@ -342,6 +345,16 @@ export const ChatSidebar = ({
     setOpenChatInfo(!openChatInfo);
   };
 
+  const getChannelRef = (channelId: string): DocumentReference<DocumentData> => {
+    let channelRef = doc(db, "channels", channelId);
+    if (roomType === "direct") {
+      channelRef = doc(db, "conversations", channelId);
+    } else if (roomType === "news") {
+      channelRef = doc(db, "announcementsMessages", channelId);
+    }
+    return channelRef;
+  };
+
   const contentSignalState = useMemo(() => {
     return { updates: true };
   }, [
@@ -359,6 +372,10 @@ export const ChatSidebar = ({
     openChatInfo,
     notifications,
     theme,
+    onlineUsers,
+    newMemberSection,
+    leading,
+    isLoadingReaction,
   ]);
 
   useEffect(() => {
@@ -392,34 +409,39 @@ export const ChatSidebar = ({
       openRoom("direct", { ...conversationData, id: findConversation.docs[0].id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
-      const conversationData = {
-        title: "",
-        members: [user2.uname, user?.uname],
-        membersInfo: {
-          [user2.uname]: {
-            uname: user2.uname,
-            imageUrl: user2.imageUrl,
-            chooseUname: !!user2.chooseUname,
-            fullname: `${user2.fName} ${user2.lName}`,
-            role: "",
-            uid: user2.userId,
-          },
-          [user?.uname]: {
-            uname: user?.uname,
-            imageUrl: user.imageUrl,
-            chooseUname: !!user.chooseUname,
-            fullname: `${user.fName} ${user.lName}`,
-            role: "",
-            uid: user?.userId,
-          },
+      const membersInfo = {
+        [user2.uname]: {
+          uname: user2.uname,
+          imageUrl: user2.imageUrl,
+          chooseUname: !!user2.chooseUname,
+          fullname: `${user2.fName} ${user2.lName}`,
+          role: "",
+          uid: user2.userId,
         },
+        [user?.uname]: {
+          uname: user?.uname,
+          imageUrl: user.imageUrl,
+          chooseUname: !!user.chooseUname,
+          fullname: `${user.fName} ${user.lName}`,
+          role: "",
+          uid: user?.userId,
+        },
+      };
+      const conversationData = {
+        title: generateChannelName(membersInfo, user),
+        members: [user2.uname, user?.uname],
+        membersInfo,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       await setDoc(converstionRef, conversationData);
+      const docSnap = await getDoc(converstionRef);
+      setLeading([...leading, docSnap.id]);
+      Post(`/chat/createChannelLeader`, { channelId: docSnap.id });
       openRoom("direct", { ...conversationData, id: converstionRef.id });
     }
   };
+
   const clearNotifications = (notifications: any) => {
     for (let notif of notifications) {
       const notifRef = doc(collection(db, "notifications"), notif.id);
@@ -458,10 +480,12 @@ export const ChatSidebar = ({
       selectedChannel={selectedChannel}
       // setDisplayTagSearcher={setDisplayTagSearcher}
       openChatInfoPage={openChatInfoPage}
+      setNewMemberSection={setNewMemberSection}
       sidebarType={"chat"}
       onlineUsers={onlineUsers}
       user={user}
       openChatInfo={openChatInfo}
+      leading={leading.includes(selectedChannel?.id)}
       SidebarContent={
         <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover
@@ -498,9 +522,13 @@ export const ChatSidebar = ({
                   setOpenChatRoom={setOpenChatRoom}
                   onlineUsers={onlineUsers}
                   user={user}
+                  sidebarWidth={sidebarWidth}
+                  getChannelRef={getChannelRef}
                 />
               ) : (
                 <Message
+                  notebookRef={notebookRef}
+                  nodeBookDispatch={nodeBookDispatch}
                   roomType={roomType}
                   theme={theme}
                   selectedChannel={selectedChannel}
@@ -513,8 +541,14 @@ export const ChatSidebar = ({
                   setForward={setForward}
                   forward={forward}
                   getMessageRef={getMessageRef}
-                  leading={leading}
+                  leading={leading.includes(selectedChannel?.id)}
                   sidebarWidth={sidebarWidth}
+                  openLinkedNode={openLinkedNode}
+                  onlineUsers={onlineUsers}
+                  newMemberSection={newMemberSection}
+                  setNewMemberSection={setNewMemberSection}
+                  getChannelRef={getChannelRef}
+                  isLoadingReaction={isLoadingReaction}
                 />
               )}
             </>
@@ -625,7 +659,31 @@ export const ChatSidebar = ({
   );
 };
 
-export const MemoizedChatSidebar = React.memo(ChatSidebar);
+const areEqual = (prevProps: any, nextProps: any) => {
+  return (
+    prevProps.user === nextProps.user &&
+    prevProps.settings === nextProps.settings &&
+    prevProps.open === nextProps.open &&
+    //prevProps.onClose === nextProps.onClose &&
+    prevProps.sidebarWidth === nextProps.sidebarWidth &&
+    prevProps.innerHeight === nextProps.innerHeight &&
+    prevProps.theme === nextProps.theme &&
+    prevProps.notebookRef === nextProps.notebookRef &&
+    prevProps.nodeBookDispatch === nextProps.nodeBookDispatch &&
+    prevProps.nodeBookState === nextProps.nodeBookState &&
+    prevProps.notebooks === nextProps.notebooks &&
+    prevProps.onChangeNotebook === nextProps.onChangeNotebook &&
+    prevProps.selectedNotebook === nextProps.selectedNotebook &&
+    prevProps.dispatch === nextProps.dispatch &&
+    prevProps.onChangeTagOfNotebookById === nextProps.onChangeTagOfNotebookById &&
+    prevProps.onlineUsers === nextProps.onlineUsers &&
+    prevProps.openLinkedNode === nextProps.openLinkedNode &&
+    prevProps.notifications === nextProps.notifications &&
+    prevProps.openUserInfoSidebar === nextProps.openUserInfoSidebar
+  );
+};
+
+export const MemoizedChatSidebar = React.memo(ChatSidebar, areEqual);
 
 const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
   const docType = change.type;

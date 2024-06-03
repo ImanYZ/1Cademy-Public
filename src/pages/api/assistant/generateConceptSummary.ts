@@ -1,18 +1,18 @@
+import { MODEL } from "@/lib/utils/constants";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { generateFlashcard } from "src/utils/assistant-helpers";
 
 export type IAssistantConetentSummary = {
   paragraphs: string[];
-  model: "gpt-4-0125-preview" | "gpt-4-0613";
+  model: string;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const payload = req.body as IAssistantConetentSummary;
     const paragraphs = payload.paragraphs || [];
-    const model = "gpt-4-0125-preview";
-    const concept: any = await generateFlashcard(paragraphs, [], model);
+    const concept: any = await generateFlashcard(paragraphs, []);
     return res.status(200).json({
       concepts: [concept],
     });

@@ -3,12 +3,15 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/Info";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+
+import GroupAvatar from "../Chat/Common/GroupAvatar";
 
 type SidebarWrapperProps = {
   id?: string;
@@ -33,9 +36,11 @@ type SidebarWrapperProps = {
   selectedChannel?: any;
   setDisplayTagSearcher?: any;
   openChatInfoPage?: any;
+  setNewMemberSection?: any;
   onlineUsers?: any;
   user?: any;
   openChatInfo?: boolean;
+  leading?: boolean;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -63,9 +68,11 @@ export const SidebarWrapper = ({
   selectedChannel = null,
   // setDisplayTagSearcher,
   openChatInfoPage,
+  setNewMemberSection,
   onlineUsers,
   user,
   openChatInfo,
+  leading,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -80,7 +87,7 @@ export const SidebarWrapper = ({
 
   const AvatarUser = ({ members }: any) => {
     const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
-    const userInfo = members[otherUser];
+    const userInfo = members[otherUser] || members[user?.uname];
     return (
       <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
         <Box
@@ -151,35 +158,66 @@ export const SidebarWrapper = ({
       }}
     >
       {sidebarType === "chat" && (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "start" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "start", gap: "10px", mt: 2 }}>
           {moveBack && (
             <Tooltip title={"Go Back"}>
-              <IconButton onClick={() => moveBack()} sx={{ mt: 2, ml: 2 }}>
+              <IconButton onClick={() => moveBack()} sx={{ ml: 2 }}>
                 <ArrowBackIcon />
               </IconButton>
             </Tooltip>
           )}
-          <Typography variant="h6" sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}>
+          {/* <Typography
+            variant="h6"
+            sx={{
+              ml: 2,
+              p: 3,
+              pb: 0,
+              fontWeight: "bold",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              maxWidth: "60%",
+              whiteSpace: "nowrap",
+            }}
+          >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
-          </Typography>
+          </Typography> */}
+          {!!selectedChannel && <GroupAvatar membersInfo={selectedChannel?.membersInfo} />}
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
-            <Tooltip title={"More Info"}>
-              <IconButton
-                sx={{
-                  width: "2px",
-                  mt: 3,
-                  ":hover": {
-                    background: "transparent",
-                    color: "grey",
-                  },
-                  ml: "5px",
-                }}
-                onClick={() => openChatInfoPage()}
-              >
-                <InfoIcon sx={{ color: "inherit" }} />
-              </IconButton>
-            </Tooltip>
+            <Box sx={{ display: "flex", gap: "5px" }}>
+              <Tooltip title={"More Info"}>
+                <IconButton
+                  sx={{
+                    width: "2px",
+                    ":hover": {
+                      background: "transparent",
+                      color: "grey",
+                    },
+                    ml: "5px",
+                  }}
+                  onClick={() => openChatInfoPage()}
+                >
+                  <InfoIcon sx={{ color: "inherit" }} />
+                </IconButton>
+              </Tooltip>
+              {leading && (
+                <Tooltip title={"Add New Member"}>
+                  <IconButton
+                    sx={{
+                      width: "2px",
+                      ":hover": {
+                        background: "transparent",
+                        color: "grey",
+                      },
+                      ml: "5px",
+                    }}
+                    onClick={() => setNewMemberSection(true)}
+                  >
+                    <PersonAddIcon sx={{ color: "inherit" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
           )}
         </Box>
       )}

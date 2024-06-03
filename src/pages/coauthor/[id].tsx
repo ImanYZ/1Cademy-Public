@@ -50,6 +50,7 @@ const Article = () => {
   const quillRef: any = useRef(false);
   const articleId = router.query.id as string;
   const { data } = useQuery("articleTypes", getArticleTypes);
+  const [expandedIssue, setExpandedIssue] = useState<number | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
@@ -225,6 +226,8 @@ const Article = () => {
               quillRef={quillRef}
               selection={selection}
               user={user}
+              expandedIssue={expandedIssue}
+              setExpandedIssue={setExpandedIssue}
             />
           </Section>
           <Bar
@@ -304,6 +307,7 @@ const Article = () => {
               articleTypePath={articleTypePath}
               setArticleTypePath={setArticleTypePath}
               articleTypes={articleTypes}
+              expandedIssue={expandedIssue}
             />
           </Section>
         </Container>

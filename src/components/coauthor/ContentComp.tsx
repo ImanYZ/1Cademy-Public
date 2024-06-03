@@ -1,9 +1,12 @@
 import "react-quill/dist/quill.snow.css";
 
+import { PeopleAltOutlined } from "@mui/icons-material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HomeIcon from "@mui/icons-material/Home";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Box,
   Button,
@@ -17,11 +20,9 @@ import {
   Modal,
   Paper,
   Popper,
-  Tab,
-  Tabs,
-  TextareaAutosize,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
 import { addDoc, collection, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
@@ -31,7 +32,6 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import { User } from "src/knowledgeTypes";
-import { sendMessageToChatGPT } from "src/services/openai";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -51,6 +51,7 @@ interface Props {
   articleTypePath: any;
   setArticleTypePath: any;
   articleTypes: any;
+  expandedIssue: number | null;
 }
 
 type AcademicArticleCategory = {
@@ -108,26 +109,36 @@ const ContentComp: React.FC<Props> = ({
   articleTypePath,
   setArticleTypePath,
   articleTypes,
+  expandedIssue,
 }) => {
   const db = getFirestore();
+  const theme = useTheme();
   const router = useRouter();
   const [content, setContent] = useState(selectedArticle?.content);
   const [open, setOpen] = useState(false);
   const [lastClickPosition, setLastClickPosition] = useState(0);
-  const [selectedTab, setSelectedTab] = useState<number>(0);
-  const [modalSection, setModalSection] = useState<number>(0);
   const [path, setPath] = useState<string[]>([]);
-  const [draft, setDraft] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [inputFieldErrors, setInputFieldErrors] = useState<{ [key: string]: string }>({});
   const [openModal, setOpenModal] = React.useState(false);
   const [users, setUsers] = React.useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [editable, setEditable] = useState<boolean>(false);
   const popperRef = useRef<any>(null);
   const [fuseInstance, setFuseInstance] = useState<any>(null);
   const [priorReviews, setPriorReviews] = useState<string>("");
+  const [isReviewsOpen, setIsReviewOpen] = useState<boolean>(false);
+  const [keyPressed, setKeyPressed] = useState(false);
+  const priorReviewsTimeoutRef = useRef<any>(null);
+  const contentTimeoutRef = useRef<any>(null);
+  const reviewsQuillRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (selectedArticle?.priorReviews) {
+      setPriorReviews(selectedArticle?.priorReviews);
+      setIsReviewOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (users.length === 0) return;
@@ -179,7 +190,6 @@ const ContentComp: React.FC<Props> = ({
   useEffect(() => {
     (async () => {
       if (selectedArticle) {
-        setPriorReviews(selectedArticle?.priorReviews || "");
         const quillEditor = quillRef.current.getEditor();
         setContent(selectedArticle.content);
         await delay(1000);
@@ -195,269 +205,56 @@ const ContentComp: React.FC<Props> = ({
     initialValues,
     validate,
     onSubmit: async values => {
-      startLoader();
-      const q = query(
-        collection(db, "articles"),
-        where("title", "==", values.title),
-        where("user", "==", user?.userId)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        alert("An article with the provided title already exists.");
-        stopLoader();
-        return;
-      }
-      setOpen(false);
-      let GPTResponse: any = {};
-      if (selectedTab === 0) {
-        const prompt = `I need to write about ${values.title}.
-      ${values.objective ? "My writing has the following objectives:" + values.objective : ""}
-      ${values.idea ? "I have already thought about it and my ideas are as follows:" + values.idea : ""}
-      ${
-        values.information
-          ? "I have already collected some pieces of information about it and they are as follows:" + values.information
-          : ""
-      }
-      ${values.outlined ? " I have already outlined my writing and the outline is as follows:" + values.outlined : ""}
-      Generate only a JSON object with the following structure:
-      {
-        "outline": "The writing outline as a long string in HTML format.",
-        "instructions": "Step by step instructions to continue writing this article based on your generated outline. This should be an object where each key indicates a step and its value explains the step instructions. This object should have the following structure: {'step 1:': 'Step 1 instructions', 'step 2:': 'Step 2 instructions', ...}"
-     }`;
+      try {
+        if (!values.title) {
+          setInputFieldErrors({ title: "Title is required." });
+          return;
+        }
+        setInputFieldErrors({});
 
-        GPTResponse = await sendMessageToChatGPT([
-          {
-            role: "user",
-            content: prompt,
-          },
-        ]);
-
-        const docRef = await addDoc(collection(db, "articles"), {
-          title: values.title,
-          content: GPTResponse.outline,
-          path,
-          outline: {
-            outlined: values.outlined,
-            idea: values.idea,
-            information: values.information,
-            objective: values.objective,
-          },
-          editors: [user?.uname],
-          editorsData: {
-            [user?.uname || ""]: {
-              fName: user?.fName,
-              lName: user?.lName,
-              uname: user?.uname,
-              imageUrl: user?.imageUrl,
-              email: user?.email,
-            },
-          },
-          user: user?.uname,
-          createdAt: new Date(),
-        });
-        let text = "";
-        for (const key in GPTResponse.instructions) {
-          if (GPTResponse.instructions.hasOwnProperty(key)) {
-            const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-            text += `${capitalizedKey} ${GPTResponse.instructions[key]}\n\n <hr>`;
+        if (path.length === 0) {
+          setError("Please select the path from tree-view.");
+          return;
+        }
+        startLoader();
+        if (formik.values.title != selectedArticle?.title) {
+          const q = query(
+            collection(db, "articles"),
+            where("title", "==", values.title),
+            where("user", "==", user?.uname)
+          );
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            alert("An article with the provided title already exists.");
+            stopLoader();
+            return;
           }
         }
-
-        await addDoc(collection(db, "articleMessages"), {
-          text: text,
-          improvement: null,
-          initial: true,
-          type: "assistant",
-          user: {
-            uid: "",
-            fullname: "1CoAuthor",
-            imageUrl: "images/icon-8x.png",
-          },
-          articleId: docRef.id,
-          createdAt: new Date(),
-        });
-
-        await saveLogs({
-          doer: user?.uname,
-          action: "Created New Article",
-          articleId: docRef.id,
-          title: values.title,
-          cursorPosition: lastClickPosition,
-        });
-      } else {
-        const articleData: any = {
+        setOpen(false);
+        await updateDoc(doc(db, "articles", selectedArticle.id), {
           title: values.title,
           path,
-          outline: {
-            outlined: values.outlined,
-            idea: values.idea,
-            information: values.information,
-            objective: values.objective,
-          },
-          editors: [user?.uname],
-          editorsData: {
-            [user?.uname || ""]: {
-              fName: user?.fName,
-              lName: user?.lName,
-              uname: user?.uname,
-              imageUrl: user?.imageUrl,
-              email: user?.email,
-            },
-          },
-          user: user?.uname,
-          createdAt: new Date(),
-        };
-        if (draft) {
-          articleData["content"] = draft;
-        }
-        if (priorReviews) {
-          articleData["priorReviews"] = priorReviews;
-        }
-        const docRef = await addDoc(collection(db, "articles"), articleData);
+          updatedAt: new Date(),
+        });
         await saveLogs({
           doer: user?.uname,
-          action: "Created New Article",
-          articleId: docRef.id,
+          action: "Updated Article",
+          articleId: selectedArticle?.id,
           title: values.title,
           cursorPosition: lastClickPosition,
         });
+        setError("");
+        stopLoader();
+      } catch (err) {
+        console.error(err);
+        stopLoader();
       }
-      setError("");
-      setModalSection(0);
-      setSelectedTab(0);
-      stopLoader();
     },
   });
 
-  const editArticleOutline = async () => {
-    startLoader();
-    if (formik.values.title != selectedArticle?.title) {
-      const q = query(
-        collection(db, "articles"),
-        where("title", "==", formik.values.title),
-        where("user", "==", user?.uname)
-      );
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        alert("An article with the provided title already exists.");
-        stopLoader();
-        return;
-      }
-    }
-    setOpen(false);
-    let GPTResponse: any = {};
-    if (selectedTab === 0) {
-      const prompt = `I need to write about ${formik.values.title}.
-    ${formik.values.objective ? "My writing has the following objectives:" + formik.values.objective : ""}
-    ${formik.values.idea ? "I have already thought about it and my ideas are as follows:" + formik.values.idea : ""}
-    ${
-      formik.values.information
-        ? "I have already collected some pieces of information about it and they are as follows:" +
-          formik.values.information
-        : ""
-    }
-    ${
-      formik.values.outlined
-        ? " I have already outlined my writing and the outline is as follows:" + formik.values.outlined
-        : ""
-    }
-    Generate only a JSON object with the following structure:
-    {
-      "outline": "The writing outline as a long string in HTML format.",
-      "instructions": "Step by step instructions to continue writing this article based on your generated outline. This should be an object where each key indicates a step and its value explains the step instructions. This object should have the following structure: {'step 1:': 'Step 1 instructions', 'step 2:': 'Step 2 instructions', ...}"
-   }`;
-
-      GPTResponse = await sendMessageToChatGPT([
-        {
-          role: "user",
-          content: prompt,
-        },
-      ]);
-
-      await updateDoc(doc(db, "articles", selectedArticle.id), {
-        title: formik.values.title,
-        content: GPTResponse.outline,
-        path,
-        outline: {
-          outlined: formik.values.outlined,
-          idea: formik.values.idea,
-          information: formik.values.information,
-          objective: formik.values.objective,
-        },
-        issues: null,
-        aSteps: null,
-        updatedAt: new Date(),
-      });
-      let text = "";
-      for (const key in GPTResponse.instructions) {
-        if (GPTResponse.instructions.hasOwnProperty(key)) {
-          const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-          text += `${capitalizedKey} ${GPTResponse.instructions[key]}\n\n <hr>`;
-        }
-      }
-
-      const articleMessageQuery = query(
-        collection(db, "articleMessages"),
-        where("initial", "==", true),
-        where("articleId", "==", selectedArticle?.id)
-      );
-      const articleMessageDocs = await getDocs(articleMessageQuery);
-      for (const doc of articleMessageDocs.docs) {
-        if (doc.exists()) {
-          await updateDoc(doc.ref, {
-            text: text,
-            updatedAt: new Date(),
-          });
-          break;
-        }
-      }
-
-      await saveLogs({
-        doer: user?.uname,
-        action: "Updated Article",
-        articleId: selectedArticle?.id,
-        title: formik.values.title,
-        cursorPosition: lastClickPosition,
-      });
-    } else {
-      const articleData: any = {
-        title: formik.values.title,
-        path,
-        outline: {
-          outlined: formik.values.outlined,
-          idea: formik.values.idea,
-          information: formik.values.information,
-          objective: formik.values.objective,
-        },
-        issues: null,
-        aSteps: null,
-        updatedAt: new Date(),
-      };
-      if (draft) {
-        articleData["content"] = draft;
-      }
-      if (priorReviews) {
-        articleData["priorReviews"] = priorReviews;
-      }
-      await updateDoc(doc(db, "articles", selectedArticle.id), articleData);
-      await saveLogs({
-        doer: user?.uname,
-        action: "Updated Article",
-        articleId: selectedArticle?.id,
-        title: formik.values.title,
-        cursorPosition: lastClickPosition,
-      });
-    }
-    setError("");
-    setModalSection(0);
-    setSelectedTab(0);
-    stopLoader();
-    setEditable(false);
-  };
-
   const saveLogs = async (logs: any) => {
     try {
-      addDoc(collection(db, "articleLogs"), {
+      await addDoc(collection(db, "articleLogs"), {
         ...logs,
         createdAt: new Date(),
       });
@@ -473,24 +270,31 @@ const ContentComp: React.FC<Props> = ({
     setArticleContent(quillEditor.root.innerHTML);
   }, []);
 
-  const saveAndAnalyze = useCallback(async () => {
-    if (selectedArticle?.id) {
-      setArticleAndDOM();
-      await updateDoc(doc(db, "articles", selectedArticle.id), {
-        issues: null,
-        aSteps: null,
-        content,
-        updatedAt: new Date(),
-      });
-      await saveLogs({
-        doer: user?.uname,
-        action: "Modified Article",
-        articleId: selectedArticle.id,
-        content: content,
-        cursorPosition: lastClickPosition,
-      });
-    }
-  }, [user, content, selectedArticle]);
+  const saveAndAnalyze = useCallback(
+    async (type: string) => {
+      if (selectedArticle?.id) {
+        setArticleAndDOM();
+        const dataForUpdate: any = {
+          updatedAt: new Date(),
+        };
+        if (type === "content") {
+          dataForUpdate["aSteps"] = null;
+        } else {
+          dataForUpdate["issues"] = null;
+        }
+        await updateDoc(doc(db, "articles", selectedArticle.id), dataForUpdate);
+        await saveLogs({
+          doer: user?.uname,
+          action: "Modified Article",
+          articleId: selectedArticle.id,
+          content: content,
+          cursorPosition: lastClickPosition,
+        });
+      }
+    },
+    [user, content, selectedArticle]
+  );
+
   // const handleChange = useCallback(
   //   (e: any) => {
   //     if (!e.target.value) {
@@ -509,7 +313,8 @@ const ContentComp: React.FC<Props> = ({
   const handleSelectionChange = useCallback(
     (range: any) => {
       if (range && range.length > 0) {
-        const selection = quillRef.current.getEditor().getSelection();
+        const quill = quillRef.current.getEditor();
+        const selection = quill.getSelection();
         setSelection(selection);
       }
     },
@@ -519,7 +324,12 @@ const ContentComp: React.FC<Props> = ({
   const handleBlur = useCallback(() => {
     const quill = quillRef.current.getEditor();
     if (selection && selection.length > 0) {
-      quill.formatText(selection.index, selection.length, "background", "#BD7A00");
+      quill.formatText(
+        selection.index,
+        selection.length,
+        "background",
+        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.gray300
+      );
     } else {
       quill.insertText(lastClickPosition, "|", "color", "red");
     }
@@ -533,7 +343,6 @@ const ContentComp: React.FC<Props> = ({
       });
       setSelection(null);
     }
-
     const redBars = document.querySelectorAll('span[style="color: red;"]');
     redBars.forEach((redBar: any) => {
       redBar.parentNode.removeChild(redBar);
@@ -543,17 +352,6 @@ const ContentComp: React.FC<Props> = ({
   const handleClose = useCallback(() => {
     setOpen(false);
   }, [selectedArticle]);
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
-  };
-
-  // const deleteArticle = async (event: any, articleId: string) => {
-  //   event.stopPropagation();
-  //   if (confirm("Are you sure to delete article")) {
-  //     await deleteDoc(doc(db, "articles", articleId));
-  //   }
-  // };
 
   const handleTreeItemClick = (path: string[]) => {
     setPath(path);
@@ -565,6 +363,9 @@ const ContentComp: React.FC<Props> = ({
         <>
           {node.map((item, index) => (
             <TreeItem
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "inherit" : "black"),
+              }}
               key={`${nodeId}-${index}`}
               nodeId={`${nodeId}-${index}`}
               label={camelCaseToSpaces(item)}
@@ -577,7 +378,14 @@ const ContentComp: React.FC<Props> = ({
       return (
         <>
           {Object.keys(node).map((key, index) => (
-            <TreeItem key={`${nodeId}-${index}`} nodeId={`${nodeId}-${index}`} label={camelCaseToSpaces(key)}>
+            <TreeItem
+              sx={{
+                color: theme => (theme.palette.mode === "dark" ? "inherit" : "black"),
+              }}
+              key={`${nodeId}-${index}`}
+              nodeId={`${nodeId}-${index}`}
+              label={camelCaseToSpaces(key)}
+            >
               {renderTree(node[key], `${nodeId}-${index}`, [...path, key])}
             </TreeItem>
           ))}
@@ -661,22 +469,82 @@ const ContentComp: React.FC<Props> = ({
 
   const changeOutline = () => {
     setOpen(true);
-    setEditable(true);
     setPath(selectedArticle?.path || []);
     formik.setFieldValue("title", selectedArticle?.title);
-    formik.setFieldValue("objective", selectedArticle?.outline?.objective);
-    formik.setFieldValue("idea", selectedArticle?.outline?.idea);
-    formik.setFieldValue("information", selectedArticle?.outline?.information);
-    formik.setFieldValue("outlined", selectedArticle?.outline?.outlined);
   };
 
+  const handleUpdatePriorReviews = async (priorReviews: any, source: any) => {
+    if (source === "user" && keyPressed) {
+      clearTimeout(priorReviewsTimeoutRef?.current);
+      priorReviewsTimeoutRef.current = setTimeout(async () => {
+        await updateDoc(doc(db, "articles", selectedArticle.id), {
+          priorReviews,
+          updatedAt: new Date(),
+        });
+      }, 1000);
+      setPriorReviews(priorReviews);
+      setKeyPressed(false);
+      await saveLogs({
+        doer: user?.uname,
+        action: "Updated Article Reviews",
+        articleId: selectedArticle?.id,
+        priorReviews,
+        cursorPosition: lastClickPosition,
+      });
+    }
+  };
+
+  const handleUpdateContent = async (content: string, source: any) => {
+    if (source === "user" && keyPressed) {
+      clearTimeout(contentTimeoutRef?.current);
+      contentTimeoutRef.current = setTimeout(async () => {
+        await updateDoc(doc(db, "articles", selectedArticle.id), {
+          content,
+          updatedAt: new Date(),
+        });
+      }, 1000);
+
+      setContent(content);
+      setKeyPressed(false);
+      await saveLogs({
+        doer: user?.uname,
+        action: "Updated Article Content",
+        articleId: selectedArticle?.id,
+        content,
+        cursorPosition: lastClickPosition,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (expandedIssue === null) return;
+    const issues = selectedArticle?.issues.issues;
+    const filteredIssue = issues[expandedIssue];
+    if (filteredIssue instanceof Object) {
+      const sentences = filteredIssue.sentences;
+      highlightSentences(sentences);
+    }
+  }, [expandedIssue]);
+
+  const highlightSentences = (sentencesToFind: any) => {
+    const quill = reviewsQuillRef.current.getEditor();
+    quill.formatText(0, articleContent.length, {
+      background: false,
+    });
+    sentencesToFind.forEach((sentence: any) => {
+      const index = quill.getText().indexOf(sentence);
+      if (index > -1) {
+        quill.formatText(
+          index,
+          sentence.length,
+          "background",
+          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG400 : DESIGN_SYSTEM_COLORS.gray300
+        );
+      }
+    });
+  };
   return (
     <Box sx={{ m: "16px 10px" }}>
-      {selectedArticle && selectedArticle?.user === user?.uname && (
-        <Button onClick={handleModalOpen} variant="outlined" sx={{ position: "absolute", right: "10px", top: "10px" }}>
-          Share
-        </Button>
-      )}
       <Modal
         open={openModal}
         onClose={handleModalClose}
@@ -761,7 +629,15 @@ const ContentComp: React.FC<Props> = ({
           )}
         </Box>
       </Modal>
-      <Box sx={{ height: "24px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <IconButton
+          onClick={() => {
+            router.push("/coauthor");
+          }}
+        >
+          <HomeIcon />
+        </IconButton>
+
         {articleTypePath.length > 0 && (
           <DisciplinesComp
             allContent={articleContent}
@@ -770,16 +646,15 @@ const ContentComp: React.FC<Props> = ({
             articleTypes={articleTypes}
           />
         )}
+
+        {selectedArticle && selectedArticle?.user === user?.uname && (
+          <Button onClick={handleModalOpen} variant="outlined">
+            <PeopleAltOutlined /> <Typography color="inherit">Share</Typography>
+          </Button>
+        )}
       </Box>
-      <Box mt={2}>
-        <IconButton
-          sx={{ position: "absolute", right: "355px", top: "59px" }}
-          onClick={() => {
-            router.push("/coauthor");
-          }}
-        >
-          <HomeIcon />
-        </IconButton>
+
+      <Box mt={2} id="quill-box">
         {/* <Select
           labelId="coauthor-articles-select"
           id="coauthor-articles-select"
@@ -816,31 +691,104 @@ const ContentComp: React.FC<Props> = ({
           ))}
         </Select> */}
         <ReactQuill
-          style={{ height: "calc(100vh - 110px)" }}
+          modules={{
+            clipboard: {
+              matchVisual: false,
+            },
+          }}
+          preserveWhitespace={false}
+          style={{ height: `calc(100vh - ${isReviewsOpen ? "400" : "170"}px)` }}
           ref={quillRef}
           value={content}
-          onChange={setContent}
+          onChange={(content, {}, source) => handleUpdateContent(content, source)}
+          onKeyDown={(event: any) => {
+            if ((event.metaKey || event.ctrlKey) && (event.key === "c" || event.key === "v")) {
+              setSelection(null);
+            }
+            setKeyPressed(true);
+          }}
           onBlur={() => handleBlur()}
           onFocus={() => handleFocus()}
           onChangeSelection={(range: any) => handleSelectionChange(range)}
         />
-
-        <Button
-          variant="outlined"
-          style={{ position: "absolute", right: "190px", top: "59.5px" }}
-          onClick={() => changeOutline()}
+        <Box
+          sx={{
+            position: "absolute",
+            top: (document.getElementById("quill-box")?.offsetTop || 0) + 2,
+            right: "13px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
         >
-          Change Outline
-        </Button>
+          <IconButton onClick={() => changeOutline()}>
+            <SettingsIcon />
+          </IconButton>
 
-        <Button
-          variant="contained"
-          color="success"
-          style={{ position: "absolute", right: "13px", top: "59.5px" }}
-          onClick={() => saveAndAnalyze()}
+          <Button variant="contained" color="success" onClick={() => saveAndAnalyze("content")}>
+            Analyze
+          </Button>
+        </Box>
+      </Box>
+      <Box mt={isReviewsOpen ? 7 : 6}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderTop: "solid 1px #CCCCCC",
+            borderLeft: "solid 1px #CCCCCC",
+            borderRight: "solid 1px #CCCCCC",
+            borderBottom: !isReviewsOpen ? "solid 1px #CCCCCC" : undefined,
+            pl: "10px",
+            pr: "2px",
+            py: "2.5px",
+          }}
         >
-          Save and Analyze
-        </Button>
+          <Typography variant="subtitle1">Reviews:</Typography>
+          <IconButton
+            sx={{
+              width: "25px",
+              height: "20px",
+              color: theme => (theme.palette.mode === "dark" ? "#bebebe" : "rgba(0, 0, 0, 0.6)"),
+
+              fontSize: "16px",
+
+              cursor: "pointer",
+            }}
+            onClick={() => setIsReviewOpen(!isReviewsOpen)}
+          >
+            <ArrowForwardIosIcon
+              fontSize="inherit"
+              sx={{
+                transform: isReviewsOpen ? "rotate(90deg)" : "rotate(270deg)",
+              }}
+            />
+          </IconButton>
+
+          <Button
+            disabled={!isReviewsOpen}
+            variant="contained"
+            color="success"
+            onClick={() => saveAndAnalyze("reviews")}
+          >
+            Analyze
+          </Button>
+        </Box>
+        <ReactQuill
+          ref={reviewsQuillRef}
+          modules={{
+            clipboard: {
+              matchVisual: false,
+            },
+            toolbar: false,
+          }}
+          preserveWhitespace={false}
+          style={{ display: !isReviewsOpen ? "none" : undefined, height: "225px" }}
+          value={priorReviews}
+          onChange={(content, {}, source) => handleUpdatePriorReviews(content, source)}
+          onKeyDown={() => setKeyPressed(true)}
+        />
       </Box>
       <Modal
         open={open}
@@ -864,179 +812,42 @@ const ContentComp: React.FC<Props> = ({
           }}
         >
           <form onSubmit={formik.handleSubmit}>
-            {modalSection == 0 && (
-              <Box>
-                <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                  <InputLabel htmlFor="standard-adornment-amount">What is the title of your writing?</InputLabel>
-                  <Input
-                    name="title"
-                    value={formik.values.title}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={Boolean(inputFieldErrors?.title)}
-                    id="standard-adornment-amount"
-                  />
-                </FormControl>
+            <Box>
+              <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                <InputLabel htmlFor="standard-adornment-amount">What is the title of your writing?</InputLabel>
+                <Input
+                  name="title"
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={Boolean(inputFieldErrors?.title)}
+                  id="standard-adornment-amount"
+                />
+              </FormControl>
 
-                <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                  {error && <Typography color={"red"}>{error}</Typography>}
-                  <Typography>
-                    Please enter the type of your writing by expanding the branches of the following tree-view:
-                  </Typography>
-                  <TreeView
-                    defaultCollapseIcon={<ExpandMoreIcon />}
-                    defaultExpandIcon={<ChevronRightIcon />}
-                    style={{ maxHeight: 400, overflowY: "auto", padding: "10px" }}
-                  >
-                    {renderTree(articleTypes, "0", [])}
-                  </TreeView>
-                </FormControl>
-              </Box>
-            )}
-
-            {modalSection == 1 && (
-              <Box>
-                <Tabs
-                  variant="fullWidth"
-                  value={selectedTab}
-                  onChange={handleTabChange}
-                  aria-label="1CoAuthor Tabs"
-                  style={{ marginBottom: "19px" }}
+              <FormControl fullWidth sx={{ m: 1 }} variant="standard">
+                {error && <Typography color={"red"}>{error}</Typography>}
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "inherit" : "black"),
+                  }}
                 >
-                  <Tab label="Help me outline" value={0} />
-                  <Tab label="I'd like to draft" value={1} />
-                </Tabs>
-
-                {selectedTab === 0 ? (
-                  <>
-                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                      <InputLabel htmlFor="standard-adornment-amount">What is the writing objective?</InputLabel>
-                      <Input
-                        name="objective"
-                        value={formik.values.objective}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        id="standard-adornment-amount"
-                      />
-                    </FormControl>
-                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                      <InputLabel htmlFor="standard-adornment-amount">What do you have in mind?</InputLabel>
-                      <Input
-                        name="idea"
-                        value={formik.values.idea}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        id="standard-adornment-amount"
-                      />
-                    </FormControl>
-                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                      <InputLabel htmlFor="standard-adornment-amount">
-                        Copy the pieces of information that you have already collected in the following box.
-                      </InputLabel>
-                      <Input
-                        name="information"
-                        value={formik.values.information}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        id="standard-adornment-amount"
-                      />
-                    </FormControl>
-                    <FormControl fullWidth sx={{ m: 1 }} variant="standard">
-                      <InputLabel htmlFor="standard-adornment-amountIf">
-                        If you have already outlined your writing copy the outline bellow.
-                      </InputLabel>
-                      <Input
-                        name="outlined"
-                        value={formik.values.outlined}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        id="standard-adornment-amount"
-                      />
-                    </FormControl>
-                  </>
-                ) : (
-                  selectedTab === 1 && (
-                    <>
-                      <ReactQuill style={{ height: "200px" }} value={draft} onChange={setDraft} />
-                      <Box mt={8}>
-                        <TextareaAutosize
-                          minRows={4}
-                          placeholder="Copy the reviews that you have already received below:"
-                          style={{
-                            width: "100%",
-                            fontSize: 16,
-                            border: "none",
-                            outline: "none",
-                            padding: "15px",
-                            fontFamily: "system-ui",
-                            background: DESIGN_SYSTEM_COLORS.notebookG700,
-                            color: "white",
-                          }}
-                          value={priorReviews}
-                          onChange={e => setPriorReviews(e.target.value)}
-                        />
-                      </Box>
-                    </>
-                  )
-                )}
-              </Box>
-            )}
+                  Please enter the type of your writing by expanding the branches of the following tree-view:
+                </Typography>
+                <TreeView
+                  defaultCollapseIcon={<ExpandMoreIcon />}
+                  defaultExpandIcon={<ChevronRightIcon />}
+                  style={{ maxHeight: 400, overflowY: "auto", padding: "10px" }}
+                >
+                  {renderTree(articleTypes, "0", [])}
+                </TreeView>
+              </FormControl>
+            </Box>
 
             <Box mt={2} sx={{ display: "flex", justifyContent: "center", gap: "5px" }}>
-              {modalSection == 0 && (
-                <Button
-                  onClick={() => {
-                    if (!formik.values.title) {
-                      setInputFieldErrors({ title: "Title is required." });
-                      return;
-                    }
-                    setInputFieldErrors({});
-
-                    if (path.length === 0) {
-                      setError("Please select the path from tree-view.");
-                      return;
-                    }
-                    setModalSection(1);
-                  }}
-                  variant="outlined"
-                >
-                  Next
-                </Button>
-              )}
-              {modalSection == 1 && (
-                <Button onClick={() => setModalSection(0)} variant="outlined">
-                  Back
-                </Button>
-              )}
-
-              {modalSection == 1 && selectedTab === 0 && (
-                <>
-                  {!editable && (
-                    <Button type="submit" variant="outlined">
-                      Outline
-                    </Button>
-                  )}
-                  {editable && (
-                    <Button onClick={() => editArticleOutline()} variant="outlined">
-                      Outline
-                    </Button>
-                  )}
-                </>
-              )}
-              {selectedTab === 1 && (
-                <>
-                  {!editable && (
-                    <Button type="submit" variant="outlined">
-                      Create
-                    </Button>
-                  )}
-                  {editable && (
-                    <Button onClick={() => editArticleOutline()} variant="outlined">
-                      Create
-                    </Button>
-                  )}
-                </>
-              )}
+              <Button type="submit" variant="outlined">
+                Save
+              </Button>
             </Box>
           </form>
         </Box>

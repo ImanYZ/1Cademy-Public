@@ -23,6 +23,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import moment from "moment";
 import { CollectionFieldSchema } from "typesense/lib/Typesense/Collection";
 import { IAssistantNodePassage, IAssistantPassageResponse } from "src/types/IAssistant";
+import { MODEL } from "@/lib/utils/constants";
 
 export type BARD_RESULT_NODE = {
   title: string;
@@ -251,7 +252,7 @@ export const sendMessageToGPT4 = async (
 
   const response = await openai.chat.completions.create({
     messages: messages.filter(message => message.gptMessage).map(message => message.gptMessage!),
-    model: "gpt-4",
+    model: MODEL,
     temperature: 0,
   });
 
@@ -277,17 +278,14 @@ export const sendMessageToGPT4V2 = async (
 
   const response = await openai.chat.completions.create({
     messages: [message],
-    model: "gpt-4",
+    model: MODEL,
     temperature: 0,
   });
 
   return response.choices[0].message.content;
 };
 
-export const sendGPTPrompt = async (
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
-  messages: any[]
-) => {
+export const sendGPTPrompt = async (messages: any[]) => {
   const config = {
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_API_ORG_ID,
@@ -297,16 +295,13 @@ export const sendGPTPrompt = async (
 
   const response = await openai.chat.completions.create({
     messages,
-    model,
+    model: MODEL,
     temperature: 0,
   });
 
   return response.choices[0].message.content;
 };
-export const sendGPTPromptJSON = async (
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-0125-preview" | "gpt-4-0613" | "gpt-4-turbo-preview",
-  messages: any[]
-): Promise<string> => {
+export const sendGPTPromptJSON = async (messages: any[]) => {
   const config = {
     apiKey: process.env.OPENAI_API_KEY,
     organization: process.env.OPENAI_API_ORG_ID,
@@ -316,7 +311,7 @@ export const sendGPTPromptJSON = async (
 
   const response = await openai.chat.completions.create({
     messages,
-    model,
+    model: MODEL,
     temperature: 0,
     response_format: { type: "json_object" },
   });
@@ -1003,7 +998,7 @@ export const getPassageTopicGpt4 = async (passage: string) => {
   prompt += `'''\n`;
   prompt += passage;
   prompt += `\n'''`;
-  const response = await sendGPTPrompt("gpt-3.5-turbo", [
+  const response = await sendGPTPrompt([
     {
       role: "user",
       content: prompt,
@@ -1061,7 +1056,7 @@ export const getFlashcardsFromPassage = async (passage: string): Promise<Flashca
     `"type": Concept or Relation\n` +
     `}\n` +
     `If you cannot extract any valuable information from the text, print an empty array [].`;
-  const response = await sendGPTPrompt("gpt-4", [
+  const response = await sendGPTPrompt([
     {
       role: "user",
       content: prompt,
@@ -1084,7 +1079,7 @@ export const combineContents = async (passages: string[]): Promise<string> => {
     `'''\n` +
     `${passages[1]}\n` +
     `'''`;
-  const response = await sendGPTPrompt("gpt-4", [
+  const response = await sendGPTPrompt([
     {
       role: "user",
       content: prompt,
@@ -1123,7 +1118,7 @@ export const generateQuestionNode = async (
     role: "user",
   });
 
-  const gptResponse = await sendGPTPrompt("gpt-3.5-turbo", context);
+  const gptResponse = await sendGPTPrompt(context);
 
   const response: string = gptResponse || "";
   if (gptResponse) {
@@ -1152,8 +1147,7 @@ export const generateQuestionNode = async (
 
 export const generateFlashcard = async (
   passages: string[],
-  context: any[],
-  model: "gpt-4-0125-preview" | "gpt-4-0613"
+  context: any[]
 ): Promise<{
   Stem: string;
   Choices: {
@@ -1181,7 +1175,7 @@ export const generateFlashcard = async (
     role: "user",
   });
 
-  const gptResponse = await sendGPTPrompt(model, context);
+  const gptResponse = await sendGPTPrompt(context);
 
   console.log({ gptResponse });
   const response: string = gptResponse || "";

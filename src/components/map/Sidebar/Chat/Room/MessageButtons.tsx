@@ -12,7 +12,7 @@ type MessageButtonProps = {
   message: any;
   sx?: SxProps<Theme>;
   replyMessage?: (message: any) => void;
-  forwardMessage: (message: any) => void;
+  forwardMessage?: (message: any) => void;
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   setEditingMessage?: any;
   setInputMessage?: any;
@@ -69,7 +69,7 @@ export const MessageButtons = ({
           <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
         </IconButton>
       </Tooltip> */}
-      {isSender && (
+      {isSender && setEditingMessage && (
         <Tooltip title={"edit"}>
           <IconButton onClick={handleEditMessage}>
             <EditIcon />

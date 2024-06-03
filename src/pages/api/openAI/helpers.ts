@@ -3,6 +3,7 @@ import moment from "moment";
 import { uploadFileToStorage } from "../STT";
 import { NextApiResponse } from "next";
 import { delay } from "@/lib/utils/utils";
+import { MODEL } from "@/lib/utils/constants";
 
 const OpenAI = require("openai");
 
@@ -101,7 +102,7 @@ export const getAssistantTutorID = async () => {
       By incorporating these enhanced instructions, you will create a comprehensive and effective learning experience that is grounded in the latest research from learning science, cognitive psychology, behavioral psychology, social psychology, memory science, and neuroscience.`,
       name: "1Tutor",
       tools: [{ type: "retrieval" }, { type: "code_interpreter" }],
-      model: "gpt-4-0125-preview",
+      model: MODEL,
     });
     return newAssistant.id;
   }
@@ -180,7 +181,7 @@ export const getAssistantGenerateTitle = async () => {
       instructions: `The user attaches a document. Write a title for the attached document as a JSON object with only one key, called "title"`,
       name: "Title Generator",
       tools: [{ type: "retrieval" }, { type: "code_interpreter" }],
-      model: "gpt-4-0125-preview",
+      model: MODEL,
     });
     return newAssistant.id;
   }
@@ -221,7 +222,7 @@ export const streamMainResponse = async ({
 }) => {
   const response2 = await openai.chat.completions.create({
     messages,
-    model: "gpt-4-0125-preview",
+    model: MODEL,
     temperature: 0,
     stream: true,
   });

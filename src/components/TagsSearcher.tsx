@@ -250,6 +250,7 @@ const TagsSearcher = ({
       id={id}
       data-testid="tree-view"
       sx={{
+        position: "relative",
         width,
         p: "20px",
         background: theme =>

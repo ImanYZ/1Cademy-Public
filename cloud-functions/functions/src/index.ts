@@ -11,6 +11,7 @@ import { signalFlashcardChanges } from "./helpers";
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
 const { deleteOntologyLock } = require("./actions/deleteOntologyLock");
+const { cleanOpenAiAssistants } = require("./cleanOpenAiAssistants");
 
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
@@ -229,16 +230,16 @@ export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onC
   }
 });
 
-export const onDirectMessagesNotification = functions.firestore
-  .document("/conversationMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
-    try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
-    } catch (error) {
-      console.log("error onDirectMessagesNotification:", error);
-    }
-  });
+// export const onDirectMessagesNotification = functions.firestore
+//   .document("/conversationMessages/{cid}/messages/{id}")
+//   .onCreate(async change => {
+//     try {
+//       const message = change.data();
+//       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
+//     } catch (error) {
+//       console.log("error onDirectMessagesNotification:", error);
+//     }
+//   });
 
 export const onChannelMessagesNotification = functions.firestore
   .document("/channelMessages/{cid}/messages/{id}")
@@ -322,3 +323,9 @@ exports.deleteOntologyLock = functions
   .pubsub.schedule("0 * * * *")
   .timeZone("America/Detroit")
   .onRun(deleteOntologyLock);
+
+exports.cleanOpenAiAssistants = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(cleanOpenAiAssistants);

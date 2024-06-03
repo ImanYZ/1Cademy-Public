@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { AutoFixHigh as AutoFixHighIcon } from "@mui/icons-material";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { useTheme } from "@mui/material";
 import Box from "@mui/material/Box";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
-import { AutoFixHigh as AutoFixHighIcon } from "@mui/icons-material";
-import { sendMessageToChatGPT } from "../../services/openai";
-import LoadingButton from "@mui/lab/LoadingButton";
+import React, { useEffect, useState } from "react";
+
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+
+import { sendMessageToChatGPT } from "../../services/openai";
 
 interface Props {
   theme: any;
@@ -25,6 +28,7 @@ const DraftComp: React.FC<Props> = ({
   sideBarWidth,
   selection,
 }) => {
+  const theme = useTheme();
   const [selectedText, setSelectedText] = useState("");
   const [cursorLocation, setCursorLocation] = useState<number | null>(null);
   const [instructions, setInstructions] = useState("");
@@ -134,8 +138,9 @@ You should always generate only a JSON response with the following structure:
                 outline: "none",
                 padding: "15px",
                 fontFamily: "system-ui",
-                background: DESIGN_SYSTEM_COLORS.notebookG700,
-                color: "white",
+                background:
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
+                color: theme.palette.mode === "dark" ? "white" : "black",
               }}
               value={instructions}
               onChange={e => setInstructions(e.target.value)}

@@ -214,6 +214,8 @@ type NodeProps = {
   editingModeNode: boolean;
   setEditingModeNode: (newValue: boolean) => void;
   displayParentOptions: boolean;
+  findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
+  findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -346,6 +348,8 @@ const Node = ({
   editingModeNode,
   setEditingModeNode,
   displayParentOptions,
+  findDescendantNodes,
+  findAncestorNodes,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -389,14 +393,12 @@ const Node = ({
   });
 
   const [toBeEligible, setToBeEligible] = useState(false);
-
   const disableTitle = disabled && !enableChildElements.includes(`${identifier}-node-title`);
   const disableContent = disabled && !enableChildElements.includes(`${identifier}-node-content`);
   const disableWhy = disabled && !enableChildElements.includes(`${identifier}-node-why`);
   const disableSwitchPreview = disabled;
   const disableProposeButton = disabled && !enableChildElements.includes(`${identifier}-button-propose-proposal`);
   const disableCancelButton = disabled && !enableChildElements.includes(`${identifier}-button-cancel-proposal`);
-
   useEffect(() => {
     setTitleCopy(title);
     setContentCopy(content);
@@ -962,7 +964,7 @@ const Node = ({
       )}
 
       <Box sx={{ float: "right" }}>
-        {!editable && !unaccepted && !simulated && !notebookRef.current.choosingNode && (
+        {!editable && !unaccepted && !simulated && (
           <MemoizedNodeHeader
             id={identifier}
             open={open}
@@ -1411,6 +1413,8 @@ const Node = ({
             setAbleToPropose={setAbleToPropose}
             choosingNode={notebookRef.current.choosingNode}
             onChangeChosenNode={onChangeChosenNodeHandler}
+            findDescendantNodes={findDescendantNodes}
+            findAncestorNodes={findAncestorNodes}
           />
         )}
 
@@ -1578,6 +1582,8 @@ const Node = ({
               setAbleToPropose={setAbleToPropose}
               choosingNode={notebookRef.current.choosingNode}
               onChangeChosenNode={onChangeChosenNodeHandler}
+              findDescendantNodes={findDescendantNodes}
+              findAncestorNodes={findAncestorNodes}
             />
           </div>
         )}

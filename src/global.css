@@ -2989,11 +2989,15 @@ right: 5px; */
 }
 
 .ql-editor span {
-  color: white !important;
+  color: white;
 }
 
 .ql-editor h1 {
   color: white !important;
+}
+
+.ql-editor {
+  white-space: normal !important;
 }
 
 .ql-editor h2 {
@@ -3025,7 +3029,7 @@ polygon {
 }
 
 .LightTheme .ql-editor span {
-  color: black !important;
+  color: black;
 }
 
 .LightTheme .ql-picker-options span {
@@ -3072,4 +3076,7 @@ polygon {
 
 .LightTheme #coauthor-articles-select {
   color: black !important;
+}
+.ql-container {
+  height: unset;
 }

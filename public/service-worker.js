@@ -31,9 +31,11 @@ const start = () => {
     console.log("activatedx");
     event.waitUntil(
       caches.open(CACHE_NAME).then(cache => {
-        cache.delete("/_next/static/chunks/src_workers_MapWorker_ts.js");
+        if (cache) {
+          cache.delete("/_next/static/chunks/src_workers_MapWorker_ts.js");
 
-        return cache.addAll(["/_next/static/chunks/src_workers_MapWorker_ts.js"]);
+          return cache.addAll(["/_next/static/chunks/src_workers_MapWorker_ts.js"]);
+        }
       })
     );
   });
@@ -41,7 +43,14 @@ const start = () => {
   self.addEventListener("fetch", event => {
     event.respondWith(
       caches.match(event.request).then(response => {
-        return response || fetch(event.request);
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).catch(() => {
+          console.error("Fetch failed; returning offline page instead.");
+
+          return new Response(null, { status: 503, statusText: "Service Unavailable" });
+        });
       })
     );
   });

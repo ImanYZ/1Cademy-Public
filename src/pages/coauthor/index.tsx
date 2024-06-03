@@ -133,7 +133,9 @@ const CoAuthor = () => {
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <Typography>{article.title}</Typography>
+                  <Typography sx={{ color: theme => (theme.palette.mode === "dark" ? "inherit" : "black") }}>
+                    {article.title}
+                  </Typography>
                   {article?.user !== user?.uname && <PeopleIcon />}
                 </Box>
                 {article?.user === user?.uname && (

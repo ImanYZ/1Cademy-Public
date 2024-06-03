@@ -41,7 +41,6 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { getMessaging, onMessage } from "firebase/messaging";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -57,6 +56,7 @@ import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
+import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 /* eslint-enable */
@@ -69,7 +69,6 @@ import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
-import { MemoizedBooksSidebar } from "@/components/map/Sidebar/SidebarV2/BooksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -86,6 +85,7 @@ import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { saveMessagingDeviceToken } from "@/lib/firestoreClient/messaging";
 // import { UploadConfirmation, useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
@@ -269,7 +269,6 @@ const Notebook = ({}: NotebookProps) => {
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
   const db = getFirestore();
-  const messaging = getMessaging();
   // const storage = getStorage();
   const theme = useTheme();
   const router = useRouter();
@@ -322,6 +321,7 @@ const Notebook = ({}: NotebookProps) => {
     lastOperation: "CancelProposals",
     contributorsNodeId: null,
     showContributors: false,
+    chatNode: null,
   });
 
   // scale and translation of the viewport over the map for the map interactions module
@@ -498,6 +498,10 @@ const Notebook = ({}: NotebookProps) => {
     },
     [mapInteractionValue.scale, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
+  useEffect(() => {
+    if (!user) return;
+    saveMessagingDeviceToken(user.userId);
+  }, [user]);
 
   //check if the user is instructor
   useEffect(() => {
@@ -1485,7 +1489,6 @@ const Notebook = ({}: NotebookProps) => {
 
     const notificationNumsCol = collection(db, "notificationNums");
     const q = query(notificationNumsCol, where("uname", "==", user.uname));
-
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
       if (!snapshot.docs.length) {
         const notificationNumRef = collection(db, "notificationNums");
@@ -1905,6 +1908,14 @@ const Notebook = ({}: NotebookProps) => {
     async ({ nodeId, title }: OnChangeChosenNode) => {
       if (!notebookRef.current.choosingNode) return;
       if (notebookRef.current.choosingNode.id === nodeId) return;
+      if (notebookRef.current.choosingNode.type === "Node") {
+        nodeBookDispatch({ type: "setChatNode", payload: { id: nodeId, title } });
+        nodeBookDispatch({ type: "setChoosingNode", payload: null });
+        notebookRef.current.choosingNode = null;
+        nodeBookDispatch({ type: "setChosenNode", payload: null });
+        notebookRef.current.chosenNode = null;
+        return;
+      }
       notebookRef.current.chosenNode = { id: nodeId, title };
       nodeBookDispatch({ type: "setChosenNode", payload: { id: nodeId, title } });
       if (notebookRef.current.choosingNode.id === "Tag") return;
@@ -7029,15 +7040,6 @@ const Notebook = ({}: NotebookProps) => {
   }, [db, user]);
 
   useEffect(() => {
-    onMessage(messaging, (message: any) => {
-      console.info("message received", message);
-      setTimeout(() => {
-        new Notification(message.notification.title, { body: message.notification.body });
-      }, 500);
-    });
-  }, [messaging]);
-
-  useEffect(() => {
     const handleUserActivity = () => {
       setLastInteractionDate(new Date(Date.now()));
     };
@@ -7067,6 +7069,42 @@ const Notebook = ({}: NotebookProps) => {
 
     return () => clearInterval(intervalId);
   }, [lastInteractionDate]);
+
+  const findDescendantNodes = useCallback(
+    (selectedNode: string, searchNode: string) => {
+      const node = graph.nodes[selectedNode] as INode;
+      if (node?.children?.some(child => child.node === searchNode)) {
+        return true;
+      }
+
+      for (const child of node?.children || []) {
+        if (findDescendantNodes(child.node, searchNode)) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [graph.nodes]
+  );
+
+  const findAncestorNodes = useCallback(
+    (selectedNode: string, searchNode: string) => {
+      const node = graph.nodes[selectedNode] as INode;
+      if (node?.parents?.some(parent => parent.node === searchNode)) {
+        return true;
+      }
+
+      for (const parent of node?.parents || []) {
+        if (findAncestorNodes(parent.node, searchNode)) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [graph.nodes]
+  );
 
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden", position: "relative" }}>
@@ -7298,142 +7336,144 @@ const Notebook = ({}: NotebookProps) => {
                 newMessages={notificationsMessages.length}
               />
 
-              <MemoizedBookmarksSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "BOOKMARKS_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                bookmark={bookmark}
-              />
-              <MemoizedChatSidebar
-                user={user}
-                settings={settings}
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "CHAT"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                bookmark={bookmark}
-                nodeBookDispatch={nodeBookDispatch}
-                notebookRef={notebookRef}
-                nodeBookState={nodeBookState}
-                notebooks={notebooks}
-                onChangeNotebook={onChangeNotebook}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                dispatch={dispatch}
-                selectedNotebook={selectedNotebook}
-                onlineUsers={onlineUsers}
-                notifications={notificationsMessages}
-                openUserInfoSidebar={openUserInfoSidebar}
-              />
-              <MemoizedBooksSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
-                open={openSidebar === "BOOK"}
-                onClose={() => onCloseSidebar()}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                proposeNewChild={proposeNewChild}
-                notebookRef={notebookRef}
-                graph={graph}
-              />
+              {openSidebar === "BOOKMARKS_SIDEBAR" && (
+                <MemoizedBookmarksSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  bookmark={bookmark}
+                />
+              )}
+              {openSidebar === "CHAT" && (
+                <MemoizedChatSidebar
+                  user={user}
+                  settings={settings}
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  bookmark={bookmark}
+                  nodeBookDispatch={nodeBookDispatch}
+                  notebookRef={notebookRef}
+                  nodeBookState={nodeBookState}
+                  notebooks={notebooks}
+                  onChangeNotebook={onChangeNotebook}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  dispatch={dispatch}
+                  selectedNotebook={selectedNotebook}
+                  onlineUsers={onlineUsers}
+                  notifications={notificationsMessages}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                />
+              )}
+              {openSidebar === "SEARCHER_SIDEBAR" && (
+                <MemoizedSearcherSidebar
+                  notebookRef={notebookRef}
+                  openLinkedNode={openLinkedNode}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  enableElements={[]}
+                  preLoadNodes={onPreLoadNodes}
+                />
+              )}
+              {openSidebar === "NOTIFICATION_SIDEBAR" && (
+                <MemoizedNotificationSidebar
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                />
+              )}
+              {openSidebar === "PENDING_PROPOSALS" && (
+                <MemoizedPendingProposalSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  tagId={user.tagId}
+                  open={true}
+                  onClose={() => onCloseSidebar()}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  // innerWidth={windowWith}
+                />
+              )}
+              {openSidebar === "USER_INFO" && (
+                <MemoizedUserInfoSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  selectedUser={nodeBookState.selectedUser}
+                />
+              )}
 
-              <MemoizedSearcherSidebar
-                notebookRef={notebookRef}
-                openLinkedNode={openLinkedNode}
-                open={openSidebar === "SEARCHER_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                enableElements={[]}
-                preLoadNodes={onPreLoadNodes}
-              />
+              {openSidebar === "PROPOSALS" &&
+                !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "") && (
+                  <MemoizedProposalsSidebar
+                    theme={settings.theme}
+                    open={true}
+                    onClose={() => {
+                      onCloseSidebar();
+                      setEditingModeNode(false);
+                    }}
+                    clearInitialProposal={clearInitialProposal}
+                    initialProposal={nodeBookState.initialProposal}
+                    nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
+                    proposeNodeImprovement={proposeNodeImprovement}
+                    fetchProposals={fetchProposals}
+                    selectedNode={nodeBookState.selectedNode}
+                    rateProposal={rateProposal}
+                    ratingProposale={ratingProposale}
+                    selectProposal={onSelectProposal}
+                    deleteProposal={deleteProposal}
+                    proposeNewChild={proposeNewChild}
+                    openProposal={selectedProposalId}
+                    db={db}
+                    sidebarWidth={sidebarWidth()}
+                    innerHeight={innerHeight}
+                    innerWidth={windowWith}
+                    username={user.uname}
+                  />
+                )}
 
-              <MemoizedNotificationSidebar
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "NOTIFICATION_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-              />
-              <MemoizedPendingProposalSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
-                open={openSidebar === "PENDING_PROPOSALS"}
-                onClose={() => onCloseSidebar()}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                // innerWidth={windowWith}
-              />
-              <MemoizedUserInfoSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "USER_INFO"}
-                onClose={() => setOpenSidebar(null)}
-                selectedUser={nodeBookState.selectedUser}
-              />
-
-              <MemoizedProposalsSidebar
-                theme={settings.theme}
-                open={
-                  openSidebar === "PROPOSALS" &&
-                  !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "")
-                }
-                onClose={() => onCloseSidebar()}
-                clearInitialProposal={clearInitialProposal}
-                initialProposal={nodeBookState.initialProposal}
-                nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
-                proposeNodeImprovement={proposeNodeImprovement}
-                fetchProposals={fetchProposals}
-                selectedNode={nodeBookState.selectedNode}
-                rateProposal={rateProposal}
-                ratingProposale={ratingProposale}
-                selectProposal={onSelectProposal}
-                deleteProposal={deleteProposal}
-                proposeNewChild={proposeNewChild}
-                openProposal={selectedProposalId}
-                db={db}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                username={user.uname}
-              />
-
-              <MemoizedUserSettingsSidebar
-                notebookRef={notebookRef}
-                openLinkedNode={openLinkedNode}
-                theme={settings.theme}
-                open={openSidebar === "USER_SETTINGS"}
-                onClose={() => setOpenSidebar(null)}
-                dispatch={dispatch}
-                nodeBookDispatch={nodeBookDispatch}
-                nodeBookState={nodeBookState}
-                userReputation={reputation}
-                user={user}
-                scrollToNode={scrollToNode}
-                settings={settings}
-                selectedNotebookId={selectedNotebookId}
-                onChangeNotebook={onChangeNotebook}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                notebookOwner={selectedNotebook?.owner ?? ""}
-              />
-              {nodeBookState.selectedNode && (
+              {openSidebar === "USER_SETTINGS" && (
+                <MemoizedUserSettingsSidebar
+                  notebookRef={notebookRef}
+                  openLinkedNode={openLinkedNode}
+                  theme={settings.theme}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  dispatch={dispatch}
+                  nodeBookDispatch={nodeBookDispatch}
+                  nodeBookState={nodeBookState}
+                  userReputation={reputation}
+                  user={user}
+                  scrollToNode={scrollToNode}
+                  settings={settings}
+                  selectedNotebookId={selectedNotebookId}
+                  onChangeNotebook={onChangeNotebook}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  notebookOwner={selectedNotebook?.owner ?? ""}
+                />
+              )}
+              {nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
                 <CitationsSidebar
-                  open={openSidebar === "CITATIONS"}
+                  open={true}
                   onClose={() => setOpenSidebar(null)}
                   openLinkedNode={openLinkedNode}
                   identifier={nodeBookState.selectedNode}
@@ -7443,52 +7483,60 @@ const Notebook = ({}: NotebookProps) => {
                 />
               )}
 
-              <ReferencesSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Reference"}
-                username={user.uname}
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-              />
+              {nodeBookState.choosingNode?.type === "Reference" && (
+                <ReferencesSidebarMemoized
+                  open={true}
+                  username={user.uname}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                />
+              )}
 
-              <TagsSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Tag"}
-                username={user.uname}
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-                notebookRef={notebookRef}
-              />
-              <ParentsSidebarMemoized
-                title={
-                  nodeBookState.choosingNode?.type === "Parent"
-                    ? "Parents to Link"
-                    : nodeBookState.choosingNode?.type === "Child"
-                    ? "Children to Link"
-                    : "Nodes to Improve"
-                }
-                open={
-                  nodeBookState.choosingNode?.type === "Parent" ||
-                  nodeBookState.choosingNode?.type === "Child" ||
-                  nodeBookState.choosingNode?.type === "Improvement"
-                }
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-                setQueryParentChildren={setQueryParentChildren}
-                queryParentChildren={queryParentChildren}
-                username={""}
-              />
+              {nodeBookState.choosingNode?.type === "Tag" && (
+                <TagsSidebarMemoized
+                  open={true}
+                  username={user.uname}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                  notebookRef={notebookRef}
+                />
+              )}
+              {(nodeBookState.choosingNode?.type === "Parent" ||
+                nodeBookState.choosingNode?.type === "Child" ||
+                nodeBookState.choosingNode?.type === "Node" ||
+                nodeBookState.choosingNode?.type === "Improvement") && (
+                <ParentsSidebarMemoized
+                  notebookRef={notebookRef}
+                  title={
+                    nodeBookState.choosingNode?.type === "Parent"
+                      ? "Parents to Link"
+                      : nodeBookState.choosingNode?.type === "Child"
+                      ? "Children to Link"
+                      : "Nodes to Improve"
+                  }
+                  open={true}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                  setQueryParentChildren={setQueryParentChildren}
+                  queryParentChildren={queryParentChildren}
+                  username={""}
+                  findAncestorNodes={findAncestorNodes}
+                  findDescendantNodes={findDescendantNodes}
+                />
+              )}
             </Box>
           )}
 
@@ -7828,6 +7876,8 @@ const Notebook = ({}: NotebookProps) => {
                   editingModeNode={editingModeNode}
                   setEditingModeNode={setEditingModeNode}
                   displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
+                  findDescendantNodes={findDescendantNodes}
+                  findAncestorNodes={findAncestorNodes}
                 />
               </MapInteractionCSS>
 
@@ -7898,19 +7948,21 @@ const Notebook = ({}: NotebookProps) => {
             </Box>
           )}
 
-          <MemoizedTutorialTableOfContent
-            open={openProgressBar}
-            reloadPermanentGraph={revertNodesOnGraph}
-            handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={tutorialGroup}
-            userTutorialState={userTutorial}
-            onCancelTutorial={onCancelTutorial}
-            onForceTutorial={tutorialKey => {
-              setForcedTutorial(tutorialKey);
-              tutorialStateWasSetUpRef.current = false;
-            }}
-            tutorialProgress={tutorialProgress}
-          />
+          {openProgressBar && (
+            <MemoizedTutorialTableOfContent
+              open={openProgressBar}
+              reloadPermanentGraph={revertNodesOnGraph}
+              handleCloseProgressBar={onCloseTableOfContent}
+              groupTutorials={tutorialGroup}
+              userTutorialState={userTutorial}
+              onCancelTutorial={onCancelTutorial}
+              onForceTutorial={tutorialKey => {
+                setForcedTutorial(tutorialKey);
+                tutorialStateWasSetUpRef.current = false;
+              }}
+              tutorialProgress={tutorialProgress}
+            />
+          )}
         </Box>
 
         {/*
