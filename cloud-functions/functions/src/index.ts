@@ -230,16 +230,16 @@ export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onC
   }
 });
 
-export const onDirectMessagesNotification = functions.firestore
-  .document("/conversationMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
-    try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
-    } catch (error) {
-      console.log("error onDirectMessagesNotification:", error);
-    }
-  });
+// export const onDirectMessagesNotification = functions.firestore
+//   .document("/conversationMessages/{cid}/messages/{id}")
+//   .onCreate(async change => {
+//     try {
+//       const message = change.data();
+//       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
+//     } catch (error) {
+//       console.log("error onDirectMessagesNotification:", error);
+//     }
+//   });
 
 export const onChannelMessagesNotification = functions.firestore
   .document("/channelMessages/{cid}/messages/{id}")
