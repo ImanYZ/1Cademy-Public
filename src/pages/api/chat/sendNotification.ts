@@ -49,7 +49,7 @@ const triggerNotifications = async (newMessage: any) => {
           const payload = {
             token,
             notification: {
-              title: `New Message from sender ${sender}`,
+              title: `New Message from ${sender}`,
               body: message,
             },
           };
