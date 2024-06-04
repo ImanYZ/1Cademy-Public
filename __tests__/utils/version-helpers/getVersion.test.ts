@@ -16,9 +16,7 @@ describe("getVersion", () => {
   });
 
   it("should return verision of sepecifc nodeType", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const nodeDoc = await db.collection("nodes").doc(node).get();
     const nodeData = nodeDoc.data();

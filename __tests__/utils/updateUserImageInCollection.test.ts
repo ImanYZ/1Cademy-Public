@@ -1,5 +1,5 @@
 import { db } from "../../src/lib/firestoreServer/admin";
-import { getTypedCollections, NODE_TYPES } from "../../src/utils";
+import { getTypedCollections } from "../../src/utils";
 import { updateUserImageInCollection } from "../../src/utils/updateUserImageInCollection";
 import {
   advertisementVersionCommentsData,
@@ -124,58 +124,56 @@ describe("updateUserImageEverywhere", () => {
   it("Should be able to update user profile image everywhere", async () => {
     const newImageUrl = "https://lh3.googleusercontent.com/ogw/AOh-ky2UJPA2Md8swcNMKdxNTwtmO0iXtjDRFosHZJqqVw=s32-c-mo";
 
-    for (const nodeType of NODE_TYPES) {
-      const { versionsColl, versionsCommentsColl } = getTypedCollections({ nodeType });
-      let writeCounts = 0;
+    const { versionsColl, versionsCommentsColl } = getTypedCollections();
+    let writeCounts = 0;
 
-      let batch = db.batch();
-      [batch, writeCounts] = await updateUserImageInCollection({
-        batch,
-        collQuery: versionsColl,
-        collectionName: versionsColl.id,
-        userAttribute: "proposer",
-        forAdmin: false,
-        uname: username,
-        imageUrl: newImageUrl,
-        fullname: "Alvin Wei",
-        chooseUname: true,
-        currentTimestamp: new Date(),
-        writeCounts,
-      });
+    let batch = db.batch();
+    [batch, writeCounts] = await updateUserImageInCollection({
+      batch,
+      collQuery: versionsColl,
+      collectionName: versionsColl.id,
+      userAttribute: "proposer",
+      forAdmin: false,
+      uname: username,
+      imageUrl: newImageUrl,
+      fullname: "Alvin Wei",
+      chooseUname: true,
+      currentTimestamp: new Date(),
+      writeCounts,
+    });
 
-      [batch, writeCounts] = await updateUserImageInCollection({
-        batch,
-        collQuery: versionsCommentsColl,
-        collectionName: versionsCommentsColl.id,
-        userAttribute: "author",
-        forAdmin: false,
-        uname: username,
-        imageUrl: newImageUrl,
-        fullname: "Alvin Wei",
-        chooseUname: true,
-        currentTimestamp: new Date(),
-        writeCounts,
-      });
-      await batch.commit();
+    [batch, writeCounts] = await updateUserImageInCollection({
+      batch,
+      collQuery: versionsCommentsColl,
+      collectionName: versionsCommentsColl.id,
+      userAttribute: "author",
+      forAdmin: false,
+      uname: username,
+      imageUrl: newImageUrl,
+      fullname: "Alvin Wei",
+      chooseUname: true,
+      currentTimestamp: new Date(),
+      writeCounts,
+    });
+    await batch.commit();
 
-      expect(
-        (
-          await db
-            .collection(versionsColl.id)
-            .where("proposer", "==", username)
-            .where("imageUrl", "==", newImageUrl)
-            .get()
-        ).docs.length
-      ).toBeGreaterThan(0);
-      expect(
-        (
-          await db
-            .collection(versionsCommentsColl.id)
-            .where("author", "==", username)
-            .where("imageUrl", "==", newImageUrl)
-            .get()
-        ).docs.length
-      ).toBeGreaterThan(0);
-    }
+    expect(
+      (
+        await db
+          .collection(versionsColl.id)
+          .where("proposer", "==", username)
+          .where("imageUrl", "==", newImageUrl)
+          .get()
+      ).docs.length
+    ).toBeGreaterThan(0);
+    expect(
+      (
+        await db
+          .collection(versionsCommentsColl.id)
+          .where("author", "==", username)
+          .where("imageUrl", "==", newImageUrl)
+          .get()
+      ).docs.length
+    ).toBeGreaterThan(0);
   });
 });

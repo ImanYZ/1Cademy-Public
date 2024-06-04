@@ -8,7 +8,7 @@ import { INode } from "src/types/INode";
 import { INodeVersion } from "src/types/INodeVersion";
 import { INotification } from "src/types/INotification";
 import { IUser } from "src/types/IUser";
-import { getTypedCollections, NODE_TYPES } from "src/utils";
+import { getTypedCollections } from "src/utils";
 import { createComMonthlyPoints, createComPoints, createComWeeklyPoints } from "testUtils/fakers/com-point";
 import { createCredit } from "testUtils/fakers/credit";
 import { createMessage } from "testUtils/fakers/message";
@@ -214,9 +214,7 @@ describe("POST /api/updateUserImageInDB", () => {
   ];
 
   for (const NODE_TYPE of NODE_TYPES) {
-    const { versionsColl } = getTypedCollections({
-      nodeType: NODE_TYPE,
-    });
+    const { versionsColl } = getTypedCollections();
     collects.push(
       new MockData(
         nodeVersions.filter(
@@ -350,17 +348,12 @@ describe("POST /api/updateUserImageInDB", () => {
     });
 
     it("{nodeType}Versions", async () => {
-      for (const NODE_TYPE of NODE_TYPES) {
-        const { versionsColl } = getTypedCollections({
-          nodeType: NODE_TYPE,
-        });
-        const nodeTypeVersionDocs = (await db.collection(versionsColl.id).where("proposer", "==", users[0].uname).get())
-          .docs;
-        expect(nodeTypeVersionDocs.length).toBeGreaterThan(0);
-        for (const nodeTypeVersionDoc of nodeTypeVersionDocs) {
-          const nodeTypeVersionDocData = nodeTypeVersionDoc.data() as INodeVersion;
-          expect(nodeTypeVersionDocData.imageUrl).toEqual(imageUrl);
-        }
+      const { versionsColl } = getTypedCollections();
+      const nodeTypeVersionDocs = (await versionsColl.where("proposer", "==", users[0].uname).get()).docs;
+      expect(nodeTypeVersionDocs.length).toBeGreaterThan(0);
+      for (const nodeTypeVersionDoc of nodeTypeVersionDocs) {
+        const nodeTypeVersionDocData = nodeTypeVersionDoc.data() as INodeVersion;
+        expect(nodeTypeVersionDocData.imageUrl).toEqual(imageUrl);
       }
     });
 

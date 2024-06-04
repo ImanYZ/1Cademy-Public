@@ -13,9 +13,7 @@ describe("getUserVersion", () => {
   });
 
   it("should return getUserVersion of sepecifc nodeType", async () => {
-    // let { userVersionsColl }: any = getTypedCollections({
-    //   nodeType: "Concept",
-    // });
+    // let { userVersionsColl }: any = getTypedCollections();
 
     let { userVersionData, userVersionRef } = await getUserVersion({
       versionId: "bkZvkniwziO1Ue7K9gtX",

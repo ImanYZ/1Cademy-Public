@@ -16,9 +16,7 @@ describe("getCumulativeProposerVersionRatingsOnNode", () => {
   });
 
   it("should perform action on  getCumulativeProposerVersionRatingsOnNode as a new version", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     let nodeDoc: any = await db.collection("nodes").doc("tKxTypLrxds").get();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();
@@ -41,9 +39,7 @@ describe("getCumulativeProposerVersionRatingsOnNode", () => {
   });
 
   it("should perform action on  getCumulativeProposerVersionRatingsOnNode as an exisiting version", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     let nodeDoc: any = await db.collection("nodes").doc("tKxTypLrxds").get();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();

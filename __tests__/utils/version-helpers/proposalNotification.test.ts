@@ -31,9 +31,7 @@ describe("proposalNotification", () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let batch = db.batch();
     let writeCounts = 0;
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     let nodeDoc: any = await db.collection("nodes").doc("FJfzAX7zbgQS8jU5XcEk").get();
     const versionsDocs: any = await versionsColl.where("node", "==", node).get();
     const versionData = versionsDocs.docs[0].data();

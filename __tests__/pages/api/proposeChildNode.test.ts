@@ -266,10 +266,8 @@ describe("POST /api/proposeChildNode", () => {
 
     it("childType=Question", async () => {
       expect(res._getStatusCode()).toEqual(200);
-      const { versionsColl } = getTypedCollections({
-        nodeType: "Question",
-      });
-      const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+      const { versionsColl } = getTypedCollections();
+      const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
       const questionVersionNode = nodeVersionsResult.docs[0].data() as INodeVersion;
       expect(questionVersionNode.choices?.length).toEqual(1);
     });
@@ -344,10 +342,8 @@ describe("POST /api/proposeChildNode", () => {
       });
 
       it("increase reputation of proposer and add nodeId, accepted=false and childType=payload.nodeType", async () => {
-        const { versionsColl } = getTypedCollections({
-          nodeType: nodes[0].nodeType,
-        });
-        const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+        const { versionsColl } = getTypedCollections();
+        const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
         const nodeVersion = nodeVersionsResult.docs[0].data() as INodeVersion;
         expect(nodeVersion.accepted).toEqual(false);
         expect(nodeVersion.childType).toEqual("Question" as INodeType);
@@ -408,10 +404,8 @@ describe("POST /api/proposeChildNode", () => {
       });
 
       it("create version doc (if approved it would be under new node and if not it would be under parent node with childType)", async () => {
-        const { versionsColl } = getTypedCollections({
-          nodeType: nodes[0].nodeType,
-        });
-        const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+        const { versionsColl } = getTypedCollections();
+        const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
         expect(nodeVersionsResult.docs.length).toEqual(1);
         const nodeVersion = nodeVersionsResult.docs[0]?.data() as INodeVersion;
         newNodeVersionId = nodeVersionsResult.docs[0].id;
@@ -419,11 +413,8 @@ describe("POST /api/proposeChildNode", () => {
       });
 
       it("create user node version for proposer and set correct=true", async () => {
-        const { userVersionsColl } = getTypedCollections({
-          nodeType: nodes[0].nodeType,
-        });
-        const nodeVersionsResult = await db
-          .collection(userVersionsColl.id)
+        const { userVersionsColl } = getTypedCollections();
+        const nodeVersionsResult = await userVersionsColl
           .where("version", "==", newNodeVersionId)
           .where("user", "==", users[0].uname)
           .limit(1)
@@ -521,10 +512,8 @@ describe("POST /api/proposeChildNode", () => {
       let newNodeVersionId: string;
 
       it("increase reputation of proposer and add nodeId (new node id), accepted=true and nodeType=payload.nodeType", async () => {
-        const { versionsColl } = getTypedCollections({
-          nodeType: "Question",
-        });
-        const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+        const { versionsColl } = getTypedCollections();
+        const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
         const nodeVersion = nodeVersionsResult.docs[0].data() as INodeVersion;
         newNodeId = nodeVersion.node;
         newNodeVersionId = nodeVersionsResult.docs[0].id;
@@ -594,19 +583,14 @@ describe("POST /api/proposeChildNode", () => {
       });
 
       it("create version doc (if approved it would be under new node and if not it would be under parent node with childType)", async () => {
-        const { versionsColl } = getTypedCollections({
-          nodeType: "Question",
-        });
-        const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+        const { versionsColl } = getTypedCollections();
+        const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
         expect(nodeVersionsResult.docs.length).toEqual(1);
       });
 
       it("create user node version for proposer and set correct=true", async () => {
-        const { userVersionsColl } = getTypedCollections({
-          nodeType: "Question",
-        });
-        const nodeVersionsResult = await db
-          .collection(userVersionsColl.id)
+        const { userVersionsColl } = getTypedCollections();
+        const nodeVersionsResult = await userVersionsColl
           .where("version", "==", newNodeVersionId)
           .where("user", "==", users[0].uname)
           .limit(1)

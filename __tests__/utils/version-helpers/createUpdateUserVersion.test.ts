@@ -20,9 +20,7 @@ describe("createUpdateUserVersion", () => {
   it("should perform createUpdateUserVersion action sepecifc nodeType", async () => {
     let batch = db.batch();
     let writeCounts = 0;
-    let { userVersionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { userVersionsColl }: any = getTypedCollections();
     const versionsRef = await userVersionsColl.doc("ehViCqDju0mysa6kgwD1");
     const versionsData = await versionsRef.get();
     let data = versionsData.data();

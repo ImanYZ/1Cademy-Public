@@ -25,9 +25,7 @@ describe("addToPendingPropsNumsExcludingVoters", () => {
   });
 
   it("should perform action on  addToPendingPropsNumsExcludingVoters", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     let batch = db.batch();
     let writeCounts = 0;
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
@@ -38,7 +36,10 @@ describe("addToPendingPropsNumsExcludingVoters", () => {
       tagIds: versionDoc.data().tagIds,
       value: 1,
       writeCounts,
+      t: null,
+      tWriteOperations: [],
     });
+
     await commitBatch(batch);
     const pendingPropsNumsDocs: any = await db.collection("pendingPropsNums").where("uname", "==", "1man").get();
     expect(writeCounts).toBeGreaterThan(0);

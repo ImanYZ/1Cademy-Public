@@ -985,11 +985,8 @@ describe("POST /api/rateVersion", () => {
       let newNodeVersion: DocumentSnapshot<any>;
 
       it("create version for new node that is accepted", async () => {
-        const newNodeData = newNode.data() as INode;
-        const { versionsColl } = getTypedCollections({
-          nodeType: newNodeData.nodeType,
-        });
-        const newNodeVersions = await db.collection(versionsColl.id).where("node", "==", newNode.id).get();
+        const { versionsColl } = getTypedCollections();
+        const newNodeVersions = await versionsColl.where("node", "==", newNode.id).get();
         expect(newNodeVersions.docs.length).toEqual(1);
         newNodeVersion = newNodeVersions.docs[0];
       });
@@ -1014,12 +1011,8 @@ describe("POST /api/rateVersion", () => {
       });
 
       it("create user version in relative nodeType user version collection", async () => {
-        const newNodeData = newNode.data() as INode;
-        const { userVersionsColl } = getTypedCollections({
-          nodeType: newNodeData.nodeType,
-        });
-        const newUserNodeVersions = await db
-          .collection(userVersionsColl.id)
+        const { userVersionsColl } = getTypedCollections();
+        const newUserNodeVersions = await userVersionsColl
           .where("version", "==", newNodeVersion.id)
           .where("user", "==", users[1].uname)
           .get();
@@ -1042,20 +1035,15 @@ describe("POST /api/rateVersion", () => {
 
       describe("if version is approved and it has childType", () => {
         it("flag version as deleted", async () => {
-          const { versionsColl } = getTypedCollections({
-            nodeType: nodes[1].nodeType,
-          });
-          const versions = await db.collection(versionsColl.id).where("node", "==", nodes[1].documentId).get();
+          const { versionsColl } = getTypedCollections();
+          const versions = await versionsColl.where("node", "==", nodes[1].documentId).get();
           const versionData = versions.docs[0].data() as INodeVersion;
           expect(versionData.deleted).toEqual(true);
         });
 
         it("flag user version as deleted", async () => {
-          const { userVersionsColl } = getTypedCollections({
-            nodeType: nodes[1].nodeType,
-          });
-          const userVersions = await db
-            .collection(userVersionsColl.id)
+          const { userVersionsColl } = getTypedCollections();
+          const userVersions = await userVersionsColl
             .where("version", "==", nodeVersions[1].documentId)
             .where("user", "==", users[1].uname)
             .get();

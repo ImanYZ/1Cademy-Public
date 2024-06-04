@@ -1,69 +1,13 @@
 import { collection, Firestore } from "firebase/firestore";
 
-import { NodeType } from "../../types";
+import { USER_VERSIONS, USER_VERSIONS_COMMENTS, VERSIONS, VERSIONS_COMMENTS } from "./firebase.collections";
 
-export const getTypedCollections = (db: Firestore, nodeType: NodeType) => {
-  let versionsColl;
-  let userVersionsColl;
-  let versionsCommentsColl;
-  let userVersionsCommentsColl;
+export const getCollectionsQuery = (db: Firestore) => {
+  let versionsColl = collection(db, VERSIONS);
+  let userVersionsColl = collection(db, USER_VERSIONS);
+  let versionsCommentsColl = collection(db, VERSIONS_COMMENTS);
+  let userVersionsCommentsColl = collection(db, USER_VERSIONS_COMMENTS);
 
-  if (nodeType === "Concept") {
-    versionsColl = collection(db, "conceptVersions");
-    userVersionsColl = collection(db, "userConceptVersions");
-    versionsCommentsColl = collection(db, "conceptVersionComments");
-    userVersionsCommentsColl = collection(db, "userConceptVersionComments");
-  } else if (nodeType === "Code") {
-    versionsColl = collection(db, "codeVersions");
-    userVersionsColl = collection(db, "userCodeVersions");
-    versionsCommentsColl = collection(db, "codeVersionComments");
-    userVersionsCommentsColl = collection(db, "userCodeVersionComments");
-  } else if (nodeType === "Relation") {
-    versionsColl = collection(db, "relationVersions");
-    userVersionsColl = collection(db, "userRelationVersions");
-    versionsCommentsColl = collection(db, "relationVersionComments");
-    userVersionsCommentsColl = collection(db, "userRelationVersionComments");
-  } else if (nodeType === "Question") {
-    versionsColl = collection(db, "questionVersions");
-    userVersionsColl = collection(db, "userQuestionVersions");
-    versionsCommentsColl = collection(db, "questionVersionComments");
-    userVersionsCommentsColl = collection(db, "userQuestionVersionComments");
-  } else if (nodeType === "Reference") {
-    versionsColl = collection(db, "referenceVersions");
-    userVersionsColl = collection(db, "userReferenceVersions");
-    versionsCommentsColl = collection(db, "referenceVersionComments");
-    userVersionsCommentsColl = collection(db, "userReferenceVersionComments");
-  } else if (nodeType === "Idea") {
-    versionsColl = collection(db, "ideaVersions");
-    userVersionsColl = collection(db, "userIdeaVersions");
-    versionsCommentsColl = collection(db, "ideaVersionComments");
-    userVersionsCommentsColl = collection(db, "userIdeaVersionComments");
-  } else if (nodeType === "Profile") {
-    versionsColl = collection(db, "profileVersions");
-    userVersionsColl = collection(db, "userProfileVersions");
-    versionsCommentsColl = collection(db, "profileVersionComments");
-    userVersionsCommentsColl = collection(db, "userProfileVersionComments");
-  } else if (nodeType === "Sequel") {
-    versionsColl = collection(db, "sequelVersions");
-    userVersionsColl = collection(db, "userSequelVersions");
-    versionsCommentsColl = collection(db, "sequelVersionComments");
-    userVersionsCommentsColl = collection(db, "userSequelVersionComments");
-  } else if (nodeType === "Advertisement") {
-    versionsColl = collection(db, "advertisementVersions");
-    userVersionsColl = collection(db, "userAdvertisementVersions");
-    versionsCommentsColl = collection(db, "advertisementVersionComments");
-    userVersionsCommentsColl = collection(db, "userAdvertisementVersionComments");
-  } else if (nodeType === "News") {
-    versionsColl = collection(db, "newsVersions");
-    userVersionsColl = collection(db, "userNewsVersions");
-    versionsCommentsColl = collection(db, "newsVersionComments");
-    userVersionsCommentsColl = collection(db, "userNewsVersionComments");
-  } else if (nodeType === "Private") {
-    versionsColl = collection(db, "privateVersions");
-    userVersionsColl = collection(db, "userPrivateVersions");
-    versionsCommentsColl = collection(db, "privateVersionComments");
-    userVersionsCommentsColl = collection(db, "userPrivateVersionComments");
-  }
   return {
     versionsColl,
     userVersionsColl,

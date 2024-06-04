@@ -252,10 +252,12 @@ describe("POST /api/proposeChildNode", () => {
     });
 
     it("user nodes should be created for both users", async () => {
-      const { versionsColl } = getTypedCollections({
-        nodeType: "Question",
-      });
-      const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+      const { versionsColl } = getTypedCollections();
+      const nodeVersionsResult = await db
+        .collection(versionsColl.id)
+        .where("nodeType", "==", "Question")
+        .limit(1)
+        .get();
       const nodeVersion = nodeVersionsResult.docs[0].data() as INodeVersion;
       const userNodes = await db
         .collection("userNodes")

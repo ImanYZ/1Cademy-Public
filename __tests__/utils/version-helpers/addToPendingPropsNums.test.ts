@@ -22,9 +22,7 @@ describe("addToPendingPropsNums", () => {
     let batch = db.batch();
     let writeCounts = 0;
     let nodeDoc: any = await db.collection("nodes").doc("VnXTRolBGyHF3q8EvxS3").get();
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     for (let versionDoc of versionsDocs.docs) {
       const versionData = versionDoc.data();

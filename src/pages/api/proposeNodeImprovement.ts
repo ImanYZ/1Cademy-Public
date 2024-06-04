@@ -120,7 +120,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       addedChildren = addedChildren.filter((nodeLink: INodeLink) => currentChildIds.indexOf(nodeLink.node) === -1);
     }
 
-    const { versionsColl, userVersionsColl }: any = getTypedCollections({ nodeType });
+    const { versionsColl, userVersionsColl }: any = getTypedCollections();
 
     // adding missing tags/tagIds
     let tagUpdates = {

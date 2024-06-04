@@ -64,11 +64,9 @@ describe("versionCreateUpdate", () => {
     let batch = db.batch();
     let writeCounts = 0;
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-    let nodeRef: any = await db.collection("nodes").doc("tKxTypLrxds");
+    let nodeRef: any = db.collection("nodes").doc("tKxTypLrxds");
     let nodeDoc: any = await nodeRef.get();
-    let { versionsColl, userVersionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl, userVersionsColl }: any = getTypedCollections();
     const versionsData = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let data = versionsData.data();
     const userVersionsDoc = await userVersionsColl.where("node", "==", data.node).get();
@@ -82,7 +80,7 @@ describe("versionCreateUpdate", () => {
       versionId: versionsData.id,
       versionData: data,
       newVersion: true,
-      childType: false,
+      childType: "",
       voter: userVersionsData.user,
       correct: 1,
       wrong: 0,
@@ -93,6 +91,14 @@ describe("versionCreateUpdate", () => {
       removedChildren: [],
       currentTimestamp,
       writeCounts,
+      versionNodeId: "bkZvknixyiO1Ue7K9htZ",
+      notebookId: "",
+      instantApprove: true,
+      courseExist: false,
+      isInstructor: false,
+      newUpdates: {},
+      t: null,
+      tWriteOperations: [],
     });
     await commitBatch(batch);
     let updatedNodeDoc: any = await await db.collection("nodes").doc("tKxTypLrxds").get();
@@ -106,9 +112,7 @@ describe("versionCreateUpdate", () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let nodeRef: any = db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL");
     let nodeDoc: any = await nodeRef.get();
-    let { versionsColl, userVersionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl, userVersionsColl }: any = getTypedCollections();
     const versionsData = await versionsColl.doc("bkYvkniwziO1Ue6K1gtN").get();
     let data = versionsData.data();
     const userVersionsDoc = await userVersionsColl.where("node", "==", data.node).get();
@@ -122,7 +126,7 @@ describe("versionCreateUpdate", () => {
       versionId: userVersionsData.version,
       versionData: data,
       newVersion: true,
-      childType: false,
+      childType: "",
       voter: "1man",
       correct: 1,
       wrong: 0,
@@ -133,6 +137,14 @@ describe("versionCreateUpdate", () => {
       removedChildren: [],
       currentTimestamp,
       writeCounts,
+      versionNodeId: "bkZvknixyiO1Ue7K9htZ",
+      notebookId: "",
+      instantApprove: true,
+      courseExist: false,
+      isInstructor: false,
+      newUpdates: {},
+      t: null,
+      tWriteOperations: [],
     });
     await commitBatch(batch);
     let updatedNodeDoc: any = await db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL").get();
