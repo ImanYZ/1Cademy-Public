@@ -701,8 +701,6 @@ export const ToolbarSidebar = ({
               }}
               text="Books"
               toolbarIsOpen={displayLargeToolbar}
-              rightOption={<CustomBadge value={newMessages} />}
-              rightFloatingOption={<CustomSmallBadge value={newMessages} />}
             />
 
             {/* dashboard */}

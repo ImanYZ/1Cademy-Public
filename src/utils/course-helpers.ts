@@ -372,8 +372,10 @@ export const isNodePracticePresentable = async ({
     .where("node", "==", nodeId)
     .limit(1)
     .get();
+  console.log(practices.docs.length);
   if (practices.docs.length) {
     const practice = practices.docs[0].data() as IPractice;
+    console.log(practice);
     const nextDate = practice.nextDate as Timestamp;
     if (!practice.lastPresented || (practice.nextDate && moment().isSameOrAfter(nextDate.toDate())) || !practice.q) {
       practice.documentId = practices.docs[0].id;

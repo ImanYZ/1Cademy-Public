@@ -69,6 +69,7 @@ import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar
 // import { Bar } from "@/components/map/Liveliness/Bar";
 import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
+import { MemoizedBooksSidebar } from "@/components/map/Sidebar/SidebarV2/BooksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
@@ -860,6 +861,7 @@ const Notebook = ({}: NotebookProps) => {
       let userNodeData: UserNodeFirestore | null = null;
       const nodeRef = doc(db, "nodes", nodeId);
       const nodeDoc = await getDoc(nodeRef);
+
       const batch = writeBatch(db);
       if (nodeDoc.exists() && user) {
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
@@ -3710,7 +3712,7 @@ const Notebook = ({}: NotebookProps) => {
             delete postData.flashcard;
             const loadingEvent = new CustomEvent("proposed-node-loading");
             window.dispatchEvent(loadingEvent);
-            ProposeNodeImprovement({ postData, flashcard });
+            saveProposeNodeImprovement({ postData, flashcard });
             updatedLinksRef.current = getInitialUpdateLinks();
             notebookRef.current.selectionType = null;
             nodeBookDispatch({ type: "setSelectionType", payload: null });
@@ -3774,7 +3776,7 @@ const Notebook = ({}: NotebookProps) => {
     [db, nodeBookDispatch, revertNodesOnGraph, scrollToNode, user, referenceConfirmation]
   );
 
-  const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
+  const saveProposeNodeImprovement = async ({ postData, flashcard }: any) => {
     const response: any = await Post("/proposeNodeImprovement", postData);
     if (!response) return;
     window.dispatchEvent(
@@ -3791,7 +3793,16 @@ const Notebook = ({}: NotebookProps) => {
   };
 
   const proposeNewChild = useCallback(
-    (event: any, childNodeType: string) => {
+    (
+      event: any,
+      childNodeType: string,
+      title = "",
+      content = "",
+      references = [],
+      referenceIds = [],
+      referenceLabels = [],
+      paragraphsIds = []
+    ) => {
       // TODO: add types ChildNodeType
       if (!user) return;
 
@@ -3841,15 +3852,16 @@ const Notebook = ({}: NotebookProps) => {
             thisNode.tagIds.filter(tagId => tagId === user.tagId).length > 0
               ? thisNode.tagIds
               : [...thisNode.tagIds, user.tagId],
-          title: "",
+          title,
           wrongs: 0,
           corrects: 1,
-          content: "",
+          content,
           nodeImage: "",
           studied: 1,
-          references: [],
-          referenceIds: [],
-          referenceLabels: [],
+          references,
+          referenceIds,
+          referenceLabels,
+          paragraphsIds,
           choices: [],
           editable: true,
           width: NODE_WIDTH,
@@ -7335,7 +7347,25 @@ const Notebook = ({}: NotebookProps) => {
                 toolbarRef={toolbarRef}
                 newMessages={notificationsMessages.length}
               />
-
+              {openSidebar === "BOOK" && (
+                <MemoizedBooksSidebar
+                  theme={settings.theme}
+                  openNodeHandler={openNodeHandler}
+                  username={user.uname}
+                  tagId={user.tagId}
+                  open={openSidebar === "BOOK"}
+                  onClose={() => onCloseSidebar()}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  proposeNewChild={proposeNewChild}
+                  notebookRef={notebookRef}
+                  graph={graph}
+                  proposeNodeImprovement={proposeNodeImprovement}
+                  setAbleToPropose={setAbleToPropose}
+                  setNodeUpdates={setNodeUpdates}
+                  setGraph={setGraph}
+                />
+              )}
               {openSidebar === "BOOKMARKS_SIDEBAR" && (
                 <MemoizedBookmarksSidebar
                   theme={settings.theme}

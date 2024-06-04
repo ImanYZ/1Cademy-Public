@@ -880,6 +880,7 @@ export const copyNode = (node: FullNodeData): FullNodeData => {
   }
   newNode.referenceLabels = [];
   if (node.referenceLabels) {
+    console.log("node.referenceLabels", node.referenceLabels);
     for (let referenceLabel of node.referenceLabels) {
       // newNode.referenceLabels.push({ ...referenceLabel });
       newNode.referenceLabels.push(referenceLabel);

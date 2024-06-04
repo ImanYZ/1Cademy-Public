@@ -10,7 +10,7 @@ export type ErrorLog = {
 };
 
 export const addClientErrorLog = async (db: Firestore, data: ErrorLog): Promise<void> => {
-  const errorsRef = doc(collection(db, "clientErrors"));
+  const errorsRef = doc(collection(db, "logs"));
   const dataCompleted: ErrorLog = { ...data, level: data.level ?? "ERROR" };
   await setDoc(errorsRef, { ...dataCompleted, createdAt: Timestamp.fromDate(new Date()) });
 };

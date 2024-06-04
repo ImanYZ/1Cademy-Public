@@ -670,7 +670,7 @@ const Node = ({
     setOperation("CancelProposals");
     setEditingModeNode(false);
     window.dispatchEvent(new CustomEvent("next-flashcard"));
-    closeSideBar();
+    // closeSideBar();
   };
 
   const proposeNodeImprovementHandler = useCallback(

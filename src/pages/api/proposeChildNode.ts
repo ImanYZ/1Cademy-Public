@@ -47,6 +47,7 @@ export type IProposeChildNodePayload = {
     referenceIds: string[];
     references: string[];
     referenceLabels: string[];
+    paragraphsIds: string[][];
     summary: string;
     subType?: string | null; // not implemented yet
     tagIds: string[];
@@ -132,6 +133,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       referenceIds: req.body.data.referenceIds,
       references: req.body.data.references,
       referenceLabels: req.body.data.referenceLabels,
+      paragraphsIds: req.body.data.paragraphsIds,
       summary: req.body.data.summary,
       newChild: true,
       subType: req.body.data.subType,
@@ -248,6 +250,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         referenceIds: req.body.data.referenceIds,
         references: req.body.data.references,
         referenceLabels: req.body.data.referenceLabels,
+        paragraphsIds: req.body.data.paragraphsIds,
         studied: 1,
         tagIds: tagUpdates.tagIds,
         tags: tagUpdates.tags,

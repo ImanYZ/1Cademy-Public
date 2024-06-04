@@ -2,7 +2,7 @@ import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
-const MODEL = "gpt-4-turbo-preview";
+
 const extractJSON = (text: string, regex = false) => {
   try {
     const start = text.indexOf("{");
@@ -77,7 +77,7 @@ const generateProposalsJSON = async (
     prompt += evalObj.reasoning;
   }
 
-  const response: string = await sendGPTPromptJSON(MODEL, [
+  const response: string = await sendGPTPromptJSON([
     {
       content: prompt,
       role: "user",
@@ -91,20 +91,26 @@ const generateProposalsJSON = async (
     return await generateProposalsJSON(originalPrompt, paragraphs, proposalsJSONString, evalObj);
   }
 };
+
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { paragraphs } = req.body;
+    console.log("paragraphs", paragraphs);
     const nodeDocs = await db
       .collection("nodes")
       .where("nodeType", "in", ["Concept", "Relation"])
       .where("tags", "array-contains-any", ["Economy", "Economics"])
       .where("deleted", "==", false)
       .get();
+    if (nodeDocs.docs.length <= 0) {
+      throw new Error("No nodes in this tag");
+    }
     const nodesArray = [];
+    const nodesHashMap: { [key: string]: any } = {};
     for (let nodeDoc of nodeDocs.docs) {
       const nodeData = nodeDoc.data();
       if (!nodeData.tags.includes("Cryptoeconomics") && !nodeData.title.includes("References")) {
-        nodesArray.push({
+        const nodeDetails = {
           id: nodeDoc.id,
           title: nodeData.title,
           content: nodeData.content,
@@ -117,9 +123,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
             node: parent.node,
             title: parent.title,
           })),
-        });
+        };
+        nodesArray.push(nodeDetails);
+        nodesHashMap[nodeDoc.id] = nodeDetails;
       }
     }
+    console.log("nodesArray", nodesArray);
+
     let originalPrompt = "'''\n";
     originalPrompt += "1Cademy is a knowledge graph with the following characteristics:\n";
     originalPrompt += "- Each node represents a unique piece of knowledge.\n";
@@ -164,13 +174,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     //   "- tags: an array of node titles tagged on this node corresponding to tagIds\n";
     originalPrompt += "The JSON array is as follows:\n";
     originalPrompt += JSON.stringify(nodesArray, null, 2);
-    const proposals = await generateProposalsJSON(
+    const response = await generateProposalsJSON(
       originalPrompt,
       paragraphs.map((p: { text: string; ids: string[] }) => p.text)
     );
+    //add the type of the nodes to the children (added ones only) and to the parents (added ones only)
+    response.child_nodes = response.child_nodes.filter((newChild: any) => newChild.parents.length > 0);
+    for (let improvement of response.improvements) {
+      for (let child of improvement.addedChildren || []) {
+        child.type = nodesHashMap[child.node].nodeType;
+      }
+      for (let child of improvement.addedParents || []) {
+        child.type = nodesHashMap[child.node].nodeType;
+      }
+    }
     console.log(paragraphs.map((p: { text: string; ids: string[] }) => p.text));
-    console.log(proposals);
-    return res.status(200).json(proposals);
+
+    console.log(JSON.stringify(response));
+    return res.status(200).json(response);
   } catch (error) {}
 }
 export default fbAuth(handler);
