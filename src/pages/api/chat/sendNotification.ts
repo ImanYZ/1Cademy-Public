@@ -2,6 +2,7 @@ import { admin, db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next/types";
 
 import fbAuth from "src/middlewares/fbAuth";
+import { IUser } from "src/types/IUser";
 
 const triggerNotifications = async (newMessage: any) => {
   try {
@@ -33,8 +34,11 @@ const triggerNotifications = async (newMessage: any) => {
     console.log(fcmTokensHash);
     if (channelData) {
       console.log(channelData?.members);
-      const _member = channelData.members.filter((m: string) => m !== sender);
-      for (let member of _member) {
+      const userDocs = await db.collection("users").where("uname", "==", newMessage.sender).get();
+      const userDoc = userDocs.docs[0];
+      const userData = userDoc.data() as IUser;
+      const members = channelData.members.filter((m: string) => m !== sender);
+      for (let member of members) {
         const newNotification = {
           ...newMessage,
           roomType,
@@ -42,15 +46,19 @@ const triggerNotifications = async (newMessage: any) => {
           seen: false,
           notify: member,
           notificationType: "chat",
+          proposer: member,
         };
+
         const notificationRef = db.collection("notifications").doc();
         try {
           const token = fcmTokensHash[channelData.membersInfo[member].uid];
           const payload = {
             token,
             notification: {
-              title: `New Message from ${sender}`,
-              body: message,
+              title: `New message from ${
+                userData?.chooseUname ? newMessage.sender : userData.fName + " " + userData.lName
+              }`,
+              body: newMessage.message,
             },
           };
           console.log(admin.messaging());

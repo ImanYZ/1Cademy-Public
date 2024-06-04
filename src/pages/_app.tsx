@@ -61,6 +61,10 @@ const App = (props: AppPropsWithLayout) => {
       //   .catch(function (err) {
       //     console.error("Service worker registration failed, error:", err);
       //   });
+
+      navigator.serviceWorker.register("../../../firebase-messaging-sw.js").catch(err => {
+        console.error("Service Worker registration failed:", err);
+      });
     }
   }, []);
 

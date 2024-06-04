@@ -434,6 +434,7 @@ export type User = {
   livelinessBar?: LivelinessBarType;
   scaleThreshold?: number;
   ontologyPath?: string[];
+  notificationSetting: { [key: string]: boolean };
 };
 
 export type UserSettings = {

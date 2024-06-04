@@ -7,6 +7,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import VpnKeyRoundedIcon from "@mui/icons-material/VpnKeyRounded";
 import {
@@ -24,6 +25,12 @@ import {
   Switch,
   SxProps,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tabs,
   TextField,
   Theme,
@@ -157,7 +164,60 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
       // },
     ],
   },
+  { type: "Notification settings", icon: <NotificationsIcon /> },
 ];
+
+const NOTIFICATION_OPTIONS: { [key: string]: { label: string; inApp: boolean; email: boolean } } = {
+  direct_chat: {
+    label: "Direct chat message to the user",
+    inApp: true,
+    email: true,
+  },
+  mention: {
+    label: "Mention of the user anywhere in the chatroom (including mentions of the user in announcements)",
+    inApp: true,
+    email: true,
+  },
+  reply_user: { label: "Reply to the user’s message", inApp: true, email: true },
+  community_announcement: {
+    label: "Community announcement (only for the communities that the user is a member of)",
+    inApp: true,
+    email: true,
+  },
+
+  community_specific: {
+    label: "Community-specific public messages (only for the communities that the user is a member of)",
+    inApp: true,
+    email: true,
+  },
+  improvement_proposal: {
+    label: "Improvement proposal on a node that the user had previously submitted a proposal on",
+    inApp: true,
+    email: true,
+  },
+  child_proposal: {
+    label: "Child proposal on a node that the user had previously submitted a proposal on",
+    inApp: true,
+    email: true,
+  },
+  upvote_node: {
+    label: "Upvote on a node that the user had previously submitted a proposal on",
+    inApp: true,
+    email: true,
+  },
+  upvote_undo: {
+    label: "Undo of Upvote on a node that the user had previously submitted a proposal on",
+    inApp: true,
+    email: true,
+  },
+  downvote_undo: {
+    label: "Undo of Downvote on a node that the user had previously submitted a proposal on",
+    inApp: true,
+    email: true,
+  },
+  approval: { label: "Approval of the user’s pending proposal", inApp: true, email: true },
+  upvote_pending_proposals: { label: "Upvote on the user’s pending proposal", inApp: true, email: true },
+};
 
 const MARKS = [{ value: 0 }, { value: 25 }, { value: 50 }, { value: 75 }, { value: 100 }];
 
@@ -605,6 +665,7 @@ const UserSettigsSidebar = ({
           | "showClusterOptions"
           | "showClusters"
           | "scaleThreshold"
+          | "notificationSettings"
       ) =>
       async (newValue: any) => {
         if (!user) return;
@@ -665,6 +726,9 @@ const UserSettigsSidebar = ({
             break;
           case "showClusters":
             userLogCollection = "userShowClustersLog";
+            break;
+          case "notificationSettings":
+            userLogCollection = "notificationSettingsLog";
             break;
           default:
           // code block
@@ -923,6 +987,10 @@ const UserSettigsSidebar = ({
     },
     [changeAttr, dispatch, user]
   );
+
+  // const handleSwitchChange = (type: string, field: string) => {
+  //   //changeAttr("foundFrom")(event.target.value);
+  // };
 
   const newTabsItems: UserSettingsTabs[] = useMemo(() => {
     return [
@@ -1545,6 +1613,51 @@ const UserSettigsSidebar = ({
                   </Box>
                 </TabPanel>
               )}
+            </TabPanel>
+            <TabPanel value={settingsValue} index={4}>
+              <ArrowBackButton text={ACCOUNT_OPTIONS[4].type} backwardsHandler={handleSettingsValue} />
+              <Box component={"section"} p={"24px 20px"}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell></TableCell>
+                        <TableCell align="center">
+                          <Typography sx={{ fontSize: "15px" }} variant="h6">
+                            In-App
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography sx={{ fontSize: "15px" }} variant="h6">
+                            Email
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Object.keys(NOTIFICATION_OPTIONS).map((notification, index) => (
+                        <TableRow key={index}>
+                          <TableCell sx={{ fontSize: "13px" }} component="th" scope="row">
+                            {NOTIFICATION_OPTIONS[notification].label}
+                          </TableCell>
+                          <TableCell align="center">
+                            <Switch
+                              checked={NOTIFICATION_OPTIONS[notification].inApp}
+                              //onChange={() => handleSwitchChange(notification, "inApp")}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Switch
+                              checked={NOTIFICATION_OPTIONS[notification].email}
+                              //onChange={() => handleSwitchChange(notification, "email")}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
             </TabPanel>
           </Box>
         ),

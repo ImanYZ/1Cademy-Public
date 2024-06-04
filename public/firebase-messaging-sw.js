@@ -1,24 +1,18 @@
 importScripts("https://www.gstatic.com/firebasejs/8.2.0/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/8.2.0/firebase-messaging.js");
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBh12u1NPq2__vRScwn6oeqnWerjGm4ZEg",
-  authDomain: "onecademy-1.firebaseapp.com",
-  databaseURL: "https://onecademy-1.firebaseio.com",
-  projectId: "onecademy-1",
-  storageBucket: "onecademy-1.appspot.com",
-  messagingSenderId: "731671946677",
-  appId: "1:731671946677:web:75dc8935cee89bd4",
+const defaultConfig = {
+  apiKey: "AIzaSyAyfoXvWQIsK1_BTzoTaPMPnBhjr6ZtZpY",
+  projectId: "onecademy-dev",
+  messagingSenderId: "735079871954",
+  appId: "1:735079871954:web:d7de111435f188126e840b",
 };
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(defaultConfig);
 
-// Retrieve firebase messaging
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(payload => {
-  console.log("Received background message ", payload);
-
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
