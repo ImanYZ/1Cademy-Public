@@ -1767,8 +1767,9 @@ const NodeFooter = ({
         {choosingNode &&
           choosingNode?.type &&
           choosingNode?.id !== identifier &&
-          !findDescendantNodes(choosingNode?.id, identifier) &&
-          !findAncestorNodes(choosingNode?.id, identifier) && (
+          (choosingNode?.type === "Child" || choosingNode?.type === "Parent"
+            ? !findDescendantNodes(choosingNode?.id, identifier) && !findAncestorNodes(choosingNode?.id, identifier)
+            : true) && (
             <Button
               variant="contained"
               onClick={onChangeChosenNode}
