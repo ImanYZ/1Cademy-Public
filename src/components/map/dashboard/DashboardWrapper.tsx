@@ -53,6 +53,7 @@ type DashboardWrapperProps = {
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
   setUserIsAnsweringPractice: (newValue: { result: boolean }) => void;
   sx?: SxProps<Theme>;
+  confirmIt: any;
 };
 
 export type DashboardWrapperRef = PracticeToolRef;
@@ -72,6 +73,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     setStartPractice,
     setDisplayRightSidebar,
     setUserIsAnsweringPractice,
+    confirmIt,
   } = props;
   const db = getFirestore();
 
@@ -312,7 +314,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
           // border: "solid 2px royalBlue",
           overflowY: "auto",
           overflowX: "hidden",
-          p: "40px 32px",
+          p: selectToolbarView === "SETTINGS" ? "" : "40px 32px",
+          px: "40px",
         }}
       >
         {isLoading && (
@@ -342,7 +345,9 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 setUserIsAnsweringPractice={setUserIsAnsweringPractice}
               />
             )}
-            {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
+            {selectToolbarView === "SETTINGS" && (
+              <DashboardSettings currentSemester={currentSemester} confirmIt={confirmIt} />
+            )}
             {selectToolbarView === "STUDENTS" && (
               <DashboardStudents currentSemester={currentSemester} onSelectUserHandler={onSelectUserHandler} />
             )}
@@ -359,8 +364,12 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
 
 DashboardWrapper.displayName = "DashboardWrapper";
 
-export const getCourseTitleFromSemester = (semester: ISemester) => {
-  return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
+export const getCourseTitleFromSemester = (semester: ISemester | null) => {
+  if (!semester) {
+    return "";
+  } else {
+    return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
+  }
 };
 
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {
