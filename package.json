@@ -83,6 +83,7 @@
     "rehype-katex": "^6.0.2",
     "rehype-raw": "^7.0.0",
     "remark": "^14.0.2",
+    "remark-gfm": "^4.0.0",
     "remark-html": "^15.0.1",
     "remark-math": "^5.1.1",
     "rive-react": "github:elVengador/rive-react#tmp",
