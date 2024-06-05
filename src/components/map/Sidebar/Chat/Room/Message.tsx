@@ -87,6 +87,7 @@ export const Message = ({
   const [replyOnMessage, setReplyOnMessage] = useState<IChannelMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
   const [isDeleting, setIsDeleting] = useState<IChannelMessage | null>(null);
+  const messageRefs = useRef<any>({});
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -317,8 +318,9 @@ export const Message = ({
     ) => {
       try {
         setReplyOnMessage(null);
+        const replyId = newId(db);
         const reply = {
-          id: newId(db),
+          id: replyId,
           parentMessage: curMessage?.id,
           pinned: false,
           read_by: [],
@@ -335,11 +337,13 @@ export const Message = ({
           channelId: selectedChannel?.id,
           important,
         };
+
         setMessages((prevMessages: any) => {
           const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage?.id);
           prevMessages[messageIdx].replies.push(reply);
           return prevMessages;
         });
+        scrollToMessage(curMessage?.id || "");
         await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
       } catch (error) {
         console.error(error);
@@ -385,7 +389,7 @@ export const Message = ({
           // });
           await setDoc(messageRef, newMessage);
 
-          //scrollToBottom();
+          scrollToBottom();
           await Post("/chat/sendNotification", {
             newMessage,
             roomType,
@@ -397,6 +401,17 @@ export const Message = ({
     },
     [messages, editingMessage, replyOnMessage]
   );
+
+  const scrollToMessage = (id: string) => {
+    if (messageRefs.current[id]) {
+      setTimeout(() => {
+        messageRefs.current[id].scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }, 100);
+    }
+  };
 
   if (!selectedChannel) return <></>;
 
@@ -472,6 +487,7 @@ export const Message = ({
                     {roomType === "news" && (
                       <NewsCard
                         notebookRef={notebookRef}
+                        messageRefs={messageRefs}
                         nodeBookDispatch={nodeBookDispatch}
                         db={db}
                         user={user}
@@ -502,6 +518,7 @@ export const Message = ({
                           <NodeLink
                             db={db}
                             notebookRef={notebookRef}
+                            messageRefs={messageRefs}
                             nodeBookDispatch={nodeBookDispatch}
                             replyOnMessage={replyOnMessage}
                             forwardMessage={forwardMessage}
@@ -532,6 +549,7 @@ export const Message = ({
                         ) : (
                           <MessageLeft
                             type={"message"}
+                            messageRefs={messageRefs}
                             notebookRef={notebookRef}
                             nodeBookDispatch={nodeBookDispatch}
                             selectedMessage={selectedMessage}

@@ -16,6 +16,7 @@ import { MessageLeft } from "./MessageLeft";
 
 type NewsCardProps = {
   notebookRef: any;
+  messageRefs: any;
   nodeBookDispatch: any;
   message: IChannelMessage;
   membersInfo: any;
@@ -41,6 +42,7 @@ type NewsCardProps = {
 };
 export const NewsCard = ({
   notebookRef,
+  messageRefs,
   nodeBookDispatch,
   message,
   membersInfo,
@@ -221,6 +223,7 @@ export const NewsCard = ({
             {(message.replies || []).map((reply: any, idx: number) => (
               <MessageLeft
                 notebookRef={notebookRef}
+                messageRefs={messageRefs}
                 nodeBookDispatch={nodeBookDispatch}
                 key={idx}
                 selectedMessage={selectedMessage}

@@ -8020,6 +8020,7 @@ const Notebook = ({}: NotebookProps) => {
             setStartPractice={setStartPractice}
             setDisplayRightSidebar={setDisplaySidebar}
             setUserIsAnsweringPractice={setUserIsAnsweringPractice}
+            confirmIt={confirmIt}
           />
         )}
 
