@@ -15,6 +15,7 @@ import { MessageLeft } from "./MessageLeft";
 type MessageRightProps = {
   type?: string;
   notebookRef: any;
+  messageRefs: any;
   nodeBookDispatch: any;
   user: any;
   parentMessage?: IChannelMessage;
@@ -52,6 +53,7 @@ type MessageRightProps = {
 };
 export const NodeLink = ({
   db,
+  messageRefs,
   parentMessage,
   user,
   type,
@@ -93,6 +95,7 @@ export const NodeLink = ({
   };
   return (
     <Box
+      ref={el => (messageRefs.current[message?.id || 0] = el)}
       sx={{
         display: "flex",
         justifyContent: "end",
@@ -256,6 +259,7 @@ export const NodeLink = ({
                       db={db}
                       type="reply"
                       notebookRef={notebookRef}
+                      messageRefs={messageRefs}
                       nodeBookDispatch={nodeBookDispatch}
                       replyOnMessage={replyOnMessage}
                       forwardMessage={forwardMessage}
@@ -288,6 +292,7 @@ export const NodeLink = ({
                     <MessageLeft
                       key={idx}
                       type={"reply"}
+                      messageRefs={messageRefs}
                       notebookRef={notebookRef}
                       nodeBookDispatch={nodeBookDispatch}
                       selectedMessage={selectedMessage}
