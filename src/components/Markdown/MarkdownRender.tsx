@@ -8,6 +8,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
 import { containsHTMLTags } from "@/lib/utils/utils";
@@ -19,7 +20,7 @@ type Props = {
 const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inherit" } }) => {
   return (
     <ReactMarkdown
-      remarkPlugins={!containsHTMLTags(text) ? [remarkMath] : []}
+      remarkPlugins={!containsHTMLTags(text) ? [remarkMath, remarkGfm] : []}
       rehypePlugins={!containsHTMLTags(text) ? [rehypeKatex, rehypeRaw as any] : [rehypeRaw as any]}
       className={customClass}
       components={{
