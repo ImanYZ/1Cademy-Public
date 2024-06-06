@@ -150,6 +150,7 @@ describe("POST /api/wrongNode", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[1],
@@ -157,6 +158,7 @@ describe("POST /api/wrongNode", () => {
       proposer: users[1],
       corrects: 0,
       tags: [nodes[0]],
+      nodeType: "Concept",
     }),
   ];
   nodes[1].versions = 1;
@@ -294,7 +296,7 @@ describe("POST /api/wrongNode", () => {
   const creditsCollection = new MockData(credits, "credits");
   const pendingPropNumsCollection = new MockData(pendingPropNums, "pendingPropsNums");
   const userNodesCollection = new MockData(userNodes, "userNodes");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const reputationsCollection = new MockData(reputations, "reputations");
 
   const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -419,7 +421,7 @@ describe("POST /api/wrongNode", () => {
       versionData: nodeVersions[0],
     });
 
-    prevVersionDoc = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
+    prevVersionDoc = await db.collection("versions").where("node", "==", nodes[0].documentId).get();
     req = HttpMock.createRequest({
       method: "POST",
       body: {},
@@ -433,7 +435,7 @@ describe("POST /api/wrongNode", () => {
     nodeDoc = await db.collection("nodes").doc(String(nodes[0].documentId)).get();
     node1Doc = await db.collection("nodes").doc(String(nodes[1].documentId)).get();
     node2Doc = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
-    //versionDoc = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
+    //versionDoc = await db.collection("versions").where("node", "==", nodes[0].documentId).get();
   }, 10000);
 
   afterAll(async () => {

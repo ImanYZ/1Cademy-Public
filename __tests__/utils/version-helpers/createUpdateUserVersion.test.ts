@@ -2,10 +2,10 @@ import { commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { createUpdateUserVersion } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { MockData, userConceptVersionsData } from "../../../testUtils/mockCollections";
+import { MockData, userVersionsData } from "../../../testUtils/mockCollections";
 
 describe("createUpdateUserVersion", () => {
-  const collects = [userConceptVersionsData];
+  const collects = [userVersionsData];
 
   collects.push(new MockData([], "userVersionsLog"));
 
@@ -20,9 +20,7 @@ describe("createUpdateUserVersion", () => {
   it("should perform createUpdateUserVersion action sepecifc nodeType", async () => {
     let batch = db.batch();
     let writeCounts = 0;
-    let { userVersionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { userVersionsColl }: any = getTypedCollections();
     const versionsRef = await userVersionsColl.doc("ehViCqDju0mysa6kgwD1");
     const versionsData = await versionsRef.get();
     let data = versionsData.data();

@@ -255,6 +255,7 @@ describe("UpDownVoteNode", () => {
         accepted: true,
         node: nodes[0],
         proposer: users[0],
+        nodeType: "Concept",
         // corrects: 0
       })
     );
@@ -264,6 +265,7 @@ describe("UpDownVoteNode", () => {
         accepted: true,
         node: nodes[1],
         proposer: users[1],
+        nodeType: "Concept",
         // corrects: 1 // this was required to have correct calculation
       })
     );
@@ -285,7 +287,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -309,7 +311,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,
@@ -700,6 +702,7 @@ describe("UpDownVoteNode", () => {
     // default node version
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[0],
         proposer: users[0],
@@ -709,6 +712,7 @@ describe("UpDownVoteNode", () => {
     // mock node version (user's own first accepted proposal)
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[1],
         proposer: users[1],
@@ -733,7 +737,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -757,7 +761,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,
@@ -1148,6 +1152,7 @@ describe("UpDownVoteNode", () => {
     // default node version
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[0],
         proposer: users[0],
@@ -1157,6 +1162,7 @@ describe("UpDownVoteNode", () => {
     // mock node version (user's own first accepted proposal)
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[1],
         proposer: users[1],
@@ -1182,7 +1188,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -1206,7 +1212,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,
@@ -1597,6 +1603,7 @@ describe("UpDownVoteNode", () => {
     // default node version
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[0],
         proposer: users[0],
@@ -1606,6 +1613,7 @@ describe("UpDownVoteNode", () => {
     // mock node version (user's own first accepted proposal)
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[1],
         proposer: users[1],
@@ -1631,7 +1639,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -1655,7 +1663,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,
@@ -2046,6 +2054,7 @@ describe("UpDownVoteNode", () => {
     // default node version
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[0],
         proposer: users[0],
@@ -2055,6 +2064,7 @@ describe("UpDownVoteNode", () => {
     // mock node version (user's own first accepted proposal)
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[1],
         proposer: users[1],
@@ -2080,7 +2090,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -2104,7 +2114,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,
@@ -2495,6 +2505,7 @@ describe("UpDownVoteNode", () => {
     // default node version
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[0],
         proposer: users[0],
@@ -2504,6 +2515,7 @@ describe("UpDownVoteNode", () => {
     // mock node version (user's own first accepted proposal)
     nodeVersions.push(
       createNodeVersion({
+        nodeType: "Concept",
         accepted: true,
         node: nodes[1],
         proposer: users[1],
@@ -2529,7 +2541,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -2553,7 +2565,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,
@@ -2971,6 +2983,7 @@ describe("UpDownVoteNode", () => {
       // default node version
       nodeVersions.push(
         createNodeVersion({
+          nodeType: "Concept",
           accepted: true,
           node: nodes[0],
           proposer: users[0],
@@ -2980,6 +2993,7 @@ describe("UpDownVoteNode", () => {
       // mock node version (user's own first accepted proposal)
       nodeVersions.push(
         createNodeVersion({
+          nodeType: "Concept",
           accepted: true,
           node: nodes[1],
           proposer: users[1],
@@ -3012,7 +3026,7 @@ describe("UpDownVoteNode", () => {
 
       const usersCollection = new MockData(users, "users");
       const nodesCollection = new MockData(nodes, "nodes");
-      const referenceVersionsCollection = new MockData(nodeVersions, "referenceVersions");
+      const versionsCollection = new MockData(nodeVersions, "versions");
       const userNodesCollection = new MockData(userNodes, "userNodes");
 
       const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -3033,7 +3047,7 @@ describe("UpDownVoteNode", () => {
       const collects = [
         usersCollection,
         nodesCollection,
-        referenceVersionsCollection,
+        versionsCollection,
         userNodesCollection,
         comPointsCollection,
         comMonthlyPointsCollection,
@@ -3316,6 +3330,7 @@ describe("UpDownVoteNode", () => {
       // default node version
       nodeVersions.push(
         createNodeVersion({
+          nodeType: "Concept",
           accepted: true,
           node: nodes[0],
           proposer: users[0],
@@ -3325,6 +3340,7 @@ describe("UpDownVoteNode", () => {
       // mock node version (user's own first accepted proposal)
       nodeVersions.push(
         createNodeVersion({
+          nodeType: "Concept",
           accepted: true,
           node: nodes[1],
           proposer: users[1],
@@ -3357,7 +3373,7 @@ describe("UpDownVoteNode", () => {
 
       const usersCollection = new MockData(users, "users");
       const nodesCollection = new MockData(nodes, "nodes");
-      const referenceVersionsCollection = new MockData(nodeVersions, "referenceVersions");
+      const versionsCollection = new MockData(nodeVersions, "versions");
       const userNodesCollection = new MockData(userNodes, "userNodes");
 
       const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -3392,7 +3408,7 @@ describe("UpDownVoteNode", () => {
       const collects = [
         usersCollection,
         nodesCollection,
-        referenceVersionsCollection,
+        versionsCollection,
         userNodesCollection,
         comPointsCollection,
         comMonthlyPointsCollection,
@@ -3415,6 +3431,7 @@ describe("UpDownVoteNode", () => {
       ];
 
       beforeAll(async () => {
+        await Promise.all(collects.map(collect => collect.clean()));
         await Promise.all(collects.map(collect => collect.populate()));
         await UpDownVoteNode({
           fullname: `${users[0].fName} ${users[0].fName}`,
@@ -3431,6 +3448,7 @@ describe("UpDownVoteNode", () => {
       });
 
       it("update votes data in each user node related to this node", async () => {
+        console.log("==>node1.documentId==>", node1.documentId);
         const userNodeDocs = (await db.collection("userNodes").where("node", "==", node1.documentId).get()).docs;
         for (const userNodeDoc of userNodeDocs) {
           const userNodeData = userNodeDoc.data() as IUserNode;

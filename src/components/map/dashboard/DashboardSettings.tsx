@@ -1,7 +1,7 @@
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { LoadingButton } from "@mui/lab";
-import { Box, Button, DialogActions, DialogContent, DialogContentText, Grid, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
-import Dialog from "@mui/material/Dialog";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
@@ -72,11 +72,11 @@ const initialErrorsState = {
 
 type DashboardSettingsProps = {
   currentSemester: CourseTag | null;
+  confirmIt: any;
 };
 
-export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) => {
+export const DashboardSettings = ({ currentSemester, confirmIt }: DashboardSettingsProps) => {
   const db = getFirestore();
-  const [open, setOpen] = React.useState(false);
   const [loaded, setLoaded] = useState(false);
   const [errorState, setErrorState] = useState(initialErrorsState);
   const [requestLoader, setRequestLoader] = useState(false);
@@ -134,14 +134,6 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
       return () => semesterSnapshot();
     }
   }, [currentSemester, db]);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const inputsHandler = (e: any, type: any, field: any = null) => {
     if (type === "nodeProposals") {
@@ -216,6 +208,26 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
 
   const onSubmitHandler = async () => {
     try {
+      const confirmSubmit = await confirmIt(
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: "10px",
+          }}
+        >
+          <DeleteForeverIcon />
+          <Typography sx={{ fontWeight: "bold" }}>Are you sure you want to save your changes?</Typography>
+        </Box>,
+        "Save changes",
+        "Ignore changes"
+      );
+      if (!confirmSubmit) {
+        return;
+      }
       setRequestLoader(true);
       let chaptersData = chapters.map((x: any) => {
         return {
@@ -376,10 +388,30 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
 
   const onDeleteHandler = async () => {
     try {
-      setOpen(false);
-      setDeleteLoader(true);
-      await Post("/instructor/course/" + currentSemester?.tagId + "/delete", {});
-      setDeleteLoader(false);
+      if (
+        await confirmIt(
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            <DeleteForeverIcon />
+            <Typography sx={{ fontWeight: "bold" }}>Do you want delete this course?</Typography>
+            <Typography>Deleting a course will permanently remove it from 1Cademy.</Typography>
+          </Box>,
+          "Delete Course",
+          "Keep Course"
+        )
+      ) {
+        setDeleteLoader(true);
+        await Post("/instructor/course/" + currentSemester?.tagId + "/delete", {});
+        setDeleteLoader(false);
+      }
     } catch (error: any) {
       setDeleteLoader(false);
     }
@@ -402,7 +434,7 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
   if (!semester) return <Typography>Sorry Semester does not exist</Typography>;
 
   return (
-    <Box sx={{ px: { xs: "10px", md: "20px" }, py: "10px" }}>
+    <Box sx={{ px: { xs: "10px", md: "20px" }, py: "10px", pb: 0 }}>
       <Grid container spacing={5}>
         <Grid item xs={12} md={6}>
           <Chapter
@@ -424,9 +456,23 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
       <Grid container spacing={0} mt={5}>
         <Vote semester={baseSemester} inputsHandler={inputsHandler} switchHandler={switchHandler} />
       </Grid>
-      <Box display="flex" justifyContent="flex-end" alignItems="center" gap="10px" mt={3}>
+      <Box
+        display="flex"
+        justifyContent="flex-end"
+        alignItems="center"
+        gap="10px"
+        mt={3}
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          background: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+          height: "50px",
+          p: "15px",
+        }}
+      >
         <LoadingButton
-          onClick={handleClickOpen}
+          onClick={onDeleteHandler}
           loading={deleteLoader}
           variant="outlined"
           loadingIndicator={
@@ -469,22 +515,6 @@ export const DashboardSettings = ({ currentSemester }: DashboardSettingsProps) =
           Submit
         </LoadingButton>
       </Box>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">Do you want delete this course?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>No</Button>
-          <Button onClick={onDeleteHandler} autoFocus>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

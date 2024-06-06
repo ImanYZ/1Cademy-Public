@@ -2,7 +2,7 @@ import { firstWeekMonthDays } from "../../src/utils/helpers";
 
 describe("getUserNode", () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ now: new Date("2022-09-18").getTime(), doNotFake: ["performance"] });
   });
 
   afterAll(() => {
