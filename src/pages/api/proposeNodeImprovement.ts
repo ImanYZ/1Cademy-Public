@@ -171,6 +171,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       awards: 0,
       deleted: false,
       accepted: false,
+      nodeType,
     };
     if (nodeType === "Question") {
       versionData.choices = choices;

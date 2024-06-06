@@ -2,10 +2,10 @@ import { commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { createUpdateUserVersion } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { MockData, userConceptVersionsData } from "../../../testUtils/mockCollections";
+import { MockData, userVersionsData } from "../../../testUtils/mockCollections";
 
 describe("createUpdateUserVersion", () => {
-  const collects = [userConceptVersionsData];
+  const collects = [userVersionsData];
 
   collects.push(new MockData([], "userVersionsLog"));
 

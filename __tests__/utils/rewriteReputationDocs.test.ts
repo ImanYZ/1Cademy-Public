@@ -2,12 +2,12 @@ import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
 import { getTypedCollections, initializeNewReputationData, rewriteReputationDocs } from "../../src/utils";
 import { firstWeekMonthDays } from "../../src/utils";
 import {
-  conceptVersionsData,
   monthlyReputationsData,
   othersReputationsData,
   othMonReputationsData,
   othWeekReputationsData,
   reputationsData,
+  versionsData,
   weeklyReputationsData,
 } from "../../testUtils/mockCollections";
 
@@ -15,7 +15,7 @@ describe("rewriteReputationDocs", () => {
   let node = "OR8UsmsxmeExHG8ekkIY";
 
   const collects = [
-    conceptVersionsData,
+    versionsData,
     monthlyReputationsData,
     othMonReputationsData,
     othWeekReputationsData,

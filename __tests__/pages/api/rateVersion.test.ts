@@ -101,6 +101,7 @@ describe("POST /api/rateVersion", () => {
         accepted: true,
         proposer: users[0],
         corrects: 1,
+        nodeType: "Concept",
       }),
       // 2nd user's accepted proposal with more rating
       createNodeVersion({
@@ -108,6 +109,7 @@ describe("POST /api/rateVersion", () => {
         accepted: true,
         proposer: users[1],
         corrects: 3,
+        nodeType: "Concept",
       }),
     ];
 
@@ -135,7 +137,7 @@ describe("POST /api/rateVersion", () => {
 
     const usersCollection = new MockData(users, "users");
     const creditsCollection = new MockData(credits, "credits");
-    const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
     const reputationsCollection = new MockData(reputations, "reputations");
     const notificationsCollection = new MockData([], "notifications");
@@ -161,7 +163,7 @@ describe("POST /api/rateVersion", () => {
 
       new MockData([], "notificationNums"),
       new MockData([], "practice"),
-      new MockData([], "userConceptVersions"),
+      new MockData([], "userVersions"),
       new MockData([], "userNodesLog"),
       new MockData([], "userVersionsLog"),
       new MockData([], "tags"),
@@ -371,6 +373,7 @@ describe("POST /api/rateVersion", () => {
           accepted: true,
           proposer: users[0],
           corrects: 1,
+          nodeType: "Concept",
         }),
         // 2nd user's non accepted proposal with more rating
         createNodeVersion({
@@ -381,6 +384,7 @@ describe("POST /api/rateVersion", () => {
           tags: [nodes[0]],
           parents: [nodes[0]],
           children: [nodes[2]],
+          nodeType: "Concept",
         }),
       ];
 
@@ -408,7 +412,7 @@ describe("POST /api/rateVersion", () => {
 
       const usersCollection = new MockData(users, "users");
       const creditsCollection = new MockData(credits, "credits");
-      const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+      const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
       const reputationsCollection = new MockData(reputations, "reputations");
       const notificationsCollection = new MockData([], "notifications");
@@ -448,7 +452,7 @@ describe("POST /api/rateVersion", () => {
 
         new MockData([], "notificationNums"),
         new MockData([], "practice"),
-        new MockData([], "userConceptVersions"),
+        new MockData([], "userVersions"),
         new MockData([], "userNodesLog"),
         new MockData([], "userVersionsLog"),
         new MockData(tags, "tags"),
@@ -713,6 +717,7 @@ describe("POST /api/rateVersion", () => {
           accepted: true,
           proposer: users[0],
           corrects: 1,
+          nodeType: "Concept",
         }),
         // 2nd user's non accepted proposal with more rating
         createNodeVersion({
@@ -724,6 +729,7 @@ describe("POST /api/rateVersion", () => {
           tags: [nodes[0]],
           parents: [nodes[0]],
           children: [nodes[2]],
+          nodeType: "Concept",
         }),
       ];
 
@@ -751,7 +757,7 @@ describe("POST /api/rateVersion", () => {
 
       const usersCollection = new MockData(users, "users");
       const creditsCollection = new MockData(credits, "credits");
-      const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+      const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
       const reputationsCollection = new MockData(reputations, "reputations");
       const notificationsCollection = new MockData([], "notifications");
@@ -806,11 +812,9 @@ describe("POST /api/rateVersion", () => {
 
         new MockData([], "notificationNums"),
         new MockData([], "practice"),
-        new MockData([], "userConceptVersions"),
+        new MockData([], "userVersions"),
         new MockData([], "userNodesLog"),
         new MockData([], "userVersionsLog"),
-        new MockData([], "questionVersions"),
-        new MockData([], "userQuestionVersions"),
         new MockData(
           [
             {
@@ -900,7 +904,7 @@ describe("POST /api/rateVersion", () => {
           "status"
         ),
 
-        new MockData(userVersions, "userConceptVersions"),
+        new MockData(userVersions, "userVersions"),
         new MockData([], "actionTracks"),
       ];
 
@@ -992,22 +996,19 @@ describe("POST /api/rateVersion", () => {
       });
 
       it("old user versions should be deleted", async () => {
-        const userConceptVersions = await db
-          .collection("userConceptVersions")
+        const userVersions = await db
+          .collection("userVersions")
           .where("version", "==", nodeVersions[1].documentId!)
           .get();
-        for (const userConceptVersion of userConceptVersions.docs) {
+        for (const userConceptVersion of userVersions.docs) {
           const userConceptVersionData = userConceptVersion.data() as IUserNodeVersion;
           expect(userConceptVersionData.deleted);
         }
       });
 
       it("old user versions should be copied under new version", async () => {
-        const userQuestionVersions = await db
-          .collection("userQuestionVersions")
-          .where("version", "==", newNodeVersion.id)
-          .get();
-        expect(userQuestionVersions.docs.length).toEqual(2); // voter (proposer of node), previous voter
+        const userVersions = await db.collection("userVersions").where("version", "==", newNodeVersion.id).get();
+        expect(userVersions.docs.length).toEqual(2); // voter (proposer of node), previous voter
       });
 
       it("create user version in relative nodeType user version collection", async () => {

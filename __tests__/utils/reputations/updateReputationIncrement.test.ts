@@ -8,17 +8,17 @@ import {
   comOthWeekPointsData,
   comPointsData,
   comWeeklyPointsData,
-  conceptVersionCommentsData,
-  conceptVersionsData,
   monthlyReputationsData,
   nodesData,
   othersReputationsData,
   othMonReputationsData,
   othWeekReputationsData,
   reputationsData,
-  userConceptVersionCommentsData,
-  userConceptVersionsData,
   usersData,
+  userVersionCommentsData,
+  userVersionsData,
+  versionCommentsData,
+  versionsData,
   weeklyReputationsData,
 } from "../../../testUtils/mockCollections";
 
@@ -38,10 +38,10 @@ describe("updateReputationIncrement", () => {
     othWeekReputationsData,
     usersData,
     nodesData,
-    conceptVersionsData,
-    userConceptVersionsData,
-    conceptVersionCommentsData,
-    userConceptVersionCommentsData,
+    userVersionCommentsData,
+    userVersionsData,
+    versionCommentsData,
+    versionsData,
   ];
 
   beforeEach(async () => {

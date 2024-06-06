@@ -136,6 +136,8 @@ export const getVersion = async ({
   versionRef = versionsColl.doc(versionId);
   versionDoc = t ? await t.get(versionRef) : await versionRef.get();
   const versionData: any = versionDoc.data();
+  console.log("versionData", versionData, versionId);
+
   return { versionData: { ...versionData, id: versionId } as any, versionRef, nodeType: versionData.nodeType };
 };
 
@@ -358,7 +360,7 @@ export const indexNodeChange = async (nodeId: string, nodeTitle: string, actionT
       }
     );
   } catch (e) {
-    console.log(e, "GOOGLE_INDEX_ERROR");
+    // console.log(e, "GOOGLE_INDEX_ERROR");
   }
 };
 

@@ -2,25 +2,20 @@ import { commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { addToPendingPropsNumsExcludingVoters } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import {
-  conceptVersionsData,
-  pendingPropsNumsData,
-  userConceptVersionsData,
-  usersData,
-} from "../../../testUtils/mockCollections";
+import { pendingPropsNumsData, usersData, userVersionsData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("addToPendingPropsNumsExcludingVoters", () => {
   beforeEach(async () => {
     await usersData.populate();
-    await conceptVersionsData.populate();
-    await userConceptVersionsData.populate();
+    await versionsData.populate();
+    await userVersionsData.populate();
     await pendingPropsNumsData.populate();
   });
 
   afterEach(async () => {
     await usersData.clean();
-    await conceptVersionsData.clean();
-    await userConceptVersionsData.clean();
+    await versionsData.clean();
+    await userVersionsData.clean();
     await pendingPropsNumsData.clean();
   });
 

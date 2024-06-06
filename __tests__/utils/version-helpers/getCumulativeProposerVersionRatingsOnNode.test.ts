@@ -2,16 +2,16 @@ import { db } from "@/lib/firestoreServer/admin";
 
 import { getCumulativeProposerVersionRatingsOnNode } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { conceptVersionsData, nodesData } from "../../../testUtils/mockCollections";
+import { nodesData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("getCumulativeProposerVersionRatingsOnNode", () => {
   beforeEach(async () => {
-    await conceptVersionsData.populate();
+    await versionsData.populate();
     await nodesData.populate();
   });
 
   afterEach(async () => {
-    await conceptVersionsData.clean();
+    await versionsData.clean();
     await nodesData.clean();
   });
 

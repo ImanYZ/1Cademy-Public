@@ -1,10 +1,10 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { createPractice } from "../../../src/utils";
 import { MockData } from "../../../testUtils/mockCollections";
-import { conceptVersionsData, nodesData, usersData } from "../../../testUtils/mockCollections";
+import { nodesData, usersData, userVersionsData } from "../../../testUtils/mockCollections";
 
 describe("createPractice", () => {
-  const collects = [conceptVersionsData, nodesData, usersData, new MockData([], "courses")];
+  const collects = [userVersionsData, nodesData, usersData, new MockData([], "courses")];
 
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));

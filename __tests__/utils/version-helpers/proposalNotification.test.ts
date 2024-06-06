@@ -2,17 +2,17 @@ import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { proposalNotification } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
 import {
-  conceptVersionsData,
   nodesData,
   notificationNumsData,
   notificationsData,
   usersData,
+  versionsData,
 } from "../../../testUtils/mockCollections";
 
 describe("proposalNotification", () => {
   let node = "OR8UsmsxmeExHG8ekkIY";
   beforeEach(async () => {
-    await conceptVersionsData.populate();
+    await versionsData.populate();
     await nodesData.populate();
     await usersData.populate();
     await notificationsData.populate();
@@ -20,7 +20,7 @@ describe("proposalNotification", () => {
   });
 
   afterEach(async () => {
-    await conceptVersionsData.clean();
+    await versionsData.clean();
     await nodesData.clean();
     await usersData.clean();
     await notificationsData.clean();

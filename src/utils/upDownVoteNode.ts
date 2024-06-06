@@ -138,13 +138,6 @@ export const UpDownVoteNode = async ({
     deleteNode = true;
   }
 
-  let typedVersionDocuments: {
-    [nodeType: string]: {
-      collectionName: string;
-      docs: QueryDocumentSnapshot<DocumentData>[];
-    };
-  } = {};
-
   //  query versions in order to update the upvotes / downvotes in addition to reputations
   const { versionsColl }: any = getTypedCollections();
   const versionsQuery = versionsColl
@@ -197,6 +190,7 @@ export const UpDownVoteNode = async ({
       maxVersionRating = versionRating;
     }
     //  if proposer not already in the dictionary
+    console.log("changedProposers", changedProposers);
     if (!(versionData.proposer in changedProposers)) {
       //  finding to what extend the upvote or downvote will affect the reputation of the specific proposer
       //  MIN_ACCEPTED_VERSION_POINT_WEIGHT defines the minimum affect a single upvote or downvote will have on a given proposer's reputation
@@ -294,7 +288,7 @@ export const UpDownVoteNode = async ({
 
   const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
   const comReputationUpdates: IComReputationUpdates = {};
-
+  console.log("==>changedProposers==>", changedProposers);
   for (let proposer in changedProposers) {
     // Updating the proposer reputation points.
     [batch, writeCounts] = await updateReputation({

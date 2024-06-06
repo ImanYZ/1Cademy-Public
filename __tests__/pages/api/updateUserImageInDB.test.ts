@@ -8,7 +8,7 @@ import { INode } from "src/types/INode";
 import { INodeVersion } from "src/types/INodeVersion";
 import { INotification } from "src/types/INotification";
 import { IUser } from "src/types/IUser";
-import { getTypedCollections } from "src/utils";
+import { getTypedCollections, NODE_TYPES } from "src/utils";
 import { createComMonthlyPoints, createComPoints, createComWeeklyPoints } from "testUtils/fakers/com-point";
 import { createCredit } from "testUtils/fakers/credit";
 import { createMessage } from "testUtils/fakers/message";
@@ -78,12 +78,14 @@ describe("POST /api/updateUserImageInDB", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[1],
       accepted: true,
       proposer: users[1],
       corrects: 1,
+      nodeType: "Concept",
     }),
   ];
 
@@ -170,6 +172,7 @@ describe("POST /api/updateUserImageInDB", () => {
         proposer: users[0],
         accepted: true,
         corrects: 1,
+        nodeType: NODE_TYPE,
       })
     );
   }
@@ -181,7 +184,7 @@ describe("POST /api/updateUserImageInDB", () => {
   const nodesCollection = new MockData(nodes, "nodes");
   const creditsCollection = new MockData(credits, "credits");
   const userNodesCollection = new MockData(userNodes, "userNodes");
-  // const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  // const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const reputationsCollection = new MockData(reputations, "reputations");
 
   const messagesCollection = new MockData(messages, "messages");

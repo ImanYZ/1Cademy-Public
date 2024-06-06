@@ -78,6 +78,7 @@ describe("POST /api/changeUsername", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
   ];
 
@@ -175,7 +176,7 @@ describe("POST /api/changeUsername", () => {
 
   const usersCollection = new MockData(users, "users");
   const creditsCollection = new MockData(credits, "credits");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
   const reputationsCollection = new MockData(reputations, "reputations");
   const monthlyReputationsCollection = new MockData(monthlyReputations, "monthlyReputations");
@@ -389,6 +390,7 @@ describe("POST /api/changeUsername", () => {
     proposer: users[0],
     tags: [nodes[0]],
     corrects: 1,
+    nodeType: "Concept",
   });
 
   collects.push(new MockData([nodeVersion], versionsColl.id));

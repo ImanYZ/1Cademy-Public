@@ -76,6 +76,7 @@ describe("POST /api/notebooks/assign", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[1],
@@ -83,6 +84,7 @@ describe("POST /api/notebooks/assign", () => {
       proposer: users[1],
       corrects: 0,
       tags: [nodes[0]],
+      nodeType: "Concept",
     }),
   ];
   nodes[1].versions = 1;
@@ -95,7 +97,7 @@ describe("POST /api/notebooks/assign", () => {
   const creditsCollection = new MockData([], "credits");
   const pendingPropNumsCollection = new MockData([], "pendingPropsNums");
   const userNodesCollection = new MockData(userNodes, "userNodes");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const reputationsCollection = new MockData(reputations, "reputations");
   const notebooks = new MockData(
     [

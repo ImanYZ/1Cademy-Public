@@ -1,9 +1,9 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addTagCommunityAndTagsOfTags, getTypedCollections } from "../../../src/utils";
-import { conceptVersionsData, MockData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { MockData, nodesData, tagsData, usersData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("addTagCommunityAndTagsOfTags", () => {
-  const collects = [conceptVersionsData, nodesData, tagsData, usersData];
+  const collects = [versionsData, nodesData, tagsData, usersData];
 
   collects.push(new MockData([], "comMonthlyPoints"));
   collects.push(new MockData([], "comOthMonPoints"));

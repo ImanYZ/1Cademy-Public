@@ -15,15 +15,15 @@ import { admin, commitBatch, db } from "@/lib/firestoreServer/admin";
 import { versionCreateUpdate } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
 import {
-  conceptVersionCommentsData,
-  conceptVersionsData,
   MockData,
   nodesData,
-  userConceptVersionsData,
+  userVersionsData,
+  versionCommentsData,
+  versionsData,
 } from "../../../testUtils/mockCollections";
 
 describe("versionCreateUpdate", () => {
-  const collects = [conceptVersionCommentsData, conceptVersionsData, nodesData, userConceptVersionsData];
+  const collects = [versionCommentsData, versionsData, nodesData, userVersionsData];
 
   collects.push(new MockData([], "comMonthlyPoints"));
   collects.push(new MockData([], "comOthMonPoints"));

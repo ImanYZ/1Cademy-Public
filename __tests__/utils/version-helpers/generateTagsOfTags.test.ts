@@ -1,20 +1,20 @@
 import { db } from "../../../src/lib/firestoreServer/admin";
 import { generateTagsOfTags } from "../../../src/utils";
-import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { nodesData, tagsData, usersData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("generateTagsOfTags", () => {
   beforeEach(async () => {
     await usersData.populate();
     await nodesData.populate();
     await tagsData.populate();
-    await conceptVersionsData.populate();
+    await versionsData.populate();
   });
 
   afterEach(async () => {
     await usersData.clean();
     await nodesData.clean();
     await tagsData.clean();
-    await conceptVersionsData.clean();
+    await versionsData.clean();
   });
 
   it("should perform generateTagsOfTags action on tags collection", async () => {
