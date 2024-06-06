@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Update caniuse-lite and browserslist
-        run: npm update caniuse-lite browserslist
+        run: npm update caniuse-lite browserslist --legacy-peer-deps
       - name: npm install and build
         run: |
           npm install --legacy-peer-deps
