@@ -2,7 +2,7 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -15,6 +15,7 @@ import { MessageInput } from "./MessageInput";
 import { NodeLink } from "./NodeLink";
 type MessageLeftProps = {
   type?: string;
+  messageRefs: any;
   notebookRef: any;
   nodeBookDispatch: any;
   selectedMessage: any;
@@ -47,6 +48,7 @@ type MessageLeftProps = {
 };
 export const MessageLeft = ({
   type,
+  messageRefs,
   notebookRef,
   nodeBookDispatch,
   selectedMessage,
@@ -87,8 +89,15 @@ export const MessageLeft = ({
     setOpenReplies(prev => !prev);
   };
 
+  useEffect(() => {
+    if (!!replyOnMessage && replyOnMessage?.id === message?.id) {
+      setOpenReplies(true);
+    }
+  }, [replyOnMessage]);
+
   return (
     <Box
+      ref={el => (messageRefs.current[message?.id || 0] = el)}
       sx={{
         display: "flex",
         gap: "5px",
@@ -269,6 +278,7 @@ export const MessageLeft = ({
                   <NodeLink
                     db={db}
                     type="reply"
+                    messageRefs={messageRefs}
                     notebookRef={notebookRef}
                     nodeBookDispatch={nodeBookDispatch}
                     replyOnMessage={replyOnMessage}
@@ -302,6 +312,7 @@ export const MessageLeft = ({
                   <MessageLeft
                     key={idx}
                     type={"reply"}
+                    messageRefs={messageRefs}
                     notebookRef={notebookRef}
                     nodeBookDispatch={nodeBookDispatch}
                     selectedMessage={selectedMessage}
@@ -333,29 +344,31 @@ export const MessageLeft = ({
                 )}
               </>
             ))}
-            <Box sx={{ ml: "37px", mt: 2 }}>
-              <MessageInput
-                notebookRef={notebookRef}
-                nodeBookDispatch={nodeBookDispatch}
-                db={db}
-                theme={"Dark"}
-                placeholder={"Type your reply..."}
-                channelUsers={channelUsers}
-                sendMessageType={"reply"}
-                toggleEmojiPicker={toggleEmojiPicker}
-                leading={leading}
-                getMessageRef={getMessageRef}
-                selectedChannel={selectedChannel}
-                replyOnMessage={message}
-                setReplyOnMessage={setReplyOnMessage}
-                user={user}
-                setMessages={setMessages}
-                roomType={roomType}
-                sendMessage={sendMessage}
-                sendReplyOnMessage={sendReplyOnMessage}
-                parentMessage={message}
-              />
-            </Box>
+            {message.replies.length > 0 && (
+              <Box sx={{ ml: "37px", mt: 2 }}>
+                <MessageInput
+                  notebookRef={notebookRef}
+                  nodeBookDispatch={nodeBookDispatch}
+                  db={db}
+                  theme={"Dark"}
+                  placeholder={"Type your reply..."}
+                  channelUsers={channelUsers}
+                  sendMessageType={"reply"}
+                  toggleEmojiPicker={toggleEmojiPicker}
+                  leading={leading}
+                  getMessageRef={getMessageRef}
+                  selectedChannel={selectedChannel}
+                  replyOnMessage={message}
+                  setReplyOnMessage={setReplyOnMessage}
+                  user={user}
+                  setMessages={setMessages}
+                  roomType={roomType}
+                  sendMessage={sendMessage}
+                  sendReplyOnMessage={sendReplyOnMessage}
+                  parentMessage={message}
+                />
+              </Box>
+            )}
           </Box>
         )}
       </Box>

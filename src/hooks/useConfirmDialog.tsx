@@ -42,7 +42,7 @@ const useDialog = () => {
   };
 
   const ConfirmDialog = (
-    <Dialog open={isOpen} onClose={() => closeDialog(false)}>
+    <Dialog open={isOpen} onClose={() => closeDialog(false)} sx={{ zIndex: 10000 }}>
       <DialogContent>
         <DialogContentText>{dialogMessage}</DialogContentText>
         {isPrompt && (

@@ -255,7 +255,7 @@ export const ChatSidebar = ({
   };
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
-    setIsLoadingReaction(message);
+
     if (message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
@@ -274,9 +274,10 @@ export const ChatSidebar = ({
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
     } else {
+      setIsLoadingReaction(message);
       await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
+      setIsLoadingReaction(null);
     }
-    setIsLoadingReaction(null);
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {

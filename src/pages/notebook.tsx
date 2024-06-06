@@ -958,6 +958,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
     setGraph(({ nodes: oldNodes, edges }) => {
+      if (!oldNodes[nodeId]) return { nodes: oldNodes, edges };
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
@@ -8009,6 +8010,7 @@ const Notebook = ({}: NotebookProps) => {
             setStartPractice={setStartPractice}
             setDisplayRightSidebar={setDisplaySidebar}
             setUserIsAnsweringPractice={setUserIsAnsweringPractice}
+            confirmIt={confirmIt}
           />
         )}
 
