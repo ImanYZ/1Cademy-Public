@@ -38,7 +38,7 @@ describe("POST /api/addProposal", () => {
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
 
-  const collects = [usersCollection, nodesCollection, new MockData([], "conceptVersions")];
+  const collects = [usersCollection, nodesCollection, new MockData([], "versions")];
 
   let accessToken: string = "";
   let req: any = {};
@@ -65,7 +65,7 @@ describe("POST /api/addProposal", () => {
 
     res = HttpMock.createResponse();
     await addProposalHandler(req, res as any);
-    let versionDoc = await db.collection("conceptVersions").where("node", "==", nodes[0].documentId).get();
+    let versionDoc = await db.collection("versions").where("node", "==", nodes[0].documentId).get();
     versionData = versionDoc.docs[0].data();
   });
 

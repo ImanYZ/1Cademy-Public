@@ -1,9 +1,9 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { generateTagsData, getTypedCollections } from "../../../src/utils";
-import { conceptVersionsData, MockData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { MockData, nodesData, tagsData, usersData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("generateTagsData", () => {
-  const collects = [usersData, nodesData, tagsData, conceptVersionsData];
+  const collects = [usersData, nodesData, tagsData, versionsData];
 
   collects.push(new MockData([], "comMonthlyPoints"));
   collects.push(new MockData([], "comOthMonPoints"));
@@ -25,7 +25,7 @@ describe("generateTagsData", () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let nodeDoc: any = await db.collection("nodes").doc("9BVhNniLS940DBVqKbFR").get();
     const prevTagDocs: any = await db.collection("tags").where("node", "==", nodeDoc.id).get();
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     let versionData = versionsDocs.docs[0].data();
     const proposer = versionData.proposer;
@@ -56,7 +56,7 @@ describe("generateTagsData", () => {
   it("should perform generateTagsData action without same tagIds on tags collection", async () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let nodeDoc: any = await db.collection("nodes").doc("iUex43wFn3yzFcDbma04").get();
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     let versionData = versionsDocs.docs[0].data();
     const proposer = versionData.proposer;

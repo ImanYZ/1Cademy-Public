@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin";
-import { getTypedCollections, NODE_TYPES, reputationTypes, tagsAndCommPoints } from "../../utils";
+import { getTypedCollections, reputationTypes, tagsAndCommPoints } from "../../utils";
 
 const changeTagTitleInAllDocs = async ({ batch, collName, allDocs, nodeId, newTitle, writeCounts }: any) => {
   let newBatch = batch;
@@ -18,20 +18,17 @@ const changeTagTitleInAllDocs = async ({ batch, collName, allDocs, nodeId, newTi
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const allVersions: any = {};
-    for (let nodeType of NODE_TYPES) {
-      if (!allVersions.nodeType) {
-        allVersions[nodeType] = [];
-      }
-      const { versionsColl }: any = getTypedCollections({ nodeType });
-      const versionsQuery = versionsColl;
-      const versionsDocs = await versionsQuery.get();
-      for (let versionDoc of versionsDocs.docs) {
-        const versionRef = versionsColl.doc(versionDoc.id);
-        const versionData = versionDoc.data();
-        allVersions[nodeType].push({ versionRef, versionData });
-      }
+    const allVersions: any = [];
+
+    const { versionsColl }: any = getTypedCollections();
+    const versionsQuery = versionsColl;
+    const versionsDocs = await versionsQuery.get();
+    for (let versionDoc of versionsDocs.docs) {
+      const versionRef = versionsColl.doc(versionDoc.id);
+      const versionData = versionDoc.data();
+      allVersions.push({ versionRef, versionData });
     }
+
     const nodesDocs = await db.collection("nodes").get();
     const allNodeDocs = nodesDocs.docs;
     const messagesDocs = await db.collection("messages").get();
@@ -187,17 +184,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           });
         }
 
-        for (let nodeType in allVersions) {
-          for (let { versionRef, versionData } of allVersions[nodeType]) {
-            for (let idx = 0; idx < versionData.tagIds.length; idx++) {
-              if (versionData.tagIds[idx] === nodeId && versionData.tags[idx] !== newTitle) {
-                versionData.tags[idx] = newTitle;
-                await versionRef.update({ tags: versionData.tags });
-                [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-              }
+        for (let { versionRef, versionData } of allVersions) {
+          for (let idx = 0; idx < versionData.tagIds.length; idx++) {
+            if (versionData.tagIds[idx] === nodeId && versionData.tags[idx] !== newTitle) {
+              versionData.tags[idx] = newTitle;
+              await versionRef.update({ tags: versionData.tags });
+              [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
             }
           }
-          console.log("Done with version of type " + nodeType);
         }
       }
       if (nodeData.nodeType === "Reference") {

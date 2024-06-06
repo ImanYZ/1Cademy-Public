@@ -1,19 +1,19 @@
 import { commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addToPendingPropsNums } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { conceptVersionsData, nodesData, pendingPropsNumsData, usersData } from "../../../testUtils/mockCollections";
+import { nodesData, pendingPropsNumsData, usersData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("addToPendingPropsNums", () => {
   beforeEach(async () => {
     await nodesData.populate();
-    await conceptVersionsData.populate();
+    await versionsData.populate();
     await pendingPropsNumsData.populate();
     await usersData.populate();
   });
 
   afterEach(async () => {
     await nodesData.clean();
-    await conceptVersionsData.clean();
+    await versionsData.clean();
     await pendingPropsNumsData.clean();
     await usersData.clean();
   });
@@ -22,9 +22,7 @@ describe("addToPendingPropsNums", () => {
     let batch = db.batch();
     let writeCounts = 0;
     let nodeDoc: any = await db.collection("nodes").doc("VnXTRolBGyHF3q8EvxS3").get();
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     for (let versionDoc of versionsDocs.docs) {
       const versionData = versionDoc.data();

@@ -401,12 +401,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    const { versionsColl, userVersionsColl }: any = getTypedCollections({
-      nodeType: newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType,
-    });
+    const { versionsColl, userVersionsColl }: any = getTypedCollections();
     // Now we have all the data we need in newVersion, so we can set the document.
     const versionRef = versionsColl.doc();
-    batch.set(versionRef, newVersion);
+    (newVersion.nodeType = newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType),
+      batch.set(versionRef, newVersion);
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
     const newUserVersion: any = {
