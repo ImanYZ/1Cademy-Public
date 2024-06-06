@@ -1,4 +1,5 @@
 name: Knowledge Testing
+
 on:
   pull_request:
     branches:
@@ -57,6 +58,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Update caniuse-lite and browserslist
+        run: npm update caniuse-lite browserslist
       - name: npm install and build
         run: |
           npm install --legacy-peer-deps
@@ -64,5 +67,7 @@ jobs:
           npm install
           cd ..
           npm run build
+        env:
+          NODE_OPTIONS: "--openssl-legacy-provider"
       - name: Unit tests
-        run: NODE_OPTIONS="--max_old_space_size=8192" npm run test:ci
+        run: NODE_OPTIONS="--max_old_space_size=8192 --openssl-legacy-provider" npm run test:ci
