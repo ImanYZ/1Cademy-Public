@@ -402,12 +402,14 @@ export const ChatSidebar = ({
   const openDMChannel = async (user2: any) => {
     if (!user?.uname || !user2.uname) return;
     const findConversation = await getDocs(
-      query(collection(db, "conversations"), where("members", "==", [user2.uname, user?.uname]))
+      query(collection(db, "conversations"), where("members", "array-contains", user.uname))
     );
-
-    if (findConversation.docs.length > 0) {
-      const conversationData: any = findConversation.docs[0].data();
-      openRoom("direct", { ...conversationData, id: findConversation.docs[0].id });
+    const filteredResults = findConversation.docs.find(
+      doc => doc.data().members.includes(user2.uname) && doc.data().members.length === 2
+    );
+    if (filteredResults) {
+      const conversationData: any = filteredResults.data();
+      openRoom("direct", { ...conversationData, id: filteredResults.id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
       const membersInfo = {
