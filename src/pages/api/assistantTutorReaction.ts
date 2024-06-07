@@ -2,8 +2,8 @@ import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { sendGPTPrompt } from "src/utils/assistant-helpers";
-import { saveLogs } from "./assistantTutor";
 import { streamMainResponse } from "./openAI/helpers";
+import { saveLogs } from "@/lib/firestoreServer/logs";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {

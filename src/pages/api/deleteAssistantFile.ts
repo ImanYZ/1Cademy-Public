@@ -2,8 +2,8 @@ import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import { openai } from "./openAI/helpers";
 import { FieldValue } from "firebase-admin/firestore";
-import { saveLogs } from "./booksAssistant";
 import fbAuth from "src/middlewares/fbAuth";
+import { saveLogs } from "@/lib/firestoreServer/logs";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
