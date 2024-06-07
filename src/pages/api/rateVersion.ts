@@ -228,12 +228,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         instantApprove,
         isInstructor,
       }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
-        await checkInstantApprovalForProposalVote(
-          nodeData?.tagIds || [],
-          uname,
-          nodeType as INodeType,
-          req.body.versionId
-        );
+        await checkInstantApprovalForProposalVote(nodeData?.tagIds || [], uname, req.body.versionId);
       if ((courseExist || isInstructor) && correct === 1) {
         isApproved = instantApprove;
       }

@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getChapterRelatedToResponse, getPromptInstructions, handleDeviating, saveLogs } from "./assistantTutor";
+import { getChapterRelatedToResponse, getPromptInstructions, handleDeviating } from "./assistantTutor";
 import { db } from "@/lib/firestoreServer/admin";
 import fbAuth from "src/middlewares/fbAuth";
+import { saveLogs } from "@/lib/firestoreServer/logs";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {

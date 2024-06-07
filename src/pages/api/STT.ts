@@ -5,7 +5,8 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { getJSON, openai } from "./openAI/helpers";
-import { saveLogs } from "./booksAssistant";
+import { saveLogs } from "@/lib/firestoreServer/logs";
+
 // import {app} from ""
 
 export async function uploadToCloudStorage(sourceBuffer: any) {
