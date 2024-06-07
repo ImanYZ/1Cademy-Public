@@ -1,43 +1,42 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../../lib/firestoreServer/admin";
-import { getTypedCollections, NODE_TYPES } from "../../utils";
+import { getTypedCollections } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     let batch = db.batch();
     let writeCounts = 0;
-    for (let nodeType of NODE_TYPES) {
-      const { versionsColl }: any = getTypedCollections({ nodeType });
-      const versionsDocs = await versionsColl.get();
-      for (let versionDoc of versionsDocs.docs) {
-        const versionData = versionDoc.data();
-        const versionUpdates: any = {};
-        if ("references" in versionData && versionData.references.length > 0) {
-          if (!versionData.referenceIds) {
-            versionUpdates.referenceIds = versionData.references.map((r: any) => r.node);
-            versionUpdates.referenceLabels = versionData.references.map((r: any) => r.label);
-            versionUpdates.references = versionData.references.map((r: any) => r.title);
-          }
-        } else {
-          versionUpdates.referenceIds = [];
-          versionUpdates.referenceLabels = [];
-          versionUpdates.references = [];
+
+    const { versionsColl }: any = getTypedCollections();
+    const versionsDocs = await versionsColl.get();
+    for (let versionDoc of versionsDocs.docs) {
+      const versionData = versionDoc.data();
+      const versionUpdates: any = {};
+      if ("references" in versionData && versionData.references.length > 0) {
+        if (!versionData.referenceIds) {
+          versionUpdates.referenceIds = versionData.references.map((r: any) => r.node);
+          versionUpdates.referenceLabels = versionData.references.map((r: any) => r.label);
+          versionUpdates.references = versionData.references.map((r: any) => r.title);
         }
-        if ("tags" in versionData && versionData.tags.length > 0) {
-          if (!versionData.tagIds) {
-            versionUpdates.tagIds = versionData.tags.map((r: any) => r.node);
-            versionUpdates.tags = versionData.tags.map((r: any) => r.title);
-          }
-        } else {
-          versionUpdates.tagIds = [];
-          versionUpdates.tags = [];
+      } else {
+        versionUpdates.referenceIds = [];
+        versionUpdates.referenceLabels = [];
+        versionUpdates.references = [];
+      }
+      if ("tags" in versionData && versionData.tags.length > 0) {
+        if (!versionData.tagIds) {
+          versionUpdates.tagIds = versionData.tags.map((r: any) => r.node);
+          versionUpdates.tags = versionData.tags.map((r: any) => r.title);
         }
-        if (Object.keys(versionUpdates).length > 0) {
-          const versionRef = versionsColl.doc(versionDoc.id);
-          batch.update(versionRef, versionUpdates);
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-        }
+      } else {
+        versionUpdates.tagIds = [];
+        versionUpdates.tags = [];
+      }
+      if (Object.keys(versionUpdates).length > 0) {
+        const versionRef = versionsColl.doc(versionDoc.id);
+        batch.update(versionRef, versionUpdates);
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
     }
 

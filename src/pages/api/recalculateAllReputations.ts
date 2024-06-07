@@ -46,7 +46,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const nodeId = nodeDoc.id;
       const nodeType = nodeData.nodeType;
       // Get a reference to versions or userVersions collections based on the node type.
-      const { versionsColl }: any = getTypedCollections({ nodeType });
+      const { versionsColl }: any = getTypedCollections();
       const versionsDocs = await versionsColl.where("node", "==", nodeId).get();
       for (let versionDoc of versionsDocs.docs) {
         const versionData = versionDoc.data();

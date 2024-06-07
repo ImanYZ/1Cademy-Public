@@ -1,20 +1,18 @@
 import { updateProposersReputationsOnNode } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { conceptVersionsData } from "../../../testUtils/mockCollections";
+import { versionsData } from "../../../testUtils/mockCollections";
 
 describe("updateProposersReputationsOnNode", () => {
   beforeEach(async () => {
-    await conceptVersionsData.populate();
+    await versionsData.populate();
   });
 
   afterEach(async () => {
-    await conceptVersionsData.clean();
+    await versionsData.clean();
   });
 
   it("should perform action on  updateProposersReputationsOnNode with new proposer", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();
     let versionRating = versionData.corrects - versionData.wrongs;
@@ -36,9 +34,7 @@ describe("updateProposersReputationsOnNode", () => {
   });
 
   it("should perform action on  updateProposersReputationsOnNode with an existing proposer", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();
     let versionRating = versionData.corrects - versionData.wrongs;

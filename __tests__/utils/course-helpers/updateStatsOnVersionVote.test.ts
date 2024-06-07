@@ -77,32 +77,31 @@ describe("updateStatsOnVersionVote", () => {
       accepted: true,
       node: nodes[0],
       proposer: users[0],
+      nodeType: "Concept",
     })
   );
 
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
-  const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const versionsCollection = new MockData(nodeVersions, "versions");
   const userNodesCollection = new MockData(userNodes, "userNodes");
   const reputationsCollection = new MockData(reputationPoints, "reputations");
 
   const collects = [
     usersCollection,
     nodesCollection,
-    conceptVersionsCollection,
+    versionsCollection,
     userNodesCollection,
     reputationsCollection,
     new MockData([], "credits"),
     new MockData([], "courses"),
     new MockData([], "instructors"),
-    new MockData([], "relationVersions"),
+    new MockData([], "versions"),
     new MockData([], "semesters"),
-    new MockData([], "questionVersions"),
     new MockData([], "semesterStudentSankeys"),
     new MockData([], "semesterStudentStats"),
     new MockData([], "semesterStudentVoteStats"),
-    new MockData([], "userConceptVersions"),
-    new MockData([], "userQuestionVersions"),
+    new MockData([], "userVersions"),
   ];
 
   const auth = admin.auth();
@@ -255,9 +254,10 @@ describe("updateStatsOnVersionVote", () => {
         corrects: 0,
         accepted: false,
         proposer: users[1],
+        nodeType: "Concept",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -342,9 +342,10 @@ describe("updateStatsOnVersionVote", () => {
         corrects: 0,
         accepted: true,
         proposer: users[1],
+        nodeType: "Concept",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -429,10 +430,11 @@ describe("updateStatsOnVersionVote", () => {
         corrects: 0,
         accepted: false,
         proposer: users[1],
+        nodeType: "Question",
         childType: "Question",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     // creating instructor vote to test disagreement
     const _userNodeVersions = [
@@ -444,7 +446,7 @@ describe("updateStatsOnVersionVote", () => {
         user: users[0],
       }),
     ];
-    await new MockData(_userNodeVersions, "userConceptVersions").populate();
+    await new MockData(_userNodeVersions, "userVersions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -469,7 +471,6 @@ describe("updateStatsOnVersionVote", () => {
       .where("uname", "==", users[1].uname)
       .where("tagId", "==", semesterId)
       .get();
-
     const semesterStudentStat = semesterStudentStats.docs[0].data() as ISemesterStudentStat;
     expect(semesterStudentStat.uname).toEqual(users[1].uname);
     for (const statDay of semesterStudentStat.days) {
@@ -491,6 +492,7 @@ describe("updateStatsOnVersionVote", () => {
 
     const semesterStudentVoteStat = semesterStudentVoteStats.docs[0].data() as ISemesterStudentVoteStat;
     expect(semesterStudentVoteStat.uname).toEqual(users[1].uname);
+
     for (const statDay of semesterStudentVoteStat.days) {
       expect(statDay.agreementsWithInst).toEqual(0);
       expect(statDay.disagreementsWithInst).toEqual(1);
@@ -513,10 +515,11 @@ describe("updateStatsOnVersionVote", () => {
         corrects: 0,
         accepted: true,
         proposer: users[1],
+        nodeType: "Concept",
         childType: "Question",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     // creating instructor vote to test agreement
     const _userNodeVersions = [
@@ -528,7 +531,7 @@ describe("updateStatsOnVersionVote", () => {
         user: users[0],
       }),
     ];
-    await new MockData(_userNodeVersions, "userConceptVersions").populate();
+    await new MockData(_userNodeVersions, "userVersions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;

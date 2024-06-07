@@ -80,6 +80,7 @@ describe("UpDownVoteNode", () => {
         node: nodes[0],
         proposer: users[0],
         corrects: 0,
+        nodeType: "Concept",
       })
     );
     // mock node version (user's own first accepted proposal)
@@ -89,6 +90,7 @@ describe("UpDownVoteNode", () => {
         node: nodes[1],
         proposer: users[1],
         corrects: 0,
+        nodeType: "Concept",
       })
     );
     // adding user nodes for mock users
@@ -109,7 +111,7 @@ describe("UpDownVoteNode", () => {
 
     const usersCollection = new MockData(users, "users");
     const nodesCollection = new MockData(nodes, "nodes");
-    const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const versionsCollection = new MockData(nodeVersions, "versions");
     const userNodesCollection = new MockData(userNodes, "userNodes");
 
     const comPointsCollection = new MockData(comPoints, "comPoints");
@@ -133,7 +135,7 @@ describe("UpDownVoteNode", () => {
     const collects = [
       usersCollection,
       nodesCollection,
-      conceptVersionsCollection,
+      versionsCollection,
       userNodesCollection,
       comPointsCollection,
       comMonthlyPointsCollection,

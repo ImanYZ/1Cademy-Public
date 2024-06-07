@@ -34,7 +34,7 @@ export const db = getFirestore(firebaseApp);
 const getPendingProposalsFromFirestore = async () => {
   let pendingProposals: string[] = [];
   for (let nodeType of NODE_TYPES_ARRAY) {
-    const { versionsColl, userVersionsColl } = getTypedCollections(nodeType);
+    const { versionsColl, userVersionsColl } = getTypedCollections();
     if (!versionsColl || !userVersionsColl) continue;
     let versionsQuery = await db
       .collection(versionsColl)

@@ -2,23 +2,21 @@ import { db } from "@/lib/firestoreServer/admin";
 
 import { getCumulativeProposerVersionRatingsOnNode } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { conceptVersionsData, nodesData } from "../../../testUtils/mockCollections";
+import { nodesData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("getCumulativeProposerVersionRatingsOnNode", () => {
   beforeEach(async () => {
-    await conceptVersionsData.populate();
+    await versionsData.populate();
     await nodesData.populate();
   });
 
   afterEach(async () => {
-    await conceptVersionsData.clean();
+    await versionsData.clean();
     await nodesData.clean();
   });
 
   it("should perform action on  getCumulativeProposerVersionRatingsOnNode as a new version", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     let nodeDoc: any = await db.collection("nodes").doc("tKxTypLrxds").get();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();
@@ -41,9 +39,7 @@ describe("getCumulativeProposerVersionRatingsOnNode", () => {
   });
 
   it("should perform action on  getCumulativeProposerVersionRatingsOnNode as an exisiting version", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     let nodeDoc: any = await db.collection("nodes").doc("tKxTypLrxds").get();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();

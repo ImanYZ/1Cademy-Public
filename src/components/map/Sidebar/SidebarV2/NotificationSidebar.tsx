@@ -184,28 +184,28 @@ const NotificationSidebar = ({
     return [...uncheckedNotifications];
   }, [notebookRequests, checkedNotifications, uncheckedNotifications, value]);
 
-  useEffect(() => {
-    const requestRef = collection(db, "requests");
-    const q = query(requestRef, where("requestedUser", "==", username), where("state", "==", "waiting"));
-    const unsub = onSnapshot(q, snapshot => {
-      const docChages = snapshot.docChanges();
-      if (!(docChages.length > 0)) return;
+  // useEffect(() => {
+  //   const requestRef = collection(db, "requests");
+  //   const q = query(requestRef, where("requestedUser", "==", username), where("state", "==", "waiting"));
+  //   const unsub = onSnapshot(q, snapshot => {
+  //     const docChages = snapshot.docChanges();
+  //     if (!(docChages.length > 0)) return;
 
-      setNotebookRequests(prev => {
-        const currentRequests = [...prev];
+  //     setNotebookRequests(prev => {
+  //       const currentRequests = [...prev];
 
-        for (const docChange of docChages) {
-          const newRequest = { ...docChange.doc.data(), id: docChange.doc.id } as NotebookRequest;
-          const exists = currentRequests.some(el => el.id === newRequest.id);
-          if (!exists) currentRequests.push(newRequest);
-        }
-        return currentRequests;
-      });
-    });
-    return () => {
-      unsub();
-    };
-  }, [db, username]);
+  //       for (const docChange of docChages) {
+  //         const newRequest = { ...docChange.doc.data(), id: docChange.doc.id } as NotebookRequest;
+  //         const exists = currentRequests.some(el => el.id === newRequest.id);
+  //         if (!exists) currentRequests.push(newRequest);
+  //       }
+  //       return currentRequests;
+  //     });
+  //   });
+  //   return () => {
+  //     unsub();
+  //   };
+  // }, [db, username]);
 
   const handleSubmitRequest = useCallback(
     async (

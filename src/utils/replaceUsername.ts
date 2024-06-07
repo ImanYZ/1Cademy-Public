@@ -56,47 +56,43 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
   writeCounts += 1;
   console.log(uname + " to " + newUsername);
 
-  for (let nodeType of NODE_TYPES) {
-    const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections({
-      nodeType,
-    });
-    [batch, writeCounts] = await replaceUnameInCollection({
-      batch,
-      collQuery: versionsColl,
-      collectionName: versionsColl.id,
-      columnName: "proposer",
-      oldUname: uname,
-      newUname: newUsername,
-      writeCounts,
-    });
-    [batch, writeCounts] = await replaceUnameInCollection({
-      batch,
-      collQuery: userVersionsColl,
-      collectionName: userVersionsColl.id,
-      columnName: "user",
-      oldUname: uname,
-      newUname: newUsername,
-      writeCounts,
-    });
-    [batch, writeCounts] = await replaceUnameInCollection({
-      batch,
-      collQuery: versionsCommentsColl,
-      collectionName: versionsCommentsColl.id,
-      columnName: "author",
-      oldUname: uname,
-      newUname: newUsername,
-      writeCounts,
-    });
-    [batch, writeCounts] = await replaceUnameInCollection({
-      batch,
-      collQuery: userVersionsCommentsColl,
-      collectionName: userVersionsCommentsColl.id,
-      columnName: "user",
-      oldUname: uname,
-      newUname: newUsername,
-      writeCounts,
-    });
-  }
+  const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections();
+  [batch, writeCounts] = await replaceUnameInCollection({
+    batch,
+    collQuery: versionsColl,
+    collectionName: versionsColl.id,
+    columnName: "proposer",
+    oldUname: uname,
+    newUname: newUsername,
+    writeCounts,
+  });
+  [batch, writeCounts] = await replaceUnameInCollection({
+    batch,
+    collQuery: userVersionsColl,
+    collectionName: userVersionsColl.id,
+    columnName: "user",
+    oldUname: uname,
+    newUname: newUsername,
+    writeCounts,
+  });
+  [batch, writeCounts] = await replaceUnameInCollection({
+    batch,
+    collQuery: versionsCommentsColl,
+    collectionName: versionsCommentsColl.id,
+    columnName: "author",
+    oldUname: uname,
+    newUname: newUsername,
+    writeCounts,
+  });
+  [batch, writeCounts] = await replaceUnameInCollection({
+    batch,
+    collQuery: userVersionsCommentsColl,
+    collectionName: userVersionsCommentsColl.id,
+    columnName: "user",
+    oldUname: uname,
+    newUname: newUsername,
+    writeCounts,
+  });
 
   for (let collName of [
     "userVersionsLog",

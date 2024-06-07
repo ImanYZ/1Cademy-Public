@@ -164,35 +164,35 @@ export const updateUserImageEverywhere = async ({
       writeCounts,
     });
   }
-  for (let nodeType of NODE_TYPES) {
-    const { versionsColl, versionsCommentsColl } = getTypedCollections({ nodeType });
-    [newBatch, writeCounts] = await updateUserImageInCollection({
-      batch: newBatch,
-      collQuery: versionsColl,
-      collectionName: nodeType + "Versions",
-      userAttribute: "proposer",
-      forAdmin: false,
-      uname: uname,
-      imageUrl,
-      fullname,
-      chooseUname,
-      currentTimestamp,
-      writeCounts,
-    });
-    [newBatch, writeCounts] = await updateUserImageInCollection({
-      batch: newBatch,
-      collQuery: versionsCommentsColl,
-      collectionName: nodeType + "versionComments",
-      userAttribute: "author",
-      forAdmin: false,
-      uname: uname,
-      imageUrl,
-      fullname,
-      chooseUname,
-      currentTimestamp,
-      writeCounts,
-    });
-  }
+
+  const { versionsColl, versionsCommentsColl } = getTypedCollections();
+  [newBatch, writeCounts] = await updateUserImageInCollection({
+    batch: newBatch,
+    collQuery: versionsColl,
+    collectionName: "versions",
+    userAttribute: "proposer",
+    forAdmin: false,
+    uname: uname,
+    imageUrl,
+    fullname,
+    chooseUname,
+    currentTimestamp,
+    writeCounts,
+  });
+  [newBatch, writeCounts] = await updateUserImageInCollection({
+    batch: newBatch,
+    collQuery: versionsCommentsColl,
+    collectionName: "versionComments",
+    userAttribute: "author",
+    forAdmin: false,
+    uname: uname,
+    imageUrl,
+    fullname,
+    chooseUname,
+    currentTimestamp,
+    writeCounts,
+  });
+
   const nodesDocs = await db.collection("nodes").where("admin", "==", uname).get();
   for (let nodeDoc of nodesDocs.docs) {
     const nodeRef = db.collection("nodes").doc(nodeDoc.id);

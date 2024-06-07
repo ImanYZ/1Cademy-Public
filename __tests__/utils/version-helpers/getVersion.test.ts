@@ -2,11 +2,11 @@ import { db } from "@/lib/firestoreServer/admin";
 
 import { getVersion } from "../../../src/utils";
 import { getTypedCollections } from "../../../src/utils/getTypedCollections";
-import { conceptVersionsData, nodesData } from "../../../testUtils/mockCollections";
+import { nodesData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("getVersion", () => {
   let node = "GJfzAY1zbgQs9jU5XeEL";
-  const collects = [nodesData, conceptVersionsData];
+  const collects = [nodesData, versionsData];
   beforeEach(async () => {
     await Promise.all(collects.map(collect => collect.populate()));
   });
@@ -16,9 +16,7 @@ describe("getVersion", () => {
   });
 
   it("should return verision of sepecifc nodeType", async () => {
-    let { versionsColl }: any = getTypedCollections({
-      nodeType: "Concept",
-    });
+    let { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const nodeDoc = await db.collection("nodes").doc(node).get();
     const nodeData = nodeDoc.data();
@@ -28,7 +26,7 @@ describe("getVersion", () => {
         nodeData: nodeData as any,
       });
       let _versionRef = versionRef as any;
-      expect(_versionRef._path.segments).toEqual(expect.arrayContaining(["conceptVersions", versionDoc.id]));
+      expect(_versionRef._path.segments).toEqual(expect.arrayContaining(["versions", versionDoc.id]));
       expect(versionData).toMatchObject({ id: versionDoc.id });
     }
   });

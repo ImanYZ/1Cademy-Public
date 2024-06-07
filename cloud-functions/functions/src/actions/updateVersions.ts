@@ -7,7 +7,7 @@ type INodeDeletedUpdates = {
 };
 export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) => {
   const nodeType = nodeData.nodeType;
-  const { versionsColl }: any = getTypedCollections({ nodeType });
+  const { versionsColl }: any = getTypedCollections();
   const versionsDocs = await versionsColl.where("node", "==", nodeId).get();
 
   // From here on, we specify the type of the changes that the user is proposing on this node

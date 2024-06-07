@@ -127,6 +127,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       tags: [],
       parents: [nodes[0]],
       children: [nodes[2]],
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[2],
@@ -136,6 +137,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       tags: [],
       parents: [nodes[0]],
       children: [nodes[1]],
+      nodeType: "Concept",
     }),
   ];
 
@@ -172,7 +174,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
   const usersCollection = new MockData(users, "users");
   const creditsCollection = new MockData(credits, "credits");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const weeklyReputationPointsCollection = new MockData([], "weeklyReputations");
   const reputationsCollection = new MockData(reputations, "reputations");
   const notificationsCollection = new MockData([], "notifications");

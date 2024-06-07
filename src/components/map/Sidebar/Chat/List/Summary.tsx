@@ -197,36 +197,38 @@ export const Summary = ({
           </Box>
           <Typography>Search</Typography>
         </Box> */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100px",
-            height: "100px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
-            ":hover": {
+        {roomType === "channel" && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100px",
+              height: "100px",
+              borderRadius: "8px",
+              cursor: "pointer",
               background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
-            },
-          }}
-          onClick={muteChannel}
-        >
-          {" "}
-          {mutingChannel ? (
-            <CircularProgress />
-          ) : (
-            <>
-              <Box>{muted ? <NotificationsOffIcon /> : <NotificationsIcon />}</Box>
-              <Typography>{muted ? "Unmute" : "Mute"}</Typography>
-            </>
-          )}
-        </Box>
-        {!leading && (
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
+              },
+            }}
+            onClick={muteChannel}
+          >
+            {" "}
+            {mutingChannel ? (
+              <CircularProgress />
+            ) : (
+              <>
+                <Box>{muted ? <NotificationsOffIcon /> : <NotificationsIcon />}</Box>
+                <Typography>{muted ? "Unmute" : "Mute"}</Typography>
+              </>
+            )}
+          </Box>
+        )}
+        {!leading && roomType === "channel" && (
           <Box
             sx={{
               display: "flex",
