@@ -1367,12 +1367,7 @@ export const shouldInstantApprovalForProposal = async (tagIds: string[], uname: 
 
 //we call this function to check if an instructor is votig on a proposal
 //if yes then we approve the proposal of the node automatically
-export const checkInstantApprovalForProposalVote = async (
-  tagIds: string[],
-  uname: string,
-  verisonType: INodeType,
-  versionId: string
-) => {
+export const checkInstantApprovalForProposalVote = async (tagIds: string[], uname: string, versionId: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
 
   let isInstructor = false;
