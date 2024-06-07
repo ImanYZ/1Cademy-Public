@@ -82,7 +82,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
     );
 
     const versionsData = await getDocs(versionCollectionRef);
-    let versionId;
     const userVersionsRefs: any[] = [];
     versionsData.forEach(versionDoc => {
       const versionData = versionDoc.data();
@@ -107,25 +106,26 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
         userVersionsRefs.push(userVersionCollectionRef);
       }
     });
-    if (userVersionsRefs.length > 0) {
-      await Promise.all(
-        userVersionsRefs.map(async userVersionsRef => {
-          const userVersionsDocs = await getDocs(userVersionsRef);
-          userVersionsDocs.forEach((userVersionsDoc: any) => {
-            const userVersion = userVersionsDoc.data();
-            versionId = userVersion.version;
-            delete userVersion.version;
-            delete userVersion.updatedAt;
-            delete userVersion.createdAt;
-            delete userVersion.user;
-            versions[versionId] = {
-              ...versions[versionId],
-              ...userVersion,
-            };
-          });
-        })
-      );
-    }
+
+    // if (userVersionsRefs.length > 0) {
+    //   await Promise.all(
+    //     userVersionsRefs.map(async userVersionsRef => {
+    //       const userVersionsDocs = await getDocs(userVersionsRef);
+    //       userVersionsDocs.forEach((userVersionsDoc: any) => {
+    //         const userVersion = userVersionsDoc.data();
+    //         versionId = userVersion.version;
+    //         delete userVersion.version;
+    //         delete userVersion.updatedAt;
+    //         delete userVersion.createdAt;
+    //         delete userVersion.user;
+    //         versions[versionId] = {
+    //           ...versions[versionId],
+    //           ...userVersion,
+    //         };
+    //       });
+    //     })
+    //   );
+    // }
 
     const orderredProposals = Object.values(versions).sort(
       (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
