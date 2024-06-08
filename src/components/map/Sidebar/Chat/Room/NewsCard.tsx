@@ -39,6 +39,7 @@ type NewsCardProps = {
   sendMessage: any;
   sendReplyOnMessage: any;
   isLoadingReaction: IChannelMessage | null;
+  makeMessageUnread: (message: IChannelMessage) => void;
 };
 export const NewsCard = ({
   notebookRef,
@@ -65,6 +66,7 @@ export const NewsCard = ({
   sendMessage,
   sendReplyOnMessage,
   isLoadingReaction,
+  makeMessageUnread,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -192,6 +194,7 @@ export const NewsCard = ({
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
                   user={user}
+                  makeMessageUnread={makeMessageUnread}
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -247,6 +250,7 @@ export const NewsCard = ({
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
                 isLoadingReaction={isLoadingReaction}
+                makeMessageUnread={makeMessageUnread}
               />
             ))}
 

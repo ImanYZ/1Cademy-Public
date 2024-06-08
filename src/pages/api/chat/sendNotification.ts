@@ -5,7 +5,7 @@ import fbAuth from "src/middlewares/fbAuth";
 
 const triggerNotifications = async (newMessage: any) => {
   try {
-    const { channelId, roomType, sender, message } = newMessage;
+    const { channelId, roomType, sender, message, subject } = newMessage;
     const fcmTokensHash: { [key: string]: string } = {};
     const fcmTokensDocs = await db.collection("fcmTokens").get();
 
@@ -49,7 +49,7 @@ const triggerNotifications = async (newMessage: any) => {
           const payload = {
             token,
             notification: {
-              title: `New Message from ${sender}`,
+              title: `${subject} ${sender}`,
               body: message,
             },
           };
@@ -79,12 +79,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
     // const { leading } = req.body?.data?.user?.userData?.customClaims || {};
-    const { roomType, newMessage } = req.body as any;
+    const { roomType, newMessage, subject } = req.body as any;
     if (uname !== newMessage.sender) {
       throw new Error("");
     }
     console.log({ newMessage, roomType });
-    await triggerNotifications({ ...newMessage, roomType });
+    await triggerNotifications({ ...newMessage, roomType, subject });
     return res.status(200).send({});
   } catch (error) {
     console.log(error);
