@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [16.x]
     steps:
       - uses: actions/checkout@v2
       - uses: isbang/compose-action@v1.3.2
@@ -57,10 +57,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Set up environment variable for OpenSSL
-        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
-      - name: Update caniuse-lite and browserslist
-        run: npm update caniuse-lite browserslist
       - name: npm install and build
         run: |
           npm install --legacy-peer-deps
