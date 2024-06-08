@@ -314,6 +314,7 @@ export const MessageLeft = ({
                       selectedMessage={selectedMessage}
                       handleDeleteMessage={handleDeleteMessage}
                       isLoadingReaction={isLoadingReaction}
+                      makeMessageUnread={makeMessageUnread}
                     />
                   ) : (
                     <MessageLeft
