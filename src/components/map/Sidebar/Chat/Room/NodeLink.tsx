@@ -50,6 +50,7 @@ type MessageRightProps = {
   selectedMessage: { id: string | null; message: string | null } | {};
   handleDeleteMessage: (message: IChannelMessage) => void;
   isLoadingReaction: IChannelMessage | null;
+  makeMessageUnread: (message: IChannelMessage) => void;
 };
 export const NodeLink = ({
   db,
@@ -83,6 +84,7 @@ export const NodeLink = ({
   handleDeleteMessage,
   isDeleting,
   isLoadingReaction,
+  makeMessageUnread,
 }: MessageRightProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
 
@@ -240,6 +242,7 @@ export const NodeLink = ({
                     type === "reply" ? handleDeleteReply(parentMessage, message) : handleDeleteMessage(message)
                   }
                   user={user}
+                  makeMessageUnread={makeMessageUnread}
                 />
               </Box>
             )}
@@ -287,6 +290,7 @@ export const NodeLink = ({
                       selectedMessage={selectedMessage}
                       handleDeleteMessage={handleDeleteMessage}
                       isLoadingReaction={isLoadingReaction}
+                      makeMessageUnread={makeMessageUnread}
                     />
                   ) : (
                     <MessageLeft
@@ -320,6 +324,7 @@ export const NodeLink = ({
                       sendMessage={sendMessage}
                       sendReplyOnMessage={sendReplyOnMessage}
                       isLoadingReaction={isLoadingReaction}
+                      makeMessageUnread={makeMessageUnread}
                     />
                   )}
                 </>

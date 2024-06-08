@@ -55,6 +55,7 @@ export const MessageInput = ({
 }: MessageInputProps) => {
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputFieldRef = useRef<any>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
@@ -248,9 +249,10 @@ export const MessageInput = ({
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
+    inputFieldRef?.current?.blur();
   };
 
-  const handleBlur = () => {
+  const handleFocus = () => {
     if (!!parentMessage && sendMessageType === "reply") {
       setReplyOnMessage({ ...parentMessage, notVisible: true });
     }
@@ -281,6 +283,7 @@ export const MessageInput = ({
       }}
     >
       <MentionsInput
+        inputRef={inputFieldRef}
         placeholder={placeholder}
         style={{
           control: {
@@ -317,7 +320,7 @@ export const MessageInput = ({
         singleLine={false}
         onChange={handleTyping}
         onKeyDown={handleKeyPress}
-        onFocus={handleBlur}
+        onFocus={handleFocus}
       >
         <Mention
           trigger="@"

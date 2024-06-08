@@ -1,6 +1,7 @@
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import MarkAsUnreadIcon from "@mui/icons-material/MarkAsUnread";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { IconButton, Tooltip } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
@@ -18,6 +19,7 @@ type MessageButtonProps = {
   setInputMessage?: any;
   handleDeleteMessage?: any;
   user: any;
+  makeMessageUnread: (message: IChannelMessage) => void;
 };
 export const MessageButtons = ({
   message,
@@ -28,6 +30,7 @@ export const MessageButtons = ({
   setEditingMessage,
   handleDeleteMessage,
   user,
+  makeMessageUnread,
 }: MessageButtonProps) => {
   const isSender = user.uname === message.sender;
   // const handleForwardMessage = () => {
@@ -62,6 +65,11 @@ export const MessageButtons = ({
       <Tooltip title={"react"}>
         <IconButton>
           <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={"unread"}>
+        <IconButton>
+          <MarkAsUnreadIcon color="secondary" onClick={() => makeMessageUnread(message)} />
         </IconButton>
       </Tooltip>
       {/* <Tooltip title={"forward"}>

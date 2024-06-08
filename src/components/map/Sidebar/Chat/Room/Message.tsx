@@ -49,6 +49,7 @@ type MessageProps = {
   setNewMemberSection: any;
   getChannelRef: any;
   isLoadingReaction: IChannelMessage | null;
+  makeMessageUnread: (message: IChannelMessage) => void;
 };
 
 export const Message = ({
@@ -74,6 +75,7 @@ export const Message = ({
   setNewMemberSection,
   getChannelRef,
   isLoadingReaction,
+  makeMessageUnread,
 }: MessageProps) => {
   const db = getFirestore();
   const { nodeBookState } = useNodeBook();
@@ -337,7 +339,6 @@ export const Message = ({
           channelId: selectedChannel?.id,
           important,
         };
-
         setMessages((prevMessages: any) => {
           const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage?.id);
           prevMessages[messageIdx].replies.push(reply);
@@ -345,6 +346,11 @@ export const Message = ({
         });
         scrollToMessage(curMessage?.id || "");
         await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
+        await Post("/chat/sendNotification", {
+          subject: "Replied from",
+          newMessage: reply,
+          roomType,
+        });
       } catch (error) {
         console.error(error);
       }
@@ -391,6 +397,7 @@ export const Message = ({
 
           scrollToBottom();
           await Post("/chat/sendNotification", {
+            subject: "New Message from",
             newMessage,
             roomType,
           });
@@ -510,6 +517,7 @@ export const Message = ({
                         sendMessage={sendMessage}
                         sendReplyOnMessage={sendReplyOnMessage}
                         isLoadingReaction={isLoadingReaction}
+                        makeMessageUnread={makeMessageUnread}
                       />
                     )}
                     {roomType !== "news" && (
@@ -545,6 +553,7 @@ export const Message = ({
                             selectedMessage={selectedMessage}
                             handleDeleteMessage={handleDeleteMessage}
                             isLoadingReaction={isLoadingReaction}
+                            makeMessageUnread={makeMessageUnread}
                           />
                         ) : (
                           <MessageLeft
@@ -578,6 +587,7 @@ export const Message = ({
                             sendMessage={sendMessage}
                             sendReplyOnMessage={sendReplyOnMessage}
                             isLoadingReaction={isLoadingReaction}
+                            makeMessageUnread={makeMessageUnread}
                           />
                         )}
                       </>
