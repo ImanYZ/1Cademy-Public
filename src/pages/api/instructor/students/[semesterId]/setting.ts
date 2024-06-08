@@ -179,7 +179,7 @@ const createVersion = async (
       tags: nodeData?.tags || [],
       tagIds: nodeData?.tagIds || [],
     } as INodeVersion;
-    return { versionRef: db.collection("relationVersions").doc(), versionData };
+    return { versionRef: db.collection("versions").doc(), versionData };
   }
 
   return { versionRef: null, versionData: null };

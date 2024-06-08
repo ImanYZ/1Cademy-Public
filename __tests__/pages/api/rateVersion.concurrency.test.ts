@@ -88,6 +88,7 @@ describe("POST /api/rateVersion", () => {
         accepted: true,
         proposer: users[0],
         corrects: 1,
+        nodeType: "Concept",
       }),
       // 2nd user's accepted proposal with more rating
       createNodeVersion({
@@ -95,6 +96,7 @@ describe("POST /api/rateVersion", () => {
         accepted: true,
         proposer: users[1],
         corrects: 3,
+        nodeType: "Concept",
       }),
     ];
 
@@ -118,7 +120,7 @@ describe("POST /api/rateVersion", () => {
 
     const usersCollection = new MockData(users, "users");
     const creditsCollection = new MockData(credits, "credits");
-    const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+    const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
     const reputationsCollection = new MockData(reputations, "reputations");
     const notificationsCollection = new MockData([], "notifications");
@@ -144,7 +146,7 @@ describe("POST /api/rateVersion", () => {
 
       new MockData([], "notificationNums"),
       new MockData([], "practice"),
-      new MockData([], "userConceptVersions"),
+      new MockData([], "userVersions"),
       new MockData([], "userNodesLog"),
       new MockData([], "userVersionsLog"),
       new MockData([], "tags"),

@@ -79,6 +79,7 @@ const NodeProposal = () => {
       ...buildTags(nodeTagsSelected),
       title: formValues.title,
       choices: formValues.questions.length ? formValues.questions : undefined,
+      nodeType: formValues.nodeType,
     };
     await mutateAsync({ data, nodeType: formValues.nodeType });
     router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) });

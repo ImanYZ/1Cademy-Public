@@ -7,13 +7,13 @@ import {
   comOthMonPointsData,
   comOthWeekPointsData,
   comPointsData,
-  conceptVersionsData,
+  versionsData,
 } from "../../testUtils/mockCollections";
 
 describe("rewriteComPointsDocs", () => {
   let node = "OR8UsmsxmeExHG8ekkIY";
   beforeEach(async () => {
-    await conceptVersionsData.populate();
+    await versionsData.populate();
     await comPointsData.populate();
     await comMonthlyPointsData.populate();
     await comOthersPointsData.populate();
@@ -22,7 +22,7 @@ describe("rewriteComPointsDocs", () => {
   });
 
   afterEach(async () => {
-    await conceptVersionsData.clean();
+    await versionsData.clean();
     await comPointsData.clean();
     await comMonthlyPointsData.clean();
     await comOthersPointsData.clean();
@@ -32,7 +32,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comPoints", async () => {
     const comPoints: any = {};
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -60,7 +60,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comMonthlyPoints", async () => {
     const comMonthlyPoints: any = {};
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -92,7 +92,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comOthersPoints", async () => {
     const comOthersPoints: any = {};
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -125,7 +125,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comOthMonPoints", async () => {
     const comOthMonPoints: any = {};
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -156,7 +156,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comOthWeekPoints", async () => {
     const comOthWeekPoints: any = {};
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";

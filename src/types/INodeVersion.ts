@@ -69,4 +69,5 @@ export type INodeVersion = {
   correct?: boolean;
   wrong?: boolean;
   award?: boolean;
+  nodeType: string;
 };

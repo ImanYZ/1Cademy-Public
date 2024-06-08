@@ -83,7 +83,7 @@ const Hero = ({ headerHeight, headerHeightMobile }: HeroProps) => {
         <Typography
           color="white"
           // variant="p"
-          sx={{ textAlign: "center", fontSize: { xs: "36px", md: "30px" }, fontWeight: 400, mb: "24px" }}
+          sx={{ textAlign: "center", fontSize: { xs: "17px", md: "30px" }, fontWeight: 400, mb: "24px" }}
         >
           Integrate 1Cademy AI Assistant into Your e-Books and Course Curriculum!
         </Typography>

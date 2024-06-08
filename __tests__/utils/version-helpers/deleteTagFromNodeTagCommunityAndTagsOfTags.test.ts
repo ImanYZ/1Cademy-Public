@@ -1,20 +1,20 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { deleteTagFromNodeTagCommunityAndTagsOfTags } from "../../../src/utils";
-import { conceptVersionsData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { nodesData, tagsData, usersData, userVersionsData } from "../../../testUtils/mockCollections";
 
 describe("deleteTagFromNodeTagCommunityAndTagsOfTags", () => {
   beforeEach(async () => {
     await usersData.populate();
     await nodesData.populate();
     await tagsData.populate();
-    await conceptVersionsData.populate();
+    await userVersionsData.populate();
   });
 
   afterEach(async () => {
     await usersData.clean();
     await nodesData.clean();
     await tagsData.clean();
-    await conceptVersionsData.clean();
+    await userVersionsData.clean();
   });
 
   it("should perform deleteTagFromNodeTagCommunityAndTagsOfTags action on tags collection", async () => {

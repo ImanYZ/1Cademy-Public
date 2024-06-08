@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import HttpMock from "node-mocks-http";
 import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.config";
-import { comPointTypes, getTypedCollections, NODE_TYPES, reputationTypes } from "src/utils";
+import { comPointTypes, getTypedCollections, reputationTypes } from "src/utils";
 import { createCredit } from "testUtils/fakers/credit";
 import {
   createMonthlyReputationPoints,
@@ -34,7 +34,6 @@ import {
 
 import { admin, db } from "../../../src/lib/firestoreServer/admin";
 import changeUsernameHandler from "../../../src/pages/api/changeUsername";
-import { INodeType } from "../../../src/types/INodeType";
 import {
   createNode,
   createNodeVersion,
@@ -79,6 +78,7 @@ describe("POST /api/changeUsername", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
   ];
 
@@ -176,7 +176,7 @@ describe("POST /api/changeUsername", () => {
 
   const usersCollection = new MockData(users, "users");
   const creditsCollection = new MockData(credits, "credits");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
   const reputationsCollection = new MockData(reputations, "reputations");
   const monthlyReputationsCollection = new MockData(monthlyReputations, "monthlyReputations");
@@ -375,58 +375,55 @@ describe("POST /api/changeUsername", () => {
   const userNodesLogs: IUserNodeLog[] = [];
   const userVersionsLogs: IUserNodeVersionLog[] = [];
 
-  for (const NODE_TYPE of NODE_TYPES) {
-    const { versionsColl, userVersionsColl } = getTypedCollections({
-      nodeType: NODE_TYPE,
-    });
-    const node = createNode({
-      admin: users[0],
-      corrects: 1,
-      tags: [nodes[0]],
-      nodeType: NODE_TYPE as INodeType,
-    });
-    nodes.push(node);
+  const { versionsColl, userVersionsColl } = getTypedCollections();
+  const node = createNode({
+    admin: users[0],
+    corrects: 1,
+    tags: [nodes[0]],
+    // nodeType: NODE_TYPE as INodeType,
+  });
+  nodes.push(node);
 
-    const nodeVersion = createNodeVersion({
-      node,
-      accepted: true,
-      proposer: users[0],
-      tags: [nodes[0]],
-      corrects: 1,
-    });
+  const nodeVersion = createNodeVersion({
+    node,
+    accepted: true,
+    proposer: users[0],
+    tags: [nodes[0]],
+    corrects: 1,
+    nodeType: "Concept",
+  });
 
-    collects.push(new MockData([nodeVersion], versionsColl.id));
+  collects.push(new MockData([nodeVersion], versionsColl.id));
 
-    const userNodeVersion = createUserNodeVersion({
-      node,
-      user: users[0],
-      correct: true,
-      version: nodeVersion,
-    });
+  const userNodeVersion = createUserNodeVersion({
+    node,
+    user: users[0],
+    correct: true,
+    version: nodeVersion,
+  });
 
-    collects.push(new MockData([userNodeVersion], userVersionsColl.id));
+  collects.push(new MockData([userNodeVersion], userVersionsColl.id));
 
-    const userNode = createUserNode({
-      node,
-      correct: true,
-      bookmarked: false,
-      isStudied: false,
-      user: users[0],
-    });
-    userNodes.push(userNode);
+  const userNode = createUserNode({
+    node,
+    correct: true,
+    bookmarked: false,
+    isStudied: false,
+    user: users[0],
+  });
+  userNodes.push(userNode);
 
-    userNodesLogs.push(
-      createUserNodeLog({
-        userNode,
-      })
-    );
+  userNodesLogs.push(
+    createUserNodeLog({
+      userNode,
+    })
+  );
 
-    userVersionsLogs.push(
-      createUserNodeVersionLog({
-        userNodeVersion,
-      })
-    );
-  }
+  userVersionsLogs.push(
+    createUserNodeVersionLog({
+      userNodeVersion,
+    })
+  );
 
   const nodesCollection = new MockData(nodes, "nodes");
   collects.push(nodesCollection);
@@ -601,13 +598,9 @@ describe("POST /api/changeUsername", () => {
 
     describe("change old username in each collection that has usernames:", () => {
       it("{nodeType}Versions, user{nodeType}Versions, {nodeType}VersionsComments (not implemented), user{nodeType}VersionsComments (not implemented)", async () => {
-        for (const NODE_TYPE of NODE_TYPES) {
-          const { versionsColl, userVersionsColl } = getTypedCollections({
-            nodeType: NODE_TYPE,
-          });
-          expect((await versionsColl.where("proposer", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
-          expect((await userVersionsColl.where("user", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
-        }
+        const { versionsColl, userVersionsColl } = getTypedCollections();
+        expect((await versionsColl.where("proposer", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
+        expect((await userVersionsColl.where("user", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
       });
 
       it("userNodes, userNodesLog, userVersionsLog, practice (not implemented), practiceCompletion (not implemented), practiceLog (not implemented)", async () => {

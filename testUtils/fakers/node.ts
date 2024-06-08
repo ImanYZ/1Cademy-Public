@@ -47,6 +47,7 @@ type IFakeNodeVersionOptions = {
   removedParents?: boolean;
   viewers?: number;
   choices?: IQuestionChoice[];
+  nodeType: string;
 };
 
 export function createNode(params: IFakeNodeOptions): INode {
@@ -241,6 +242,7 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     corrects,
     wrongs,
     choices,
+    nodeType,
   } = params;
   return {
     documentId: documentId ? documentId : faker.datatype.uuid(),
@@ -296,6 +298,7 @@ export function createNodeVersion(params: IFakeNodeVersionOptions): INodeVersion
     updatedAt: new Date(),
     tags: tags ? tags.map(tag => tag.title) : [],
     tagIds: tags ? tags.map(tag => String(tag.documentId)) : [],
+    nodeType,
   };
 }
 

@@ -700,9 +700,7 @@ export const updateStatsOnVersionVote = async ({
       // student to student interactions
       const studentSankeys = await getStudentSankeysBySemesterId(semesterId, t, true);
 
-      const { userVersionsColl } = getTypedCollections({
-        nodeType: (isChild && (justApproved || (!justApproved && !approved)) ? parentType : nodeType) as NodeType,
-      });
+      const { userVersionsColl } = getTypedCollections();
       const versionVotesByUser: {
         [uname: string]: FirebaseFirestore.QueryDocumentSnapshot<any>;
       } = {};
@@ -1369,12 +1367,7 @@ export const shouldInstantApprovalForProposal = async (tagIds: string[], uname: 
 
 //we call this function to check if an instructor is votig on a proposal
 //if yes then we approve the proposal of the node automatically
-export const checkInstantApprovalForProposalVote = async (
-  tagIds: string[],
-  uname: string,
-  verisonType: INodeType,
-  versionId: string
-) => {
+export const checkInstantApprovalForProposalVote = async (tagIds: string[], uname: string, versionId: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
 
   let isInstructor = false;
@@ -1390,7 +1383,7 @@ export const checkInstantApprovalForProposalVote = async (
       instantApprove: true,
     };
   }
-  const { userVersionsColl } = getTypedCollections({ nodeType: verisonType });
+  const { userVersionsColl } = getTypedCollections();
 
   const userVersions = await userVersionsColl.where("version", "==", versionId).get();
 

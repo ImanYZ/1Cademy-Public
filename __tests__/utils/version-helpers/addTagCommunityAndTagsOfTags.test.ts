@@ -1,9 +1,9 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addTagCommunityAndTagsOfTags, getTypedCollections } from "../../../src/utils";
-import { conceptVersionsData, MockData, nodesData, tagsData, usersData } from "../../../testUtils/mockCollections";
+import { MockData, nodesData, tagsData, usersData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("addTagCommunityAndTagsOfTags", () => {
-  const collects = [conceptVersionsData, nodesData, tagsData, usersData];
+  const collects = [versionsData, nodesData, tagsData, usersData];
 
   collects.push(new MockData([], "comMonthlyPoints"));
   collects.push(new MockData([], "comOthMonPoints"));
@@ -23,7 +23,7 @@ describe("addTagCommunityAndTagsOfTags", () => {
   it("should perform addTagCommunityAndTagsOfTags action on tags collection", async () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let nodeDoc: any = await db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL").get();
-    const { versionsColl }: any = getTypedCollections({ nodeType: "Concept" });
+    const { versionsColl }: any = getTypedCollections();
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     const proposer = versionsDocs.docs[0].data().proposer;
     let batch = db.batch();

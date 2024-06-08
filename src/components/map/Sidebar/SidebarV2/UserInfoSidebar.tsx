@@ -4,10 +4,9 @@ import { Box, CircularProgress, MenuItem, Select, Stack, Tab, Tabs, Typography }
 import { collection, doc, getDoc, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { Reputation, UserTheme } from "src/knowledgeTypes";
-import { NodeType } from "src/types";
 
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { getTypedCollections } from "@/lib/utils/getTypedCollections";
+import { getCollectionsQuery } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
@@ -34,7 +33,7 @@ type UserInfoTabs = {
   content: ReactNode;
 };
 
-const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
+// const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
 const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selectedUser }: UserInfoSidebarProps) => {
   const [value, setValue] = React.useState(0);
@@ -73,63 +72,60 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
 
     setIsRetrieving(true);
     const versions: { [key: string]: any } = {};
-    for (let nodeType of NODE_TYPE_ARRAY) {
-      const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
 
-      if (!versionsColl || !userVersionsColl) continue;
+    const { versionsColl, userVersionsColl } = getCollectionsQuery(db);
 
-      const versionCollectionRef = query(
-        versionsColl,
-        where("proposer", "==", selectedUser.username),
-        where("deleted", "==", false)
-      );
+    const versionCollectionRef = query(
+      versionsColl,
+      where("proposer", "==", selectedUser.username),
+      where("deleted", "==", false)
+    );
 
-      const versionsData = await getDocs(versionCollectionRef);
-      let versionId;
-      const userVersionsRefs: any[] = [];
-      versionsData.forEach(versionDoc => {
-        const versionData = versionDoc.data();
+    const versionsData = await getDocs(versionCollectionRef);
+    const userVersionsRefs: any[] = [];
+    versionsData.forEach(versionDoc => {
+      const versionData = versionDoc.data();
 
-        versions[versionDoc.id] = {
-          ...versionData,
-          id: versionDoc.id,
-          createdAt: versionData.createdAt.toDate(),
-          award: false,
-          correct: false,
-          wrong: false,
-          nodeType,
-        };
-        delete versions[versionDoc.id].deleted;
-        delete versions[versionDoc.id].updatedAt;
-        if (username) {
-          const userVersionCollectionRef = query(
-            userVersionsColl,
-            where("version", "==", versionDoc.id),
-            where("user", "==", username)
-          );
-          userVersionsRefs.push(userVersionCollectionRef);
-        }
-      });
-      if (userVersionsRefs.length > 0) {
-        await Promise.all(
-          userVersionsRefs.map(async userVersionsRef => {
-            const userVersionsDocs = await getDocs(userVersionsRef);
-            userVersionsDocs.forEach((userVersionsDoc: any) => {
-              const userVersion = userVersionsDoc.data();
-              versionId = userVersion.version;
-              delete userVersion.version;
-              delete userVersion.updatedAt;
-              delete userVersion.createdAt;
-              delete userVersion.user;
-              versions[versionId] = {
-                ...versions[versionId],
-                ...userVersion,
-              };
-            });
-          })
+      versions[versionDoc.id] = {
+        ...versionData,
+        id: versionDoc.id,
+        createdAt: versionData.createdAt.toDate(),
+        award: false,
+        correct: false,
+        wrong: false,
+        nodeType: versionData.nodeType,
+      };
+      delete versions[versionDoc.id].deleted;
+      delete versions[versionDoc.id].updatedAt;
+      if (username) {
+        const userVersionCollectionRef = query(
+          userVersionsColl,
+          where("version", "==", versionDoc.id),
+          where("user", "==", username)
         );
+        userVersionsRefs.push(userVersionCollectionRef);
       }
-    }
+    });
+
+    // if (userVersionsRefs.length > 0) {
+    //   await Promise.all(
+    //     userVersionsRefs.map(async userVersionsRef => {
+    //       const userVersionsDocs = await getDocs(userVersionsRef);
+    //       userVersionsDocs.forEach((userVersionsDoc: any) => {
+    //         const userVersion = userVersionsDoc.data();
+    //         versionId = userVersion.version;
+    //         delete userVersion.version;
+    //         delete userVersion.updatedAt;
+    //         delete userVersion.createdAt;
+    //         delete userVersion.user;
+    //         versions[versionId] = {
+    //           ...versions[versionId],
+    //           ...userVersion,
+    //         };
+    //       });
+    //     })
+    //   );
+    // }
 
     const orderredProposals = Object.values(versions).sort(
       (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))

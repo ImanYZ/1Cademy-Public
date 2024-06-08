@@ -370,6 +370,7 @@ export type ProposalInput = {
   node: string;
   summary: string;
   choices?: KnowledgeChoice[];
+  nodeType: string;
 };
 
 export type UserTheme = "Dark" | "Light";
