@@ -10,6 +10,7 @@ import { roundNum } from "src/utils/common.utils";
 import { extractArray } from "./assignment/generateRubrics";
 import { uploadFileToStorage } from "./streamAudio";
 import { MODEL } from "@/lib/utils/constants";
+import { saveLogs } from "@/lib/firestoreServer/logs";
 type Message = {
   role: string;
   content: string;
@@ -17,15 +18,6 @@ type Message = {
   question: true;
   sentAt: Timestamp;
   mid: string;
-};
-
-export const saveLogs = async (logs: { [key: string]: any }) => {
-  const newLogRef = db.collection("logs").doc();
-  await newLogRef.set({
-    ...logs,
-    createdAt: new Date(),
-    project: "1Tutor",
-  });
 };
 const getId = () => {
   return db.collection("tutorConversations").doc().id;

@@ -13,6 +13,7 @@ import {
   sendMessageTime,
 } from "./openAI/helpers";
 import { detach } from "src/utils/helpers";
+import { saveLogs } from "@/lib/firestoreServer/logs";
 
 const uploadPdf = async (bookUrl: string, bookId: string) => {
   const bookRef = db.collection("books").doc(bookId);
@@ -48,15 +49,6 @@ const getThread = async (bookId: string) => {
   return bookData;
 };
 
-export const saveLogs = async (logs: any) => {
-  try {
-    const newLogRef = db.collection("tutorLogs").doc();
-    await newLogRef.set({
-      ...logs,
-      createdAt: new Date(),
-    });
-  } catch (error) {}
-};
 const savReaction = async (bookId: string, messageId: string, reaction: string, username: string) => {
   const bookDoc = await db.collection("books").doc(bookId).get();
   if (bookDoc.exists) {
@@ -147,6 +139,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         message: newMessage,
         reponse: response?.message || "",
         reaction,
+        project: "booksAssistant",
       });
     });
 

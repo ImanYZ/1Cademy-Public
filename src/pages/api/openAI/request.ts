@@ -2,9 +2,10 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "@/lib/firestoreServer/admin";
 import OpenAI from "openai";
 import fbAuth from "src/middlewares/fbAuth";
-import { saveLogs } from "../assistantTutor";
+
 import moment from "moment";
 import { FieldValue } from "firebase-admin/firestore";
+import { saveLogs } from "@/lib/firestoreServer/logs";
 const MAX_REQUESTS = 100;
 
 const openai = new OpenAI({
