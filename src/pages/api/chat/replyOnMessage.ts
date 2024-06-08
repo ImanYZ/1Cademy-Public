@@ -32,7 +32,7 @@ const getMessageRef = async (
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
-    const { leading } = req.body?.data?.user?.userData?.customClaims;
+    const customClaims = req.body?.data?.user?.userData?.customClaims;
 
     const { reply, curMessage, roomType } = req.body as IReactOnMessagePayload;
 
@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       throw new Error("User is not a member of teh channel!");
     }
     reply.sender = uname;
-    if (reply.important && !leading.includes(curMessage.channelId)) {
+    if (reply.important && !customClaims?.leading.includes(curMessage.channelId)) {
       reply.important = false;
     }
     await mDoc.ref.update({

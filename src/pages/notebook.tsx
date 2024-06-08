@@ -6739,6 +6739,17 @@ const Notebook = ({}: NotebookProps) => {
     setDisplayDashboard(true);
   }, [displayDashboard, router.query.nb, router.query.root, user]);
 
+  // useEffect(() => {
+  //   if ("serviceWorker" in navigator) {
+  //     navigator.serviceWorker.addEventListener("message", event => {
+  //       if (event.data && event.data.type === "PERFORM_ACTION") {
+  //         const data = event.data.data;
+  //         console.log(data, "data-from-notification-worker");
+  //       }
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
     const duplicateNotebookFromParams = async () => {
       const nb = router.query.nb as string;
@@ -7018,10 +7029,10 @@ const Notebook = ({}: NotebookProps) => {
 
             const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
             if (docType === "added" && prevIdx === -1) {
-              prev.push(curData);
+              prev.push({ ...curData, doc: change.doc });
             }
             if (docType === "modified" && prevIdx !== -1) {
-              prev[prevIdx] = curData;
+              prev[prevIdx] = { ...curData, doc: change.doc };
             }
 
             if (docType === "removed" && prevIdx !== -1) {

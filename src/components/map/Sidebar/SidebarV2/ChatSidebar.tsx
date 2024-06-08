@@ -123,7 +123,7 @@ export const ChatSidebar = ({
     if (!user) return;
     const onSynchronize = (changes: channelsChange[]) => {
       setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
@@ -133,7 +133,7 @@ export const ChatSidebar = ({
     if (!user) return;
     const onSynchronize = (changes: conversationChange[]) => {
       setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
     };
     const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
@@ -325,6 +325,7 @@ export const ChatSidebar = ({
     setSelectedChannel(channel);
     setMessages([]);
     clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
+    //makeMessageRead(channel.id);
   };
 
   const moveBack = () => {
@@ -379,15 +380,15 @@ export const ChatSidebar = ({
     isLoadingReaction,
   ]);
 
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: channelsChange[]) => {
+  //     setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -447,13 +448,32 @@ export const ChatSidebar = ({
 
   const clearNotifications = (notifications: any) => {
     for (let notif of notifications) {
-      const notifRef = doc(collection(db, "notifications"), notif.id);
-      updateDoc(notifRef, {
+      updateDoc(notif.doc.ref, {
         seen: true,
         seenAt: new Date(),
       });
     }
   };
+
+  const makeMessageUnread = async (message: IChannelMessage) => {
+    if (!selectedChannel) return;
+    const channelRef = getChannelRef(selectedChannel.id || "");
+    const membersInfo = {
+      ...selectedChannel?.membersInfo,
+      [user.uname]: { ...selectedChannel?.membersInfo[user.uname], unreadMessageId: message.id },
+    };
+    await updateDoc(channelRef, {
+      membersInfo,
+    });
+  };
+
+  // const makeMessageRead = async (channelId: string) => {
+  //   const channelRef = getChannelRef(channelId);
+  //   await updateDoc(channelRef, {
+  //     unread: false,
+  //   });
+  // };
+
   useEffect(() => {
     if (!selectedChannel || !roomType) return;
     clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id));
@@ -465,6 +485,7 @@ export const ChatSidebar = ({
     },
     [notifications]
   );
+
   return (
     <SidebarWrapper
       id="chat"
@@ -552,6 +573,7 @@ export const ChatSidebar = ({
                   setNewMemberSection={setNewMemberSection}
                   getChannelRef={getChannelRef}
                   isLoadingReaction={isLoadingReaction}
+                  makeMessageUnread={makeMessageUnread}
                 />
               )}
             </>
@@ -707,10 +729,10 @@ const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
   return prev;
 };
 
-const synchroniseSelectedChannel = (selectedChannel: any, changes: any) => {
-  if (!selectedChannel?.id) return null;
-  const newIdx = changes.findIndex((c: any) => c.data.id === selectedChannel.id);
-  if (newIdx !== -1) {
-    return changes[newIdx].data;
-  }
-};
+// const synchroniseSelectedChannel = (selectedChannel: any, changes: any) => {
+//   if (!selectedChannel?.id) return null;
+//   const newIdx = changes.findIndex((c: any) => c.data.id === selectedChannel.id);
+//   if (newIdx !== -1) {
+//     return changes[newIdx].data;
+//   }
+// };
