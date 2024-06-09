@@ -9,6 +9,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { nodeId } = req.body;
   const { uname } = req?.body?.data?.user?.userData as IUser;
   try {
+    console.log("checkInstantDeleteForNode", { nodeId, uname });
+    if (!nodeId) {
+      return res.status(200).json({ courseExist: true, instantDelete: true });
+    }
     const nodeDoc = await db.collection("nodes").doc(nodeId).get();
     const tagIds = nodeDoc.data()?.tagIds;
     const { courseExist, instantDelete } = await checkInstantDeleteForNode(tagIds, uname, nodeId);
