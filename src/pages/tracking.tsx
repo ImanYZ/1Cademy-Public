@@ -19,6 +19,7 @@ import { collection, getDocs, getFirestore, query, where, writeBatch } from "fir
 import React, { useEffect, useState } from "react";
 import { roundNum } from "src/utils/common.utils";
 
+import withAuthUser from "@/components/hoc/withAuthUser";
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
@@ -204,5 +205,7 @@ const Tracking = () => {
     </Box>
   );
 };
-
-export default Tracking;
+export default withAuthUser({
+  shouldRedirectToLogin: true,
+  shouldRedirectToHomeIfAuthenticated: false,
+})(Tracking);
