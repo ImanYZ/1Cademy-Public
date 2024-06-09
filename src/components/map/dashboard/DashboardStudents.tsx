@@ -1,6 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import EditIcon from "@mui/icons-material/Edit";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import SearchIcon from "@mui/icons-material/Search";
 import { LoadingButton } from "@mui/lab";
@@ -755,7 +755,7 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
           onClick={handleEditAndAdd}
           sx={{ borderRadius: "32px" }}
         >
-          <AddRoundedIcon fontSize="small" /> Add Student
+          <EditIcon fontSize="small" /> {" Edit"}
         </Button>
       </Box>
       <Box
@@ -1092,7 +1092,7 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
           {(editMode || disableEdit) && (
             <Box sx={{ display: "flex", justifyContent: "space-between", paddingTop: "25px" }}>
               {!disableEdit && (
-                <Box>
+                <Box sx={{ display: "flex" }}>
                   <CsvButton
                     // variant="text"
                     addNewData={addNewData}

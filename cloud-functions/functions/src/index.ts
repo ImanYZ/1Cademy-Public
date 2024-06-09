@@ -6,7 +6,7 @@ import * as moment from "moment";
 
 admin.initializeApp();
 
-import { signalFlashcardChanges } from "./helpers";
+import { signalFlashcardChanges, trackHours } from "./helpers";
 
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
@@ -142,6 +142,10 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
     const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
     recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+
+    //track hours
+
+    await trackHours(data);
   } catch (error) {
     console.log("error:", error);
   }
