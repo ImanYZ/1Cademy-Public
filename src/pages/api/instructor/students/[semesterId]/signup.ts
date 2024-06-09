@@ -183,7 +183,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
 
         [batch, writeCounts] = await createOrRestoreStatDocs(semesterData.tagId, uname, batch, writeCounts);
 
-        await sendPasswordResetEmail(frontAuth, addedStudent.email);
+        // await sendPasswordResetEmail(frontAuth, addedStudent.email);
         semesterData.students.push({
           chooseUname: false,
           email: addedStudent.email,

@@ -1,4 +1,4 @@
-import { collection, Firestore, onSnapshot, query, Unsubscribe, where } from "firebase/firestore";
+import { collection, doc, Firestore, getDoc, onSnapshot, query, Unsubscribe, where } from "firebase/firestore";
 import { IChannels } from "src/chatTypes";
 import { SnapshotChangesTypes } from "src/types";
 
@@ -28,4 +28,20 @@ export const getChannelsSnapshot = (
     callback(channelDocuments);
   });
   return killSnapshot;
+};
+
+export const getSelectedChannel = async (db: Firestore, roomType: string, channelId: string) => {
+  if (!channelId || !roomType) return;
+  let channelRef = doc(db, "channels", channelId);
+  if (roomType === "direct") {
+    channelRef = doc(db, "conversations", channelId);
+  } else if (roomType === "news") {
+    channelRef = doc(db, "announcementsMessages", channelId);
+  }
+
+  const channelDoc = await getDoc(channelRef);
+  if (channelDoc.exists()) {
+    return { ...channelDoc.data(), id: channelDoc.id } as IChannels;
+  }
+  return false;
 };

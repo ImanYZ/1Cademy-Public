@@ -4,7 +4,7 @@ import { IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, doc, getDoc, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getFirestore, Timestamp, updateDoc } from "firebase/firestore";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
@@ -326,6 +326,7 @@ export const Message = ({
           parentMessage: curMessage?.id,
           pinned: false,
           read_by: [],
+          unread_by: {},
           edited: false,
           message: inputMessage,
           node,
@@ -374,7 +375,7 @@ export const Message = ({
           } else if (roomType === "news") {
             channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
           }
-          const messageRef = doc(collection(channelRef, "messages"));
+          const messageRef = collection(channelRef, "messages");
           const newMessage = {
             pinned: false,
             read_by: [],
@@ -393,12 +394,12 @@ export const Message = ({
           // await updateDoc(channelRef, {
           //   updatedAt: new Date(),
           // });
-          await setDoc(messageRef, newMessage);
+          const docRef = await addDoc(messageRef, newMessage);
 
           scrollToBottom();
           await Post("/chat/sendNotification", {
             subject: "New Message from",
-            newMessage,
+            newMessage: { ...newMessage, id: docRef.id },
             roomType,
           });
         }
