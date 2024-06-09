@@ -18,8 +18,7 @@ import {
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IChannelMessage, IChannels, IConversation } from "src/chatTypes";
-import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
-import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
+import { getSelectedChannel } from "src/client/firestore/channels.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { AllTagsTreeView, ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
@@ -66,6 +65,8 @@ type ChatSidebarProps = {
   onChangeTagOfNotebookById: any;
   notifications: any;
   openUserInfoSidebar: any;
+  channels: IChannels[];
+  conversations: IConversation[];
 };
 
 export const ChatSidebar = ({
@@ -88,6 +89,8 @@ export const ChatSidebar = ({
   openLinkedNode,
   notifications,
   openUserInfoSidebar,
+  channels,
+  conversations,
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -99,8 +102,6 @@ export const ChatSidebar = ({
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("");
   const [selectedChannel, setSelectedChannel] = useState<IChannels | null>(null);
-  const [channels, setChannels] = useState<IChannels[]>([]);
-  const [conversations, setConversations] = useState<IConversation[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const messageBoxRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<any>([]);
@@ -120,24 +121,33 @@ export const ChatSidebar = ({
   const [isLoadingReaction, setIsLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+    (async () => {
+      const updatedSelectedChannel = await getSelectedChannel(db, roomType, selectedChannel?.id || "");
+      if (updatedSelectedChannel) {
+        setSelectedChannel({ ...updatedSelectedChannel });
+      }
+    })();
+  }, [channels, conversations]);
 
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: channelsChange[]) => {
+  //     setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
+
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: conversationChange[]) => {
+  //     setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -325,7 +335,7 @@ export const ChatSidebar = ({
     setSelectedChannel(channel);
     setMessages([]);
     clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
-    //makeMessageRead(channel.id);
+    makeMessageRead(channel.id);
   };
 
   const moveBack = () => {
@@ -390,15 +400,15 @@ export const ChatSidebar = ({
   //   return () => killSnapshot();
   // }, [db, user]);
 
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: conversationChange[]) => {
+  //     setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
 
   const openDMChannel = async (user2: any) => {
     if (!user?.uname || !user2.uname) return;
@@ -457,26 +467,25 @@ export const ChatSidebar = ({
 
   const makeMessageUnread = async (message: IChannelMessage) => {
     if (!selectedChannel) return;
+
     const channelRef = getChannelRef(selectedChannel.id || "");
     const membersInfo = {
-      ...selectedChannel?.membersInfo,
+      ...(selectedChannel?.membersInfo || {}),
       [user.uname]: { ...selectedChannel?.membersInfo[user.uname], unreadMessageId: message.id },
     };
     await updateDoc(channelRef, {
       membersInfo,
     });
+    await Post("/chat/markAsUnread", { roomType, message });
   };
 
-  // const makeMessageRead = async (channelId: string) => {
-  //   const channelRef = getChannelRef(channelId);
-  //   await updateDoc(channelRef, {
-  //     unread: false,
-  //   });
-  // };
+  const makeMessageRead = async (channelId: string) => {
+    await Post("/chat/markAsRead", { roomType, channelId });
+  };
 
   useEffect(() => {
     if (!selectedChannel || !roomType) return;
-    clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id));
+    clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id && !n?.manualSeen));
   }, [notifications, selectedChannel]);
 
   const getNotificationsNumbers = useCallback(
@@ -704,30 +713,32 @@ const areEqual = (prevProps: any, nextProps: any) => {
     prevProps.onlineUsers === nextProps.onlineUsers &&
     prevProps.openLinkedNode === nextProps.openLinkedNode &&
     prevProps.notifications === nextProps.notifications &&
-    prevProps.openUserInfoSidebar === nextProps.openUserInfoSidebar
+    prevProps.openUserInfoSidebar === nextProps.openUserInfoSidebar &&
+    prevProps.channels === nextProps.channels &&
+    prevProps.conversations === nextProps.conversations
   );
 };
 
 export const MemoizedChatSidebar = React.memo(ChatSidebar, areEqual);
 
-const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
-  const docType = change.type;
-  const curData = change.data as any & { id: string };
+// const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
+//   const docType = change.type;
+//   const curData = change.data as any & { id: string };
 
-  const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
-  if (docType === "added" && prevIdx === -1) {
-    prev.push(curData);
-  }
-  if (docType === "modified" && prevIdx !== -1) {
-    prev[prevIdx] = curData;
-  }
+//   const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+//   if (docType === "added" && prevIdx === -1) {
+//     prev.push(curData);
+//   }
+//   if (docType === "modified" && prevIdx !== -1) {
+//     prev[prevIdx] = curData;
+//   }
 
-  if (docType === "removed" && prevIdx !== -1) {
-    prev.splice(prevIdx, 1);
-  }
-  prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
-  return prev;
-};
+//   if (docType === "removed" && prevIdx !== -1) {
+//     prev.splice(prevIdx, 1);
+//   }
+//   prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
+//   return prev;
+// };
 
 // const synchroniseSelectedChannel = (selectedChannel: any, changes: any) => {
 //   if (!selectedChannel?.id) return null;

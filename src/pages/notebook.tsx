@@ -48,10 +48,13 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { IChannels, IConversation } from "src/chatTypes";
+import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 import {
   channelNotificationChange,
   getchatNotificationsSnapshot,
 } from "src/client/firestore/chatNotifications.firesrtore";
+import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
@@ -454,6 +457,9 @@ const Notebook = ({}: NotebookProps) => {
 
   //last interaction date from the user
   const [lastInteractionDate, setLastInteractionDate] = useState<Date>(new Date(Date.now()));
+
+  const [channels, setChannels] = useState<IChannels[]>([]);
+  const [conversations, setConversations] = useState<IConversation[]>([]);
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
@@ -6741,6 +6747,24 @@ const Notebook = ({}: NotebookProps) => {
   // }, []);
 
   useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelsChange[]) => {
+      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+    };
+    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: conversationChange[]) => {
+      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+    };
+    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
     const duplicateNotebookFromParams = async () => {
       const nb = router.query.nb as string;
       if (!nb) return;
@@ -7373,6 +7397,8 @@ const Notebook = ({}: NotebookProps) => {
                   onlineUsers={onlineUsers}
                   notifications={notificationsMessages}
                   openUserInfoSidebar={openUserInfoSidebar}
+                  channels={channels}
+                  conversations={conversations}
                 />
               )}
               {openSidebar === "SEARCHER_SIDEBAR" && (
@@ -8354,4 +8380,23 @@ const revertNodeChanges = ({
   resetUpdateLink();
 
   return { newChangedNodes: changedNodes, newEdges, newNodes, newTempNodes: tempNodes, updatedNodeIds };
+};
+
+const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
+  const docType = change.type;
+  const curData = change.data as any & { id: string };
+
+  const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+  if (docType === "added" && prevIdx === -1) {
+    prev.push(curData);
+  }
+  if (docType === "modified" && prevIdx !== -1) {
+    prev[prevIdx] = curData;
+  }
+
+  if (docType === "removed" && prevIdx !== -1) {
+    prev.splice(prevIdx, 1);
+  }
+  prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
+  return prev;
 };
