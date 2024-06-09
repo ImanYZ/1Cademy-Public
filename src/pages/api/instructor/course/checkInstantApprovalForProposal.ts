@@ -10,6 +10,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const { nodeId } = req.body;
   const { uname } = req?.body?.data?.user?.userData as IUser;
   try {
+    console.log("checkInstantApprovalForProposal", { nodeId, uname });
+    if (!nodeId) {
+      return res.status(200).json({ isInstructor: true, courseExist: true, instantApprove: true });
+    }
     const nodeDoc = await db.collection("nodes").doc(nodeId).get();
     const tagIds = nodeDoc.data()?.tagIds ?? [];
     const { isInstructor, courseExist, instantApprove } = await shouldInstantApprovalForProposal(tagIds, uname);
