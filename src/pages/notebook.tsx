@@ -1250,19 +1250,29 @@ const Notebook = ({}: NotebookProps) => {
     const killSnapshot = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
 
-      const newNotebooks = docChanges.map(change => {
-        const userNodeData = change.doc.data() as INotebook;
-        return { type: change.type, id: change.doc.id, data: userNodeData };
-      });
+      setNotebooks((prevNotebooks: any) =>
+        docChanges.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = { id: change.doc.id, ...change.doc.data() };
 
-      setNotebooks(prevNotebooks => {
-        const notesBooksMerged = newNotebooks.reduce((acu: INotebook[], cur) => {
-          if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
-          if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
-          return acu.filter(c => c.id !== cur.id);
-        }, prevNotebooks);
-        return notesBooksMerged;
-      });
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1 && !curData.conversation) {
+              prev.push({ ...curData, doc: change.doc });
+            }
+            if (docType === "modified" && prevIdx !== -1 && !curData.conversation) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx);
+            }
+            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            return prev;
+          },
+          [...prevNotebooks]
+        )
+      );
     });
 
     return () => {
@@ -1271,11 +1281,12 @@ const Notebook = ({}: NotebookProps) => {
   }, [allTagsLoaded, db, user?.uname, userTutorialLoaded]);
 
   useEffect(() => {
-    if (selectedNotebookId) return;
+    const findSelectedNotebook = notebooks.findIndex(n => n.id === selectedNotebookId);
+    if (findSelectedNotebook !== -1) return;
     if (!notebooks[0]) return;
-
     // first time we set as default the first notebook
     const firstNotebook = notebooks[0].id;
+
     setSelectedNotebookId(firstNotebook);
   }, [notebooks, selectedNotebookId]);
 
