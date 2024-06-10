@@ -88,7 +88,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const [currentSemester, setCurrentSemester] = useState<CourseTag | null>(null);
   const [selectToolbarView, setSelectToolbarView] = useState<ToolbarView>("DASHBOARD");
 
-  const [/* selectedStudent, */ setSelectedStudent] = useState<User | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [toolbarIsCollapsed, setToolbarIsCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
@@ -330,7 +330,11 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
         {!isLoading && currentSemester && allCourses[currentSemester.tagId] && (
           <>
             {selectToolbarView === "DASHBOARD" &&
-              (user.role === "INSTRUCTOR" ? <TrackingHours /> : <StudentDetail uname={user.uname} />)}
+              (user.role === "INSTRUCTOR" ? (
+                <TrackingHours />
+              ) : (
+                <StudentDetail uname={user.uname} user={selectedStudent ? selectedStudent : user} />
+              ))}
             {/* {selectToolbarView === "DASHBOARD" && (
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
             )} */}

@@ -24,9 +24,8 @@ import { roundNum } from "src/utils/common.utils";
 
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { Z_INDEX } from "@/lib/utils/constants";
 
-const StudentDetail = ({ uname }: { uname: string }) => {
+const StudentDetail = ({ uname }: { uname: string; user: any }) => {
   const db = getFirestore();
   const [trackingData, setTrackingData] = useState<any[]>([]);
   const [currentStudent, setCurrentStudent] = useState<any>({});
@@ -201,7 +200,6 @@ const StudentDetail = ({ uname }: { uname: string }) => {
         background: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
         height: "100vh",
-        zIndex: 10000,
       }}
     >
       <Container>
@@ -224,7 +222,12 @@ const StudentDetail = ({ uname }: { uname: string }) => {
               value={selectedGranularity}
               onChange={event => setSelectedGranularity(event.target.value)}
               variant="outlined"
-              sx={{ marginRight: 2, zIndex: Z_INDEX["dashboard"] + 6000 }}
+              sx={{ marginRight: 2 }}
+              MenuProps={{
+                sx: {
+                  zIndex: "9999",
+                },
+              }}
             >
               <MenuItem value="Month">Per Month</MenuItem>
               <MenuItem value="Week">Per 2-Weeks</MenuItem>
