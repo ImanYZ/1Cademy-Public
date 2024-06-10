@@ -208,6 +208,7 @@ export const MessageInput = ({
   );
 
   useEffect(() => {
+    if (!inputValue) return;
     const timeoutId = setTimeout(() => {
       createActionTrack(
         db,
