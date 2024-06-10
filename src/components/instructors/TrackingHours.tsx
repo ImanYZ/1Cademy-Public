@@ -26,7 +26,6 @@ import { roundNum } from "src/utils/common.utils";
 
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { Z_INDEX } from "@/lib/utils/constants";
 interface HoursData {
   day: string; // Assuming the day is stored as a string in the format "MM-DD-YYYY"
   semesterId: string;
@@ -309,14 +308,19 @@ const TrackingHours = () => {
       }}
     >
       <Container>
-        <Box sx={{ display: "flex", gap: "13px", py: "9px", zIndex: Z_INDEX["dashboard"] + 1 }}>
+        <Box sx={{ display: "flex", gap: "13px", py: "9px" }}>
           {Object.keys(semesters).length > 2 && (
             <Select
               value={selectedSemester}
               onChange={handleSemesterChange}
               displayEmpty
               variant="outlined"
-              sx={{ width: "500px", zIndex: 9000 }}
+              sx={{ width: "500px" }}
+              MenuProps={{
+                sx: {
+                  zIndex: "9999",
+                },
+              }}
             >
               <MenuItem value="" disabled>
                 Select Course
@@ -337,6 +341,11 @@ const TrackingHours = () => {
             }}
             displayEmpty
             variant="outlined"
+            MenuProps={{
+              sx: {
+                zIndex: "9999",
+              },
+            }}
           >
             {periods.map(period => (
               <MenuItem key={period.index} value={period.index}>
@@ -344,12 +353,17 @@ const TrackingHours = () => {
               </MenuItem>
             ))}
           </Select>
-          <LocalizationProvider dateAdapter={AdapterDayjs} sx={{ zIndex: 9000 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="--/--/--"
               value={selectedDate}
               onChange={handleDateChange}
               renderInput={params => <TextField {...params} />}
+              PopperProps={{
+                sx: {
+                  zIndex: "9999",
+                },
+              }}
             />
           </LocalizationProvider>
         </Box>
