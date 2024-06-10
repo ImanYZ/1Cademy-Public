@@ -84,12 +84,13 @@ export const trackHours = async (data: any) => {
       if (diffInMinutes > 0 && diffInMinutes <= 5) {
         trackData.totalMinutes += diffInMinutes;
         trackData.trackedMinutes.push(createdAt);
+        trackData.lastActionTime = createdAt;
       }
       if (diffInMinutes > 5) {
         trackData.totalMinutes += 1;
         trackData.trackedMinutes.push(createdAt);
+        trackData.lastActionTime = createdAt;
       }
-      trackData.lastActionTime = createdAt;
       trackDoc.ref.update(trackData);
     } else {
       // If it's the first action, just initialize lastActionTime
