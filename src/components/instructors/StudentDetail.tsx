@@ -193,6 +193,28 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
 
     await batch.commit();
   };
+  const generateTwoWeekPeriods = (startDate: any) => {
+    let periods = [];
+    let currentDate = moment(startDate);
+    let now = moment();
+    let index = 0;
+
+    while (currentDate.isBefore(now)) {
+      const periodStart = currentDate;
+      const periodEnd = moment(periodStart).add(13, "days");
+      periods.push({
+        start: periodStart,
+        end: periodEnd,
+        label: `${periodStart.format("MM/DD/YYYY")} - ${periodEnd.format("MM/DD/YYYY")}`,
+        index: index,
+      });
+      currentDate = moment(periodStart).add(14, "days");
+      index++;
+    }
+
+    return periods;
+  };
+  const periods = generateTwoWeekPeriods("2024-06-10");
 
   return (
     <Box
@@ -254,7 +276,7 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
             <TableBody>
               {filterData().map((entry: any, index: number) => (
                 <TableRow key={index}>
-                  <TableCell>{entry}</TableCell>
+                  <TableCell>{selectedGranularity === "Week" ? periods[entry - 1].label : entry}</TableCell>
                   <TableCell>{roundNum(getHoursTracked(entry))}</TableCell>
 
                   <TableCell>
@@ -262,6 +284,19 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
                       checked={isPaid(entry)}
                       onChange={() => togglePaidStatus(entry)}
                       disabled={!adminView || roundNum(getHoursTracked(entry)) === 0}
+                      sx={{
+                        "&.Mui-disabled": {
+                          color: isPaid(entry) ? "green" : "gray",
+                        },
+                        "& .MuiSvgIcon-root": {
+                          color:
+                            !adminView || roundNum(getHoursTracked(entry)) === 0
+                              ? isPaid(entry)
+                                ? "green"
+                                : "gray"
+                              : "primary.main",
+                        },
+                      }}
                     />
                   </TableCell>
                 </TableRow>
