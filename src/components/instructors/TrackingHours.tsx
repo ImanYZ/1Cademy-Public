@@ -282,11 +282,15 @@ const TrackingHours = () => {
                     sx={{
                       color: !adminView || roundNum((student.totalMinutes || 0) / 60) === 0 ? "green" : "primary.main", // Set color based on disabled state
                       "&.Mui-disabled": {
-                        color: "green", // Custom disabled color
+                        color: student.paid ? "green" : "gray", // Custom disabled color
                       },
                       "& .MuiSvgIcon-root": {
                         color:
-                          !adminView || roundNum((student.totalMinutes || 0) / 60) === 0 ? "green" : "primary.main", // Icon color based on disabled state
+                          !adminView || roundNum((student.totalMinutes || 0) / 60) === 0
+                            ? student.paid
+                              ? "green"
+                              : "gray"
+                            : "primary.main", // Icon color based on disabled state
                       },
                     }}
                   />
