@@ -21,11 +21,15 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Dayjs } from "dayjs";
 import { collection, getDocs, getFirestore, query, where, writeBatch } from "firebase/firestore";
 import moment from "moment";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { roundNum } from "src/utils/common.utils";
 
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { getAvatarName } from "@/lib/utils/Map.utils";
+
+const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 interface HoursData {
   day: string; // Assuming the day is stored as a string in the format "MM-DD-YYYY"
   semesterId: string;
@@ -161,6 +165,7 @@ const TrackingHours = () => {
 
     for (let hoursTrackDoc of hoursTrackedDocs.docs) {
       const hoursData = hoursTrackDoc.data() as HoursData;
+      if (!updatedSemesters[hoursData.semesterId]) continue;
       const students = updatedSemesters[hoursData.semesterId]?.students;
 
       if (!students.length) continue;
@@ -264,8 +269,33 @@ const TrackingHours = () => {
             {studentsList.map((student: any) => (
               <TableRow key={student.uname} style={{ textDecoration: "none", cursor: "pointer" }}>
                 <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Avatar src={student.imageUrl} alt={student.uname} sx={{ mr: 2 }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                    {/* <Avatar src={student.imageUrl} alt={student.uname} sx={{ mr: 2 }} /> */}
+                    <Box id={`${student.uname}-picture`} sx={{ "& img": { borderRadius: "50%" }, borderRadius: "8px" }}>
+                      {student.imageUrl && student.imageUrl !== "" && student.imageUrl !== DEFAULT_PROFILE_URL ? (
+                        <Image
+                          src={student.imageUrl || ""}
+                          alt={`${student.fName} ${student.lName}`}
+                          width={50}
+                          height={50}
+                          objectFit="cover"
+                          objectPosition="center center"
+                        />
+                      ) : (
+                        <Avatar
+                          sx={{
+                            width: "50px",
+                            height: "50px",
+                            color: "white",
+                            fontSize: "24px",
+                            fontWeight: "600",
+                            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+                          }}
+                        >
+                          {getAvatarName(student.fName, student.lName)}
+                        </Avatar>
+                      )}
+                    </Box>
                     <Link href={`/tracking/${student.uname}`} target="_blank" rel="noreferrer">
                       {student.fName} {student.lName}
                     </Link>

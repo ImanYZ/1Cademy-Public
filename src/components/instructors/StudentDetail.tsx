@@ -19,11 +19,14 @@ import {
 } from "@mui/material";
 import { collection, doc, getDoc, getFirestore, onSnapshot, query, where, writeBatch } from "firebase/firestore";
 import moment from "moment";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { roundNum } from "src/utils/common.utils";
 
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { getAvatarName } from "@/lib/utils/Map.utils";
+const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
 const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
   const db = getFirestore();
@@ -43,6 +46,9 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
       const user = {
         imageUrl: userData.imageUrl,
         fullName: userData.fName + " " + userData.lName,
+        fName: userData.fName,
+        lName: userData.lName,
+        uname: userData.uname,
       };
       setCurrentStudent(user);
     }
@@ -233,8 +239,40 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
             </Link>
           )}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Avatar src={currentStudent.imageUrl} alt={currentStudent.fullName} />
-            <Typography variant="h4" gutterBottom sx={{ ml: "5px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
+              {/* <Avatar src={student.imageUrl} alt={student.uname} sx={{ mr: 2 }} /> */}
+              <Box
+                id={`${currentStudent.uname}-picture`}
+                sx={{ "& img": { borderRadius: "50%" }, borderRadius: "8px" }}
+              >
+                {currentStudent.imageUrl &&
+                currentStudent.imageUrl !== "" &&
+                currentStudent.imageUrl !== DEFAULT_PROFILE_URL ? (
+                  <Image
+                    src={currentStudent.imageUrl || ""}
+                    alt={`${currentStudent.fName} ${currentStudent.lName}`}
+                    width={50}
+                    height={50}
+                    objectFit="cover"
+                    objectPosition="center center"
+                  />
+                ) : (
+                  <Avatar
+                    sx={{
+                      width: "50px",
+                      height: "50px",
+                      color: "white",
+                      fontSize: "24px",
+                      fontWeight: "600",
+                      background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+                    }}
+                  >
+                    {getAvatarName(currentStudent.fName, currentStudent.lName)}
+                  </Avatar>
+                )}
+              </Box>
+            </Box>
+            <Typography variant="h4" gutterBottom sx={{ ml: "5px", mt: "5px" }}>
               {currentStudent.fullName}
             </Typography>
           </Box>
