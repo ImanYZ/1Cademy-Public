@@ -25,7 +25,7 @@ import { roundNum } from "src/utils/common.utils";
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
-const StudentDetail = ({ uname }: { uname: string; user: any }) => {
+const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
   const db = getFirestore();
   const [trackingData, setTrackingData] = useState<any[]>([]);
   const [currentStudent, setCurrentStudent] = useState<any>({});
