@@ -43,7 +43,7 @@ const getActionIcon = (actionType: ActionTrackType) => {
   if (actionType === "NodeBookmark") return BookmarkIcon;
   if (actionType === "NodeShare") return ReplyIcon;
   if (actionType === "Search") return SearchIcon;
-  console.error("Unidentified aciontType");
+  //console.error("Unidentified aciontType");
   return null;
   // throw new Error("Unidentified aciontType");
 };

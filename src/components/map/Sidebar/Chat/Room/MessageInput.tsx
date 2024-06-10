@@ -11,6 +11,7 @@ import { IChannelMessage } from "src/chatTypes";
 
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
@@ -40,6 +41,8 @@ type MessageInputProps = {
   parentMessage?: IChannelMessage;
 };
 export const MessageInput = ({
+  db,
+  user,
   notebookRef,
   nodeBookDispatch,
   theme,
@@ -203,6 +206,26 @@ export const MessageInput = ({
     },
     [inputValue]
   );
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      createActionTrack(
+        db,
+        "MessageTyped",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user.email
+      );
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [inputValue]);
 
   const handleTyping = useCallback(
     async (e: any) => {
