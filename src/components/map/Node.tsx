@@ -29,6 +29,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { getFirestore } from "firebase/firestore";
 import moment from "moment";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
@@ -36,6 +37,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import {
   ChosenType,
@@ -351,6 +353,7 @@ const Node = ({
   findDescendantNodes,
   findAncestorNodes,
 }: NodeProps) => {
+  const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -535,6 +538,51 @@ const Node = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (!user) return;
+    if (!editable) return;
+    const timeoutId = setTimeout(() => {
+      createActionTrack(
+        db,
+        "NodeTitleChanged",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [titleCopy]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!editable) return;
+    const timeoutId = setTimeout(() => {
+      createActionTrack(
+        db,
+        "NodeContentChanged",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [contentCopy]);
+
   const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
 
   // const open = useMemo(() => {
