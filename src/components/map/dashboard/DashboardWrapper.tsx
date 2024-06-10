@@ -27,8 +27,11 @@ import React, {
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
 import { VoiceAssistant } from "src/nodeBookTypes";
 
+import StudentDetail from "@/components/instructors/StudentDetail";
+import TrackingHours from "@/components/instructors/TrackingHours";
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
+// import { Z_INDEX } from "@/lib/utils/constants";
 import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import { OpenRightSidebar } from "../../../pages/notebook";
@@ -37,7 +40,7 @@ import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
 import { DashboardToolbar } from "../Dashobard/DashboradToolbar";
 import { Assignments } from "./Assignments";
-import { Dashboard } from "./Dashboard";
+// import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
 
@@ -85,7 +88,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
   const [currentSemester, setCurrentSemester] = useState<CourseTag | null>(null);
   const [selectToolbarView, setSelectToolbarView] = useState<ToolbarView>("DASHBOARD");
 
-  const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
+  const [/* selectedStudent, */ setSelectedStudent] = useState<User | null>(null);
   const [toolbarIsCollapsed, setToolbarIsCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [rootFound, setRootFound] = useState<boolean>(false);
@@ -326,9 +329,11 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
         )}
         {!isLoading && currentSemester && allCourses[currentSemester.tagId] && (
           <>
-            {selectToolbarView === "DASHBOARD" && (
+            {selectToolbarView === "DASHBOARD" &&
+              (user.role === "INSTRUCTOR" ? <TrackingHours /> : <StudentDetail uname={user.uname} />)}
+            {/* {selectToolbarView === "DASHBOARD" && (
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
-            )}
+            )} */}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
                 voiceAssistant={voiceAssistant}

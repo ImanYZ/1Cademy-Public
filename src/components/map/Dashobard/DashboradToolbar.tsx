@@ -1,8 +1,8 @@
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import DescriptionIcon from "@mui/icons-material/Description";
-import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
+// import DescriptionIcon from "@mui/icons-material/Description";
+// import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
+// import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import {
@@ -168,7 +168,7 @@ export const DashboardToolbar = ({
             onChangeToolbarView={() => onChangeToolbarView("DASHBOARD")}
             isCollapsed={isCollapsed}
           />
-          {(user.role === "STUDENT" || user.role === "INSTRUCTOR") && (
+          {/* {(user.role === "STUDENT" || user.role === "INSTRUCTOR") && (
             <DashboardToolbarViewButton
               name="Practice"
               view="PRACTICE"
@@ -177,10 +177,10 @@ export const DashboardToolbar = ({
               onChangeToolbarView={() => onChangeToolbarView("PRACTICE")}
               isCollapsed={isCollapsed}
             />
-          )}
+          )} */}
           {user.role === "INSTRUCTOR" && (
             <>
-              <DashboardToolbarViewButton
+              {/* <DashboardToolbarViewButton
                 name="Students"
                 view="STUDENTS"
                 active={view === "STUDENTS"}
@@ -195,7 +195,7 @@ export const DashboardToolbar = ({
                 IconButton={<DescriptionIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange400 }} />}
                 onChangeToolbarView={() => onChangeToolbarView("ASSIGNMENTS")}
                 isCollapsed={isCollapsed}
-              />
+              /> */}
               <DashboardToolbarViewButton
                 name="Settings"
                 view="SETTINGS"
