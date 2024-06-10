@@ -15,7 +15,13 @@ export type IActionTrackType =
   | "Search"
   | "MessageSent"
   | "MessageReplied"
-  | "MessageEdited";
+  | "MessageEdited"
+  | "MessageTyped"
+  | "MessageReacted"
+  | "MessageTabChanged"
+  | "MessageRoomOpened"
+  | "MessageMarkUnread"
+  | "MessageMemberAdded";
 export type IActionTrackAction = "Correct" | "Wrong" | "CorrectRM" | "WrongRM" | string;
 
 export type IActionTrack = {

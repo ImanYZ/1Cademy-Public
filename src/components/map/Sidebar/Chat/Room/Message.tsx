@@ -308,7 +308,7 @@ export const Message = ({
         editedAt: new Date(),
       });
     }
-    await createActionTrack(
+    createActionTrack(
       db,
       "MessageEdited",
       "",
@@ -367,7 +367,7 @@ export const Message = ({
           newMessage: reply,
           roomType,
         });
-        await createActionTrack(
+        createActionTrack(
           db,
           "MessageReplied",
           "",
@@ -431,7 +431,7 @@ export const Message = ({
             newMessage: { ...newMessage, id: docRef.id },
             roomType,
           });
-          await createActionTrack(
+          createActionTrack(
             db,
             "MessageSent",
             "",

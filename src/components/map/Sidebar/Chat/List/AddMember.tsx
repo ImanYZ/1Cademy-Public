@@ -5,6 +5,7 @@ import { Firestore, updateDoc } from "firebase/firestore";
 import { IUser } from "src/types/IUser";
 
 import { generateChannelName } from "@/lib/utils/chat";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 
 import UserSuggestion from "../Common/UserSuggestion";
 
@@ -38,6 +39,20 @@ export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRe
       members,
       membersInfo,
     });
+    createActionTrack(
+      db,
+      "MessageMemberAdded",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
   };
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
