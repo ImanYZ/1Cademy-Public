@@ -12,7 +12,10 @@ export type IActionTrackType =
   | "NodeStudied"
   | "NodeBookmark"
   | "NodeShare"
-  | "Search";
+  | "Search"
+  | "MessageSent"
+  | "MessageReplied"
+  | "MessageEdited";
 export type IActionTrackAction = "Correct" | "Wrong" | "CorrectRM" | "WrongRM" | string;
 
 export type IActionTrack = {
