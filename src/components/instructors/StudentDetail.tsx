@@ -51,7 +51,6 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
   useEffect(() => {
     if (!uname) return;
     const leading: any = user?.claims?.leading || [];
-
     const queryTrack = query(collection(db, "trackHours"), where("uname", "==", uname));
     const unsubscribe = onSnapshot(queryTrack, snapshot => {
       const data: any = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -61,7 +60,7 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
         return dateA.diff(dateB);
       });
       if (!data.length) return;
-      if (uname !== user?.uname && !adminView && !leading.includes(data.semesterId)) return;
+      if (uname !== user?.uname && !adminView && !leading.includes(data[0].semesterId)) return;
       setTrackingData(sortedData);
 
       // Extract available months, days, and weeks from the data

@@ -14,6 +14,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import { NotFoundNotification } from "../../SidebarV2/NotificationSidebar";
@@ -307,6 +308,20 @@ export const Message = ({
         editedAt: new Date(),
       });
     }
+    createActionTrack(
+      db,
+      "MessageEdited",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
     setEditingMessage(null);
   };
 
@@ -352,6 +367,20 @@ export const Message = ({
           newMessage: reply,
           roomType,
         });
+        createActionTrack(
+          db,
+          "MessageReplied",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user.email
+        );
       } catch (error) {
         console.error(error);
       }
@@ -402,6 +431,20 @@ export const Message = ({
             newMessage: { ...newMessage, id: docRef.id },
             roomType,
           });
+          createActionTrack(
+            db,
+            "MessageSent",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            "",
+            [],
+            user.email
+          );
         }
       } catch (error) {
         console.error(error);

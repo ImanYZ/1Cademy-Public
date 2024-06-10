@@ -28,6 +28,7 @@ import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
 import { Post } from "@/lib/mapApi";
 import { generateChannelName } from "@/lib/utils/chat";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 
 import { CustomBadge } from "../../CustomBudge";
 import { ChannelsList } from "../Chat/List/Channels";
@@ -98,6 +99,20 @@ export const ChatSidebar = ({
   const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    createActionTrack(
+      db,
+      "MessageTabChanged",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
   };
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("");
@@ -327,6 +342,20 @@ export const ChatSidebar = ({
     } else {
       addReaction(message, emoji);
     }
+    createActionTrack(
+      db,
+      "MessageReacted",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
     setAnchorEl(null);
   };
   const openRoom = (type: string, channel: any) => {
@@ -336,6 +365,20 @@ export const ChatSidebar = ({
     setMessages([]);
     clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
     makeMessageRead(channel.id);
+    createActionTrack(
+      db,
+      "MessageRoomOpened",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
   };
 
   const moveBack = () => {
@@ -477,6 +520,20 @@ export const ChatSidebar = ({
       membersInfo,
     });
     await Post("/chat/markAsUnread", { roomType, message });
+    createActionTrack(
+      db,
+      "MessageMarkUnread",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
   };
 
   const makeMessageRead = async (channelId: string) => {
