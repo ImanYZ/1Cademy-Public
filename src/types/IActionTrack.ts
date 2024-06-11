@@ -12,6 +12,8 @@ export type IActionTrackType =
   | "NodeStudied"
   | "NodeBookmark"
   | "NodeShare"
+  | "NodeTitleChanged"
+  | "NodeContentChanged"
   | "Search"
   | "MessageSent"
   | "MessageReplied"
