@@ -28,7 +28,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
-const StudentDetail = ({ uname, setSelectedStudent }: { uname: string; user?: any; setSelectedStudent: any }) => {
+const StudentDetail = ({ uname, setSelectedStudent }: { uname: string; user?: any; setSelectedStudent?: any }) => {
   const db = getFirestore();
   const [trackingData, setTrackingData] = useState<any[]>([]);
   const [currentStudent, setCurrentStudent] = useState<any>({});
@@ -230,7 +230,7 @@ const StudentDetail = ({ uname, setSelectedStudent }: { uname: string; user?: an
     >
       <Container>
         <Box sx={{ display: "flex", gap: "15px", pt: "15px" }}>
-          {adminView && (
+          {adminView && setSelectedStudent && (
             <Link
               onClick={() => {
                 setSelectedStudent(null);
