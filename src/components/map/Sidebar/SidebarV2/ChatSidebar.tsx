@@ -68,6 +68,8 @@ type ChatSidebarProps = {
   openUserInfoSidebar: any;
   channels: IChannels[];
   conversations: IConversation[];
+  openChatByNotification: any;
+  setOpenChatByNotification: any;
 };
 
 export const ChatSidebar = ({
@@ -92,6 +94,8 @@ export const ChatSidebar = ({
   openUserInfoSidebar,
   channels,
   conversations,
+  openChatByNotification,
+  setOpenChatByNotification,
 }: ChatSidebarProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -125,6 +129,7 @@ export const ChatSidebar = ({
   }>({
     message: null,
   });
+  const messageRefs = useRef<any>({});
   const [anchorEl, setAnchorEl] = useState(null);
   const [forward, setForward] = useState<boolean>(false);
   const openPicker = Boolean(anchorEl);
@@ -134,6 +139,28 @@ export const ChatSidebar = ({
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
   const [newMemberSection, setNewMemberSection] = useState(false);
   const [isLoadingReaction, setIsLoadingReaction] = useState<IChannelMessage | null>(null);
+
+  useEffect(() => {
+    if (!openChatByNotification) return;
+    let findChannel = {} as IChannels;
+    if (openChatByNotification.roomType === "direct") {
+      findChannel = conversations.find(
+        conversation => conversation.id === openChatByNotification.channelId
+      ) as IChannels;
+    } else {
+      findChannel = channels.find(channel => channel.id === openChatByNotification.channelId) as IChannels;
+    }
+    if (selectedChannel?.id !== findChannel.id) {
+      openRoom(openChatByNotification.roomType, findChannel);
+      setTimeout(
+        () => scrollToMessage(openChatByNotification.messageId, openChatByNotification.messageType, 500),
+        5000
+      );
+    } else {
+      scrollToMessage(openChatByNotification.messageId, openChatByNotification.messageType, 500);
+    }
+    setOpenChatByNotification(null);
+  }, [openChatByNotification]);
 
   useEffect(() => {
     (async () => {
@@ -552,6 +579,17 @@ export const ChatSidebar = ({
     [notifications]
   );
 
+  const scrollToMessage = (id: string, type: string = "message", delay: number = 100) => {
+    if (messageRefs.current[id]) {
+      setTimeout(() => {
+        messageRefs.current[id].scrollIntoView({
+          behavior: "smooth",
+          block: type === "message" ? "center" : "end",
+        });
+      }, delay);
+    }
+  };
+
   return (
     <SidebarWrapper
       id="chat"
@@ -640,6 +678,8 @@ export const ChatSidebar = ({
                   getChannelRef={getChannelRef}
                   isLoadingReaction={isLoadingReaction}
                   makeMessageUnread={makeMessageUnread}
+                  scrollToMessage={scrollToMessage}
+                  messageRefs={messageRefs}
                 />
               )}
             </>
@@ -772,7 +812,8 @@ const areEqual = (prevProps: any, nextProps: any) => {
     prevProps.notifications === nextProps.notifications &&
     prevProps.openUserInfoSidebar === nextProps.openUserInfoSidebar &&
     prevProps.channels === nextProps.channels &&
-    prevProps.conversations === nextProps.conversations
+    prevProps.conversations === nextProps.conversations &&
+    prevProps.openChatByNotification === nextProps.openChatByNotification
   );
 };
 

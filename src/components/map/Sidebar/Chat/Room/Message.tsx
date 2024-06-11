@@ -51,6 +51,8 @@ type MessageProps = {
   getChannelRef: any;
   isLoadingReaction: IChannelMessage | null;
   makeMessageUnread: (message: IChannelMessage) => void;
+  scrollToMessage: (id: string, type?: string, delay?: number) => void;
+  messageRefs: any;
 };
 
 export const Message = ({
@@ -77,6 +79,8 @@ export const Message = ({
   getChannelRef,
   isLoadingReaction,
   makeMessageUnread,
+  scrollToMessage,
+  messageRefs,
 }: MessageProps) => {
   const db = getFirestore();
   const { nodeBookState } = useNodeBook();
@@ -90,7 +94,6 @@ export const Message = ({
   const [replyOnMessage, setReplyOnMessage] = useState<IChannelMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
   const [isDeleting, setIsDeleting] = useState<IChannelMessage | null>(null);
-  const messageRefs = useRef<any>({});
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -301,13 +304,17 @@ export const Message = ({
       });
     } else {
       const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
-
       await updateDoc(messageRef, {
         message: newMessage,
         edited: true,
         editedAt: new Date(),
       });
     }
+    Post("/chat/sendNotification", {
+      subject: "Edited by",
+      newMessage: editingMessage,
+      roomType,
+    });
     createActionTrack(
       db,
       "MessageEdited",
@@ -452,17 +459,6 @@ export const Message = ({
     },
     [messages, editingMessage, replyOnMessage]
   );
-
-  const scrollToMessage = (id: string) => {
-    if (messageRefs.current[id]) {
-      setTimeout(() => {
-        messageRefs.current[id].scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
-      }, 100);
-    }
-  };
 
   if (!selectedChannel) return <></>;
 

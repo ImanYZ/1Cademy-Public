@@ -52,6 +52,12 @@ const triggerNotifications = async (newMessage: any) => {
               title: `${subject} ${sender}`,
               body: message,
             },
+            data: {
+              messageId: newMessage?.parentMessage || newMessage.id,
+              roomType,
+              channelId,
+              messageType: subject.includes("Repl") ? "reply" : "message",
+            },
           };
           console.log(admin.messaging());
           console.log(payload);
