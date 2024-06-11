@@ -28,7 +28,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
-const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
+const StudentDetail = ({ uname, setSelectedStudent }: { uname: string; user?: any; setSelectedStudent: any }) => {
   const db = getFirestore();
   const [trackingData, setTrackingData] = useState<any[]>([]);
   const [currentStudent, setCurrentStudent] = useState<any>({});
@@ -38,7 +38,6 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
   const [availableWeeks, setAvailableWeeks] = useState<any>([]);
   const [{ user }] = useAuth();
   const adminView = !!user?.claims?.tracking;
-
   const loadUser = async (uname: string) => {
     const userDoc = await getDoc(doc(collection(db, "users"), uname));
     const userData: any = userDoc.data();
@@ -232,7 +231,11 @@ const StudentDetail = ({ uname }: { uname: string; user?: any }) => {
       <Container>
         <Box sx={{ display: "flex", gap: "15px", pt: "15px" }}>
           {adminView && (
-            <Link href="/tracking">
+            <Link
+              onClick={() => {
+                setSelectedStudent(null);
+              }}
+            >
               <Button variant="contained" color="primary" sx={{ mt: "15px" }}>
                 <ArrowBackIcon />
               </Button>
