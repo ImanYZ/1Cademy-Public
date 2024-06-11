@@ -1,7 +1,7 @@
 import dagre from "dagre";
 import { collection, doc, Firestore, getDocs, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
 import { ReputationSignal } from "src/knowledgeTypes";
-import { IActionTrack, IActionTrackType } from "src/types/IActionTrack";
+import { IActionTrack /* , IActionTrackType */ } from "src/types/IActionTrack";
 import { INodeVersion } from "src/types/INodeVersion";
 import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
@@ -1379,7 +1379,7 @@ export const generateReputationSignal = (
 
 export const createActionTrack = (
   db: Firestore,
-  type: IActionTrackType,
+  type: string,
   action: string,
   userData: {
     uname: string;
