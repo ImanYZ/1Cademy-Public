@@ -18,7 +18,11 @@ const GroupAvatar = ({ membersInfo, max = 5, size = 30 }: GroupAvatarProps) => {
     >
       {Object.keys(membersInfo).map((member: any, index: number) => {
         return (
-          <Avatar key={index} alt={membersInfo[member]?.fullname} src={membersInfo[member]?.imageUrl}>
+          <Avatar
+            key={index}
+            alt={membersInfo[member]?.fullname}
+            src={!membersInfo[member]?.imageUrl.includes("no-img") ? membersInfo[member]?.imageUrl : null}
+          >
             <Box>
               <OptimizedAvatar2
                 alt={membersInfo[member]?.fullname || ""}
