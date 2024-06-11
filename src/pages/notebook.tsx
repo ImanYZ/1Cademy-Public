@@ -1642,8 +1642,24 @@ const Notebook = ({}: NotebookProps) => {
         uInfo: uname,
         createdAt: Timestamp.fromDate(new Date()),
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "openUserInfoSidebar",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
     },
-    [db, nodeBookDispatch, user?.uname, setOpenSidebar, revertNodesOnGraph]
+    [db, nodeBookDispatch, user, setOpenSidebar, revertNodesOnGraph]
   );
 
   const getFirstParent = (childId: string) => {
@@ -2458,6 +2474,21 @@ const Notebook = ({}: NotebookProps) => {
 
         return graph;
       });
+
+      createActionTrack(
+        db,
+        "openAllChildren",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        [],
+        user.email
+      );
       lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
@@ -2579,6 +2610,21 @@ const Notebook = ({}: NotebookProps) => {
 
         return graph;
       });
+
+      createActionTrack(
+        db,
+        "openAllParent",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        [],
+        user.email
+      );
       lastNodeOperation.current = { name: "OpenAllParent", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
@@ -2676,6 +2722,20 @@ const Notebook = ({}: NotebookProps) => {
       setSelectedNotebookId(notebookId);
       await detectHtmlElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
+      createActionTrack(
+        db,
+        "openNodesOnNotebook",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user.email
+      );
     },
     [db, user]
   );
@@ -2808,10 +2868,25 @@ const Notebook = ({}: NotebookProps) => {
         //   setOpenRecentNodes(true);
         // }
       }
-
       processHeightChange(nodeId);
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       notebookRef.current.selectedNode = nodeId;
+      if (user) {
+        createActionTrack(
+          db,
+          "openNodePart",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2866,6 +2941,22 @@ const Notebook = ({}: NotebookProps) => {
           edges,
         };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "referenceLabelChange",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [setGraph]
   );
@@ -2932,6 +3023,21 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: oldNodes, edges };
       });
       event.currentTarget.blur();
+
+      createActionTrack(
+        db,
+        "markStudied",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        [],
+        user?.email
+      );
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3037,6 +3143,22 @@ const Notebook = ({}: NotebookProps) => {
       setNodeParts(nodeId, node => {
         return { ...node, disableVotes: false };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "correctNode",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [setNodeParts]
@@ -3162,6 +3284,22 @@ const Notebook = ({}: NotebookProps) => {
           });
           return { nodes, edges };
         });
+        if (user) {
+          createActionTrack(
+            db,
+            "wrongNode",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            [],
+            user?.email
+          );
+        }
       } catch (error) {
         console.error(error);
       }
@@ -3199,6 +3337,22 @@ const Notebook = ({}: NotebookProps) => {
       if (!ableToPropose) {
         setAbleToPropose(true);
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "changeChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [ableToPropose, setNodeParts]
   );
@@ -3216,6 +3370,22 @@ const Notebook = ({}: NotebookProps) => {
       });
       if (!ableToPropose) {
         setAbleToPropose(true);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "changeFeedback",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
       }
     },
     [ableToPropose, setNodeParts]
@@ -3236,6 +3406,22 @@ const Notebook = ({}: NotebookProps) => {
       if (!ableToPropose) {
         setAbleToPropose(true);
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "switchChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [ableToPropose, setNodeParts]
   );
@@ -3252,6 +3438,22 @@ const Notebook = ({}: NotebookProps) => {
       });
       if (!ableToPropose) {
         setAbleToPropose(true);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "deleteChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
       }
     },
     [ableToPropose, setNodeParts]
@@ -3273,6 +3475,22 @@ const Notebook = ({}: NotebookProps) => {
       });
       if (!ableToPropose) {
         setAbleToPropose(true);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "addChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
       }
     },
     [ableToPropose, setNodeParts]
@@ -3311,6 +3529,22 @@ const Notebook = ({}: NotebookProps) => {
       createdAt: Timestamp.fromDate(new Date()),
     });
     setOpenSidebar(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "closeSideBar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [
     user,
     graph.nodes,
@@ -3356,6 +3590,22 @@ const Notebook = ({}: NotebookProps) => {
       processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
+      if (user) {
+        createActionTrack(
+          db,
+          "proposeNodeImprovement",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [processHeightChange, revertNodesOnGraph, scrollToNode]
   );
@@ -3475,6 +3725,22 @@ const Notebook = ({}: NotebookProps) => {
         });
         return { nodes: newNodes, edges: newEdges };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "proposeNewParent",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, revertNodesOnGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
@@ -3541,6 +3807,22 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "selectNode",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
       }
     },
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
@@ -3775,6 +4057,22 @@ const Notebook = ({}: NotebookProps) => {
 
           return updatedLinks;
         });
+        if (user) {
+          createActionTrack(
+            db,
+            "saveProposedImprovement",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            notebookRef.current.selectedNode || "",
+            [],
+            user?.email
+          );
+        }
       } catch (err) {
         console.error(err);
         const errorData = {
@@ -3906,6 +4204,22 @@ const Notebook = ({}: NotebookProps) => {
         });
         return { nodes: newNodes, edges: newEdges };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "proposeNewChild",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, revertNodesOnGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
@@ -4080,6 +4394,22 @@ const Notebook = ({}: NotebookProps) => {
           scrollToNode(newNodeId);
           return { nodes, edges };
         });
+        if (user) {
+          createActionTrack(
+            db,
+            "saveProposedParentNode",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            notebookRef.current.selectedNode || "",
+            [],
+            user?.email
+          );
+        }
       } catch (err) {
         console.error(err);
         const errorData = {
@@ -4310,6 +4640,22 @@ const Notebook = ({}: NotebookProps) => {
           errorMessage: err instanceof Error ? err.message : "",
         };
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "saveProposedChildNode",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
       }
     },
     [selectedNotebookId, user, nodeBookDispatch, graph.nodes, scrollToNode, settings.showClusterOptions, allTags, db]
@@ -4666,6 +5012,22 @@ const Notebook = ({}: NotebookProps) => {
         }, 200);
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
+      if (user) {
+        createActionTrack(
+          db,
+          "onSelectProposal",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     [user?.uname, nodeBookState.selectedNode, allTags, revertNodesOnGraph, settings.showClusterOptions]
   );
@@ -4688,6 +5050,22 @@ const Notebook = ({}: NotebookProps) => {
         setProposals(proposalsTemp);
         // setIsSubmitting(false);
         scrollToNode(nodeBookState.selectedNode);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "deleteProposal",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
       }
     },
     [nodeBookState.choosingNode, nodeBookState.selectedNode, revertNodesOnGraph, scrollToNode, selectedNodeType]
@@ -4838,6 +5216,22 @@ const Notebook = ({}: NotebookProps) => {
             }
           );
         }
+        if (user) {
+          createActionTrack(
+            db,
+            "uploadNodeImage",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            [],
+            user?.email
+          );
+        }
       } catch (err) {
         console.error("Image Upload Error: ", err);
         setIsUploading(false);
@@ -4986,6 +5380,22 @@ const Notebook = ({}: NotebookProps) => {
           updatedAt: new Date(),
         });
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "rateProposal",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          newNodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [selectedNotebookId, user, nodeBookState.selectedNode, nodeBookState.choosingNode, selectedNodeType]
   );
@@ -5009,11 +5419,43 @@ const Notebook = ({}: NotebookProps) => {
 
   const onOpenSideBar = useCallback((sidebar: OpenLeftSidebar) => {
     setOpenSidebar(sidebar);
+    if (user) {
+      createActionTrack(
+        db,
+        "onOpenSideBar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, []);
 
   // this method was required to cleanup editor added, removed child and parent list
   const cleanEditorLink = useCallback(() => {
     updatedLinksRef.current = getInitialUpdateLinks();
+    if (user) {
+      createActionTrack(
+        db,
+        "cleanEditorLink",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, []);
 
   const onScrollToLastNode = () => {
@@ -5025,6 +5467,22 @@ const Notebook = ({}: NotebookProps) => {
     revertNodesOnGraph();
     if (notebookRef.current.selectedNode) scrollToNode(notebookRef.current.selectedNode);
     setOpenSidebar(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "onCloseSidebar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [revertNodesOnGraph, scrollToNode]);
 
   const onRedrawGraph = useCallback(() => {
@@ -5039,6 +5497,22 @@ const Notebook = ({}: NotebookProps) => {
     setTimeout(() => {
       setNotebookChanges({ updated: true });
     }, 200);
+    if (user) {
+      createActionTrack(
+        db,
+        "onRedrawGraph",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [setNotebookChanges]);
 
   const setSelectedNode = useCallback(
@@ -5077,14 +5551,67 @@ const Notebook = ({}: NotebookProps) => {
   const onCancelTutorial = useCallback(() => {
     if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     setTutorial(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "onCancelTutorial",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [setTutorial, tutorialTargetId]);
 
   const onCloseTableOfContent = useCallback(() => {
     setOpenProgressBar(false);
   }, []);
 
-  const onOnlyCloseSidebar = useCallback(() => setOpenSidebar(null), []);
-  const onDisplayInstructorPage = useCallback(() => setDisplayDashboard(true), []);
+  const onOnlyCloseSidebar = useCallback(() => {
+    setOpenSidebar(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "onOnlyCloseSidebar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
+  }, [user, db]);
+
+  const onDisplayInstructorPage = useCallback(() => {
+    setDisplayDashboard(true);
+    if (user) {
+      createActionTrack(
+        db,
+        "onDisplayInstructorPage",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
+  }, []);
 
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
@@ -5116,6 +5643,22 @@ const Notebook = ({}: NotebookProps) => {
       await updateDoc(tutorialRef, userTutorialUpdated);
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
+    }
+    if (user) {
+      createActionTrack(
+        db,
+        "onSkipTutorial",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
     }
   }, [
     user,
@@ -5222,6 +5765,22 @@ const Notebook = ({}: NotebookProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
+    if (user) {
+      createActionTrack(
+        db,
+        "onFinalizeTutorial",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [
     user,
     currentStep,
@@ -5282,7 +5841,22 @@ const Notebook = ({}: NotebookProps) => {
         nodeIds: [targetId],
         updatedAt: new Date(),
       });
-
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndForceTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
       return true;
     },
 
@@ -5298,6 +5872,22 @@ const Notebook = ({}: NotebookProps) => {
       if (!targetIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndRemoveTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
       }
     },
     [graph.nodes, setTutorial, dynamicTargetId, tutorial]
@@ -5323,9 +5913,25 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
       }
       startTutorial(tutorialName);
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndCallSidebarTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
       return true;
     },
-    [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+    [db, user, forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
   );
 
   const detectAndCallTutorial = useCallback(
@@ -5347,9 +5953,27 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectedNode = newTargetId;
         scrollToNode(newTargetId);
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndCallTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
       return true;
     },
     [
+      db,
+      user,
       forcedTutorial,
       graph.nodes,
       nodeBookDispatch,
@@ -6248,10 +6872,28 @@ const Notebook = ({}: NotebookProps) => {
         );
         if (result) return;
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "detectTriggerTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
     };
 
     detectTriggerTutorial();
   }, [
+    db,
+    user,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
     detectAndForceTutorial,
