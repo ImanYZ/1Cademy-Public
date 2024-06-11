@@ -230,7 +230,7 @@ const StudentDetail = ({ uname, setSelectedStudent }: { uname: string; user?: an
     >
       <Container>
         <Box sx={{ display: "flex", gap: "15px", pt: "15px" }}>
-          {adminView && setSelectedStudent && (
+          {setSelectedStudent && (
             <Link
               onClick={() => {
                 setSelectedStudent(null);

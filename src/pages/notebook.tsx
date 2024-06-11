@@ -461,6 +461,8 @@ const Notebook = ({}: NotebookProps) => {
   const [channels, setChannels] = useState<IChannels[]>([]);
   const [conversations, setConversations] = useState<IConversation[]>([]);
 
+  const [openChatByNotification, setOpenChatByNotification] = useState<any>(null);
+
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
       setNotebooks(prev => {
@@ -505,6 +507,17 @@ const Notebook = ({}: NotebookProps) => {
     if (!user) return;
     saveMessagingDeviceToken(user.userId);
   }, [user]);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", event => {
+        if (event.data && event.data.type === "NOTIFICATION_CLICKED") {
+          setOpenSidebar("CHAT");
+          setOpenChatByNotification(event.data);
+        }
+      });
+    }
+  }, []);
 
   //check if the user is instructor
   useEffect(() => {
@@ -8052,6 +8065,8 @@ const Notebook = ({}: NotebookProps) => {
                   openUserInfoSidebar={openUserInfoSidebar}
                   channels={channels}
                   conversations={conversations}
+                  openChatByNotification={openChatByNotification}
+                  setOpenChatByNotification={setOpenChatByNotification}
                 />
               )}
               {openSidebar === "SEARCHER_SIDEBAR" && (
