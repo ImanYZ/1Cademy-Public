@@ -68,9 +68,9 @@ import { INotificationNum } from "src/types/INotification";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
-import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
+// import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
 // import { Bar } from "@/components/map/Liveliness/Bar";
-import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
+// import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
@@ -409,7 +409,7 @@ const Notebook = ({}: NotebookProps) => {
     isEnabled: false,
   });
 
-  const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
+  const [openLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
 
@@ -8393,7 +8393,7 @@ const Notebook = ({}: NotebookProps) => {
 
           {/* end Data from map */}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
+          {/* {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
             <MemoizedRelativeLivelinessBar
               onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
               onlineUsers={onlineUsers}
@@ -8435,7 +8435,7 @@ const Notebook = ({}: NotebookProps) => {
               variant="absoluteReputations"
               onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
-          )}
+          )} */}
 
           {focusView.isEnabled && (
             <MemoizedFocusedNotebook
