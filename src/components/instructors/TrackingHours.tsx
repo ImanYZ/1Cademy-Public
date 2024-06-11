@@ -13,13 +13,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
+  Typography,
 } from "@mui/material";
-import TextField from "@mui/material/TextField";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Dayjs } from "dayjs";
-import { collection, getDocs, getFirestore, query, where, writeBatch } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query, runTransaction, where, writeBatch } from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -29,6 +30,8 @@ import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 
+import StudentDetail from "./StudentDetail";
+
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 interface HoursData {
   day: string; // Assuming the day is stored as a string in the format "MM-DD-YYYY"
@@ -36,6 +39,7 @@ interface HoursData {
   uname: string;
   totalMinutes: number;
   paid: boolean;
+  meetings: boolean[]; // Array to store meeting attendance for each Monday in the period
 }
 
 interface Semesters {
@@ -48,6 +52,7 @@ interface Student {
   uname: string;
   totalMinutes: number;
   paid: boolean;
+  meetings: boolean[]; // Array to store meeting attendance for each Monday in the period
 }
 
 interface Period {
@@ -56,6 +61,7 @@ interface Period {
   label: string;
   index: number;
 }
+
 const TrackingHours = () => {
   const db = getFirestore();
   const [semesters, setSemesters] = useState<any>({});
@@ -65,6 +71,7 @@ const TrackingHours = () => {
   const [{ user }] = useAuth();
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedDatePeriod, setSelectedDatePeriod] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const adminView = !!user?.claims?.tracking;
 
   const handleDateChange = (date: Dayjs | null) => {
@@ -122,17 +129,19 @@ const TrackingHours = () => {
         semestersMap[semesterDoc.id] = semesterData;
         let _students = [];
         for (let student of semesterData.students) {
-          _students.push({ ...student, semesterId: semesterDoc.id, semesterName: semesterData.title });
+          _students.push({ ...student, semesterId: semesterDoc.id, semesterName: semesterData.title, meetings: [] });
         }
         semesterData.students = _students;
       }
     }
     setSemesters(semestersMap);
   };
+
   function parseDate(dateStr: string): Date {
     const [day, month, year] = dateStr.split("-").map(Number);
     return new Date(year, month - 1, day);
   }
+
   function checkDateInRange(_start: string, _end: string, day: string): boolean {
     const start = parseDate(_start);
     const end = parseDate(_end);
@@ -140,6 +149,7 @@ const TrackingHours = () => {
 
     return _day >= start && _day <= end;
   }
+
   const loadTrackingData = async (
     semesters: Semesters,
     selectedPeriod: number,
@@ -159,6 +169,7 @@ const TrackingHours = () => {
       if (students) {
         for (const student of students) {
           student.totalMinutes = 0;
+          student.meetings = [];
         }
       }
     }
@@ -187,6 +198,7 @@ const TrackingHours = () => {
         if (visible) {
           students[studentIdx].totalMinutes = (students[studentIdx].totalMinutes || 0) + hoursData.totalMinutes;
           students[studentIdx].paid = hoursData.paid || false;
+          students[studentIdx].meetings = [...students[studentIdx].meetings, ...(hoursData.meetings || [])];
         }
       }
     }
@@ -235,6 +247,53 @@ const TrackingHours = () => {
     }
   };
 
+  const toggleMeetingStatus = async (uname: string, semesterId: string, meeting: any) => {
+    const students = trackedStudents[semesterId].students;
+    const studentIdx = students.findIndex((s: any) => s.uname === uname);
+
+    if (studentIdx !== -1 && meeting.day) {
+      let student = students[studentIdx];
+      const meetingsIdx = student.meetings.findIndex((m: any) => m.day === meeting.day);
+      if (meetingsIdx !== -1) {
+        student.meetings[meetingsIdx].attended = !student.meetings[meetingsIdx].attended;
+        if (student.meetings[meetingsIdx].attended) {
+          student.totalMinutes += 60;
+        } else {
+          student.totalMinutes -= 60;
+        }
+      }
+      setTrackedStudents({ ...trackedStudents });
+      const docQuery = query(
+        collection(db, "trackHours"),
+        where("uname", "==", uname),
+        where("semesterId", "==", semesterId),
+        where("day", "==", meeting.day)
+      );
+      const hoursDocs = await getDocs(docQuery);
+
+      await runTransaction(db, async (transaction: any) => {
+        for (const doc of hoursDocs.docs) {
+          const docRef = doc.ref;
+          const docData = (await transaction.get(docRef)).data();
+          const currentMeetings = docData?.meetings || [];
+
+          if (currentMeetings.length > 0) {
+            currentMeetings[0].attended = !currentMeetings[0].attended;
+            let totalMinutes: number = docData?.totalMinutes || 0;
+
+            if (currentMeetings[0].attended) {
+              totalMinutes += 60;
+            } else {
+              totalMinutes -= 60;
+            }
+
+            transaction.update(docRef, { meetings: currentMeetings, totalMinutes });
+          }
+        }
+      });
+    }
+  };
+
   const renderTable = () => {
     let studentsList: any = [];
     if (selectedSemester && trackedStudents[selectedSemester]) {
@@ -261,8 +320,9 @@ const TrackingHours = () => {
             <TableRow>
               <TableCell>Student Name</TableCell>
               <TableCell>Hours Tracked</TableCell>
-              <TableCell>Course</TableCell>
+              {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Paid</TableCell>
+              {(!adminView || user?.uname === "1man") && <TableCell>Meetings</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -270,7 +330,6 @@ const TrackingHours = () => {
               <TableRow key={student.uname} style={{ textDecoration: "none", cursor: "pointer" }}>
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                    {/* <Avatar src={student.imageUrl} alt={student.uname} sx={{ mr: 2 }} /> */}
                     <Box id={`${student.uname}-picture`} sx={{ "& img": { borderRadius: "50%" }, borderRadius: "8px" }}>
                       {student.imageUrl && student.imageUrl !== "" && student.imageUrl !== DEFAULT_PROFILE_URL ? (
                         <Image
@@ -296,13 +355,19 @@ const TrackingHours = () => {
                         </Avatar>
                       )}
                     </Box>
-                    <Link href={`/tracking/${student.uname}`} target="_blank" rel="noreferrer">
+                    <Link
+                      onClick={() => {
+                        setSelectedStudent(student.uname);
+                      }}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                       {student.fName} {student.lName}
                     </Link>
                   </Box>
                 </TableCell>
                 <TableCell>{roundNum((student.totalMinutes || 0) / 60)}</TableCell>
-                <TableCell>{student.semesterName}</TableCell>
+                {Object.keys(semesters).length > 2 && <TableCell>{student.semesterName}</TableCell>}
 
                 <TableCell>
                   <Checkbox
@@ -325,6 +390,24 @@ const TrackingHours = () => {
                     }}
                   />
                 </TableCell>
+                {(!adminView || user?.uname === "1man") && (
+                  <TableCell>
+                    {(student.meetings || []).map((meeting: any, meetingIdx: number) => (
+                      <Box
+                        key={`${student.uname}-meeting-${meetingIdx}`}
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <Typography>{meeting.day}</Typography>
+                        <Checkbox
+                          checked={meeting.attended}
+                          onChange={() => {
+                            toggleMeetingStatus(student.uname, student.semesterId, meeting);
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
@@ -334,77 +417,83 @@ const TrackingHours = () => {
   };
 
   return (
-    <Box
-      sx={{
-        background: theme =>
-          theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
-        height: "100vh",
-      }}
-    >
-      <Container>
-        <Box sx={{ display: "flex", gap: "13px", py: "9px" }}>
-          {Object.keys(semesters).length > 2 && (
-            <Select
-              value={selectedSemester}
-              onChange={handleSemesterChange}
-              displayEmpty
-              variant="outlined"
-              sx={{ width: "500px" }}
-              MenuProps={{
-                sx: {
-                  zIndex: "9999",
-                },
-              }}
-            >
-              <MenuItem value="" disabled>
-                Select Course
-              </MenuItem>
-              <MenuItem value="">All Courses</MenuItem>
-              {Object.keys(semesters).map(semesterId => (
-                <MenuItem key={semesterId} value={semesterId}>
-                  {semesters[semesterId].title}
-                </MenuItem>
-              ))}
-            </Select>
-          )}
-          <Select
-            value={selectedPeriod}
-            onChange={(event: any) => {
-              setSelectedPeriod(event.target.value);
-              setSelectedDate(null);
-            }}
-            displayEmpty
-            variant="outlined"
-            MenuProps={{
-              sx: {
-                zIndex: "9999",
-              },
-            }}
-          >
-            {periods.map(period => (
-              <MenuItem key={period.index} value={period.index}>
-                {period.label}
-              </MenuItem>
-            ))}
-          </Select>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="--/--/--"
-              value={selectedDate}
-              onChange={handleDateChange}
-              renderInput={params => <TextField {...params} />}
-              PopperProps={{
-                sx: {
-                  zIndex: "9999",
-                },
-              }}
-            />
-          </LocalizationProvider>
-        </Box>
+    <>
+      {selectedStudent ? (
+        <StudentDetail uname={selectedStudent} setSelectedStudent={setSelectedStudent} />
+      ) : (
+        <Box
+          sx={{
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
+            height: "100vh",
+          }}
+        >
+          <Container>
+            <Box sx={{ display: "flex", gap: "13px", py: "9px" }}>
+              {Object.keys(semesters).length > 2 && (
+                <Select
+                  value={selectedSemester}
+                  onChange={handleSemesterChange}
+                  displayEmpty
+                  variant="outlined"
+                  sx={{ width: "500px" }}
+                  MenuProps={{
+                    sx: {
+                      zIndex: "9999",
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    Select Course
+                  </MenuItem>
+                  <MenuItem value="">All Courses</MenuItem>
+                  {Object.keys(semesters).map(semesterId => (
+                    <MenuItem key={semesterId} value={semesterId}>
+                      {semesters[semesterId].title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+              <Select
+                value={selectedPeriod}
+                onChange={(event: any) => {
+                  setSelectedPeriod(event.target.value);
+                  setSelectedDate(null);
+                }}
+                displayEmpty
+                variant="outlined"
+                MenuProps={{
+                  sx: {
+                    zIndex: "9999",
+                  },
+                }}
+              >
+                {periods.map(period => (
+                  <MenuItem key={period.index} value={period.index}>
+                    {period.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="--/--/--"
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  renderInput={params => <TextField {...params} />}
+                  PopperProps={{
+                    sx: {
+                      zIndex: "9999",
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+            </Box>
 
-        {renderTable()}
-      </Container>
-    </Box>
+            {renderTable()}
+          </Container>
+        </Box>
+      )}
+    </>
   );
 };
 
