@@ -23,9 +23,11 @@ const OptimizedAvatar2: FC<Props> = ({ imageUrl, alt, size, onClick, quality = 5
     <Box
       onClick={onClick}
       sx={{
-        minWidth: `${size}px`,
-        width: `${size}px`,
-        height: `${size}px`,
+        ...(size > 0 && {
+          minWidth: `${size}px`,
+          width: `${size}px`,
+          height: `${size}px`,
+        }),
         position: "relative",
         borderRadius: "50%",
         cursor: "pointer",
