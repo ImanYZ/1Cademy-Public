@@ -490,6 +490,11 @@ export const ChatSidebar = ({
     );
     if (filteredResults) {
       const conversationData: any = filteredResults.data();
+      if (conversationData?.deleted) {
+        await updateDoc(doc(db, "conversations", filteredResults.id), {
+          deleted: false,
+        });
+      }
       openRoom("direct", { ...conversationData, id: filteredResults.id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
@@ -515,6 +520,7 @@ export const ChatSidebar = ({
         title: generateChannelName(membersInfo, user),
         members: [user2.uname, user?.uname],
         membersInfo,
+        deleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
