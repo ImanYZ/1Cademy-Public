@@ -2917,6 +2917,10 @@ right: 5px; */
   display: block;
 }
 
+.direct-channel:hover > .direct-channel-delete {
+  display: block;
+}
+
 #message-box::-webkit-scrollbar {
   display: none;
 }

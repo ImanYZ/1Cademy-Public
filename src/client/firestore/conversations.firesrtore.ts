@@ -15,7 +15,7 @@ export const getConversationsSnapshot = (
   callback: (changes: conversationChange[]) => void
 ): Unsubscribe => {
   const channelRef = collection(db, "conversations");
-  let q = query(channelRef, where("members", "array-contains", data.username));
+  let q = query(channelRef, where("members", "array-contains", data.username), where("deleted", "==", false));
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 

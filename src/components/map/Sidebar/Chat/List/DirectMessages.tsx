@@ -1,9 +1,10 @@
-import { Paper, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Firestore } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { doc, Firestore, updateDoc } from "firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
 import { IConversation } from "src/chatTypes";
 
 import { CustomBadge } from "@/components/map/CustomBudge";
@@ -45,6 +46,17 @@ export const DirectMessagesList = ({
       }, {})
     );
   }, [notifications]);
+
+  const handleDeleteChannel = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>, conversation: IConversation) => {
+      event.stopPropagation();
+      const channelRef = doc(db, "conversations", conversation.id);
+      await updateDoc(channelRef, {
+        deleted: true,
+      });
+    },
+    []
+  );
 
   const OverlappingAvatars = ({ members }: any) => {
     if (!user?.uname) return <></>;
@@ -91,11 +103,12 @@ export const DirectMessagesList = ({
       </Box>
       {conversations.map((conversation: IConversation, idx: number) => (
         <Paper
+          className="direct-channel"
           onClick={() => openRoom("direct", conversation)}
           key={idx}
           elevation={3}
-          className="CollapsedProposal collection-item"
           sx={{
+            position: "relative",
             display: "flex",
             flexDirection: "column",
             padding: "12px 16px 10px 16px",
@@ -162,6 +175,21 @@ export const DirectMessagesList = ({
               />
             )}
           </Box>
+          <IconButton
+            className="direct-channel-delete"
+            sx={{
+              position: "absolute",
+              right: "0px",
+              top: "-5px",
+              display: "none",
+              width: "30px",
+              height: "30px",
+              p: "3px",
+            }}
+            onClick={e => handleDeleteChannel(e, conversation)}
+          >
+            <CloseIcon />
+          </IconButton>
         </Paper>
       ))}
     </Box>
