@@ -1,8 +1,14 @@
 import {
   Avatar,
   Box,
+  Button,
   Checkbox,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Link,
   MenuItem,
   Paper,
@@ -19,8 +25,21 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { Dayjs } from "dayjs";
-import { collection, getDocs, getFirestore, query, runTransaction, where, writeBatch } from "firebase/firestore";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import dayjs, { Dayjs } from "dayjs";
+import {
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  query,
+  runTransaction,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -29,6 +48,7 @@ import { roundNum } from "src/utils/common.utils";
 import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
+import { newId } from "@/lib/utils/newFirestoreId";
 
 import StudentDetail from "./StudentDetail";
 
@@ -39,7 +59,8 @@ interface HoursData {
   uname: string;
   totalMinutes: number;
   paid: boolean;
-  meetings: boolean[]; // Array to store meeting attendance for each Monday in the period
+  meetings: any[]; // Array to store meeting attendance for each Monday in the period
+  shortMeetings: any[];
 }
 
 interface Semesters {
@@ -52,7 +73,13 @@ interface Student {
   uname: string;
   totalMinutes: number;
   paid: boolean;
-  meetings: boolean[]; // Array to store meeting attendance for each Monday in the period
+  meetings: any[];
+  shortMeetings: any[];
+  imageUrl: string;
+  fName: string;
+  lName: string;
+  semesterId: string;
+  semesterName: string;
 }
 
 interface Period {
@@ -60,6 +87,13 @@ interface Period {
   end: moment.Moment;
   label: string;
   index: number;
+}
+interface Meeting {
+  sTimestamp: Timestamp;
+  eTimestamp: Timestamp;
+  meetingId: string;
+  duration: number;
+  day: string;
 }
 
 const TrackingHours = () => {
@@ -71,7 +105,13 @@ const TrackingHours = () => {
   const [{ user }] = useAuth();
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [selectedDatePeriod, setSelectedDatePeriod] = useState<any>(null);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [selectedStudentForMeeting, setSelectedStudentForMeeting] = useState<any>({});
+  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+  const [activityDate, setActivityDate] = useState<Dayjs | null>(dayjs());
+  const [startTime, setStartTime] = useState<any>(null);
+  const [endTime, setEndTime] = useState<any>(null);
+
   const adminView = !!user?.claims?.tracking;
 
   const handleDateChange = (date: Dayjs | null) => {
@@ -170,6 +210,7 @@ const TrackingHours = () => {
         for (const student of students) {
           student.totalMinutes = 0;
           student.meetings = [];
+          student.shortMeetings = [];
         }
       }
     }
@@ -199,6 +240,10 @@ const TrackingHours = () => {
           students[studentIdx].totalMinutes = (students[studentIdx].totalMinutes || 0) + hoursData.totalMinutes;
           students[studentIdx].paid = hoursData.paid || false;
           students[studentIdx].meetings = [...students[studentIdx].meetings, ...(hoursData.meetings || [])];
+          students[studentIdx].shortMeetings = [
+            ...students[studentIdx].shortMeetings,
+            ...(hoursData.shortMeetings || []),
+          ];
         }
       }
     }
@@ -303,7 +348,109 @@ const TrackingHours = () => {
         studentsList = studentsList.concat(semester.students);
       });
     }
-    if (!adminView && Object.keys(semesters).length <= 0) return;
+
+    if (!adminView && Object.keys(semesters).length <= 0) return null;
+
+    const handleOpenDialog = (student: any) => {
+      setSelectedStudentForMeeting(student);
+      setDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+      setDialogOpen(false);
+      setSelectedStudent(null);
+    };
+    const getActivityTimeStamps = (aDate: Dayjs, sTime: Dayjs, eTime: Dayjs) => {
+      const year = aDate.year();
+      const month = aDate.month();
+      const date = aDate.date();
+      const formattedDay = aDate.format("DD-MM-YYYY");
+
+      const startHours = sTime.hour();
+      const startMinutes = sTime.minute();
+      const endHours = eTime.hour();
+      const endMinutes = eTime.minute();
+
+      const stTime = new Date(year, month, date, startHours, startMinutes);
+      const etTime = new Date(year, month, date, endHours, endMinutes);
+
+      const sTimestamp = Timestamp.fromDate(stTime);
+      const eTimestamp = Timestamp.fromDate(etTime);
+
+      return { sTimestamp, eTimestamp, formattedDay };
+    };
+
+    const handleSaveMeeting = async () => {
+      try {
+        if (!activityDate) {
+          return;
+        }
+        const { sTimestamp, eTimestamp, formattedDay } = getActivityTimeStamps(activityDate, startTime, endTime);
+        const trackingQuery = query(
+          collection(db, "trackHours"),
+          where("uname", "==", selectedStudentForMeeting.uname),
+          where("day", "==", formattedDay)
+        );
+
+        const trackingDocs = await getDocs(trackingQuery);
+        const duration = endTime.diff(startTime, "minutes");
+        if (trackingDocs.docs.length > 0) {
+          const trackingData = trackingDocs.docs[0].data();
+          const shortMeetings: Meeting[] = trackingData.shortMeetings || [];
+
+          const intersectingMeeting = shortMeetings.some(
+            meeting => sTimestamp < meeting.eTimestamp && eTimestamp > meeting.sTimestamp
+          );
+          if (intersectingMeeting) {
+            throw new Error("New meeting time intersects with an existing meeting.");
+          } else {
+            shortMeetings.push({
+              sTimestamp,
+              eTimestamp,
+              duration,
+              meetingId: newId(db),
+              day: formattedDay,
+            });
+            const docRef = trackingDocs.docs[0].ref;
+            await updateDoc(docRef, {
+              shortMeetings,
+              totalMinutes: trackingData.totalMinutes + endTime.diff(startTime, "minutes"),
+            });
+          }
+        } else {
+          const newDocumentRef = doc(collection(db, "trackHours"));
+          const newDocument = {
+            day: formattedDay,
+            totalMinutes: 0,
+            trackedMinutes: [],
+            uname: selectedStudentForMeeting.uname,
+            lName: selectedStudentForMeeting.lName,
+            imageUrl: selectedStudentForMeeting.imageUrl,
+            email: selectedStudentForMeeting.email,
+            chooseUname: false,
+            fName: selectedStudentForMeeting.fName,
+            semesterId: selectedStudentForMeeting.semesterId,
+            semesterName: selectedStudentForMeeting.semesterName,
+            lastActionTime: new Date(),
+            createdAt: new Date(),
+            shortMeetings: [
+              {
+                sTimestamp,
+                eTimestamp,
+                duration,
+                meetingId: newId(db),
+                day: formattedDay,
+              },
+            ],
+          };
+          setDoc(newDocumentRef, newDocument);
+        }
+        setDialogOpen(false);
+        setSelectedStudent(null);
+      } catch (error) {
+        console.error("Error saving meeting:", error);
+      }
+    };
 
     return (
       <TableContainer component={Paper} sx={{ overflow: "auto", height: "100vh" }}>
@@ -318,15 +465,17 @@ const TrackingHours = () => {
             }}
           >
             <TableRow>
-              <TableCell>Student Name</TableCell>
+              <TableCell>Intern</TableCell>
               <TableCell>Hours Tracked</TableCell>
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Meetings</TableCell>
+              {(!adminView || user?.uname === "1man") && <TableCell>Meetings</TableCell>}
+              <TableCell>1:1 Meetings</TableCell>
               <TableCell>Paid</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {studentsList.map((student: any) => (
+            {studentsList.map((student: Student) => (
               <TableRow key={student.uname} style={{ textDecoration: "none", cursor: "pointer" }}>
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: "15px" }}>
@@ -392,14 +541,35 @@ const TrackingHours = () => {
                   ))}
                 </TableCell>
                 <TableCell>
+                  {(student.shortMeetings || []).map((meeting: any, meetingIdx: number) => (
+                    <Box
+                      key={`${student.uname}-meeting-${meetingIdx}`}
+                      sx={{ display: "flex", alignItems: "center", gap: "5px" }}
+                    >
+                      <Typography>{meeting.duration} Min.</Typography>
+                      <Typography>in {meeting.day}</Typography>
+                    </Box>
+                  ))}
+                  {!adminView && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleOpenDialog(student)}
+                      sx={{ mt: "15px" }}
+                    >
+                      Add 1:1 Meeting
+                    </Button>
+                  )}
+                </TableCell>
+                <TableCell>
                   <Checkbox
                     checked={student.paid}
                     onChange={() => togglePaidStatus(student.uname, student.semesterId)}
                     disabled={!adminView || roundNum((student.totalMinutes || 0) / 60) === 0}
                     sx={{
-                      color: !adminView || roundNum((student.totalMinutes || 0) / 60) === 0 ? "green" : "primary.main", // Set color based on disabled state
+                      color: !adminView || roundNum((student.totalMinutes || 0) / 60) === 0 ? "green" : "primary.main",
                       "&.Mui-disabled": {
-                        color: student.paid ? "green" : "gray", // Custom disabled color
+                        color: student.paid ? "green" : "gray",
                       },
                       "& .MuiSvgIcon-root": {
                         color:
@@ -407,7 +577,7 @@ const TrackingHours = () => {
                             ? student.paid
                               ? "green"
                               : "gray"
-                            : "primary.main", // Icon color based on disabled state
+                            : "primary.main",
                       },
                     }}
                   />
@@ -416,6 +586,77 @@ const TrackingHours = () => {
             ))}
           </TableBody>
         </Table>
+        <Dialog open={dialogOpen} onClose={handleCloseDialog} sx={{ zIndex: 9998 }}>
+          <DialogTitle>Add 1:1 Meeting</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Enter the details of the 1:1 meeting with{" "}
+              <strong style={{ color: "orange" }}>
+                {selectedStudentForMeeting.fName} {selectedStudentForMeeting.lName}
+              </strong>
+              :
+            </DialogContentText>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Box sx={{ display: "flex", mt: "25px", gap: "12px" }}>
+                <Box className="ActivityDateTimePicker">
+                  <DatePicker
+                    label="Meeting Date"
+                    value={activityDate}
+                    onChange={newValue => {
+                      setActivityDate(newValue);
+                    }}
+                    renderInput={params => <TextField {...params} />}
+                    PopperProps={{
+                      sx: {
+                        zIndex: "9999",
+                      },
+                    }}
+                  />
+                </Box>
+                <Box className="ActivityDateTimePicker">
+                  <TimePicker
+                    className="ActivityDateTimePicker"
+                    label="Start Time"
+                    value={startTime}
+                    onChange={newValue => {
+                      setStartTime(newValue);
+                    }}
+                    renderInput={params => <TextField {...params} />}
+                    PopperProps={{
+                      sx: {
+                        zIndex: "9999",
+                      },
+                    }}
+                  />
+                </Box>
+                <Box className="ActivityDateTimePicker">
+                  <TimePicker
+                    className="ActivityDateTimePicker"
+                    label="End Time"
+                    value={endTime}
+                    onChange={newValue => {
+                      setEndTime(newValue);
+                    }}
+                    renderInput={params => <TextField {...params} />}
+                    PopperProps={{
+                      sx: {
+                        zIndex: "9999",
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            </LocalizationProvider>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveMeeting} color="primary">
+              Add
+            </Button>
+          </DialogActions>
+        </Dialog>
       </TableContainer>
     );
   };

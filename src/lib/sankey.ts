@@ -82,14 +82,16 @@ export default function Sankey() {
       node.sourceLinks = [];
       node.targetLinks = [];
     });
-    links.forEach(function (link) {
-      var source = link.source,
-        target = link.target;
-      if (typeof source === "number") source = link.source = nodes[link.source];
-      if (typeof target === "number") target = link.target = nodes[link.target];
-      source.sourceLinks.push(link);
-      target.targetLinks.push(link);
-    });
+    if (links.length > 0) {
+      links.forEach(function (link) {
+        var source = link.source,
+          target = link.target;
+        if (typeof source === "number") source = link.source = nodes[link.source];
+        if (typeof target === "number") target = link.target = nodes[link.target];
+        source.sourceLinks.push(link);
+        target.targetLinks.push(link);
+      });
+    }
   }
 
   // Compute the value (size) of each node by summing the associated links.
