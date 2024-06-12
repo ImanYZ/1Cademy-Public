@@ -321,8 +321,8 @@ const TrackingHours = () => {
               <TableCell>Student Name</TableCell>
               <TableCell>Hours Tracked</TableCell>
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
+              <TableCell>Meetings</TableCell>
               <TableCell>Paid</TableCell>
-              {(!adminView || user?.uname === "1man") && <TableCell>Meetings</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -368,7 +368,29 @@ const TrackingHours = () => {
                 </TableCell>
                 <TableCell>{roundNum((student.totalMinutes || 0) / 60)}</TableCell>
                 {Object.keys(semesters).length > 2 && <TableCell>{student.semesterName}</TableCell>}
-
+                <TableCell>
+                  {(student.meetings || []).map((meeting: any, meetingIdx: number) => (
+                    <Box key={`${student.uname}-meeting-${meetingIdx}`} sx={{ display: "flex", alignItems: "center" }}>
+                      <Typography>{meeting.day}</Typography>
+                      <Checkbox
+                        checked={meeting.attended}
+                        onChange={() => {
+                          toggleMeetingStatus(student.uname, student.semesterId, meeting);
+                        }}
+                        sx={{
+                          color: adminView ? "green" : "primary.main",
+                          "&.Mui-disabled": {
+                            color: meeting.attended ? "green" : "gray",
+                          },
+                          "& .MuiSvgIcon-root": {
+                            color: adminView ? (meeting.attended ? "green" : "gray") : "primary.main",
+                          },
+                        }}
+                        disabled={adminView}
+                      />
+                    </Box>
+                  ))}
+                </TableCell>
                 <TableCell>
                   <Checkbox
                     checked={student.paid}
@@ -390,24 +412,6 @@ const TrackingHours = () => {
                     }}
                   />
                 </TableCell>
-                {(!adminView || user?.uname === "1man") && (
-                  <TableCell>
-                    {(student.meetings || []).map((meeting: any, meetingIdx: number) => (
-                      <Box
-                        key={`${student.uname}-meeting-${meetingIdx}`}
-                        sx={{ display: "flex", alignItems: "center" }}
-                      >
-                        <Typography>{meeting.day}</Typography>
-                        <Checkbox
-                          checked={meeting.attended}
-                          onChange={() => {
-                            toggleMeetingStatus(student.uname, student.semesterId, meeting);
-                          }}
-                        />
-                      </Box>
-                    ))}
-                  </TableCell>
-                )}
               </TableRow>
             ))}
           </TableBody>
