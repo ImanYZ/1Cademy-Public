@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, Paper, Typography } from "@mui/material";
+import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -94,6 +94,7 @@ export const Message = ({
   const [replyOnMessage, setReplyOnMessage] = useState<IChannelMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
   const [isDeleting, setIsDeleting] = useState<IChannelMessage | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -137,6 +138,7 @@ export const Message = ({
       messagesObject[formattedDate].push(message);
     });
     setMessagesByDate(messagesObject);
+    setIsLoading(false);
   }, [messages]);
 
   useEffect(() => {
@@ -169,10 +171,11 @@ export const Message = ({
     },
     [setSelectedMessage, setForward]
   );
+
   // const scroll = () => {
-  //   if (messageBoxRef.current && messages.length > 2) {
   //     messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
   //   }
+  //   if (messageBoxRef.current && messages.length > 2) {
   // };
 
   useEffect(() => {
@@ -190,13 +193,11 @@ export const Message = ({
   }, [messages]);
 
   useEffect(() => {
+    setIsLoading(true);
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
       setTimeout(() => {
-        if (firstLoad) {
-          setFirstLoad(false);
-          scrollToBottom();
-        }
+        setFirstLoad(false);
       }, 500);
     };
     const killSnapshot = getChannelMesasgesSnapshot(
@@ -205,7 +206,14 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [db, firstLoad]);
+  }, [db]);
+
+  useEffect(() => {
+    if (!messages.length) return;
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+  }, [messages]);
 
   const scrollToBottom = () => {
     if (scrolling.current) {
@@ -312,7 +320,7 @@ export const Message = ({
     }
     Post("/chat/sendNotification", {
       subject: "Edited by",
-      newMessage: editingMessage,
+      newMessage: { ...editingMessage, message: newMessage },
       roomType,
     });
     createActionTrack(
@@ -461,6 +469,13 @@ export const Message = ({
   );
 
   if (!selectedChannel) return <></>;
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: "50%" }}>
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   return (
     <Box
