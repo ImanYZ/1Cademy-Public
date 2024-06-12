@@ -24,7 +24,6 @@ import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
 import { NodeLink } from "./NodeLink";
-import { Reply } from "./Reply";
 
 dayjs.extend(relativeTime);
 type MessageProps = {
@@ -138,6 +137,11 @@ export const Message = ({
       messagesObject[formattedDate].push(message);
     });
     setMessagesByDate(messagesObject);
+    if (isLoading) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
     setIsLoading(false);
   }, [messages]);
 
@@ -207,13 +211,6 @@ export const Message = ({
     );
     return () => killSnapshot();
   }, [db]);
-
-  useEffect(() => {
-    if (!messages.length) return;
-    setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-  }, [messages]);
 
   const scrollToBottom = () => {
     if (scrolling.current) {
@@ -666,7 +663,7 @@ export const Message = ({
             width: { xs: `${window.innerWidth - 30}px`, sm: `${sidebarWidth - 32}px` },
           }}
         >
-          {replyOnMessage && !replyOnMessage?.notVisible && (
+          {/* {replyOnMessage && !replyOnMessage?.notVisible && (
             <Paper>
               <Reply
                 message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
@@ -674,7 +671,7 @@ export const Message = ({
                 sx={{ py: "5px", mb: "5px" }}
               />
             </Paper>
-          )}
+          )} */}
           <MessageInput
             notebookRef={notebookRef}
             nodeBookDispatch={nodeBookDispatch}
