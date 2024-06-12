@@ -353,31 +353,30 @@ export const MessageLeft = ({
                   )}
                 </Fragment>
               ))}
-              {message.replies.length > 0 && (
-                <Box sx={{ ml: "37px", mt: 2 }}>
-                  <MessageInput
-                    notebookRef={notebookRef}
-                    nodeBookDispatch={nodeBookDispatch}
-                    db={db}
-                    theme={"Dark"}
-                    placeholder={"Type your reply..."}
-                    channelUsers={channelUsers}
-                    sendMessageType={"reply"}
-                    toggleEmojiPicker={toggleEmojiPicker}
-                    leading={leading}
-                    getMessageRef={getMessageRef}
-                    selectedChannel={selectedChannel}
-                    replyOnMessage={message}
-                    setReplyOnMessage={setReplyOnMessage}
-                    user={user}
-                    setMessages={setMessages}
-                    roomType={roomType}
-                    sendMessage={sendMessage}
-                    sendReplyOnMessage={sendReplyOnMessage}
-                    parentMessage={message}
-                  />
-                </Box>
-              )}
+
+              <Box sx={{ ml: "37px", mt: 2 }}>
+                <MessageInput
+                  notebookRef={notebookRef}
+                  nodeBookDispatch={nodeBookDispatch}
+                  db={db}
+                  theme={"Dark"}
+                  placeholder={"Type your reply..."}
+                  channelUsers={channelUsers}
+                  sendMessageType={"reply"}
+                  toggleEmojiPicker={toggleEmojiPicker}
+                  leading={leading}
+                  getMessageRef={getMessageRef}
+                  selectedChannel={selectedChannel}
+                  replyOnMessage={message}
+                  setReplyOnMessage={setReplyOnMessage}
+                  user={user}
+                  setMessages={setMessages}
+                  roomType={roomType}
+                  sendMessage={sendMessage}
+                  sendReplyOnMessage={sendReplyOnMessage}
+                  parentMessage={message}
+                />
+              </Box>
             </Box>
           )}
         </Box>
