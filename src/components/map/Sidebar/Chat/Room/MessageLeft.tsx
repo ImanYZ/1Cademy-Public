@@ -2,7 +2,7 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -280,7 +280,7 @@ export const MessageLeft = ({
               }}
             >
               {(message.replies || []).map((reply: any, idx: number) => (
-                <>
+                <Fragment key={reply?.id}>
                   {reply?.node?.id ? (
                     <NodeLink
                       db={db}
@@ -351,7 +351,7 @@ export const MessageLeft = ({
                       makeMessageUnread={makeMessageUnread}
                     />
                   )}
-                </>
+                </Fragment>
               ))}
               {message.replies.length > 0 && (
                 <Box sx={{ ml: "37px", mt: 2 }}>
