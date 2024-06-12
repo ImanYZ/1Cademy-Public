@@ -701,7 +701,7 @@ export const ChatSidebar = ({
               >
                 <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"} variant="fullWidth">
                   {[
-                    { title: "News", type: "announcement" },
+                    { title: "News", type: "news" },
                     { title: "Channels", type: "channel" },
                     { title: "Direct", type: "direct" },
                   ].map((tabItem: any, idx: number) => (
