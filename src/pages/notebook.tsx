@@ -3880,7 +3880,6 @@ const Notebook = ({}: NotebookProps) => {
         if (!referencesOK) return;
 
         const {
-          courseExist,
           isInstructor,
           instantApprove,
         }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
@@ -3986,11 +3985,15 @@ const Notebook = ({}: NotebookProps) => {
             delete postData.top;
             delete postData.height;
             let willBeApproved = false;
-            if (courseExist || isInstructor) {
-              willBeApproved = instantApprove;
-            } else {
-              willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-            }
+
+            willBeApproved = isVersionApproved({
+              corrects: 1,
+              wrongs: 0,
+              nodeData: newNode,
+              instantApprove,
+              isInstructor,
+            });
+
             lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
 
             if (willBeApproved) {
@@ -4490,7 +4493,10 @@ const Notebook = ({}: NotebookProps) => {
           return;
         }
 
-        const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
+        const {
+          instantApprove,
+          isInstructor,
+        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
             tagIds,
@@ -4572,12 +4578,13 @@ const Notebook = ({}: NotebookProps) => {
 
           const parentNode = graph.nodes[newNode.parents[0].node];
 
-          let willBeApproved = false;
-          if (courseExist) {
-            willBeApproved = instantApprove;
-          } else {
-            willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-          }
+          const willBeApproved = isVersionApproved({
+            corrects: 1,
+            wrongs: 0,
+            nodeData: parentNode,
+            instantApprove,
+            isInstructor,
+          });
 
           const nodePartChanges = {
             editable: false,
@@ -5339,16 +5346,14 @@ const Notebook = ({}: NotebookProps) => {
           "/instructor/course/checkInstantApprovalForProposalVote",
           checkInstantApproval
         );
-        let willBeApproved: boolean = false;
-        if (voteType === "Correct" && (courseExist || isInstructor)) {
-          willBeApproved = instantApprove;
-        } else {
-          willBeApproved = isVersionApproved({
-            corrects: proposalsTemp[proposalIdx].corrects,
-            wrongs: proposalsTemp[proposalIdx].wrongs,
-            nodeData: graph.nodes[nodeBookState.selectedNode],
-          });
-        }
+        let willBeApproved: boolean = isVersionApproved({
+          corrects: proposalsTemp[proposalIdx].corrects,
+          wrongs: proposalsTemp[proposalIdx].wrongs,
+          nodeData: graph.nodes[nodeBookState.selectedNode],
+          instantApprove,
+          isInstructor,
+        });
+
         setRatingProposale(false);
 
         if (willBeApproved) {
@@ -6588,7 +6593,10 @@ const Notebook = ({}: NotebookProps) => {
       ) {
         const acceptedProposalLaunched = detectAndCallTutorial(
           "reconcilingAcceptedProposal",
-          node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+          node =>
+            !!node &&
+            !!node.open &&
+            isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false })
         );
         if (acceptedProposalLaunched) return;
       }
@@ -6607,7 +6615,11 @@ const Notebook = ({}: NotebookProps) => {
           lastNodeOperation.current.data === "notAccepted") */
       ) {
         const notAcceptedProposalLaunched = detectAndCallTutorial("reconcilingNotAcceptedProposal", node =>
-          Boolean(node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }))
+          Boolean(
+            node &&
+              node.open &&
+              !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false })
+          )
         );
         setOpenSidebar("PROPOSALS");
         // setDynamicTargetId('')
@@ -7191,7 +7203,15 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
-        node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
+        node &&
+        node.open &&
+        isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: node,
+          isInstructor: false,
+          instantApprove: false,
+        });
 
       const node = graph.nodes[dynamicTargetId];
       if (!reconcilingAcceptedProposalIsValid(node)) {
@@ -7206,7 +7226,7 @@ const Notebook = ({}: NotebookProps) => {
       const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
         node &&
         node.open &&
-        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
+        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false }) &&
         openSidebar === "PROPOSALS";
 
       const node = graph.nodes[dynamicTargetId];

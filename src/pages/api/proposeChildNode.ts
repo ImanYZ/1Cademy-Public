@@ -148,16 +148,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeData?.tagIds || [],
       userData.uname
     );
-    let parentNodeData = null;
-    if (courseExist || isInstructor) {
-      parentNodeData = instantApprove ? nodeData : null;
-    } else {
-      parentNodeData = await isVersionApproved({
-        corrects: newVersion.corrects,
-        wrongs: newVersion.wrongs,
-        nodeData,
-      });
-    }
+    let parentNodeData = isVersionApproved({
+      corrects: newVersion.corrects,
+      wrongs: newVersion.wrongs,
+      nodeData,
+      instantApprove,
+      isInstructor,
+    })
+      ? nodeData
+      : null;
 
     // TODO: i think we should run transaction here
     const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
