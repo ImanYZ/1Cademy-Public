@@ -231,11 +231,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrongs: versionData.wrongs + wrong,
         nodeData,
         isInstructor,
-        instantApprove,
+        instantApprove: instantApprove && correct === 1,
       });
-      if (correct === 1) {
-        isApproved = instantApprove;
-      }
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({

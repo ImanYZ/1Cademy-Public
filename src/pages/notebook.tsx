@@ -5243,7 +5243,7 @@ const Notebook = ({}: NotebookProps) => {
             if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
               const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
               if (previewNode) {
-                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: false };
+                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: true };
               }
               if (tempNodes.has(newNodeId)) {
                 tempNodes.delete(newNodeId);
