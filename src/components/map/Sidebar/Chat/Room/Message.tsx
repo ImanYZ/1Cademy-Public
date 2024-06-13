@@ -4,7 +4,18 @@ import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { addDoc, collection, doc, getDoc, getFirestore, Timestamp, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  onSnapshot,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
@@ -94,6 +105,9 @@ export const Message = ({
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
   const [isDeleting, setIsDeleting] = useState<IChannelMessage | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [openReplies, setOpenReplies] = useState<IChannelMessage | null>(null);
+  const [replies, setReplies] = useState<IChannelMessage[]>([]);
+  const [isRepliesLoaded, setIsRepliesLoaded] = useState<boolean>(true);
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -167,6 +181,26 @@ export const Message = ({
       }
     })();
   }, [nodeBookState?.chatNode]);
+
+  useEffect(() => {
+    if (!openReplies) return;
+    setIsRepliesLoaded(false);
+    const messageRef = getMessageRef(openReplies?.id, openReplies?.channelId);
+    const replyRef = collection(messageRef, "replies");
+    const q = query(replyRef, where("deleted", "==", false));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const repliesDocuments: any = snapshot.docs.map(doc => {
+        const document = doc.data();
+        return { ...document, id: doc.id };
+      }) as IChannelMessage[];
+      repliesDocuments.sort(
+        (a: IChannelMessage, b: IChannelMessage) => a.createdAt.toMillis() - b.createdAt.toMillis()
+      );
+      setReplies(repliesDocuments);
+      setIsRepliesLoaded(true);
+    });
+    return () => unsubscribe();
+  }, [openReplies]);
 
   const forwardMessage = useCallback(
     (message: any) => {
@@ -295,18 +329,22 @@ export const Message = ({
   const saveMessageEdit = async (newMessage: string, imageUrls: string[] = []) => {
     if (!editingMessage?.channelId) return;
     if (editingMessage.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
-      parentMessage.replies[replyIdx] = {
-        ...parentMessage.replies[replyIdx],
+      // const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+      // const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+      // parentMessage.replies[replyIdx] = {
+      //   ...parentMessage.replies[replyIdx],
+      //   message: newMessage,
+      //   imageUrls,
+      //   edited: true,
+      //   editedAt: new Date(),
+      // };
+      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+      const replyRef = doc(messageRef, "replies", editingMessage?.id || "");
+      await updateDoc(replyRef, {
         message: newMessage,
         imageUrls,
         edited: true,
         editedAt: new Date(),
-      };
-      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
-      await updateDoc(messageRef, {
-        replies: parentMessage.replies,
       });
     } else {
       const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
@@ -368,13 +406,12 @@ export const Message = ({
           reactions: [],
           channelId: selectedChannel?.id,
           important,
+          deleted: false,
         };
-        setMessages((prevMessages: any) => {
-          const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage?.id);
-          prevMessages[messageIdx].replies.push(reply);
-          return prevMessages;
+        setReplies((prevMessages: any) => {
+          return [...prevMessages, reply];
         });
-        scrollToMessage(curMessage?.id || "");
+        scrollToMessage(curMessage?.id || "", "reply");
         await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
@@ -574,6 +611,11 @@ export const Message = ({
                         makeMessageUnread={makeMessageUnread}
                         handleDeleteMessage={handleDeleteMessage}
                         handleDeleteReply={handleDeleteReply}
+                        openReplies={openReplies}
+                        setOpenReplies={setOpenReplies}
+                        replies={replies}
+                        setReplies={setReplies}
+                        isRepliesLoaded={isRepliesLoaded}
                       />
                     )}
                     {roomType !== "news" && (
@@ -610,6 +652,11 @@ export const Message = ({
                             handleDeleteMessage={handleDeleteMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            openReplies={openReplies}
+                            setOpenReplies={setOpenReplies}
+                            replies={replies}
+                            setReplies={setReplies}
+                            isRepliesLoaded={isRepliesLoaded}
                           />
                         ) : (
                           <MessageLeft
@@ -644,6 +691,11 @@ export const Message = ({
                             sendReplyOnMessage={sendReplyOnMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            openReplies={openReplies}
+                            setOpenReplies={setOpenReplies}
+                            replies={replies}
+                            setReplies={setReplies}
+                            isRepliesLoaded={isRepliesLoaded}
                           />
                         )}
                       </>
