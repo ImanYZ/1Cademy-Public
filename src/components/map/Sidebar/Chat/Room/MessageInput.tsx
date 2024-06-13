@@ -282,6 +282,12 @@ export const MessageInput = ({
     }
   };
 
+  const handleBlur = () => {
+    if (!!parentMessage && sendMessageType === "reply") {
+      setReplyOnMessage(null);
+    }
+  };
+
   const choosingNewLinkedNode = () => {
     notebookRef.current.choosingNode = { id: "", type: "Node", impact: "node" };
     notebookRef.current.selectedNode = "";
@@ -345,6 +351,7 @@ export const MessageInput = ({
         onChange={handleTyping}
         onKeyDown={handleKeyPress}
         onFocus={handleFocus}
+        onBlur={handleBlur}
       >
         <Mention
           trigger="@"

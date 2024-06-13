@@ -1,8 +1,8 @@
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Button, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -46,6 +46,11 @@ type MessageLeftProps = {
   sendReplyOnMessage: any;
   isLoadingReaction: IChannelMessage | null;
   makeMessageUnread: (message: IChannelMessage) => void;
+  openReplies?: IChannelMessage | null;
+  setOpenReplies?: any;
+  replies?: IChannelMessage[];
+  setReplies?: any;
+  isRepliesLoaded?: boolean;
 };
 export const MessageLeft = ({
   type,
@@ -80,22 +85,25 @@ export const MessageLeft = ({
   sendReplyOnMessage,
   isLoadingReaction,
   makeMessageUnread,
+  openReplies,
+  setOpenReplies,
+  replies,
+  setReplies,
+  isRepliesLoaded,
 }: MessageLeftProps) => {
-  const [openReplies, setOpenReplies] = useState<boolean>(false);
-
   const handleReplyMessage = () => {
+    setOpenReplies(message);
     setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
-    setOpenReplies(prev => !prev);
-  };
-
-  useEffect(() => {
-    if (!!replyOnMessage && replyOnMessage?.id === message?.id) {
-      setOpenReplies(true);
+    setReplies([]);
+    if (openReplies?.id !== message?.id) {
+      setOpenReplies(message);
+    } else {
+      setOpenReplies(null);
     }
-  }, [replyOnMessage]);
+  };
 
   return (
     <>
@@ -174,7 +182,7 @@ export const MessageLeft = ({
             </Box>
 
             <Typography sx={{ fontSize: "12px" }}>
-              {moment(message.createdAt.toDate().getTime()).format("h:mm a")}
+              {moment(message?.createdAt?.toDate()?.getTime())?.format("h:mm a")}
             </Typography>
           </Box>
           <Box
@@ -238,11 +246,13 @@ export const MessageLeft = ({
                 </Box>
               </Box>
             )}
-            {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
+            {(message?.totalReplies || 0) > 0 && editingMessage?.id !== message.id && (
               <Button onClick={handleOpenReplies} style={{ border: "none" }}>
-                {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+                {openReplies?.id === message?.id ? "Hide" : message?.totalReplies}{" "}
+                {message?.totalReplies || 0 > 1 ? "Replies" : "Reply"}
               </Button>
             )}
+
             {editingMessage?.id !== message.id && (
               <>
                 <Box className="message-buttons" sx={{ display: "none" }}>
@@ -272,14 +282,19 @@ export const MessageLeft = ({
               </>
             )}
           </Box>
-          {openReplies && (
+          {openReplies?.id === message?.id && (
             <Box
               sx={{
                 transition: "ease-in",
                 ml: "25px",
               }}
             >
-              {(message.replies || []).map((reply: any, idx: number) => (
+              {!isRepliesLoaded && replies?.length === 0 && (
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+              {replies?.map((reply: any, idx: number) => (
                 <Fragment key={reply?.id}>
                   {reply?.node?.id ? (
                     <NodeLink
