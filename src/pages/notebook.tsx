@@ -5215,11 +5215,12 @@ const Notebook = ({}: NotebookProps) => {
           "/instructor/course/checkInstantApprovalForProposalVote",
           checkInstantApproval
         );
+
         let willBeApproved: boolean = isVersionApproved({
           corrects: proposalsTemp[proposalIdx].corrects,
           wrongs: proposalsTemp[proposalIdx].wrongs,
           nodeData: graph.nodes[nodeBookState.selectedNode],
-          instantApprove,
+          instantApprove: instantApprove && correct,
           isInstructor,
         });
 

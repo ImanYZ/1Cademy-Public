@@ -270,7 +270,7 @@ const SelectedProposalItem = ({
                 color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
               }}
             >
-              {dayjs(proposal.createdAt).fromNow()}
+              {dayjs(proposal.createdAt.toDate()).fromNow()}
             </Box>
           </Box>
           <Box>

@@ -1,4 +1,11 @@
-import { admin, checkRestartBatchWriteCounts, commitBatch, db, TWriteOperation } from "../lib/firestoreServer/admin";
+import {
+  admin,
+  checkRestartBatchWriteCounts,
+  commitBatch,
+  db,
+  TWriteOperation,
+  writeTransactionWithT,
+} from "../lib/firestoreServer/admin";
 import axios from "axios";
 import { google } from "googleapis";
 
@@ -1852,29 +1859,37 @@ export const versionCreateUpdate = async ({
   if (!deleted) {
     const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
     const comReputationUpdates: IComReputationUpdates = {};
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
 
-    //  proposer and voters are the same user, automatic self-vote
-    [newBatch, writeCounts] = await updateReputation({
-      batch: newBatch,
-      uname: proposer,
-      imageUrl,
-      fullname,
-      chooseUname,
-      tagIds,
-      tags,
-      nodeType,
-      correctVal: correct,
-      wrongVal: wrong,
-      instVal: award,
-      ltermVal: 0,
-      ltermDayVal: 0,
-      voter,
-      writeCounts,
-      comReputationUpdates,
-      t,
-      tWriteOperations,
+      const tWriteOperations: { objRef: any; data: any; operationType: "set" | "update" | "delete" }[] = [];
+      await db.runTransaction(async t => {
+        //  proposer and voters are the same user, automatic self-vote
+        [newBatch, writeCounts] = await updateReputation({
+          batch: newBatch,
+          uname: proposer,
+          imageUrl,
+          fullname,
+          chooseUname,
+          tagIds,
+          tags,
+          nodeType,
+          correctVal: correct,
+          wrongVal: wrong,
+          instVal: award,
+          ltermVal: 0,
+          ltermDayVal: 0,
+          voter,
+          writeCounts,
+          comReputationUpdates,
+          t,
+          tWriteOperations,
+        });
+        writeTransactionWithT(tWriteOperations, t);
+      });
+      await commitBatch(batch);
     });
-
     for (const tagId in comReputationUpdates) {
       for (const reputationType of reputationTypes) {
         if (!comReputationUpdates[tagId][reputationType]) continue;
@@ -2069,16 +2084,21 @@ export const versionCreateUpdate = async ({
           }
 
           if (nodeData.title !== title || versionData.changedNodeType) {
-            [newBatch, writeCounts] = await changeNodeTitle({
-              batch: newBatch,
-              nodeData,
-              nodeId,
-              newTitle: title,
-              nodeType,
-              currentTimestamp,
-              writeCounts,
-              t,
-              tWriteOperations,
+            await detach(async () => {
+              let batch = db.batch();
+              let writeCounts = 0;
+              [newBatch, writeCounts] = await changeNodeTitle({
+                batch: newBatch,
+                nodeData,
+                nodeId,
+                newTitle: title,
+                nodeType,
+                currentTimestamp,
+                writeCounts,
+                t,
+                tWriteOperations,
+              });
+              await commitBatch(batch);
             });
           }
 
@@ -2268,26 +2288,31 @@ export const versionCreateUpdate = async ({
               wrong: wrong === 1 ? true : wrong === 0 ? userVersionData.wrong : false,
             };
           }
-          [newBatch, writeCounts] = await createUpdateUserVersion({
-            batch: newBatch,
-            userVersionRef: newUserVersionRef,
-            userVersionData,
-            nodeType: childType,
-            writeCounts,
-            t,
-            tWriteOperations,
-          });
+          await detach(async () => {
+            let newBatch = db.batch();
+            let writeCounts: number = 0;
+            [newBatch, writeCounts] = await createUpdateUserVersion({
+              batch: newBatch,
+              userVersionRef: newUserVersionRef,
+              userVersionData,
+              nodeType: childType,
+              writeCounts,
+              t,
+              tWriteOperations,
+            });
+            [newBatch, writeCounts] = (await transferUserVersionsToNewNode({
+              batch: newBatch,
+              writeCounts,
+              childType,
+              newVersionId: versionRef.id,
+              versionId,
+              skipUnames: [voter],
+              t,
+              tWriteOperations,
+              versionType: nodeType,
+            })) as [WriteBatch, number];
 
-          [newBatch, writeCounts] = await transferUserVersionsToNewNode({
-            batch: newBatch,
-            writeCounts,
-            childType,
-            newVersionId: versionRef.id,
-            versionId,
-            skipUnames: [voter],
-            t,
-            tWriteOperations,
-            versionType: nodeType,
+            await commitBatch(newBatch);
           });
 
           // userNode for voter
@@ -2364,24 +2389,31 @@ export const versionCreateUpdate = async ({
               [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
             }
           }
-          [batch, writeCounts] = await generateTagsData({
-            batch,
-            nodeId: childNodeRef.id,
-            isTag: false,
-            nodeUpdates: childNode,
-            nodeTagIds: [],
-            nodeTags: [],
-            versionTagIds: tagIds,
-            versionTags: tags,
-            proposer,
-            aImgUrl: imageUrl,
-            aFullname: fullname,
-            aChooseUname: chooseUname,
-            currentTimestamp,
-            writeCounts,
-            t,
-            tWriteOperations,
+          await detach(async () => {
+            let batch = db.batch();
+            let writeCounts: number = 0;
+
+            [batch, writeCounts] = await generateTagsData({
+              batch,
+              nodeId: childNodeRef.id,
+              isTag: false,
+              nodeUpdates: childNode,
+              nodeTagIds: [],
+              nodeTags: [],
+              versionTagIds: tagIds,
+              versionTags: tags,
+              proposer,
+              aImgUrl: imageUrl,
+              aFullname: fullname,
+              aChooseUname: chooseUname,
+              currentTimestamp,
+              writeCounts,
+              t,
+              tWriteOperations,
+            });
+            await commitBatch(batch);
           });
+
           childNode = {
             ...childNode,
             nodeType: childType,

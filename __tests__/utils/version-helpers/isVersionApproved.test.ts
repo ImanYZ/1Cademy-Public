@@ -21,6 +21,6 @@ describe("isVersionApproved", () => {
       isInstructor: false,
       instantApprove: false,
     });
-    expect(Object.keys(is_approved).length).toBeGreaterThan(0);
+    expect(is_approved).toBeTruthy();
   });
 });
