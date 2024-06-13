@@ -316,19 +316,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // a version and its corresponding userVersion on the parent node that the voter is
       // voting on. So, regardless of whether the version is for a new child or improvement,
       // we need to update the votes on the old version.
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts = 0;
-        await createUpdateUserVersion({
-          batch,
-          userVersionRef,
-          userVersionData: { node: versionData.node, ...userVersionData },
-          nodeType,
-          writeCounts,
-          t: null,
-          tWriteOperations,
-        });
-        await commitBatch(batch);
+      await createUpdateUserVersion({
+        userVersionRef,
+        userVersionData,
+        nodeType,
+        writeCounts,
+        t,
+        tWriteOperations,
       });
 
       let notificationData = {
