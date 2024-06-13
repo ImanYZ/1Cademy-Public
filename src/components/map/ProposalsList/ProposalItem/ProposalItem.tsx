@@ -31,12 +31,12 @@ type ProposalItemProps = {
   openLinkedNode: any;
   proposalSummaries?: any;
   isClickable?: boolean;
-  userVotesOnProposals: { [key: string]: any };
+  userVotesOnProposals?: { [key: string]: any };
 };
 
 const ProposalItem = ({
   isClickable = true,
-  userVotesOnProposals,
+  userVotesOnProposals = {},
   proposal,
   shouldSelectProposal,
   showTitle,

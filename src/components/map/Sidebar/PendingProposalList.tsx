@@ -14,10 +14,10 @@ type PendingProposalListProps = {
   // setPendingProposalsNum: any;
   proposals: any[];
   openLinkedNode: any;
-  userVotesOnProposals: { [key: string]: any };
+  userVotesOnProposals?: { [key: string]: any };
 };
 
-const PendingProposalList = ({ proposals, openLinkedNode, userVotesOnProposals }: PendingProposalListProps) => {
+const PendingProposalList = ({ proposals, openLinkedNode, userVotesOnProposals = {} }: PendingProposalListProps) => {
   const theme = useTheme();
   // const [{ user }] = useAuth();
   // const db = getFirestore();
