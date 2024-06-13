@@ -1,7 +1,7 @@
 import LinkIcon from "@mui/icons-material/Link";
-import { Button, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React, { useState } from "react";
+import React from "react";
 import { IChannelMessage, MembersInfo } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -51,6 +51,11 @@ type MessageRightProps = {
   handleDeleteMessage: (message: IChannelMessage) => void;
   isLoadingReaction: IChannelMessage | null;
   makeMessageUnread: (message: IChannelMessage) => void;
+  openReplies?: IChannelMessage | null;
+  setOpenReplies?: any;
+  replies?: IChannelMessage[];
+  setReplies?: any;
+  isRepliesLoaded?: boolean;
 };
 export const NodeLink = ({
   db,
@@ -85,16 +90,26 @@ export const NodeLink = ({
   isDeleting,
   isLoadingReaction,
   makeMessageUnread,
+  openReplies,
+  setOpenReplies,
+  replies,
+  setReplies,
+  isRepliesLoaded,
 }: MessageRightProps) => {
-  const [openReplies, setOpenReplies] = useState<boolean>(false);
-
-  const handleOpenReplies = () => {
-    setOpenReplies(prev => !prev);
-  };
-
   const handleReplyMessage = () => {
+    setOpenReplies(message);
     setReplyOnMessage(message);
   };
+
+  const handleOpenReplies = () => {
+    setReplies([]);
+    if (openReplies?.id !== message?.id) {
+      setOpenReplies(message);
+    } else {
+      setOpenReplies(null);
+    }
+  };
+
   return (
     <Box
       ref={el => (messageRefs.current[message?.id || 0] = el)}
@@ -227,11 +242,14 @@ export const NodeLink = ({
                 isLoadingReaction={isLoadingReaction}
               />
             </Box>
-            {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
+
+            {(message?.totalReplies || 0) > 0 && editingMessage?.id !== message.id && (
               <Button onClick={handleOpenReplies} style={{ border: "none" }}>
-                {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+                {openReplies?.id === message?.id ? "Hide" : message?.totalReplies}{" "}
+                {message?.totalReplies || 0 > 1 ? "Replies" : "Reply"}
               </Button>
             )}
+
             {isDeleting?.id !== message?.id && (
               <Box className="message-buttons" sx={{ display: "none" }}>
                 <MessageButtons
@@ -248,14 +266,19 @@ export const NodeLink = ({
             )}
           </Box>
 
-          {openReplies && (
+          {openReplies?.id === message?.id && (
             <Box
               sx={{
                 transition: "ease-in",
                 ml: "25px",
               }}
             >
-              {(message.replies || []).map((reply: any, idx: number) => (
+              {!isRepliesLoaded && replies?.length === 0 && (
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+              {replies?.map((reply: any, idx: number) => (
                 <>
                   {reply?.node?.id ? (
                     <NodeLink

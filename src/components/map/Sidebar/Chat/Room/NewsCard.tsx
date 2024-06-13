@@ -1,8 +1,8 @@
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Avatar, Button, Typography } from "@mui/material";
+import { Avatar, Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { useState } from "react";
+import React from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -42,6 +42,11 @@ type NewsCardProps = {
   handleDeleteMessage: any;
   handleDeleteReply: any;
   parentMessage?: IChannelMessage;
+  openReplies?: IChannelMessage | null;
+  setOpenReplies?: any;
+  replies?: IChannelMessage[];
+  setReplies?: any;
+  isRepliesLoaded?: boolean;
 };
 export const NewsCard = ({
   type,
@@ -73,12 +78,24 @@ export const NewsCard = ({
   handleDeleteMessage,
   handleDeleteReply,
   parentMessage,
+  openReplies,
+  setOpenReplies,
+  replies,
+  setReplies,
+  isRepliesLoaded,
 }: NewsCardProps) => {
-  const [openReplies, setOpenReplies] = useState<boolean>(false);
-  const handleOpenReplies = () => setOpenReplies(prev => !prev);
-
   const handleReplyOnMessage = () => {
+    setOpenReplies(message);
     setReplyOnMessage(message);
+  };
+
+  const handleOpenReplies = () => {
+    setReplies([]);
+    if (openReplies?.id !== message?.id) {
+      setOpenReplies(message);
+    } else {
+      setOpenReplies(null);
+    }
   };
 
   return (
@@ -217,21 +234,28 @@ export const NewsCard = ({
               </Box>
             </>
           )}
-          {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
+
+          {(message?.totalReplies || 0) > 0 && editingMessage?.id !== message.id && (
             <Button onClick={handleOpenReplies} style={{ border: "none" }}>
-              {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+              {openReplies?.id === message?.id ? "Hide" : message?.totalReplies}{" "}
+              {message?.totalReplies || 0 > 1 ? "Replies" : "Reply"}
             </Button>
           )}
         </Box>
 
-        {openReplies && (
+        {openReplies?.id === message?.id && (
           <Box
             sx={{
               transition: "ease-in",
               ml: "25px",
             }}
           >
-            {(message.replies || []).map((reply: any, idx: number) => (
+            {!isRepliesLoaded && replies?.length === 0 && (
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                <CircularProgress />
+              </Box>
+            )}
+            {replies?.map((reply: any, idx: number) => (
               <NewsCard
                 type="reply"
                 notebookRef={notebookRef}
