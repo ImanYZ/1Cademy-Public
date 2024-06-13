@@ -25,26 +25,40 @@ type ProposalsListProps = {
   proposals: INodeVersion[];
   setProposals: any;
   proposeNodeImprovement: any;
-  fetchProposals: any;
   rateProposal: any;
   selectProposal: any;
   deleteProposal: any;
   editHistory: boolean;
   proposeNewChild: any;
   openProposal: string;
-  isAdmin: boolean;
   username: string;
-  ratingProposale: boolean;
+  ratingProposal: boolean;
+  userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
+  setUserVotesOnProposals: any;
 };
 
-const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsListProps) => {
+const ProposalsList = ({
+  proposals,
+  setProposals,
+  rateProposal,
+  selectProposal,
+  deleteProposal,
+  editHistory,
+  openProposal,
+  username,
+  ratingProposal,
+  userVotesOnProposals,
+  setUserVotesOnProposals,
+}: ProposalsListProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const rateProposalClick = useCallback(
     (proposal: INodeVersion, proposalIdx: number, correct: boolean, wrong: boolean, award: boolean) => {
-      return props.rateProposal({
-        proposals: props.proposals,
-        setProposals: props.setProposals,
+      return rateProposal({
+        proposals: proposals,
+        setProposals: setProposals,
+        userVotesOnProposals,
+        setUserVotesOnProposals,
         proposalId: proposal.id,
         proposalIdx: proposalIdx,
         correct: correct,
@@ -53,7 +67,7 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
         newNodeId: proposal.newNodeId,
       });
     },
-    [props]
+    [proposals, rateProposal, setProposals, setUserVotesOnProposals, userVotesOnProposals]
   );
 
   const deleteProposalClick = useCallback(
@@ -67,10 +81,10 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
       if (!deleteOK) return;
 
       setIsDeleting(true);
-      await deleteProposal(event, props.proposals, props.setProposals, proposal.id, proposalIdx);
+      await deleteProposal(event, proposals, setProposals, proposal.id, proposalIdx);
       setIsDeleting(false);
     },
-    [deleteProposal, props.proposals, props.setProposals]
+    [deleteProposal, proposals, setProposals]
   );
 
   // const shouldDisableButton = (proposal: any, isAdmin: boolean, username: string) => {
@@ -79,12 +93,12 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
 
   return (
     <Box>
-      {props.proposals.map((proposal: any, proposalIdx: number) => {
+      {proposals.map((proposal: any, proposalIdx: number) => {
         const proposalSummaries = proposalSummariesGenerator(proposal);
-        // const isDisabled = shouldDisableButton(proposal, props.isAdmin, username);
+        // const isDisabled = shouldDisableButton(proposal, isAdmin, username);
 
-        if ((props.editHistory && proposal.accepted) || (!props.editHistory && !proposal.accepted)) {
-          if (props.openProposal === proposal.id) {
+        if ((editHistory && proposal.accepted) || (!editHistory && !proposal.accepted)) {
+          if (openProposal === proposal.id) {
             // this will display selected proposal
             return (
               <Box key={proposal.id} sx={{ display: "flex", flexDirection: "column", mt: "5px" }}>
@@ -96,9 +110,10 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
                   proposalIdx={proposalIdx}
                   proposalSummaries={proposalSummaries}
                   rateProposalClick={rateProposalClick}
-                  selectProposal={props.selectProposal}
-                  ratingProposale={ratingProposale}
-                  username={props.username}
+                  selectProposal={selectProposal}
+                  ratingProposal={ratingProposal}
+                  username={username}
+                  userVotesOnProposals={userVotesOnProposals}
                 />
               </Box>
             );
@@ -109,11 +124,12 @@ const ProposalsList = ({ deleteProposal, ratingProposale, ...props }: ProposalsL
                 <ProposalItem
                   key={proposal.id}
                   proposal={proposal}
-                  selectProposal={props.selectProposal}
+                  selectProposal={selectProposal}
                   proposalSummaries={proposalSummaries}
                   shouldSelectProposal={true}
                   showTitle={true}
                   openLinkedNode={() => {}}
+                  userVotesOnProposals={userVotesOnProposals}
                 />
               </Box>
             );
@@ -134,7 +150,8 @@ type SelectedProposalItemType = {
   deleteProposalClick: any;
   username: string;
   isDeleting: boolean;
-  ratingProposale: boolean;
+  ratingProposal: boolean;
+  userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
 };
 
 const SelectedProposalItem = ({
@@ -146,15 +163,21 @@ const SelectedProposalItem = ({
   deleteProposalClick,
   username,
   isDeleting,
-  ratingProposale,
+  ratingProposal,
+  userVotesOnProposals,
 }: SelectedProposalItemType) => {
   const canRemoveProposal = useMemo(
     () => !isDeleting && !proposal.accepted && proposal.proposer === username,
     [isDeleting, proposal.accepted, proposal.proposer, username]
   );
-  const upvoteProposal = (e: any) => {
+  const upVoteProposal = (e: any) => {
     e.stopPropagation();
+
     rateProposalClick(proposal, proposalIdx, true, false, false);
+  };
+  const downVoteProposal = (e: any) => {
+    e.stopPropagation();
+    rateProposalClick(proposal, proposalIdx, false, true, false);
   };
 
   return (
@@ -247,7 +270,7 @@ const SelectedProposalItem = ({
                 color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
               }}
             >
-              {dayjs(proposal.createdAt).fromNow()}
+              {dayjs(proposal.createdAt.toDate()).fromNow()}
             </Box>
           </Box>
           <Box>
@@ -262,7 +285,7 @@ const SelectedProposalItem = ({
             >
               <ContainedButton
                 title="Click if you find this proposal helpful."
-                onClick={upvoteProposal}
+                onClick={upVoteProposal}
                 sx={{
                   borderRadius: "52px 0px 0px 52px",
                   background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
@@ -271,10 +294,18 @@ const SelectedProposalItem = ({
                     background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
                   },
                 }}
-                disabled={ratingProposale}
+                disabled={ratingProposal}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <DoneIcon sx={{ fill: proposal.correct ? "rgb(0, 211, 105)" : "inherit", fontSize: "19px" }} />
+                  <DoneIcon
+                    sx={{
+                      fill:
+                        userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].correct
+                          ? "rgb(0, 211, 105)"
+                          : "inherit",
+                      fontSize: "19px",
+                    }}
+                  />
                   <Typography
                     sx={{
                       color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
@@ -293,10 +324,7 @@ const SelectedProposalItem = ({
               />
               <ContainedButton
                 title="Click if you find this proposal Unhelpful."
-                onClick={(e: any) => {
-                  e.stopPropagation();
-                  rateProposalClick(proposal, proposalIdx, false, true, false);
-                }}
+                onClick={downVoteProposal}
                 sx={{
                   borderRadius: canRemoveProposal ? "0px" : "0px 52px 52px 0px",
                   background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
@@ -309,7 +337,10 @@ const SelectedProposalItem = ({
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
                   <CloseIcon
                     sx={{
-                      fill: proposal.wrong ? "rgb(255, 29, 29)" : "inherit",
+                      fill:
+                        userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].wrong
+                          ? "rgb(255, 29, 29)"
+                          : "inherit",
                       fontSize: "19px",
                       color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
                     }}

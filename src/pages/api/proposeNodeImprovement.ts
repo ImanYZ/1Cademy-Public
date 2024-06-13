@@ -312,6 +312,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       version: versionRef.id,
       user: userData.uname,
       wrong: false,
+      node: id,
     };
     [batch, writeCounts] = await createUpdateUserVersion({
       batch,

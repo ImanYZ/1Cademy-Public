@@ -204,6 +204,8 @@ export type OnChangeChosenNode = { nodeId: string; title: string };
 type RateProposal = {
   proposals: INodeVersion[];
   setProposals: (proposals: INodeVersion[]) => void;
+  userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
+  setUserVotesOnProposals: any;
   proposalId: string;
   proposalIdx: number;
   correct: boolean;
@@ -451,7 +453,7 @@ const Notebook = ({}: NotebookProps) => {
   const [instructor, setInstructor] = useState<Instructor | null>(null);
 
   const [editingModeNode, setEditingModeNode] = useState(false);
-  const [ratingProposale, setRatingProposale] = useState<boolean>(false);
+  const [ratingProposal, setRatingProposal] = useState<boolean>(false);
 
   // const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
 
@@ -3880,7 +3882,6 @@ const Notebook = ({}: NotebookProps) => {
         if (!referencesOK) return;
 
         const {
-          courseExist,
           isInstructor,
           instantApprove,
         }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
@@ -3986,11 +3987,15 @@ const Notebook = ({}: NotebookProps) => {
             delete postData.top;
             delete postData.height;
             let willBeApproved = false;
-            if (courseExist || isInstructor) {
-              willBeApproved = instantApprove;
-            } else {
-              willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-            }
+
+            willBeApproved = isVersionApproved({
+              corrects: 1,
+              wrongs: 0,
+              nodeData: newNode,
+              instantApprove,
+              isInstructor,
+            });
+
             lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
 
             if (willBeApproved) {
@@ -4490,7 +4495,10 @@ const Notebook = ({}: NotebookProps) => {
           return;
         }
 
-        const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
+        const {
+          instantApprove,
+          isInstructor,
+        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
             tagIds,
@@ -4572,12 +4580,13 @@ const Notebook = ({}: NotebookProps) => {
 
           const parentNode = graph.nodes[newNode.parents[0].node];
 
-          let willBeApproved = false;
-          if (courseExist) {
-            willBeApproved = instantApprove;
-          } else {
-            willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-          }
+          const willBeApproved = isVersionApproved({
+            corrects: 1,
+            wrongs: 0,
+            nodeData: parentNode,
+            instantApprove,
+            isInstructor,
+          });
 
           const nodePartChanges = {
             editable: false,
@@ -4695,165 +4704,6 @@ const Notebook = ({}: NotebookProps) => {
       window.dispatchEvent(new CustomEvent("question-node-proposed"));
     }
   };
-
-  const fetchProposals = useCallback(
-    async (
-      setIsAdmin: (value: boolean) => void,
-      setIsRetrieving: (value: boolean) => void,
-      setProposals: (value: any) => void
-    ) => {
-      if (!user) return;
-      if (!selectedNodeType) return;
-
-      setGraph(({ nodes: oldNodes, edges }) => {
-        (async () => {
-          setIsRetrieving(true);
-          if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
-            setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
-          }
-          const currentNode = oldNodes[String(nodeBookState.selectedNode)];
-          if (!currentNode) return;
-          const versions: any = {};
-          let versionId;
-          const versionIds: string[] = [];
-          const comments: any = {};
-          const userVersionsRefs: Query<DocumentData>[] = [];
-          const versionsCommentsRefs: Query<DocumentData>[] = [];
-          const userVersionsCommentsRefs: Query<DocumentData>[] = [];
-
-          const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } =
-            getCollectionsQuery(db);
-
-          const versionsQuery = query(
-            versionsColl,
-            where("node", "==", nodeBookState.selectedNode),
-            where("deleted", "==", false)
-          );
-
-          const versionsData = await getDocs(versionsQuery);
-
-          // iterate version and push userVersion and versionComments
-          versionsData.forEach(versionDoc => {
-            versionIds.push(versionDoc.id);
-            const versionData = versionDoc.data();
-
-            versions[versionDoc.id] = {
-              ...versionData,
-              nodeType: versionData.nodeType,
-              id: versionDoc.id,
-              createdAt: versionData.createdAt.toDate(),
-              award: false,
-              correct: false,
-              wrong: false,
-              comments: [],
-            };
-            delete versions[versionDoc.id].deleted;
-            delete versions[versionDoc.id].updatedAt;
-            delete versions[versionDoc.id].node;
-            const userVersionsQuery = query(
-              userVersionsColl,
-              where("version", "==", versionDoc.id),
-              where("user", "==", user.uname)
-            );
-            userVersionsRefs.push(userVersionsQuery);
-            const versionsCommentsQuery = query(
-              versionsCommentsColl,
-              where("version", "==", versionDoc.id),
-              where("deleted", "==", false)
-            );
-            versionsCommentsRefs.push(versionsCommentsQuery);
-          });
-
-          // merge version and userVersion: version[id] = {...version[id],userVersion}
-          if (userVersionsRefs.length > 0) {
-            await Promise.all(
-              userVersionsRefs.map(async userVersionsRef => {
-                const userVersionsDocs = await getDocs(userVersionsRef);
-                userVersionsDocs.forEach(userVersionsDoc => {
-                  const userVersion = userVersionsDoc.data();
-                  versionId = userVersion.version;
-                  delete userVersion.version;
-                  delete userVersion.updatedAt;
-                  delete userVersion.createdAt;
-                  delete userVersion.user;
-                  if (userVersion.hasOwnProperty("id")) {
-                    delete userVersion.id;
-                  }
-                  versions[versionId] = {
-                    ...versions[versionId],
-                    ...userVersion,
-                  };
-                });
-              })
-            );
-          }
-
-          // build version comments {}
-          if (versionsCommentsRefs.length > 0) {
-            await Promise.all(
-              versionsCommentsRefs.map(async versionsCommentsRef => {
-                const versionsCommentsDocs = await getDocs(versionsCommentsRef);
-                versionsCommentsDocs.forEach(versionsCommentsDoc => {
-                  const versionsComment = versionsCommentsDoc.data();
-                  delete versionsComment.updatedAt;
-                  comments[versionsCommentsDoc.id] = {
-                    ...versionsComment,
-                    id: versionsCommentsDoc.id,
-                    createdAt: versionsComment.createdAt.toDate(),
-                  };
-                  const userVersionsCommentsQuery = query(
-                    userVersionsCommentsColl,
-                    where("versionComment", "==", versionsCommentsDoc.id),
-                    where("user", "==", user.uname)
-                  );
-
-                  userVersionsCommentsRefs.push(userVersionsCommentsQuery);
-                });
-              })
-            );
-
-            // merge comments and userVersionComment
-            if (userVersionsCommentsRefs.length > 0) {
-              await Promise.all(
-                userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
-                  const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef);
-                  userVersionsCommentsDocs.forEach(userVersionsCommentsDoc => {
-                    const userVersionsComment = userVersionsCommentsDoc.data();
-                    const versionCommentId = userVersionsComment.versionComment;
-                    delete userVersionsComment.versionComment;
-                    delete userVersionsComment.updatedAt;
-                    delete userVersionsComment.createdAt;
-                    delete userVersionsComment.user;
-                    comments[versionCommentId] = {
-                      ...comments[versionCommentId],
-                      ...userVersionsComment,
-                    };
-                  });
-                })
-              );
-            }
-          }
-
-          // merge comments into versions
-          Object.values(comments).forEach((comment: any) => {
-            versionId = comment.version;
-            delete comment.version;
-            versions[versionId].comments.push(comment);
-          });
-
-          const proposalsTemp = Object.values(versions);
-          const orderedProposals = proposalsTemp.sort(
-            (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
-          );
-          setProposals(orderedProposals);
-          setIsRetrieving(false);
-        })();
-
-        return { nodes: oldNodes, edges };
-      });
-    },
-    [user, selectedNodeType, db, nodeBookState.selectedNode]
-  );
 
   /////////////////////////////////////////////////////
   // Inner functions
@@ -5255,36 +5105,62 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const rateProposal = useCallback(
-    async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProposal) => {
+    async ({
+      proposals,
+      setProposals,
+      userVotesOnProposals,
+      setUserVotesOnProposals,
+      proposalId,
+      proposalIdx,
+      correct,
+      wrong,
+      award,
+      newNodeId,
+    }: RateProposal) => {
       if (!selectedNotebookId) return;
       if (!user) return;
       if (!nodeBookState.selectedNode) return;
       if (!selectedNodeType) return;
-      setRatingProposale(true);
-      devLog("RATE_PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
-
+      setRatingProposal(true);
+      devLog("RATE_PROPOSAL", {
+        proposals,
+        setProposals,
+        proposalId,
+        userVotesOnProposals,
+        proposalIdx,
+        correct,
+        wrong,
+        award,
+        newNodeId,
+      });
+      if (!userVotesOnProposals[proposalId]) {
+        userVotesOnProposals[proposalId] = {
+          correct: false,
+          wrong: false,
+        };
+      }
       if (!nodeBookState.choosingNode) {
         const proposalsTemp = [...proposals];
         let interactionValue = 0;
         let voteType: string = "";
         if (correct) {
-          interactionValue += proposalsTemp[proposalIdx].correct ? -1 : 1;
-          if (!proposalsTemp[proposalIdx].correct) {
+          interactionValue += userVotesOnProposals[proposalId].correct ? -1 : 1;
+          if (!userVotesOnProposals[proposalId].correct) {
             voteType = "Correct";
           }
-          proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 0;
-          proposalsTemp[proposalIdx].wrong = false;
-          proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 1;
-          proposalsTemp[proposalIdx].correct = !proposalsTemp[proposalIdx].correct;
+          proposalsTemp[proposalIdx].wrongs += userVotesOnProposals[proposalId].wrong ? -1 : 0;
+          userVotesOnProposals[proposalId].wrong = false;
+          proposalsTemp[proposalIdx].corrects += userVotesOnProposals[proposalId].correct ? -1 : 1;
+          userVotesOnProposals[proposalId].correct = !proposalsTemp[proposalIdx].correct;
         } else if (wrong) {
           if (!proposalsTemp[proposalIdx].wrong) {
             voteType = "Wrong";
           }
-          interactionValue += proposalsTemp[proposalIdx].wrong ? 1 : -1;
-          proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 0;
-          proposalsTemp[proposalIdx].correct = false;
-          proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 1;
-          proposalsTemp[proposalIdx].wrong = !proposalsTemp[proposalIdx].wrong;
+          interactionValue += userVotesOnProposals[proposalId].wrong ? 1 : -1;
+          proposalsTemp[proposalIdx].corrects += userVotesOnProposals[proposalId].correct ? -1 : 0;
+          userVotesOnProposals[proposalId].correct = false;
+          proposalsTemp[proposalIdx].wrongs += userVotesOnProposals[proposalId].wrong ? -1 : 1;
+          userVotesOnProposals[proposalId].wrong = !proposalsTemp[proposalIdx].wrong;
         } else if (award) {
           if (!proposalsTemp[proposalIdx].award) {
             voteType = "Award";
@@ -5339,17 +5215,16 @@ const Notebook = ({}: NotebookProps) => {
           "/instructor/course/checkInstantApprovalForProposalVote",
           checkInstantApproval
         );
-        let willBeApproved: boolean = false;
-        if (voteType === "Correct" && (courseExist || isInstructor)) {
-          willBeApproved = instantApprove;
-        } else {
-          willBeApproved = isVersionApproved({
-            corrects: proposalsTemp[proposalIdx].corrects,
-            wrongs: proposalsTemp[proposalIdx].wrongs,
-            nodeData: graph.nodes[nodeBookState.selectedNode],
-          });
-        }
-        setRatingProposale(false);
+
+        let willBeApproved: boolean = isVersionApproved({
+          corrects: proposalsTemp[proposalIdx].corrects,
+          wrongs: proposalsTemp[proposalIdx].wrongs,
+          nodeData: graph.nodes[nodeBookState.selectedNode],
+          instantApprove: instantApprove && correct,
+          isInstructor,
+        });
+
+        setRatingProposal(false);
 
         if (willBeApproved) {
           const res = await confirmIt("Are you sure you want to approve this proposal?", "Yes", "Cancel");
@@ -5369,7 +5244,7 @@ const Notebook = ({}: NotebookProps) => {
             if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
               const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
               if (previewNode) {
-                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: false };
+                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: true };
               }
               if (tempNodes.has(newNodeId)) {
                 tempNodes.delete(newNodeId);
@@ -5381,6 +5256,7 @@ const Notebook = ({}: NotebookProps) => {
             setOpenSidebar(null);
           }
           setProposals(proposalsTemp);
+          setUserVotesOnProposals(userVotesOnProposals);
           try {
             Post("/rateVersion", postData);
           } catch (error) {
@@ -6588,7 +6464,10 @@ const Notebook = ({}: NotebookProps) => {
       ) {
         const acceptedProposalLaunched = detectAndCallTutorial(
           "reconcilingAcceptedProposal",
-          node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+          node =>
+            !!node &&
+            !!node.open &&
+            isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false })
         );
         if (acceptedProposalLaunched) return;
       }
@@ -6607,7 +6486,11 @@ const Notebook = ({}: NotebookProps) => {
           lastNodeOperation.current.data === "notAccepted") */
       ) {
         const notAcceptedProposalLaunched = detectAndCallTutorial("reconcilingNotAcceptedProposal", node =>
-          Boolean(node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }))
+          Boolean(
+            node &&
+              node.open &&
+              !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false })
+          )
         );
         setOpenSidebar("PROPOSALS");
         // setDynamicTargetId('')
@@ -7191,7 +7074,15 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
-        node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
+        node &&
+        node.open &&
+        isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: node,
+          isInstructor: false,
+          instantApprove: false,
+        });
 
       const node = graph.nodes[dynamicTargetId];
       if (!reconcilingAcceptedProposalIsValid(node)) {
@@ -7206,7 +7097,7 @@ const Notebook = ({}: NotebookProps) => {
       const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
         node &&
         node.open &&
-        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
+        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false }) &&
         openSidebar === "PROPOSALS";
 
       const node = graph.nodes[dynamicTargetId];
@@ -8129,10 +8020,9 @@ const Notebook = ({}: NotebookProps) => {
                     initialProposal={nodeBookState.initialProposal}
                     nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
                     proposeNodeImprovement={proposeNodeImprovement}
-                    fetchProposals={fetchProposals}
                     selectedNode={nodeBookState.selectedNode}
                     rateProposal={rateProposal}
-                    ratingProposale={ratingProposale}
+                    ratingProposal={ratingProposal}
                     selectProposal={onSelectProposal}
                     deleteProposal={deleteProposal}
                     proposeNewChild={proposeNewChild}
