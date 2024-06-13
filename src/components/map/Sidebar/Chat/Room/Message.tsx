@@ -292,7 +292,7 @@ export const Message = ({
     }
   };
 
-  const saveMessageEdit = async (newMessage: string) => {
+  const saveMessageEdit = async (newMessage: string, imageUrls: string[] = []) => {
     if (!editingMessage?.channelId) return;
     if (editingMessage.parentMessage) {
       const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
@@ -300,6 +300,7 @@ export const Message = ({
       parentMessage.replies[replyIdx] = {
         ...parentMessage.replies[replyIdx],
         message: newMessage,
+        imageUrls,
         edited: true,
         editedAt: new Date(),
       };
@@ -311,6 +312,7 @@ export const Message = ({
       const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
       await updateDoc(messageRef, {
         message: newMessage,
+        imageUrls,
         edited: true,
         editedAt: new Date(),
       });
@@ -404,7 +406,7 @@ export const Message = ({
     async (imageUrls: string[], important = false, sendMessageType: string, inputValue: string, node = {}) => {
       try {
         if (sendMessageType === "edit") {
-          saveMessageEdit(inputValue);
+          saveMessageEdit(inputValue, imageUrls);
         } else if (!!replyOnMessage || sendMessageType === "reply") {
           if (!inputValue.trim() && !imageUrls.length) return;
           sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
@@ -570,6 +572,8 @@ export const Message = ({
                         sendReplyOnMessage={sendReplyOnMessage}
                         isLoadingReaction={isLoadingReaction}
                         makeMessageUnread={makeMessageUnread}
+                        handleDeleteMessage={handleDeleteMessage}
+                        handleDeleteReply={handleDeleteReply}
                       />
                     )}
                     {roomType !== "news" && (
