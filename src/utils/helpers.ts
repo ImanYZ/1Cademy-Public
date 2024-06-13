@@ -37,18 +37,27 @@ export const doNeedToDeleteNode = (corrects: number, wrongs: number, locked: boo
   return corrects < wrongs && !locked;
 };
 
-export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
+export const isVersionApproved = ({
+  corrects,
+  wrongs,
+  nodeData,
+  instantApprove,
+  isInstructor,
+}: {
+  corrects: any;
+  wrongs: any;
+  nodeData: any;
+  instantApprove: boolean;
+  isInstructor: boolean;
+}): boolean => {
   try {
     if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
     const nodeRating = nodeData.corrects - nodeData.wrongs;
     const versionRating = corrects - wrongs;
-    if (versionRating >= nodeRating / 2) {
-      return nodeData;
-    }
-    return false;
+    return (isInstructor && instantApprove) || versionRating >= nodeRating / 2;
   } catch (err) {
     console.error(err);
-    return err;
+    return false;
   }
 };
 

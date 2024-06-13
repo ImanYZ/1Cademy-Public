@@ -82,7 +82,7 @@ export type IProposeChildNodePayload = {
 // - create notification for proposer, should have aType=newChild and set oType=Propo if version not get accepted and oType=PropoAccept if version get accepted
 // - increment notificationNums +1 for proposer
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  let nodeRef, nodeData, userNodesData, userNodesRefs;
+  let nodeRef: any, nodeData: any, userNodesData: any, userNodesRefs: any;
   const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
   let writeCounts = 0;
   let batch = db.batch();
@@ -148,39 +148,43 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeData?.tagIds || [],
       userData.uname
     );
-    let parentNodeData = null;
-    if (courseExist || isInstructor) {
-      parentNodeData = instantApprove ? nodeData : null;
-    } else {
-      parentNodeData = await isVersionApproved({
-        corrects: newVersion.corrects,
-        wrongs: newVersion.wrongs,
-        nodeData,
-      });
-    }
+    let parentNodeData = isVersionApproved({
+      corrects: newVersion.corrects,
+      wrongs: newVersion.wrongs,
+      nodeData,
+      instantApprove,
+      isInstructor,
+    })
+      ? nodeData
+      : null;
 
     // TODO: i think we should run transaction here
     const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
     const comReputationUpdates: IComReputationUpdates = {};
 
     if (!parentNodeData) {
-      [batch, writeCounts] = await updateReputation({
-        batch,
-        uname: req.body.data.user.userData.uname,
-        imageUrl: req.body.data.user.userData.imageUrl,
-        fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        chooseUname: req.body.data.user.userData.chooseUname,
-        tagIds: nodeData.tagIds,
-        tags: nodeData.tags,
-        nodeType: req.body.data.parentType,
-        correctVal: 1,
-        wrongVal: 0,
-        instVal: 0,
-        ltermVal: 0,
-        ltermDayVal: 0,
-        voter: req.body.data.user.userData.uname,
-        writeCounts,
-        comReputationUpdates,
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts: number = 0;
+        [batch, writeCounts] = await updateReputation({
+          batch,
+          uname: req.body.data.user.userData.uname,
+          imageUrl: req.body.data.user.userData.imageUrl,
+          fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
+          chooseUname: req.body.data.user.userData.chooseUname,
+          tagIds: nodeData.tagIds,
+          tags: nodeData.tags,
+          nodeType: req.body.data.parentType,
+          correctVal: 1,
+          wrongVal: 0,
+          instVal: 0,
+          ltermVal: 0,
+          ltermDayVal: 0,
+          voter: req.body.data.user.userData.uname,
+          writeCounts,
+          comReputationUpdates,
+        });
+        await commitBatch(batch);
       });
       newVersion.childType = req.body.data.nodeType;
       newVersion.node = req.body.data.parentId;
@@ -201,24 +205,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         writeCounts,
       });
     } else {
-      [batch, writeCounts] = await updateReputation({
-        batch,
-        uname: req.body.data.user.userData.uname,
-        imageUrl: req.body.data.user.userData.imageUrl,
-        fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        chooseUname: req.body.data.user.userData.chooseUname,
-        tagIds: req.body.data.tagIds,
-        tags: req.body.data.tags,
-        nodeType: req.body.data.nodeType,
-        correctVal: 1,
-        wrongVal: 0,
-        instVal: 0,
-        ltermVal: 0,
-        ltermDayVal: 0,
-        voter: req.body.data.user.userData.uname,
-        writeCounts,
-        comReputationUpdates,
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts: number = 0;
+        [batch, writeCounts] = await updateReputation({
+          batch,
+          uname: req.body.data.user.userData.uname,
+          imageUrl: req.body.data.user.userData.imageUrl,
+          fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
+          chooseUname: req.body.data.user.userData.chooseUname,
+          tagIds: req.body.data.tagIds,
+          tags: req.body.data.tags,
+          nodeType: req.body.data.nodeType,
+          correctVal: 1,
+          wrongVal: 0,
+          instVal: 0,
+          ltermVal: 0,
+          ltermDayVal: 0,
+          voter: req.body.data.user.userData.uname,
+          writeCounts,
+          comReputationUpdates,
+        });
+        await commitBatch(batch);
       });
+
       nodeRef = db.collection("nodes").doc();
       if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
         nodeRef = db.collection("nodes").doc(versionNodeId);
@@ -283,22 +293,28 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // the corresponding changes in the tags collection. At this point, we generate tagsData
       // to prepare for the changes.
       // The new child node id does not exist, so we just pass "1RandomID".
-      [batch, writeCounts] = await generateTagsData({
-        batch: batch,
-        nodeId: nodeRef.id,
-        isTag: false,
-        nodeUpdates: newNode,
-        nodeTagIds: [],
-        nodeTags: [],
-        versionTagIds: req.body.data.tagIds,
-        versionTags: req.body.data.tags,
-        proposer: req.body.data.user.userData.uname,
-        aImgUrl: req.body.data.user.userData.imageUrl,
-        aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        aChooseUname: req.body.data.user.userData.chooseUname,
-        currentTimestamp,
-        writeCounts,
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts: number = 0;
+        [batch, writeCounts] = await generateTagsData({
+          batch: batch,
+          nodeId: nodeRef.id,
+          isTag: false,
+          nodeUpdates: newNode,
+          nodeTagIds: [],
+          nodeTags: [],
+          versionTagIds: req.body.data.tagIds,
+          versionTags: req.body.data.tags,
+          proposer: req.body.data.user.userData.uname,
+          aImgUrl: req.body.data.user.userData.imageUrl,
+          aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
+          aChooseUname: req.body.data.user.userData.chooseUname,
+          currentTimestamp,
+          writeCounts,
+        });
+        await commitBatch(batch);
       });
+
       batch.set(nodeRef, newNode);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       const parentNodeRef = db.doc(`/nodes/${req.body.data.parentId}`);
@@ -316,15 +332,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       // Signal all userNodes for all the users who have had some kind of interaction with the parent
       // node that a child is being added to it.
-      [batch, writeCounts] = await signalAllUserNodesChanges({
-        batch,
-        userNodesRefs,
-        userNodesData,
-        nodeChanges: ParentNodeChanges,
-        major: true,
-        deleted: false,
-        currentTimestamp,
-        writeCounts,
+      await detach(async () => {
+        let batch = db.batch();
+        let writeCounts: number = 0;
+        [batch, writeCounts] = await signalAllUserNodesChanges({
+          batch,
+          userNodesRefs,
+          userNodesData,
+          nodeChanges: ParentNodeChanges,
+          major: true,
+          deleted: false,
+          currentTimestamp,
+          writeCounts,
+        });
+        await commitBatch(batch);
       });
 
       const newUserNodeObj: IUserNode = {
@@ -381,25 +402,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         await commitBatch(batch);
       });
     }
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
 
-    for (const tagId in comReputationUpdates) {
-      for (const reputationType of reputationTypes) {
-        if (!comReputationUpdates[tagId][reputationType]) continue;
-
-        if (comReputationUpdates[tagId][reputationType].isNew) {
-          batch.set(
-            comReputationUpdates[tagId][reputationType].docRef,
-            comReputationUpdates[tagId][reputationType].docData
-          );
-        } else {
-          batch.update(
-            comReputationUpdates[tagId][reputationType].docRef,
-            comReputationUpdates[tagId][reputationType].docData
-          );
+          if (comReputationUpdates[tagId][reputationType].isNew) {
+            batch.set(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          } else {
+            batch.update(
+              comReputationUpdates[tagId][reputationType].docRef,
+              comReputationUpdates[tagId][reputationType].docData
+            );
+          }
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         }
-        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
       }
-    }
+      await commitBatch(batch);
+    });
 
     const { versionsColl, userVersionsColl }: any = getTypedCollections();
     // Now we have all the data we need in newVersion, so we can set the document.
@@ -407,7 +432,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     (newVersion.nodeType = newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType),
       batch.set(versionRef, newVersion);
     [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
     const newUserVersion: any = {
       award: false,
       correct: true,
@@ -426,17 +450,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     delete newUserVersion.updatedAt;
     newUserVersion.nodeType = req.body.data.nodeType;
     batch.set(userVersionLogRef, newUserVersion);
-
-    [batch, writeCounts] = await proposalNotification({
-      batch,
-      nodeId: newVersion.accepted ? nodeRef.id : req.body.data.parentId,
-      nodeTitle: newVersion.accepted ? req.body.data.title : nodeData.title,
-      uname: req.body.data.user.userData.uname,
-      versionData: newVersion,
-      currentTimestamp,
-      writeCounts,
-    });
     await commitBatch(batch);
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await proposalNotification({
+        batch,
+        nodeId: newVersion.accepted ? nodeRef.id : req.body.data.parentId,
+        nodeTitle: newVersion.accepted ? req.body.data.title : nodeData.title,
+        uname: req.body.data.user.userData.uname,
+        versionData: newVersion,
+        currentTimestamp,
+        writeCounts,
+      });
+      await commitBatch(batch);
+    });
 
     // TODO: move these to queue
     // action tracks

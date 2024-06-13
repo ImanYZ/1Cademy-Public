@@ -14,9 +14,10 @@ type PendingProposalListProps = {
   // setPendingProposalsNum: any;
   proposals: any[];
   openLinkedNode: any;
+  userVotesOnProposals?: { [key: string]: any };
 };
 
-const PendingProposalList = (props: PendingProposalListProps) => {
+const PendingProposalList = ({ proposals, openLinkedNode, userVotesOnProposals = {} }: PendingProposalListProps) => {
   const theme = useTheme();
   // const [{ user }] = useAuth();
   // const db = getFirestore();
@@ -137,14 +138,14 @@ const PendingProposalList = (props: PendingProposalListProps) => {
   // }, [lastIndex, pendingProposals, pendingProposalsLoaded]);
 
   const loadOlderProposalsClick = useCallback(() => {
-    if (lastIndex >= props.proposals.length) return;
+    if (lastIndex >= proposals.length) return;
 
     setIsRetrieving(true);
     setLastIndex(lastIndex + ELEMENTS_PER_PAGE);
     setTimeout(() => {
       setIsRetrieving(false);
     }, 500);
-  }, [lastIndex, props.proposals.length]);
+  }, [lastIndex, proposals.length]);
 
   useEffect(() => {
     if (!inViewInfinityLoaderTrigger) return;
@@ -155,7 +156,7 @@ const PendingProposalList = (props: PendingProposalListProps) => {
 
   return (
     <Box id="PendingProposalsContainer">
-      {!props.proposals.length && (
+      {!proposals.length && (
         <Box
           sx={{
             display: "flex",
@@ -183,22 +184,23 @@ const PendingProposalList = (props: PendingProposalListProps) => {
         </Box>
       )}
 
-      {!!props.proposals.length && (
+      {!!proposals.length && (
         <ul
           className="collection Proposals"
           style={{ display: "flex", padding: "0px", margin: "0px", flexDirection: "column", gap: "4px" }}
         >
-          {props.proposals.slice(0, lastIndex).map((proposal, idx) => {
+          {proposals.slice(0, lastIndex).map((proposal, idx) => {
             return (
               <ProposalItem
                 key={idx}
                 proposal={proposal}
-                openLinkedNode={(nodeId: string) => props.openLinkedNode(nodeId, "initialProposal-" + proposal.id)}
+                openLinkedNode={(nodeId: string) => openLinkedNode(nodeId, "initialProposal-" + proposal.id)}
                 showTitle={true}
+                userVotesOnProposals={userVotesOnProposals}
               />
             );
           })}
-          {props.proposals.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
+          {proposals.length > lastIndex && <Box id="ContinueButton" ref={refInfinityLoaderTrigger}></Box>}
         </ul>
       )}
     </Box>
