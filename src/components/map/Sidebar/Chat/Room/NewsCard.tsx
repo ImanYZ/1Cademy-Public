@@ -11,9 +11,9 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
-import { MessageLeft } from "./MessageLeft";
 
 type NewsCardProps = {
+  type?: string;
   notebookRef: any;
   messageRefs: any;
   nodeBookDispatch: any;
@@ -39,8 +39,12 @@ type NewsCardProps = {
   sendReplyOnMessage: any;
   isLoadingReaction: IChannelMessage | null;
   makeMessageUnread: (message: IChannelMessage) => void;
+  handleDeleteMessage: any;
+  handleDeleteReply: any;
+  parentMessage?: IChannelMessage;
 };
 export const NewsCard = ({
+  type,
   notebookRef,
   messageRefs,
   nodeBookDispatch,
@@ -66,6 +70,9 @@ export const NewsCard = ({
   sendReplyOnMessage,
   isLoadingReaction,
   makeMessageUnread,
+  handleDeleteMessage,
+  handleDeleteReply,
+  parentMessage,
 }: NewsCardProps) => {
   const [openReplies, setOpenReplies] = useState<boolean>(false);
   const handleOpenReplies = () => setOpenReplies(prev => !prev);
@@ -193,6 +200,9 @@ export const NewsCard = ({
                   setEditingMessage={setEditingMessage}
                   user={user}
                   makeMessageUnread={makeMessageUnread}
+                  handleDeleteMessage={() =>
+                    type === "reply" ? handleDeleteReply(parentMessage, message) : handleDeleteMessage(message)
+                  }
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -222,7 +232,8 @@ export const NewsCard = ({
             }}
           >
             {(message.replies || []).map((reply: any, idx: number) => (
-              <MessageLeft
+              <NewsCard
+                type="reply"
                 notebookRef={notebookRef}
                 messageRefs={messageRefs}
                 nodeBookDispatch={nodeBookDispatch}
@@ -249,6 +260,9 @@ export const NewsCard = ({
                 sendReplyOnMessage={sendReplyOnMessage}
                 isLoadingReaction={isLoadingReaction}
                 makeMessageUnread={makeMessageUnread}
+                handleDeleteMessage={handleDeleteMessage}
+                handleDeleteReply={handleDeleteReply}
+                parentMessage={message}
               />
             ))}
 
@@ -257,7 +271,6 @@ export const NewsCard = ({
                 notebookRef={notebookRef}
                 nodeBookDispatch={nodeBookDispatch}
                 db={db}
-                user={user}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
                 channelUsers={channelUsers}
@@ -268,8 +281,11 @@ export const NewsCard = ({
                 selectedChannel={selectedChannel}
                 replyOnMessage={message}
                 setReplyOnMessage={setReplyOnMessage}
+                user={user}
+                roomType={roomType}
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
+                parentMessage={message}
               />
             </Box>
           </Box>

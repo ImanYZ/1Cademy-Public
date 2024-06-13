@@ -60,7 +60,7 @@ export const MessageInput = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputFieldRef = useRef<any>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(editingMessage?.imageUrls || []);
   const [inputValue, setInputValue] = useState<string>("");
   const [important, setImportant] = useState(false);
 
@@ -408,31 +408,35 @@ export const MessageInput = ({
         }}
       >
         <input type="file" ref={fileInputRef} onChange={onUploadImage} hidden />
-        {!editingMessage && (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            {isUploading ? (
-              <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
-            ) : (
-              <Tooltip title={"Upload Image"}>
-                <IconButton onClick={uploadImageClicked}>
-                  <CollectionsIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            {leading && (
-              <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
-                <IconButton onClick={() => setImportant(prev => !prev)}>
-                  <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title={"Upload a node from notebook"}>
-              <IconButton onClick={() => choosingNewLinkedNode()}>
-                <AddLinkIcon />
+
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {isUploading ? (
+            <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
+          ) : (
+            <Tooltip title={"Upload Image"}>
+              <IconButton onClick={uploadImageClicked}>
+                <CollectionsIcon />
               </IconButton>
             </Tooltip>
-          </Box>
-        )}
+          )}
+          {!editingMessage && (
+            <>
+              {leading && (
+                <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
+                  <IconButton onClick={() => setImportant(prev => !prev)}>
+                    <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title={"Upload a node from notebook"}>
+                <IconButton onClick={() => choosingNewLinkedNode()}>
+                  <AddLinkIcon />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Box>
+
         {!editingMessage ? (
           <Button
             variant="contained"
