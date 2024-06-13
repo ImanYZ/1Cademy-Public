@@ -1,3 +1,4 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Avatar,
   Box,
@@ -46,6 +47,7 @@ import { useEffect, useState } from "react";
 import { roundNum } from "src/utils/common.utils";
 
 import { useAuth } from "@/context/AuthContext";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 import { newId } from "@/lib/utils/newFirestoreId";
@@ -94,10 +96,12 @@ interface Meeting {
   meetingId: string;
   duration: number;
   day: string;
+  previousDuration: number;
 }
 
 const TrackingHours = () => {
   const db = getFirestore();
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [semesters, setSemesters] = useState<any>({});
   const [trackedStudents, setTrackedStudents] = useState<any>({});
   const [selectedSemester, setSelectedSemester] = useState<string>("");
@@ -189,7 +193,67 @@ const TrackingHours = () => {
 
     return _day >= start && _day <= end;
   }
+  const formatTime = (timestamp: Timestamp, hour12 = true): string => {
+    const date = timestamp.toDate();
+    const formattedDate = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (!hour12) {
+      return formattedDate.replace(/\s*(AM|PM)/, "");
+    }
+    return formattedDate;
+  };
+  const handleDeleteShortMeeting = async (student: any, meeting: Meeting, semesterId: string) => {
+    try {
+      if (
+        await confirmIt(
+          <Box>
+            <Typography variant="h6">Delete 1:1 Meeting</Typography>
+            Are you sure you want to delete this meeting with{" "}
+            <strong style={{ color: "orange" }}>
+              {student.fName} {student.lName}{" "}
+            </strong>
+            at in <strong style={{ color: "orange" }}>{meeting.day}</strong> from{" "}
+            <strong style={{ color: "orange" }}>{formatTime(meeting.sTimestamp)} </strong>to{" "}
+            <strong style={{ color: "orange" }}>{formatTime(meeting.eTimestamp, false)}</strong>?
+          </Box>,
+          "Yes",
+          "Cancel"
+        )
+      ) {
+        const trackingQuery = query(
+          collection(db, "trackHours"),
+          where("uname", "==", student.uname),
+          where("day", "==", meeting.day)
+        );
 
+        const trackingDocs = await getDocs(trackingQuery);
+        if (trackingDocs.docs.length > 0) {
+          const trackingDoc = trackingDocs.docs[0];
+          const hoursData = trackingDoc.data() as HoursData;
+
+          const totalMinutes = hoursData.totalMinutes - meeting.duration + (meeting.previousDuration || 0);
+          const meetings = hoursData.shortMeetings.filter((m: any) => m.meetingId !== meeting.meetingId);
+
+          await updateDoc(trackingDoc.ref, { shortMeetings: meetings, totalMinutes });
+          setTrackedStudents((prev: any) => {
+            const _prev = { ...prev };
+            const semester = prev[semesterId];
+            if (semester) {
+              const currStudentIdx: any = semester.students.findIndex((s: any) => s.uname === student.uname);
+              const currStudent = semester.students[currStudentIdx];
+              const shortMeetings = currStudent.shortMeetings.filter((m: any) => m.meetingId !== meeting.meetingId);
+              currStudent.shortMeetings = shortMeetings;
+              currStudent.totalMinutes = currStudent.totalMinutes - meeting.duration + (meeting.previousDuration || 0);
+              semester.students[currStudentIdx] = currStudent;
+              prev[semesterId] = semester;
+            }
+            return _prev;
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const loadTrackingData = async (
     semesters: Semesters,
     selectedPeriod: number,
@@ -394,15 +458,38 @@ const TrackingHours = () => {
 
         const trackingDocs = await getDocs(trackingQuery);
         const duration = endTime.diff(startTime, "minutes");
+        if (duration < 0) {
+          await confirmIt(`The start time cannot be after the end time. Please select another time`, "OK", "");
+          return;
+        }
+        if (duration === 0) {
+          await confirmIt(
+            `The duration of the meeting must be greater than 0 minutes. Please select another time`,
+            "OK",
+            ""
+          );
+          return;
+        }
         if (trackingDocs.docs.length > 0) {
           const trackingData = trackingDocs.docs[0].data();
           const shortMeetings: Meeting[] = trackingData.shortMeetings || [];
 
-          const intersectingMeeting = shortMeetings.some(
+          const overlappingMeeting = shortMeetings.find(
             meeting => sTimestamp < meeting.eTimestamp && eTimestamp > meeting.sTimestamp
           );
-          if (intersectingMeeting) {
-            throw new Error("New meeting time intersects with an existing meeting.");
+
+          if (overlappingMeeting) {
+            await confirmIt(
+              <Box>
+                The time you've selected overlaps with another meeting starting at{" "}
+                <strong style={{ color: "orange" }}>{formatTime(overlappingMeeting.sTimestamp)}</strong> and ending at{" "}
+                <strong style={{ color: "orange" }}>{formatTime(overlappingMeeting.eTimestamp)}</strong>. Please select
+                another time.
+              </Box>,
+              "OK",
+              ""
+            );
+            return;
           } else {
             shortMeetings.push({
               sTimestamp,
@@ -410,18 +497,35 @@ const TrackingHours = () => {
               duration,
               meetingId: newId(db),
               day: formattedDay,
+              previousDuration: 0,
             });
             const docRef = trackingDocs.docs[0].ref;
             await updateDoc(docRef, {
               shortMeetings,
-              totalMinutes: trackingData.totalMinutes + endTime.diff(startTime, "minutes"),
+              totalMinutes: trackingData.totalMinutes + Math.max(0, duration),
             });
           }
+          setTrackedStudents((prev: any) => {
+            const semester = prev[selectedStudentForMeeting.semesterId];
+            if (semester) {
+              const student: any = semester.students.find((s: any) => s.uname === selectedStudentForMeeting.uname);
+              student.shortMeetings.push({
+                sTimestamp,
+                eTimestamp,
+                duration,
+                meetingId: newId(db),
+                day: formattedDay,
+                previousDuration: 0,
+              });
+              student.totalMinutes = student.totalMinutes + Math.max(0, duration);
+            }
+            return prev;
+          });
         } else {
           const newDocumentRef = doc(collection(db, "trackHours"));
           const newDocument = {
             day: formattedDay,
-            totalMinutes: 0,
+            totalMinutes: Math.max(0, duration),
             trackedMinutes: [],
             uname: selectedStudentForMeeting.uname,
             lName: selectedStudentForMeeting.lName,
@@ -444,6 +548,22 @@ const TrackingHours = () => {
             ],
           };
           setDoc(newDocumentRef, newDocument);
+          setTrackedStudents((prev: any) => {
+            const semester = prev[selectedStudentForMeeting.semesterId];
+            if (semester) {
+              const student: any = semester.students.find((s: any) => s.uname === student.uname);
+              student.shortMeetings.push({
+                sTimestamp,
+                eTimestamp,
+                duration,
+                meetingId: newId(db),
+                day: formattedDay,
+                previousDuration: 0,
+              });
+              student.totalMinutes += Math.max(0, duration);
+            }
+            return prev;
+          });
         }
         setDialogOpen(false);
         setSelectedStudent(null);
@@ -469,7 +589,6 @@ const TrackingHours = () => {
               <TableCell>Hours Tracked</TableCell>
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Meetings</TableCell>
-              {(!adminView || user?.uname === "1man") && <TableCell>Meetings</TableCell>}
               <TableCell>1:1 Meetings</TableCell>
               <TableCell>Paid</TableCell>
             </TableRow>
@@ -541,15 +660,23 @@ const TrackingHours = () => {
                   ))}
                 </TableCell>
                 <TableCell>
-                  {(student.shortMeetings || []).map((meeting: any, meetingIdx: number) => (
-                    <Box
-                      key={`${student.uname}-meeting-${meetingIdx}`}
-                      sx={{ display: "flex", alignItems: "center", gap: "5px" }}
-                    >
-                      <Typography>{meeting.duration} Min.</Typography>
-                      <Typography>in {meeting.day}</Typography>
-                    </Box>
-                  ))}
+                  {(student.shortMeetings || []).map((meeting: Meeting, meetingIdx: number) => {
+                    return (
+                      <Box
+                        key={`${student.uname}-meeting-${meetingIdx}`}
+                        sx={{ display: "flex", alignItems: "center", gap: "5px" }}
+                      >
+                        <Typography>
+                          - <strong>{meeting.day}</strong>: {formatTime(meeting.sTimestamp, false)} -{" "}
+                          {formatTime(meeting.eTimestamp)}
+                        </Typography>
+                        <DeleteIcon
+                          sx={{ ":hover": { cursor: "pointer", color: "orange" }, ml: "4px" }}
+                          onClick={() => handleDeleteShortMeeting(student, meeting, student.semesterId)}
+                        />
+                      </Box>
+                    );
+                  })}
                   {!adminView && (
                     <Button
                       variant="contained"
@@ -738,6 +865,7 @@ const TrackingHours = () => {
           </Container>
         </Box>
       )}
+      {ConfirmDialog}
     </>
   );
 };
