@@ -321,7 +321,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // we need to update the votes on the old version.
       await createUpdateUserVersion({
         userVersionRef,
-        userVersionData,
+        userVersionData: { node: versionData.node, ...userVersionData },
         nodeType,
         writeCounts,
         t,

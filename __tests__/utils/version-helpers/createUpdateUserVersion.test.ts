@@ -23,7 +23,7 @@ describe("createUpdateUserVersion", () => {
     let { userVersionsColl }: any = getTypedCollections();
     const versionsRef = await userVersionsColl.doc("ehViCqDju0mysa6kgwD1");
     const versionsData = await versionsRef.get();
-    let data = versionsData.data();
+    let data = { node: versionsData.node, ...versionsData.data() };
     data["user"] = "1man 1cademy";
     [batch, writeCounts] = await createUpdateUserVersion({
       batch,

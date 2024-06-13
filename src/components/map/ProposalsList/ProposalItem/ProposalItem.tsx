@@ -31,34 +31,44 @@ type ProposalItemProps = {
   openLinkedNode: any;
   proposalSummaries?: any;
   isClickable?: boolean;
+  userVotesOnProposals: { [key: string]: any };
 };
 
-const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
+const ProposalItem = ({
+  isClickable = true,
+  userVotesOnProposals,
+  proposal,
+  shouldSelectProposal,
+  showTitle,
+  selectProposal,
+  openLinkedNode,
+  proposalSummaries,
+}: ProposalItemProps) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
-      if (props.shouldSelectProposal) {
-        props.selectProposal(event, proposal, proposal.newNodeId);
+      if (shouldSelectProposal) {
+        selectProposal(event, proposal, proposal.newNodeId);
       } else {
-        props.openLinkedNode(proposal.node);
+        openLinkedNode(proposal.node);
       }
     },
-    [props]
-    // [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
+    []
+    // [openLinkedNode, shouldSelectProposal, selectProposal]
   );
 
-  let proposalSummaries;
+  let _proposalSummaries;
 
-  if (props.proposalSummaries) {
-    proposalSummaries = props.proposalSummaries;
+  if (proposalSummaries) {
+    _proposalSummaries = proposalSummaries;
   } else {
-    proposalSummaries = proposalSummariesGenerator(props.proposal);
+    _proposalSummaries = proposalSummariesGenerator(proposal);
   }
 
   return (
     <Paper
       elevation={3}
       className="CollapsedProposal collection-item avatar"
-      key={`Proposal${props.proposal.id}`}
+      key={`Proposal${proposal.id}`}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -77,12 +87,12 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
         }),
       }}
     >
-      {/* <h6>{props.proposal.newNodeId}</h6> */}
+      {/* <h6>{proposal.newNodeId}</h6> */}
       <Box>
         <Box>
-          {props.showTitle && (
+          {showTitle && (
             <MarkdownRender
-              text={props.proposal.title}
+              text={proposal.title}
               customClass={"custom-react-markdown"}
               sx={{ fontWeight: 400, letterSpacing: "inherit" }}
             />
@@ -93,8 +103,8 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               paddingY: "10px",
             }}
           >
-            {proposalSummaries.length > 0
-              ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
+            {_proposalSummaries.length > 0
+              ? _proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
                   return (
                     <Box
                       component="p"
@@ -103,15 +113,13 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                         color: theme =>
                           theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
                       }}
-                      key={"Summary" + props.proposal.id + prSummaryIdx}
+                      key={"Summary" + proposal.id + prSummaryIdx}
                     >
                       {prSummary}
                     </Box>
                   );
                 })
-              : props.proposal.summary && (
-                  <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
-                )}
+              : proposal.summary && <Editor label="" readOnly setValue={doNothing} value={proposal.summary} />}
           </Box>
         </Box>
         <Box
@@ -139,7 +147,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                 alignItems: "center",
               }}
             >
-              <NodeTypeIcon nodeType={props.proposal.nodeType || ""} fontSize="inherit" />
+              <NodeTypeIcon nodeType={proposal.nodeType || ""} fontSize="inherit" />
             </Box>
             <Box
               sx={{
@@ -148,7 +156,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                 color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
               }}
             >
-              {dayjs(props.proposal.createdAt).fromNow()}
+              {dayjs(proposal.createdAt).fromNow()}
             </Box>
           </Box>
           <Box
@@ -167,14 +175,20 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
                 <DoneRoundedIcon
                   fontSize="small"
-                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                    fill:
+                      userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].correct
+                        ? "rgb(0, 211, 105)"
+                        : "",
+                  }}
                 />
                 <Typography
                   sx={{
                     color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
                   }}
                 >
-                  {shortenNumber(props.proposal.corrects, 2, false)}
+                  {shortenNumber(proposal.corrects, 2, false)}
                 </Typography>
               </Box>
             </Tooltip>
@@ -191,14 +205,20 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
                 <CloseRoundedIcon
                   fontSize="small"
-                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                    fill:
+                      userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].wrong
+                        ? "rgb(255, 29, 29)"
+                        : "",
+                  }}
                 />
                 <Typography
                   sx={{
                     color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
                   }}
                 >
-                  {shortenNumber(props.proposal.wrongs, 2, false)}
+                  {shortenNumber(proposal.wrongs, 2, false)}
                 </Typography>
               </Box>
             </Tooltip>
@@ -206,7 +226,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
           <Button
             sx={{ borderRadius: "20px" }}
             variant="contained"
-            onClick={isClickable ? openLinkedNodeClick(props.proposal) : undefined}
+            onClick={isClickable ? openLinkedNodeClick(proposal) : undefined}
           >
             Compare
           </Button>
