@@ -2,7 +2,7 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Avatar, Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -47,6 +47,7 @@ type NewsCardProps = {
   replies?: IChannelMessage[];
   setReplies?: any;
   isRepliesLoaded?: boolean;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const NewsCard = ({
   type,
@@ -83,6 +84,7 @@ export const NewsCard = ({
   replies,
   setReplies,
   isRepliesLoaded,
+  setOpenMedia,
 }: NewsCardProps) => {
   const handleReplyOnMessage = () => {
     setOpenReplies(message);
@@ -180,6 +182,7 @@ export const NewsCard = ({
                 setEditingMessage={setEditingMessage}
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
+                setOpenMedia={setOpenMedia}
               />
             </Box>
           ) : (
@@ -200,6 +203,7 @@ export const NewsCard = ({
                     src={imageUrl}
                     alt="news image"
                     key={imageUrl}
+                    onClick={() => setOpenMedia(imageUrl)}
                   />
                 ))}
               </Box>
@@ -287,6 +291,7 @@ export const NewsCard = ({
                 handleDeleteMessage={handleDeleteMessage}
                 handleDeleteReply={handleDeleteReply}
                 parentMessage={message}
+                setOpenMedia={setOpenMedia}
               />
             ))}
 
@@ -310,6 +315,7 @@ export const NewsCard = ({
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
                 parentMessage={message}
+                setOpenMedia={setOpenMedia}
               />
             </Box>
           </Box>

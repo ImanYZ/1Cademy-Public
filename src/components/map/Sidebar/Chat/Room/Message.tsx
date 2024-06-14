@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
+import { CircularProgress, IconButton, Modal, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -16,7 +16,10 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+/* eslint-disable */
+// @ts-ignore
+import { MapInteractionCSS } from "react-map-interaction";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
@@ -108,6 +111,7 @@ export const Message = ({
   const [openReplies, setOpenReplies] = useState<IChannelMessage | null>(null);
   const [replies, setReplies] = useState<IChannelMessage[]>([]);
   const [isRepliesLoaded, setIsRepliesLoaded] = useState<boolean>(true);
+  const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -616,6 +620,7 @@ export const Message = ({
                         replies={replies}
                         setReplies={setReplies}
                         isRepliesLoaded={isRepliesLoaded}
+                        setOpenMedia={setOpenMedia}
                       />
                     )}
                     {roomType !== "news" && (
@@ -657,6 +662,7 @@ export const Message = ({
                             replies={replies}
                             setReplies={setReplies}
                             isRepliesLoaded={isRepliesLoaded}
+                            setOpenMedia={setOpenMedia}
                           />
                         ) : (
                           <MessageLeft
@@ -696,6 +702,7 @@ export const Message = ({
                             replies={replies}
                             setReplies={setReplies}
                             isRepliesLoaded={isRepliesLoaded}
+                            setOpenMedia={setOpenMedia}
                           />
                         )}
                       </>
@@ -749,10 +756,42 @@ export const Message = ({
             sendMessageType={"message"}
             sendMessage={sendMessage}
             sendReplyOnMessage={sendReplyOnMessage}
+            setOpenMedia={setOpenMedia}
           />
         </Box>
       )}
       {ConfirmDialog}
+      <Suspense fallback={<div></div>}>
+        <Modal
+          open={Boolean(openMedia)}
+          onClose={() => setOpenMedia(null)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <>
+            <CloseIcon
+              sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+              onClick={() => setOpenMedia(null)}
+            />
+            <MapInteractionCSS>
+              <Paper
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100vh",
+                  width: "100vw",
+                  background: "transparent",
+                }}
+              >
+                {/* TODO: change to Next Image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={openMedia || ""} alt="Node image" className="responsive-img" />
+              </Paper>
+            </MapInteractionCSS>
+          </>
+        </Modal>
+      </Suspense>
     </Box>
   );
 };

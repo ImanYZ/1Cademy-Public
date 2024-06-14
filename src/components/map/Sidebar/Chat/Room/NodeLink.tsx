@@ -1,7 +1,7 @@
 import LinkIcon from "@mui/icons-material/Link";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage, MembersInfo } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -56,6 +56,7 @@ type MessageRightProps = {
   replies?: IChannelMessage[];
   setReplies?: any;
   isRepliesLoaded?: boolean;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const NodeLink = ({
   db,
@@ -95,6 +96,7 @@ export const NodeLink = ({
   replies,
   setReplies,
   isRepliesLoaded,
+  setOpenMedia,
 }: MessageRightProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
@@ -314,6 +316,7 @@ export const NodeLink = ({
                       handleDeleteMessage={handleDeleteMessage}
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
                     />
                   ) : (
                     <MessageLeft
@@ -348,6 +351,7 @@ export const NodeLink = ({
                       sendReplyOnMessage={sendReplyOnMessage}
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
                     />
                   )}
                 </>
@@ -373,6 +377,7 @@ export const NodeLink = ({
                   sendMessage={sendMessage}
                   sendReplyOnMessage={sendReplyOnMessage}
                   parentMessage={message}
+                  setOpenMedia={setOpenMedia}
                 />
               </Box>
             </Box>
