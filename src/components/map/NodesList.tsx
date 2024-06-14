@@ -203,6 +203,7 @@ const NodesList = ({
               added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
               removed: (nodes[nId]?.removedTags || []).includes(nodes[nId].tagIds[idx]),
             }))}
+            tagIds={nodes[nId].tagIds}
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
             choices={nodes[nId].choices}
