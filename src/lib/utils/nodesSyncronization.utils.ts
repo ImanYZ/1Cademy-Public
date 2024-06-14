@@ -1,5 +1,5 @@
 import { graphlib } from "dagre";
-import { doc, DocumentChange, DocumentData, Firestore, getDoc } from "firebase/firestore";
+import { collection, DocumentChange, DocumentData, Firestore, getDocs, query, where } from "firebase/firestore";
 
 import { AllTagsTreeView } from "@/components/TagsSearcher";
 import { Graph } from "@/pages/notebook";
@@ -25,10 +25,24 @@ import {
 } from "./Map.utils";
 // import { FullNodeData, NodeFireStore, NodesData, UserNodeChanges } from "../../noteBookTypes";
 
+export const arrayToChunks = (inputArray: any[], perChunk: number = 30) => {
+  const result = inputArray.reduce((resultArray, item, index) => {
+    const chunkIndex = Math.floor(index / perChunk);
+
+    if (!resultArray[chunkIndex]) {
+      resultArray[chunkIndex] = []; // start a new chunk
+    }
+
+    resultArray[chunkIndex].push(item);
+
+    return resultArray;
+  }, []);
+
+  return result;
+};
 export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
   // const docChanges = snapshot.docChanges();
   // if (!docChanges.length) return null
-
   return docChanges.map(change => {
     const userNodeData: UserNodeFirestore = change.doc.data() as UserNodeFirestore;
     return {
@@ -41,14 +55,17 @@ export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): 
 
 export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<NodesData[]> => {
   // console.log("[GET NODES]");
-  const nodeDocsPromises = nodeIds.map(nodeId => {
-    const nodeRef = doc(db, "nodes", nodeId);
-    return getDoc(nodeRef);
+  const chunks = arrayToChunks(nodeIds);
+  const nodeDocsPromises = chunks.map((nodeIds: string[]) => {
+    const nodeQuery = query(collection(db, "nodes"), where("__name__", "in", nodeIds));
+    return getDocs(nodeQuery);
   });
 
   const nodeDocs = await Promise.all(nodeDocsPromises);
-
-  return nodeDocs.map(nodeDoc => {
+  console.log("nodeDocs.flat()", nodeDocs.flat());
+  const flatDocs = nodeDocs.flatMap(nd => nd.docs);
+  return flatDocs.map((nodeDoc: any) => {
+    console.log("nodeDoc", nodeDoc.docs);
     if (!nodeDoc.exists()) return null;
 
     const tmpData = nodeDoc.data();
