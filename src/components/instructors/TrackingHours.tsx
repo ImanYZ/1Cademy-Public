@@ -20,7 +20,16 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Dayjs } from "dayjs";
-import { collection, getDocs, getFirestore, query, runTransaction, where, writeBatch } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  orderBy,
+  query,
+  runTransaction,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import moment from "moment";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -156,7 +165,7 @@ const TrackingHours = () => {
     selectedDatePeriod?: Period,
     periods?: Period[]
   ) => {
-    let hoursQuery: any = collection(db, "trackHours");
+    let hoursQuery: any = query(collection(db, "trackHours"), orderBy("createdAt", "desc"));
 
     // if (selectedDatePeriod && selectedPeriod !== -1) {
     //   hoursQuery = query(hoursQuery, where("day", "==", selectedDatePeriod.start.format("DD-MM-YYYY")));
