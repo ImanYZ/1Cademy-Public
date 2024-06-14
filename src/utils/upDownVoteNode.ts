@@ -125,7 +125,9 @@ export const UpDownVoteNode = async ({
       willRemoveNode = doNeedToDeleteNode(
         nodeData.corrects + correctChange,
         nodeData.wrongs + wrongChange,
-        !!nodeData?.locked
+        !!nodeData?.locked,
+        false,
+        false
       );
     }
   }
