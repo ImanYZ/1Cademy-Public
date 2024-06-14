@@ -217,7 +217,7 @@ const ProposalsSidebar = ({
             const docType = change.type;
             const curData = {
               ...change.data,
-              // createdAt: change.data.createdAt.toDate(),
+              createdAt: change.data.createdAt.toDate(),
               award: false,
               correct: false,
               wrong: false,
@@ -235,7 +235,7 @@ const ProposalsSidebar = ({
             if (docType === "removed" && prevIdx !== -1) {
               prev.splice(prevIdx);
             }
-            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            prev.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
             return prev;
           },
           [...prev]
