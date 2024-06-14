@@ -33,7 +33,7 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
   const [suggestions, setSuggestions] = useState<IUser[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const fuse = new Fuse(users, {
-    keys: ["fullName"],
+    keys: ["fullName", "uname"],
   });
   const wrapperRef = useRef<any>(null);
 
@@ -46,6 +46,8 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
         _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName} ${userDoc.data().lName}` });
       });
       setUsers(_users);
+      setSuggestions(_users.splice(0, 10));
+      setShowSuggestions(true);
     };
     getUsers();
   }, [db]);
@@ -97,6 +99,9 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
         placeholder="Search User"
         fullWidth
         variant="outlined"
+        onClick={() => {
+          setShowSuggestions(true);
+        }}
       />
       {showSuggestions && (
         <SuggestionList>
