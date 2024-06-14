@@ -18,7 +18,6 @@ export const updateImage = async ({ userData }: IaddUserToChannel) => {
           chooseUname: !!userData.chooseUname,
           fullname: `${userData.fName} ${userData.lName}`,
           role: "",
-          joined: new Date(),
         };
         await channelDoc.ref.update({
           membersInfo,
@@ -38,7 +37,6 @@ export const updateImage = async ({ userData }: IaddUserToChannel) => {
           chooseUname: !!userData.chooseUname,
           fullname: `${userData.fName} ${userData.lName}`,
           role: "",
-          joined: new Date(),
         };
         await conversationDoc.ref.update({
           membersInfo,
