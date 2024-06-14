@@ -318,6 +318,8 @@ export const MessageInput = ({
         inputRef={inputFieldRef}
         placeholder={placeholder}
         style={{
+          maxHeight: "100px",
+          overflowY: "auto",
           control: {
             fontSize: 16,
             padding: "10px",
