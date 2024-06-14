@@ -2,7 +2,7 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { Fragment } from "react";
+import React, { Dispatch, Fragment, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -51,6 +51,7 @@ type MessageLeftProps = {
   replies?: IChannelMessage[];
   setReplies?: any;
   isRepliesLoaded?: boolean;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const MessageLeft = ({
   type,
@@ -90,6 +91,7 @@ export const MessageLeft = ({
   replies,
   setReplies,
   isRepliesLoaded,
+  setOpenMedia,
 }: MessageLeftProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
@@ -221,6 +223,7 @@ export const MessageLeft = ({
                   parentMessage={parentMessage}
                   sendMessage={sendMessage}
                   sendReplyOnMessage={sendReplyOnMessage}
+                  setOpenMedia={setOpenMedia}
                 />
               </Box>
             ) : (
@@ -241,6 +244,7 @@ export const MessageLeft = ({
                       src={imageUrl}
                       alt="news image"
                       key={imageUrl}
+                      onClick={() => setOpenMedia(imageUrl)}
                     />
                   ))}
                 </Box>
@@ -330,6 +334,7 @@ export const MessageLeft = ({
                       handleDeleteMessage={handleDeleteMessage}
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
                     />
                   ) : (
                     <MessageLeft
@@ -364,6 +369,7 @@ export const MessageLeft = ({
                       sendReplyOnMessage={sendReplyOnMessage}
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
                     />
                   )}
                 </Fragment>
@@ -390,6 +396,7 @@ export const MessageLeft = ({
                   sendMessage={sendMessage}
                   sendReplyOnMessage={sendReplyOnMessage}
                   parentMessage={message}
+                  setOpenMedia={setOpenMedia}
                 />
               </Box>
             </Box>
