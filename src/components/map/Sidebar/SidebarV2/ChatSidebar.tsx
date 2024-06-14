@@ -532,9 +532,9 @@ export const ChatSidebar = ({
     }
   };
 
-  const clearNotifications = (notifications: any) => {
+  const clearNotifications = async (notifications: any) => {
     for (let notif of notifications) {
-      updateDoc(notif.doc.ref, {
+      await updateDoc(notif.doc.ref, {
         seen: true,
         seenAt: new Date(),
       });
