@@ -99,7 +99,7 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
         placeholder="Search User"
         fullWidth
         variant="outlined"
-        onClick={() => {
+        onFocus={() => {
           setShowSuggestions(true);
         }}
       />
