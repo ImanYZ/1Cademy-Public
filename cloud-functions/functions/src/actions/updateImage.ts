@@ -6,10 +6,9 @@ type IaddUserToChannel = {
 
 export const updateImage = async ({ userData }: IaddUserToChannel) => {
   try {
-    const channels = await db.collection("channels").get();
+    const channels = await db.collection("channels").where("members", "array-contains", userData.uname).get();
     for (const channelDoc of channels.docs) {
       const channelData: any = channelDoc.data();
-      if (!channelData.members.includes(userData.uname)) continue;
       const membersInfo = channelData.membersInfo;
       if (channelData.members.includes(userData.uname)) {
         membersInfo[userData.uname] = {
@@ -23,10 +22,9 @@ export const updateImage = async ({ userData }: IaddUserToChannel) => {
         console.log("user", userData.uname, "updated");
       }
     }
-    const conversations = await db.collection("conversations").get();
+    const conversations = await db.collection("conversations").where("members", "array-contains", userData.uname).get();
     for (const conversationDoc of conversations.docs) {
       const conversationData: any = conversationDoc.data();
-      if (!conversationData.members.includes(userData.uname)) continue;
       const membersInfo = conversationData.membersInfo;
       if (conversationData.members.includes(userData.uname)) {
         membersInfo[userData.uname] = {
