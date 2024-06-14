@@ -456,7 +456,7 @@ export const getSemestersByIds = async (semesterIds: string[]) => {
     [semesterId: string]: ISemester;
   } = {};
 
-  const semesterIdsChunks = arrayToChunks(Array.from(new Set(semesterIds)), 10);
+  const semesterIdsChunks = arrayToChunks(Array.from(new Set(semesterIds)), 30);
   for (const semesterIds of semesterIdsChunks) {
     const semesters = await db.collection("semesters").where("__name__", "in", semesterIds).get();
     for (const semester of semesters.docs) {

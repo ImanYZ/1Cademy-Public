@@ -3,6 +3,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import UndoIcon from "@mui/icons-material/Undo";
@@ -42,6 +43,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import NextImage from "next/image";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -94,6 +96,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import EditIcon from "../../public/edit.svg";
 import { TargetClientRect, TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
 import { Assistant } from "../components/map/Assistant";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
@@ -175,6 +178,8 @@ import {
 } from "../nodeBookTypes";
 import { INotebook, NodeType, NotebookDocument, SimpleNode2 } from "../types";
 import {
+  checkInstantApprovalForProposalVote,
+  checkInstantDeleteForNode,
   childrenParentsDifferences,
   doNeedToDeleteNode,
   isVersionApproved,
@@ -3188,10 +3193,11 @@ const Notebook = ({}: NotebookProps) => {
       correct: any,
       wrongs: number,
       corrects: number,
-      locked: boolean
+      locked: boolean,
+      tagIds: string[]
     ) => {
       try {
-        if (notebookRef.current.choosingNode) return;
+        if (notebookRef.current.choosingNode || !user) return;
 
         let deleteOK: any = true;
         notebookRef.current.selectedNode = nodeId;
@@ -3205,24 +3211,17 @@ const Notebook = ({}: NotebookProps) => {
         setNodeParts(nodeId, node => {
           return { ...node, disableVotes: true };
         });
-        const { courseExist, instantDelete }: { courseExist: boolean; instantDelete: boolean } = await Post(
-          "/instructor/course/checkInstantDeleteForNode",
-          {
-            nodeId,
-          }
-        );
+
+        const { instantDelete, isInstructor }: { instantDelete: boolean; isInstructor: boolean } =
+          await checkInstantDeleteForNode(tagIds, user.uname, nodeId);
 
         setNodeParts(nodeId, node => {
           return { ...node, disableVotes: false };
         });
 
         const node = graph.nodes[nodeId];
-        let willRemoveNode = false;
-        if (courseExist) {
-          willRemoveNode = instantDelete;
-        } else {
-          willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
-        }
+        let willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked, instantDelete, isInstructor);
+
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             confirmIt(
@@ -3233,7 +3232,20 @@ const Notebook = ({}: NotebookProps) => {
             deleteOK = false;
           } else {
             deleteOK = await confirmIt(
-              "You are going to permanently delete this node by downvoting it. Are you sure?",
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  gap: "10px",
+                }}
+              >
+                <DeleteForeverIcon />
+                <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this node?</Typography>
+                <Typography>Deleting a node will permanently remove it from 1cademy.</Typography>
+              </Box>,
               "Delete Node",
               "Keep Node"
             );
@@ -3320,7 +3332,7 @@ const Notebook = ({}: NotebookProps) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setNodeParts]
+    [setNodeParts, user]
   );
 
   /////////////////////////////////////////////////////
@@ -5196,25 +5208,13 @@ const Notebook = ({}: NotebookProps) => {
         };
 
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
-        type CheckInstantApproval = {
-          nodeId: string;
-          verisonType: INodeType;
-          versionId: string;
-        };
-        const checkInstantApproval: CheckInstantApproval = {
-          nodeId: nodeBookState.selectedNode,
-          verisonType: selectedNodeType,
-          versionId: proposalId,
-        };
 
         const {
           courseExist,
           instantApprove,
           isInstructor,
-        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
-          "/instructor/course/checkInstantApprovalForProposalVote",
-          checkInstantApproval
-        );
+        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
+          await checkInstantApprovalForProposalVote(nodeBookState.selectedNode, user.uname, proposalId);
 
         let willBeApproved: boolean = isVersionApproved({
           corrects: proposalsTemp[proposalIdx].corrects,
@@ -5227,7 +5227,25 @@ const Notebook = ({}: NotebookProps) => {
         setRatingProposal(false);
 
         if (willBeApproved) {
-          const res = await confirmIt("Are you sure you want to approve this proposal?", "Yes", "Cancel");
+          const res = await confirmIt(
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+                borderRadius: "40px",
+              }}
+            >
+              <NextImage width={"22px"} height={"22px"} src={EditIcon} alt="search icon" />
+              <Typography sx={{ fontWeight: "bold" }}>Approve Proposal</Typography>
+              <Typography>Are you sure you want to approve this proposal?</Typography>
+            </Box>,
+            "Yes",
+            "Cancel"
+          );
           if (!res) return;
         }
 
