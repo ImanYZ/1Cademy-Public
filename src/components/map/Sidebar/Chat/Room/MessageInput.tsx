@@ -5,7 +5,7 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import { Box } from "@mui/system";
 import { getStorage } from "firebase/storage";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
@@ -39,6 +39,7 @@ type MessageInputProps = {
   sendMessage: any;
   sendReplyOnMessage: any;
   parentMessage?: IChannelMessage;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const MessageInput = ({
   db,
@@ -55,6 +56,7 @@ export const MessageInput = ({
   sendMessageType,
   sendMessage,
   parentMessage,
+  setOpenMedia,
 }: MessageInputProps) => {
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -400,6 +402,7 @@ export const MessageInput = ({
               src={imageUrl}
               alt=""
               key={imageUrl}
+              onClick={() => setOpenMedia(imageUrl)}
             />
           </Box>
         ))}
