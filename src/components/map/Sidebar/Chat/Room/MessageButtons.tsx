@@ -67,11 +67,13 @@ export const MessageButtons = ({
           <AddReactionIcon color="secondary" />
         </IconButton>
       </Tooltip>
-      <Tooltip title={"unread"}>
-        <IconButton onClick={() => makeMessageUnread(message)}>
-          <MarkAsUnreadIcon color="secondary" />
-        </IconButton>
-      </Tooltip>
+      {!message.parentMessage && (
+        <Tooltip title={"unread"}>
+          <IconButton onClick={() => makeMessageUnread(message)}>
+            <MarkAsUnreadIcon color="secondary" />
+          </IconButton>
+        </Tooltip>
+      )}
       {/* <Tooltip title={"forward"}>
         <IconButton onClick={handleForwardMessage}>
           <ReplyIcon sx={{ transform: "scaleX(-1)" }} />

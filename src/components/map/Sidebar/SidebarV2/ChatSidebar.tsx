@@ -138,7 +138,7 @@ export const ChatSidebar = ({
   const [leading, setLeading] = useState<any>(user.claims?.leading || []);
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
   const [newMemberSection, setNewMemberSection] = useState(false);
-  const [isLoadingReaction, setIsLoadingReaction] = useState<IChannelMessage | null>(null);
+  const [isLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
     if (!openChatByNotification) return;
@@ -308,42 +308,33 @@ export const ChatSidebar = ({
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
 
-    if (message.parentMessage) {
-      setMessages((prevMessages: any) => {
-        const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
-        const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions.push({ user: user?.uname, emoji });
-        return prevMessages;
-      });
-    } else {
+    if (!message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.id);
         prevMessages[messageIdx].reactions.push({ user: user?.uname, emoji });
         return prevMessages;
       });
     }
-    if (message.sender === user?.uname && !message.parentMessage) {
+    if (!message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
     } else {
-      setIsLoadingReaction(message);
-      await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
-      setIsLoadingReaction(null);
+      const mRef = getMessageRef(message.parentMessage, message.channelId);
+      const replyRef = doc(mRef, "replies", message?.id || "");
+      await updateDoc(replyRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
+      // await updateDoc(replyRef, {
+      //   message: newMessage,
+      //   imageUrls,
+      //   edited: true,
+      //   editedAt: new Date(),
+      // });
+      // await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
     }
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId) return;
-    if (message.parentMessage) {
-      setMessages((prevMessages: any) => {
-        const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
-        const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions = prevMessages[messageIdx].replies[
-          replyIdx
-        ].reactions.filter((r: any) => r.emoji !== emoji && r.user !== user?.uname);
-        return prevMessages;
-      });
-    } else {
+    if (!message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.id);
         prevMessages[messageIdx].reactions = prevMessages[messageIdx].reactions.filter(
@@ -353,11 +344,14 @@ export const ChatSidebar = ({
       });
     }
 
-    if (message.sender === user?.uname && !message.parentMessage) {
+    if (!message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
     } else {
-      await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
+      const mRef = getMessageRef(message.parentMessage, message.channelId);
+      const replyRef = doc(mRef, "replies", message?.id || "");
+      await updateDoc(replyRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
+      // await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
     }
   };
 

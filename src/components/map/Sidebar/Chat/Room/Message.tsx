@@ -1,11 +1,25 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { CircularProgress, IconButton, Paper, Typography } from "@mui/material";
+import { CircularProgress, IconButton, Modal, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { addDoc, collection, doc, getDoc, getFirestore, Timestamp, updateDoc } from "firebase/firestore";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  onSnapshot,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+/* eslint-disable */
+// @ts-ignore
+import { MapInteractionCSS } from "react-map-interaction";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
@@ -94,6 +108,10 @@ export const Message = ({
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
   const [isDeleting, setIsDeleting] = useState<IChannelMessage | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [openReplies, setOpenReplies] = useState<IChannelMessage | null>(null);
+  const [replies, setReplies] = useState<IChannelMessage[]>([]);
+  const [isRepliesLoaded, setIsRepliesLoaded] = useState<boolean>(true);
+  const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -167,6 +185,26 @@ export const Message = ({
       }
     })();
   }, [nodeBookState?.chatNode]);
+
+  useEffect(() => {
+    if (!openReplies) return;
+    setIsRepliesLoaded(false);
+    const messageRef = getMessageRef(openReplies?.id, openReplies?.channelId);
+    const replyRef = collection(messageRef, "replies");
+    const q = query(replyRef, where("deleted", "==", false));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const repliesDocuments: any = snapshot.docs.map(doc => {
+        const document = doc.data();
+        return { ...document, id: doc.id };
+      }) as IChannelMessage[];
+      repliesDocuments.sort(
+        (a: IChannelMessage, b: IChannelMessage) => a.createdAt.toMillis() - b.createdAt.toMillis()
+      );
+      setReplies(repliesDocuments);
+      setIsRepliesLoaded(true);
+    });
+    return () => unsubscribe();
+  }, [openReplies]);
 
   const forwardMessage = useCallback(
     (message: any) => {
@@ -292,25 +330,31 @@ export const Message = ({
     }
   };
 
-  const saveMessageEdit = async (newMessage: string) => {
+  const saveMessageEdit = async (newMessage: string, imageUrls: string[] = []) => {
     if (!editingMessage?.channelId) return;
     if (editingMessage.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
-      parentMessage.replies[replyIdx] = {
-        ...parentMessage.replies[replyIdx],
+      // const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+      // const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+      // parentMessage.replies[replyIdx] = {
+      //   ...parentMessage.replies[replyIdx],
+      //   message: newMessage,
+      //   imageUrls,
+      //   edited: true,
+      //   editedAt: new Date(),
+      // };
+      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+      const replyRef = doc(messageRef, "replies", editingMessage?.id || "");
+      await updateDoc(replyRef, {
         message: newMessage,
+        imageUrls,
         edited: true,
         editedAt: new Date(),
-      };
-      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
-      await updateDoc(messageRef, {
-        replies: parentMessage.replies,
       });
     } else {
       const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
       await updateDoc(messageRef, {
         message: newMessage,
+        imageUrls,
         edited: true,
         editedAt: new Date(),
       });
@@ -366,13 +410,12 @@ export const Message = ({
           reactions: [],
           channelId: selectedChannel?.id,
           important,
+          deleted: false,
         };
-        setMessages((prevMessages: any) => {
-          const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage?.id);
-          prevMessages[messageIdx].replies.push(reply);
-          return prevMessages;
+        setReplies((prevMessages: any) => {
+          return [...prevMessages, reply];
         });
-        scrollToMessage(curMessage?.id || "");
+        scrollToMessage(curMessage?.id || "", "reply");
         await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
@@ -404,7 +447,7 @@ export const Message = ({
     async (imageUrls: string[], important = false, sendMessageType: string, inputValue: string, node = {}) => {
       try {
         if (sendMessageType === "edit") {
-          saveMessageEdit(inputValue);
+          saveMessageEdit(inputValue, imageUrls);
         } else if (!!replyOnMessage || sendMessageType === "reply") {
           if (!inputValue.trim() && !imageUrls.length) return;
           sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
@@ -570,6 +613,14 @@ export const Message = ({
                         sendReplyOnMessage={sendReplyOnMessage}
                         isLoadingReaction={isLoadingReaction}
                         makeMessageUnread={makeMessageUnread}
+                        handleDeleteMessage={handleDeleteMessage}
+                        handleDeleteReply={handleDeleteReply}
+                        openReplies={openReplies}
+                        setOpenReplies={setOpenReplies}
+                        replies={replies}
+                        setReplies={setReplies}
+                        isRepliesLoaded={isRepliesLoaded}
+                        setOpenMedia={setOpenMedia}
                       />
                     )}
                     {roomType !== "news" && (
@@ -606,6 +657,12 @@ export const Message = ({
                             handleDeleteMessage={handleDeleteMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            openReplies={openReplies}
+                            setOpenReplies={setOpenReplies}
+                            replies={replies}
+                            setReplies={setReplies}
+                            isRepliesLoaded={isRepliesLoaded}
+                            setOpenMedia={setOpenMedia}
                           />
                         ) : (
                           <MessageLeft
@@ -640,6 +697,12 @@ export const Message = ({
                             sendReplyOnMessage={sendReplyOnMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            openReplies={openReplies}
+                            setOpenReplies={setOpenReplies}
+                            replies={replies}
+                            setReplies={setReplies}
+                            isRepliesLoaded={isRepliesLoaded}
+                            setOpenMedia={setOpenMedia}
                           />
                         )}
                       </>
@@ -693,10 +756,42 @@ export const Message = ({
             sendMessageType={"message"}
             sendMessage={sendMessage}
             sendReplyOnMessage={sendReplyOnMessage}
+            setOpenMedia={setOpenMedia}
           />
         </Box>
       )}
       {ConfirmDialog}
+      <Suspense fallback={<div></div>}>
+        <Modal
+          open={Boolean(openMedia)}
+          onClose={() => setOpenMedia(null)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <>
+            <CloseIcon
+              sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+              onClick={() => setOpenMedia(null)}
+            />
+            <MapInteractionCSS>
+              <Paper
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100vh",
+                  width: "100vw",
+                  background: "transparent",
+                }}
+              >
+                {/* TODO: change to Next Image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={openMedia || ""} alt="Node image" className="responsive-img" />
+              </Paper>
+            </MapInteractionCSS>
+          </>
+        </Modal>
+      </Suspense>
     </Box>
   );
 };

@@ -68,6 +68,7 @@ export type IChannelMessage = {
   deleted: boolean;
   important: boolean;
   notVisible?: boolean;
+  totalReplies?: number;
 };
 
 export type IAnnouncement = {
