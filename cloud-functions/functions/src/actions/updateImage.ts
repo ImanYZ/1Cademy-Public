@@ -13,11 +13,9 @@ export const updateImage = async ({ userData }: IaddUserToChannel) => {
       const membersInfo = channelData.membersInfo;
       if (channelData.members.includes(userData.uname)) {
         membersInfo[userData.uname] = {
-          uname: userData.uname,
-          imageUrl: userData.imageUrl,
-          chooseUname: !!userData.chooseUname,
+          ...membersInfo[userData.uname],
           fullname: `${userData.fName} ${userData.lName}`,
-          role: "",
+          imageUrl: userData.imageUrl,
         };
         await channelDoc.ref.update({
           membersInfo,
@@ -32,11 +30,9 @@ export const updateImage = async ({ userData }: IaddUserToChannel) => {
       const membersInfo = conversationData.membersInfo;
       if (conversationData.members.includes(userData.uname)) {
         membersInfo[userData.uname] = {
-          uname: userData.uname,
-          imageUrl: userData.imageUrl,
-          chooseUname: !!userData.chooseUname,
+          ...membersInfo[userData.uname],
           fullname: `${userData.fName} ${userData.lName}`,
-          role: "",
+          imageUrl: userData.imageUrl,
         };
         await conversationDoc.ref.update({
           membersInfo,
