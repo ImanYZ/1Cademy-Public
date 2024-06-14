@@ -24,6 +24,7 @@ import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 import { db } from "./admin";
 import { updateSavedCards } from "./actions/updateSavedCards";
 import { sentAlertEmail } from "./actions/sentAlertEmail";
+import { updateImage } from "./actions/updateImage";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -272,6 +273,9 @@ export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate
     const previousData = change.before.data();
     if (userData.tagId !== previousData.tagId) {
       addUserToChannel({ userData });
+    }
+    if ((userData?.imageURL !== previousData?.imageURL) || (userData.fName !==previousData?.fName) || (userData.lName !==previousData?.lName)) {
+      updateImage({ userData });
     }
   } catch (error) {
     console.log("error onUserUpdate:", error);
