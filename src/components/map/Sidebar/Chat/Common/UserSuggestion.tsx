@@ -47,7 +47,6 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
       });
       setUsers(_users);
       setSuggestions(_users.splice(0, 10));
-      setShowSuggestions(true);
     };
     getUsers();
   }, [db]);
@@ -99,7 +98,7 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
         placeholder="Search User"
         fullWidth
         variant="outlined"
-        onClick={() => {
+        onFocus={() => {
           setShowSuggestions(true);
         }}
       />
