@@ -92,6 +92,14 @@ type NodeFooterProps = {
   markedWrong: any;
   references: any;
   tags: any;
+  removedTags: string[];
+  addedTags: any;
+  addedReferences: any;
+  removedReferences: any;
+  addedParents: any;
+  removedParents: any;
+  addedChildren: any;
+  removedChildren: any;
   parents: any;
   nodesChildren: any;
   commentsNum: any;
@@ -163,6 +171,14 @@ const NodeFooter = ({
   markedWrong,
   references,
   tags,
+  removedTags,
+  addedTags,
+  addedReferences,
+  removedReferences,
+  addedParents,
+  removedParents,
+  addedChildren,
+  removedChildren,
   parents,
   nodesChildren,
   // commentsNum,
@@ -417,6 +433,16 @@ const NodeFooter = ({
     },
     [displayProposals, identifier, proposeNodeImprovement]
   );
+  const getNumberColor = (added: any, removed: any) => {
+    if ((removed || []).length > 0 && (added || []).length > 0) {
+      return "orange";
+    } else if ((added || []).length > 0) {
+      return "green";
+    } else if ((removed || []).length > 0) {
+      return "red";
+    }
+    return "";
+  };
 
   return (
     <>
@@ -920,7 +946,9 @@ const NodeFooter = ({
                             src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
                             alt="tag icon"
                           />
-                          <span>{shortenNumber(tags.length, 2, false)}</span>
+                          <span style={{ color: getNumberColor(addedTags, removedTags) }}>
+                            {shortenNumber(tags.length, 2, false)}
+                          </span>
                         </Box>
                       </ContainedButton>
                     </Box>
@@ -952,7 +980,10 @@ const NodeFooter = ({
                           }}
                         >
                           <NextImage width={"22px"} src={ReferenceIcon} alt="tag icon" style={{ marginRight: "2px" }} />
-                          <span className="CitationsSpanBeforeTagIcon">
+                          <span
+                            style={{ color: getNumberColor(addedReferences, removedReferences) }}
+                            className="CitationsSpanBeforeTagIcon"
+                          >
                             {shortenNumber(references.length, 2, false)}
                           </span>
                         </Box>
@@ -967,7 +998,13 @@ const NodeFooter = ({
                           }}
                         >
                           <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
-                          <span>{shortenNumber(tags.length, 2, false)}</span>
+                          <span
+                            style={{
+                              color: getNumberColor(addedTags, removedTags),
+                            }}
+                          >
+                            {shortenNumber(tags.length, 2, false)}
+                          </span>
                         </Box>
                       </Box>
                     </Box>
@@ -1019,7 +1056,10 @@ const NodeFooter = ({
                               alt="tag icon"
                             />
 
-                            <span className="CitationsSpanBeforeTagIcon" style={{ marginTop: "3px" }}>
+                            <span
+                              style={{ marginTop: "3px", color: getNumberColor(addedReferences, removedReferences) }}
+                              className="CitationsSpanBeforeTagIcon"
+                            >
                               {shortenNumber(references.length, 2, false)}
                             </span>
                           </Box>
@@ -1041,7 +1081,9 @@ const NodeFooter = ({
                               src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
                               alt="tag icon"
                             />
-                            <span style={{ marginTop: "3px" }}>{shortenNumber(tags.length, 2, false)}</span>
+                            <span style={{ marginTop: "3px", color: getNumberColor(addedTags, removedTags) }}>
+                              {shortenNumber(tags.length, 2, false)}
+                            </span>
                           </Box>
                         </Box>
                       </ContainedButton>
@@ -1151,12 +1193,19 @@ const NodeFooter = ({
                     cursor: disableParentChildrenButton ? "not-allowed" : "pointer",
                   }}
                 >
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <span
+                    className="FooterParentNodesOpen"
+                    style={{ color: getNumberColor(addedParents, removedParents) }}
+                  >
+                    {shortenNumber(parents.length, 2, false)}
+                  </span>
                   <SwapHorizIcon
                     sx={{ fontSize: "20px" }}
                     color={openPart === "LinkingWords" ? "primary" : "inherit"}
                   />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                    {shortenNumber(nodesChildren.length, 2, false)}
+                  </span>
                 </Box>
               ) : (
                 <Box
@@ -1187,9 +1236,16 @@ const NodeFooter = ({
                     // disabled={disableParentChildrenButton}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                      <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                      <span
+                        className="FooterParentNodesOpen"
+                        style={{ color: getNumberColor(addedParents, removedParents) }}
+                      >
+                        {shortenNumber(parents.length, 2, false)}
+                      </span>
                       <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                      <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                      <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                        {shortenNumber(nodesChildren.length, 2, false)}
+                      </span>
                     </Box>
                   </ContainedButton>
                 </Box>
@@ -1756,9 +1812,16 @@ const NodeFooter = ({
                 disabled={disableParentChildrenButton}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <span
+                    className="FooterParentNodesOpen"
+                    style={{ color: getNumberColor(addedParents, removedParents) }}
+                  >
+                    {shortenNumber(parents.length, 2, false)}
+                  </span>
                   <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                    {shortenNumber(nodesChildren.length, 2, false)}
+                  </span>
                 </Box>
               </ContainedButton>
             </Box>

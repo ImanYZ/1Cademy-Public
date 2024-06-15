@@ -178,19 +178,9 @@ export const showDifferences = (oldText: string, proposalText: string): string =
 
 export const childrenParentsDifferences = (current: any[], proposal: any[]): any => {
   // console.log({ current, proposal });
-  const added = proposal.filter((c: any) => !current.find((cp: any) => c.node === cp.node));
-  added.forEach((c: any) => {
-    c.added = true;
-  });
-  const _current = [...current, ...added];
-
-  for (let c of _current) {
-    if (!proposal.find((cp: any) => c.node === cp.node)) {
-      c.removed = true;
-    }
-  }
-
-  return _current;
+  const removed = current.filter((t: any) => !proposal.some(cp => cp.node === t.node));
+  const added = proposal.filter((t: any) => !current.some(cp => cp.node === t.node));
+  return { added, removed };
 };
 
 export const tagsRefDifferences = (current: any, proposal: any): any => {

@@ -1391,6 +1391,7 @@ export const createActionTrack = (
   receivers: string[],
   email: string
 ) => {
+  if (process.env.NODE_ENV === "development") return;
   const actionTracksCol = collection(db, "actionTracks");
   return setDoc(doc(actionTracksCol), {
     accepted: true,

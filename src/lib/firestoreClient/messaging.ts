@@ -26,6 +26,7 @@ export async function saveMessagingDeviceToken(uid: string) {
     const fcmToken = await getToken(msg, { vapidKey: VAPID_KEY });
     if (fcmToken) {
       // Save device token to Firestore
+      if (process.env.NODE_ENV === "development") return;
       const tokenRef = doc(db, "fcmTokens", uid);
       await setDoc(tokenRef, { token: fcmToken });
       // This will fire when a message is received while the app is in the foreground.

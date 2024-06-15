@@ -100,6 +100,8 @@ export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) 
     }
     if (!compareFlatLinks({ links1: versionData.tagIds, links2: nodeData.tagIds })) {
       versionData.changedTags = true;
+      versionData.addedTags = false;
+      versionData.deletedTags = false;
     }
     if (parentCompare.addedLinks.length > 0) {
       versionData.addedParents = true;
