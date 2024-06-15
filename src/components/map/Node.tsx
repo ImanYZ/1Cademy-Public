@@ -133,6 +133,14 @@ type NodeProps = {
         title?: string;
         label?: string;
       }[];
+  removedTags: string[];
+  addedTags: any;
+  addedReferences: any;
+  removedReferences: any;
+  addedParents: any;
+  removedParents: any;
+  addedChildren: any;
+  removedChildren: any;
   choices: KnowledgeChoice[];
   commentsNum: number;
   proposalsNum: number;
@@ -271,6 +279,14 @@ const Node = ({
   markedWrong,
   references,
   disableVotes,
+  removedTags,
+  addedTags,
+  addedReferences,
+  removedReferences,
+  addedParents,
+  removedParents,
+  addedChildren,
+  removedChildren,
   tags,
   tagIds,
   parents,
@@ -903,10 +919,6 @@ const Node = ({
     setImageLoaded(true);
   }, [nodeImage]);
 
-  if (!user) {
-    return null;
-  }
-
   if (hideNode && !editable) {
     return (
       <div
@@ -985,9 +997,27 @@ const Node = ({
       </div>
     );
   }
+  const flagLinks = (current: any, added: any, removed: any) => {
+    const addedHash: any = {};
+    const removedHash: any = {};
+    added.forEach((p: { node: string }) => {
+      addedHash[p.node] = true;
+    });
+    removed.forEach((p: { node: string }) => {
+      removedHash[p.node] = true;
+    });
+    for (let element of current) {
+      if (addedHash[element.node]) {
+        element.added = true;
+      } else if (removedHash[element.node]) {
+        element.removed = true;
+      }
+    }
+    return current;
+  };
 
   return (
-    <div
+    <Box
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
@@ -1027,7 +1057,7 @@ const Node = ({
           />
         )}
       </Box>
-      <div className="card-content">
+      <Box className="card-content">
         {/* preview edit options */}
         {open && editable && (
           <Box sx={{ display: "flex", justifyContent: "end" }}>
@@ -1396,7 +1426,7 @@ const Node = ({
           </Box>
         )}
 
-        {open && (
+        {open && user && (
           <MemoizedNodeFooter
             open={true}
             addVideo={addVideo}
@@ -1429,6 +1459,14 @@ const Node = ({
             markedWrong={markedWrong}
             references={references}
             tags={tags}
+            removedTags={removedTags}
+            addedTags={addedTags}
+            addedReferences={addedReferences}
+            removedReferences={removedReferences}
+            addedParents={addedParents}
+            removedParents={removedParents}
+            addedChildren={addedChildren}
+            removedChildren={removedChildren}
             parents={parents}
             nodesChildren={nodesChildren}
             commentsNum={commentsNum}
@@ -1481,8 +1519,8 @@ const Node = ({
             reason={reason}
             references={references}
             tags={tags}
-            parents={parents}
-            nodesChildren={nodesChildren}
+            parents={flagLinks(parents, addedParents, removedParents)}
+            nodesChildren={flagLinks(nodesChildren, addedChildren, removedChildren)}
             chosenNodeChanged={chosenNodeChanged}
             referenceLabelChange={referenceLabelChange}
             deleteLink={deleteLinkHandler}
@@ -1566,8 +1604,8 @@ const Node = ({
           </div>
         )}
 
-        {!open && (
-          <div className="footer">
+        {!open && user && (
+          <Box className="footer">
             <MemoizedNodeFooter
               open={false}
               addVideo={addVideo}
@@ -1600,6 +1638,14 @@ const Node = ({
               markedWrong={markedWrong}
               references={references}
               tags={tags}
+              removedTags={removedTags}
+              addedTags={addedTags}
+              addedReferences={addedReferences}
+              removedReferences={removedReferences}
+              addedParents={addedParents}
+              removedParents={removedParents}
+              addedChildren={addedChildren}
+              removedChildren={removedChildren}
               parents={parents}
               nodesChildren={nodesChildren}
               commentsNum={commentsNum}
@@ -1636,9 +1682,9 @@ const Node = ({
               findDescendantNodes={findDescendantNodes}
               findAncestorNodes={findAncestorNodes}
             />
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
       {!isNew && nodeType !== "Reference" && editable && user && displayParentOptions && (
         <Box
           id={`${identifier}-new-parent-nodes-buttons`}
@@ -1754,7 +1800,7 @@ const Node = ({
           )}
         </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
@@ -1767,6 +1813,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.isAcceptedProposalSelected === next.isAcceptedProposalSelected &&
     // prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
+    prev.simulated === next.simulated &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&

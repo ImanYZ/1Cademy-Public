@@ -5,6 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import UndoIcon from "@mui/icons-material/Undo";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
@@ -3867,7 +3868,19 @@ const Notebook = ({}: NotebookProps) => {
         currentNode.references.length === 0
       ) {
         referencesOK = await confirmIt(
-          "You are proposing a node without any reference. Are you sure?",
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+            <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+          </Box>,
           "Yes",
           "cancel"
         );
@@ -3998,9 +4011,8 @@ const Notebook = ({}: NotebookProps) => {
             delete postData.left;
             delete postData.top;
             delete postData.height;
-            let willBeApproved = false;
 
-            willBeApproved = isVersionApproved({
+            const willBeApproved = isVersionApproved({
               corrects: 1,
               wrongs: 0,
               nodeData: newNode,
@@ -4015,6 +4027,7 @@ const Notebook = ({}: NotebookProps) => {
               const newChildIds: string[] = newNode.children.map(child => child.node);
               const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
               const oldChildIds: string[] = oldNode.children.map(child => child.node);
+              // const newTagsIds: string[] = newNode.parents.map(parent => parent.node);
               const idsToBeRemoved = Array.from(
                 new Set<string>([
                   ...newParentIds,
@@ -4044,7 +4057,7 @@ const Notebook = ({}: NotebookProps) => {
             if (willBeApproved) {
               oldNodes = {
                 ...graph.nodes,
-                [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false }, // e3
+                [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false, simulated: true }, // e3
               };
             } else {
               // revertNodesOnGraph()
@@ -4117,6 +4130,16 @@ const Notebook = ({}: NotebookProps) => {
 
   const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
     const response: any = await Post("/proposeNodeImprovement", postData);
+    setGraph(graph => {
+      const oldNodes = {
+        ...graph.nodes,
+        [postData.id]: { ...graph.nodes[postData.id], editable: false, simulated: false }, // e3
+      };
+      return {
+        nodes: oldNodes,
+        edges: graph.edges,
+      };
+    });
     if (!response) return;
     window.dispatchEvent(
       new CustomEvent("propose-flashcard", {
@@ -4851,8 +4874,12 @@ const Notebook = ({}: NotebookProps) => {
             thisNode.nodeVideoStartTime = proposal.nodeVideoStartTime;
             thisNode.nodeVideoEndTime = proposal.nodeVideoEndTime;
             thisNode.nodeImage = proposal.nodeImage;
-            thisNode.children = newChildren;
-            thisNode.parents = newParents;
+            thisNode.children = [...thisNode.children, ...newChildren.added];
+            thisNode.addedChildren = newChildren.added;
+            thisNode.removedChildren = newChildren.removed;
+            thisNode.parents = [...thisNode.parents, ...newParents.added];
+            thisNode.addedParents = newParents.added;
+            thisNode.removedParents = newParents.removed;
             thisNode.addedTags = newTags.added;
             thisNode.removedTags = newTags.removed;
             thisNode.references = Array.from(new Set([...thisNode.references, ...proposal.references]));
@@ -5270,6 +5297,12 @@ const Notebook = ({}: NotebookProps) => {
             } else {
               oldNodes[nodeBookState.selectedNode].title = proposalsTemp[proposalIdx].title;
               oldNodes[nodeBookState.selectedNode].content = proposalsTemp[proposalIdx].content;
+              oldNodes[nodeBookState.selectedNode].tags = proposalsTemp[proposalIdx].tags;
+              oldNodes[nodeBookState.selectedNode].referenceIds = proposalsTemp[proposalIdx].referenceIds;
+              oldNodes[nodeBookState.selectedNode].referenceLabels = proposalsTemp[proposalIdx].referenceLabels;
+              // oldNodes[nodeBookState.selectedNode].children = proposalsTemp[proposalIdx].children;
+              oldNodes[nodeBookState.selectedNode].tagIds = proposalsTemp[proposalIdx].tagIds;
+              oldNodes[nodeBookState.selectedNode].simulated = true;
             }
             setOpenSidebar(null);
           }

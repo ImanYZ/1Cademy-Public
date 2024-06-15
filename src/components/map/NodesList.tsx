@@ -203,6 +203,14 @@ const NodesList = ({
               added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
               removed: (nodes[nId]?.removedTags || []).includes(nodes[nId].tagIds[idx]),
             }))}
+            removedTags={nodes[nId].removedTags || []}
+            addedTags={nodes[nId].addedTags || []}
+            addedReferences={nodes[nId].addedReferences || []}
+            removedReferences={nodes[nId].removedReferences || []}
+            addedParents={nodes[nId].addedParents || []}
+            removedParents={nodes[nId].removedParents || []}
+            addedChildren={nodes[nId].addedChildren || []}
+            removedChildren={nodes[nId].removedChildren || []}
             tagIds={nodes[nId].tagIds}
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
