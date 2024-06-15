@@ -438,7 +438,7 @@ export type FullNodeData = Omit<UserNodeFirestore, "changedAt" | "createdAt" | "
     addedParents?: any[];
     removedParents?: any[];
     addedChildren?: any[];
-    removedChildren: any[];
+    removedChildren?: any[];
     bookmarks: number;
   };
 
