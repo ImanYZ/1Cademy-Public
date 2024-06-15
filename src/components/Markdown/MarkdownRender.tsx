@@ -16,8 +16,9 @@ type Props = {
   text: string;
   customClass?: string;
   sx?: SxProps<Theme>;
+  handleLinkClick?: any;
 };
-const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inherit" } }) => {
+const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inherit" }, handleLinkClick }) => {
   return (
     <ReactMarkdown
       remarkPlugins={!containsHTMLTags(text) ? [remarkMath, remarkGfm] : []}
@@ -28,8 +29,13 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
           <Typography lineHeight={"inherit"} {...props} sx={{ p: "0px", wordBreak: "break-word", ...sx }} />
         ),
         a: ({ ...props }) => {
-          return (
-            <Link href={props.href} target="_blank" rel="noopener">
+          const isMention = props.href && props.href.startsWith("/mention/");
+          return isMention ? (
+            <Link href={props.href} onClick={event => handleLinkClick(event, props.href)} {...props}>
+              {props.children}
+            </Link>
+          ) : (
+            <Link href={props.href} target="_blank" rel="noopener" {...props}>
               {props.children}
             </Link>
           );

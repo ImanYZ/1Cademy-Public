@@ -52,6 +52,7 @@ type MessageLeftProps = {
   setReplies?: any;
   isRepliesLoaded?: boolean;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
+  handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
 };
 export const MessageLeft = ({
   type,
@@ -92,6 +93,7 @@ export const MessageLeft = ({
   setReplies,
   isRepliesLoaded,
   setOpenMedia,
+  handleMentionUserOpenRoom,
 }: MessageLeftProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
@@ -234,7 +236,7 @@ export const MessageLeft = ({
                   lineHeight: "24px",
                 }}
               >
-                <MarkdownRender text={message.message || ""} />
+                <MarkdownRender text={message.message || ""} handleLinkClick={handleMentionUserOpenRoom} />
                 <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
                 <Box sx={{ pt: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
                   {(message.imageUrls || []).map(imageUrl => (
@@ -335,6 +337,7 @@ export const MessageLeft = ({
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
                       setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                     />
                   ) : (
                     <MessageLeft
@@ -370,6 +373,7 @@ export const MessageLeft = ({
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
                       setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                     />
                   )}
                 </Fragment>
