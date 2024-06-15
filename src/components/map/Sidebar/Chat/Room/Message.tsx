@@ -250,7 +250,7 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [db, selectedChannel]);
+  }, [db, selectedChannel?.id]);
 
   const scrollToBottom = () => {
     if (scrolling.current) {
