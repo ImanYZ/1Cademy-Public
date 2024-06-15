@@ -184,7 +184,7 @@ export const SidebarWrapper = ({
           {!!selectedChannel && <GroupAvatar membersInfo={selectedChannel?.membersInfo} />}
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
-            <Box sx={{ display: "flex", gap: "5px" }}>
+            <Box sx={{ display: "flex", gap: "10px" }}>
               <Tooltip title={"More Info"}>
                 <IconButton
                   sx={{

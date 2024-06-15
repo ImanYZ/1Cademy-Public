@@ -361,6 +361,7 @@ export const MessageInput = ({
           displayTransform={(id, display) => {
             return `@${display}`;
           }}
+          markup="@[__display__](/mention/__id__)"
           renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
         />
       </MentionsInput>

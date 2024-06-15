@@ -66,6 +66,7 @@ type MessageProps = {
   makeMessageUnread: (message: IChannelMessage) => void;
   scrollToMessage: (id: string, type?: string, delay?: number) => void;
   messageRefs: any;
+  openDMChannel: (user2: any) => void;
 };
 
 export const Message = ({
@@ -94,6 +95,7 @@ export const Message = ({
   makeMessageUnread,
   scrollToMessage,
   messageRefs,
+  openDMChannel,
 }: MessageProps) => {
   const db = getFirestore();
   const { nodeBookState } = useNodeBook();
@@ -248,7 +250,7 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [db]);
+  }, [db, selectedChannel]);
 
   const scrollToBottom = () => {
     if (scrolling.current) {
@@ -270,6 +272,16 @@ export const Message = ({
       messageList.removeEventListener("scroll", handleScroll);
     };
   }, [loadMore]);
+
+  const handleMentionUserOpenRoom = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => {
+      event.preventDefault();
+      const extractedUname = uname.split("/")[2];
+      const user = selectedChannel?.membersInfo[extractedUname];
+      openDMChannel(user);
+    },
+    [selectedChannel]
+  );
 
   const handleDeleteReply = async (curMessage: IChannelMessage, reply: IChannelMessage) => {
     if (
@@ -621,6 +633,7 @@ export const Message = ({
                         setReplies={setReplies}
                         isRepliesLoaded={isRepliesLoaded}
                         setOpenMedia={setOpenMedia}
+                        handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                       />
                     )}
                     {roomType !== "news" && (
@@ -663,6 +676,7 @@ export const Message = ({
                             setReplies={setReplies}
                             isRepliesLoaded={isRepliesLoaded}
                             setOpenMedia={setOpenMedia}
+                            handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                           />
                         ) : (
                           <MessageLeft
@@ -703,6 +717,7 @@ export const Message = ({
                             setReplies={setReplies}
                             isRepliesLoaded={isRepliesLoaded}
                             setOpenMedia={setOpenMedia}
+                            handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                           />
                         )}
                       </>

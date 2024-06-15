@@ -475,10 +475,13 @@ export const ChatSidebar = ({
   // }, [db, user]);
 
   const openDMChannel = async (user2: any) => {
+    if (roomType === "direct") return;
     if (!user?.uname || !user2.uname) return;
-    const findConversation = await getDocs(
-      query(collection(db, "conversations"), where("members", "array-contains", user.uname))
-    );
+    let q = query(collection(db, "conversations"), where("members", "array-contains", user.uname));
+    if (user?.uname === user2?.uname) {
+      q = query(collection(db, "conversations"), where("members", "==", [user.uname, user2?.uname]));
+    }
+    const findConversation = await getDocs(q);
     const filteredResults = findConversation.docs.find(
       doc => doc.data().members.includes(user2.uname) && doc.data().members.length === 2
     );
@@ -497,9 +500,9 @@ export const ChatSidebar = ({
           uname: user2.uname,
           imageUrl: user2.imageUrl,
           chooseUname: !!user2.chooseUname,
-          fullname: `${user2.fName} ${user2.lName}`,
+          fullname: user2?.fName ? `${user2.fName} ${user2.lName}` : user2?.fullname,
           role: "",
-          uid: user2.userId,
+          uid: user2.userId || "",
         },
         [user?.uname]: {
           uname: user?.uname,
@@ -680,6 +683,7 @@ export const ChatSidebar = ({
                   makeMessageUnread={makeMessageUnread}
                   scrollToMessage={scrollToMessage}
                   messageRefs={messageRefs}
+                  openDMChannel={openDMChannel}
                 />
               )}
             </>

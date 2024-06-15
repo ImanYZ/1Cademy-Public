@@ -48,6 +48,7 @@ type NewsCardProps = {
   setReplies?: any;
   isRepliesLoaded?: boolean;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
+  handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
 };
 export const NewsCard = ({
   type,
@@ -85,6 +86,7 @@ export const NewsCard = ({
   setReplies,
   isRepliesLoaded,
   setOpenMedia,
+  handleMentionUserOpenRoom,
 }: NewsCardProps) => {
   const handleReplyOnMessage = () => {
     setOpenReplies(message);
@@ -193,7 +195,7 @@ export const NewsCard = ({
                 lineHeight: "24px",
               }}
             >
-              <MarkdownRender text={message.message || ""} />
+              <MarkdownRender text={message.message || ""} handleLinkClick={handleMentionUserOpenRoom} />
               <Typography sx={{ color: "grey", ml: 1 }}>{message.edited ? "(edited)" : ""}</Typography>
               <Box sx={{ display: "flex" }}>
                 {(message.imageUrls || []).map(imageUrl => (
@@ -292,6 +294,7 @@ export const NewsCard = ({
                 handleDeleteReply={handleDeleteReply}
                 parentMessage={message}
                 setOpenMedia={setOpenMedia}
+                handleMentionUserOpenRoom={handleMentionUserOpenRoom}
               />
             ))}
 
