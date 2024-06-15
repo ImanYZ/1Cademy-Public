@@ -274,7 +274,7 @@ export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate
     if (userData.tagId !== previousData.tagId) {
       addUserToChannel({ userData });
     }
-    if (userData?.imageURL !== previousData?.imageURL) {
+    if ((userData?.imageURL !== previousData?.imageURL) || (userData.fName !==previousData?.fName) || (userData.lName !==previousData?.lName)) {
       updateImage({ userData });
     }
   } catch (error) {
