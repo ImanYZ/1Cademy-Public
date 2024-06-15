@@ -125,7 +125,9 @@ export const UpDownVoteNode = async ({
       willRemoveNode = doNeedToDeleteNode(
         nodeData.corrects + correctChange,
         nodeData.wrongs + wrongChange,
-        !!nodeData?.locked
+        !!nodeData?.locked,
+        false,
+        false
       );
     }
   }
@@ -153,82 +155,84 @@ export const UpDownVoteNode = async ({
 
   let maxVersionNetVotes = 1;
   // finding max net vote from active proposals
-
-  for (const versionDoc of versionsDocs.docs) {
-    const versionData = versionDoc.data();
-    const versionNetVote = versionData.corrects - versionData.wrongs || 0;
-    if (maxVersionNetVotes < versionNetVote) {
-      maxVersionNetVotes = versionNetVote;
+  await detach(async () => {
+    let batch = db.batch();
+    let writeCounts = 0;
+    for (const versionDoc of versionsDocs.docs) {
+      const versionData = versionDoc.data();
+      const versionNetVote = versionData.corrects - versionData.wrongs || 0;
+      if (maxVersionNetVotes < versionNetVote) {
+        maxVersionNetVotes = versionNetVote;
+      }
     }
-  }
+    for (const versionDoc of versionsDocs.docs) {
+      const versionData = versionDoc.data();
+      let versionRatingChange =
+        Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, versionData.corrects - versionData.wrongs) / maxVersionNetVotes;
+      // edge case if node has 0 up-down votes
+      if (nodeData.corrects === 0 && nodeData.wrongs === 0) {
+        versionRatingChange = 1;
+      }
+      const correctVal = Math.round((correctChange * versionRatingChange + Number.EPSILON) * 100) / 100;
+      const wrongVal = Math.round((wrongChange * versionRatingChange + Number.EPSILON) * 100) / 100;
 
-  for (const versionDoc of versionsDocs.docs) {
-    const versionData = versionDoc.data();
-    let versionRatingChange =
-      Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, versionData.corrects - versionData.wrongs) / maxVersionNetVotes;
-    // edge case if node has 0 up-down votes
-    if (nodeData.corrects === 0 && nodeData.wrongs === 0) {
-      versionRatingChange = 1;
-    }
-    const correctVal = Math.round((correctChange * versionRatingChange + Number.EPSILON) * 100) / 100;
-    const wrongVal = Math.round((wrongChange * versionRatingChange + Number.EPSILON) * 100) / 100;
-
-    // Updating the accepted version points.
-    const versionRef = versionsColl.doc(versionDoc.id);
-    const versionChanges = {
-      //  minimum value 0, for number of correct or wrongs on each version
-      wrongs: Math.max(0, versionData.wrongs + wrongVal),
-      corrects: Math.max(0, versionData.corrects + correctVal),
-      updatedAt: currentTimestamp,
-    };
-    batch.update(versionRef, versionChanges);
-    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
-    // Update the maxVersionRating correspondingly.
-    const versionRating = versionChanges.corrects - versionChanges.wrongs;
-    if (versionRating > maxVersionRating && versionRating >= 1) {
-      maxVersionRating = versionRating;
-    }
-    //  if proposer not already in the dictionary
-    console.log("changedProposers", changedProposers);
-    if (!(versionData.proposer in changedProposers)) {
-      //  finding to what extend the upvote or downvote will affect the reputation of the specific proposer
-      //  MIN_ACCEPTED_VERSION_POINT_WEIGHT defines the minimum affect a single upvote or downvote will have on a given proposer's reputation
-      //  due to a specific version that they proposed that is accepted.
-
-      //  Math.max disallows negative values. Therefore, a proposal with many negative votes will still cause proposer to lose reputation
-      //  We also do not want 0 value, which will cause upvote or downvote to have no affect on proposal's points and its proposer's reputation.
-      //  Number.EPSILON * 100 then dividing by 100 ensures two decimal places.
-
-      changedProposers[versionData.proposer] = {
-        imageUrl: versionData.imageUrl,
-        fullname: versionData.fullname,
-        chooseUname: versionData.chooseUname,
-        correctVal,
-        wrongVal,
+      // Updating the accepted version points.
+      const versionRef = versionsColl.doc(versionDoc.id);
+      const versionChanges = {
+        //  minimum value 0, for number of correct or wrongs on each version
+        wrongs: Math.max(0, versionData.wrongs + wrongVal),
+        corrects: Math.max(0, versionData.corrects + correctVal),
+        updatedAt: currentTimestamp,
       };
-    } else {
-      //  if proposer already in dictionary, accumulate values
-      changedProposers[versionData.proposer] = {
-        ...changedProposers[versionData.proposer],
-        correctVal: changedProposers[versionData.proposer].correctVal + correctVal,
-        wrongVal: changedProposers[versionData.proposer].wrongVal + wrongVal,
-      };
-    }
-  }
+      batch.update(versionRef, versionChanges);
+      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
-  for (const proposer in changedProposers) {
-    // we need update contributors, contribNames, institNames, institutions
-    // TODO: move these to queue
-    await detach(async () => {
+      // Update the maxVersionRating correspondingly.
+      const versionRating = versionChanges.corrects - versionChanges.wrongs;
+      if (versionRating > maxVersionRating && versionRating >= 1) {
+        maxVersionRating = versionRating;
+      }
+      //  if proposer not already in the dictionary
+      console.log("changedProposers", changedProposers);
+      if (!(versionData.proposer in changedProposers)) {
+        //  finding to what extend the upvote or downvote will affect the reputation of the specific proposer
+        //  MIN_ACCEPTED_VERSION_POINT_WEIGHT defines the minimum affect a single upvote or downvote will have on a given proposer's reputation
+        //  due to a specific version that they proposed that is accepted.
+
+        //  Math.max disallows negative values. Therefore, a proposal with many negative votes will still cause proposer to lose reputation
+        //  We also do not want 0 value, which will cause upvote or downvote to have no affect on proposal's points and its proposer's reputation.
+        //  Number.EPSILON * 100 then dividing by 100 ensures two decimal places.
+
+        changedProposers[versionData.proposer] = {
+          imageUrl: versionData.imageUrl,
+          fullname: versionData.fullname,
+          chooseUname: versionData.chooseUname,
+          correctVal,
+          wrongVal,
+        };
+      } else {
+        //  if proposer already in dictionary, accumulate values
+        changedProposers[versionData.proposer] = {
+          ...changedProposers[versionData.proposer],
+          correctVal: changedProposers[versionData.proposer].correctVal + correctVal,
+          wrongVal: changedProposers[versionData.proposer].wrongVal + wrongVal,
+        };
+      }
+    }
+
+    for (const proposer in changedProposers) {
+      // we need update contributors, contribNames, institNames, institutions
+      // TODO: move these to queue
+
       await updateNodeContributions({
         nodeId,
         uname: proposer,
         accepted: true,
         contribution: changedProposers[proposer].correctVal - changedProposers[proposer].wrongVal,
       });
-    });
-  }
+    }
+    await commitBatch(batch);
+  });
 
   // TODO: move these to queue
   // action tracks

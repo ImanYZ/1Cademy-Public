@@ -7,30 +7,25 @@ export type channelNotificationChange = {
   type: SnapshotChangesTypes;
 };
 
-export const getchatNotificationsSnapshot = (
+export const getProposalsSnapshot = (
   db: Firestore,
   data: {
-    username: any;
+    nodeId: string;
   },
   callback: (changes: channelNotificationChange[]) => void
 ): Unsubscribe => {
-  const { username } = data;
+  const { nodeId } = data;
 
-  const chatNotificationsRef = collection(db, "notifications");
+  const chatNotificationsRef = collection(db, "versions");
 
-  let q = query(
-    chatNotificationsRef,
-    where("notify", "==", username),
-    where("notificationType", "==", "chat"),
-    where("seen", "==", false)
-  );
+  let q = query(chatNotificationsRef, where("node", "==", nodeId), where("deleted", "==", false));
 
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 
     const actionTrackDocuments: channelNotificationChange[] = docChanges.map(change => {
       const document = change.doc.data() as IChannelMessage;
-      return { type: change.type, data: { ...document, id: change.doc.id }, doc: change.doc };
+      return { type: change.type, data: { id: change.doc.id, ...document }, doc: change.doc };
     });
     callback(actionTrackDocuments);
   });

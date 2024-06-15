@@ -1,11 +1,25 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, Paper, Typography } from "@mui/material";
+import { CircularProgress, IconButton, Modal, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { addDoc, collection, doc, getDoc, getFirestore, Timestamp, updateDoc } from "firebase/firestore";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  onSnapshot,
+  query,
+  Timestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import React, { Suspense, useCallback, useEffect, useRef, useState } from "react";
+/* eslint-disable */
+// @ts-ignore
+import { MapInteractionCSS } from "react-map-interaction";
 import { IChannelMessage } from "src/chatTypes";
 import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
@@ -24,7 +38,6 @@ import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 import { NewsCard } from "./NewsCard";
 import { NodeLink } from "./NodeLink";
-import { Reply } from "./Reply";
 
 dayjs.extend(relativeTime);
 type MessageProps = {
@@ -53,6 +66,7 @@ type MessageProps = {
   makeMessageUnread: (message: IChannelMessage) => void;
   scrollToMessage: (id: string, type?: string, delay?: number) => void;
   messageRefs: any;
+  openDMChannel: (user2: any) => void;
 };
 
 export const Message = ({
@@ -81,6 +95,7 @@ export const Message = ({
   makeMessageUnread,
   scrollToMessage,
   messageRefs,
+  openDMChannel,
 }: MessageProps) => {
   const db = getFirestore();
   const { nodeBookState } = useNodeBook();
@@ -94,6 +109,11 @@ export const Message = ({
   const [replyOnMessage, setReplyOnMessage] = useState<IChannelMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<IChannelMessage | null>(null);
   const [isDeleting, setIsDeleting] = useState<IChannelMessage | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [openReplies, setOpenReplies] = useState<IChannelMessage | null>(null);
+  const [replies, setReplies] = useState<IChannelMessage[]>([]);
+  const [isRepliesLoaded, setIsRepliesLoaded] = useState<boolean>(true);
+  const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
 
   useEffect(() => {
@@ -137,6 +157,12 @@ export const Message = ({
       messagesObject[formattedDate].push(message);
     });
     setMessagesByDate(messagesObject);
+    if (isLoading) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+    setIsLoading(false);
   }, [messages]);
 
   useEffect(() => {
@@ -162,6 +188,26 @@ export const Message = ({
     })();
   }, [nodeBookState?.chatNode]);
 
+  useEffect(() => {
+    if (!openReplies) return;
+    setIsRepliesLoaded(false);
+    const messageRef = getMessageRef(openReplies?.id, openReplies?.channelId);
+    const replyRef = collection(messageRef, "replies");
+    const q = query(replyRef, where("deleted", "==", false));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const repliesDocuments: any = snapshot.docs.map(doc => {
+        const document = doc.data();
+        return { ...document, id: doc.id };
+      }) as IChannelMessage[];
+      repliesDocuments.sort(
+        (a: IChannelMessage, b: IChannelMessage) => a.createdAt.toMillis() - b.createdAt.toMillis()
+      );
+      setReplies(repliesDocuments);
+      setIsRepliesLoaded(true);
+    });
+    return () => unsubscribe();
+  }, [openReplies]);
+
   const forwardMessage = useCallback(
     (message: any) => {
       setSelectedMessage(message);
@@ -169,10 +215,11 @@ export const Message = ({
     },
     [setSelectedMessage, setForward]
   );
+
   // const scroll = () => {
-  //   if (messageBoxRef.current && messages.length > 2) {
   //     messageBoxRef.current.scrollTop = messageBoxRef.current.scrollHeight;
   //   }
+  //   if (messageBoxRef.current && messages.length > 2) {
   // };
 
   useEffect(() => {
@@ -190,13 +237,11 @@ export const Message = ({
   }, [messages]);
 
   useEffect(() => {
+    setIsLoading(true);
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
       setTimeout(() => {
-        if (firstLoad) {
-          setFirstLoad(false);
-          scrollToBottom();
-        }
+        setFirstLoad(false);
       }, 500);
     };
     const killSnapshot = getChannelMesasgesSnapshot(
@@ -205,7 +250,7 @@ export const Message = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [db, firstLoad]);
+  }, [db, selectedChannel?.id]);
 
   const scrollToBottom = () => {
     if (scrolling.current) {
@@ -227,6 +272,16 @@ export const Message = ({
       messageList.removeEventListener("scroll", handleScroll);
     };
   }, [loadMore]);
+
+  const handleMentionUserOpenRoom = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => {
+      event.preventDefault();
+      const extractedUname = uname.split("/")[2];
+      const user = selectedChannel?.membersInfo[extractedUname];
+      openDMChannel(user);
+    },
+    [selectedChannel]
+  );
 
   const handleDeleteReply = async (curMessage: IChannelMessage, reply: IChannelMessage) => {
     if (
@@ -287,32 +342,38 @@ export const Message = ({
     }
   };
 
-  const saveMessageEdit = async (newMessage: string) => {
+  const saveMessageEdit = async (newMessage: string, imageUrls: string[] = []) => {
     if (!editingMessage?.channelId) return;
     if (editingMessage.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
-      parentMessage.replies[replyIdx] = {
-        ...parentMessage.replies[replyIdx],
+      // const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+      // const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+      // parentMessage.replies[replyIdx] = {
+      //   ...parentMessage.replies[replyIdx],
+      //   message: newMessage,
+      //   imageUrls,
+      //   edited: true,
+      //   editedAt: new Date(),
+      // };
+      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+      const replyRef = doc(messageRef, "replies", editingMessage?.id || "");
+      await updateDoc(replyRef, {
         message: newMessage,
+        imageUrls,
         edited: true,
         editedAt: new Date(),
-      };
-      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
-      await updateDoc(messageRef, {
-        replies: parentMessage.replies,
       });
     } else {
       const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
       await updateDoc(messageRef, {
         message: newMessage,
+        imageUrls,
         edited: true,
         editedAt: new Date(),
       });
     }
     Post("/chat/sendNotification", {
       subject: "Edited by",
-      newMessage: editingMessage,
+      newMessage: { ...editingMessage, message: newMessage },
       roomType,
     });
     createActionTrack(
@@ -361,13 +422,12 @@ export const Message = ({
           reactions: [],
           channelId: selectedChannel?.id,
           important,
+          deleted: false,
         };
-        setMessages((prevMessages: any) => {
-          const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage?.id);
-          prevMessages[messageIdx].replies.push(reply);
-          return prevMessages;
+        setReplies((prevMessages: any) => {
+          return [...prevMessages, reply];
         });
-        scrollToMessage(curMessage?.id || "");
+        scrollToMessage(curMessage?.id || "", "reply");
         await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
@@ -399,7 +459,7 @@ export const Message = ({
     async (imageUrls: string[], important = false, sendMessageType: string, inputValue: string, node = {}) => {
       try {
         if (sendMessageType === "edit") {
-          saveMessageEdit(inputValue);
+          saveMessageEdit(inputValue, imageUrls);
         } else if (!!replyOnMessage || sendMessageType === "reply") {
           if (!inputValue.trim() && !imageUrls.length) return;
           sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
@@ -461,6 +521,13 @@ export const Message = ({
   );
 
   if (!selectedChannel) return <></>;
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: "50%" }}>
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -558,6 +625,15 @@ export const Message = ({
                         sendReplyOnMessage={sendReplyOnMessage}
                         isLoadingReaction={isLoadingReaction}
                         makeMessageUnread={makeMessageUnread}
+                        handleDeleteMessage={handleDeleteMessage}
+                        handleDeleteReply={handleDeleteReply}
+                        openReplies={openReplies}
+                        setOpenReplies={setOpenReplies}
+                        replies={replies}
+                        setReplies={setReplies}
+                        isRepliesLoaded={isRepliesLoaded}
+                        setOpenMedia={setOpenMedia}
+                        handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                       />
                     )}
                     {roomType !== "news" && (
@@ -594,6 +670,13 @@ export const Message = ({
                             handleDeleteMessage={handleDeleteMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            openReplies={openReplies}
+                            setOpenReplies={setOpenReplies}
+                            replies={replies}
+                            setReplies={setReplies}
+                            isRepliesLoaded={isRepliesLoaded}
+                            setOpenMedia={setOpenMedia}
+                            handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                           />
                         ) : (
                           <MessageLeft
@@ -628,6 +711,13 @@ export const Message = ({
                             sendReplyOnMessage={sendReplyOnMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            openReplies={openReplies}
+                            setOpenReplies={setOpenReplies}
+                            replies={replies}
+                            setReplies={setReplies}
+                            isRepliesLoaded={isRepliesLoaded}
+                            setOpenMedia={setOpenMedia}
+                            handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                           />
                         )}
                       </>
@@ -651,7 +741,7 @@ export const Message = ({
             width: { xs: `${window.innerWidth - 30}px`, sm: `${sidebarWidth - 32}px` },
           }}
         >
-          {replyOnMessage && !replyOnMessage?.notVisible && (
+          {/* {replyOnMessage && !replyOnMessage?.notVisible && (
             <Paper>
               <Reply
                 message={{ ...replyOnMessage, sender: selectedChannel.membersInfo[replyOnMessage.sender].fullname }}
@@ -659,7 +749,7 @@ export const Message = ({
                 sx={{ py: "5px", mb: "5px" }}
               />
             </Paper>
-          )}
+          )} */}
           <MessageInput
             notebookRef={notebookRef}
             nodeBookDispatch={nodeBookDispatch}
@@ -681,10 +771,42 @@ export const Message = ({
             sendMessageType={"message"}
             sendMessage={sendMessage}
             sendReplyOnMessage={sendReplyOnMessage}
+            setOpenMedia={setOpenMedia}
           />
         </Box>
       )}
       {ConfirmDialog}
+      <Suspense fallback={<div></div>}>
+        <Modal
+          open={Boolean(openMedia)}
+          onClose={() => setOpenMedia(null)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <>
+            <CloseIcon
+              sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+              onClick={() => setOpenMedia(null)}
+            />
+            <MapInteractionCSS>
+              <Paper
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "100vh",
+                  width: "100vw",
+                  background: "transparent",
+                }}
+              >
+                {/* TODO: change to Next Image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={openMedia || ""} alt="Node image" className="responsive-img" />
+              </Paper>
+            </MapInteractionCSS>
+          </>
+        </Modal>
+      </Suspense>
     </Box>
   );
 };

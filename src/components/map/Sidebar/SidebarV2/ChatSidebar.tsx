@@ -138,7 +138,7 @@ export const ChatSidebar = ({
   const [leading, setLeading] = useState<any>(user.claims?.leading || []);
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
   const [newMemberSection, setNewMemberSection] = useState(false);
-  const [isLoadingReaction, setIsLoadingReaction] = useState<IChannelMessage | null>(null);
+  const [isLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
     if (!openChatByNotification) return;
@@ -308,42 +308,33 @@ export const ChatSidebar = ({
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
 
-    if (message.parentMessage) {
-      setMessages((prevMessages: any) => {
-        const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
-        const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions.push({ user: user?.uname, emoji });
-        return prevMessages;
-      });
-    } else {
+    if (!message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.id);
         prevMessages[messageIdx].reactions.push({ user: user?.uname, emoji });
         return prevMessages;
       });
     }
-    if (message.sender === user?.uname && !message.parentMessage) {
+    if (!message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
     } else {
-      setIsLoadingReaction(message);
-      await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
-      setIsLoadingReaction(null);
+      const mRef = getMessageRef(message.parentMessage, message.channelId);
+      const replyRef = doc(mRef, "replies", message?.id || "");
+      await updateDoc(replyRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
+      // await updateDoc(replyRef, {
+      //   message: newMessage,
+      //   imageUrls,
+      //   edited: true,
+      //   editedAt: new Date(),
+      // });
+      // await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
     }
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId) return;
-    if (message.parentMessage) {
-      setMessages((prevMessages: any) => {
-        const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
-        const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions = prevMessages[messageIdx].replies[
-          replyIdx
-        ].reactions.filter((r: any) => r.emoji !== emoji && r.user !== user?.uname);
-        return prevMessages;
-      });
-    } else {
+    if (!message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.id);
         prevMessages[messageIdx].reactions = prevMessages[messageIdx].reactions.filter(
@@ -353,11 +344,14 @@ export const ChatSidebar = ({
       });
     }
 
-    if (message.sender === user?.uname && !message.parentMessage) {
+    if (!message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
     } else {
-      await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
+      const mRef = getMessageRef(message.parentMessage, message.channelId);
+      const replyRef = doc(mRef, "replies", message?.id || "");
+      await updateDoc(replyRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
+      // await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
     }
   };
 
@@ -481,15 +475,23 @@ export const ChatSidebar = ({
   // }, [db, user]);
 
   const openDMChannel = async (user2: any) => {
+    if (roomType === "direct") return;
     if (!user?.uname || !user2.uname) return;
-    const findConversation = await getDocs(
-      query(collection(db, "conversations"), where("members", "array-contains", user.uname))
-    );
+    let q = query(collection(db, "conversations"), where("members", "array-contains", user.uname));
+    if (user?.uname === user2?.uname) {
+      q = query(collection(db, "conversations"), where("members", "==", [user.uname, user2?.uname]));
+    }
+    const findConversation = await getDocs(q);
     const filteredResults = findConversation.docs.find(
       doc => doc.data().members.includes(user2.uname) && doc.data().members.length === 2
     );
     if (filteredResults) {
       const conversationData: any = filteredResults.data();
+      if (conversationData?.deleted) {
+        await updateDoc(doc(db, "conversations", filteredResults.id), {
+          deleted: false,
+        });
+      }
       openRoom("direct", { ...conversationData, id: filteredResults.id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
@@ -498,9 +500,9 @@ export const ChatSidebar = ({
           uname: user2.uname,
           imageUrl: user2.imageUrl,
           chooseUname: !!user2.chooseUname,
-          fullname: `${user2.fName} ${user2.lName}`,
+          fullname: user2?.fName ? `${user2.fName} ${user2.lName}` : user2?.fullname,
           role: "",
-          uid: user2.userId,
+          uid: user2.userId || "",
         },
         [user?.uname]: {
           uname: user?.uname,
@@ -515,6 +517,7 @@ export const ChatSidebar = ({
         title: generateChannelName(membersInfo, user),
         members: [user2.uname, user?.uname],
         membersInfo,
+        deleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -526,9 +529,9 @@ export const ChatSidebar = ({
     }
   };
 
-  const clearNotifications = (notifications: any) => {
+  const clearNotifications = async (notifications: any) => {
     for (let notif of notifications) {
-      updateDoc(notif.doc.ref, {
+      await updateDoc(notif.doc.ref, {
         seen: true,
         seenAt: new Date(),
       });
@@ -680,6 +683,7 @@ export const ChatSidebar = ({
                   makeMessageUnread={makeMessageUnread}
                   scrollToMessage={scrollToMessage}
                   messageRefs={messageRefs}
+                  openDMChannel={openDMChannel}
                 />
               )}
             </>
@@ -695,7 +699,7 @@ export const ChatSidebar = ({
               >
                 <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"} variant="fullWidth">
                   {[
-                    { title: "News", type: "announcement" },
+                    { title: "News", type: "news" },
                     { title: "Channels", type: "channel" },
                     { title: "Direct", type: "direct" },
                   ].map((tabItem: any, idx: number) => (

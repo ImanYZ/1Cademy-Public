@@ -1,9 +1,8 @@
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Avatar, Button, Typography } from "@mui/material";
+import { Avatar, Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import NextImage from "next/image";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -12,9 +11,9 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
-import { MessageLeft } from "./MessageLeft";
 
 type NewsCardProps = {
+  type?: string;
   notebookRef: any;
   messageRefs: any;
   nodeBookDispatch: any;
@@ -40,8 +39,19 @@ type NewsCardProps = {
   sendReplyOnMessage: any;
   isLoadingReaction: IChannelMessage | null;
   makeMessageUnread: (message: IChannelMessage) => void;
+  handleDeleteMessage: any;
+  handleDeleteReply: any;
+  parentMessage?: IChannelMessage;
+  openReplies?: IChannelMessage | null;
+  setOpenReplies?: any;
+  replies?: IChannelMessage[];
+  setReplies?: any;
+  isRepliesLoaded?: boolean;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
+  handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
 };
 export const NewsCard = ({
+  type,
   notebookRef,
   messageRefs,
   nodeBookDispatch,
@@ -67,12 +77,29 @@ export const NewsCard = ({
   sendReplyOnMessage,
   isLoadingReaction,
   makeMessageUnread,
+  handleDeleteMessage,
+  handleDeleteReply,
+  parentMessage,
+  openReplies,
+  setOpenReplies,
+  replies,
+  setReplies,
+  isRepliesLoaded,
+  setOpenMedia,
+  handleMentionUserOpenRoom,
 }: NewsCardProps) => {
-  const [openReplies, setOpenReplies] = useState<boolean>(false);
-  const handleOpenReplies = () => setOpenReplies(prev => !prev);
-
   const handleReplyOnMessage = () => {
+    setOpenReplies(message);
     setReplyOnMessage(message);
+  };
+
+  const handleOpenReplies = () => {
+    setReplies([]);
+    if (openReplies?.id !== message?.id) {
+      setOpenReplies(message);
+    } else {
+      setOpenReplies(null);
+    }
   };
 
   return (
@@ -157,6 +184,7 @@ export const NewsCard = ({
                 setEditingMessage={setEditingMessage}
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
+                setOpenMedia={setOpenMedia}
               />
             </Box>
           ) : (
@@ -167,17 +195,17 @@ export const NewsCard = ({
                 lineHeight: "24px",
               }}
             >
-              <MarkdownRender text={message.message || ""} />
+              <MarkdownRender text={message.message || ""} handleLinkClick={handleMentionUserOpenRoom} />
               <Typography sx={{ color: "grey", ml: 1 }}>{message.edited ? "(edited)" : ""}</Typography>
               <Box sx={{ display: "flex" }}>
                 {(message.imageUrls || []).map(imageUrl => (
-                  <NextImage
-                    width={"500px"}
-                    height={"300px"}
-                    style={{ borderRadius: "8px" }}
+                  <img
+                    width={"100%"}
+                    style={{ borderRadius: "8px", objectFit: "contain" }}
                     src={imageUrl}
                     alt="news image"
                     key={imageUrl}
+                    onClick={() => setOpenMedia(imageUrl)}
                   />
                 ))}
               </Box>
@@ -195,6 +223,9 @@ export const NewsCard = ({
                   setEditingMessage={setEditingMessage}
                   user={user}
                   makeMessageUnread={makeMessageUnread}
+                  handleDeleteMessage={() =>
+                    type === "reply" ? handleDeleteReply(parentMessage, message) : handleDeleteMessage(message)
+                  }
                 />
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
@@ -209,22 +240,30 @@ export const NewsCard = ({
               </Box>
             </>
           )}
-          {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
+
+          {(message?.totalReplies || 0) > 0 && editingMessage?.id !== message.id && (
             <Button onClick={handleOpenReplies} style={{ border: "none" }}>
-              {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+              {openReplies?.id === message?.id ? "Hide" : message?.totalReplies}{" "}
+              {message?.totalReplies || 0 > 1 ? "Replies" : "Reply"}
             </Button>
           )}
         </Box>
 
-        {openReplies && (
+        {openReplies?.id === message?.id && (
           <Box
             sx={{
               transition: "ease-in",
               ml: "25px",
             }}
           >
-            {(message.replies || []).map((reply: any, idx: number) => (
-              <MessageLeft
+            {!isRepliesLoaded && replies?.length === 0 && (
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                <CircularProgress />
+              </Box>
+            )}
+            {replies?.map((reply: any, idx: number) => (
+              <NewsCard
+                type="reply"
                 notebookRef={notebookRef}
                 messageRefs={messageRefs}
                 nodeBookDispatch={nodeBookDispatch}
@@ -251,6 +290,11 @@ export const NewsCard = ({
                 sendReplyOnMessage={sendReplyOnMessage}
                 isLoadingReaction={isLoadingReaction}
                 makeMessageUnread={makeMessageUnread}
+                handleDeleteMessage={handleDeleteMessage}
+                handleDeleteReply={handleDeleteReply}
+                parentMessage={message}
+                setOpenMedia={setOpenMedia}
+                handleMentionUserOpenRoom={handleMentionUserOpenRoom}
               />
             ))}
 
@@ -259,7 +303,6 @@ export const NewsCard = ({
                 notebookRef={notebookRef}
                 nodeBookDispatch={nodeBookDispatch}
                 db={db}
-                user={user}
                 theme={"Dark"}
                 placeholder={"Type your reply..."}
                 channelUsers={channelUsers}
@@ -270,8 +313,12 @@ export const NewsCard = ({
                 selectedChannel={selectedChannel}
                 replyOnMessage={message}
                 setReplyOnMessage={setReplyOnMessage}
+                user={user}
+                roomType={roomType}
                 sendMessage={sendMessage}
                 sendReplyOnMessage={sendReplyOnMessage}
+                parentMessage={message}
+                setOpenMedia={setOpenMedia}
               />
             </Box>
           </Box>

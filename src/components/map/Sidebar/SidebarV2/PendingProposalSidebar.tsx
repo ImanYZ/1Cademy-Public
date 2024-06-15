@@ -33,6 +33,7 @@ const PendingProposalSidebar = ({
 }: // innerWidth,
 PendingProposalSidebarProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
+  const [userVotesOnProposals, setUserVotesOnProposals] = useState({});
   const [type, setType] = useState<string>("all");
   const db = getFirestore();
 
@@ -94,13 +95,13 @@ PendingProposalSidebarProps) => {
             }
           }
         }
-
+        setUserVotesOnProposals(versions);
         const pendingProposals = { ...versions };
         const proposalsTemp = Object.values(pendingProposals);
-        const orderredProposals = proposalsTemp.sort(
+        const orderedProposals = proposalsTemp.sort(
           (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
         );
-        setProposals(orderredProposals);
+        setProposals(orderedProposals);
       }
     });
     versionsSnapshots.push(versionsSnapshot);
@@ -183,6 +184,7 @@ PendingProposalSidebarProps) => {
           <PendingProposalList
             proposals={type === "all" ? proposals : proposals.filter(proposal => proposal.nodeType === type)}
             openLinkedNode={openLinkedNode}
+            userVotesOnProposals={userVotesOnProposals}
           />
         </Box>
       }

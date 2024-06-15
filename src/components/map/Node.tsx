@@ -124,6 +124,7 @@ type NodeProps = {
         title?: string;
         label?: string;
       }[];
+  tagIds: string[];
   parents: Parent[];
   nodesChildren:
     | string[]
@@ -271,6 +272,7 @@ const Node = ({
   references,
   disableVotes,
   tags,
+  tagIds,
   parents,
   nodesChildren,
   choices,
@@ -647,7 +649,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked),
+    (event: any) =>
+      wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked, tagIds),
     [wrongNode, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
   );
 

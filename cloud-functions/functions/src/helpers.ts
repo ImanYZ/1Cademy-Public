@@ -1,4 +1,5 @@
-import moment = require("moment");
+import moment = require("moment-timezone");
+
 import { db, commitBatch, batchUpdate } from "./admin";
 
 export const signalFlashcardChanges = async (nodeId: string, type: string) => {
@@ -63,6 +64,20 @@ export const trackHours = async (data: any) => {
     const createdAt = moment(data.createdAt.toDate());
     const todayDate = moment().format("DD-MM-YYYY");
 
+    const createdAtEST = createdAt.tz("America/New_York");
+    const hourEST = createdAtEST.hour();
+    const dayOfWeekEST = createdAtEST.day();
+
+    // Check if the current time is between 7 PM EST and 8 PM EST
+    if (
+      dayOfWeekEST === 5 &&
+      hourEST >= 19 &&
+      hourEST < 20 &&
+      students[data.doer].semesterId === "6E1h49QYINasnDOpVpHL"
+    ) {
+      console.log("Cannot track hours between 7 PM EST and 8 PM EST on Fridays.");
+      return;
+    }
     const trackHoursDayQuery = await db
       .collection("trackHours")
       .where("uname", "==", data.doer)

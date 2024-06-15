@@ -49,7 +49,7 @@ const triggerNotifications = async (newMessage: any) => {
           const payload = {
             token,
             notification: {
-              title: `${subject} ${sender}`,
+              title: `${subject} ${channelData.membersInfo[member].fullname}`,
               body: message,
             },
             data: {

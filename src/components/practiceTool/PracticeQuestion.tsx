@@ -73,7 +73,7 @@ const NodeQuestion = ({
     const wrongChange = thisNode.wrong ? -1 : 1;
     const _corrects = thisNode.corrects + correctChange;
     const _wrongs = thisNode.wrongs + wrongChange;
-    const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, thisNode.locked);
+    const willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, thisNode.locked, false, false);
     let deleteOK = willRemoveNode ? false : true;
     // INFO: is not required to validate children, because a question shoould not have childs
     if (willRemoveNode) {

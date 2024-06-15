@@ -260,7 +260,7 @@ const TrackingHours = () => {
     selectedDatePeriod?: Period,
     periods?: Period[]
   ) => {
-    let hoursQuery: any = collection(db, "trackHours");
+    let hoursQuery: any = query(collection(db, "trackHours"), orderBy("createdAt", "desc"));
 
     // if (selectedDatePeriod && selectedPeriod !== -1) {
     //   hoursQuery = query(hoursQuery, where("day", "==", selectedDatePeriod.start.format("DD-MM-YYYY")));

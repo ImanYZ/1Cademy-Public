@@ -1,8 +1,8 @@
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Button, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, Fragment, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -46,6 +46,13 @@ type MessageLeftProps = {
   sendReplyOnMessage: any;
   isLoadingReaction: IChannelMessage | null;
   makeMessageUnread: (message: IChannelMessage) => void;
+  openReplies?: IChannelMessage | null;
+  setOpenReplies?: any;
+  replies?: IChannelMessage[];
+  setReplies?: any;
+  isRepliesLoaded?: boolean;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
+  handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
 };
 export const MessageLeft = ({
   type,
@@ -80,22 +87,27 @@ export const MessageLeft = ({
   sendReplyOnMessage,
   isLoadingReaction,
   makeMessageUnread,
+  openReplies,
+  setOpenReplies,
+  replies,
+  setReplies,
+  isRepliesLoaded,
+  setOpenMedia,
+  handleMentionUserOpenRoom,
 }: MessageLeftProps) => {
-  const [openReplies, setOpenReplies] = useState<boolean>(false);
-
   const handleReplyMessage = () => {
+    setOpenReplies(message);
     setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
-    setOpenReplies(prev => !prev);
-  };
-
-  useEffect(() => {
-    if (!!replyOnMessage && replyOnMessage?.id === message?.id) {
-      setOpenReplies(true);
+    setReplies([]);
+    if (openReplies?.id !== message?.id) {
+      setOpenReplies(message);
+    } else {
+      setOpenReplies(null);
     }
-  }, [replyOnMessage]);
+  };
 
   return (
     <>
@@ -174,7 +186,7 @@ export const MessageLeft = ({
             </Box>
 
             <Typography sx={{ fontSize: "12px" }}>
-              {moment(message.createdAt.toDate().getTime()).format("h:mm a")}
+              {moment(message?.createdAt?.toDate()?.getTime())?.format("h:mm a")}
             </Typography>
           </Box>
           <Box
@@ -213,6 +225,7 @@ export const MessageLeft = ({
                   parentMessage={parentMessage}
                   sendMessage={sendMessage}
                   sendReplyOnMessage={sendReplyOnMessage}
+                  setOpenMedia={setOpenMedia}
                 />
               </Box>
             ) : (
@@ -223,7 +236,7 @@ export const MessageLeft = ({
                   lineHeight: "24px",
                 }}
               >
-                <MarkdownRender text={message.message || ""} />
+                <MarkdownRender text={message.message || ""} handleLinkClick={handleMentionUserOpenRoom} />
                 <Typography sx={{ color: "grey", ml: "auto" }}>{message.edited ? "(edited)" : ""}</Typography>
                 <Box sx={{ pt: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
                   {(message.imageUrls || []).map(imageUrl => (
@@ -233,16 +246,19 @@ export const MessageLeft = ({
                       src={imageUrl}
                       alt="news image"
                       key={imageUrl}
+                      onClick={() => setOpenMedia(imageUrl)}
                     />
                   ))}
                 </Box>
               </Box>
             )}
-            {message?.replies?.length > 0 && editingMessage?.id !== message.id && (
+            {(message?.totalReplies || 0) > 0 && editingMessage?.id !== message.id && (
               <Button onClick={handleOpenReplies} style={{ border: "none" }}>
-                {openReplies ? "Hide" : message.replies.length} {message.replies.length > 1 ? "Replies" : "Reply"}
+                {openReplies?.id === message?.id ? "Hide" : message?.totalReplies}{" "}
+                {message?.totalReplies || 0 > 1 ? "Replies" : "Reply"}
               </Button>
             )}
+
             {editingMessage?.id !== message.id && (
               <>
                 <Box className="message-buttons" sx={{ display: "none" }}>
@@ -272,15 +288,20 @@ export const MessageLeft = ({
               </>
             )}
           </Box>
-          {openReplies && (
+          {openReplies?.id === message?.id && (
             <Box
               sx={{
                 transition: "ease-in",
                 ml: "25px",
               }}
             >
-              {(message.replies || []).map((reply: any, idx: number) => (
-                <>
+              {!isRepliesLoaded && replies?.length === 0 && (
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+              {replies?.map((reply: any, idx: number) => (
+                <Fragment key={reply?.id}>
                   {reply?.node?.id ? (
                     <NodeLink
                       db={db}
@@ -315,6 +336,8 @@ export const MessageLeft = ({
                       handleDeleteMessage={handleDeleteMessage}
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                     />
                   ) : (
                     <MessageLeft
@@ -349,35 +372,37 @@ export const MessageLeft = ({
                       sendReplyOnMessage={sendReplyOnMessage}
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                     />
                   )}
-                </>
+                </Fragment>
               ))}
-              {message.replies.length > 0 && (
-                <Box sx={{ ml: "37px", mt: 2 }}>
-                  <MessageInput
-                    notebookRef={notebookRef}
-                    nodeBookDispatch={nodeBookDispatch}
-                    db={db}
-                    theme={"Dark"}
-                    placeholder={"Type your reply..."}
-                    channelUsers={channelUsers}
-                    sendMessageType={"reply"}
-                    toggleEmojiPicker={toggleEmojiPicker}
-                    leading={leading}
-                    getMessageRef={getMessageRef}
-                    selectedChannel={selectedChannel}
-                    replyOnMessage={message}
-                    setReplyOnMessage={setReplyOnMessage}
-                    user={user}
-                    setMessages={setMessages}
-                    roomType={roomType}
-                    sendMessage={sendMessage}
-                    sendReplyOnMessage={sendReplyOnMessage}
-                    parentMessage={message}
-                  />
-                </Box>
-              )}
+
+              <Box sx={{ ml: "37px", mt: 2 }}>
+                <MessageInput
+                  notebookRef={notebookRef}
+                  nodeBookDispatch={nodeBookDispatch}
+                  db={db}
+                  theme={"Dark"}
+                  placeholder={"Type your reply..."}
+                  channelUsers={channelUsers}
+                  sendMessageType={"reply"}
+                  toggleEmojiPicker={toggleEmojiPicker}
+                  leading={leading}
+                  getMessageRef={getMessageRef}
+                  selectedChannel={selectedChannel}
+                  replyOnMessage={message}
+                  setReplyOnMessage={setReplyOnMessage}
+                  user={user}
+                  setMessages={setMessages}
+                  roomType={roomType}
+                  sendMessage={sendMessage}
+                  sendReplyOnMessage={sendReplyOnMessage}
+                  parentMessage={message}
+                  setOpenMedia={setOpenMedia}
+                />
+              </Box>
             </Box>
           )}
         </Box>

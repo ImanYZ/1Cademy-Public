@@ -1,7 +1,9 @@
-import { Box, CircularProgress, MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
 import { Firestore } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
+import { getProposalsSnapshot } from "src/client/firestore/proposals.firesrtore";
+import { getUserProposalsSnapshot } from "src/client/firestore/userProposals.firestore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import NoProposalDarkIcon from "../../../../../public/no-proposals-dark-mode.svg";
@@ -18,9 +20,8 @@ type ProposalsSidebarProps = {
   nodeLoaded: boolean;
   theme: UserTheme;
   proposeNodeImprovement: any;
-  fetchProposals: any;
   rateProposal: any;
-  ratingProposale: boolean;
+  ratingProposal: boolean;
   selectProposal: any;
   deleteProposal: any;
   proposeNewChild: any;
@@ -38,12 +39,10 @@ const ProposalsSidebar = ({
   onClose,
   clearInitialProposal,
   initialProposal,
-  nodeLoaded,
   theme,
   proposeNodeImprovement,
-  fetchProposals,
   rateProposal,
-  ratingProposale,
+  ratingProposal,
   selectProposal,
   deleteProposal,
   proposeNewChild,
@@ -55,35 +54,211 @@ const ProposalsSidebar = ({
   selectedNode,
   username,
 }: ProposalsSidebarProps) => {
-  const [isRetrieving, setIsRetrieving] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [proposals, setProposals] = useState<any[]>([]);
+  const [userVotesOnProposals, setUserVotesOnProposals] = useState<{ [key: string]: any }>({});
   const [value, setValue] = React.useState(0);
   const [type, setType] = useState<string>("all");
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleSwitchTab = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  // const userVersionsRefs: Query<DocumentData>[] = [];
+  // const versionsCommentsRefs: Query<DocumentData>[] = [];
+  // const userVersionsCommentsRefs: Query<DocumentData>[] = [];
+  // versionsData.forEach(versionDoc => {
+  //   versionIds.push(versionDoc.id);
+  //   const versionData = versionDoc.data();
+
+  //   versions[versionDoc.id] = {
+  //     ...versionData,
+  //     nodeType: versionData.nodeType,
+  //     id: versionDoc.id,
+  //     createdAt: versionData.createdAt.toDate(),
+  //     award: false,
+  //     correct: false,
+  //     wrong: false,
+  //     comments: [],
+  //   };
+  //   delete versions[versionDoc.id].deleted;
+  //   delete versions[versionDoc.id].updatedAt;
+  //   delete versions[versionDoc.id].node;
+  //   const userVersionsQuery = query(
+  //     userVersionsColl,
+  //     where("version", "==", versionDoc.id),
+  //     where("user", "==", user.uname)
+  //   );
+  //   userVersionsRefs.push(userVersionsQuery);
+  //   const versionsCommentsQuery = query(
+  //     versionsCommentsColl,
+  //     where("version", "==", versionDoc.id),
+  //     where("deleted", "==", false)
+  //   );
+  //   versionsCommentsRefs.push(versionsCommentsQuery);
+  // });
+  // console.log(nodeLoaded, "nodeLoaded");
+  // if (userVersionsRefs.length > 0) {
+  //   await Promise.all(
+  //     userVersionsRefs.map(async userVersionsRef => {
+  //       const userVersionsDocs = await getDocs(userVersionsRef);
+  //       userVersionsDocs.forEach(userVersionsDoc => {
+  //         const userVersion = userVersionsDoc.data();
+  //         versionId = userVersion.version;
+  //         delete userVersion.version;
+  //         delete userVersion.updatedAt;
+  //         delete userVersion.createdAt;
+  //         delete userVersion.user;
+  //         if (userVersion.hasOwnProperty("id")) {
+  //           delete userVersion.id;
+  //         }
+  //         versions[versionId] = {
+  //           ...versions[versionId],
+  //           ...userVersion,
+  //         };
+  //       });
+  //     })
+  //   );
+  // }
+
+  // build version comments {}
+  // if (versionsCommentsRefs.length > 0) {
+  //   await Promise.all(
+  //     versionsCommentsRefs.map(async versionsCommentsRef => {
+  //       const versionsCommentsDocs = await getDocs(versionsCommentsRef);
+  //       versionsCommentsDocs.forEach(versionsCommentsDoc => {
+  //         const versionsComment = versionsCommentsDoc.data();
+  //         delete versionsComment.updatedAt;
+  //         comments[versionsCommentsDoc.id] = {
+  //           ...versionsComment,
+  //           id: versionsCommentsDoc.id,
+  //           createdAt: versionsComment.createdAt.toDate(),
+  //         };
+  //         const userVersionsCommentsQuery = query(
+  //           userVersionsCommentsColl,
+  //           where("versionComment", "==", versionsCommentsDoc.id),
+  //           where("user", "==", user.uname)
+  //         );
+
+  //         userVersionsCommentsRefs.push(userVersionsCommentsQuery);
+  //       });
+  //     })
+  //   );
+
+  //   // merge comments and userVersionComment
+  //   if (userVersionsCommentsRefs.length > 0) {
+  //     await Promise.all(
+  //       userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
+  //         const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef);
+  //         userVersionsCommentsDocs.forEach(userVersionsCommentsDoc => {
+  //           const userVersionsComment = userVersionsCommentsDoc.data();
+  //           const versionCommentId = userVersionsComment.versionComment;
+  //           delete userVersionsComment.versionComment;
+  //           delete userVersionsComment.updatedAt;
+  //           delete userVersionsComment.createdAt;
+  //           delete userVersionsComment.user;
+  //           comments[versionCommentId] = {
+  //             ...comments[versionCommentId],
+  //             ...userVersionsComment,
+  //           };
+  //         });
+  //       })
+  //     );
+  //   }
+  // }
+  // Object.values(comments).forEach((comment: any) => {
+  //   versionId = comment.version;
+  //   delete comment.version;
+  //   versions[versionId].comments.push(comment);
+  // });
+
+  // const versions: any = {};
+
+  // const proposalsTemp = Object.values(versions);
+  // const orderedProposals = proposalsTemp.sort(
+  //   (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
+  // );
 
   useEffect(() => {
-    if (selectedNode && open && nodeLoaded) {
-      fetchProposals(setIsAdmin, setIsRetrieving, setProposals);
-    }
-  }, [fetchProposals, selectedNode, open, nodeLoaded]);
+    if (!selectedNode) return;
+
+    const onSynchronize = (changes: any) => {
+      setUserVotesOnProposals((prev: any) =>
+        changes.reduce((prev: { [versionId: string]: any }, change: any) => {
+          const docType = change.type;
+          const curData = {
+            ...change.data,
+            createdAt: change.data.createdAt.toDate(),
+            comments: [],
+          } as any & { id: string };
+
+          if (docType === "added" && !prev.hasOwnProperty(curData.version)) {
+            prev[curData.version] = { ...curData, doc: change.doc };
+          }
+          if (docType === "modified" && prev.hasOwnProperty(curData.version)) {
+            prev[curData.version] = { ...curData, doc: change.doc };
+          }
+
+          if (docType === "removed" && prev.hasOwnProperty(curData.id)) {
+            delete prev[curData.version];
+          }
+          return prev;
+        }, prev)
+      );
+    };
+    const killSnapshot = getUserProposalsSnapshot(db, { nodeId: selectedNode, uname: username }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, selectedNode]);
+
+  useEffect(() => {
+    if (!selectedNode) return;
+    const onSynchronize = (changes: any) => {
+      setProposals((prev: any) =>
+        changes.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = {
+              ...change.data,
+              createdAt: change.data.createdAt.toDate(),
+              award: false,
+              correct: false,
+              wrong: false,
+              comments: [],
+            } as any & { id: string };
+
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1) {
+              prev.push({ ...curData, doc: change.doc });
+            }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx);
+            }
+            prev.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            return prev;
+          },
+          [...prev]
+        )
+      );
+    };
+    const killSnapshot = getProposalsSnapshot(db, { nodeId: selectedNode }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, selectedNode]);
 
   const proposalsWithId = useMemo(() => {
     return proposals.map((cur: any) => ({ ...cur, newNodeId: newId(db) }));
   }, [db, proposals]);
 
   useEffect(() => {
-    if (selectedNode && open && initialProposal && !isRetrieving) {
+    if (selectedNode && open && initialProposal) {
       const proposal = proposalsWithId.find(_proposal => _proposal.id === initialProposal);
       if (proposal) {
         clearInitialProposal();
         selectProposal({ preventDefault: () => {} }, proposal, proposal.newNodeId);
       }
     }
-  }, [isRetrieving, initialProposal, selectedNode, open, proposalsWithId, clearInitialProposal, selectProposal]);
+  }, [initialProposal, selectedNode, open, proposalsWithId, clearInitialProposal, selectProposal]);
 
   const a11yProps = (index: number) => {
     return {
@@ -94,7 +269,7 @@ const ProposalsSidebar = ({
 
   const contentSignalState = useMemo(() => {
     return { updated: true };
-  }, [isRetrieving, proposals, openProposal, initialProposal, value, type]);
+  }, [proposals, openProposal, initialProposal, value, type]);
 
   return (
     <SidebarWrapper
@@ -126,7 +301,7 @@ const ProposalsSidebar = ({
             <Tabs
               id="focused-tabs"
               value={value}
-              onChange={handleChange}
+              onChange={handleSwitchTab}
               aria-label={"Proposal Tabs"}
               variant="fullWidth"
             >
@@ -189,13 +364,13 @@ const ProposalsSidebar = ({
             </Select>
           </Box>
 
-          {isRetrieving && (
+          {/* {
             <Box sx={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
               <CircularProgress />
             </Box>
-          )}
+          } */}
 
-          {!isRetrieving && !proposalsWithId.filter(cur => (value === 0 ? !cur.accepted : cur.accepted)).length && (
+          {!proposalsWithId.filter(cur => (value === 0 ? !cur.accepted : cur.accepted)).length && (
             <Box
               sx={{
                 display: "flex",
@@ -217,7 +392,7 @@ const ProposalsSidebar = ({
               </Typography>
             </Box>
           )}
-          {!isRetrieving && value === 0 && (
+          {value === 0 && (
             <Box
               component="ul"
               className="collection"
@@ -229,20 +404,20 @@ const ProposalsSidebar = ({
                 }
                 setProposals={setProposals}
                 proposeNodeImprovement={proposeNodeImprovement}
-                fetchProposals={fetchProposals}
                 rateProposal={rateProposal}
                 selectProposal={selectProposal}
                 deleteProposal={deleteProposal}
                 editHistory={false}
-                ratingProposale={ratingProposale}
+                ratingProposal={ratingProposal}
                 proposeNewChild={proposeNewChild}
                 openProposal={openProposal}
-                isAdmin={isAdmin}
                 username={username}
+                userVotesOnProposals={userVotesOnProposals}
+                setUserVotesOnProposals={setUserVotesOnProposals}
               />
             </Box>
           )}
-          {!isRetrieving && value === 1 && (
+          {value === 1 && (
             <Box
               component="ul"
               className="collection"
@@ -254,16 +429,16 @@ const ProposalsSidebar = ({
                 }
                 setProposals={setProposals}
                 proposeNodeImprovement={proposeNodeImprovement}
-                fetchProposals={fetchProposals}
                 rateProposal={rateProposal}
-                ratingProposale={ratingProposale}
+                ratingProposal={ratingProposal}
                 selectProposal={selectProposal}
                 deleteProposal={deleteProposal}
                 editHistory={true}
                 proposeNewChild={proposeNewChild}
                 openProposal={openProposal}
-                isAdmin={isAdmin}
                 username={username}
+                userVotesOnProposals={userVotesOnProposals}
+                setUserVotesOnProposals={setUserVotesOnProposals}
               />
             </Box>
           )}

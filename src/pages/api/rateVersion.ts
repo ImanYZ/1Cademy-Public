@@ -218,20 +218,21 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // it version was previously approved
       accepted = versionData.accepted;
       // if its going to approve now
-      isApproved = isVersionApproved({
-        corrects: versionData.corrects + correct,
-        wrongs: versionData.wrongs + wrong,
-        nodeData,
-      });
+
       const {
         courseExist,
         instantApprove,
         isInstructor,
       }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
         await checkInstantApprovalForProposalVote(nodeData?.tagIds || [], uname, req.body.versionId);
-      if ((courseExist || isInstructor) && correct === 1) {
-        isApproved = instantApprove;
-      }
+
+      isApproved = isVersionApproved({
+        corrects: versionData.corrects + correct,
+        wrongs: versionData.wrongs + wrong,
+        nodeData,
+        isInstructor,
+        instantApprove: instantApprove && correct === 1,
+      });
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
