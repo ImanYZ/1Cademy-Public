@@ -33,6 +33,7 @@ import {
   doc,
   getDocs,
   getFirestore,
+  orderBy,
   query,
   runTransaction,
   setDoc,
@@ -405,6 +406,7 @@ const TrackingHours = () => {
 
   const renderTable = () => {
     let studentsList: any = [];
+
     if (selectedSemester && trackedStudents[selectedSemester]) {
       studentsList = trackedStudents[selectedSemester].students;
     } else {
@@ -412,7 +414,7 @@ const TrackingHours = () => {
         studentsList = studentsList.concat(semester.students);
       });
     }
-
+    const showMeetings = studentsList.some((student: any) => student.shortMeetings.length > 0);
     if (!adminView && Object.keys(semesters).length <= 0) return null;
 
     const handleOpenDialog = (student: any) => {
@@ -444,11 +446,12 @@ const TrackingHours = () => {
       return { sTimestamp, eTimestamp, formattedDay };
     };
 
-    const handleSaveMeeting = async () => {
+    const handleSaveShortMeeting = async () => {
       try {
         if (!activityDate) {
           return;
         }
+
         const { sTimestamp, eTimestamp, formattedDay } = getActivityTimeStamps(activityDate, startTime, endTime);
         const trackingQuery = query(
           collection(db, "trackHours"),
@@ -470,6 +473,7 @@ const TrackingHours = () => {
           );
           return;
         }
+        const meetingId = newId(db);
         if (trackingDocs.docs.length > 0) {
           const trackingData = trackingDocs.docs[0].data();
           const shortMeetings: Meeting[] = trackingData.shortMeetings || [];
@@ -495,7 +499,7 @@ const TrackingHours = () => {
               sTimestamp,
               eTimestamp,
               duration,
-              meetingId: newId(db),
+              meetingId,
               day: formattedDay,
               previousDuration: 0,
             });
@@ -513,7 +517,7 @@ const TrackingHours = () => {
                 sTimestamp,
                 eTimestamp,
                 duration,
-                meetingId: newId(db),
+                meetingId,
                 day: formattedDay,
                 previousDuration: 0,
               });
@@ -542,7 +546,7 @@ const TrackingHours = () => {
                 sTimestamp,
                 eTimestamp,
                 duration,
-                meetingId: newId(db),
+                meetingId,
                 day: formattedDay,
               },
             ],
@@ -551,12 +555,12 @@ const TrackingHours = () => {
           setTrackedStudents((prev: any) => {
             const semester = prev[selectedStudentForMeeting.semesterId];
             if (semester) {
-              const student: any = semester.students.find((s: any) => s.uname === student.uname);
+              const student: any = semester.students.find((s: any) => s.uname === selectedStudentForMeeting.uname);
               student.shortMeetings.push({
                 sTimestamp,
                 eTimestamp,
                 duration,
-                meetingId: newId(db),
+                meetingId,
                 day: formattedDay,
                 previousDuration: 0,
               });
@@ -589,7 +593,9 @@ const TrackingHours = () => {
               <TableCell>Hours Tracked</TableCell>
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Meetings</TableCell>
-              <TableCell>1:1 Meetings</TableCell>
+              {(((user?.claims?.leading as any) || []).length > 0 || showMeetings) && (
+                <TableCell>1:1 Meetings</TableCell>
+              )}
               <TableCell>Paid</TableCell>
             </TableRow>
           </TableHead>
@@ -654,40 +660,44 @@ const TrackingHours = () => {
                             color: adminView ? (meeting.attended ? "green" : "gray") : "primary.main",
                           },
                         }}
-                        disabled={adminView}
+                        disabled={!((user?.claims?.leading as any) || []).includes(student.semesterId)}
                       />
                     </Box>
                   ))}
                 </TableCell>
-                <TableCell>
-                  {(student.shortMeetings || []).map((meeting: Meeting, meetingIdx: number) => {
-                    return (
-                      <Box
-                        key={`${student.uname}-meeting-${meetingIdx}`}
-                        sx={{ display: "flex", alignItems: "center", gap: "5px" }}
+                {(showMeetings || ((user?.claims?.leading as any) || []).includes(student.semesterId)) && (
+                  <TableCell>
+                    {(student.shortMeetings || []).map((meeting: Meeting, meetingIdx: number) => {
+                      return (
+                        <Box
+                          key={`${student.uname}-meeting-${meetingIdx}`}
+                          sx={{ display: "flex", alignItems: "center", gap: "5px" }}
+                        >
+                          <Typography>
+                            - <strong>{meeting.day}</strong>: {formatTime(meeting.sTimestamp, false)} -{" "}
+                            {formatTime(meeting.eTimestamp)}
+                          </Typography>
+                          {((user?.claims?.leading as any) || []).includes(student.semesterId) && (
+                            <DeleteIcon
+                              sx={{ ":hover": { cursor: "pointer", color: "orange" }, ml: "4px" }}
+                              onClick={() => handleDeleteShortMeeting(student, meeting, student.semesterId)}
+                            />
+                          )}
+                        </Box>
+                      );
+                    })}
+                    {((user?.claims?.leading as any) || []).includes(student.semesterId) && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleOpenDialog(student)}
+                        sx={{ mt: "15px" }}
                       >
-                        <Typography>
-                          - <strong>{meeting.day}</strong>: {formatTime(meeting.sTimestamp, false)} -{" "}
-                          {formatTime(meeting.eTimestamp)}
-                        </Typography>
-                        <DeleteIcon
-                          sx={{ ":hover": { cursor: "pointer", color: "orange" }, ml: "4px" }}
-                          onClick={() => handleDeleteShortMeeting(student, meeting, student.semesterId)}
-                        />
-                      </Box>
-                    );
-                  })}
-                  {!adminView && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleOpenDialog(student)}
-                      sx={{ mt: "15px" }}
-                    >
-                      Add 1:1 Meeting
-                    </Button>
-                  )}
-                </TableCell>
+                        Add 1:1 Meeting
+                      </Button>
+                    )}
+                  </TableCell>
+                )}
                 <TableCell>
                   <Checkbox
                     checked={student.paid}
@@ -779,7 +789,7 @@ const TrackingHours = () => {
             <Button onClick={handleCloseDialog} color="primary">
               Cancel
             </Button>
-            <Button onClick={handleSaveMeeting} color="primary">
+            <Button onClick={handleSaveShortMeeting} color="primary">
               Add
             </Button>
           </DialogActions>
