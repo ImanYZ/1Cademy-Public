@@ -128,6 +128,7 @@ export const DirectMessagesList = ({
           }}
         >
           <Box
+            className="direct-channel-box"
             sx={{
               display: "flex",
               alignItems: "center",
@@ -174,22 +175,19 @@ export const DirectMessagesList = ({
                 }}
               />
             )}
+            <IconButton
+              className="direct-channel-delete"
+              sx={{
+                display: "none",
+                width: "30px",
+                height: "30px",
+                p: "3px",
+              }}
+              onClick={e => handleDeleteChannel(e, conversation)}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
-          <IconButton
-            className="direct-channel-delete"
-            sx={{
-              position: "absolute",
-              right: "0px",
-              top: "-5px",
-              display: "none",
-              width: "30px",
-              height: "30px",
-              p: "3px",
-            }}
-            onClick={e => handleDeleteChannel(e, conversation)}
-          >
-            <CloseIcon />
-          </IconButton>
         </Paper>
       ))}
     </Box>

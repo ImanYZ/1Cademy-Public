@@ -57,6 +57,7 @@ type MessageRightProps = {
   setReplies?: any;
   isRepliesLoaded?: boolean;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
+  handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
 };
 export const NodeLink = ({
   db,
@@ -97,6 +98,7 @@ export const NodeLink = ({
   setReplies,
   isRepliesLoaded,
   setOpenMedia,
+  handleMentionUserOpenRoom,
 }: MessageRightProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
@@ -233,7 +235,7 @@ export const NodeLink = ({
                 {message?.node?.title?.length || 0 > 40 ? "..." : ""}
               </Typography>
             </Box>
-            <MarkdownRender text={message?.node?.content || ""} />
+            <MarkdownRender text={message?.node?.content || ""} handleLinkClick={handleMentionUserOpenRoom} />
             <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
               <Emoticons
                 message={message}
@@ -317,6 +319,7 @@ export const NodeLink = ({
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
                       setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                     />
                   ) : (
                     <MessageLeft
@@ -352,6 +355,7 @@ export const NodeLink = ({
                       isLoadingReaction={isLoadingReaction}
                       makeMessageUnread={makeMessageUnread}
                       setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                     />
                   )}
                 </>
