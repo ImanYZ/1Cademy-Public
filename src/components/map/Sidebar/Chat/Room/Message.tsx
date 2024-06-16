@@ -341,6 +341,8 @@ export const Message = ({
       let channelRef = doc(db, "channelMessages", message?.channelId);
       if (roomType === "direct") {
         channelRef = doc(db, "conversationMessages", message?.channelId);
+      } else if (roomType === "news") {
+        channelRef = doc(db, "announcementsMessages", message?.channelId);
       }
       const messageRef = doc(collection(channelRef, "messages"), message.id);
       await updateDoc(messageRef, {
