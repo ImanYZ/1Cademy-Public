@@ -37,7 +37,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
 
-import JoinUs from "../../components/community/JoinUs";
+// import JoinUs from "../../components/community/JoinUs";
 // import { ONE_CADEMY_SECTIONS } from "@/components/home/SectionsItems";
 import {
   darkBase,
@@ -49,7 +49,7 @@ import {
   gray800,
   orange250,
   orangeDark,
-  orangeLight,
+  // orangeLight,
 } from "../home";
 
 const subSections = [
@@ -310,9 +310,9 @@ const Communities = (props: Props) => {
   //   setExpandedOption(newExpanded ? option : false);
   // };
 
-  const joinUsClick = () => {
-    window.location.replace("#JoinUsSection");
-  };
+  // const joinUsClick = () => {
+  //   window.location.replace("#JoinUsSection");
+  // };
   const onSwitchSection = (sectionId: string) => {
     window.location.href = `/#${sectionId}`;
   };
@@ -502,7 +502,7 @@ const Communities = (props: Props) => {
             >
               {community.title}
             </Typography>
-            <Button
+            {/* <Button
               onClick={joinUsClick}
               sx={{
                 textTransform: "initial",
@@ -516,7 +516,7 @@ const Communities = (props: Props) => {
               }}
             >
               Apply to join this community
-            </Button>
+            </Button> */}
           </Stack>
 
           <Box sx={{ py: "10px", px: { xs: "10px" }, mb: "19px" }}>
@@ -679,13 +679,13 @@ const Communities = (props: Props) => {
             {/* {getImage(expandedOption, { display: { xs: "none", md: "block" } })} */}
           </Box>
 
-          <DividerStyled />
+          {/* <DividerStyled /> */}
 
-          <Typography variant="h4" gutterBottom align="center" sx={{ textTransform: "capitalize", p: { xs: "10px" } }}>
+          {/* <Typography variant="h4" gutterBottom align="center" sx={{ textTransform: "capitalize", p: { xs: "10px" } }}>
             Apply to Join this Community
           </Typography>
 
-          <JoinUs community={community} themeName="dark" />
+          <JoinUs community={community} themeName="dark" /> */}
 
           {typeof community.accomplishments === "object" &&
             !Array.isArray(community.accomplishments) &&

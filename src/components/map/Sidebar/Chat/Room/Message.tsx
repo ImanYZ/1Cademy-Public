@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { CircularProgress, IconButton, Modal, Paper, Typography } from "@mui/material";
+import { IconButton, Modal, Paper, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -157,10 +157,10 @@ export const Message = ({
       messagesObject[formattedDate].push(message);
     });
     setMessagesByDate(messagesObject);
-    if (isLoading) {
+    if (firstLoad) {
       setTimeout(() => {
         scrollToBottom();
-      }, 100);
+      }, 500);
     }
     setIsLoading(false);
   }, [messages]);
@@ -259,6 +259,7 @@ export const Message = ({
   };
 
   useEffect(() => {
+    if (!messageBoxRef.current) return;
     const messageList: any = messageBoxRef.current;
     const handleScroll = () => {
       if (messageList.scrollTop === 0) {
@@ -271,7 +272,7 @@ export const Message = ({
     return () => {
       messageList.removeEventListener("scroll", handleScroll);
     };
-  }, [loadMore]);
+  }, [loadMore, messageBoxRef.current]);
 
   useEffect(() => {
     if (!!openReplies) {
@@ -529,8 +530,38 @@ export const Message = ({
   if (!selectedChannel) return <></>;
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: "50%" }}>
-        <CircularProgress size={60} />
+      <Box>
+        {Array.from(new Array(7)).map((_, index) => (
+          <Box
+            key={index}
+            sx={{
+              display: "flex",
+              justifyContent: "flex-start",
+              p: 1,
+            }}
+          >
+            <Skeleton
+              variant="circular"
+              width={50}
+              height={50}
+              sx={{
+                bgcolor: "grey.500",
+                borderRadius: "50%",
+              }}
+            />
+            <Skeleton
+              variant="rectangular"
+              width={410}
+              height={90}
+              sx={{
+                bgcolor: "grey.300",
+                borderRadius: "0px 10px 10px 10px",
+                mt: "19px",
+                ml: "5px",
+              }}
+            />
+          </Box>
+        ))}
       </Box>
     );
   }
