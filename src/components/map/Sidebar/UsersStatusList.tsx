@@ -405,6 +405,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
             fullname={user.fullname}
             chooseUname={user.chooseUname}
             online={online}
+            user={user}
             // inUserBar={false}
             // inNodeFooter={false}
             reloadPermanentGrpah={() => console.warn("here should call props.reloadPermanentGrpah")}
@@ -427,6 +428,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
       alignItems={"center"} // this value is modified by parent in toolbar sidebar when isMenuOpen
       sx={{
         height: "100%",
+        width: "100%",
         // display: "flex",
         // flexDirection: "column",
         // alignItems: "center",

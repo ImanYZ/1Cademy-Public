@@ -1,6 +1,7 @@
+import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, SxProps, Theme, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import { DispatchNodeBookActions } from "src/nodeBookTypes";
@@ -30,6 +31,7 @@ type UserStatusIconProps = {
   sx?: SxProps<Theme>;
   disabled?: boolean;
   smallVersion?: boolean;
+  user?: any;
 };
 
 const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: UserStatusIconProps) => {
@@ -174,6 +176,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 whiteSpace: "nowrap",
                 display: "inline-block",
                 fontSize: "13px",
+                width: "80%",
               }}
             >
               {props.fullname}
@@ -191,7 +194,17 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 }}
               >
                 <DoneIcon className=" DoneIcon green-text" sx={{ fontSize: "14px" }} />
-                <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                    fontSize: "14px",
+                    width: "47px",
+                    paddingLeft: "4px",
+                  }}
+                >
                   {shortenNumber(props.totalPositives, 2, false)}
                 </span>
                 {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
@@ -203,13 +216,41 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 }}
               >
                 <CloseIcon className="material-icons red-text" sx={{ fontSize: "14px" }} />
-                <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                    fontSize: "14px",
+                    width: "47px",
+                    paddingLeft: "4px",
+                  }}
+                >
                   {shortenNumber(props.totalNegatives, 2, false)}
                 </span>
                 {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
               </Box>
             </Box>
           </Box>
+        )}
+        {!smallVersion && (
+          <IconButton
+            sx={{ position: "absolute", right: "0px", top: "20px" }}
+            size="small"
+            onClick={e => {
+              e.stopPropagation();
+              props.setOpenSideBar("CHAT");
+              setTimeout(() => {
+                const openChatEvent = new CustomEvent("open-chat", {
+                  detail: { user: props.user },
+                });
+                window.dispatchEvent(openChatEvent);
+              }, 500);
+            }}
+          >
+            <ChatIcon fontSize="small" color="primary" />
+          </IconButton>
         )}
       </Box>
     </Tooltip>
