@@ -129,23 +129,7 @@ export const MessageLeft = ({
             width: `${!message.parentMessage ? 40 : 30}px`,
             height: `${!message.parentMessage ? 40 : 30}px`,
             cursor: "pointer",
-            transition: "all 0.2s 0s ease",
-            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
             borderRadius: "50%",
-            "& > .user-image": {
-              borderRadius: "50%",
-              overflow: "hidden",
-              width: "30px",
-              height: "30px",
-            },
-            "@keyframes slidein": {
-              from: {
-                transform: "translateY(0%)",
-              },
-              to: {
-                transform: "translateY(100%)",
-              },
-            },
           }}
         >
           <OptimizedAvatar2

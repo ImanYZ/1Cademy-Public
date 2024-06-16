@@ -1,11 +1,12 @@
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Avatar, Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
 import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { Emoticons } from "../Common/Emoticons";
@@ -104,6 +105,7 @@ export const NewsCard = ({
 
   return (
     <Box
+      ref={el => (messageRefs.current[message?.id || 0] = el)}
       sx={{
         display: "flex",
         gap: "5px",
@@ -111,8 +113,21 @@ export const NewsCard = ({
         mt: 2,
       }}
     >
-      <Box sx={{ pt: 1 }}>
-        <Avatar src={membersInfo[message.sender]?.imageUrl} />
+      <Box
+        sx={{
+          width: `${!message.parentMessage ? 40 : 30}px`,
+          height: `${!message.parentMessage ? 40 : 30}px`,
+          cursor: "pointer",
+          borderRadius: "50%",
+        }}
+      >
+        <OptimizedAvatar2
+          alt={membersInfo[message.sender]?.fullname || ""}
+          imageUrl={membersInfo[message.sender]?.imageUrl || ""}
+          size={!message.parentMessage ? 40 : 30}
+          sx={{ border: "none" }}
+        />
+
         <Box
           sx={{
             background: onlineUsers.includes(membersInfo[message.sender]?.uname) ? "#12B76A" : "grey",
