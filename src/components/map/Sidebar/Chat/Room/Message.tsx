@@ -273,6 +273,12 @@ export const Message = ({
     };
   }, [loadMore]);
 
+  useEffect(() => {
+    if (!!openReplies) {
+      scrollToMessage(openReplies?.id || "", "reply", 100);
+    }
+  }, [openReplies, replies]);
+
   const handleMentionUserOpenRoom = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => {
       event.preventDefault();

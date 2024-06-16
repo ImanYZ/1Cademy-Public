@@ -593,12 +593,22 @@ export const ChatSidebar = ({
 
   const scrollToMessage = (id: string, type: string = "message", delay: number = 100) => {
     if (messageRefs.current[id]) {
-      setTimeout(() => {
-        messageRefs.current[id].scrollIntoView({
-          behavior: "smooth",
-          block: type === "message" ? "center" : "end",
-        });
-      }, delay);
+      if (type === "reply") {
+        const input = messageRefs.current[id].querySelectorAll("textarea")[0];
+        setTimeout(() => {
+          input.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, delay);
+      } else {
+        setTimeout(() => {
+          messageRefs.current[id].scrollIntoView({
+            behavior: "smooth",
+            block: type === "message" ? "center" : "end",
+          });
+        }, delay);
+      }
     }
   };
 
