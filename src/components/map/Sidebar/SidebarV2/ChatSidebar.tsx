@@ -163,6 +163,15 @@ export const ChatSidebar = ({
   }, [openChatByNotification]);
 
   useEffect(() => {
+    const listener = (e: any) => {
+      const { user } = e.detail;
+      openDMChannel(user);
+    };
+    window.addEventListener("open-chat", listener);
+    return () => window.removeEventListener("open-chat", listener);
+  }, []);
+
+  useEffect(() => {
     (async () => {
       const updatedSelectedChannel = await getSelectedChannel(db, roomType, selectedChannel?.id || "");
       if (updatedSelectedChannel) {

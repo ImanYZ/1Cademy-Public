@@ -297,8 +297,11 @@ export const MessageInput = ({
     nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: "Node" } });
     nodeBookDispatch({ type: "setSelectedNode", payload: "" });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
-    if (!!parentMessage && sendMessageType === "reply") {
+
+    if (!!parentMessage) {
       setReplyOnMessage({ ...parentMessage, notVisible: true });
+    } else {
+      setReplyOnMessage(null);
     }
   };
 
