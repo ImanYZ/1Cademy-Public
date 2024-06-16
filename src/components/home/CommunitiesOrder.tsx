@@ -2,151 +2,150 @@ import { Typography } from "@mui/material";
 import React from "react";
 
 export const allCommunities = [
-  {
-    id: "ux-research-in-cognitive-psychology-of-Learning",
-    name: "Cognitive_Psychology",
-    tags: [
-      {
-        title: "Cognitive Psychology",
-        node: "jTz0wx46dQsbPURkQ0cl",
-      },
-      {
-        title: "Knowledge Visualization",
-        node: "WgF7yr5q7tJc54apVQSr",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Cognitive_Psychology.jpeg",
-    title: "UX Research in Cognitive Psychology of Learning",
-    width: "33%",
-    leaders: [
-      {
-        name: "Iman YeckehZaare",
-        image: "Iman_YeckehZaare.jpg",
-        about: `I am a Ph.D. from the University of Michigan School of Information.`,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/oneweb/",
-          },
-        ],
-      },
-    ],
-    YouTube: "B6q-LYXvNCg",
-    description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
-    accomplishments: (
-      <div>
-        <Typography>We have recently published the following papers in ACM conferences:</Typography>
-        <ul>
-          <li>
-            <a>
-              YeckehZaare, I., Chen, S., & Barghi, T. (2023). Reducing Procrastination Without Sacrificing Students'
-              Autonomy Through Optional Weekly Presentations of Student-Generated Content. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 54th ACM Technical Symposium on Computer Science Education (SIGCSE 2023), March
-                15--18, 2023, Toronto, Canada. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3506860.3506907" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Mulligan, V., Ramstad, G. V., &amp; Resnick, P. (2022). Semester-level Spacing but Not
-              Procrastination Affected Student Exam Performance. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 12th International Conference on Learning Analytics and Knowledge (LAK&#8216;22)
-                online, March 21-25, 2022. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499408" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Grot, G., &amp; Aronoff, C. (2022). Retrieval-based Teaching Incentivizes Spacing and
-              Improves Grades in Computer Science Education. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
-                3--5, 2022, Providence, RI, USA. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499313" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Grot, G., Dimovski, I., Pollock, K., &amp; Fox, E. (2022). Another Victim of COVID-19:
-              Computer Science Education. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
-                3--5, 2022, Providence, RI, USA. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3446871.3469760" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Fox, E., Grot, G., Chen, S., Walkosak, C., Kwon, K., ... &amp; Silverstein, N. (2021,
-              August). Incentivized Spacing and Gender in Computer Science Education. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 17th ACM Conference on International Computing Education Research
-              </span>{" "}
-              (pp. 18-28).
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3313831.3376882" target="_blank" rel="noreferrer">
-              Yeckehzaare, I., Barghi, T., &amp; Resnick, P. (2020, April). QMaps: Engaging Students in Voluntary
-              Question Generation and Linking. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 2020 CHI Conference on Human Factors in Computing Systems
-              </span>{" "}
-              (pp. 1-14).
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3291279.3339411" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Resnick, P., &amp; Ericson, B. (2019, July). A spaced, interleaved retrieval practice
-              tool that is motivating and effective. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 2019 ACM Conference on International Computing Education Research
-              </span>{" "}
-              (pp. 71-79).
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3287324.3287417" target="_blank" rel="noreferrer">
-              YeckehZaare, I., &amp; Resnick, P. (2019, February). Speed and Studying: Gendered Pathways to Success. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 50th ACM Technical Symposium on Computer Science Education
-              </span>{" "}
-              (pp. 693-698).
-            </a>
-          </li>
-        </ul>
-      </div>
-    ),
-    gains: [
-      `Work remotely with an interdisciplinary community of talented students and researchers from different schools.`,
-      `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
-      `Get involved in all aspects of conducting an online controlled experiment under the supervision of Iman YeckehZaare.`,
-      `Learn about a mixed-method study including both qualitative and quantitative data, and analysis to prepare for future Ph.D. programs in related disciplines.`,
-      `Work towards publishing research on cognitive psychology of learning and memory in reputable venues.`,
-      `Have opportunities to take on leadership roles within the community.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
-    // coursera: "https://www.coursera.org/learn/academicinfoseek",
-    hasTest: true,
-    qualifications: [
-      `A strong academic background in topics related to education, learning science, cognitive psychology, memory science, statistics, or econometrics`,
-      `Fluency in writing and reading in English`,
-    ],
-    responsibilities: [
-      `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
-      `Conduct several experiment sessions and guide participants through the session.`,
-      `Thematically code the qualitative data collected throughout our experiments.`,
-      `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
-      `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
-      `Present the essence of what you learn from the related papers and book chapters in weekly meetings for further discussion.`,
-      `Co-author the final research paper to submit to reputable conferences/journals.`,
-    ],
-  },
-
+  // {
+  //   id: "ux-research-in-cognitive-psychology-of-Learning",
+  //   name: "Cognitive_Psychology",
+  //   tags: [
+  //     {
+  //       title: "Cognitive Psychology",
+  //       node: "jTz0wx46dQsbPURkQ0cl",
+  //     },
+  //     {
+  //       title: "Knowledge Visualization",
+  //       node: "WgF7yr5q7tJc54apVQSr",
+  //     },
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Cognitive_Psychology.jpeg",
+  //   title: "UX Research in Cognitive Psychology of Learning",
+  //   width: "33%",
+  //   leaders: [
+  //     {
+  //       name: "Iman YeckehZaare",
+  //       image: "Iman_YeckehZaare.jpg",
+  //       about: `I am a Ph.D. from the University of Michigan School of Information.`,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/oneweb/",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   YouTube: "B6q-LYXvNCg",
+  //   description: `We study the UX Research and Cognitive Psychology literature on learning and memorizing. Using 1Cademy, we break down articles into granular knowledge pieces, connect them within a larger context of research, communicate our findings to other community members, and utilize our knowledge to conduct research. We conduct online controlled experiments using our research pipeline and co-author research papers to submit to reputable journals and conferences.`,
+  //   accomplishments: (
+  //     <div>
+  //       <Typography>We have recently published the following papers in ACM conferences:</Typography>
+  //       <ul>
+  //         <li>
+  //           <a>
+  //             YeckehZaare, I., Chen, S., & Barghi, T. (2023). Reducing Procrastination Without Sacrificing Students'
+  //             Autonomy Through Optional Weekly Presentations of Student-Generated Content. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 54th ACM Technical Symposium on Computer Science Education (SIGCSE 2023), March
+  //               15--18, 2023, Toronto, Canada. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3506860.3506907" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Mulligan, V., Ramstad, G. V., &amp; Resnick, P. (2022). Semester-level Spacing but Not
+  //             Procrastination Affected Student Exam Performance. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 12th International Conference on Learning Analytics and Knowledge (LAK&#8216;22)
+  //               online, March 21-25, 2022. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499408" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Grot, G., &amp; Aronoff, C. (2022). Retrieval-based Teaching Incentivizes Spacing and
+  //             Improves Grades in Computer Science Education. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
+  //               3--5, 2022, Providence, RI, USA. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499313" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Grot, G., Dimovski, I., Pollock, K., &amp; Fox, E. (2022). Another Victim of COVID-19:
+  //             Computer Science Education. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
+  //               3--5, 2022, Providence, RI, USA. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3446871.3469760" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Fox, E., Grot, G., Chen, S., Walkosak, C., Kwon, K., ... &amp; Silverstein, N. (2021,
+  //             August). Incentivized Spacing and Gender in Computer Science Education. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 17th ACM Conference on International Computing Education Research
+  //             </span>{" "}
+  //             (pp. 18-28).
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3313831.3376882" target="_blank" rel="noreferrer">
+  //             Yeckehzaare, I., Barghi, T., &amp; Resnick, P. (2020, April). QMaps: Engaging Students in Voluntary
+  //             Question Generation and Linking. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 2020 CHI Conference on Human Factors in Computing Systems
+  //             </span>{" "}
+  //             (pp. 1-14).
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3291279.3339411" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Resnick, P., &amp; Ericson, B. (2019, July). A spaced, interleaved retrieval practice
+  //             tool that is motivating and effective. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 2019 ACM Conference on International Computing Education Research
+  //             </span>{" "}
+  //             (pp. 71-79).
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3287324.3287417" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., &amp; Resnick, P. (2019, February). Speed and Studying: Gendered Pathways to Success. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 50th ACM Technical Symposium on Computer Science Education
+  //             </span>{" "}
+  //             (pp. 693-698).
+  //           </a>
+  //         </li>
+  //       </ul>
+  //     </div>
+  //   ),
+  //   gains: [
+  //     `Work remotely with an interdisciplinary community of talented students and researchers from different schools.`,
+  //     `Gain experience using crucial skills in research including paper analysis, summarization, and making connections between disciplines.`,
+  //     `Get involved in all aspects of conducting an online controlled experiment under the supervision of Iman YeckehZaare.`,
+  //     `Learn about a mixed-method study including both qualitative and quantitative data, and analysis to prepare for future Ph.D. programs in related disciplines.`,
+  //     `Work towards publishing research on cognitive psychology of learning and memory in reputable venues.`,
+  //     `Have opportunities to take on leadership roles within the community.`,
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
+  //   // coursera: "https://www.coursera.org/learn/academicinfoseek",
+  //   hasTest: true,
+  //   qualifications: [
+  //     `A strong academic background in topics related to education, learning science, cognitive psychology, memory science, statistics, or econometrics`,
+  //     `Fluency in writing and reading in English`,
+  //   ],
+  //   responsibilities: [
+  //     `Dedicate 25 hours a week over the Summer to engage in all aspects of the research project.`,
+  //     `Conduct several experiment sessions and guide participants through the session.`,
+  //     `Thematically code the qualitative data collected throughout our experiments.`,
+  //     `Engage in ideation, critical thinking, and peer-review of research proposed by other community members.`,
+  //     `Regularly study textbooks and research papers, summarize them, and share the essence of what you learn with our large research team.`,
+  //     `Present the essence of what you learn from the related papers and book chapters in weekly meetings for further discussion.`,
+  //     `Co-author the final research paper to submit to reputable conferences/journals.`,
+  //   ],
+  // },
   {
     id: "clinical-psychology",
     name: "Clinical_Psychology",
@@ -564,259 +563,259 @@ export const allCommunities = [
       `Co-author the final research paper to submit to reputable conferences/journals.`,
     ],
   },
-  {
-    id: "education-and-psychology-research",
-    name: "UX_Research_in_Online_Communities",
-    tags: [
-      {
-        title: "Online Communities",
-        node: "ZyVgzAZOlOXx7d7tWEDx",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Online_Communities.jpg",
-    title: "Education and Psychology Research",
-    width: "50%",
-    leaders: [
-      {
-        name: "Iman YeckehZaare",
-        image: "Iman_YeckehZaare.jpg",
-        about: `I am a Ph.D. from the University of Michigan School of Information.`,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/oneweb/",
-          },
-        ],
-      },
-      {
-        name: "Ben Brown",
-        image: "Ben_Brown.jpeg",
-        about: `I am in my second year studying library and information science at SJSU and I serve as a content editor for my school's Student Research Journal. I have excellent communication skills which include written and verbal communication. I enjoy learning about information searching, organization, and retrieval, and look forward to more opportunities to apply what I have learned so far.`,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/benjamin-brown-b8b5611a7/",
-          },
-        ],
-      },
-      {
-        name: "Lily DiBartolomeo",
-        image: "Lily_DiBartolomeo.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/lily-dibartolomeo/",
-          },
-        ],
-      },
-    ],
-    YouTube: "MSysfWhNXmg",
-    description: (
-      <>
-        <p>
-          1Cademy is a collaborative community that supports interdisciplinary research and learning through content
-          generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating
-          regularly by summarizing and organizing content on the platform. This community is focused on learning how to
-          make healthier, more engaged online communities in order to improve our users’ learning, contributions, and
-          experience.
-        </p>
-        This research team is dedicated to uncovering, presenting, and compiling the latest literature and research on
-        creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster
-        online communities where users actively contribute their ideas and value the perspectives of their peers. We are
-        seeking a team of dedicated students to conduct thorough research in various disciplines including social
-        science, cognitive science, information science, and education. Utilizing the 1Cademy platform, we will take
-        notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our
-        findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online
-        communities.
-        <p></p>
-      </>
-    ),
+  // {
+  //   id: "education-and-psychology-research",
+  //   name: "UX_Research_in_Online_Communities",
+  //   tags: [
+  //     {
+  //       title: "Online Communities",
+  //       node: "ZyVgzAZOlOXx7d7tWEDx",
+  //     },
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Online_Communities.jpg",
+  //   title: "Education and Psychology Research",
+  //   width: "50%",
+  //   leaders: [
+  //     {
+  //       name: "Iman YeckehZaare",
+  //       image: "Iman_YeckehZaare.jpg",
+  //       about: `I am a Ph.D. from the University of Michigan School of Information.`,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/oneweb/",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       name: "Ben Brown",
+  //       image: "Ben_Brown.jpeg",
+  //       about: `I am in my second year studying library and information science at SJSU and I serve as a content editor for my school's Student Research Journal. I have excellent communication skills which include written and verbal communication. I enjoy learning about information searching, organization, and retrieval, and look forward to more opportunities to apply what I have learned so far.`,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/benjamin-brown-b8b5611a7/",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       name: "Lily DiBartolomeo",
+  //       image: "Lily_DiBartolomeo.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/lily-dibartolomeo/",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   YouTube: "MSysfWhNXmg",
+  //   description: (
+  //     <>
+  //       <p>
+  //         1Cademy is a collaborative community that supports interdisciplinary research and learning through content
+  //         generation, mapping, and evaluation. We have multiple successful communities from various fields collaborating
+  //         regularly by summarizing and organizing content on the platform. This community is focused on learning how to
+  //         make healthier, more engaged online communities in order to improve our users’ learning, contributions, and
+  //         experience.
+  //       </p>
+  //       This research team is dedicated to uncovering, presenting, and compiling the latest literature and research on
+  //       creating and maintaining engaging and beneficial online communities. Our goal is to understand how to foster
+  //       online communities where users actively contribute their ideas and value the perspectives of their peers. We are
+  //       seeking a team of dedicated students to conduct thorough research in various disciplines including social
+  //       science, cognitive science, information science, and education. Utilizing the 1Cademy platform, we will take
+  //       notes, organize ideas, and map concepts from the literature we find. Ultimately, our aim is to apply our
+  //       findings to make meaningful improvements to the 1Cademy platform and enhance the user experience of our online
+  //       communities.
+  //       <p></p>
+  //     </>
+  //   ),
 
-    accomplishments: (
-      <div>
-        <Typography>We have recently published the following papers in ACM conferences:</Typography>
-        <ul>
-          <li>
-            <a>
-              YeckehZaare, I., Chen, S., & Barghi, T. (2023). Reducing Procrastination Without Sacrificing Students'
-              Autonomy Through Optional Weekly Presentations of Student-Generated Content. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 54th ACM Technical Symposium on Computer Science Education (SIGCSE 2023), March
-                15--18, 2023, Toronto, Canada. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3506860.3506907" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Mulligan, V., Ramstad, G. V., &amp; Resnick, P. (2022). Semester-level Spacing but Not
-              Procrastination Affected Student Exam Performance. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 12th International Conference on Learning Analytics and Knowledge (LAK&#8216;22)
-                online, March 21-25, 2022. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499408" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Grot, G., &amp; Aronoff, C. (2022). Retrieval-based Teaching Incentivizes Spacing and
-              Improves Grades in Computer Science Education. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
-                3--5, 2022, Providence, RI, USA. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499313" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Grot, G., Dimovski, I., Pollock, K., &amp; Fox, E. (2022). Another Victim of COVID-19:
-              Computer Science Education. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
-                3--5, 2022, Providence, RI, USA. ACM.
-              </span>
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3446871.3469760" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Fox, E., Grot, G., Chen, S., Walkosak, C., Kwon, K., ... &amp; Silverstein, N. (2021,
-              August). Incentivized Spacing and Gender in Computer Science Education. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 17th ACM Conference on International Computing Education Research
-              </span>{" "}
-              (pp. 18-28).
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3313831.3376882" target="_blank" rel="noreferrer">
-              Yeckehzaare, I., Barghi, T., &amp; Resnick, P. (2020, April). QMaps: Engaging Students in Voluntary
-              Question Generation and Linking. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 2020 CHI Conference on Human Factors in Computing Systems
-              </span>{" "}
-              (pp. 1-14).
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3291279.3339411" target="_blank" rel="noreferrer">
-              YeckehZaare, I., Resnick, P., &amp; Ericson, B. (2019, July). A spaced, interleaved retrieval practice
-              tool that is motivating and effective. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 2019 ACM Conference on International Computing Education Research
-              </span>{" "}
-              (pp. 71-79).
-            </a>
-          </li>
-          <li>
-            <a href="https://dl.acm.org/doi/abs/10.1145/3287324.3287417" target="_blank" rel="noreferrer">
-              YeckehZaare, I., &amp; Resnick, P. (2019, February). Speed and Studying: Gendered Pathways to Success. In{" "}
-              <span style={{ fontStyle: "italic" }}>
-                Proceedings of the 50th ACM Technical Symposium on Computer Science Education
-              </span>{" "}
-              (pp. 693-698).
-            </a>
-          </li>
-        </ul>
-      </div>
-    ),
-    gains: [
-      `Learn how to use the 1Cademy platform for information management, organization, and dissemination purposes `,
-      `Collaborate with a team of motivated and invested research interns from around the world`,
-      `Gain experience evaluating, paraphrasing, and presenting research`,
-      `Gain experience working in a remote setting and collaborating with a team on academic research`,
-      `Work toward reviewing and synthesizing literature into original research`,
-      `Have opportunities to take on leadership roles `,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
-    // coursera: "https://www.coursera.org/learn/academicinfoseek",
-    hasTest: true,
-    qualifications: [
-      `Enthusiasm for topics related to psychology, information sciences, learning science, education or related fields`,
-      `Ability to verbally communicate effectively and facilitate team meetings`,
-      `Experience and willingness to work in collaborative environments `,
-      `Ability to engage in group discourse and resolve complex issues`,
-      `Ability to work asynchronously and independently`,
-      `Strong presentation and summarization skills `,
-      `Fluency in writing and reading in English`,
-      `Motivation to read new and upcoming research papers`,
-    ],
-    responsibilities: [
-      `Work asynchronously and attend online meetings once per week. `,
-      `Contribute 15-20 hours/week of your time to developing the 1Cademy platform`,
-      `Use the 1Cademy platform to organize knowledge `,
-      `Work with a team to develop and improve the psychology and education area of 1Cademy `,
-      `Support research projects by summarizing background literature`,
-      `Work remotely for all interactions, task fulfillment, and communications `,
-      `Translate research into ideas to improve the experience of 1Cademy communities`,
-    ],
-  },
-  {
-    id: "ADHD-and-autism",
-    name: "ADHD_and_autism",
-    tags: [
-      {
-        title: "Attention-Deficit Hyperactivity Disorder (ADHD)",
-        node: "HJq7AEyAXkO3Kp3ft2o7",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/ADHD_and_Autism.jpg",
-    title: "ADHD and Autism",
-    width: "50%",
-    leaders: [
-      {
-        name: "Lee Pavelle",
-        image: "Lee_Pavelle.jpeg",
-        about: `I am a Ph.D. from the University of Michigan School of Information.`,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/eleanore-pavelle-73642b199/",
-          },
-        ],
-      },
-    ],
-    YouTube: "jFBeYsMNbY4",
-    description: `
-    The ADHD and Autism research community is centered around researching aspects of neurodivergence including (but by no means limited to) the relationships between ADHD and Autism with things such as OCD, schizoid disorders, physical disabilities, different types of therapy, depression, anxiety, and gender identity. Interns are encouraged to personalize their research to suit their interests surrounding neurodivergence and will have the opportunity to present their findings at our weekly meetings as well as collaborate with other interns. We will also have opportunities to work with other communities such as the Clinical Psychology community and Disabilities Studies community. Working with 1Cademy allows interns to gain valuable research experience, explore various research topics, collaborate with others, and learn how to present their findings in a succinct, articulate manner.
-    `,
-    accomplishments: (
-      <>
-        This community is new and brimming with potential! Join our interdisciplinary, transnational community of
-        researchers who have been developing and adding empirical research to the large-scale and collaborative
-        platform, 1Cademy, to gain research experience on what you want to research. The goal of the ADHD and Autism
-        research community on 1Cademy is to deepen our understanding of ADHD, Autism Spectrum Disorder, and the many
-        related conditions that can accompany them while also strengthening research skills and preparing to enter the
-        professional psychology field.
-      </>
-    ),
-    gains: [
-      `Gain valuable research experience such as paper summarization, topic organization, paper analysis, and making connections between disciplines/topics`,
-      "Work towards publishing papers about ADHD and ASD",
-      "Be able to collaborate with others to review, summarize, and analyze existing research and examine future research topics",
-      "Work remotely with all task fulfillment, interactions, and communications (about 5-10 hours per week)",
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
-    // coursera: "https://www.coursera.org/learn/academicinfoseek",
-    hasTest: true,
-    qualifications: [
-      `Strong interest in topics relating to ADHD and ASD`,
-      `Willingness to contribute to group discussions and present your findings to others during team meetings`,
-      `Able to commit to around 5-10 hours of work each week`,
-      `Fluency in reading and writing in English (will have to summarize research articles)`,
-    ],
-    responsibilities: [
-      `Read and summarize textbook chapters and scientific journal articles`,
-      `Make connections between different concepts and disciplines `,
-      `Contribute concise summaries of information to the 1Cademy platform`,
-      `Attend weekly online meetings`,
-      `Contribute to meetings by presenting findings and participating in group discussions`,
-      `All interactions, task fulfillment, and communications will be remote`,
-    ],
-  },
+  //   accomplishments: (
+  //     <div>
+  //       <Typography>We have recently published the following papers in ACM conferences:</Typography>
+  //       <ul>
+  //         <li>
+  //           <a>
+  //             YeckehZaare, I., Chen, S., & Barghi, T. (2023). Reducing Procrastination Without Sacrificing Students'
+  //             Autonomy Through Optional Weekly Presentations of Student-Generated Content. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 54th ACM Technical Symposium on Computer Science Education (SIGCSE 2023), March
+  //               15--18, 2023, Toronto, Canada. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3506860.3506907" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Mulligan, V., Ramstad, G. V., &amp; Resnick, P. (2022). Semester-level Spacing but Not
+  //             Procrastination Affected Student Exam Performance. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 12th International Conference on Learning Analytics and Knowledge (LAK&#8216;22)
+  //               online, March 21-25, 2022. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499408" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Grot, G., &amp; Aronoff, C. (2022). Retrieval-based Teaching Incentivizes Spacing and
+  //             Improves Grades in Computer Science Education. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
+  //               3--5, 2022, Providence, RI, USA. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3478431.3499313" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Grot, G., Dimovski, I., Pollock, K., &amp; Fox, E. (2022). Another Victim of COVID-19:
+  //             Computer Science Education. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 53rd ACM Technical Symposium on Computer Science Education V. 1 (SIGCSE 2022), March
+  //               3--5, 2022, Providence, RI, USA. ACM.
+  //             </span>
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3446871.3469760" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Fox, E., Grot, G., Chen, S., Walkosak, C., Kwon, K., ... &amp; Silverstein, N. (2021,
+  //             August). Incentivized Spacing and Gender in Computer Science Education. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 17th ACM Conference on International Computing Education Research
+  //             </span>{" "}
+  //             (pp. 18-28).
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3313831.3376882" target="_blank" rel="noreferrer">
+  //             Yeckehzaare, I., Barghi, T., &amp; Resnick, P. (2020, April). QMaps: Engaging Students in Voluntary
+  //             Question Generation and Linking. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 2020 CHI Conference on Human Factors in Computing Systems
+  //             </span>{" "}
+  //             (pp. 1-14).
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3291279.3339411" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., Resnick, P., &amp; Ericson, B. (2019, July). A spaced, interleaved retrieval practice
+  //             tool that is motivating and effective. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 2019 ACM Conference on International Computing Education Research
+  //             </span>{" "}
+  //             (pp. 71-79).
+  //           </a>
+  //         </li>
+  //         <li>
+  //           <a href="https://dl.acm.org/doi/abs/10.1145/3287324.3287417" target="_blank" rel="noreferrer">
+  //             YeckehZaare, I., &amp; Resnick, P. (2019, February). Speed and Studying: Gendered Pathways to Success. In{" "}
+  //             <span style={{ fontStyle: "italic" }}>
+  //               Proceedings of the 50th ACM Technical Symposium on Computer Science Education
+  //             </span>{" "}
+  //             (pp. 693-698).
+  //           </a>
+  //         </li>
+  //       </ul>
+  //     </div>
+  //   ),
+  //   gains: [
+  //     `Learn how to use the 1Cademy platform for information management, organization, and dissemination purposes `,
+  //     `Collaborate with a team of motivated and invested research interns from around the world`,
+  //     `Gain experience evaluating, paraphrasing, and presenting research`,
+  //     `Gain experience working in a remote setting and collaborating with a team on academic research`,
+  //     `Work toward reviewing and synthesizing literature into original research`,
+  //     `Have opportunities to take on leadership roles `,
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
+  //   // coursera: "https://www.coursera.org/learn/academicinfoseek",
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Enthusiasm for topics related to psychology, information sciences, learning science, education or related fields`,
+  //     `Ability to verbally communicate effectively and facilitate team meetings`,
+  //     `Experience and willingness to work in collaborative environments `,
+  //     `Ability to engage in group discourse and resolve complex issues`,
+  //     `Ability to work asynchronously and independently`,
+  //     `Strong presentation and summarization skills `,
+  //     `Fluency in writing and reading in English`,
+  //     `Motivation to read new and upcoming research papers`,
+  //   ],
+  //   responsibilities: [
+  //     `Work asynchronously and attend online meetings once per week. `,
+  //     `Contribute 15-20 hours/week of your time to developing the 1Cademy platform`,
+  //     `Use the 1Cademy platform to organize knowledge `,
+  //     `Work with a team to develop and improve the psychology and education area of 1Cademy `,
+  //     `Support research projects by summarizing background literature`,
+  //     `Work remotely for all interactions, task fulfillment, and communications `,
+  //     `Translate research into ideas to improve the experience of 1Cademy communities`,
+  //   ],
+  // },
+  // {
+  //   id: "ADHD-and-autism",
+  //   name: "ADHD_and_autism",
+  //   tags: [
+  //     {
+  //       title: "Attention-Deficit Hyperactivity Disorder (ADHD)",
+  //       node: "HJq7AEyAXkO3Kp3ft2o7",
+  //     },
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/ADHD_and_Autism.jpg",
+  //   title: "ADHD and Autism",
+  //   width: "50%",
+  //   leaders: [
+  //     {
+  //       name: "Lee Pavelle",
+  //       image: "Lee_Pavelle.jpeg",
+  //       about: `I am a Ph.D. from the University of Michigan School of Information.`,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/eleanore-pavelle-73642b199/",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   YouTube: "jFBeYsMNbY4",
+  //   description: `
+  //   The ADHD and Autism research community is centered around researching aspects of neurodivergence including (but by no means limited to) the relationships between ADHD and Autism with things such as OCD, schizoid disorders, physical disabilities, different types of therapy, depression, anxiety, and gender identity. Interns are encouraged to personalize their research to suit their interests surrounding neurodivergence and will have the opportunity to present their findings at our weekly meetings as well as collaborate with other interns. We will also have opportunities to work with other communities such as the Clinical Psychology community and Disabilities Studies community. Working with 1Cademy allows interns to gain valuable research experience, explore various research topics, collaborate with others, and learn how to present their findings in a succinct, articulate manner.
+  //   `,
+  //   accomplishments: (
+  //     <>
+  //       This community is new and brimming with potential! Join our interdisciplinary, transnational community of
+  //       researchers who have been developing and adding empirical research to the large-scale and collaborative
+  //       platform, 1Cademy, to gain research experience on what you want to research. The goal of the ADHD and Autism
+  //       research community on 1Cademy is to deepen our understanding of ADHD, Autism Spectrum Disorder, and the many
+  //       related conditions that can accompany them while also strengthening research skills and preparing to enter the
+  //       professional psychology field.
+  //     </>
+  //   ),
+  //   gains: [
+  //     `Gain valuable research experience such as paper summarization, topic organization, paper analysis, and making connections between disciplines/topics`,
+  //     "Work towards publishing papers about ADHD and ASD",
+  //     "Be able to collaborate with others to review, summarize, and analyze existing research and examine future research topics",
+  //     "Work remotely with all task fulfillment, interactions, and communications (about 5-10 hours per week)",
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in psychology, education, or a related field, and answer our quiz questions to evaluate their domain knowledge.`,
+  //   // coursera: "https://www.coursera.org/learn/academicinfoseek",
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Strong interest in topics relating to ADHD and ASD`,
+  //     `Willingness to contribute to group discussions and present your findings to others during team meetings`,
+  //     `Able to commit to around 5-10 hours of work each week`,
+  //     `Fluency in reading and writing in English (will have to summarize research articles)`,
+  //   ],
+  //   responsibilities: [
+  //     `Read and summarize textbook chapters and scientific journal articles`,
+  //     `Make connections between different concepts and disciplines `,
+  //     `Contribute concise summaries of information to the 1Cademy platform`,
+  //     `Attend weekly online meetings`,
+  //     `Contribute to meetings by presenting findings and participating in group discussions`,
+  //     `All interactions, task fulfillment, and communications will be remote`,
+  //   ],
+  // },
   // {
   //   id: "Graph_Neural_Network",
   //   tags: [
