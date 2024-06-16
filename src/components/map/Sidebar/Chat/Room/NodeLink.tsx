@@ -1,6 +1,8 @@
 import LinkIcon from "@mui/icons-material/Link";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
+import moment from "moment";
 import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage, MembersInfo } from "src/chatTypes";
 
@@ -119,7 +121,7 @@ export const NodeLink = ({
       ref={el => (messageRefs.current[message?.id || 0] = el)}
       sx={{
         display: "flex",
-        justifyContent: "end",
+        justifyContent: "start",
         gap: "10px",
         cursor: "pointer",
         pb: 4,
@@ -168,15 +170,30 @@ export const NodeLink = ({
           />
         </Box>
         <Box>
-          <Typography
-            sx={{
-              fontSize: "16px",
-              fontWeight: "500",
-              lineHeight: "24px",
-            }}
-          >
-            {membersInfo[message.sender]?.fullname || ""}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex" }}>
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontWeight: "500",
+                  lineHeight: "24px",
+                }}
+              >
+                {membersInfo[message.sender]?.fullname || ""}
+              </Typography>
+              {message.important && (
+                <Box sx={{ display: "flex", ml: 2 }}>
+                  {" "}
+                  <Typography sx={{ fontWeight: "bold", color: "red" }}>IMPORTANT</Typography>
+                  <PriorityHighIcon sx={{ color: "red", p: 0 }} />
+                </Box>
+              )}
+            </Box>
+
+            <Typography sx={{ fontSize: "12px" }}>
+              {moment(message?.createdAt?.toDate()?.getTime())?.format("h:mm a")}
+            </Typography>
+          </Box>
 
           <Box
             className="reply-box"
