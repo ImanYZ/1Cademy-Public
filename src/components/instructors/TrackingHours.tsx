@@ -533,22 +533,22 @@ const TrackingHours = () => {
               ""
             );
             return;
-          } else {
-            const overlappedDuration = getOverlappedDuration(trackingData.trackedMinutes, sTimestamp, eTimestamp);
-            shortMeetings.push({
-              sTimestamp,
-              eTimestamp,
-              duration,
-              meetingId,
-              day: formattedDay,
-              previousDuration: overlappedDuration,
-            });
-            const docRef = trackingDocs.docs[0].ref;
-            await updateDoc(docRef, {
-              shortMeetings,
-              totalMinutes: trackingData.totalMinutes + Math.max(0, duration) - overlappedDuration,
-            });
           }
+          const overlappedDuration = getOverlappedDuration(trackingData.trackedMinutes, sTimestamp, eTimestamp);
+          shortMeetings.push({
+            sTimestamp,
+            eTimestamp,
+            duration,
+            meetingId,
+            day: formattedDay,
+            previousDuration: overlappedDuration,
+          });
+          const docRef = trackingDocs.docs[0].ref;
+          await updateDoc(docRef, {
+            shortMeetings,
+            totalMinutes: trackingData.totalMinutes + Math.max(0, duration) - overlappedDuration,
+          });
+
           setTrackedStudents((prev: any) => {
             const semester = prev[selectedStudentForMeeting.semesterId];
             if (semester) {
@@ -559,9 +559,9 @@ const TrackingHours = () => {
                 duration,
                 meetingId,
                 day: formattedDay,
-                previousDuration: overlappingMeeting,
+                previousDuration: overlappedDuration,
               });
-              student.totalMinutes = student.totalMinutes + Math.max(0, duration) - (overlappingMeeting || 0);
+              student.totalMinutes = student.totalMinutes + Math.max(0, duration) - (overlappedDuration || 0);
             }
             return prev;
           });
