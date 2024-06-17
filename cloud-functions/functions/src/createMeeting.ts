@@ -15,27 +15,25 @@ exports.createMeeting = async () => {
     for (let semesterDoc of semestersDocs.docs) {
       if (checkMeetingTime(semesterDoc.id)) {
         const semesterData = semesterDoc.data();
-        for (let student of semesterData.students) {
+        const LibraryScienceDoc = await db.collection("semesters").doc("mrnIdj52F4FVBgTaJBl1").get();
+        const LibraryScienceData: any = LibraryScienceDoc.data();
+        const students = [...semesterData.students, ...LibraryScienceData.students];
+        for (let student of students) {
           const trackHoursDayQuery = await db
             .collection("trackHours")
             .where("uname", "==", student.uname)
             .where("day", "==", todayDate)
             .get();
           if (trackHoursDayQuery.docs.length > 0) {
+            console.log(student.uname, "student.uname");
             const trackDoc = trackHoursDayQuery.docs[0];
-            const trackData = trackDoc.data();
-            const addedPrev = trackData.meetings.findIndex((m: { day: string }) => m.day === todayDate);
-            if (addedPrev !== -1) {
-              trackData.meetings = [
-                ...trackData.meetings,
+            trackDoc.ref.update({
+              meetings: [
                 {
                   day: todayDate,
                   attended: false,
                 },
-              ];
-            }
-            trackDoc.ref.update({
-              meetings: trackData.meetings,
+              ],
             });
           } else {
             const newData = {
