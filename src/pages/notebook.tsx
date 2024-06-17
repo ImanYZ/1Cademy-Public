@@ -5477,11 +5477,11 @@ const Notebook = ({}: NotebookProps) => {
       defaultScaleDevice = 0.92;
     }
     const userThresholdPercentage = user.scaleThreshold;
-    let userThresholdcurrentScale = 1;
+    let userThresholdCurrentScale = 1;
 
-    userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
+    userThresholdCurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
 
-    return mapInteractionValue.scale < userThresholdcurrentScale;
+    return mapInteractionValue.scale < userThresholdCurrentScale;
   }, [mapInteractionValue.scale, user, windowWith]);
 
   // const handleCloseProgressBarMenu = useCallback(() => {
