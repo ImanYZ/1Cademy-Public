@@ -231,10 +231,9 @@ const TrackingHours = () => {
           const trackingDoc = trackingDocs.docs[0];
           const hoursData = trackingDoc.data() as HoursData;
 
-          const totalMinutes = hoursData.totalMinutes - meeting.duration + (meeting.previousDuration || 0);
+          const _meeting: any = hoursData.shortMeetings.find((m: any) => m.meetingId === meeting.meetingId);
+          const totalMinutes = hoursData.totalMinutes - _meeting.duration + (_meeting.previousDuration || 0);
           const meetings = hoursData.shortMeetings.filter((m: any) => m.meetingId !== meeting.meetingId);
-
-          await updateDoc(trackingDoc.ref, { shortMeetings: meetings, totalMinutes });
           setTrackedStudents((prev: any) => {
             const _prev = { ...prev };
             const semester = prev[semesterId];
@@ -243,12 +242,14 @@ const TrackingHours = () => {
               const currStudent = semester.students[currStudentIdx];
               const shortMeetings = currStudent.shortMeetings.filter((m: any) => m.meetingId !== meeting.meetingId);
               currStudent.shortMeetings = shortMeetings;
-              currStudent.totalMinutes = currStudent.totalMinutes - meeting.duration + (meeting.previousDuration || 0);
+              currStudent.totalMinutes =
+                currStudent.totalMinutes - _meeting.duration + (_meeting.previousDuration || 0);
               semester.students[currStudentIdx] = currStudent;
               prev[semesterId] = semester;
             }
             return _prev;
           });
+          await updateDoc(trackingDoc.ref, { shortMeetings: meetings, totalMinutes });
         }
       }
     } catch (error) {
@@ -403,6 +404,40 @@ const TrackingHours = () => {
       });
     }
   };
+  const getOverlappedDuration = (trackedMinutes: Timestamp[], sTimestamp: Timestamp, eTimestamp: Timestamp): number => {
+    let trackedTimeInRange = 0;
+
+    const startTime = new Date(sTimestamp.seconds * 1000 + sTimestamp.nanoseconds / 1000000);
+    const endTime = new Date(eTimestamp.seconds * 1000 + eTimestamp.nanoseconds / 1000000);
+
+    trackedMinutes.sort(
+      (a, b) => a.seconds * 1000 + a.nanoseconds / 1000000 - (b.seconds * 1000 + b.nanoseconds / 1000000)
+    );
+
+    let previousTrackedTime: Date | null = null;
+
+    trackedMinutes.forEach(timestamp => {
+      const trackTime = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+
+      if (trackTime >= startTime && trackTime <= endTime) {
+        if (previousTrackedTime) {
+          const diffInMillis = trackTime.getTime() - previousTrackedTime.getTime();
+          const diffInMinutes = diffInMillis / (1000 * 60);
+
+          if (diffInMinutes < 5) {
+            trackedTimeInRange += diffInMinutes;
+          } else {
+            trackedTimeInRange += 1;
+          }
+        } else {
+          trackedTimeInRange += 1;
+        }
+        previousTrackedTime = trackTime;
+      }
+    });
+
+    return trackedTimeInRange;
+  };
 
   const renderTable = () => {
     let studentsList: any = [];
@@ -451,7 +486,10 @@ const TrackingHours = () => {
         if (!activityDate) {
           return;
         }
-
+        if (!startTime || !endTime) {
+          await confirmIt(`The start and end of the meeting time is required.`, "OK", "");
+          return;
+        }
         const { sTimestamp, eTimestamp, formattedDay } = getActivityTimeStamps(activityDate, startTime, endTime);
         const trackingQuery = query(
           collection(db, "trackHours"),
@@ -461,6 +499,7 @@ const TrackingHours = () => {
 
         const trackingDocs = await getDocs(trackingQuery);
         const duration = endTime.diff(startTime, "minutes");
+
         if (duration < 0) {
           await confirmIt(`The start time cannot be after the end time. Please select another time`, "OK", "");
           return;
@@ -494,21 +533,22 @@ const TrackingHours = () => {
               ""
             );
             return;
-          } else {
-            shortMeetings.push({
-              sTimestamp,
-              eTimestamp,
-              duration,
-              meetingId,
-              day: formattedDay,
-              previousDuration: 0,
-            });
-            const docRef = trackingDocs.docs[0].ref;
-            await updateDoc(docRef, {
-              shortMeetings,
-              totalMinutes: trackingData.totalMinutes + Math.max(0, duration),
-            });
           }
+          const overlappedDuration = getOverlappedDuration(trackingData.trackedMinutes, sTimestamp, eTimestamp);
+          shortMeetings.push({
+            sTimestamp,
+            eTimestamp,
+            duration,
+            meetingId,
+            day: formattedDay,
+            previousDuration: overlappedDuration,
+          });
+          const docRef = trackingDocs.docs[0].ref;
+          await updateDoc(docRef, {
+            shortMeetings,
+            totalMinutes: trackingData.totalMinutes + Math.max(0, duration) - overlappedDuration,
+          });
+
           setTrackedStudents((prev: any) => {
             const semester = prev[selectedStudentForMeeting.semesterId];
             if (semester) {
@@ -519,9 +559,9 @@ const TrackingHours = () => {
                 duration,
                 meetingId,
                 day: formattedDay,
-                previousDuration: 0,
+                previousDuration: overlappedDuration,
               });
-              student.totalMinutes = student.totalMinutes + Math.max(0, duration);
+              student.totalMinutes = student.totalMinutes + Math.max(0, duration) - (overlappedDuration || 0);
             }
             return prev;
           });
