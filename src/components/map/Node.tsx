@@ -918,10 +918,27 @@ const Node = ({
   useEffect(() => {
     setImageLoaded(true);
   }, [nodeImage]);
-
+  const flagLinks = (current: any, added: any, removed: any) => {
+    const addedHash: any = {};
+    const removedHash: any = {};
+    added.forEach((p: { node: string }) => {
+      addedHash[p.node] = true;
+    });
+    removed.forEach((p: { node: string }) => {
+      removedHash[p.node] = true;
+    });
+    for (let element of current) {
+      if (addedHash[element.node]) {
+        element.added = true;
+      } else if (removedHash[element.node]) {
+        element.removed = true;
+      }
+    }
+    return current;
+  };
   if (hideNode && !editable) {
     return (
-      <div
+      <Box
         ref={nodeRef}
         id={identifier}
         onClick={nodeClickHandler}
@@ -994,28 +1011,9 @@ const Node = ({
             sx={{ fontSize: `${30}px`, position: "absolute", bottom: "4px", left: "4px" }}
           />
         </Box>
-      </div>
+      </Box>
     );
   }
-  const flagLinks = (current: any, added: any, removed: any) => {
-    const addedHash: any = {};
-    const removedHash: any = {};
-    added.forEach((p: { node: string }) => {
-      addedHash[p.node] = true;
-    });
-    removed.forEach((p: { node: string }) => {
-      removedHash[p.node] = true;
-    });
-    for (let element of current) {
-      if (addedHash[element.node]) {
-        element.added = true;
-      } else if (removedHash[element.node]) {
-        element.removed = true;
-      }
-    }
-    return current;
-  };
-
   return (
     <Box
       ref={nodeRef}
