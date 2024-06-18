@@ -22,11 +22,11 @@ async function requestNotificationsPermissions(uid: string) {
 // Saves the messaging device token to Cloud Firestore.
 export async function saveMessagingDeviceToken(uid: string) {
   try {
+    if (process.env.NODE_ENV === "development") return;
     const msg = await messaging();
     const fcmToken = await getToken(msg, { vapidKey: VAPID_KEY });
     if (fcmToken) {
       // Save device token to Firestore
-      if (process.env.NODE_ENV === "development") return;
       const tokenRef = doc(db, "fcmTokens", uid);
       await setDoc(tokenRef, { token: fcmToken });
       // This will fire when a message is received while the app is in the foreground.
