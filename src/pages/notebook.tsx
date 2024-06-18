@@ -1446,7 +1446,8 @@ const Notebook = ({}: NotebookProps) => {
       versionsColl,
       where("accepted", "==", false),
       where("tagIds", "array-contains", user?.tagId),
-      where("deleted", "==", false)
+      where("deleted", "==", false),
+      limit(40)
     );
 
     const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
@@ -1464,7 +1465,7 @@ const Notebook = ({}: NotebookProps) => {
               correct: false,
               wrong: false,
             } as any & { id: string };
-            const prevIdx = prev.findIndex(v => v.id === change.doc.id);
+            const prevIdx = prev.findIndex((v: any) => v.id === change.doc.id);
 
             if (docType === "added" && prevIdx === -1) {
               prev.push({ ...curData, doc: change.doc });
@@ -1484,7 +1485,7 @@ const Notebook = ({}: NotebookProps) => {
     return () => {
       versionsSnapshot();
     };
-  }, [db, user]);
+  }, [db, user, user?.tagId]);
 
   useEffect(() => {
     if (!db) return;
