@@ -188,9 +188,9 @@ export const StudentsLayout: FC<Props> = ({ children }) => {
 
   if (!user || !queryUname)
     return (
-      <div className="CenterredLoadingImageContainer">
+      <div className="CenteredLoadingImageContainer">
         <Image
-          className="CenterredLoadingImage"
+          className="CenteredLoadingImage"
           loading="lazy"
           src={LoadingImg}
           alt="Loading"

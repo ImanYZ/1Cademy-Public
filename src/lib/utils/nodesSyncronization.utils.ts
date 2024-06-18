@@ -62,10 +62,8 @@ export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promis
   });
 
   const nodeDocs = await Promise.all(nodeDocsPromises);
-  console.log("nodeDocs.flat()", nodeDocs.flat());
   const flatDocs = nodeDocs.flatMap(nd => nd.docs);
   return flatDocs.map((nodeDoc: any) => {
-    console.log("nodeDoc", nodeDoc.docs);
     if (!nodeDoc.exists()) return null;
 
     const tmpData = nodeDoc.data();

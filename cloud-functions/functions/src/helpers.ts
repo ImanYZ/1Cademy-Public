@@ -57,8 +57,16 @@ const getMinutesDiff = (createdAt: any, lastActionTime: any) => {
 };
 
 const shouldTrackHours = (semesterId: string, hourEST: any, dayOfWeekEST: any) => {
-  const community1 = semesterId === "6E1h49QYINasnDOpVpHL" && hourEST >= 18 && hourEST < 19 && dayOfWeekEST === 5;
-  const community2 = semesterId === "8bMQ51sit8VeFD27TDEt" && hourEST >= 16 && hourEST < 17 && dayOfWeekEST === 1;
+  const community1 =
+    (semesterId === "6E1h49QYINasnDOpVpHL" || semesterId === "mrnIdj52F4FVBgTaJBl1") &&
+    hourEST >= 18 &&
+    hourEST < 19 &&
+    dayOfWeekEST === 5;
+  const community2 =
+    (semesterId === "8bMQ51sit8VeFD27TDEt" || semesterId === "mrnIdj52F4FVBgTaJBl1") &&
+    hourEST >= 16 &&
+    hourEST < 17 &&
+    dayOfWeekEST === 1;
   return !community1 && !community2;
 };
 export const trackHours = async (data: any) => {

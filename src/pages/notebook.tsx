@@ -381,6 +381,8 @@ const Notebook = ({}: NotebookProps) => {
   const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
+  const [pendingProposals, setPendingProposals] = useState<any>([]);
+
   // const previousLengthNodes = useRef(0);
   // const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
@@ -390,7 +392,6 @@ const Notebook = ({}: NotebookProps) => {
   //Notifications
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
-  const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
   const lastNodeOperation = useRef<{ name: string; data: string } | null>(null);
   const proposalTimer = useRef<any>(null);
@@ -1436,84 +1437,55 @@ const Notebook = ({}: NotebookProps) => {
       bookmarkSnapshot();
     };
   }, [allTagsLoaded, db, user?.uname, currentStep, tutorial]);
-
   useEffect(() => {
-    if (!db) return;
     if (!user?.uname) return;
     if (!user?.tagId) return;
-    if (!allTagsLoaded) return;
-    if (currentStep) return;
 
-    const versionsSnapshots: any[] = [];
-    const versions: { [key: string]: any } = {};
-    // const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
-
-    const { versionsColl, userVersionsColl } = getCollectionsQuery(db);
-
+    const { versionsColl } = getCollectionsQuery(db);
     const versionsQuery = query(
       versionsColl,
       where("accepted", "==", false),
-      where("tagIds", "array-contains", user.tagId),
-      where("deleted", "==", false)
+      where("tagIds", "array-contains", user?.tagId),
+      where("deleted", "==", false),
+      limit(40)
     );
 
     const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (docChanges.length > 0) {
-        for (let change of docChanges) {
-          const versionId = change.doc.id;
-          const versionData = change.doc.data();
-          if (change.type === "removed") {
-            delete versions[versionId];
-          }
-          if (change.type === "added" || change.type === "modified") {
-            versions[versionId] = {
-              ...versionData,
-              id: versionId,
-              createdAt: versionData.createdAt.toDate(),
+      const changes = snapshot.docChanges();
+      if (changes.length > 0) {
+        setPendingProposals((prev: any) =>
+          changes.reduce((prev: any, change: any) => {
+            const docType = change.type;
+            const changeData = change.doc.data();
+            const curData = {
+              ...changeData,
+              id: change.doc.id,
+              createdAt: changeData.createdAt.toDate(),
               award: false,
               correct: false,
               wrong: false,
-            };
-            delete versions[versionId].deleted;
-            delete versions[versionId].updatedAt;
+            } as any & { id: string };
+            const prevIdx = prev.findIndex((v: any) => v.id === change.doc.id);
 
-            const q = query(
-              userVersionsColl,
-              where("version", "==", versionId),
-              where("user", "==", user?.uname),
-              limit(1)
-            );
-
-            const userVersionsDocs = await getDocs(q);
-
-            for (let userVersionsDoc of userVersionsDocs.docs) {
-              const userVersion = userVersionsDoc.data();
-              delete userVersion.version;
-              delete userVersion.updatedAt;
-              delete userVersion.createdAt;
-              delete userVersion.user;
-              versions[versionId] = {
-                ...versions[versionId],
-                ...userVersion,
-              };
+            if (docType === "added" && prevIdx === -1) {
+              prev.push({ ...curData, doc: change.doc });
             }
-          }
-        }
-
-        const pendingProposals = { ...versions };
-        const proposalsTemp = Object.values(pendingProposals);
-        setPendingProposalsNum(proposalsTemp.length);
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
+            }
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx, 1);
+            }
+            return prev;
+          }, prev)
+        );
       }
     });
-    versionsSnapshots.push(versionsSnapshot);
 
     return () => {
-      for (let vSnapshot of versionsSnapshots) {
-        vSnapshot();
-      }
+      versionsSnapshot();
     };
-  }, [allTagsLoaded, db, user?.tagId, user?.uname, currentStep]);
+  }, [db, user, user?.tagId]);
 
   useEffect(() => {
     if (!db) return;
@@ -5308,17 +5280,23 @@ const Notebook = ({}: NotebookProps) => {
           }
           setProposals(proposalsTemp);
           setUserVotesOnProposals(userVotesOnProposals);
-          try {
-            Post("/rateVersion", postData);
-          } catch (error) {
-            console.error(error);
-          }
           return { nodes: oldNodes, edges };
         });
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
+        try {
+          await Post("/rateVersion", postData);
+          setGraph(({ nodes: oldNodes, edges }) => {
+            if (oldNodes[postData.nodeId]) {
+              oldNodes[postData.nodeId] = { ...oldNodes[postData.nodeId], unaccepted: false, simulated: false };
+            }
+            return { nodes: oldNodes, edges };
+          });
+        } catch (error) {
+          console.error(error);
+        }
       }
       if (user) {
         createActionTrack(
@@ -7917,8 +7895,8 @@ const Notebook = ({}: NotebookProps) => {
             </Container>
             <Suspense fallback={<div></div>}>
               {(isSubmitting || (!queueFinished && firstLoading)) && (
-                <div className="CenterredLoadingImageContainer">
-                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                <div className="CenteredLoadingImageContainer">
+                  <Image className="CenteredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
                 </div>
               )}
             </Suspense>
@@ -7948,7 +7926,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedUser={selectedUser}
                 uncheckedNotificationsNum={uncheckedNotificationsNum}
                 bookmarkUpdatesNum={bookmarkUpdatesNum}
-                pendingProposalsNum={pendingProposalsNum}
+                pendingProposalsNum={pendingProposals.length || 0}
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
@@ -8044,6 +8022,7 @@ const Notebook = ({}: NotebookProps) => {
                   onClose={() => onCloseSidebar()}
                   sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
+                  pendingProposals={pendingProposals}
                   // innerWidth={windowWith}
                 />
               )}
@@ -8568,9 +8547,9 @@ const Notebook = ({}: NotebookProps) => {
                   </>
                 </Modal>
                 {(isSubmitting || (!queueFinished && firstLoading)) && (
-                  <div className="CenterredLoadingImageContainer">
+                  <div className="CenteredLoadingImageContainer">
                     <Image
-                      className="CenterredLoadingImage"
+                      className="CenteredLoadingImage"
                       loading="lazy"
                       src={LoadingImg}
                       alt="Loading"
