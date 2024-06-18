@@ -1,8 +1,8 @@
 import AdapterMomentJs from "@date-io/moment";
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -18,7 +18,6 @@ import {
   Button,
   CircularProgress,
   Fab,
-  IconButton,
   Paper,
   Switch,
   TextField,
@@ -36,7 +35,6 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { createActionTrack } from "@/lib/utils/Map.utils";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import {
@@ -1239,9 +1237,33 @@ const Node = ({
 
               <Box id={`${identifier}-node-content-media`}>
                 {nodeImage && (
-                  <Box sx={{ position: "relative", minHeight: imageHeight }}>
+                  <Box sx={{ position: "relative", minHeight: imageHeight, p: "5px", pb: "15px" }}>
                     {/* TODO: change to Next Image */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
+
+                    {editable && (
+                      <Tooltip title={"Remove Image"} placement="top">
+                        <CloseIcon
+                          className="close-icon"
+                          sx={{
+                            backgroundColor: "grey",
+                            color: "black",
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            ":hover": {
+                              backgroundColor: "black",
+                              color: "white",
+                            },
+                            zIndex: 10,
+                            position: "absolute",
+                            top: "0px",
+                            right: "0px",
+                            padding: "5px",
+                          }}
+                          onClick={removeImageHandler}
+                        />
+                      </Tooltip>
+                    )}
                     <img
                       ref={imageElementRef}
                       src={nodeImage}
@@ -1249,25 +1271,10 @@ const Node = ({
                       className="responsive-img NodeImage"
                       onLoad={onImageLoad}
                       onClick={onImageClick}
+                      style={{
+                        borderRadius: "11px",
+                      }}
                     />
-
-                    {editable && (
-                      <Tooltip title={"Click to remove the image"}>
-                        <IconButton
-                          onClick={removeImageHandler}
-                          color="primary"
-                          size="small"
-                          sx={{
-                            position: "absolute",
-                            right: "4px",
-                            top: "4px",
-                            background: DESIGN_SYSTEM_COLORS.notebookG500,
-                          }}
-                        >
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
                     {/* TODO: add loading background */}
                   </Box>
                 )}

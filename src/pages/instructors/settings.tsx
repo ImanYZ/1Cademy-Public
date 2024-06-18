@@ -364,9 +364,9 @@ const CourseSetting: InstructorLayoutPage = ({ selectedSemester, selectedCourse,
 
   if (!loaded) {
     return (
-      <Box className="CenterredLoadingImageContainer" sx={{ background: "transparent" }}>
+      <Box className="CenteredLoadingImageContainer" sx={{ background: "transparent" }}>
         <Image
-          className="CenterredLoadingImage"
+          className="CenteredLoadingImage"
           loading="lazy"
           src={LoadingImg}
           alt="Loading"

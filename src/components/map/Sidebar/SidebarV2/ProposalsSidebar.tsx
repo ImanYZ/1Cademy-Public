@@ -1,4 +1,4 @@
-import { Box, MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Skeleton, Tab, Tabs, Typography } from "@mui/material";
 import { Firestore } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
@@ -58,124 +58,11 @@ const ProposalsSidebar = ({
   const [userVotesOnProposals, setUserVotesOnProposals] = useState<{ [key: string]: any }>({});
   const [value, setValue] = React.useState(0);
   const [type, setType] = useState<string>("all");
+  const [loadingProposals, setLoadingProposals] = useState(true);
 
   const handleSwitchTab = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  // const userVersionsRefs: Query<DocumentData>[] = [];
-  // const versionsCommentsRefs: Query<DocumentData>[] = [];
-  // const userVersionsCommentsRefs: Query<DocumentData>[] = [];
-  // versionsData.forEach(versionDoc => {
-  //   versionIds.push(versionDoc.id);
-  //   const versionData = versionDoc.data();
-
-  //   versions[versionDoc.id] = {
-  //     ...versionData,
-  //     nodeType: versionData.nodeType,
-  //     id: versionDoc.id,
-  //     createdAt: versionData.createdAt.toDate(),
-  //     award: false,
-  //     correct: false,
-  //     wrong: false,
-  //     comments: [],
-  //   };
-  //   delete versions[versionDoc.id].deleted;
-  //   delete versions[versionDoc.id].updatedAt;
-  //   delete versions[versionDoc.id].node;
-  //   const userVersionsQuery = query(
-  //     userVersionsColl,
-  //     where("version", "==", versionDoc.id),
-  //     where("user", "==", user.uname)
-  //   );
-  //   userVersionsRefs.push(userVersionsQuery);
-  //   const versionsCommentsQuery = query(
-  //     versionsCommentsColl,
-  //     where("version", "==", versionDoc.id),
-  //     where("deleted", "==", false)
-  //   );
-  //   versionsCommentsRefs.push(versionsCommentsQuery);
-  // });
-  // console.log(nodeLoaded, "nodeLoaded");
-  // if (userVersionsRefs.length > 0) {
-  //   await Promise.all(
-  //     userVersionsRefs.map(async userVersionsRef => {
-  //       const userVersionsDocs = await getDocs(userVersionsRef);
-  //       userVersionsDocs.forEach(userVersionsDoc => {
-  //         const userVersion = userVersionsDoc.data();
-  //         versionId = userVersion.version;
-  //         delete userVersion.version;
-  //         delete userVersion.updatedAt;
-  //         delete userVersion.createdAt;
-  //         delete userVersion.user;
-  //         if (userVersion.hasOwnProperty("id")) {
-  //           delete userVersion.id;
-  //         }
-  //         versions[versionId] = {
-  //           ...versions[versionId],
-  //           ...userVersion,
-  //         };
-  //       });
-  //     })
-  //   );
-  // }
-
-  // build version comments {}
-  // if (versionsCommentsRefs.length > 0) {
-  //   await Promise.all(
-  //     versionsCommentsRefs.map(async versionsCommentsRef => {
-  //       const versionsCommentsDocs = await getDocs(versionsCommentsRef);
-  //       versionsCommentsDocs.forEach(versionsCommentsDoc => {
-  //         const versionsComment = versionsCommentsDoc.data();
-  //         delete versionsComment.updatedAt;
-  //         comments[versionsCommentsDoc.id] = {
-  //           ...versionsComment,
-  //           id: versionsCommentsDoc.id,
-  //           createdAt: versionsComment.createdAt.toDate(),
-  //         };
-  //         const userVersionsCommentsQuery = query(
-  //           userVersionsCommentsColl,
-  //           where("versionComment", "==", versionsCommentsDoc.id),
-  //           where("user", "==", user.uname)
-  //         );
-
-  //         userVersionsCommentsRefs.push(userVersionsCommentsQuery);
-  //       });
-  //     })
-  //   );
-
-  //   // merge comments and userVersionComment
-  //   if (userVersionsCommentsRefs.length > 0) {
-  //     await Promise.all(
-  //       userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
-  //         const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef);
-  //         userVersionsCommentsDocs.forEach(userVersionsCommentsDoc => {
-  //           const userVersionsComment = userVersionsCommentsDoc.data();
-  //           const versionCommentId = userVersionsComment.versionComment;
-  //           delete userVersionsComment.versionComment;
-  //           delete userVersionsComment.updatedAt;
-  //           delete userVersionsComment.createdAt;
-  //           delete userVersionsComment.user;
-  //           comments[versionCommentId] = {
-  //             ...comments[versionCommentId],
-  //             ...userVersionsComment,
-  //           };
-  //         });
-  //       })
-  //     );
-  //   }
-  // }
-  // Object.values(comments).forEach((comment: any) => {
-  //   versionId = comment.version;
-  //   delete comment.version;
-  //   versions[versionId].comments.push(comment);
-  // });
-
-  // const versions: any = {};
-
-  // const proposalsTemp = Object.values(versions);
-  // const orderedProposals = proposalsTemp.sort(
-  //   (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
-  // );
 
   useEffect(() => {
     if (!selectedNode) return;
@@ -241,6 +128,7 @@ const ProposalsSidebar = ({
           [...prev]
         )
       );
+      setLoadingProposals(false);
     };
     const killSnapshot = getProposalsSnapshot(db, { nodeId: selectedNode }, onSynchronize);
     return () => killSnapshot();
@@ -364,12 +252,33 @@ const ProposalsSidebar = ({
             </Select>
           </Box>
 
-          {/* {
-            <Box sx={{ width: "100%", display: "flex", justifyContent: "center", padding: "20px" }}>
-              <CircularProgress />
-            </Box>
-          } */}
+          {loadingProposals && (
+            <Box>
+              {Array.from(new Array(7)).map((_, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
 
+                    px: 2,
+                  }}
+                >
+                  <Skeleton
+                    variant="rectangular"
+                    width={500}
+                    height={250}
+                    sx={{
+                      bgcolor: "grey.300",
+                      borderRadius: "10px",
+                      mt: "19px",
+                      ml: "5px",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          )}
           {!proposalsWithId.filter(cur => (value === 0 ? !cur.accepted : cur.accepted)).length && (
             <Box
               sx={{
@@ -388,7 +297,7 @@ const ProposalsSidebar = ({
                   fontWeight: "500",
                 }}
               >
-                There's no Pending Proposals
+                The node currently has no pending proposals
               </Typography>
             </Box>
           )}

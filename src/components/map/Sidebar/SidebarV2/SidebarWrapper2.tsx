@@ -152,20 +152,17 @@ export const SidebarWrapper2 = ({
             right: "10px",
           }}
         >
-          <Tooltip title="Close the sidebar." placement="left">
-            <IconButton
-              disabled={disabled}
-              onClick={onClose}
-              sx={{
-                ":hover": {
-                  background: theme =>
-                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            disabled={disabled}
+            onClick={onClose}
+            sx={{
+              ":hover": {
+                background: theme => (theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)"),
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </Box>
       )}
     </Drawer>
