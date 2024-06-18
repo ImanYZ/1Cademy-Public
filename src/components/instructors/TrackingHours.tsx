@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -617,7 +616,7 @@ const TrackingHours = () => {
     };
 
     return (
-      <TableContainer component={Paper} sx={{ overflow: "auto", height: "100vh" }}>
+      <TableContainer component={Paper} sx={{ overflow: "auto", height: "100vh", width: "auto" }}>
         <Table>
           <TableHead
             sx={{
@@ -713,13 +712,13 @@ const TrackingHours = () => {
                           key={`${student.uname}-meeting-${meetingIdx}`}
                           sx={{ display: "flex", alignItems: "center", gap: "5px" }}
                         >
-                          <Typography>
+                          <Typography /* sx={{ fontSize: "10px" }} */>
                             - <strong>{meeting.day}</strong>: {formatTime(meeting.sTimestamp, false)} -{" "}
                             {formatTime(meeting.eTimestamp)}
                           </Typography>
                           {((user?.claims?.leading as any) || []).includes(student.semesterId) && (
                             <DeleteIcon
-                              sx={{ ":hover": { cursor: "pointer", color: "orange" }, ml: "4px" }}
+                              sx={{ ":hover": { cursor: "pointer", color: "orange" } }}
                               onClick={() => handleDeleteShortMeeting(student, meeting, student.semesterId)}
                             />
                           )}
@@ -839,7 +838,7 @@ const TrackingHours = () => {
   };
 
   return (
-    <>
+    <Box>
       {selectedStudent ? (
         <StudentDetail uname={selectedStudent} setSelectedStudent={setSelectedStudent} />
       ) : (
@@ -848,75 +847,74 @@ const TrackingHours = () => {
             background: theme =>
               theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG900 : DESIGN_SYSTEM_COLORS.gray100,
             height: "100vh",
+            width: "100%",
           }}
         >
-          <Container>
-            <Box sx={{ display: "flex", gap: "13px", py: "9px" }}>
-              {Object.keys(semesters).length > 2 && (
-                <Select
-                  value={selectedSemester}
-                  onChange={handleSemesterChange}
-                  displayEmpty
-                  variant="outlined"
-                  sx={{ width: "500px" }}
-                  MenuProps={{
-                    sx: {
-                      zIndex: "9999",
-                    },
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Select Course
-                  </MenuItem>
-                  <MenuItem value="">All Courses</MenuItem>
-                  {Object.keys(semesters).map(semesterId => (
-                    <MenuItem key={semesterId} value={semesterId}>
-                      {semesters[semesterId].title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
+          <Box sx={{ display: "flex", gap: "13px", py: "9px" }}>
+            {Object.keys(semesters).length > 2 && (
               <Select
-                value={selectedPeriod}
-                onChange={(event: any) => {
-                  setSelectedPeriod(event.target.value);
-                  setSelectedDate(null);
-                }}
+                value={selectedSemester}
+                onChange={handleSemesterChange}
                 displayEmpty
                 variant="outlined"
+                sx={{ width: "500px" }}
                 MenuProps={{
                   sx: {
                     zIndex: "9999",
                   },
                 }}
               >
-                {periods.map(period => (
-                  <MenuItem key={period.index} value={period.index}>
-                    {period.label}
+                <MenuItem value="" disabled>
+                  Select Course
+                </MenuItem>
+                <MenuItem value="">All Courses</MenuItem>
+                {Object.keys(semesters).map(semesterId => (
+                  <MenuItem key={semesterId} value={semesterId}>
+                    {semesters[semesterId].title}
                   </MenuItem>
                 ))}
               </Select>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="--/--/--"
-                  value={selectedDate}
-                  onChange={handleDateChange}
-                  renderInput={params => <TextField {...params} />}
-                  PopperProps={{
-                    sx: {
-                      zIndex: "9999",
-                    },
-                  }}
-                />
-              </LocalizationProvider>
-            </Box>
+            )}
+            <Select
+              value={selectedPeriod}
+              onChange={(event: any) => {
+                setSelectedPeriod(event.target.value);
+                setSelectedDate(null);
+              }}
+              displayEmpty
+              variant="outlined"
+              MenuProps={{
+                sx: {
+                  zIndex: "9999",
+                },
+              }}
+            >
+              {periods.map(period => (
+                <MenuItem key={period.index} value={period.index}>
+                  {period.label}
+                </MenuItem>
+              ))}
+            </Select>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="--/--/--"
+                value={selectedDate}
+                onChange={handleDateChange}
+                renderInput={params => <TextField {...params} />}
+                PopperProps={{
+                  sx: {
+                    zIndex: "9999",
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Box>
 
-            {renderTable()}
-          </Container>
+          {renderTable()}
         </Box>
       )}
       {ConfirmDialog}
-    </>
+    </Box>
   );
 };
 
