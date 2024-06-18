@@ -616,7 +616,7 @@ const TrackingHours = () => {
     };
 
     return (
-      <TableContainer component={Paper} sx={{ overflow: "auto", height: "100vh", width: "auto" }}>
+      <TableContainer component={Paper} sx={{ overflow: "auto", height: "100vh", width: "auto", pb: "156px" }}>
         <Table>
           <TableHead
             sx={{
@@ -909,7 +909,6 @@ const TrackingHours = () => {
               />
             </LocalizationProvider>
           </Box>
-
           {renderTable()}
         </Box>
       )}
