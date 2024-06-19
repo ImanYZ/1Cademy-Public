@@ -58,7 +58,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Set Node.js environment variable
-        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
+        run: export NODE_OPTIONS=--openssl-legacy-provider
       - name: Update caniuse-lite and browserslist
         run: npm update caniuse-lite browserslist --legacy-peer-deps
       - name: npm install and build
