@@ -27,7 +27,7 @@ import React, {
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
 import { VoiceAssistant } from "src/nodeBookTypes";
 
-import StudentDetail from "@/components/instructors/StudentDetail";
+import StudentDetailHoursTracking from "@/components/instructors/StudentDetail";
 import TrackingHours from "@/components/instructors/TrackingHours";
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
@@ -333,7 +333,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
               (user.role === "INSTRUCTOR" ? (
                 <TrackingHours />
               ) : (
-                <StudentDetail uname={user.uname} user={selectedStudent ? selectedStudent : user} />
+                <StudentDetailHoursTracking uname={user.uname} user={selectedStudent ? selectedStudent : user} />
               ))}
             {/* {selectToolbarView === "DASHBOARD" && (
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
