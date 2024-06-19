@@ -4,7 +4,6 @@ import { uploadFileToStorage } from "../STT";
 import { NextApiResponse } from "next";
 import { delay } from "@/lib/utils/utils";
 import { MODEL } from "@/lib/utils/constants";
-import { fileToGenerativePart } from "../gemini/GeminiAPI";
 
 const OpenAI = require("openai");
 
@@ -2172,7 +2171,28 @@ function isValidJSON(jsonString: string) {
     return false;
   }
 }
+export const fileToGenerativePart = async (file: File): Promise<any> => {
+  const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (reader.result) {
+        resolve(reader.result.toString().split(",")[1] || "");
+      } else {
+        reject("Failed to read file");
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
+  const base64Data = await base64EncodedDataPromise;
+  return {
+    inlineData: {
+      mimeType: file.type,
+      data: base64Data,
+    },
+  };
+};
 export async function callOpenAIChat(files: File[], userPrompt: string, systemPrompt: string = "") {
   try {
     files.forEach((file, index) => {
