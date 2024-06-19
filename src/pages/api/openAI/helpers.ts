@@ -4,6 +4,7 @@ import { uploadFileToStorage } from "../STT";
 import { NextApiResponse } from "next";
 import { delay } from "@/lib/utils/utils";
 import { MODEL } from "@/lib/utils/constants";
+import { fileToGenerativePart } from "../gemini/GeminiAPI";
 
 const OpenAI = require("openai");
 
@@ -2163,3 +2164,77 @@ export const chaptersMapCoreEcon = [
     ],
   },
 ];
+function isValidJSON(jsonString: string) {
+  try {
+    JSON.parse(jsonString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function callOpenAIChat(files: File[], userPrompt: string, systemPrompt: string = "") {
+  try {
+    files.forEach((file, index) => {
+      console.log(`File ${index} type:`, file.constructor.name);
+    });
+
+    const validFiles = files.filter(file => file instanceof File);
+    if (validFiles.length !== files.length) {
+      console.error("Some objects are not File instances:", files);
+      throw new Error("Some provided objects are not File instances");
+    }
+
+    const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
+
+    const systemPrompts = [];
+    if (systemPrompt) {
+      systemPrompts.push({
+        role: "system",
+        content: [
+          {
+            type: "text",
+            text: systemPrompt,
+          },
+        ],
+      });
+    }
+    let response = "";
+    for (let i = 0; i < 4; i++) {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          ...systemPrompts,
+          {
+            role: "user",
+            content: [
+              ...imageParts,
+              {
+                type: "text",
+                text: userPrompt,
+              },
+            ],
+          },
+        ],
+        temperature: 0,
+        response_format: { type: "json_object" },
+      });
+
+      response = completion.choices[0].message.content || "";
+      if (isValidJSON(response)) {
+        break;
+      }
+      console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
+      console.log("Response: ", response);
+    }
+
+    if (!isValidJSON(response)) {
+      throw new Error("Failed to get a complete JSON object");
+    }
+
+    return response;
+  } catch (error) {
+    console.error("Error in callOpenAIChat:", error);
+    throw error;
+  }
+}
