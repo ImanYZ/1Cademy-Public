@@ -442,7 +442,7 @@ export const MessageInput = ({
                   </IconButton>
                 </Tooltip>
               )}
-              <Tooltip title={"Upload a node from notebook"}>
+              <Tooltip title={"Share a node from notebook"}>
                 <IconButton onClick={() => choosingNewLinkedNode()}>
                   <AddLinkIcon />
                 </IconButton>
@@ -455,6 +455,7 @@ export const MessageInput = ({
           <Button
             variant="contained"
             onClick={handleSendMessage}
+            disabled={!imageUrls.length && !inputValue.trim()}
             sx={{
               minWidth: "0px",
               width: "36px",
