@@ -308,7 +308,7 @@ const TrackingHours = () => {
             hours = studentHours[student.uname].trackHoursPerPeriod[period].time / 60;
             meetings = studentHours[student.uname].trackHoursPerPeriod[period].meetings || [];
             shortMeetings = studentHours[student.uname].trackHoursPerPeriod[period].shortMeetings || [];
-            paid = !!studentHours[student.uname].trackHoursPerPeriod[period].shortMeetings;
+            paid = !!studentHours[student.uname].trackHoursPerPeriod[period]?.paid;
           }
           student.hours = hours;
           student.meetings = meetings;
@@ -388,24 +388,17 @@ const TrackingHours = () => {
 
   const togglePaidStatus = async (uname: string, semesterId: string) => {
     const batch = writeBatch(db);
-    const students = semesters[semesterId].students;
-    const studentIdx = students.findIndex((s: any) => s.uname === uname);
-    if (studentIdx !== -1) {
-      const student = students[studentIdx];
+    const docQuery = query(
+      collection(db, "trackHours"),
+      where("uname", "==", uname),
+      where("semesterId", "==", semesterId)
+    );
+    const hoursDocs = await getDocs(docQuery);
 
-      const docQuery = query(
-        collection(db, "trackHours"),
-        where("uname", "==", uname),
-        where("semesterId", "==", semesterId)
-      );
-      const hoursDocs = await getDocs(docQuery);
-
-      hoursDocs.forEach(doc => {
-        batch.update(doc.ref, { paid: !student.paid });
-      });
-      student.paid = !student.paid;
-      await batch.commit();
-    }
+    hoursDocs.forEach(doc => {
+      batch.update(doc.ref, { paid: !doc.data().paid });
+    });
+    await batch.commit();
   };
 
   const toggleMeetingStatus = async (uname: string, semesterId: string, meeting: any) => {
