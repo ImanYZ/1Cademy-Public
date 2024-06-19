@@ -119,7 +119,7 @@ const TrackingHours = () => {
   const [endTime, setEndTime] = useState<any>(null);
   const [studentHours, setStudentsHours] = useState<any>({});
 
-  const adminView = !!user?.claims?.tracking;
+  const adminView = !user?.claims?.tracking;
 
   const handleDateChange = (date: Dayjs | null) => {
     setSelectedDate(date);
@@ -302,16 +302,18 @@ const TrackingHours = () => {
           let hours = (studentHours[student.uname].trackedHoursPerDay[selectedDay]?.time || 0) / 60;
           let meetings = studentHours[student.uname].trackedHoursPerDay[selectedDay]?.meetings || [];
           let shortMeetings = studentHours[student.uname].trackedHoursPerDay[selectedDay]?.shortMeetings || [];
-
+          let paid = !!studentHours[student.uname].trackedHoursPerDay[selectedDay]?.paid;
           if (selectedPeriod !== -1) {
             const period = periods[selectedPeriod].label;
             hours = studentHours[student.uname].trackHoursPerPeriod[period].time / 60;
             meetings = studentHours[student.uname].trackHoursPerPeriod[period].meetings || [];
             shortMeetings = studentHours[student.uname].trackHoursPerPeriod[period].shortMeetings || [];
+            paid = !!studentHours[student.uname].trackHoursPerPeriod[period].shortMeetings;
           }
           student.hours = hours;
           student.meetings = meetings;
           student.shortMeetings = shortMeetings;
+          student.paid = paid;
         }
       }
     }
@@ -345,7 +347,7 @@ const TrackingHours = () => {
             <strong style={{ color: "orange" }}>
               {student.fName} {student.lName}{" "}
             </strong>
-            at in <strong style={{ color: "orange" }}>{meeting.day}</strong> from{" "}
+            at <strong style={{ color: "orange" }}>{meeting.day}</strong> from{" "}
             <strong style={{ color: "orange" }}>{formatTime(meeting.sTimestamp)} </strong>to{" "}
             <strong style={{ color: "orange" }}>{formatTime(meeting.eTimestamp, false)}</strong>?
           </Box>,
