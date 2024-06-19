@@ -119,7 +119,7 @@ const TrackingHours = () => {
   const [endTime, setEndTime] = useState<any>(null);
   const [studentHours, setStudentsHours] = useState<any>({});
 
-  const adminView = !user?.claims?.tracking;
+  const adminView = !!user?.claims?.tracking;
 
   const handleDateChange = (date: Dayjs | null) => {
     setSelectedDate(date);
