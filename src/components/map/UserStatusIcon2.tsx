@@ -176,7 +176,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 whiteSpace: "nowrap",
                 display: "inline-block",
                 fontSize: "13px",
-                width: "90%",
+                width: "95%",
               }}
             >
               {props.fullname}
