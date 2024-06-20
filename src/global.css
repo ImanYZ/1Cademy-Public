@@ -714,6 +714,10 @@
   display: none;
 }
 
+.chat__mention__input::-webkit-scrollbar {
+  display: none;
+}
+
 #Sidebar::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 4px;

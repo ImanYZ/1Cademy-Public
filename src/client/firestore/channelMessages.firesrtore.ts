@@ -17,7 +17,7 @@ export type channelMessagesChange = {
   type: SnapshotChangesTypes;
 };
 
-export const getChannelMesasgesSnapshot = (
+export const getChannelMessagesSnapshot = (
   db: Firestore,
   data: {
     lastVisible: any;

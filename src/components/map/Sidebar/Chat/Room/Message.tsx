@@ -21,7 +21,7 @@ import React, { Suspense, useCallback, useEffect, useRef, useState } from "react
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
 import { IChannelMessage } from "src/chatTypes";
-import { getChannelMesasgesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
+import { getChannelMessagesSnapshot } from "src/client/firestore/channelMessages.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
@@ -244,7 +244,7 @@ export const Message = ({
         setFirstLoad(false);
       }, 500);
     };
-    const killSnapshot = getChannelMesasgesSnapshot(
+    const killSnapshot = getChannelMessagesSnapshot(
       db,
       { channelId: selectedChannel.id, lastVisible, roomType },
       onSynchronize

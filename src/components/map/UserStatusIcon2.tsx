@@ -1,4 +1,4 @@
-import ChatIcon from "@mui/icons-material/Chat";
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, IconButton, SxProps, Theme, Tooltip, Typography } from "@mui/material";
@@ -176,7 +176,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 whiteSpace: "nowrap",
                 display: "inline-block",
                 fontSize: "13px",
-                width: "80%",
+                width: "90%",
               }}
             >
               {props.fullname}
@@ -236,7 +236,15 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
         )}
         {!smallVersion && (
           <IconButton
-            sx={{ position: "absolute", right: "0px", top: "20px" }}
+            sx={{
+              position: "absolute",
+              right: "0px",
+              top: "20px",
+              ":hover": {
+                background: "transparent",
+                boxShadow: "none!important",
+              },
+            }}
             size="small"
             onClick={e => {
               e.stopPropagation();
@@ -249,7 +257,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
               }, 500);
             }}
           >
-            <ChatIcon fontSize="small" color="primary" />
+            <ChatBubbleOutlineOutlinedIcon fontSize="small" color="primary" />
           </IconButton>
         )}
       </Box>
