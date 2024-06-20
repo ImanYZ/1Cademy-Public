@@ -321,7 +321,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeType,
       writeCounts,
     });
-
+    await commitBatch(batch);
     //  If the proposal is not approved, we do not directly update the node document inside versionCreateUpdate function,
     //  so we have to set nodeData.versions + 1 here
     await detach(async () => {

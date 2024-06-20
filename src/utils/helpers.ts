@@ -319,3 +319,35 @@ export const checkInstantApprovalForProposalVote = async (nodeId: string, uname:
     instantApprove: true,
   };
 };
+
+//we call this function to check if an instructor is creating a new version of a node
+//if yes we approve the version automatically
+export const shouldInstantApprovalForProposal = async ({ tagIds, uname }: any) => {
+  const semestersByIds = await getSemestersByIds(tagIds);
+  let isInstructor = false;
+  const instructorDocs = await getDocs(query(collection(db, "instructors"), where("uname", "==", uname)));
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
+  if (!Object.keys(semestersByIds).length) {
+    return {
+      isInstructor,
+      courseExist: false,
+      instantApprove: true,
+    };
+  }
+  for (const semester of Object.values(semestersByIds)) {
+    if (!semester.instructors.includes(uname)) {
+      return {
+        isInstructor,
+        courseExist: true,
+        instantApprove: false,
+      };
+    }
+  }
+  return {
+    isInstructor,
+    courseExist: true,
+    instantApprove: true,
+  };
+};
