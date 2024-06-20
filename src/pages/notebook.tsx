@@ -184,6 +184,7 @@ import {
   childrenParentsDifferences,
   doNeedToDeleteNode,
   isVersionApproved,
+  shouldInstantApprovalForProposal,
   showDifferences,
   tagsRefDifferences,
 } from "../utils/helpers";
@@ -853,40 +854,45 @@ const Notebook = ({}: NotebookProps) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
       const expanded = openWithDefaultValues.hasOwnProperty("open") ? Boolean(openWithDefaultValues.open) : true;
       // update graph with preloaded data, to get changes immediately
-      setGraph(graph => {
-        const preloadedNode = preLoadedNodesRef.current[nodeId];
-        if (!preloadedNode) return graph;
-        const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
-        if (selectedNotebookIdx < 0) {
-          console.error("selectedNotebook property doesn't exist into notebooks property!");
-          return graph;
-        }
-
-        return synchronizeGraph({
-          g: g.current,
-          graph,
-          fullNodes: [
-            {
-              ...preloadedNode,
-              open: expanded,
-              expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
-            },
-          ],
-          selectedNotebookId,
-          allTags,
-          setNodeUpdates,
-          setNoNodesFoundMessage,
-        });
-      });
-
       // update on DB, to save changes
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodeFirestore | null = null;
       const nodeRef = doc(db, "nodes", nodeId);
-      const nodeDoc = await getDoc(nodeRef);
+
       const batch = writeBatch(db);
-      if (nodeDoc.exists() && user) {
+      if (/* nodeDoc.exists() && */ user) {
+        setGraph(graph => {
+          const preloadedNode = preLoadedNodesRef.current[nodeId];
+          if (!preloadedNode) return graph;
+          const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
+          if (selectedNotebookIdx < 0) {
+            console.error("selectedNotebook property doesn't exist into notebooks property!");
+            return graph;
+          }
+
+          return synchronizeGraph({
+            g: g.current,
+            graph,
+            fullNodes: [
+              {
+                ...preloadedNode,
+                open: expanded,
+                expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
+              },
+            ],
+            selectedNotebookId,
+            allTags,
+            setNodeUpdates,
+            setNoNodesFoundMessage,
+          });
+        });
+        if (selectNode) {
+          notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
+        }
+
+        const nodeDoc = await getDoc(nodeRef);
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
 
         try {
@@ -964,11 +970,6 @@ const Notebook = ({}: NotebookProps) => {
 
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
-
-          if (selectNode) {
-            notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
-            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
-          }
         } catch (err) {
           console.error(err);
           const errorData = {
@@ -3863,7 +3864,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedImprovement = useCallback(
-    async (summary: string, reason: string, onFail: () => void) => {
+    async (summary: string, reason: string, tagIds: string[], onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
       if (!user) return;
 
@@ -3881,12 +3882,11 @@ const Notebook = ({}: NotebookProps) => {
         const {
           isInstructor,
           instantApprove,
-        }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
-          "/instructor/course/checkInstantApprovalForProposal",
-          {
-            nodeId: notebookRef.current.selectedNode,
-          }
-        );
+        }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } =
+          await shouldInstantApprovalForProposal({
+            tagIds,
+            uname: user.uname,
+          });
 
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
