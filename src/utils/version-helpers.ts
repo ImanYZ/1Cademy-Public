@@ -1865,7 +1865,7 @@ export const versionCreateUpdate = async ({
 
       const tWriteOperations: { objRef: any; data: any; operationType: "set" | "update" | "delete" }[] = [];
       //  proposer and voters are the same user, automatic self-vote
-      [newBatch, writeCounts] = await updateReputation({
+      [batch, writeCounts] = await updateReputation({
         batch,
         uname: proposer,
         imageUrl,
@@ -2079,12 +2079,11 @@ export const versionCreateUpdate = async ({
             newBatch.update(nodeRef, nodeUpdates);
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
-
-          if (nodeData.title !== title || versionData.changedNodeType) {
+          if (nodeData.title !== title || nodeType !== nodeData.nodeType) {
             await detach(async () => {
               let batch = db.batch();
               let writeCounts = 0;
-              [newBatch, writeCounts] = await changeNodeTitle({
+              [batch, writeCounts] = await changeNodeTitle({
                 batch,
                 nodeData,
                 nodeId,
