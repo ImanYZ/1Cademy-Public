@@ -703,7 +703,7 @@ const Node = ({
           return;
         }
 
-        await saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        await saveProposedImprovement("", reason, tagIds, () => setAbleToPropose(true));
         setProposeLoading(false);
         notebookRef.current.selectedNode = identifier;
         notebookRef.current.selectedNode = identifier;

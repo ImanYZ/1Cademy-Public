@@ -2,6 +2,18 @@ import { admin, db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next/types";
 
 import fbAuth from "src/middlewares/fbAuth";
+const removeInvalidTokens = async (invalidTokens: { [key: string]: string[] }) => {
+  for (let uid in invalidTokens) {
+    const fcmTokensDoc = await db.collection("fcmTokens").doc(uid).get();
+    if (fcmTokensDoc.exists) {
+      const tokens = fcmTokensDoc.data()?.tokens;
+      const newTokens = tokens.filter((token: string) => !invalidTokens[uid].includes(token));
+      await fcmTokensDoc.ref.update({
+        tokens: newTokens,
+      });
+    }
+  }
+};
 
 const triggerNotifications = async (newMessage: any) => {
   try {
@@ -10,7 +22,7 @@ const triggerNotifications = async (newMessage: any) => {
     const fcmTokensDocs = await db.collection("fcmTokens").get();
 
     for (let fcmToken of fcmTokensDocs.docs) {
-      fcmTokensHash[fcmToken.id] = fcmToken.data().token;
+      fcmTokensHash[fcmToken.id] = fcmToken.data().tokens;
     }
 
     let channelRef = db.collection("channels").doc(channelId);
@@ -32,9 +44,15 @@ const triggerNotifications = async (newMessage: any) => {
     }
     console.log(fcmTokensHash);
     if (channelData) {
+      const membersInfo = channelData.membersInfo;
       console.log(channelData?.members);
-      const _member = channelData.members.filter((m: string) => m !== sender);
+      const _member = channelData.members.filter(
+        (m: string) => m !== sender && fcmTokensHash.hasOwnProperty(membersInfo[m].uid)
+      );
+      const invalidTokens: any = {};
       for (let member of _member) {
+        const UID = membersInfo[member].uid;
+
         const newNotification = {
           ...newMessage,
           roomType,
@@ -45,34 +63,44 @@ const triggerNotifications = async (newMessage: any) => {
         };
         const notificationRef = db.collection("notifications").doc();
         try {
-          const token = fcmTokensHash[channelData.membersInfo[member].uid];
-          const payload = {
-            token,
-            notification: {
-              title: `${subject} ${channelData.membersInfo[sender].fullname}`,
-              body: message,
-            },
-            data: {
-              messageId: newMessage?.parentMessage || newMessage.id,
-              roomType,
-              channelId,
-              messageType: subject.includes("Repl") ? "reply" : "message",
-            },
-          };
-          console.log(admin.messaging());
-          console.log(payload);
-          admin
-            .messaging()
-            .send(payload)
-            .then((response: any) => {
-              console.log("Successfully sent message: ", response);
-            })
-            .catch((error: any) => {
-              console.log("error: ", error);
-            });
+          const tokens = fcmTokensHash[UID];
+          for (let token of tokens) {
+            const payload = {
+              token,
+              notification: {
+                title: `${subject} ${membersInfo[sender].fullname}`,
+                body: message,
+              },
+              data: {
+                messageId: newMessage?.parentMessage || newMessage.id,
+                roomType,
+                channelId,
+                messageType: subject.includes("Repl") ? "reply" : "message",
+              },
+            };
+            console.log(admin.messaging());
+            console.log(payload);
+            admin
+              .messaging()
+              .send(payload)
+              .then((response: any) => {
+                console.log("Successfully sent message: ", response);
+              })
+              .catch((error: any) => {
+                if (
+                  error.code === "messaging/invalid-registration-token" ||
+                  error.code === "messaging/registration-token-not-registered"
+                ) {
+                  console.log(`Token ${token} is invalid. Removing token...`);
+
+                  invalidTokens[UID] = [...(invalidTokens[UID] || []), token];
+                }
+              });
+          }
         } catch (error) {}
         await notificationRef.set(newNotification);
       }
+      await removeInvalidTokens(invalidTokens);
     }
 
     console.log("documents created");
