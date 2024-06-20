@@ -72,7 +72,6 @@ export const SidebarWrapper = ({
   onlineUsers,
   user,
   openChatInfo,
-  leading,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -200,23 +199,22 @@ export const SidebarWrapper = ({
                   <InfoIcon sx={{ color: "inherit" }} />
                 </IconButton>
               </Tooltip>
-              {leading && (
-                <Tooltip title={"Add New Member"}>
-                  <IconButton
-                    sx={{
-                      width: "2px",
-                      ":hover": {
-                        background: "transparent",
-                        color: "grey",
-                      },
-                      ml: "5px",
-                    }}
-                    onClick={() => setNewMemberSection(true)}
-                  >
-                    <PersonAddIcon sx={{ color: "inherit" }} />
-                  </IconButton>
-                </Tooltip>
-              )}
+
+              <Tooltip title={"Add New Member"}>
+                <IconButton
+                  sx={{
+                    width: "2px",
+                    ":hover": {
+                      background: "transparent",
+                      color: "grey",
+                    },
+                    ml: "5px",
+                  }}
+                  onClick={() => setNewMemberSection(true)}
+                >
+                  <PersonAddIcon sx={{ color: "inherit" }} />
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
         </Box>

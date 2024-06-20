@@ -421,6 +421,7 @@ export const ChatSidebar = ({
     } else {
       setOpenChatRoom(false);
       setSelectedChannel(null);
+      setRoomType("");
     }
   };
 
