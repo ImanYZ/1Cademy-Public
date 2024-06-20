@@ -318,6 +318,7 @@ export const MessageInput = ({
       }}
     >
       <MentionsInput
+        className="chat__mention"
         inputRef={inputFieldRef}
         placeholder={placeholder}
         style={{
@@ -326,7 +327,7 @@ export const MessageInput = ({
             padding: "10px",
             boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
             border: "none",
-            overFlow: "hidden",
+            maxHeight: "100px",
           },
           input: {
             fontSize: 16,
@@ -335,7 +336,7 @@ export const MessageInput = ({
             width: "100%",
             color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
             padding: "8px",
-            overFlow: "auto",
+            overflowY: "auto",
           },
           suggestions: {
             list: {

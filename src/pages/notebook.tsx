@@ -7658,7 +7658,7 @@ const Notebook = ({}: NotebookProps) => {
             }
 
             if (docType === "removed" && prevIdx !== -1) {
-              prev.splice(prevIdx);
+              prev.splice(prevIdx, 1);
             }
             prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
             return prev;

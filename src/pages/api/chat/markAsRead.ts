@@ -22,7 +22,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const channelDoc = await t.get(channelRef);
       if (channelDoc.exists) {
         const channelData = channelDoc.data();
-        console.log(channelData?.membersInfo, "channelData?.membersInfo--channelData?.membersInfo");
         const membersInfo = {
           ...(channelData?.membersInfo || {}),
           [uname]: { ...channelData?.membersInfo[uname], unreadMessageId: null },
