@@ -36,7 +36,6 @@ import {
   onSnapshot,
   orderBy,
   query,
-  runTransaction,
   setDoc,
   Timestamp,
   Unsubscribe,
@@ -414,26 +413,24 @@ const TrackingHours = () => {
       );
       const hoursDocs = await getDocs(docQuery);
 
-      await runTransaction(db, async (transaction: any) => {
-        for (const doc of hoursDocs.docs) {
-          const docRef = doc.ref;
-          const docData = (await transaction.get(docRef)).data();
-          const currentMeetings = docData?.meetings || [];
+      for (const doc of hoursDocs.docs) {
+        const docRef = doc.ref;
+        const docData = doc.data();
+        const currentMeetings = docData?.meetings || [];
 
-          if (currentMeetings.length > 0) {
-            currentMeetings[0].attended = !currentMeetings[0].attended;
-            let totalMinutes: number = docData?.totalMinutes || 0;
+        if (currentMeetings.length > 0) {
+          currentMeetings[0].attended = !currentMeetings[0].attended;
+          let totalMinutes: number = docData?.totalMinutes || 0;
 
-            if (currentMeetings[0].attended) {
-              totalMinutes += 60;
-            } else {
-              totalMinutes -= 60;
-            }
-
-            transaction.update(docRef, { meetings: currentMeetings, totalMinutes });
+          if (currentMeetings[0].attended) {
+            totalMinutes += 60;
+          } else {
+            totalMinutes -= 60;
           }
+
+          updateDoc(docRef, { meetings: currentMeetings, totalMinutes });
         }
-      });
+      }
     }
   };
   const getOverlappedDuration = (trackedMinutes: Timestamp[], sTimestamp: Timestamp, eTimestamp: Timestamp): number => {
