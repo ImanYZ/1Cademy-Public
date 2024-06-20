@@ -201,7 +201,7 @@ export const MessageInput = ({
 
   const handleKeyPress = useCallback(
     (event: any) => {
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && (imageUrls.length > 0 || inputValue.trim())) {
         event.preventDefault();
         handleSendMessage();
       }

@@ -122,6 +122,7 @@ export const NodeLink = ({
       sx={{
         display: "flex",
         justifyContent: "start",
+
         gap: "10px",
         cursor: "pointer",
         pb: 4,
@@ -199,7 +200,7 @@ export const NodeLink = ({
             className="reply-box"
             sx={{
               position: "relative",
-
+              borderRadius: "12px",
               p: "10px 14px",
               background: theme =>
                 theme.palette.mode === "dark"
