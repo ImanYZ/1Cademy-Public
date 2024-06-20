@@ -1882,7 +1882,7 @@ export const versionCreateUpdate = async ({
         voter,
         writeCounts,
         comReputationUpdates,
-        t,
+        t: null,
         tWriteOperations,
       });
       await commitBatch(batch);
