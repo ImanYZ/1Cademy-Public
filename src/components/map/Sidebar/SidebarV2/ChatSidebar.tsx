@@ -421,6 +421,7 @@ export const ChatSidebar = ({
     } else {
       setOpenChatRoom(false);
       setSelectedChannel(null);
+      setRoomType("");
     }
   };
 
@@ -629,6 +630,7 @@ export const ChatSidebar = ({
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
       // setDisplayTagSearcher={setDisplayTagSearcher}
+      roomType={roomType}
       openChatInfoPage={openChatInfoPage}
       setNewMemberSection={setNewMemberSection}
       sidebarType={"chat"}
