@@ -327,6 +327,7 @@ export const SidebarWrapper = ({
               ":hover": {
                 background: theme => (theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)"),
               },
+              zIndex: "5000",
             }}
           >
             <CloseIcon />

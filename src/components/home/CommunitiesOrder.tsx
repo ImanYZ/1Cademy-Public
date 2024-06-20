@@ -311,6 +311,17 @@ export const allCommunities = [
           },
         ],
       },
+      {
+        name: "Jayson Malasig",
+        image: "",
+        about: ``,
+        websites: [
+          {
+            name: "LinkedIn",
+            url: "https://www.linkedin.com/in/jayson-malasig/",
+          },
+        ],
+      },
     ],
     YouTube: "tLYj1Ts8_F0",
 
