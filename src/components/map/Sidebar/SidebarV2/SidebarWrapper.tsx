@@ -41,6 +41,7 @@ type SidebarWrapperProps = {
   user?: any;
   openChatInfo?: boolean;
   leading?: boolean;
+  roomType?: string;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -73,6 +74,7 @@ export const SidebarWrapper = ({
   user,
   openChatInfo,
   leading,
+  roomType,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -200,7 +202,7 @@ export const SidebarWrapper = ({
                   <InfoIcon sx={{ color: "inherit" }} />
                 </IconButton>
               </Tooltip>
-              {leading && (
+              {(leading || roomType === "direct") && (
                 <Tooltip title={"Add New Member"}>
                   <IconButton
                     sx={{
