@@ -165,9 +165,9 @@ const TrackingHours = () => {
     const semestersMap: { [key: string]: any } = {};
     const leading: any = user?.claims?.leading || [];
     if (!(leading || []).length && !adminView) return;
-    const semestersQuery = query(collection(db, "semesters"), where("trackingHours", "==", true));
-    /*       ? query(collection(db, "semesters"), where("trackingHours", "==", true))
-      : query(collection(db, "semesters"), where("trackingHours", "==", true), where("__name__", "in", leading)); */
+    const semestersQuery = adminView
+      ? query(collection(db, "semesters"), where("trackingHours", "==", true))
+      : query(collection(db, "semesters"), where("trackingHours", "==", true), where("__name__", "in", leading));
     const semestersDocs = await getDocs(semestersQuery);
 
     for (let semesterDoc of semestersDocs.docs) {
