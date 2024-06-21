@@ -112,7 +112,10 @@ export const MessageLeft = ({
   return (
     <>
       {selectedChannel?.membersInfo[user.uname]?.unreadMessageId === message?.id && (
-        <Box mt={2} sx={{ borderTop: "solid 1px red", width: "100%" }} />
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+          <Box mt={2} sx={{ borderTop: "solid 1px red", width: "90%", mt: "11.5px" }} />
+          <Typography color="error">New</Typography>
+        </Box>
       )}
       <Box
         ref={el => (messageRefs.current[message?.id || 0] = el)}
