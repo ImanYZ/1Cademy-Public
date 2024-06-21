@@ -570,7 +570,7 @@ const CourseComponent = () => {
       sx={{
         height: "100vh",
         overflow: "auto",
-        background: theme => theme.palette.common.darkGrayBackground,
+        // background: theme => theme.palette.common.darkGrayBackground,
         display: "flex",
       }}
     >
@@ -585,18 +585,22 @@ const CourseComponent = () => {
           }}
           displayEmpty
           variant="outlined"
-          sx={{ width: "500px" }}
+          sx={{ width: "500px", backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
           MenuProps={{
             sx: {
               zIndex: "9999",
             },
           }}
         >
-          <MenuItem value="" disabled>
+          <MenuItem value="" disabled sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}>
             Select Course
           </MenuItem>
           {courses.map((course: any) => (
-            <MenuItem key={course.title} value={course.title}>
+            <MenuItem
+              key={course.title}
+              value={course.title}
+              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+            >
               {course.title}
             </MenuItem>
           ))}
@@ -610,6 +614,7 @@ const CourseComponent = () => {
             onChange={handleTitleChange}
             margin="normal"
             variant="outlined"
+            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
           />
         </Box>
 
@@ -622,6 +627,7 @@ const CourseComponent = () => {
           margin="normal"
           variant="outlined"
           rows={4}
+          sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
         />
         <TextField
           label="Target Learners"
@@ -632,6 +638,7 @@ const CourseComponent = () => {
           margin="normal"
           variant="outlined"
           rows={4}
+          sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
         />
         <Box marginTop="20px">
           {getCourses()[selectedCourse].syllabus.map((category, categoryIndex) => (
@@ -720,7 +727,7 @@ const CourseComponent = () => {
                         <CloseIcon
                           className="close-icon"
                           sx={{
-                            backgroundColor: "grey",
+                            // backgroundColor: "grey",
                             color: "black",
                             borderRadius: "50%",
                             ":hover": {
@@ -982,7 +989,7 @@ const CourseComponent = () => {
             zIndex: 9999,
             display: "flex",
             flexDirection: "column",
-            background: theme => theme.palette.common.darkGrayBackground,
+            // background: theme => theme.palette.common.darkGrayBackground,
           }}
           elevation={8}
         >
