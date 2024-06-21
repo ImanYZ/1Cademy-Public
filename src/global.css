@@ -767,7 +767,7 @@
   background: rgba(128, 128, 128, 0.13);
 } */
 
-#SidebarBody .CenterredLoadingImage {
+#SidebarBody .CenteredLoadingImage {
   width: 400px;
 }
 
@@ -789,7 +789,7 @@
   margin-bottom: 25px;
 }
 
-.CenterredLoadingImageSidebar {
+.CenteredLoadingImageSidebar {
   display: flex;
   height: 100%;
   width: 100%;

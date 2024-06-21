@@ -12,6 +12,7 @@ const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContrib
 const { updateInstitutions } = require("./updateInstitutions");
 const { deleteOntologyLock } = require("./actions/deleteOntologyLock");
 const { cleanOpenAiAssistants } = require("./cleanOpenAiAssistants");
+const { createMeeting } = require("./createMeeting");
 
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
@@ -340,3 +341,9 @@ exports.cleanOpenAiAssistants = functions
   .pubsub.schedule("every 25 hours")
   .timeZone("America/Detroit")
   .onRun(cleanOpenAiAssistants);
+
+exports.createMeeting = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("0 16 * * 1,5")
+  .timeZone("America/Detroit")
+  .onRun(createMeeting);

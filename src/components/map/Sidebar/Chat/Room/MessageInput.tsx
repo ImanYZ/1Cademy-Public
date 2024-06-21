@@ -201,7 +201,7 @@ export const MessageInput = ({
 
   const handleKeyPress = useCallback(
     (event: any) => {
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && (imageUrls.length > 0 || inputValue.trim())) {
         event.preventDefault();
         handleSendMessage();
       }
@@ -443,7 +443,7 @@ export const MessageInput = ({
                   </IconButton>
                 </Tooltip>
               )}
-              <Tooltip title={"Upload a node from notebook"}>
+              <Tooltip title={"Share a node from notebook"}>
                 <IconButton onClick={() => choosingNewLinkedNode()}>
                   <AddLinkIcon />
                 </IconButton>
@@ -456,6 +456,7 @@ export const MessageInput = ({
           <Button
             variant="contained"
             onClick={handleSendMessage}
+            disabled={!imageUrls.length && !inputValue.trim()}
             sx={{
               minWidth: "0px",
               width: "36px",

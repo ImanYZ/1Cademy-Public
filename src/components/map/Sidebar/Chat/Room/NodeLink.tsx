@@ -196,12 +196,10 @@ export const NodeLink = ({
                   </Box>
                 )}
               </Box>
-
               <Typography sx={{ fontSize: "12px" }}>
                 {moment(message?.createdAt?.toDate()?.getTime())?.format("h:mm a")}
               </Typography>
             </Box>
-
             <Box
               className="reply-box"
               sx={{
