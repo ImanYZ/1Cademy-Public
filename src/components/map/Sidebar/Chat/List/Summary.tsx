@@ -34,6 +34,7 @@ type SummaryProps = {
   user: any;
   sidebarWidth: number;
   getChannelRef: any;
+  openDMChannel: (user2: any) => void;
 };
 export const Summary = ({
   theme,
@@ -48,6 +49,7 @@ export const Summary = ({
   user,
   sidebarWidth,
   getChannelRef,
+  openDMChannel,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -137,7 +139,7 @@ export const Summary = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
-      <GroupAvatar membersInfo={selectedChannel.membersInfo} size={40} />
+      <GroupAvatar membersInfo={selectedChannel.membersInfo} size={40} openDMChannel={openDMChannel} />
       <Box
         sx={{
           display: "flex",

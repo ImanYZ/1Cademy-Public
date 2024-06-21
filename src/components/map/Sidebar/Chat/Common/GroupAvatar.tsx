@@ -7,9 +7,10 @@ type GroupAvatarProps = {
   membersInfo: any;
   max?: number;
   size?: number;
+  openDMChannel?: (user2: any) => void;
 };
 
-const GroupAvatar = ({ membersInfo, max = 5, size = 30 }: GroupAvatarProps) => {
+const GroupAvatar = ({ membersInfo, max = 5, size = 30, openDMChannel }: GroupAvatarProps) => {
   return (
     <AvatarGroup
       sx={{ "& .MuiAvatar-root": { width: size, height: size, fontSize: 10 } }}
@@ -22,6 +23,7 @@ const GroupAvatar = ({ membersInfo, max = 5, size = 30 }: GroupAvatarProps) => {
             key={index}
             alt={membersInfo[member]?.fullname}
             src={!membersInfo[member]?.imageUrl.includes("no-img") ? membersInfo[member]?.imageUrl : null}
+            onClick={openDMChannel ? () => openDMChannel(membersInfo[member]) : () => {}}
           >
             <Box>
               <OptimizedAvatar2

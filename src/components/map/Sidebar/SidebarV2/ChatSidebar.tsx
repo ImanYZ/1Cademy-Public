@@ -669,6 +669,7 @@ export const ChatSidebar = ({
       user={user}
       openChatInfo={openChatInfo}
       leading={leading.includes(selectedChannel?.id)}
+      openDMChannel={openDMChannel}
       SidebarContent={
         <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover
@@ -707,6 +708,7 @@ export const ChatSidebar = ({
                   user={user}
                   sidebarWidth={sidebarWidth}
                   getChannelRef={getChannelRef}
+                  openDMChannel={openDMChannel}
                 />
               ) : (
                 <Message
