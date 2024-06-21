@@ -42,6 +42,7 @@ type SidebarWrapperProps = {
   openChatInfo?: boolean;
   leading?: boolean;
   roomType?: string;
+  openDMChannel?: (user2: string) => void;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -75,6 +76,7 @@ export const SidebarWrapper = ({
   openChatInfo,
   leading,
   roomType,
+  openDMChannel,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -183,7 +185,9 @@ export const SidebarWrapper = ({
           >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography> */}
-          {!!selectedChannel && <GroupAvatar membersInfo={selectedChannel?.membersInfo} />}
+          {!!selectedChannel && (
+            <GroupAvatar membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
+          )}
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
             <Box sx={{ display: "flex", gap: "10px" }}>

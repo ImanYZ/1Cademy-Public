@@ -6,8 +6,6 @@ const getChannelRef = (channelId: string, roomType: string) => {
   let channelRef = db.collection("channels").doc(channelId);
   if (roomType === "direct") {
     channelRef = db.collection("conversations").doc(channelId);
-  } else if (roomType === "news") {
-    channelRef = db.collection("announcementsMessages").doc(channelId);
   }
   return channelRef;
 };

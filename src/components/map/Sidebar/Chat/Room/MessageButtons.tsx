@@ -19,7 +19,7 @@ type MessageButtonProps = {
   setInputMessage?: any;
   handleDeleteMessage?: any;
   user: any;
-  makeMessageUnread: (message: IChannelMessage) => void;
+  makeMessageUnread?: (message: IChannelMessage) => void;
 };
 export const MessageButtons = ({
   message,
@@ -67,7 +67,7 @@ export const MessageButtons = ({
           <AddReactionIcon color="secondary" />
         </IconButton>
       </Tooltip>
-      {!message.parentMessage && (
+      {!message.parentMessage && makeMessageUnread && (
         <Tooltip title={"unread"}>
           <IconButton onClick={() => makeMessageUnread(message)}>
             <MarkAsUnreadIcon color="secondary" />
