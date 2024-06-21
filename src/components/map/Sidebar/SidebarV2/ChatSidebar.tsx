@@ -560,13 +560,23 @@ export const ChatSidebar = ({
     await updateDoc(channelRef, {
       membersInfo,
     });
+    const batch = writeBatch(db);
+    const q = query(
+      query(collection(db, "notifications")),
+      where("notify", "==", user.uname),
+      where("channelId", "==", message.channelId),
+      where("manualSeen", "==", true)
+    );
+    const notificatioDoc = await getDocs(q);
+    for (const notification of notificatioDoc.docs) {
+      batch.delete(notification.ref);
+    }
 
     const messageIdx = messages.findIndex((msg: any) => msg?.id === message?.id);
     if (messageIdx != -1) {
       const newMessagesRef = [...messages];
       const newMessagesArray = newMessagesRef.splice(messageIdx);
       const numberOfMessages = newMessagesArray.filter((msg: any) => msg?.sender != user?.uname);
-      const batch = writeBatch(db);
       for (const msg of numberOfMessages) {
         const messageRef = doc(collection(db, "notifications"));
         delete msg?.doc;
