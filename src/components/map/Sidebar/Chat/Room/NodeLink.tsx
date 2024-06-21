@@ -134,6 +134,7 @@ export const NodeLink = ({
           pb: 4,
           pt: 2,
           opacity: isDeleting?.id === message?.id ? 0.5 : undefined,
+          borderRadius: "8px",
         }}
       >
         <Box sx={{ display: "flex", gap: "5px", position: "relative" }}>
@@ -214,6 +215,7 @@ export const NodeLink = ({
                     : message.sender === "You"
                     ? DESIGN_SYSTEM_COLORS.gray200
                     : DESIGN_SYSTEM_COLORS.orange100,
+                borderRadius: "8px",
               }}
             >
               <Box
