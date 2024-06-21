@@ -393,8 +393,8 @@ export const ChatSidebar = ({
     setRoomType(type);
     setSelectedChannel(channel);
     setMessages([]);
+    makeMessageRead(channel.id, type);
     clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
-    makeMessageRead(channel.id);
     createActionTrack(
       db,
       "MessageRoomOpened",
@@ -559,7 +559,7 @@ export const ChatSidebar = ({
     await updateDoc(channelRef, {
       membersInfo,
     });
-    await Post("/chat/markAsUnread", { roomType, message });
+    await Post("/chat/markAsUnread", { roomType, message: { ...message, createdAt: message.createdAt.toDate() } });
     createActionTrack(
       db,
       "MessageMarkUnread",
@@ -576,7 +576,7 @@ export const ChatSidebar = ({
     );
   };
 
-  const makeMessageRead = async (channelId: string) => {
+  const makeMessageRead = async (channelId: string, roomType: string) => {
     await Post("/chat/markAsRead", { roomType, channelId });
   };
 

@@ -1,69 +1,56 @@
 import { db } from "@/lib/firestoreServer/admin";
-import { Timestamp } from "firebase-admin/firestore";
 import { NextApiRequest, NextApiResponse } from "next/types";
 
 import fbAuth from "src/middlewares/fbAuth";
 
-const isTimestampGreater = (ts1: Timestamp, ts2: Timestamp) => {
-  const seconds1 = ts1.seconds;
-  const nanoseconds1 = ts1.nanoseconds;
-  const seconds2 = ts2.seconds;
-  const nanoseconds2 = ts2.nanoseconds;
-
-  if (seconds1 > seconds2) {
-    return true;
-  } else if (seconds1 < seconds2) {
-    return false;
-  } else {
-    return nanoseconds1 > nanoseconds2;
+const getMessageRef = (messageId: string, channelId: string, roomType: string) => {
+  let channelRef = db.collection("channelMessages").doc(channelId);
+  if (roomType === "direct") {
+    channelRef = db.collection("conversationMessages").doc(channelId);
+  } else if (roomType === "news") {
+    channelRef = db.collection("announcementsMessages").doc(channelId);
   }
+  return channelRef.collection("messages").doc(messageId);
 };
-
-// const getMessageRef = (messageId: string, channelId: string, roomType: string) => {
-//   let channelRef = db.collection("channelMessages").doc(channelId);
-//   if (roomType === "direct") {
-//     channelRef = db.collection("conversationMessages").doc(channelId);
-//   } else if (roomType === "news") {
-//     channelRef = db.collection("announcementsMessages").doc(channelId);
-//   }
-//   return channelRef.collection("messages").doc(messageId);
-// };
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
     const { message, roomType } = req.body as any;
-
-    const notificationQuery = db
-      .collection("notifications")
-      .where("notify", "==", uname)
-      .where("channelId", "==", message.channelId);
+    const notificationQuery = db.collection("notifications").where("channelId", "==", message.channelId);
 
     await db.runTransaction(async (t: any) => {
       const notificationDocs = await t.get(notificationQuery);
-      // const messageRef = getMessageRef(message?.id || "", message.channelId || "", roomType);
-      // const messageDoc = await t.get(messageRef);
-      // if (messageDoc.exists) {
-      //   const messageData = messageDoc.data();
-      //   console.log(messageData, "messageData---messageData");
-      //   await t.update(messageRef, {
-      //     unread_by: {
-      //       ...(messageData.unread || {}),
-      //       [uname]: {
-      //         unreadMessageId: message.id,
-      //       },
-      //     },
-      //   });
-      // }
-
+      const messageIds: string[] = [];
+      const selectedMessageNotification = notificationDocs.docs.find(
+        (notification: any) => notification.data().id === message?.id || notification.data().messageId === message?.id
+      );
+      const selectedMessageNotificationData = selectedMessageNotification?.data();
+      const selectedMessageNotificationCreatedAt =
+        selectedMessageNotificationData?.createdAt?.toDate()?.getTime() || new Date(message.createdAt).getTime();
       for (const notification of notificationDocs.docs) {
         const notificationData = notification.data();
+        const notificationCreatedAt = notificationData.createdAt.toDate().getTime();
         if (
-          isTimestampGreater(notificationData.createdAt, message.createdAt) &&
+          notificationCreatedAt >= selectedMessageNotificationCreatedAt - 1500 &&
+          (notificationData.subject == "New Message from" || !notificationData?.subject) &&
           notificationData.sender !== uname &&
+          notificationData.notify === uname &&
           !notificationData?.parentMessage
         ) {
-          t.update(notification.ref, { seen: false, manualSeen: true });
+          if (!messageIds.includes(notificationData?.id || notificationData?.messageId)) {
+            const messageDoc = await getMessageRef(
+              notificationData?.id || notificationData?.messageId,
+              message.channelId,
+              roomType
+            ).get();
+            if (messageDoc.exists) {
+              if (!messageDoc.data()?.deleted) {
+                t.update(notification.ref, { seen: false, manualSeen: true });
+                messageIds.push(notificationData.id);
+              }
+            }
+          }
         }
       }
     });
