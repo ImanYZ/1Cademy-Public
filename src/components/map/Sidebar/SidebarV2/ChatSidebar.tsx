@@ -14,6 +14,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -559,7 +560,29 @@ export const ChatSidebar = ({
     await updateDoc(channelRef, {
       membersInfo,
     });
-    await Post("/chat/markAsUnread", { roomType, message: { ...message, createdAt: message.createdAt.toDate() } });
+
+    const messageIdx = messages.findIndex((msg: any) => msg?.id === message?.id);
+    if (messageIdx != -1) {
+      const newMessagesRef = [...messages];
+      const newMessagesArray = newMessagesRef.splice(messageIdx);
+      const numberOfMessages = newMessagesArray.filter((msg: any) => msg?.sender != user?.uname);
+      const batch = writeBatch(db);
+      for (const msg of numberOfMessages) {
+        const messageRef = doc(collection(db, "notifications"));
+        delete msg?.doc;
+        batch.set(messageRef, {
+          ...msg,
+          seen: false,
+          notify: user?.uname,
+          roomType,
+          notificationType: "chat",
+          manualSeen: true,
+          createdAt: new Date(),
+        });
+      }
+      await batch.commit();
+    }
+
     createActionTrack(
       db,
       "MessageMarkUnread",
