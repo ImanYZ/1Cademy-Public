@@ -60,6 +60,7 @@ type MessageRightProps = {
   isRepliesLoaded?: boolean;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
   handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
+  openDMChannel: (user2: any) => void;
 };
 export const NodeLink = ({
   db,
@@ -101,6 +102,7 @@ export const NodeLink = ({
   isRepliesLoaded,
   setOpenMedia,
   handleMentionUserOpenRoom,
+  openDMChannel,
 }: MessageRightProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
@@ -143,23 +145,11 @@ export const NodeLink = ({
               width: `${!message.parentMessage ? 40 : 30}px`,
               height: `${!message.parentMessage ? 40 : 30}px`,
               cursor: "pointer",
-              transition: "all 0.2s 0s ease",
-              background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
               borderRadius: "50%",
-              "& > .user-image": {
-                borderRadius: "50%",
-                overflow: "hidden",
-                width: "30px",
-                height: "30px",
-              },
-              "@keyframes slidein": {
-                from: {
-                  transform: "translateY(0%)",
-                },
-                to: {
-                  transform: "translateY(100%)",
-                },
-              },
+            }}
+            onClick={() => {
+              if (roomType === "direct") return;
+              openDMChannel(membersInfo[message.sender]);
             }}
           >
             <OptimizedAvatar2
@@ -344,6 +334,7 @@ export const NodeLink = ({
                         makeMessageUnread={makeMessageUnread}
                         setOpenMedia={setOpenMedia}
                         handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                        openDMChannel={openDMChannel}
                       />
                     ) : (
                       <MessageLeft
@@ -380,6 +371,7 @@ export const NodeLink = ({
                         makeMessageUnread={makeMessageUnread}
                         setOpenMedia={setOpenMedia}
                         handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                        openDMChannel={openDMChannel}
                       />
                     )}
                   </>

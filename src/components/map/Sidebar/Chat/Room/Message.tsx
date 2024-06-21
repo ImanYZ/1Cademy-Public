@@ -673,6 +673,7 @@ export const Message = ({
                         isRepliesLoaded={isRepliesLoaded}
                         setOpenMedia={setOpenMedia}
                         handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                        openDMChannel={openDMChannel}
                       />
                     )}
                     {roomType !== "news" && (
@@ -716,6 +717,7 @@ export const Message = ({
                             isRepliesLoaded={isRepliesLoaded}
                             setOpenMedia={setOpenMedia}
                             handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                            openDMChannel={openDMChannel}
                           />
                         ) : (
                           <MessageLeft
@@ -757,6 +759,7 @@ export const Message = ({
                             isRepliesLoaded={isRepliesLoaded}
                             setOpenMedia={setOpenMedia}
                             handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                            openDMChannel={openDMChannel}
                           />
                         )}
                       </>
