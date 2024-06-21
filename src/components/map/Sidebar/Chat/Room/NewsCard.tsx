@@ -50,6 +50,7 @@ type NewsCardProps = {
   isRepliesLoaded?: boolean;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
   handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
+  openDMChannel: (user2: any) => void;
 };
 export const NewsCard = ({
   type,
@@ -88,6 +89,7 @@ export const NewsCard = ({
   isRepliesLoaded,
   setOpenMedia,
   handleMentionUserOpenRoom,
+  openDMChannel,
 }: NewsCardProps) => {
   const handleReplyOnMessage = () => {
     setOpenReplies(message);
@@ -119,6 +121,10 @@ export const NewsCard = ({
           height: `${!message.parentMessage ? 40 : 30}px`,
           cursor: "pointer",
           borderRadius: "50%",
+        }}
+        onClick={() => {
+          if (roomType === "direct") return;
+          openDMChannel(membersInfo[message.sender]);
         }}
       >
         <OptimizedAvatar2
@@ -237,7 +243,6 @@ export const NewsCard = ({
                   forwardMessage={forwardMessage}
                   setEditingMessage={setEditingMessage}
                   user={user}
-                  makeMessageUnread={makeMessageUnread}
                   handleDeleteMessage={() =>
                     type === "reply" ? handleDeleteReply(parentMessage, message) : handleDeleteMessage(message)
                   }
@@ -310,6 +315,7 @@ export const NewsCard = ({
                 parentMessage={message}
                 setOpenMedia={setOpenMedia}
                 handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                openDMChannel={openDMChannel}
               />
             ))}
 

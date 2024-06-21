@@ -53,6 +53,7 @@ type MessageLeftProps = {
   isRepliesLoaded?: boolean;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
   handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
+  openDMChannel: (user2: any) => void;
 };
 export const MessageLeft = ({
   type,
@@ -94,6 +95,7 @@ export const MessageLeft = ({
   isRepliesLoaded,
   setOpenMedia,
   handleMentionUserOpenRoom,
+  openDMChannel,
 }: MessageLeftProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
@@ -133,6 +135,10 @@ export const MessageLeft = ({
             height: `${!message.parentMessage ? 40 : 30}px`,
             cursor: "pointer",
             borderRadius: "50%",
+          }}
+          onClick={() => {
+            if (roomType === "direct") return;
+            openDMChannel(membersInfo[message.sender]);
           }}
         >
           <OptimizedAvatar2
@@ -325,6 +331,7 @@ export const MessageLeft = ({
                       makeMessageUnread={makeMessageUnread}
                       setOpenMedia={setOpenMedia}
                       handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                      openDMChannel={openDMChannel}
                     />
                   ) : (
                     <MessageLeft
@@ -361,6 +368,7 @@ export const MessageLeft = ({
                       makeMessageUnread={makeMessageUnread}
                       setOpenMedia={setOpenMedia}
                       handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                      openDMChannel={openDMChannel}
                     />
                   )}
                 </Fragment>
