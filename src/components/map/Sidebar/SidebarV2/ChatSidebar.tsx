@@ -14,6 +14,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -393,8 +394,8 @@ export const ChatSidebar = ({
     setRoomType(type);
     setSelectedChannel(channel);
     setMessages([]);
+    makeMessageRead(channel.id, type);
     clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
-    makeMessageRead(channel.id);
     createActionTrack(
       db,
       "MessageRoomOpened",
@@ -559,7 +560,29 @@ export const ChatSidebar = ({
     await updateDoc(channelRef, {
       membersInfo,
     });
-    await Post("/chat/markAsUnread", { roomType, message });
+
+    const messageIdx = messages.findIndex((msg: any) => msg?.id === message?.id);
+    if (messageIdx != -1) {
+      const newMessagesRef = [...messages];
+      const newMessagesArray = newMessagesRef.splice(messageIdx);
+      const numberOfMessages = newMessagesArray.filter((msg: any) => msg?.sender != user?.uname);
+      const batch = writeBatch(db);
+      for (const msg of numberOfMessages) {
+        const messageRef = doc(collection(db, "notifications"));
+        delete msg?.doc;
+        batch.set(messageRef, {
+          ...msg,
+          seen: false,
+          notify: user?.uname,
+          roomType,
+          notificationType: "chat",
+          manualSeen: true,
+          createdAt: new Date(),
+        });
+      }
+      await batch.commit();
+    }
+
     createActionTrack(
       db,
       "MessageMarkUnread",
@@ -576,7 +599,7 @@ export const ChatSidebar = ({
     );
   };
 
-  const makeMessageRead = async (channelId: string) => {
+  const makeMessageRead = async (channelId: string, roomType: string) => {
     await Post("/chat/markAsRead", { roomType, channelId });
   };
 
