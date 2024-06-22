@@ -74,6 +74,7 @@ type NodeListProps = {
   displayParentOptions: boolean;
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  lockedNodes: { [key: string]: boolean };
 };
 
 const NodesList = ({
@@ -141,6 +142,7 @@ const NodesList = ({
   displayParentOptions,
   findDescendantNodes,
   findAncestorNodes,
+  lockedNodes,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -202,6 +204,7 @@ const NodesList = ({
               title: cur,
               added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
               removed: (nodes[nId]?.removedTags || []).includes(nodes[nId].tagIds[idx]),
+              locked: lockedNodes[nodes[nId].tagIds[idx]],
             }))}
             removedTags={nodes[nId].removedTags || []}
             addedTags={nodes[nId].addedTags || []}

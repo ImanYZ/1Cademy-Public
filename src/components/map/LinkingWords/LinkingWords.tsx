@@ -7,7 +7,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { Box, Button, IconButton, Link, Tooltip } from "@mui/material";
+import { Box, Button, Divider, IconButton, Link, Tooltip } from "@mui/material";
 import React, { MutableRefObject, useCallback } from "react";
 import { DispatchNodeBookActions, TNodeBookState } from "src/nodeBookTypes";
 
@@ -410,48 +410,100 @@ const LinkingWords = ({
               sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}
             >
               <strong>Tags</strong>
-              {tags.map((tag: any, idx: number) => {
-                return (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      //gridTemplateColumns: editable && tags.length ? "1fr 32px" : "1fr",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                    key={identifier + "LinkTo" + tag.node + "DIV"}
-                  >
-                    <LinkingButton
-                      id={`${identifier}-tag-button-${idx}`}
-                      key={identifier + "LinkTo" + tag.node}
-                      onClick={openLinkedNode}
-                      linkedNodeID={tag.node}
-                      linkedNodeTitle={tag.title}
-                      linkedNodeType="tag"
-                      iClassName="local_offer"
-                      disabled={disabled && !enableChildElements.includes(`${identifier}-tag-button-${idx}`)}
-                      removed={tag.removed}
-                      added={tag.added}
-                    />
-                    {editable && (
-                      <Tooltip
-                        title="Delete the link to this tag."
-                        placement="right"
-                        sx={{
-                          color: "#bebebe",
-                          ":hover": {
-                            color: theme => theme.palette.common.orange,
-                          },
-                        }}
-                      >
-                        <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                );
-              })}
+              {tags
+                .filter((tag: any) => !tag.locked)
+                .map((tag: any, idx: number) => {
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        //gridTemplateColumns: editable && tags.length ? "1fr 32px" : "1fr",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                      key={identifier + "LinkTo" + tag.node + "DIV"}
+                    >
+                      <LinkingButton
+                        id={`${identifier}-tag-button-${idx}`}
+                        key={identifier + "LinkTo" + tag.node}
+                        onClick={openLinkedNode}
+                        linkedNodeID={tag.node}
+                        linkedNodeTitle={tag.title}
+                        linkedNodeType="tag"
+                        iClassName="local_offer"
+                        disabled={disabled && !enableChildElements.includes(`${identifier}-tag-button-${idx}`)}
+                        removed={tag.removed}
+                        added={tag.added}
+                      />
+                      {editable && (
+                        <Tooltip
+                          title="Delete the link to this tag."
+                          placement="right"
+                          sx={{
+                            color: "#bebebe",
+                            ":hover": {
+                              color: theme => theme.palette.common.orange,
+                            },
+                          }}
+                        >
+                          <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  );
+                })}
+              <Divider
+                sx={{
+                  borderTop: theme => (theme.palette.mode === "dark" ? `solid 1px #404040` : "solid 1px #D0D5DD"),
+                }}
+              />
+              <strong>Courses</strong>
+              {tags
+                .filter((tag: any) => tag.locked)
+                .map((tag: any, idx: number) => {
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        //gridTemplateColumns: editable && tags.length ? "1fr 32px" : "1fr",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                      key={identifier + "LinkTo" + tag.node + "DIV"}
+                    >
+                      <LinkingButton
+                        id={`${identifier}-tag-button-${idx}`}
+                        key={identifier + "LinkTo" + tag.node}
+                        onClick={openLinkedNode}
+                        linkedNodeID={tag.node}
+                        linkedNodeTitle={tag.title}
+                        linkedNodeType="tag"
+                        iClassName="locked_tag"
+                        disabled={disabled && !enableChildElements.includes(`${identifier}-tag-button-${idx}`)}
+                        removed={tag.removed}
+                        added={tag.added}
+                      />
+                      {editable && (
+                        <Tooltip
+                          title="Delete the link to this tag."
+                          placement="right"
+                          sx={{
+                            color: "#bebebe",
+                            ":hover": {
+                              color: theme => theme.palette.common.orange,
+                            },
+                          }}
+                        >
+                          <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  );
+                })}
               {editable && openPart === "References" && (
                 <MemoizedMetaButton
                   id={`${identifier}-tag-node`}

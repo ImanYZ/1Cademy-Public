@@ -1033,6 +1033,7 @@ type TGenerateTagsOfTagsWithNodesParam = {
     tags: string[];
   };
   visitedNodeIds: string[];
+  firstCall?: boolean;
 };
 export const generateTagsOfTagsWithNodes = async ({
   nodeId,
@@ -1040,6 +1041,7 @@ export const generateTagsOfTagsWithNodes = async ({
   nodes,
   nodeUpdates,
   visitedNodeIds,
+  firstCall = true,
 }: TGenerateTagsOfTagsWithNodesParam) => {
   // push current node id as visited if not already present
   if (!visitedNodeIds.includes(nodeId)) {
@@ -1071,7 +1073,11 @@ export const generateTagsOfTagsWithNodes = async ({
     visitedNodeIds.push(tagId);
     // if given tag is deleted we don't want it to be present in tag lists
     // or if already validated cycle for this tag id and its present under nodeUpdates.tagIds
-    if (nodes[tagId].deleted || nodeUpdates.tagIds.includes(tagId)) {
+    if (
+      (!nodes[nodeId].locked && nodes[tagId].locked && !firstCall) ||
+      nodes[tagId].deleted ||
+      nodeUpdates.tagIds.includes(tagId)
+    ) {
       continue;
     }
 
@@ -1111,6 +1117,7 @@ export const generateTagsOfTagsWithNodes = async ({
       nodes,
       nodeUpdates,
       visitedNodeIds,
+      firstCall: false,
     });
   }
 
