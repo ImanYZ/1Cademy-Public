@@ -113,14 +113,14 @@ const layoutHandler = (
   // calculate map
   // console.log(oldNodes, JSON.parse(JSON.stringify(oldNodes)));
   // console.log("worker: iterate node to calculate Dimensions");
-  Object.keys(oldNodes).map(n => {
+  for (let nodeId in oldNodes) {
     // const nodeN = dag1.node(n);
-    const nodeN = g.node(n);
+    const nodeN = g.node(nodeId);
     // If there is an object (label) assigned to the node in dag1[0], otherwise it'd be undefined:
     if (nodeN) {
       const newLeft = nodeN.x + XOFFSET - nodeN.width / 2;
       const newTop = nodeN.y + YOFFSET - nodeN.height / 2;
-      const thisNode = { ...oldNodes[n] };
+      const thisNode = { ...oldNodes[nodeId] };
       //  if the distance between the new edge and old edge is >= constant value MIN_CHANGE
       //  update the map's width and mapChangedFlag accordingly
       // console.log(thisNode, n, JSON.parse(JSON.stringify(thisNode)));
@@ -132,7 +132,7 @@ const layoutHandler = (
         Math.abs(thisNode.top - newTop) >= MIN_CHANGE
       ) {
         // oldNodes = setDagNode(g, n, { ...thisNode, left: newLeft, top: newTop }, oldNodes, {}, null);
-        oldNodes[n] = { ...thisNode, left: newLeft, top: newTop };
+        oldNodes[nodeId] = { ...thisNode, left: newLeft, top: newTop };
 
         mapNewWidth = newLeft + nodeN.width + MAP_RIGHT_GAP;
         if (oldMapWidth < mapNewWidth) {
@@ -145,8 +145,7 @@ const layoutHandler = (
         // mapChangedFlag = true;
       }
     }
-    return null;
-  });
+  }
 
   // ITERATE EDGES and calculate the new positions
   // debugger;

@@ -1,3 +1,4 @@
+import LockIcon from "@mui/icons-material/Lock";
 import { Box, Button, Tooltip } from "@mui/material";
 import NextImage from "next/image";
 import React, { ReactNode, useCallback } from "react";
@@ -60,9 +61,12 @@ const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: Lin
             <NextImage height={"20px"} width={"22px"} src={TagYellowIcon} alt="tag icon" />
           ) : props.iClassName == "menu_book" ? (
             <NextImage width={"22px"} src={ReferenceYellowIcon} alt="reference icon" />
+          ) : props.iClassName == "locked_tag" ? (
+            <LockIcon sx={{ height: "20px", width: "22px", color: "#ff8a33" }} />
           ) : (
             ""
           )}
+
           <NodeTypeIcon
             nodeType={props.nodeType}
             tooltipPlacement={"left"}

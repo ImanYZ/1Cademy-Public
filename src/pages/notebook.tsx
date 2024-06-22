@@ -807,6 +807,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
 
+  const [lockedNodes, setLockedNodes] = useState({});
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -1024,6 +1025,17 @@ const Notebook = ({}: NotebookProps) => {
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
+  useEffect(() => {
+    const getLockedNodes = async () => {
+      const locked: { [key: string]: boolean } = {};
+      const lockedNodesDocs = await getDocs(query(collection(db, "nodes"), where("locked", "==", true)));
+      for (let lockedDoc of lockedNodesDocs.docs) {
+        locked[lockedDoc.id] = true;
+      }
+      setLockedNodes(locked);
+    };
+    getLockedNodes();
+  }, [db]);
   // useEffect(() => {
   //   // fetch user tutorial state first time
 
@@ -8492,6 +8504,7 @@ const Notebook = ({}: NotebookProps) => {
                   displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
                   findDescendantNodes={findDescendantNodes}
                   findAncestorNodes={findAncestorNodes}
+                  lockedNodes={lockedNodes}
                 />
               </MapInteractionCSS>
 
