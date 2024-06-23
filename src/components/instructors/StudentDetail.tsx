@@ -79,7 +79,7 @@ const StudentDetailHoursTracking = ({
       const monthsSet = new Set<string>();
       const daysSet = new Set<string>();
       const weeksSet = new Set<number>();
-      const weekStartDate = moment("09-06-2024", "DD-MM-YYYY");
+      const weekStartDate = moment("10-06-2024", "DD-MM-YYYY");
       weekStartDate.startOf("week"); // Set to the start of the week (Sunday)
 
       sortedData.forEach((entry: any) => {
@@ -95,6 +95,7 @@ const StudentDetailHoursTracking = ({
         const weekNumber = getWeekNumberFromStart(weekStartDate.toDate(), date.toDate());
         weeksSet.add(weekNumber);
       });
+
       setAvailableMonths(Array.from(monthsSet));
       setAvailableDays(Array.from(daysSet));
       setAvailableWeeks(Array.from(weeksSet));
@@ -134,7 +135,7 @@ const StudentDetailHoursTracking = ({
   // Function to get hours tracked for the selected granularity
   const getHoursTracked = (granularity: string) => {
     const filteredData = trackingData.filter(entry => {
-      const startWeek = moment("09-06-2024", "DD-MM-YYYY");
+      const startWeek = moment("10-06-2024", "DD-MM-YYYY");
       const date = moment(entry.day, "DD-MM-YYYY");
       const formattedDay = date.format("MM/DD/YYYY");
       const monthName = date.format("MMMM");
@@ -323,29 +324,35 @@ const StudentDetailHoursTracking = ({
             <TableBody>
               {filterData().map((entry: any, index: number) => (
                 <TableRow key={index}>
-                  <TableCell>{selectedGranularity === "Week" ? periods[entry - 1].label : entry}</TableCell>
-                  <TableCell>{roundNum(getHoursTracked(entry))}</TableCell>
+                  {(periods[entry - 1]?.label || selectedGranularity !== "Week") && (
+                    <TableCell>{selectedGranularity === "Week" ? periods[entry - 1]?.label : entry}</TableCell>
+                  )}
+                  {(periods[entry - 1]?.label || selectedGranularity !== "Week") && (
+                    <TableCell>{roundNum(getHoursTracked(entry))}</TableCell>
+                  )}
 
-                  <TableCell>
-                    <Checkbox
-                      checked={isPaid(entry)}
-                      onChange={() => togglePaidStatus(entry)}
-                      disabled={!adminView || roundNum(getHoursTracked(entry)) === 0}
-                      sx={{
-                        "&.Mui-disabled": {
-                          color: isPaid(entry) ? "green" : "gray",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color:
-                            !adminView || roundNum(getHoursTracked(entry)) === 0
-                              ? isPaid(entry)
-                                ? "green"
-                                : "gray"
-                              : "primary.main",
-                        },
-                      }}
-                    />
-                  </TableCell>
+                  {(periods[entry - 1]?.label || selectedGranularity !== "Week") && (
+                    <TableCell>
+                      <Checkbox
+                        checked={isPaid(entry)}
+                        onChange={() => togglePaidStatus(entry)}
+                        disabled={!adminView || roundNum(getHoursTracked(entry)) === 0}
+                        sx={{
+                          "&.Mui-disabled": {
+                            color: isPaid(entry) ? "green" : "gray",
+                          },
+                          "& .MuiSvgIcon-root": {
+                            color:
+                              !adminView || roundNum(getHoursTracked(entry)) === 0
+                                ? isPaid(entry)
+                                  ? "green"
+                                  : "gray"
+                                : "primary.main",
+                          },
+                        }}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
