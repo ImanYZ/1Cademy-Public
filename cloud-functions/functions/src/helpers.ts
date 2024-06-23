@@ -114,7 +114,7 @@ export const trackHours = async (data: any) => {
         trackData.trackedMinutes.push(createdAt);
         trackData.lastActionTime = createdAt;
       }
-      trackDoc.ref.update(trackData);
+      trackDoc.ref.update({ ...trackData, paid: false });
     } else {
       // If it's the first action, just initialize lastActionTime
       const newData = {
