@@ -395,7 +395,7 @@ export const ChatSidebar = ({
     setSelectedChannel(channel);
     setMessages([]);
     makeMessageRead(channel.id, type);
-    clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
+    clearNotifications(notifications.filter((n: any) => n.channelId === channel.id && n.roomType === type));
     createActionTrack(
       db,
       "MessageRoomOpened",
@@ -551,9 +551,13 @@ export const ChatSidebar = ({
     if (!selectedChannel) return;
 
     const channelRef = getChannelRef(selectedChannel.id || "");
+    let updatedMemberInfo: any = { ...selectedChannel?.membersInfo[user.uname], unreadMessageId: message.id };
+    if (roomType === "news") {
+      updatedMemberInfo = { ...selectedChannel?.membersInfo[user.uname], unreadNewsMessageId: message.id };
+    }
     const membersInfo = {
       ...(selectedChannel?.membersInfo || {}),
-      [user.uname]: { ...selectedChannel?.membersInfo[user.uname], unreadMessageId: message.id },
+      [user.uname]: updatedMemberInfo,
     };
     await updateDoc(channelRef, {
       membersInfo,
@@ -563,7 +567,8 @@ export const ChatSidebar = ({
       query(collection(db, "notifications")),
       where("notify", "==", user.uname),
       where("channelId", "==", message.channelId),
-      where("manualSeen", "==", true)
+      where("manualSeen", "==", true),
+      where("roomType", "==", roomType)
     );
     const notificatioDoc = await getDocs(q);
     for (const notification of notificatioDoc.docs) {
@@ -613,7 +618,9 @@ export const ChatSidebar = ({
 
   useEffect(() => {
     if (!selectedChannel || !roomType) return;
-    clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id && !n?.manualSeen));
+    clearNotifications(
+      notifications.filter((n: any) => n.channelId === selectedChannel.id && n.roomType === roomType && !n?.manualSeen)
+    );
   }, [notifications, selectedChannel]);
 
   const getNotificationsNumbers = useCallback(
