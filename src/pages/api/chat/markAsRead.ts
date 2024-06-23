@@ -20,9 +20,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       const channelDoc = await t.get(channelRef);
       if (channelDoc.exists) {
         const channelData = channelDoc.data();
+        let updatedMemberInfo = { ...channelData?.membersInfo[uname], unreadMessageId: null };
+        if (roomType === "news") {
+          updatedMemberInfo = { ...channelData?.membersInfo[uname], unreadNewsMessageId: null };
+        }
         const membersInfo = {
           ...(channelData?.membersInfo || {}),
-          [uname]: { ...channelData?.membersInfo[uname], unreadMessageId: null },
+          [uname]: updatedMemberInfo,
         };
         await t.update(channelRef, { membersInfo });
       }
