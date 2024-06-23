@@ -2,13 +2,14 @@ import AddLinkIcon from "@mui/icons-material/AddLink";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Button, IconButton, Tooltip } from "@mui/material";
+import { Button, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { getStorage } from "firebase/storage";
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { createActionTrack } from "@/lib/utils/Map.utils";
@@ -65,6 +66,7 @@ export const MessageInput = ({
   const [imageUrls, setImageUrls] = useState<string[]>(editingMessage?.imageUrls || []);
   const [inputValue, setInputValue] = useState<string>("");
   const [important, setImportant] = useState(false);
+  const [isPreview, setIsPreview] = useState<any>(false);
 
   useEffect(() => {
     if (editingMessage) {
@@ -275,6 +277,7 @@ export const MessageInput = ({
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
+    setIsPreview(false);
     inputFieldRef?.current?.blur();
   };
 
@@ -317,58 +320,63 @@ export const MessageInput = ({
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
-      <MentionsInput
-        className="chat__mention"
-        inputRef={inputFieldRef}
-        placeholder={placeholder}
-        style={{
-          control: {
-            fontSize: 16,
-            padding: "10px",
-            boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
-            border: "none",
-            maxHeight: "100px",
-          },
-          input: {
-            fontSize: 16,
-            border: "none",
-            outline: "none",
-            width: "100%",
-            color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
-            padding: "8px",
-            overflowY: "auto",
-          },
-          suggestions: {
-            list: {
-              background:
-                theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
-              padding: "2px",
+      {isPreview ? (
+        <MarkdownRender sx={{ p: "10px" }} text={inputValue} />
+      ) : (
+        <MentionsInput
+          className="chat__mention"
+          inputRef={inputFieldRef}
+          placeholder={placeholder}
+          style={{
+            control: {
               fontSize: 16,
-              position: "absolute",
-              top: "-120px",
-              left: "-16px",
-              maxHeight: "150px",
+              padding: "10px",
+              boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
+              border: "none",
+              maxHeight: "100px",
+            },
+            input: {
+              fontSize: 16,
+              border: "none",
+              outline: "none",
+              width: "100%",
+              color:
+                theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
+              padding: "8px",
               overflowY: "auto",
             },
-          },
-        }}
-        value={inputValue}
-        singleLine={false}
-        onChange={handleTyping}
-        onKeyDown={handleKeyPress}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-      >
-        <Mention
-          trigger="@"
-          data={channelUsers}
-          displayTransform={(id, display) => {
-            return `@${display}`;
+            suggestions: {
+              list: {
+                background:
+                  theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+                padding: "2px",
+                fontSize: 16,
+                position: "absolute",
+                top: "-120px",
+                left: "-16px",
+                maxHeight: "150px",
+                overflowY: "auto",
+              },
+            },
           }}
-          markup="@[__display__](/mention/__id__)"
-          renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
-        />
-      </MentionsInput>
+          value={inputValue}
+          singleLine={false}
+          onChange={handleTyping}
+          onKeyDown={handleKeyPress}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        >
+          <Mention
+            trigger="@"
+            data={channelUsers}
+            displayTransform={(id, display) => {
+              return `@${display}`;
+            }}
+            markup="@[__display__](/mention/__id__)"
+            renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
+          />
+        </MentionsInput>
+      )}
       <Box sx={{ display: "flex" }}>
         {imageUrls.map(imageUrl => (
           <Box
@@ -434,6 +442,7 @@ export const MessageInput = ({
               </IconButton>
             </Tooltip>
           )}
+
           {!editingMessage && (
             <>
               {leading && (
@@ -450,6 +459,35 @@ export const MessageInput = ({
               </Tooltip>
             </>
           )}
+          <Box ml={3} sx={{ display: "flex", justifyContent: "end" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+                borderRadius: "10px",
+              }}
+            >
+              <Typography
+                onClick={() => setIsPreview(false)}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Edit
+              </Typography>
+              <Switch
+                //disabled={disableSwitchPreview}
+                checked={isPreview}
+                onClick={() => setIsPreview(!isPreview)}
+                size="small"
+              />
+              <Typography
+                onClick={() => setIsPreview(true)}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Preview
+              </Typography>
+            </Box>
+          </Box>
         </Box>
 
         {!editingMessage ? (
