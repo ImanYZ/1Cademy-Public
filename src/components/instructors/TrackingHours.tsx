@@ -740,25 +740,47 @@ const TrackingHours = () => {
                     </TableCell>
                   }
                   <TableCell>
-                    <Checkbox
-                      checked={student.paid}
-                      onChange={() => togglePaidStatus(student.uname, student.semesterId)}
-                      disabled={!adminView || roundNum(student.hours) === 0}
-                      sx={{
-                        color: !adminView || roundNum(student.hours) === 0 ? "green" : "primary.main",
-                        "&.Mui-disabled": {
-                          color: student.paid ? "green" : "gray",
-                        },
-                        "& .MuiSvgIcon-root": {
-                          color:
-                            !adminView || roundNum(student.hours) === 0
-                              ? student.paid
-                                ? "green"
-                                : "gray"
-                              : "primary.main",
-                        },
-                      }}
-                    />
+                    {student.paid ? (
+                      <Checkbox
+                        checked={true}
+                        onChange={() => togglePaidStatus(student.uname, student.semesterId)}
+                        disabled={!adminView || roundNum(student.hours) === 0}
+                        sx={{
+                          color: !adminView || roundNum(student.hours) === 0 ? "green" : "primary.main",
+                          "&.Mui-disabled": {
+                            color: student.paid ? "green" : "gray",
+                          },
+                          "& .MuiSvgIcon-root": {
+                            color:
+                              !adminView || roundNum(student.hours) === 0
+                                ? student.paid
+                                  ? "green"
+                                  : "gray"
+                                : "primary.main",
+                          },
+                        }}
+                      />
+                    ) : (
+                      <Checkbox
+                        checked={false}
+                        onChange={() => togglePaidStatus(student.uname, student.semesterId)}
+                        disabled={!adminView || roundNum(student.hours) === 0}
+                        sx={{
+                          color: !adminView || roundNum(student.hours) === 0 ? "green" : "primary.main",
+                          "&.Mui-disabled": {
+                            color: student.paid ? "green" : "gray",
+                          },
+                          "& .MuiSvgIcon-root": {
+                            color:
+                              !adminView || roundNum(student.hours) === 0
+                                ? student.paid
+                                  ? "green"
+                                  : "gray"
+                                : "primary.main",
+                          },
+                        }}
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               );
