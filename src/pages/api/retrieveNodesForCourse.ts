@@ -210,7 +210,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     );
     console.log("response", nodes);
     return res.status(200).json({
-      response: nodes,
+      nodes,
     });
   } catch (error) {
     console.log(error);
