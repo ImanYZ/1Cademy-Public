@@ -340,8 +340,7 @@ export const MessageInput = ({
               border: "none",
               outline: "none",
               width: "100%",
-              color:
-                theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
+              color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.baseBlack,
               padding: "8px",
               overflowY: "auto",
             },
