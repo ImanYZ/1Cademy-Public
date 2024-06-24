@@ -327,7 +327,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             <LinearProgress />
           </Stack>
         )}
-        {!isLoading && currentSemester && allCourses[currentSemester.tagId] && (
+        {currentSemester && allCourses[currentSemester.tagId] && (
           <>
             {selectToolbarView === "DASHBOARD" &&
               (user.role === "INSTRUCTOR" ? (

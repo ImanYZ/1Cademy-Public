@@ -210,6 +210,9 @@ const TrackingHours = () => {
     });
     return killSnapshot;
   };
+  const getPeriodForDay = (day: moment.Moment, periods: any[]) => {
+    return periods.find(period => day.isBetween(period.start, period.end, undefined, "[]"));
+  };
 
   useEffect(() => {
     const onSynchronize = (changes: any) => {
@@ -225,6 +228,12 @@ const TrackingHours = () => {
           const meetings = curData.meetings || [];
           let time = curData.totalMinutes;
 
+          const dayMoment = moment(curData.day, "DD-MM-YYYY");
+          const currentPeriod = getPeriodForDay(dayMoment, periods);
+          const periodLabel = currentPeriod?.label;
+
+          if (!periodLabel) return prev; // If no period found, return prev
+
           if (docType === "added" || docType === "modified") {
             if (!prev.hasOwnProperty(curData.uname)) {
               prev[curData.uname] = {
@@ -232,7 +241,7 @@ const TrackingHours = () => {
                   [curData.day]: { time, shortMeetings, meetings, paid: !!curData.paid },
                 },
                 trackHoursPerPeriod: {
-                  "06/10/2024 - 06/23/2024": {
+                  [periodLabel]: {
                     time,
                     shortMeetings,
                     meetings,
@@ -241,34 +250,40 @@ const TrackingHours = () => {
                 },
               };
             } else {
-              prev[curData.uname] = {
-                trackedHoursPerDay: {
-                  ...(prev[curData.uname]?.trackedHoursPerDay || {}),
-                  [curData.day]: {
-                    time,
-                    shortMeetings,
-                    meetings,
-                    paid: !!curData.paid,
-                  },
+              prev[curData.uname].trackedHoursPerDay = {
+                ...(prev[curData.uname]?.trackedHoursPerDay || {}),
+                [curData.day]: {
+                  time,
+                  shortMeetings,
+                  meetings,
+                  paid: !!curData.paid,
                 },
               };
-              let previousPeriodTime = 0;
-              let _meetings: any = [];
-              let _shortMeetings: any = [];
-              let _paid = true;
+
+              let periodTime = 0;
+              let periodMeetings: any[] = [];
+              let periodShortMeetings: any[] = [];
+              let periodPaid = true;
               const trackedDay = prev[curData.uname].trackedHoursPerDay;
+
               for (let day in trackedDay) {
-                previousPeriodTime = previousPeriodTime + trackedDay[day].time;
-                _meetings = [...(trackedDay[day].meetings || []), ..._meetings];
-                _shortMeetings = [...(trackedDay[day].shortMeetings || []), ..._shortMeetings];
-                _paid = !!trackedDay[day].paid;
+                const dayMoment = moment(day, "DD-MM-YYYY");
+
+                if (getPeriodForDay(dayMoment, periods)?.label === periodLabel) {
+                  periodTime += trackedDay[day].time;
+                  periodMeetings = [...trackedDay[day].meetings, ...periodMeetings];
+                  periodShortMeetings = [...trackedDay[day].shortMeetings, ...periodShortMeetings];
+                  periodPaid = periodPaid && trackedDay[day].paid;
+                }
               }
+
               prev[curData.uname].trackHoursPerPeriod = {
-                "06/10/2024 - 06/23/2024": {
-                  time: previousPeriodTime,
-                  meetings: _meetings,
-                  shortMeetings: _shortMeetings,
-                  paid: _paid,
+                ...prev[curData.uname].trackHoursPerPeriod,
+                [periodLabel]: {
+                  time: periodTime,
+                  meetings: periodMeetings,
+                  shortMeetings: periodShortMeetings,
+                  paid: periodPaid,
                 },
               };
             }
@@ -283,7 +298,7 @@ const TrackingHours = () => {
     };
     const killSnapshot = getUserHoursSnapshot(db, onSynchronize);
     return () => killSnapshot();
-  }, [db]);
+  }, [db, periods]);
 
   const updatedSemesters = (
     semesters: any,
@@ -297,6 +312,7 @@ const TrackingHours = () => {
       const students = updatedSemesters[semesterId]?.students;
       if (students) {
         for (const student of students) {
+          if (!studentHours[student.uname]) continue;
           const selectedDay = selectedDatePeriod ? selectedDatePeriod.start.format("DD-MM-YYYY") : null;
           let hours = (studentHours[student.uname].trackedHoursPerDay[selectedDay]?.time || 0) / 60;
           let meetings = studentHours[student.uname].trackedHoursPerDay[selectedDay]?.meetings || [];
@@ -304,9 +320,10 @@ const TrackingHours = () => {
           let paid = !!studentHours[student.uname].trackedHoursPerDay[selectedDay]?.paid;
           if (selectedPeriod !== -1) {
             const period = periods[selectedPeriod].label;
-            hours = studentHours[student.uname].trackHoursPerPeriod[period].time / 60;
-            meetings = studentHours[student.uname].trackHoursPerPeriod[period].meetings || [];
-            shortMeetings = studentHours[student.uname].trackHoursPerPeriod[period].shortMeetings || [];
+
+            hours = (studentHours[student.uname].trackHoursPerPeriod[period]?.time || 0) / 60;
+            meetings = studentHours[student.uname].trackHoursPerPeriod[period]?.meetings || [];
+            shortMeetings = studentHours[student.uname].trackHoursPerPeriod[period]?.shortMeetings || [];
             paid = !!studentHours[student.uname].trackHoursPerPeriod[period]?.paid;
           }
           student.hours = hours;
@@ -385,17 +402,33 @@ const TrackingHours = () => {
     setSelectedSemester(event.target.value);
   };
 
-  const togglePaidStatus = async (uname: string, semesterId: string) => {
+  const togglePaidStatus = async (uname: string, semesterId: string, newPaidValue: boolean) => {
     const batch = writeBatch(db);
-    const docQuery = query(
+    const selectedDay = selectedDatePeriod ? selectedDatePeriod.start.format("DD-MM-YYYY") : null;
+
+    let docQuery = query(
       collection(db, "trackHours"),
       where("uname", "==", uname),
       where("semesterId", "==", semesterId)
     );
+    if (selectedDay) {
+      docQuery = query(
+        collection(db, "trackHours"),
+        where("uname", "==", uname),
+        where("semesterId", "==", semesterId),
+        where("day", "==", selectedDay)
+      );
+    }
+
+    const periodLabel = selectedPeriod !== -1 ? periods[selectedPeriod].label : null;
     const hoursDocs = await getDocs(docQuery);
 
     hoursDocs.forEach(doc => {
-      batch.update(doc.ref, { paid: !doc.data().paid });
+      const dayMoment = moment(doc.data().day, "DD-MM-YYYY");
+      const periodDoc = getPeriodForDay(dayMoment, periods)?.label;
+      if (selectedPeriod === -1 || periodLabel === periodDoc) {
+        batch.update(doc.ref, { paid: newPaidValue });
+      }
     });
     await batch.commit();
   };
@@ -743,7 +776,7 @@ const TrackingHours = () => {
                     {student.paid ? (
                       <Checkbox
                         checked={true}
-                        onChange={() => togglePaidStatus(student.uname, student.semesterId)}
+                        onChange={() => togglePaidStatus(student.uname, student.semesterId, false)}
                         disabled={!adminView || roundNum(student.hours) === 0}
                         sx={{
                           color: !adminView || roundNum(student.hours) === 0 ? "green" : "primary.main",
@@ -763,7 +796,7 @@ const TrackingHours = () => {
                     ) : (
                       <Checkbox
                         checked={false}
-                        onChange={() => togglePaidStatus(student.uname, student.semesterId)}
+                        onChange={() => togglePaidStatus(student.uname, student.semesterId, true)}
                         disabled={!adminView || roundNum(student.hours) === 0}
                         sx={{
                           color: !adminView || roundNum(student.hours) === 0 ? "green" : "primary.main",
@@ -905,6 +938,7 @@ const TrackingHours = () => {
               onChange={(event: any) => {
                 setSelectedPeriod(event.target.value);
                 setSelectedDate(null);
+                setSelectedDatePeriod(null);
               }}
               displayEmpty
               variant="outlined"
