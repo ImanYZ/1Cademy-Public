@@ -28,6 +28,9 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
+import ImageSlider from "@/components/ImageSlider";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
+import NodeTypeIcon from "@/components/NodeTypeIcon";
 import { Post } from "@/lib/mapApi";
 
 const COURSES = [
@@ -267,10 +270,11 @@ const CourseComponent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [loadingNodes, setLoadingNodes] = useState(false);
-  // const [nodesPerTopic, setNodesPerTopic] = useState<{ [key: string]: any }>({});
+  const [nodesPerTopic, setNodesPerTopic] = useState<{ [key: string]: any }>({});
   const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState("");
   const [editTopic, setEditTopic] = useState<any>(null);
+  const [expandedNode, setExpandedNode] = useState(null);
 
   // const [topicImages /* , setTopicImages */] = useState<any>({
   //   "History and Approaches to Psychology":
@@ -498,26 +502,32 @@ const CourseComponent = () => {
   const handlePaperClick = async (topic: string) => {
     setSelectedTopic(topic);
     setSidebarOpen(true);
+    if (nodesPerTopic[topic]) return;
     setLoadingNodes(true);
-    // const courseTitle = courses[selectedCourse].title;
-    // const courseDescription = courses[selectedCourse].description;
-    // const targetLearners = courses[selectedCourse].learners;
-    // const syllabus = courses[selectedCourse].syllabus;
-    // const tags = courses[selectedCourse].tags;
-    // const references = courses[selectedCourse].references;
-    //
-    // const response: { nodes: any } = await Post("/retrieveNodesForCourse", {
-    //   tags,
-    //   courseTitle,
-    //   courseDescription,
-    //   targetLearners,
-    //   references,
-    //   syllabus,
-    // });
-    // setLoadingNodes(false);
-    // setNodesPerTopic(prev => {
-    //   prev[topic] = response.nodes;
-    // });
+    setImprovements([]);
+    setCurrentImprovement({});
+
+    const courseTitle = courses[selectedCourse].title;
+    const courseDescription = courses[selectedCourse].description;
+    const targetLearners = courses[selectedCourse].learners;
+    const syllabus = courses[selectedCourse].syllabus;
+    const tags = courses[selectedCourse].tags;
+    const references = courses[selectedCourse].references;
+
+    const response: { nodes: any } = await Post("/retrieveNodesForCourse", {
+      tags,
+      courseTitle,
+      courseDescription,
+      targetLearners,
+      references,
+      syllabus,
+    });
+    setLoadingNodes(false);
+
+    setNodesPerTopic(prev => {
+      prev[topic] = response.nodes;
+      return prev;
+    });
   };
 
   const handleSidebarClose = () => {
@@ -570,7 +580,11 @@ const CourseComponent = () => {
       sx={{
         height: "100vh",
         overflow: "auto",
-        // background: theme => theme.palette.common.darkGrayBackground,
+        background: theme =>
+          theme.palette.mode === "dark"
+            ? theme.palette.common.darkGrayBackground
+            : theme.palette.common.lightGrayBackground,
+
         display: "flex",
       }}
     >
@@ -989,7 +1003,7 @@ const CourseComponent = () => {
             zIndex: 9999,
             display: "flex",
             flexDirection: "column",
-            // background: theme => theme.palette.common.darkGrayBackground,
+            background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : ""),
           }}
           elevation={8}
         >
@@ -1002,12 +1016,14 @@ const CourseComponent = () => {
               borderBottom: "1px solid lightgrey",
             }}
           >
-            <Typography variant="h6">{currentImprovement ? "Improvement" : selectedTopic}</Typography>
+            <Typography variant="h6">
+              {Object.keys(currentImprovement).length > 0 ? "Improvement" : selectedTopic}
+            </Typography>
             <IconButton onClick={handleSidebarClose}>
               <CloseIcon />
             </IconButton>
           </Box>
-          {currentImprovement ? (
+          {Object.keys(currentImprovement).length > 0 && (
             <Box>
               <Paper sx={{ p: "15px", m: "17px" }}>
                 <strong style={{ color: "green", marginRight: "5px" }}> Rationale:</strong>{" "}
@@ -1035,8 +1051,6 @@ const CourseComponent = () => {
                 </Button>
               </Box>
             </Box>
-          ) : (
-            <Box></Box>
           )}
           {loadingNodes ? (
             <Box>
@@ -1067,7 +1081,98 @@ const CourseComponent = () => {
               </Box>
             </Box>
           ) : (
-            <></>
+            <Box sx={{ gap: "5px", my: "15px", mx: "19px" }}>
+              {selectedTopic &&
+                (nodesPerTopic[selectedTopic] || []).map((node: any) => (
+                  <Box key={node.id}>
+                    <Accordion
+                      id={node.id}
+                      expanded={expandedNode === node.id}
+                      sx={{
+                        borderRadius: "13px!important",
+
+                        overflow: "hidden",
+                        listStyle: "none",
+                        transition: "box-shadow 0.3s",
+
+                        border: expandedNode === node.id ? `2px solid orange` : "",
+                        p: "0px !important",
+                      }}
+                    >
+                      <AccordionSummary
+                        sx={{
+                          p: "0px !important",
+                          marginBlock: "-13px !important",
+                        }}
+                      >
+                        <Box sx={{ flexDirection: "column", width: "100%" }}>
+                          <Box
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (expandedNode === node.id) {
+                                setExpandedNode(null);
+                              } else {
+                                setExpandedNode(node.id);
+                              }
+                            }}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              m: "15px",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                pr: "25px",
+                                // pb: '15px',
+                                display: "flex",
+                                gap: "15px",
+                              }}
+                            >
+                              <NodeTypeIcon
+                                id={node.id}
+                                nodeType={node.nodeType}
+                                tooltipPlacement={"top"}
+                                fontSize={"medium"}
+                                // disabled={disabled}
+                              />
+                              <MarkdownRender
+                                text={node?.title}
+                                sx={{
+                                  fontSize: "20px",
+                                  fontWeight: 900,
+                                  letterSpacing: "inherit",
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+                      </AccordionSummary>
+
+                      <AccordionDetails sx={{ p: "0px !important" }}>
+                        <Box sx={{ p: "17px", pt: 0 }}>
+                          <Box
+                            sx={{
+                              transition: "border 0.3s",
+                            }}
+                          >
+                            <MarkdownRender
+                              text={node.content}
+                              sx={{
+                                fontSize: "16px",
+                                fontWeight: 400,
+                                letterSpacing: "inherit",
+                              }}
+                            />
+                          </Box>
+                          {/* <FlashcardVideo flashcard={concept} /> */}
+                          {(node?.nodeImage || []).length > 0 && <ImageSlider images={[node?.nodeImage]} />}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
+                ))}
+            </Box>
           )}
         </Paper>
       )}
