@@ -1104,6 +1104,7 @@ const Node = ({
               editOption={option}
               disabled={disableTitle}
               proposalsSelected={isProposalsSelected}
+              focus={true}
             />
             {editable && (
               <Box sx={{ marginTop: "5px" }}>
