@@ -1163,6 +1163,26 @@ const Notebook = ({}: NotebookProps) => {
     return () => unsubscribe();
   }, [db, user]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      const userAgent = navigator.userAgent;
+      const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(userAgent);
+      const isCtrlF = event.ctrlKey && event.key === "f";
+      const isCmdF = isMac && event.metaKey && event.key === "f";
+
+      if (isCtrlF || isCmdF) {
+        event.preventDefault();
+        setOpenSidebar("SEARCHER_SIDEBAR");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const onPreLoadNodes = useCallback(
     async (nodeIds: string[], fullNodes: FullNodeData[]) => {
       if (!user?.uname) return;
