@@ -75,23 +75,17 @@ const StudentDetailHoursTracking = ({
       if (uname !== user?.uname && !adminView && !leading.includes(data[0].semesterId)) return;
       setTrackingData(sortedData);
 
-      // Extract available months, days, and weeks from the data
       const monthsSet = new Set<string>();
       const daysSet = new Set<string>();
       const weeksSet = new Set<number>();
-      const weekStartDate = moment("10-06-2024", "DD-MM-YYYY");
-      weekStartDate.startOf("week"); // Set to the start of the week (Sunday)
+      const weekStartDate = moment("10-06-2024", "DD-MM-YYYY").startOf("isoWeek");
 
       sortedData.forEach((entry: any) => {
-        // Convert date string to Date object
         const date = moment(entry.day, "DD-MM-YYYY");
-        // Get month name
         const monthName = date.format("MMMM");
         monthsSet.add(monthName);
-        // Get formatted date
         const formattedDate = date.format("MM/DD/YYYY");
         daysSet.add(formattedDate);
-        // Calculate week number based on the first tracking date
         const weekNumber = getWeekNumberFromStart(weekStartDate.toDate(), date.toDate());
         weeksSet.add(weekNumber);
       });
@@ -108,15 +102,13 @@ const StudentDetailHoursTracking = ({
   }, [uname, user]);
 
   // Function to calculate week number from the first tracking date
-  function getWeekNumberFromStart(startDate: Date, currentDate: Date): number {
-    const millisecondsInDay = 86400000; // 1000 * 60 * 60 * 24
-    const millisecondsInWeek = 14 * millisecondsInDay;
-
-    const diffInMilliseconds = currentDate.getTime() - startDate.getTime();
-    const weekNumber = Math.floor(diffInMilliseconds / millisecondsInWeek) + 1;
-
-    return weekNumber;
-  }
+  const getWeekNumberFromStart = (start: any, date: any) => {
+    const startDate = moment(start);
+    const currentDate = moment(date);
+    // Calculate the number of days difference and then divide by 14 to get two-week periods
+    const daysDifference = currentDate.diff(startDate, "days");
+    return Math.floor(daysDifference / 14) + 1;
+  };
 
   // Function to filter data based on selected granularity
   const filterData = () => {
@@ -155,31 +147,41 @@ const StudentDetailHoursTracking = ({
 
   // Function to check if an entry is paid
   const isPaid = (granularity: string) => {
-    return trackingData.some(entry => {
-      const startWeek = moment("09-06-2024", "DD-MM-YYYY");
-      const date = moment(entry.day, "DD-MM-YYYY");
-      const formattedDay = date.format("MM/DD/YYYY");
-      const monthName = date.format("MMMM");
-      switch (selectedGranularity) {
-        case "Month":
+    const startWeek = moment("10-06-2024", "DD-MM-YYYY");
+
+    // Function to get the week number from the start date
+
+    switch (selectedGranularity) {
+      case "Month":
+        return trackingData.every(entry => {
+          const date = moment(entry.day, "DD-MM-YYYY");
+          const monthName = date.format("MMMM");
           return monthName === granularity && entry.paid;
-        case "Day":
+        });
+      case "Day":
+        return trackingData.some(entry => {
+          const date = moment(entry.day, "DD-MM-YYYY");
+          const formattedDay = date.format("MM/DD/YYYY");
           return formattedDay === granularity && entry.paid;
-        case "Week":
-          return getWeekNumberFromStart(startWeek.toDate(), date.toDate()) === parseInt(granularity) && entry.paid;
-        default:
-          return false;
-      }
-    });
+        });
+      case "Week":
+        const weekNumber = parseInt(granularity);
+        return trackingData.every(entry => {
+          const date = moment(entry.day, "DD-MM-YYYY");
+          return getWeekNumberFromStart(startWeek.toDate(), date.toDate()) === weekNumber && entry.paid;
+        });
+      default:
+        return false;
+    }
   };
 
   // Function to toggle paid status
-  const togglePaidStatus = async (granularity: string) => {
+  const togglePaidStatus = async (granularity: string, newValue: boolean) => {
     const batch = writeBatch(db);
 
     trackingData.forEach(entry => {
       let shouldUpdate = false;
-      const startWeek = moment("09-06-2024", "DD-MM-YYYY");
+      const startWeek = moment("10-06-2024", "DD-MM-YYYY");
       const date = moment(entry.day, "DD-MM-YYYY");
       const formattedDay = date.format("MM/DD/YYYY");
       const monthName = date.format("MMMM");
@@ -199,7 +201,7 @@ const StudentDetailHoursTracking = ({
 
       if (shouldUpdate) {
         const docRef = doc(db, "trackHours", entry.id);
-        batch.update(docRef, { paid: !entry.paid });
+        batch.update(docRef, { paid: newValue });
       }
     });
 
@@ -333,24 +335,35 @@ const StudentDetailHoursTracking = ({
 
                   {(periods[entry - 1]?.label || selectedGranularity !== "Week") && (
                     <TableCell>
-                      <Checkbox
-                        checked={isPaid(entry)}
-                        onChange={() => togglePaidStatus(entry)}
-                        disabled={!adminView || roundNum(getHoursTracked(entry)) === 0}
-                        sx={{
-                          "&.Mui-disabled": {
-                            color: isPaid(entry) ? "green" : "gray",
-                          },
-                          "& .MuiSvgIcon-root": {
-                            color:
-                              !adminView || roundNum(getHoursTracked(entry)) === 0
-                                ? isPaid(entry)
-                                  ? "green"
-                                  : "gray"
-                                : "primary.main",
-                          },
-                        }}
-                      />
+                      {isPaid(entry) ? (
+                        <Checkbox
+                          checked={true}
+                          onChange={() => togglePaidStatus(entry, false)}
+                          disabled={!adminView || roundNum(getHoursTracked(entry)) === 0}
+                          sx={{
+                            "&.Mui-disabled": {
+                              color: "green",
+                            },
+                            "& .MuiSvgIcon-root": {
+                              color: !adminView || roundNum(getHoursTracked(entry)) === 0 ? "green" : "primary.main",
+                            },
+                          }}
+                        />
+                      ) : (
+                        <Checkbox
+                          checked={false}
+                          onChange={() => togglePaidStatus(entry, true)}
+                          disabled={!adminView || roundNum(getHoursTracked(entry)) === 0}
+                          sx={{
+                            "&.Mui-disabled": {
+                              color: "gray",
+                            },
+                            "& .MuiSvgIcon-root": {
+                              color: !adminView || roundNum(getHoursTracked(entry)) === 0 ? "gray" : "primary.main",
+                            },
+                          }}
+                        />
+                      )}
                     </TableCell>
                   )}
                 </TableRow>

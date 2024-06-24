@@ -99,7 +99,7 @@ export const ChatSidebar = ({
   setOpenChatByNotification,
 }: ChatSidebarProps) => {
   const db = getFirestore();
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(2);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
