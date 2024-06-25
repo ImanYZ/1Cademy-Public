@@ -3,6 +3,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { LoadingButton } from "@mui/lab";
@@ -40,6 +41,7 @@ import withAuthUser from "@/components/hoc/withAuthUser";
 import ImageSlider from "@/components/ImageSlider";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 
 const COURSES = [
@@ -431,6 +433,11 @@ const CourseComponent = () => {
 
   const [newCourseTitle, setNewCourseTitle] = useState("");
   const [newCourseLearners, setNewCourseLearners] = useState("");
+
+  const [editCategory, setEditCategory] = useState<any>(null);
+  const [newCategoryTitle, setNewCategoryTitle] = useState<string>("");
+
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
   // const [topicImages /* , setTopicImages */] = useState<any>({
   //   "History and Approaches to Psychology":
   //     "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
@@ -938,6 +945,52 @@ const CourseComponent = () => {
     });
     setLoadingCourseStructure(false);
   };
+  const deleteCategory = async (c: any) => {
+    if (
+      await confirmIt(
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: "10px",
+          }}
+        >
+          <DeleteForeverIcon />
+          <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this syllabus?</Typography>
+        </Box>,
+        "Delete Syllabus",
+        "Keep Syllabus"
+      )
+    ) {
+      const _courses = [...courses];
+      const course = _courses[selectedCourse];
+      course.syllabus = course.syllabus.filter((s: any) => s.category !== c.category);
+      setCourses(_courses);
+    }
+  };
+
+  const handleEditCategory = () => {
+    const _courses = [...courses];
+    const course = _courses[selectedCourse];
+    if (editCategory === "new") {
+      course.syllabus.unshift({
+        category: newCategoryTitle,
+        topics: [],
+      });
+    } else {
+      const category: any = course.syllabus.find((s: any) => s.category === editCategory.category);
+      if (category) {
+        category.category = newCategoryTitle;
+      }
+    }
+
+    setCourses(_courses);
+    setEditCategory(null);
+    setNewCategoryTitle("");
+  };
   return (
     <Box
       sx={{
@@ -1104,12 +1157,13 @@ const CourseComponent = () => {
               placeholder="Add a new course skill..."
             />
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
-            <Typography variant="h2" sx={{ my: "16px" }}>
-              Course Structure
-            </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", py: "15px", mt: "26px" }}>
+            <Typography variant="h2">Course Structure:</Typography>
+            <Button sx={{ ml: "19px" }} onClick={() => setEditCategory("new")}>
+              Add syllabus
+            </Button>
             <InputAdornment position="end">
-              {!courses[selectedCourse].syllabus?.length && (
+              {courses[selectedCourse].syllabus?.length && (
                 <LoadingButton
                   onClick={generateCourseStructure}
                   sx={{
@@ -1130,7 +1184,8 @@ const CourseComponent = () => {
                   expandIcon={<ExpandMoreIcon />}
                   aria-controls={`panel${categoryIndex}-content`}
                   id={`panel${categoryIndex}-header`}
-                  onClick={() => {
+                  onClick={e => {
+                    e.stopPropagation();
                     if (expanded.includes(category.category)) {
                       setExpanded([]);
                     } else {
@@ -1141,33 +1196,57 @@ const CourseComponent = () => {
                   {currentImprovement.type === "category" &&
                   currentImprovement.action === "modify" &&
                   currentImprovement.old_category === category.category ? (
-                    <Box sx={{ display: "flex", gap: "5px" }}>
-                      <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
-                        {category.category}
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: "green" }}>
-                        {currentImprovement.new_category.category}
-                      </Typography>
+                    <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
+                      <Box sx={{ display: "flex", gap: "5px" }}>
+                        <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
+                          {category.category}
+                        </Typography>
+                        <Typography variant="h6" sx={{ color: "green" }}>
+                          {currentImprovement.new_category.category}
+                        </Typography>
+                      </Box>
                     </Box>
                   ) : (
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        color:
-                          currentImprovement.type === "topic" && currentImprovement.category === category.category
-                            ? "orange"
-                            : currentImprovement.type === "topic" &&
-                              currentImprovement.current_category === category.category
-                            ? "red"
-                            : currentImprovement.new_category === category.category
-                            ? "green"
-                            : "",
-                      }}
-                    >
-                      {category.category}
-                    </Typography>
+                    <Box sx={{ display: "flex", width: "100%", justifyContent: "space-between" }}>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          color:
+                            currentImprovement.type === "topic" && currentImprovement.category === category.category
+                              ? "orange"
+                              : currentImprovement.type === "topic" &&
+                                currentImprovement.current_category === category.category
+                              ? "red"
+                              : currentImprovement.new_category === category.category
+                              ? "green"
+                              : "",
+                        }}
+                      >
+                        {category.category}
+                      </Typography>
+                      <Box>
+                        <Button
+                          onClick={e => {
+                            e.stopPropagation();
+                            deleteCategory(category);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          onClick={e => {
+                            e.stopPropagation();
+                            setEditCategory(category);
+                            setNewCategoryTitle(category.category);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </Box>
+                    </Box>
                   )}
                 </AccordionSummary>
+
                 <AccordionDetails>
                   <Grid container spacing={2}>
                     {category.topics.map((tc: any, topicIndex) => (
@@ -1437,7 +1516,42 @@ const CourseComponent = () => {
               Create New Course
             </LoadingButton>
           </Box>
-
+          <Dialog
+            open={!!editCategory}
+            onClose={() => {
+              setEditCategory(null);
+              setNewCategoryTitle("");
+            }}
+            sx={{ zIndex: 9998 }}
+          >
+            <DialogTitle>{`${editCategory === "new" ? "Add" : "Edit"} syllabus`}</DialogTitle>
+            <DialogContent>
+              <TextField
+                label={"Syllabus Title"}
+                multiline
+                fullWidth
+                value={newCategoryTitle}
+                onChange={event => setNewCategoryTitle(event.target.value)}
+                margin="normal"
+                variant="outlined"
+                sx={{ width: "500px" }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setEditCategory(null);
+                }}
+                color="primary"
+                variant="contained"
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleEditCategory} color="primary" variant="contained">
+                Save
+              </Button>
+            </DialogActions>
+          </Dialog>
           <Dialog open={createCourseModel} onClose={handleCloseCourseDialog} sx={{ zIndex: 9998 }}>
             <DialogTitle>{"Add a Course"}</DialogTitle>
             <DialogContent>
@@ -1815,6 +1929,7 @@ const CourseComponent = () => {
           </Paper>
         )}
       </Box>
+      {ConfirmDialog}
     </Box>
   );
 };
