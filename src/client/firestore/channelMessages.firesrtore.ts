@@ -2,10 +2,12 @@ import {
   collection,
   doc,
   Firestore,
+  limit,
   // limit,
   onSnapshot,
   orderBy,
   query,
+  startAfter,
   // startAfter,
   Unsubscribe,
 } from "firebase/firestore";
@@ -26,7 +28,8 @@ export const getChannelMessagesSnapshot = (
   },
   callback: (changes: channelMessagesChange[]) => void
 ): Unsubscribe => {
-  const { channelId, roomType /* , lastVisible */ } = data;
+  const { channelId, roomType, lastVisible } = data;
+  const pageSize = 8;
   let channelRef = doc(db, "channelMessages", channelId);
   if (roomType === "direct") {
     channelRef = doc(db, "conversationMessages", channelId);
@@ -36,11 +39,12 @@ export const getChannelMessagesSnapshot = (
 
   const messageRef = collection(channelRef, "messages");
 
-  let q = query(messageRef, orderBy("createdAt", "desc"));
+  let q = query(messageRef, orderBy("createdAt", "desc"), limit(pageSize));
 
-  // if (lastVisible) {
-  //   q = query(messageRef, orderBy("createdAt", "desc"), startAfter(lastVisible));
-  // }
+  if (lastVisible) {
+    q = query(messageRef, orderBy("createdAt", "desc"), startAfter(lastVisible), limit(pageSize));
+  }
+  console.log(lastVisible, "lastVisible--lastVisible");
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 

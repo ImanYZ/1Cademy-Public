@@ -9,9 +9,13 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
+  limit,
   onSnapshot,
+  orderBy,
   query,
+  startAfter,
   Timestamp,
   updateDoc,
   where,
@@ -233,10 +237,6 @@ export const Message = ({
   }, [selectedChannel]);
 
   useEffect(() => {
-    setLastVisible(messages[0]?.doc || null);
-  }, [messages]);
-
-  useEffect(() => {
     setIsLoading(true);
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
@@ -259,20 +259,20 @@ export const Message = ({
   };
 
   useEffect(() => {
-    if (!messageBoxRef.current) return;
     const messageList: any = messageBoxRef.current;
+    console.log(messageList, "messageList-----messageListmessageListmessageListmessageList");
     const handleScroll = () => {
+      console.log("Loader.....");
+      console.log(messageList.scrollTop, "messageList.scrollTop");
       if (messageList.scrollTop === 0) {
-        setLoadMore(l => !l);
+        fetchOlderMessages();
       }
     };
-
-    messageList.addEventListener("scroll", handleScroll);
-
+    messageList?.addEventListener("scroll", handleScroll);
     return () => {
-      messageList.removeEventListener("scroll", handleScroll);
+      messageList?.removeEventListener("scroll", handleScroll);
     };
-  }, [loadMore, messageBoxRef.current]);
+  }, [messages, messageBoxRef.current]);
 
   useEffect(() => {
     if (!!openReplies) {
@@ -289,6 +289,30 @@ export const Message = ({
     },
     [selectedChannel]
   );
+
+  const fetchOlderMessages = async () => {
+    let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+    if (roomType === "direct") {
+      channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+    } else if (roomType === "news") {
+      channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
+    }
+
+    const messageRef = collection(channelRef, "messages");
+
+    const q = query(messageRef, orderBy("createdAt", "desc"), startAfter(messages[0].doc), limit(8));
+    const messageSnapshot = await getDocs(q);
+    const olderMessages = messageSnapshot.docs.map(doc => ({
+      type: "added",
+      data: { id: doc.id, ...document },
+      doc: doc,
+    }));
+
+    if (olderMessages.length > 0) {
+      setLastVisible(messageSnapshot.docs[messageSnapshot.docs.length - 1]);
+      setMessages((prev: any) => messageSnapshot.docs.reduce(synchronizationMessages, [...prev]));
+    }
+  };
 
   const handleDeleteReply = async (curMessage: IChannelMessage, reply: IChannelMessage) => {
     if (
@@ -530,43 +554,6 @@ export const Message = ({
   );
 
   if (!selectedChannel) return <></>;
-  if (isLoading) {
-    return (
-      <Box>
-        {Array.from(new Array(7)).map((_, index) => (
-          <Box
-            key={index}
-            sx={{
-              display: "flex",
-              justifyContent: "flex-start",
-              p: 1,
-            }}
-          >
-            <Skeleton
-              variant="circular"
-              width={50}
-              height={50}
-              sx={{
-                bgcolor: "grey.500",
-                borderRadius: "50%",
-              }}
-            />
-            <Skeleton
-              variant="rectangular"
-              width={410}
-              height={90}
-              sx={{
-                bgcolor: "grey.300",
-                borderRadius: "0px 10px 10px 10px",
-                mt: "19px",
-                ml: "5px",
-              }}
-            />
-          </Box>
-        ))}
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -582,6 +569,41 @@ export const Message = ({
         overflow: "auto",
       }}
     >
+      {isLoading && (
+        <Box>
+          {Array.from(new Array(7)).map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                justifyContent: "flex-start",
+                p: 1,
+              }}
+            >
+              <Skeleton
+                variant="circular"
+                width={50}
+                height={50}
+                sx={{
+                  bgcolor: "grey.500",
+                  borderRadius: "50%",
+                }}
+              />
+              <Skeleton
+                variant="rectangular"
+                width={410}
+                height={90}
+                sx={{
+                  bgcolor: "grey.300",
+                  borderRadius: "0px 10px 10px 10px",
+                  mt: "19px",
+                  ml: "5px",
+                }}
+              />
+            </Box>
+          ))}
+        </Box>
+      )}
       {newMemberSection && (
         <Box sx={{ position: "relative", pt: "14px" }}>
           <AddMember
