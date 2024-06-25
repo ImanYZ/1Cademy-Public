@@ -84,7 +84,7 @@ const convertSyllabusToRelatedNodesString = (
 const searchJSONForCourse = async (
   nodesArray: any[],
   courseTitle: string,
-  courseDecription: string,
+  courseDescription: string,
   targetLearners: string,
   syllabus: Array<
     | {
@@ -98,11 +98,12 @@ const searchJSONForCourse = async (
         category: string;
         topics: Array<{ topic: string; hours: number; difficulty: string }>;
       }
-  >
+  >,
+  topic: string
 ) => {
   let prompt =
     "Task Summary:\n" +
-    "Search through the JSON array of nodes in 1Cademy and find a maximum of ten most related nodes to each topic in the syllabus of a course. Return the results in a specified JSON format.\n\n" +
+    "Search through the JSON array of nodes in 1Cademy and find a maximum of ten most related nodes to a topic that a student is searching. Return the results in a specified JSON format.\n\n" +
     DEFINITION_OF_1CADEMY +
     "{\n" +
     '"nodes": ' +
@@ -114,7 +115,7 @@ const searchJSONForCourse = async (
     "\n\n" +
     "The course is described in the following triple-quoted text:\n" +
     "'''\n" +
-    courseDecription +
+    courseDescription +
     "\n'''\n\n" +
     "The target learners of the course are: " +
     targetLearners +
@@ -122,16 +123,22 @@ const searchJSONForCourse = async (
     "The course syllabus is as follows:\n" +
     "```\n" +
     JSON.stringify(syllabus, null, 2) +
+    "The student is searching for the topic: " +
+    topic +
     "\n```\n\n" +
     "Task Instructions:\n" +
-    "1. **Search**: Identify a maximum of ten nodes in the JSON array that most relate to each topic in the syllabus of a course.\n" +
+    "1. **Search**: Identify a maximum of ten nodes in the JSON array that most relate to the topic " +
+    topic +
+    " in the syllabus of a course.\n" +
     "2. **Ensure Uniqueness**: The titles assigned to each topic should be unique.\n" +
     "3. **Output**: Respond with a JSON object following this schema:\n" +
-    convertSyllabusToRelatedNodesString(syllabus) +
-    "\n" +
+    // convertSyllabusToRelatedNodesString(syllabus) +
+    "{\n" +
+    '  "related_nodes": ["Node 1 title", "Node 2 title", "Node 3 title", ...]\n' +
+    "}\n" +
     "Please take your time to think carefully before responding.";
 
-  const response: string = await askGemini([], prompt);
+  const response = await askGemini([], prompt);
   const searchObj = JSON.parse(response).related_nodes;
   // console.log("searchObj:", searchObj);
   return searchObj;
@@ -155,14 +162,15 @@ const retrieveNodesForCourse = async (
         category: string;
         topics: Array<{ topic: string; hours: number; difficulty: string }>;
       }
-  >
+  >,
+  currentTopic: string
 ) => {
   const nodeDocs = await db
     .collection("nodes")
     .where("nodeType", "in", ["Concept", "Relation"])
     .where("tags", "array-contains-any", tags)
     .get();
-  const nodesArray = [];
+  const nodesArray: any = [];
   for (let nodeDoc of nodeDocs.docs) {
     const nodeData = nodeDoc.data();
     if (!nodeData.deleted && !nodeData.title.includes("References")) {
@@ -191,22 +199,43 @@ const retrieveNodesForCourse = async (
 
   console.log(nodesArray.length + " Nodes retrieved.");
 
-  let searchResults = await searchJSONForCourse(nodesArray, courseTitle, courseDescription, targetLearners, syllabus);
-  console.log("searchResults:", searchResults);
-  const nodes = nodesArray.filter(node => searchResults.includes(node.title));
-  return nodes;
+  // const chunkSize = 50;
+  // const nodeChunks = [];
+  // for (let i = 0; i < nodesArray.length; i += chunkSize) {
+  //   const chunk = nodesArray.slice(i, i + chunkSize);
+  //   nodeChunks.push(chunk);
+  // }
+
+  console.log("Topic:", currentTopic);
+
+  // for (let chunk of nodeChunks) {
+  const searchResults = await searchJSONForCourse(
+    nodesArray,
+    courseTitle,
+    courseDescription,
+    targetLearners,
+    syllabus,
+    currentTopic
+  );
+  console.log(searchResults);
+  console.log(nodesArray);
+
+  return nodesArray.filter((node: any) => searchResults.includes(node.title));
+
+  // }
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { tags, courseTitle, courseDescription, targetLearners, references, syllabus } = req.body;
+    const { tags, courseTitle, courseDescription, targetLearners, references, syllabus, topic } = req.body;
     const nodes = await retrieveNodesForCourse(
       tags,
       courseTitle,
       courseDescription,
       targetLearners,
       references,
-      syllabus
+      syllabus,
+      topic
     );
     console.log("response", nodes);
     return res.status(200).json({
