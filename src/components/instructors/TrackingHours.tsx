@@ -503,12 +503,18 @@ const TrackingHours = () => {
 
   const renderTable = () => {
     let studentsList: any = [];
+    let totalNodes: number = 0;
+    let totalProposals: number = 0;
 
     if (selectedSemester && semesters[selectedSemester]) {
       studentsList = semesters[selectedSemester].students;
+      totalNodes = semesters[selectedSemester]?.totalNodes || 0;
+      totalProposals = semesters[selectedSemester]?.totalProposals || 0;
     } else {
       Object.values(semesters).forEach((semester: any) => {
         studentsList = studentsList.concat(semester.students);
+        totalNodes += semester?.totalNodes || 0;
+        totalProposals += semester?.totalProposals || 0;
       });
     }
 
@@ -660,6 +666,8 @@ const TrackingHours = () => {
             <TableRow>
               <TableCell>Intern</TableCell>
               <TableCell>Hours Tracked</TableCell>
+              <TableCell>Nodes</TableCell>
+              <TableCell>Proposals</TableCell>
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Meetings</TableCell>
               {((user?.claims?.leading as any) || []).length > 0 && <TableCell>1:1 Meetings</TableCell>}
@@ -712,6 +720,8 @@ const TrackingHours = () => {
                     </Box>
                   </TableCell>
                   <TableCell>{roundNum(student?.hours || 0)}</TableCell>
+                  <TableCell>{student?.totalNodes || 0}</TableCell>
+                  <TableCell>{student?.totalProposals || 0}</TableCell>
                   {Object.keys(semesters).length > 2 && <TableCell>{student.semesterName}</TableCell>}
                   <TableCell>
                     {(student.meetings || []).map((meeting: any, meetingIdx: number) => (
@@ -820,6 +830,15 @@ const TrackingHours = () => {
             })}
           </TableBody>
         </Table>
+        <Box sx={{ p: "20px" }}>
+          <Typography>
+            Total number of added nodes: <strong style={{ color: DESIGN_SYSTEM_COLORS.orange400 }}>{totalNodes}</strong>
+          </Typography>
+          <Typography>
+            Total number of added proposals:{" "}
+            <strong style={{ color: DESIGN_SYSTEM_COLORS.orange400 }}>{totalProposals}</strong>
+          </Typography>
+        </Box>
         <Dialog open={dialogOpen} onClose={handleCloseDialog} sx={{ zIndex: 9998 }}>
           <DialogTitle>Add 1:1 Meeting</DialogTitle>
           <DialogContent>
