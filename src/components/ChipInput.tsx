@@ -38,8 +38,8 @@ const ChipInput = ({ ...props }) => {
       if (!event.target.value.replace(/\s/g, "").length) return;
       const altrs = event.target.value
         .split(" ")
-        .map(x => x.trim())
-        .filter(x => x !== "");
+        .map((x: any) => x.trim())
+        .filter((x: any) => x !== "");
       newSelectedItem = [...newSelectedItem, ...altrs];
       setSelectedItem(newSelectedItem);
       selectedTags(newSelectedItem, itemId);
