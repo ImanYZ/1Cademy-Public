@@ -25,8 +25,8 @@ import { User } from "../../knowledgeTypes";
 import { Option } from "../layouts/InstructorsLayout";
 import { ThemeSwitcher } from "../ThemeSwitcher";
 
-type HeaderNavbarProps = { options?: Option[]; user: User; onNewCourse?: () => void };
-const HeaderNavbar = ({ options = [], user, onNewCourse }: HeaderNavbarProps) => {
+type HeaderNavbarProps = { options: Option[]; user: User; onNewCourse?: () => void };
+const HeaderNavbar = ({ options, user, onNewCourse }: HeaderNavbarProps) => {
   const [handleThemeSwitch] = useThemeChange();
   const router = useRouter();
   const theme = useTheme();
