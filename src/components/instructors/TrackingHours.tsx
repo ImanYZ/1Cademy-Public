@@ -144,7 +144,7 @@ const TrackingHours = () => {
 
     while (currentDate.isBefore(now)) {
       const periodStart = currentDate;
-      const periodEnd = moment(periodStart).add(13, "days");
+      const periodEnd = index === 1 ? moment(periodStart).add(14, "days") : moment(periodStart).add(13, "days");
       periods.push({
         start: periodStart,
         end: periodEnd,
