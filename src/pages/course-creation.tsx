@@ -1405,7 +1405,7 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {Object.keys(improvements[currentChangeIndex] || {}).length <= 0 && (
+          {
             <Box
               sx={{
                 display: "flex",
@@ -1435,7 +1435,7 @@ const CourseComponent = () => {
                 Create New Course
               </LoadingButton>
             </Box>
-          )}
+          }
           <Dialog open={createCourseModel} onClose={handleCloseCourseDialog} sx={{ zIndex: 9998 }}>
             <DialogTitle>{"Add a Course"}</DialogTitle>
             <DialogContent>
