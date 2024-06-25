@@ -1055,6 +1055,15 @@ const CourseComponent = () => {
               </MenuItem>
             ))}
           </Select>
+          <LoadingButton
+            variant="contained"
+            color="success"
+            sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+            onClick={createCourse}
+            loading={loading}
+          >
+            Create New Course
+          </LoadingButton>
           <Box sx={{ display: "flex" }}>
             <TextField
               label="Course Title"
@@ -1505,15 +1514,6 @@ const CourseComponent = () => {
               loading={loading}
             >
               Improve Course Structure
-            </LoadingButton>
-            <LoadingButton
-              variant="contained"
-              color="success"
-              sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
-              onClick={createCourse}
-              loading={loading}
-            >
-              Create New Course
             </LoadingButton>
           </Box>
           <Dialog
