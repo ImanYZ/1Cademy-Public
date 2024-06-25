@@ -1068,12 +1068,11 @@ const CourseComponent = () => {
             <TextField
               label="Course Title"
               multiline
-              fullWidth
               value={courses[selectedCourse].title}
               onChange={handleTitleChange}
               margin="normal"
               variant="outlined"
-              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
             />
           </Box>
           <TextField
