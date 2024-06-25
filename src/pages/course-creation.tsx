@@ -83,6 +83,7 @@ const COURSES = [
       "Critical evaluation of psychological research and theories",
       "Engagement in psychological discussions and practical activities",
     ],
+    hours: 13,
     syllabus: [
       {
         category: "Foundations of Psychology",
@@ -452,6 +453,14 @@ const CourseComponent = () => {
     updatedCourses[selectedCourse] = {
       ...updatedCourses[selectedCourse],
       title: e.target.value,
+    };
+    setCourses(updatedCourses);
+  };
+  const handleHoursChange = (e: any) => {
+    const updatedCourses: any = [...courses];
+    updatedCourses[selectedCourse] = {
+      ...updatedCourses[selectedCourse],
+      hours: Number(e.target.value),
     };
     setCourses(updatedCourses);
   };
@@ -869,6 +878,7 @@ const CourseComponent = () => {
       prev.push({
         title: newCourseTitle,
         learners: newCourseLearners,
+        hours: 0,
         courseObjectives: [],
         courseSkills: [],
         description: "",
@@ -1064,7 +1074,7 @@ const CourseComponent = () => {
           >
             Create New Course
           </LoadingButton>
-          <Box sx={{ display: "flex" }}>
+          <Box sx={{ display: "flex", gap: "15px" }}>
             <TextField
               label="Course Title"
               multiline
@@ -1074,6 +1084,50 @@ const CourseComponent = () => {
               variant="outlined"
               sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
             />
+            <TextField
+              label="Number of Hour-long Class Sessions"
+              fullWidth
+              value={courses[selectedCourse].hours || 0}
+              onChange={handleHoursChange}
+              margin="normal"
+              variant="outlined"
+              sx={{ width: "500px" }}
+              type="number"
+              inputProps={{ min: 0 }}
+            />
+            <Select
+              value={courses[selectedCourse].references[0]}
+              displayEmpty
+              variant="outlined"
+              sx={{
+                width: "500px",
+                height: "55px",
+                mt: "16px",
+                backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+              }}
+              MenuProps={{
+                sx: {
+                  zIndex: "9999",
+                },
+              }}
+            >
+              <MenuItem
+                value=""
+                disabled
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+              >
+                Select Book
+              </MenuItem>
+              {courses[selectedCourse].references.map((book: any) => (
+                <MenuItem
+                  key={book}
+                  value={book}
+                  sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                >
+                  {book}
+                </MenuItem>
+              ))}
+            </Select>
           </Box>
           <TextField
             label="Target Learners"
@@ -1171,7 +1225,7 @@ const CourseComponent = () => {
               Add syllabus
             </Button>
             <InputAdornment position="end">
-              {courses[selectedCourse].syllabus?.length && (
+              {!courses[selectedCourse].syllabus?.length && (
                 <LoadingButton
                   onClick={generateCourseStructure}
                   sx={{
