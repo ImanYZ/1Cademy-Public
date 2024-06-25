@@ -1196,6 +1196,10 @@ const CourseComponent = () => {
                               },
                             }}
                             elevation={10}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handlePaperClick(tc);
+                            }}
                           >
                             {currentImprovement.topic !== tc.topic && currentImprovement.old_topic !== tc.topic && (
                               <CloseIcon
@@ -1230,7 +1234,7 @@ const CourseComponent = () => {
                                   }}
                                 />
                               )}
-                            <Box onClick={() => handlePaperClick(tc)}>
+                            <Box>
                               {currentImprovement.action === "modify" && currentImprovement.old_topic === tc.topic ? (
                                 <Box>
                                   <Typography
