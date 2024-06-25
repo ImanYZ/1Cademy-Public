@@ -205,8 +205,8 @@ const AppHeader = forwardRef(
             spacing={{ xs: "2px", sm: "8px", md: "16px" }}
             sx={{
               px: { xs: "16px", sm: "32px" },
-              maxWidth: "1280px",
-              margin: "auto",
+              maxWidth: !aiCourse ? "1280px" : "100%",
+              margin: !aiCourse ? "auto" : "",
               height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
             }}
           >
@@ -228,6 +228,7 @@ const AppHeader = forwardRef(
                     cursor: "pointer",
                     width: "240px",
                     height: "auto",
+                    mr: "auto",
                     borderRadius: 0,
                     // mb: "50px",
                   }}

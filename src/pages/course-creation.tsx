@@ -1405,37 +1405,36 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                marginTop: "20px",
-                position: "sticky",
-                bottom: 24,
-                gap: "5px",
-              }}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "20px",
+              position: "sticky",
+              bottom: 24,
+              gap: "5px",
+            }}
+          >
+            <LoadingButton
+              variant="contained"
+              color="success"
+              sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
+              onClick={improveCourseStructure}
+              loading={loading}
             >
-              <LoadingButton
-                variant="contained"
-                color="success"
-                sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
-                onClick={improveCourseStructure}
-                loading={loading}
-              >
-                Improve Course Structure
-              </LoadingButton>
-              <LoadingButton
-                variant="contained"
-                color="success"
-                sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
-                onClick={createCourse}
-                loading={loading}
-              >
-                Create New Course
-              </LoadingButton>
-            </Box>
-          }
+              Improve Course Structure
+            </LoadingButton>
+            <LoadingButton
+              variant="contained"
+              color="success"
+              sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
+              onClick={createCourse}
+              loading={loading}
+            >
+              Create New Course
+            </LoadingButton>
+          </Box>
+
           <Dialog open={createCourseModel} onClose={handleCloseCourseDialog} sx={{ zIndex: 9998 }}>
             <DialogTitle>{"Add a Course"}</DialogTitle>
             <DialogContent>
