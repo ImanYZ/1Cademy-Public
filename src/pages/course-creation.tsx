@@ -939,7 +939,16 @@ const CourseComponent = () => {
     setLoadingCourseStructure(false);
   };
   return (
-    <Box>
+    <Box
+      sx={{
+        height: "100vh",
+        overflow: "auto",
+        background: theme =>
+          theme.palette.mode === "dark"
+            ? theme.palette.common.darkGrayBackground
+            : theme.palette.common.lightGrayBackground,
+      }}
+    >
       <AppHeaderMemoized
         page="ONE_CADEMY"
         tutorPage={true}
@@ -948,20 +957,10 @@ const CourseComponent = () => {
         onSwitchSection={() => {}}
         aiCourse={true}
       />
-      <Box
-        padding="20px"
-        sx={{
-          height: "95vh",
-          overflow: "auto",
-          background: theme =>
-            theme.palette.mode === "dark"
-              ? theme.palette.common.darkGrayBackground
-              : theme.palette.common.lightGrayBackground,
-
-          display: "flex",
-          mb: "100px",
-        }}
-      >
+      <Box sx={{ alignItems: "center", textAlign: "center", padding: "20px" }}>
+        <Typography variant="h2">AI-Enhanced Course Creation</Typography>
+      </Box>
+      <Box padding="20px">
         <Box sx={{ flex: sidebarOpen ? 0.7 : 1, transition: "flex 0.3s" }}>
           <Select
             label={"Select Course"}
