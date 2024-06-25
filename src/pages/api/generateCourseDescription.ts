@@ -58,8 +58,8 @@ const generateCourseDescription = async (courseTitle: string, targetLearners: st
 };
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, targetLearners } = req.body;
-    const description = await generateCourseDescription(courseTitle, targetLearners, 13).catch(console.error);
+    const { courseTitle, targetLearners, hours } = req.body;
+    const description = await generateCourseDescription(courseTitle, targetLearners, hours).catch(console.error);
     console.log("description ==>", description);
     return res.status(200).json(description);
   } catch (error) {

@@ -896,7 +896,8 @@ const CourseComponent = () => {
     setLoadingDescription(true);
     const courseTitle = courses[selectedCourse].title;
     const targetLearners = courses[selectedCourse].learners;
-    const response = await Post("/generateCourseDescription", { courseTitle, targetLearners });
+    const hours = courses[selectedCourse].hours;
+    const response = await Post("/generateCourseDescription", { courseTitle, targetLearners, hours });
     setCourses((prev: any) => {
       prev[selectedCourse].description = response;
       return prev;
@@ -908,7 +909,8 @@ const CourseComponent = () => {
     const courseTitle = courses[selectedCourse].title;
     const targetLearners = courses[selectedCourse].learners;
     const courseDescription = courses[selectedCourse].description;
-    const response = await Post("/generateCourseObjectives", { courseTitle, targetLearners, courseDescription });
+    const hours = courses[selectedCourse].hours;
+    const response = await Post("/generateCourseObjectives", { courseTitle, targetLearners, courseDescription, hours });
     setCourses((prev: any) => {
       prev[selectedCourse].courseObjectives = response;
       return prev;
@@ -921,12 +923,14 @@ const CourseComponent = () => {
     const targetLearners = courses[selectedCourse].learners;
     const courseObjectives = courses[selectedCourse].courseObjectives;
     const courseDescription = courses[selectedCourse].description;
+    const hours = courses[selectedCourse].hours;
 
     const response = await Post("/generateCourseSkills", {
       courseTitle,
       targetLearners,
       courseDescription,
       courseObjectives,
+      hours,
     });
     setCourses((prev: any) => {
       prev[selectedCourse].courseSkills = response;
@@ -941,6 +945,7 @@ const CourseComponent = () => {
     const courseObjectives = courses[selectedCourse].courseObjectives;
     const courseDescription = courses[selectedCourse].description;
     const courseSkills = courses[selectedCourse].courseSkills;
+    const hours = courses[selectedCourse].hours;
 
     const response = await Post("/generateCourseStructure", {
       courseTitle,
@@ -948,6 +953,7 @@ const CourseComponent = () => {
       courseObjectives,
       courseDescription,
       courseSkills,
+      hours,
     });
     setCourses((prev: any) => {
       prev[selectedCourse].syllabus = response;
@@ -1020,9 +1026,7 @@ const CourseComponent = () => {
         onSwitchSection={() => {}}
         aiCourse={true}
       />
-      <Box sx={{ alignItems: "center", textAlign: "center", padding: "20px" }}>
-        <Typography variant="h2">AI-Enhanced Course Creation</Typography>
-      </Box>
+
       <Box padding="20px">
         <Box sx={{ flex: sidebarOpen ? 0.7 : 1, transition: "flex 0.3s" }}>
           <Select
@@ -1222,7 +1226,7 @@ const CourseComponent = () => {
           <Box sx={{ display: "flex", alignItems: "center", py: "15px", mt: "26px" }}>
             <Typography variant="h2">Course Structure:</Typography>
             <Button sx={{ ml: "19px" }} onClick={() => setEditCategory("new")}>
-              Add syllabus
+              Add Category
             </Button>
             <InputAdornment position="end">
               {!courses[selectedCourse].syllabus?.length && (
@@ -1662,7 +1666,7 @@ const CourseComponent = () => {
                 multiline
                 fullWidth
                 value={topicDescription}
-                onChange={event => setNewTopic(event.target.value)}
+                onChange={event => setTopicDescription(event.target.value)}
                 margin="normal"
                 variant="outlined"
                 sx={{ width: "500px" }}

@@ -235,7 +235,9 @@ const AppHeader = forwardRef(
                   onClick={() => {}}
                 />
               )}
-
+              <Box sx={{ alignItems: "center", textAlign: "center", padding: "20px" }}>
+                <Typography variant="h2">AI-Enhanced Course Creation</Typography>
+              </Box>
               <Stack
                 direction={"row"}
                 aria-label="navigation bar"

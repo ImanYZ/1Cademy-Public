@@ -213,11 +213,11 @@ const generateCourseSyllabus = async (
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, targetLearners, courseDescription, courseObjectives, courseSkills } = req.body;
+    const { courseTitle, targetLearners, courseDescription, courseObjectives, courseSkills, hours } = req.body;
     const syllabus = await generateCourseSyllabus(
       courseTitle,
       targetLearners,
-      13,
+      hours,
       courseDescription,
       courseObjectives,
       courseSkills
