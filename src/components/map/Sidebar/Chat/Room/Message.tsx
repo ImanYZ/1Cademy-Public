@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, Modal, Paper, Skeleton, Typography } from "@mui/material";
+import { IconButton, LinearProgress, Modal, Paper, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -9,13 +9,9 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
   getFirestore,
-  limit,
   onSnapshot,
-  orderBy,
   query,
-  startAfter,
   Timestamp,
   updateDoc,
   where,
@@ -106,7 +102,6 @@ export const Message = ({
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [channelUsers, setChannelUsers] = useState([]);
-  const [lastVisible, setLastVisible] = useState<any>(null);
   const [loadMore, setLoadMore] = useState<boolean>(false);
   const [messagesByDate, setMessagesByDate] = useState<any>({});
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
@@ -119,6 +114,7 @@ export const Message = ({
   const [isRepliesLoaded, setIsRepliesLoaded] = useState<boolean>(true);
   const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
+  const unsubscribeRefs = useRef<any>([]);
 
   useEffect(() => {
     const currentDate = new Date();
@@ -246,7 +242,7 @@ export const Message = ({
     };
     const killSnapshot = getChannelMessagesSnapshot(
       db,
-      { channelId: selectedChannel.id, lastVisible, roomType },
+      { channelId: selectedChannel.id, lastVisible: null, roomType },
       onSynchronize
     );
     return () => killSnapshot();
@@ -260,10 +256,7 @@ export const Message = ({
 
   useEffect(() => {
     const messageList: any = messageBoxRef.current;
-    console.log(messageList, "messageList-----messageListmessageListmessageListmessageList");
     const handleScroll = () => {
-      console.log("Loader.....");
-      console.log(messageList.scrollTop, "messageList.scrollTop");
       if (messageList.scrollTop === 0) {
         fetchOlderMessages();
       }
@@ -280,6 +273,12 @@ export const Message = ({
     }
   }, [openReplies, replies]);
 
+  useEffect(() => {
+    return () => {
+      unsubscribeRefs.current.forEach((unsubscribe: any) => unsubscribe());
+    };
+  }, []);
+
   const handleMentionUserOpenRoom = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => {
       event.preventDefault();
@@ -290,28 +289,18 @@ export const Message = ({
     [selectedChannel]
   );
 
-  const fetchOlderMessages = async () => {
-    let channelRef = doc(db, "channelMessages", selectedChannel?.id);
-    if (roomType === "direct") {
-      channelRef = doc(db, "conversationMessages", selectedChannel?.id);
-    } else if (roomType === "news") {
-      channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
-    }
-
-    const messageRef = collection(channelRef, "messages");
-
-    const q = query(messageRef, orderBy("createdAt", "desc"), startAfter(messages[0].doc), limit(8));
-    const messageSnapshot = await getDocs(q);
-    const olderMessages = messageSnapshot.docs.map(doc => ({
-      type: "added",
-      data: { id: doc.id, ...document },
-      doc: doc,
-    }));
-
-    if (olderMessages.length > 0) {
-      setLastVisible(messageSnapshot.docs[messageSnapshot.docs.length - 1]);
-      setMessages((prev: any) => messageSnapshot.docs.reduce(synchronizationMessages, [...prev]));
-    }
+  const fetchOlderMessages = () => {
+    setLoadMore(true);
+    const onSynchronize = (changes: any) => {
+      setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
+      setLoadMore(false);
+    };
+    const killSnapshot = getChannelMessagesSnapshot(
+      db,
+      { channelId: selectedChannel.id, lastVisible: messages[0].doc, roomType },
+      onSynchronize
+    );
+    unsubscribeRefs.current.push(killSnapshot);
   };
 
   const handleDeleteReply = async (curMessage: IChannelMessage, reply: IChannelMessage) => {
@@ -461,7 +450,16 @@ export const Message = ({
           return [...prevMessages, reply];
         });
         scrollToMessage(curMessage?.id || "", "reply");
-        await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
+
+        const mRef = getMessageRef(curMessage?.id, selectedChannel?.id);
+        const replyRef = collection(mRef, "replies");
+
+        await addDoc(replyRef, reply);
+        updateDoc(mRef, {
+          totalReplies: (curMessage?.totalReplies || 0) + 1,
+        });
+
+        //await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
           newMessage: reply,
@@ -638,6 +636,7 @@ export const Message = ({
               <NotFoundNotification title="Start Chatting" description="" />
             </Box>
           )}
+          {loadMore && <LinearProgress sx={{ width: "100%" }} />}
           {Object.keys(messagesByDate).map(date => {
             return (
               <Box key={date}>
@@ -795,7 +794,7 @@ export const Message = ({
         </Box>
       )}
 
-      {(leading || replyOnMessage || roomType !== "news") && (
+      {!isLoading && (leading || replyOnMessage || roomType !== "news") && (
         <Box
           sx={{
             position: "fixed",
@@ -878,7 +877,6 @@ export const Message = ({
 const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
   const docType = messageChange.type;
   const curData = messageChange.data as IChannelMessage & { id: string };
-
   const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
   if (docType === "added" && messageIdx === -1 && !curData.deleted) {
     prevMessages.push({ ...curData, doc: messageChange.doc });
