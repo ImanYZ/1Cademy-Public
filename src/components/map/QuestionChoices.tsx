@@ -2,13 +2,13 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 // import "./QuestionChoices.css"
 import React, { startTransition, useCallback, useEffect, useState } from "react";
 
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { Editor } from "../Editor";
-import { MemoizedMetaButton } from "./MetaButton";
+// import { MemoizedMetaButton } from "./MetaButton";
 
 // import HyperEditor from "../../../Editor/HyperEditor/HyperEditorWrapper"
 // import MetaButton from "../../MetaButton/MetaButton"
@@ -103,14 +103,14 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
     return (
       <li className="QuestionChoices">
         <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ alignSelf: "flex-end" }}>
+          <div>
             {props.choice.correct ? (
               <IconButton onClick={switchChoiceHandler}>
-                <DoneIcon className="green-text" sx={{ fontSize: "16px" }} />
+                <DoneIcon className="green-text" sx={{ fontSize: "20px" }} />
               </IconButton>
             ) : (
               <IconButton onClick={switchChoiceHandler}>
-                <CloseIcon className="red-text" sx={{ fontSize: "16px" }} />
+                <CloseIcon className="red-text" sx={{ fontSize: "20px" }} />
               </IconButton>
             )}
           </div>
@@ -125,10 +125,12 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             // onBlurCallback={changeChoiceHandler}
           />
           {props.choicesNum > 1 && (
-            <div style={{ display: "flex", alignSelf: "flex-end", padding: "8px 0px" }}>
-              <MemoizedMetaButton onClick={deleteChoiceHandler} tooltip="Delete this choice from this question.">
-                <DeleteForeverIcon className="red-text" sx={{ fontSize: "16px" }} />
-              </MemoizedMetaButton>
+            <div>
+              <Tooltip title={"Delete this choice from this question."}>
+                <IconButton onClick={deleteChoiceHandler}>
+                  <DeleteForeverIcon className="red-text" sx={{ fontSize: "20px" }} />
+                </IconButton>
+              </Tooltip>
             </div>
           )}
         </div>
