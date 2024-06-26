@@ -499,14 +499,15 @@ const CourseComponent = () => {
 
   const handleSaveTopic = () => {
     const updatedCourses = [...courses];
-    const topics = updatedCourses[selectedCourse].syllabus[selectedCategory].topics;
+    const topics: any = updatedCourses[selectedCourse].syllabus[selectedCategory].topics;
     if (editTopic) {
-      const topicIndex = topics.findIndex(t => t.topic === editTopic.topic);
+      const topicIndex = topics.findIndex((t: any) => t.topic === editTopic.topic);
 
       if (topicIndex !== -1) {
         topics[topicIndex].topic = newTopic;
         topics[topicIndex].hours = hours;
         topics[topicIndex].difficulty = difficulty;
+        topics[topicIndex].skills = skills;
       }
     } else {
       topics.push({
@@ -751,6 +752,7 @@ const CourseComponent = () => {
     }
     setSelectedTopic(topic);
     setSidebarOpen(true);
+    return;
     if (nodesPerTopic[topic.topic]) return;
     setLoadingNodes(true);
     setImprovements([]);
@@ -1007,6 +1009,17 @@ const CourseComponent = () => {
     setEditCategory(null);
     setNewCategoryTitle("");
   };
+
+  const setNewSkills = (newTags: string[]) => {
+    const _courses: any = [...courses];
+    _courses[selectedCourse].courseSkills = newTags;
+    setCourses(_courses);
+  };
+  const setNewCourseObjectives = (newTags: string[]) => {
+    const _courses: any = [...courses];
+    _courses[selectedCourse].courseObjectives = newTags;
+    setCourses(_courses);
+  };
   return (
     <Box
       sx={{
@@ -1192,6 +1205,7 @@ const CourseComponent = () => {
             <ChipInput
               tags={courses[selectedCourse].courseObjectives}
               selectedTags={() => {}}
+              setTags={setNewCourseObjectives}
               fullWidth
               variant="outlined"
               placeholder="Add a new course objective..."
@@ -1218,6 +1232,7 @@ const CourseComponent = () => {
             <ChipInput
               tags={courses[selectedCourse].courseSkills}
               selectedTags={() => {}}
+              setTags={setNewSkills}
               fullWidth
               variant="outlined"
               placeholder="Add a new course skill..."
@@ -1675,10 +1690,11 @@ const CourseComponent = () => {
                 <Typography>Skills:</Typography>
                 <ChipInput
                   tags={skills}
+                  setTags={setSkills}
                   selectedTags={() => {}}
                   fullWidth
                   variant="outlined"
-                  placeholder="Add a new skill..."
+                  placeholder="Type a new skill and click enter ↵ to add it..."
                 />
               </Box>
               <FormControl fullWidth margin="normal" sx={{ width: "500px" }}>
