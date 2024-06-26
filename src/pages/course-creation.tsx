@@ -4,6 +4,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { LoadingButton } from "@mui/lab";
@@ -33,7 +34,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
@@ -399,6 +400,10 @@ const glowRed = keyframes`
 `;
 
 const CourseComponent = () => {
+  const dragItem = useRef<any>(null);
+  const dragOverItem = useRef<any>(null);
+  const containerRef = useRef<any>(null);
+  const [glowCategoryIIndex, setGlowCategoryIIndex] = useState(-1);
   const [loadingDescription, setLoadingDescription] = useState(false);
   const [loadingObjectives, setLoadingObjectives] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
@@ -1020,6 +1025,44 @@ const CourseComponent = () => {
     _courses[selectedCourse].courseObjectives = newTags;
     setCourses(_courses);
   };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const mouseY = e.clientY;
+
+    const distanceFromTop = mouseY - containerRect.top;
+    const distanceFromBottom = containerRect.bottom - mouseY;
+
+    const scrollSpeed = 15;
+
+    const scrollThreshold = 100;
+
+    const scrollAreaHeight = 100;
+
+    if (distanceFromTop < scrollAreaHeight) {
+      const scrollAmount = scrollSpeed * (1 - distanceFromTop / scrollAreaHeight);
+
+      container.scrollTop -= scrollAmount;
+    } else if (distanceFromTop < scrollThreshold) {
+      container.scrollTop -= scrollSpeed;
+    } else if (distanceFromBottom < scrollThreshold) {
+      container.scrollTop += scrollSpeed;
+    }
+  };
+  const handleSorting = () => {
+    const _courses = [...courses];
+    const dragItemContent = _courses[selectedCourse].syllabus[dragItem.current];
+    setGlowCategoryIIndex(dragOverItem.current);
+    _courses[selectedCourse].syllabus.splice(dragItem.current, 1);
+    _courses[selectedCourse].syllabus.splice(dragOverItem.current, 0, dragItemContent);
+    setCourses(_courses);
+    setTimeout(() => {
+      setGlowCategoryIIndex(-1);
+    }, 700);
+  };
   return (
     <Box
       sx={{
@@ -1261,9 +1304,21 @@ const CourseComponent = () => {
             </InputAdornment>
           </Box>
 
-          <Box marginTop="20px">
+          <Box ref={containerRef} marginTop="20px">
             {getCourses()[selectedCourse].syllabus.map((category, categoryIndex) => (
-              <Accordion key={categoryIndex} expanded={expanded.includes(category.category)}>
+              <Accordion
+                key={category.category}
+                expanded={expanded.includes(category.category)}
+                draggable
+                onDragStart={() => {
+                  dragItem.current = categoryIndex;
+                }}
+                onDragEnter={() => {
+                  dragOverItem.current = categoryIndex;
+                }}
+                onDragOver={handleDragOver}
+                onDragEnd={handleSorting}
+              >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
                   aria-controls={`panel${categoryIndex}-content`}
@@ -1276,7 +1331,11 @@ const CourseComponent = () => {
                       setExpanded([category.category]);
                     }
                   }}
+                  sx={{
+                    animation: categoryIndex === glowCategoryIIndex ? `${glowGreen} 1.5s ease-in-out infinite` : "",
+                  }}
                 >
+                  <DragIndicatorIcon />
                   {currentImprovement.type === "category" &&
                   currentImprovement.action === "modify" &&
                   currentImprovement.old_category === category.category ? (
@@ -1331,242 +1390,247 @@ const CourseComponent = () => {
                   )}
                 </AccordionSummary>
 
-                <AccordionDetails>
-                  <Grid container spacing={2}>
-                    {category.topics.map((tc: any, topicIndex) => (
-                      <Grid item xs={12} sm={6} md={4} key={topicIndex}>
-                        <Slide direction="down" timeout={800} in={true}>
-                          <Paper
-                            sx={{
-                              height: "300px",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              // backgroundImage: `url(${topicImages[tc.topic]})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                              borderRadius: "15px",
-                              position: "relative",
-                              cursor: "pointer",
-                              animation: isRemoved.includes(tc.topic)
-                                ? `${glowRed} 1.5s ease-in-out infinite`
-                                : isChanged.includes(tc.topic)
-                                ? `${glowGreen} 1.5s ease-in-out infinite`
-                                : "none",
-                              border: `1px solid ${getTopicColor(category, tc)}`,
-                              ":hover": {
-                                border: "1px solid orange",
-                              },
-                            }}
-                            elevation={10}
-                            onClick={e => {
-                              e.stopPropagation();
-                              handlePaperClick(tc);
-                            }}
-                          >
-                            {currentImprovement.topic !== tc.topic && currentImprovement.old_topic !== tc.topic && (
-                              <CloseIcon
-                                className="close-icon"
+                {expanded.includes(category.category) && (
+                  <AccordionDetails>
+                    {
+                      <Grid container spacing={2}>
+                        {category.topics.map((tc: any, topicIndex) => (
+                          <Grid item xs={12} sm={6} md={4} key={topicIndex}>
+                            <Slide direction="down" timeout={800} in={true}>
+                              <Paper
                                 sx={{
-                                  // backgroundColor: "grey",
-                                  color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                                  borderRadius: "50%",
+                                  height: "300px",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  // backgroundImage: `url(${topicImages[tc.topic]})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  borderRadius: "15px",
+                                  position: "relative",
+                                  cursor: "pointer",
+                                  animation: isRemoved.includes(tc.topic)
+                                    ? `${glowRed} 1.5s ease-in-out infinite`
+                                    : isChanged.includes(tc.topic)
+                                    ? `${glowGreen} 1.5s ease-in-out infinite`
+                                    : "none",
+                                  border: `1px solid ${getTopicColor(category, tc)}`,
                                   ":hover": {
-                                    backgroundColor: "black",
-                                    color: "white",
+                                    border: "1px solid orange",
                                   },
-                                  zIndex: 10,
-                                  position: "absolute",
-                                  top: "0px",
-                                  right: "0px",
-                                  padding: "5px",
-                                  fontSize: "35px",
                                 }}
-                                onClick={() => handleRemoveTopic(categoryIndex, topicIndex)}
-                              />
-                            )}
-                            {currentImprovement.action === "move" &&
-                              currentImprovement.type === "topic" &&
-                              currentImprovement.topic === tc.topic && (
-                                <SwapHorizIcon
+                                elevation={10}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handlePaperClick(tc);
+                                }}
+                              >
+                                {currentImprovement.topic !== tc.topic && currentImprovement.old_topic !== tc.topic && (
+                                  <CloseIcon
+                                    className="close-icon"
+                                    sx={{
+                                      // backgroundColor: "grey",
+                                      color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                                      borderRadius: "50%",
+                                      ":hover": {
+                                        backgroundColor: "black",
+                                        color: "white",
+                                      },
+                                      zIndex: 10,
+                                      position: "absolute",
+                                      top: "0px",
+                                      right: "0px",
+                                      padding: "5px",
+                                      fontSize: "35px",
+                                    }}
+                                    onClick={() => handleRemoveTopic(categoryIndex, topicIndex)}
+                                  />
+                                )}
+                                {currentImprovement.action === "move" &&
+                                  currentImprovement.type === "topic" &&
+                                  currentImprovement.topic === tc.topic && (
+                                    <SwapHorizIcon
+                                      sx={{
+                                        position: "absolute",
+                                        top: "0px",
+                                        fontSize: "40px",
+                                        color: currentImprovement.new_category === category.category ? "green" : "red",
+                                      }}
+                                    />
+                                  )}
+                                <Box>
+                                  {currentImprovement.action === "modify" &&
+                                  currentImprovement.old_topic === tc.topic ? (
+                                    <Box>
+                                      <Typography
+                                        variant="h6"
+                                        sx={{
+                                          textAlign: "center",
+                                          color: "red",
+                                          textDecoration: "line-through",
+                                        }}
+                                      >
+                                        {currentImprovement?.old_topic || ""}
+                                      </Typography>
+                                      <Typography
+                                        variant="h6"
+                                        sx={{
+                                          textAlign: "center",
+                                          color: "green",
+                                        }}
+                                      >
+                                        {currentImprovement?.new_topic.topic || ""}
+                                      </Typography>
+                                    </Box>
+                                  ) : (
+                                    <Typography
+                                      variant="h6"
+                                      sx={{
+                                        textAlign: "center",
+                                        color: getTopicColor(category, tc),
+                                        fontWeight: 300,
+                                      }}
+                                    >
+                                      {tc?.topic || ""}
+                                    </Typography>
+                                  )}
+
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      bottom: "0px",
+                                      right: "0px",
+                                      m: 2,
+                                      gap: "5px",
+                                    }}
+                                  >
+                                    <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
+                                    <Chip
+                                      label={tc?.difficulty}
+                                      color={
+                                        tc?.difficulty.toLowerCase() === "easy"
+                                          ? "success"
+                                          : tc?.difficulty.toLowerCase() === "medium"
+                                          ? "warning"
+                                          : "error"
+                                      }
+                                    />
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      bottom: "0px",
+                                      left: "0px",
+                                      m: 2,
+                                      gap: "5px",
+                                    }}
+                                  >
+                                    <Button
+                                      variant="contained"
+                                      sx={{ borderRadius: "40px" }}
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        setEditTopic({
+                                          category: category.category,
+                                          ...tc,
+                                        });
+                                        setNewTopic(tc.topic);
+                                        setDifficulty(tc.difficulty.toLowerCase());
+                                        setHours(tc.hours);
+                                        setTopicDescription(tc.description || "");
+                                        setSkills(tc.skills || []);
+                                        handleOpenDialog(categoryIndex);
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
+                                  </Box>
+                                </Box>
+                              </Paper>
+                            </Slide>
+                          </Grid>
+                        ))}
+                        {currentImprovement.category === category.category &&
+                          getNewTopics(currentImprovement).length > 0 &&
+                          getNewTopics(currentImprovement).map(tc => (
+                            <Grid key={tc.topic} item xs={12} sm={6} md={4}>
+                              <Paper
+                                sx={{
+                                  height: "300px",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  backgroundImage: `url(${topicImages[tc]})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  borderRadius: "15px",
+                                  position: "relative",
+                                  cursor: "pointer",
+                                  border: "2px solid green",
+                                  ":hover": {
+                                    border: "1px solid orange",
+                                  },
+                                }}
+                                elevation={10}
+                              >
+                                <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
+                                  {tc.topic}
+                                </Typography>
+                                <Box
                                   sx={{
                                     position: "absolute",
-                                    top: "0px",
-                                    fontSize: "40px",
-                                    color: currentImprovement.new_category === category.category ? "green" : "red",
+                                    bottom: "0px",
+                                    right: "0px",
+                                    m: 2,
+                                    gap: "5px",
                                   }}
-                                />
-                              )}
-                            <Box>
-                              {currentImprovement.action === "modify" && currentImprovement.old_topic === tc.topic ? (
-                                <Box>
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: "red",
-                                      textDecoration: "line-through",
-                                    }}
-                                  >
-                                    {currentImprovement?.old_topic || ""}
-                                  </Typography>
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: "green",
-                                    }}
-                                  >
-                                    {currentImprovement?.new_topic.topic || ""}
-                                  </Typography>
+                                >
+                                  <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
+                                  <Chip
+                                    label={tc?.difficulty}
+                                    color={
+                                      tc?.difficulty.toLowerCase() === "easy"
+                                        ? "success"
+                                        : tc?.difficulty.toLowerCase() === "medium"
+                                        ? "warning"
+                                        : "error"
+                                    }
+                                  />
                                 </Box>
-                              ) : (
-                                <Typography
-                                  variant="h6"
-                                  sx={{
-                                    textAlign: "center",
-                                    color: getTopicColor(category, tc),
-                                    fontWeight: 300,
-                                  }}
-                                >
-                                  {tc?.topic || ""}
-                                </Typography>
-                              )}
-
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  bottom: "0px",
-                                  right: "0px",
-                                  m: 2,
-                                  gap: "5px",
-                                }}
-                              >
-                                <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                                <Chip
-                                  label={tc?.difficulty}
-                                  color={
-                                    tc?.difficulty.toLowerCase() === "easy"
-                                      ? "success"
-                                      : tc?.difficulty.toLowerCase() === "medium"
-                                      ? "warning"
-                                      : "error"
-                                  }
-                                />
-                              </Box>
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  bottom: "0px",
-                                  left: "0px",
-                                  m: 2,
-                                  gap: "5px",
-                                }}
-                              >
-                                <Button
-                                  variant="contained"
-                                  sx={{ borderRadius: "40px" }}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    setEditTopic({
-                                      category: category.category,
-                                      ...tc,
-                                    });
-                                    setNewTopic(tc.topic);
-                                    setDifficulty(tc.difficulty.toLowerCase());
-                                    setHours(tc.hours);
-                                    setTopicDescription(tc.description || "");
-                                    setSkills(tc.skills || []);
-                                    handleOpenDialog(categoryIndex);
-                                  }}
-                                >
-                                  Edit
-                                </Button>
-                              </Box>
-                            </Box>
-                          </Paper>
-                        </Slide>
-                      </Grid>
-                    ))}
-                    {currentImprovement.category === category.category &&
-                      getNewTopics(currentImprovement).length > 0 &&
-                      getNewTopics(currentImprovement).map(tc => (
-                        <Grid key={tc.topic} item xs={12} sm={6} md={4}>
+                              </Paper>
+                            </Grid>
+                          ))}
+                        <Grid item xs={12} sm={6} md={4} key="add-topic">
                           <Paper
                             sx={{
                               height: "300px",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
-                              backgroundImage: `url(${topicImages[tc]})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
+                              border: "2px dashed grey",
                               borderRadius: "15px",
-                              position: "relative",
                               cursor: "pointer",
-                              border: "2px solid green",
                               ":hover": {
-                                border: "1px solid orange",
+                                border: "2px dashed orange",
                               },
                             }}
-                            elevation={10}
+                            onClick={() => handleOpenDialog(categoryIndex)}
                           >
-                            <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                              {tc.topic}
-                            </Typography>
-                            <Box
+                            <AddIcon
                               sx={{
-                                position: "absolute",
-                                bottom: "0px",
-                                right: "0px",
-                                m: 2,
-                                gap: "5px",
+                                fontSize: 64,
+                                color: "grey",
+                                ":hover": {
+                                  color: "orange",
+                                },
                               }}
-                            >
-                              <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                              <Chip
-                                label={tc?.difficulty}
-                                color={
-                                  tc?.difficulty.toLowerCase() === "easy"
-                                    ? "success"
-                                    : tc?.difficulty.toLowerCase() === "medium"
-                                    ? "warning"
-                                    : "error"
-                                }
-                              />
-                            </Box>
+                            />
                           </Paper>
                         </Grid>
-                      ))}
-                    <Grid item xs={12} sm={6} md={4} key="add-topic">
-                      <Paper
-                        sx={{
-                          height: "300px",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          border: "2px dashed grey",
-                          borderRadius: "15px",
-                          cursor: "pointer",
-                          ":hover": {
-                            border: "2px dashed orange",
-                          },
-                        }}
-                        onClick={() => handleOpenDialog(categoryIndex)}
-                      >
-                        <AddIcon
-                          sx={{
-                            fontSize: 64,
-                            color: "grey",
-                            ":hover": {
-                              color: "orange",
-                            },
-                          }}
-                        />
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                </AccordionDetails>
+                      </Grid>
+                    }
+                  </AccordionDetails>
+                )}
               </Accordion>
             ))}
           </Box>
