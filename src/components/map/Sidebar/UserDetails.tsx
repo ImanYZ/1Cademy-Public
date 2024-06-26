@@ -60,7 +60,11 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points, o
         )}
         <Box
           className={online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-          sx={{ top: "-10px", right: "-10px" }}
+          sx={{
+            top: "-10px",
+            right: "-10px",
+            backgroundColor: !online ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe") : "",
+          }}
         ></Box>
       </Box>
       <Box>

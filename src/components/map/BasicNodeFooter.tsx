@@ -491,6 +491,11 @@ BasicNodeFooterProps) => {
             <Box
               id="OptimizedAvatarUserStatusOnlineIcon"
               className={true ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+              // sx={{
+              //   backgroundColor: !openedProfile?.online
+              //     ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+              //     : "",
+              // }}
             />
           </Box>
         )}

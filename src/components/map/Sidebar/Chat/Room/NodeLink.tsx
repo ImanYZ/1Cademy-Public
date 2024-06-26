@@ -162,6 +162,10 @@ export const NodeLink = ({
             <Box
               sx={{
                 fontSize: "1px",
+
+                backgroundColor: !onlineUsers[membersInfo[message.sender]?.uname]
+                  ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                  : "",
               }}
               className={
                 onlineUsers[membersInfo[message.sender]?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"

@@ -221,6 +221,11 @@ export const Members = ({
                       ? "UserStatusOnlineIcon"
                       : "UserStatusOfflineIcon"
                   }
+                  sx={{
+                    backgroundColor: !onlineUsers[selectedChannel.membersInfo[member].uname]
+                      ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                      : "",
+                  }}
                 />
               </Box>
               <Box>

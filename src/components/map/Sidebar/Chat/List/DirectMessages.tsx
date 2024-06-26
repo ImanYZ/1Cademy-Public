@@ -88,7 +88,14 @@ export const DirectMessagesList = ({
         }}
       >
         <OptimizedAvatar2 alt={userInfo?.fullname} imageUrl={userInfo?.imageUrl} size={40} sx={{ border: "none" }} />
-        <Box className={onlineUsers[userInfo?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
+        <Box
+          className={onlineUsers[userInfo?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+          sx={{
+            backgroundColor: !onlineUsers[userInfo?.uname]
+              ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+              : "",
+          }}
+        />
       </Box>
     );
   };

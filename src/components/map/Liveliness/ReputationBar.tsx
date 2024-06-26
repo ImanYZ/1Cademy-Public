@@ -360,6 +360,11 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
 
                         <Box
                           className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+                          sx={{
+                            backgroundColor: !onlineUsers.includes(uname)
+                              ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                              : "",
+                          }}
                         />
                       </Box>
                     </Tooltip>
