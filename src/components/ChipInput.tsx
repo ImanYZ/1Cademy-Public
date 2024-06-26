@@ -18,7 +18,7 @@ const useStyles: any = makeStyles(() => ({
 
 const ChipInput = ({ ...props }) => {
   const classes = useStyles();
-  const { selectedTags, placeholder, tags, readOnly, itemId, setTags, ...other } = props;
+  const { selectedTags, placeholder, tags, readOnly, itemId, setTags, ...other }: any = props;
   const [inputValue, setInputValue] = React.useState("");
 
   const handleKeyDown = (event: any) => {
@@ -69,7 +69,7 @@ const ChipInput = ({ ...props }) => {
 
   return (
     <React.Fragment>
-      <Downshift id="downshift-multiple" inputValue={inputValue} onChange={handleChange} tags={tags}>
+      <Downshift id="downshift-multiple" inputValue={inputValue} onChange={handleChange}>
         {({ getInputProps }) => {
           const { onBlur, onChange, ...inputProps }: any = getInputProps({
             onKeyDown: handleKeyDown,
