@@ -161,7 +161,7 @@ const TrackingHours = () => {
   const periods = generateTwoWeekPeriods("2024-06-10");
   useEffect(() => {
     setSelectedPeriod(periods.length - 1);
-  }, [periods]);
+  }, []);
 
   const loadListOfStudents = async () => {
     const semestersMap: { [key: string]: any } = {};
