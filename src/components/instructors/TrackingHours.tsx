@@ -159,6 +159,9 @@ const TrackingHours = () => {
   };
 
   const periods = generateTwoWeekPeriods("2024-06-10");
+  useEffect(() => {
+    setSelectedPeriod(periods.length - 1);
+  }, []);
 
   const loadListOfStudents = async () => {
     const semestersMap: { [key: string]: any } = {};
@@ -666,12 +669,12 @@ const TrackingHours = () => {
             <TableRow>
               <TableCell>Intern</TableCell>
               <TableCell>Hours Tracked</TableCell>
-              <TableCell>Nodes</TableCell>
-              <TableCell>Proposals</TableCell>
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Meetings</TableCell>
               {((user?.claims?.leading as any) || []).length > 0 && <TableCell>1:1 Meetings</TableCell>}
               <TableCell>Paid</TableCell>
+              <TableCell>Nodes</TableCell>
+              <TableCell>Proposals</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -720,8 +723,6 @@ const TrackingHours = () => {
                     </Box>
                   </TableCell>
                   <TableCell>{roundNum(student?.hours || 0)}</TableCell>
-                  <TableCell>{student?.totalNodes || 0}</TableCell>
-                  <TableCell>{student?.totalProposals || 0}</TableCell>
                   {Object.keys(semesters).length > 2 && <TableCell>{student.semesterName}</TableCell>}
                   <TableCell>
                     {(student.meetings || []).map((meeting: any, meetingIdx: number) => (
@@ -825,6 +826,8 @@ const TrackingHours = () => {
                       />
                     )}
                   </TableCell>
+                  <TableCell>{student?.totalNodes || 0}</TableCell>
+                  <TableCell>{student?.totalProposals || 0}</TableCell>
                 </TableRow>
               );
             })}
