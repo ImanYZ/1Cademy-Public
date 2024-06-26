@@ -79,10 +79,13 @@ const generateCourseObjectives = async (
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, targetLearners, courseDescription } = req.body;
-    const courseObjectives = await generateCourseObjectives(courseTitle, targetLearners, 13, courseDescription).catch(
-      console.error
-    );
+    const { courseTitle, targetLearners, courseDescription, hours } = req.body;
+    const courseObjectives = await generateCourseObjectives(
+      courseTitle,
+      targetLearners,
+      hours,
+      courseDescription
+    ).catch(console.error);
     console.log("description ==>", courseObjectives);
     return res.status(200).json(courseObjectives);
   } catch (error) {

@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import { makeStyles } from "@mui/styles";
 import Downshift from "downshift";
 import PropTypes from "prop-types";
-import React, { useEffect } from "react";
+import React from "react";
 
 const useStyles: any = makeStyles(() => ({
   inputChip: {
@@ -18,17 +18,12 @@ const useStyles: any = makeStyles(() => ({
 
 const ChipInput = ({ ...props }) => {
   const classes = useStyles();
-  const { selectedTags, placeholder, tags, readOnly, itemId, ...other } = props;
+  const { selectedTags, placeholder, tags, readOnly, itemId, setTags, ...other } = props;
   const [inputValue, setInputValue] = React.useState("");
-  const [selectedItem, setSelectedItem] = React.useState([]);
-
-  useEffect(() => {
-    setSelectedItem(tags);
-  }, [tags]);
 
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter") {
-      let newSelectedItem: any = [...selectedItem];
+      let newSelectedItem: any = [...tags];
       const duplicatedValues = newSelectedItem.indexOf(event.target.value.trim());
 
       if (duplicatedValues !== -1) {
@@ -37,34 +32,34 @@ const ChipInput = ({ ...props }) => {
       }
       if (!event.target.value.replace(/\s/g, "").length) return;
       const altrs = event.target.value
-        .split(" ")
+        .split(",")
         .map((x: any) => x.trim())
         .filter((x: any) => x !== "");
       newSelectedItem = [...newSelectedItem, ...altrs];
-      setSelectedItem(newSelectedItem);
+      setTags(newSelectedItem);
       selectedTags(newSelectedItem, itemId);
       setInputValue("");
     }
-    if (selectedItem.length && !inputValue.length && event.key === "Backspace") {
-      setSelectedItem(selectedItem.slice(0, selectedItem.length - 1));
-      selectedTags(selectedItem.slice(0, selectedItem.length - 1), itemId);
+    if (tags.length && !inputValue.length && event.key === "Backspace") {
+      setTags(tags.slice(0, tags.length - 1));
+      selectedTags(tags.slice(0, tags.length - 1), itemId);
     }
   };
 
   const handleChange = (item: any) => {
-    let newSelectedItem: any = [...selectedItem];
+    let newSelectedItem: any = [...tags];
     if (newSelectedItem.indexOf(item) === -1) {
       newSelectedItem = [...newSelectedItem, item];
     }
     setInputValue("");
-    setSelectedItem(newSelectedItem);
+    setTags(newSelectedItem);
     selectedTags(newSelectedItem, itemId);
   };
 
   const handleDelete = (item: any) => () => {
-    const newSelectedItem: any = [...selectedItem];
+    const newSelectedItem: any = [...tags];
     newSelectedItem.splice(newSelectedItem.indexOf(item), 1);
-    setSelectedItem(newSelectedItem);
+    setTags(newSelectedItem);
     selectedTags(newSelectedItem, itemId);
   };
 
@@ -74,7 +69,7 @@ const ChipInput = ({ ...props }) => {
 
   return (
     <React.Fragment>
-      <Downshift id="downshift-multiple" inputValue={inputValue} onChange={handleChange} selectedItem={selectedItem}>
+      <Downshift id="downshift-multiple" inputValue={inputValue} onChange={handleChange} tags={tags}>
         {({ getInputProps }) => {
           const { onBlur, onChange, ...inputProps }: any = getInputProps({
             onKeyDown: handleKeyDown,
@@ -82,11 +77,11 @@ const ChipInput = ({ ...props }) => {
           });
           return (
             <div className="">
-              {(selectedItem.length > 0 || !readOnly) && (
+              {(tags.length > 0 || !readOnly) && (
                 <TextField
                   className={classes.inputChip}
                   InputProps={{
-                    startAdornment: selectedItem.map(item => (
+                    startAdornment: tags.map((item: any) => (
                       <>
                         {readOnly ? (
                           <Chip key={item} tabIndex={-1} label={item} className={classes.innerChip} />

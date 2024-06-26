@@ -5066,12 +5066,14 @@ const Notebook = ({}: NotebookProps) => {
         ) {
           confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", "Ok", "");
         } else {
-          let userName = await promptIt(
-            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
-            "Save",
-            ""
+          let fullname = await promptIt(
+            "Consent that you have all the rights to upload this image and the image does not violate any laws.",
+            "I Consent",
+            "",
+            `${user?.fName} ${user?.lName}`
           );
-          if (userName != `${user?.fName} ${user?.lName}`) {
+
+          if (fullname != `${user?.fName} ${user?.lName}`) {
             confirmIt("Entered full name is not correct", "Ok", "");
             return;
           }
