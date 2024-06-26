@@ -409,7 +409,7 @@ const CourseComponent = () => {
   const [loadingObjectives, setLoadingObjectives] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingCourseStructure, setLoadingCourseStructure] = useState(false);
-
+  const [slideIn, setSlideIn] = useState(true);
   const [courses, setCourses] = useState(COURSES);
   const [displayCourses, setDisplayCourses] = useState(null);
 
@@ -585,7 +585,7 @@ const CourseComponent = () => {
       case "move":
         return `**<span style="color: orange;">Move</span>** the topic **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
       case "delete":
-        return `**<span style="color: Delete;">Move</span>**the topic **"${topic}"** under the category **"${category}"**.`;
+        return `**<span style="color: orange;">Move</span>** the topic **"${topic}"** under the category **"${category}"**.`;
       default:
         return "Invalid action.";
     }
@@ -734,14 +734,17 @@ const CourseComponent = () => {
         prev.splice(currentChangeIndex, 1);
         return prev;
       });
-      navigateChange(currentChangeIndex + 1);
+      navigateChange(currentChangeIndex);
     }, 3000);
   };
 
   const navigateChange = (index: any) => {
     if (improvements[index]) {
-      setCurrentChangeIndex(index);
-      setCurrentImprovement(improvements[index]);
+      TriggerSlideAnimation();
+      setTimeout(() => {
+        setCurrentChangeIndex(index);
+        setCurrentImprovement(improvements[index]);
+      }, 1000);
     } else {
       setSidebarOpen(false);
       setCurrentImprovement({});
@@ -1091,6 +1094,15 @@ const CourseComponent = () => {
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
+  const TriggerSlideAnimation = () => {
+    setSlideIn(false);
+    const timeoutId = setTimeout(() => {
+      setSlideIn(true);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  };
+
   return (
     <Box
       sx={{
@@ -1903,39 +1915,43 @@ const CourseComponent = () => {
                     ":hover": { backgroundColor: "#084694" },
                   }}
                   onClick={() => {
-                    navigateChange(currentChangeIndex - 1);
                     setDisplayCourses(null);
+
+                    navigateChange(currentChangeIndex - 1);
                   }}
                   disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
                 >
                   <ArrowBackIosNewIcon />
                 </Button>
-                <Paper sx={{ p: "15px", m: "17px" }}>
-                  {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                    <Box sx={{ mb: "15px" }}>
-                      <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
-                      <MarkdownRender
-                        text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
-                        sx={{
-                          fontSize: "16px",
-                          fontWeight: 400,
-                          letterSpacing: "inherit",
-                        }}
-                      />
-                    </Box>
-                  )}
-                  <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
-                  <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
-                  <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
-                    {currentChangeIndex + 1}/{improvements.length}
-                  </Typography>
-                </Paper>
+                <Slide direction="down" timeout={800} in={slideIn}>
+                  <Paper sx={{ p: "15px", m: "17px" }}>
+                    {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                      <Box sx={{ mb: "15px" }}>
+                        <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
+                        <MarkdownRender
+                          text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
+                          sx={{
+                            fontSize: "16px",
+                            fontWeight: 400,
+                            letterSpacing: "inherit",
+                          }}
+                        />
+                      </Box>
+                    )}
+                    <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
+                    <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
+                    <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
+                      {currentChangeIndex + 1}/{improvements.length}
+                    </Typography>
+                  </Paper>
+                </Slide>
                 <Button
                   variant="contained"
                   sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
                   onClick={() => {
-                    navigateChange(currentChangeIndex + 1);
+                    TriggerSlideAnimation();
                     setDisplayCourses(null);
+                    navigateChange(currentChangeIndex + 1);
                   }}
                   disabled={
                     currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
