@@ -568,7 +568,11 @@ const CourseComponent = () => {
 
     switch (action) {
       case "add":
-        return `**<span style="color: green;">Add a new topic</span>** called **"${new_topic?.topic}"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take **${new_topic?.hours}** hour(s).`;
+        return `**<span style="color: green;">Add a new topic</span>** called **"${
+          new_topic?.topic
+        }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
+          new_topic?.difficulty
+        }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
       case "modify":
         return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
           new_topic?.topic
