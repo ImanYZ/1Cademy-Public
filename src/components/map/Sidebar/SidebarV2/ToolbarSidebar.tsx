@@ -101,7 +101,7 @@ type MainSidebarProps = {
   pendingProposalsNum: number;
   windowHeight: number;
   reputationSignal: ReputationSignal[];
-  onlineUsers: string[];
+  onlineUsers: { [uname: string]: boolean };
   usersOnlineStatusLoaded: boolean;
   disableToolbar?: boolean;
   enabledToolbarElements?: string[];

@@ -145,8 +145,13 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                     sx={{ border: "none" }}
                   />
                   <Box
-                    sx={{ background: onlineUsers.includes(suggestion.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-                    className="UserStatusOnlineIcon"
+                    sx={{
+                      fontSize: "1px",
+                      backgroundColor: !onlineUsers[suggestion.uname]
+                        ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                        : "",
+                    }}
+                    className={onlineUsers[suggestion.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
                   />
                 </Box>
                 <Box>

@@ -97,7 +97,7 @@ type UsersStatusListProps = {
   setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   sx?: SxProps<Theme>;
   sxUserStatus?: SxProps<Theme>;
-  onlineUsers: string[];
+  onlineUsers: { [uname: string]: boolean };
   usersOnlineStatusLoaded: boolean;
   isSmaller?: boolean;
   disabled?: boolean;
@@ -344,7 +344,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
               userReputation.lterm;
           // only skip small amounts if user status is for all time filter and other filter
           if (((usersStatus !== "All Time" && usersStatus !== "Others Votes") || totalPoints >= 13) && totalPoints) {
-            if (onlineUsers.includes(uname)) {
+            if (onlineUsers[uname]) {
               onlineUsersListTmp.push(usersListObjFromReputationObj(user, userReputation, uname));
             } else {
               usersListTmp.push(usersListObjFromReputationObj(user, userReputation, uname));

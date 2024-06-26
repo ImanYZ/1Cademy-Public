@@ -534,21 +534,24 @@
   position: relative;
   white-space: nowrap;
   margin: -10px 0px -4px 0px;
-  height: 10px;
-  width: 10px;
+  height: 11px;
+  width: 11px;
   border-radius: 50%;
-  background-color: #12b76a;
   overflow: hidden;
+}
+
+.UserStatusOnlineIcon {
+  background-color: #12b76a;
+}
+
+.UserStatusOfflineIcon {
+  border: 2.5px solid grey;
+  background-color: #1b1a1a;
 }
 
 .Lightmode .UserStatusOnlineIcon {
   background-color: #12b76a;
 }
-
-.UserStatusOfflineIcon {
-  background-color: #a7a7a7;
-}
-
 .UserStatusTotalPoints,
 .UserStatusTotalAwards {
   color: white;

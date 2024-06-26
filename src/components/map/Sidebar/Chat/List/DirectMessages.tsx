@@ -89,8 +89,12 @@ export const DirectMessagesList = ({
       >
         <OptimizedAvatar2 alt={userInfo?.fullname} imageUrl={userInfo?.imageUrl} size={40} sx={{ border: "none" }} />
         <Box
-          sx={{ background: onlineUsers.includes(userInfo?.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-          className="UserStatusOnlineIcon"
+          className={onlineUsers[userInfo?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+          sx={{
+            backgroundColor: !onlineUsers[userInfo?.uname]
+              ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+              : "",
+          }}
         />
       </Box>
     );
@@ -148,11 +152,6 @@ export const DirectMessagesList = ({
               >
                 {generateChannelName(conversation.membersInfo, user)}
               </Typography>
-              {(notificationHash[conversation.id] || []).length > 0 && (
-                <Typography sx={{ fontSize: "13px", color: "grey" }}>
-                  {getMessageSummary(notificationHash[conversation.id][0])}
-                </Typography>
-              )}
             </Box>
 
             <Typography
@@ -188,6 +187,11 @@ export const DirectMessagesList = ({
               <CloseIcon />
             </IconButton>
           </Box>
+          {(notificationHash[conversation.id] || []).length > 0 && (
+            <Typography sx={{ fontSize: "13px", color: "grey", pl: "54px" }}>
+              {getMessageSummary(notificationHash[conversation.id][0])}
+            </Typography>
+          )}
         </Paper>
       ))}
     </Box>

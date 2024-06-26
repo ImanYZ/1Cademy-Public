@@ -4,6 +4,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { LoadingButton } from "@mui/lab";
@@ -33,7 +34,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
@@ -399,6 +400,10 @@ const glowRed = keyframes`
 `;
 
 const CourseComponent = () => {
+  const dragItem = useRef<any>(null);
+  const dragOverItem = useRef<any>(null);
+  const containerRef = useRef<any>(null);
+  const [glowCategoryIIndex, setGlowCategoryIIndex] = useState(-1);
   const [loadingDescription, setLoadingDescription] = useState(false);
   const [loadingObjectives, setLoadingObjectives] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
@@ -752,6 +757,7 @@ const CourseComponent = () => {
     }
     setSelectedTopic(topic);
     setSidebarOpen(true);
+    return;
     if (nodesPerTopic[topic.topic]) return;
     setLoadingNodes(true);
     setImprovements([]);
@@ -1019,10 +1025,51 @@ const CourseComponent = () => {
     _courses[selectedCourse].courseObjectives = newTags;
     setCourses(_courses);
   };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const mouseY = e.clientY;
+
+    const distanceFromTop = mouseY - containerRect.top;
+    const distanceFromBottom = containerRect.bottom - mouseY;
+
+    const scrollSpeed = 15;
+
+    const scrollThreshold = 100;
+
+    const scrollAreaHeight = 100;
+
+    if (distanceFromTop < scrollAreaHeight) {
+      const scrollAmount = scrollSpeed * (1 - distanceFromTop / scrollAreaHeight);
+
+      container.scrollTop -= scrollAmount;
+    } else if (distanceFromTop < scrollThreshold) {
+      container.scrollTop -= scrollSpeed;
+    } else if (distanceFromBottom < scrollThreshold) {
+      container.scrollTop += scrollSpeed;
+    }
+  };
+  const handleSorting = () => {
+    const _courses = [...courses];
+    const dragItemContent = _courses[selectedCourse].syllabus[dragItem.current];
+    setGlowCategoryIIndex(dragOverItem.current);
+    _courses[selectedCourse].syllabus.splice(dragItem.current, 1);
+    _courses[selectedCourse].syllabus.splice(dragOverItem.current, 0, dragItemContent);
+    setCourses(_courses);
+    setTimeout(() => {
+      setGlowCategoryIIndex(-1);
+    }, 700);
+  };
   return (
     <Box
       sx={{
         height: "100vh",
+        width: sidebarOpen ? "70%" : "100%",
+        flex: sidebarOpen ? 0.7 : 1,
+        transition: "flex 0.3s",
         overflow: "auto",
         background: theme =>
           theme.palette.mode === "dark"
@@ -1040,7 +1087,7 @@ const CourseComponent = () => {
       />
 
       <Box padding="20px">
-        <Box sx={{ flex: sidebarOpen ? 0.7 : 1, transition: "flex 0.3s" }}>
+        <Box>
           <Select
             label={"Select Course"}
             value={courses[selectedCourse].title}
@@ -1257,9 +1304,21 @@ const CourseComponent = () => {
             </InputAdornment>
           </Box>
 
-          <Box marginTop="20px">
+          <Box ref={containerRef} marginTop="20px">
             {getCourses()[selectedCourse].syllabus.map((category, categoryIndex) => (
-              <Accordion key={categoryIndex} expanded={expanded.includes(category.category)}>
+              <Accordion
+                key={category.category}
+                expanded={expanded.includes(category.category)}
+                draggable
+                onDragStart={() => {
+                  dragItem.current = categoryIndex;
+                }}
+                onDragEnter={() => {
+                  dragOverItem.current = categoryIndex;
+                }}
+                onDragOver={handleDragOver}
+                onDragEnd={handleSorting}
+              >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
                   aria-controls={`panel${categoryIndex}-content`}
@@ -1272,7 +1331,11 @@ const CourseComponent = () => {
                       setExpanded([category.category]);
                     }
                   }}
+                  sx={{
+                    animation: categoryIndex === glowCategoryIIndex ? `${glowGreen} 1.5s ease-in-out infinite` : "",
+                  }}
                 >
+                  <DragIndicatorIcon />
                   {currentImprovement.type === "category" &&
                   currentImprovement.action === "modify" &&
                   currentImprovement.old_category === category.category ? (
@@ -1327,501 +1390,249 @@ const CourseComponent = () => {
                   )}
                 </AccordionSummary>
 
-                <AccordionDetails>
-                  <Grid container spacing={2}>
-                    {category.topics.map((tc: any, topicIndex) => (
-                      <Grid item xs={12} sm={6} md={4} key={topicIndex}>
-                        <Slide direction="down" timeout={800} in={true}>
-                          <Paper
-                            sx={{
-                              height: "300px",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              // backgroundImage: `url(${topicImages[tc.topic]})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                              borderRadius: "15px",
-                              position: "relative",
-                              cursor: "pointer",
-                              animation: isRemoved.includes(tc.topic)
-                                ? `${glowRed} 1.5s ease-in-out infinite`
-                                : isChanged.includes(tc.topic)
-                                ? `${glowGreen} 1.5s ease-in-out infinite`
-                                : "none",
-                              border: `1px solid ${getTopicColor(category, tc)}`,
-                              ":hover": {
-                                border: "1px solid orange",
-                              },
-                            }}
-                            elevation={10}
-                            onClick={e => {
-                              e.stopPropagation();
-                              handlePaperClick(tc);
-                            }}
-                          >
-                            {currentImprovement.topic !== tc.topic && currentImprovement.old_topic !== tc.topic && (
-                              <CloseIcon
-                                className="close-icon"
+                {expanded.includes(category.category) && (
+                  <AccordionDetails>
+                    {
+                      <Grid container spacing={2}>
+                        {category.topics.map((tc: any, topicIndex) => (
+                          <Grid item xs={12} sm={6} md={4} key={topicIndex}>
+                            <Slide direction="down" timeout={800} in={true}>
+                              <Paper
                                 sx={{
-                                  // backgroundColor: "grey",
-                                  color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                                  borderRadius: "50%",
+                                  height: "300px",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  // backgroundImage: `url(${topicImages[tc.topic]})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  borderRadius: "15px",
+                                  position: "relative",
+                                  cursor: "pointer",
+                                  animation: isRemoved.includes(tc.topic)
+                                    ? `${glowRed} 1.5s ease-in-out infinite`
+                                    : isChanged.includes(tc.topic)
+                                    ? `${glowGreen} 1.5s ease-in-out infinite`
+                                    : "none",
+                                  border: `1px solid ${getTopicColor(category, tc)}`,
                                   ":hover": {
-                                    backgroundColor: "black",
-                                    color: "white",
+                                    border: "1px solid orange",
                                   },
-                                  zIndex: 10,
-                                  position: "absolute",
-                                  top: "0px",
-                                  right: "0px",
-                                  padding: "5px",
-                                  fontSize: "35px",
                                 }}
-                                onClick={() => handleRemoveTopic(categoryIndex, topicIndex)}
-                              />
-                            )}
-                            {currentImprovement.action === "move" &&
-                              currentImprovement.type === "topic" &&
-                              currentImprovement.topic === tc.topic && (
-                                <SwapHorizIcon
-                                  sx={{
-                                    position: "absolute",
-                                    top: "0px",
-                                    fontSize: "40px",
-                                    color: currentImprovement.new_category === category.category ? "green" : "red",
-                                  }}
-                                />
-                              )}
-                            <Box>
-                              {currentImprovement.action === "modify" && currentImprovement.old_topic === tc.topic ? (
-                                <Box>
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: "red",
-                                      textDecoration: "line-through",
-                                    }}
-                                  >
-                                    {currentImprovement?.old_topic || ""}
-                                  </Typography>
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: "green",
-                                    }}
-                                  >
-                                    {currentImprovement?.new_topic.topic || ""}
-                                  </Typography>
-                                </Box>
-                              ) : (
-                                <Typography
-                                  variant="h6"
-                                  sx={{
-                                    textAlign: "center",
-                                    color: getTopicColor(category, tc),
-                                    fontWeight: 300,
-                                  }}
-                                >
-                                  {tc?.topic || ""}
-                                </Typography>
-                              )}
-
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  bottom: "0px",
-                                  right: "0px",
-                                  m: 2,
-                                  gap: "5px",
+                                elevation={10}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handlePaperClick(tc);
                                 }}
                               >
-                                <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                                <Chip
-                                  label={tc?.difficulty}
-                                  color={
-                                    tc?.difficulty.toLowerCase() === "easy"
-                                      ? "success"
-                                      : tc?.difficulty.toLowerCase() === "medium"
-                                      ? "warning"
-                                      : "error"
-                                  }
-                                />
-                              </Box>
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  bottom: "0px",
-                                  left: "0px",
-                                  m: 2,
-                                  gap: "5px",
-                                }}
-                              >
-                                <Button
-                                  variant="contained"
-                                  sx={{ borderRadius: "40px" }}
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    setEditTopic({
-                                      category: category.category,
-                                      ...tc,
-                                    });
-                                    setNewTopic(tc.topic);
-                                    setDifficulty(tc.difficulty.toLowerCase());
-                                    setHours(tc.hours);
-                                    setTopicDescription(tc.description || "");
-                                    setSkills(tc.skills || []);
-                                    handleOpenDialog(categoryIndex);
-                                  }}
-                                >
-                                  Edit
-                                </Button>
-                              </Box>
-                            </Box>
-                          </Paper>
-                        </Slide>
-                      </Grid>
-                    ))}
-                    {currentImprovement.category === category.category &&
-                      getNewTopics(currentImprovement).length > 0 &&
-                      getNewTopics(currentImprovement).map(tc => (
-                        <Grid key={tc.topic} item xs={12} sm={6} md={4}>
-                          <Paper
-                            sx={{
-                              height: "300px",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              backgroundImage: `url(${topicImages[tc]})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                              borderRadius: "15px",
-                              position: "relative",
-                              cursor: "pointer",
-                              border: "2px solid green",
-                              ":hover": {
-                                border: "1px solid orange",
-                              },
-                            }}
-                            elevation={10}
-                          >
-                            <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                              {tc.topic}
-                            </Typography>
-                            <Box
-                              sx={{
-                                position: "absolute",
-                                bottom: "0px",
-                                right: "0px",
-                                m: 2,
-                                gap: "5px",
-                              }}
-                            >
-                              <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                              <Chip
-                                label={tc?.difficulty}
-                                color={
-                                  tc?.difficulty.toLowerCase() === "easy"
-                                    ? "success"
-                                    : tc?.difficulty.toLowerCase() === "medium"
-                                    ? "warning"
-                                    : "error"
-                                }
-                              />
-                            </Box>
-                          </Paper>
-                        </Grid>
-                      ))}
-                    <Grid item xs={12} sm={6} md={4} key="add-topic">
-                      <Paper
-                        sx={{
-                          height: "300px",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          border: "2px dashed grey",
-                          borderRadius: "15px",
-                          cursor: "pointer",
-                          ":hover": {
-                            border: "2px dashed orange",
-                          },
-                        }}
-                        onClick={() => handleOpenDialog(categoryIndex)}
-                      >
-                        <AddIcon
-                          sx={{
-                            fontSize: 64,
-                            color: "grey",
-                            ":hover": {
-                              color: "orange",
-                            },
-                          }}
-                        />
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                </AccordionDetails>
-              </Accordion>
-            ))}
-            {sidebarOpen && (
-              <Paper
-                sx={{
-                  width: "30%",
-                  height: "100vh",
-                  backgroundColor: "white",
-                  boxShadow: 3,
-                  position: "fixed",
-                  borderTopLeftRadius: "25px",
-                  right: 0,
-                  top: 0,
-                  zIndex: 9999,
-                  display: "flex",
-                  flexDirection: "column",
-                  background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : ""),
-                }}
-                elevation={8}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    p: 2,
-                    borderBottom: "1px solid lightgrey",
-                  }}
-                >
-                  <Typography variant="h6">
-                    {Object.keys(improvements[currentChangeIndex] || {}).length > 0
-                      ? "AI-Proposed Improvements"
-                      : selectedTopic.topic}
-                  </Typography>
-                  <IconButton onClick={handleSidebarClose}>
-                    <CloseIcon />
-                  </IconButton>
-                </Box>
-                {selectedTopic && (
-                  <Box sx={{ mx: "15px" }}>
-                    <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Description:</Typography>
-                    <Typography>{selectedTopic.description}</Typography>{" "}
-                  </Box>
-                )}
-
-                {selectedTopic && (
-                  <Box sx={{ mx: "15px" }}>
-                    <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
-                    <ChipInput
-                      tags={selectedTopic.skills}
-                      selectedTags={() => {}}
-                      fullWidth
-                      variant="outlined"
-                      readOnly={true}
-                    />
-                  </Box>
-                )}
-                {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                  <Box>
-                    <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          minWidth: "32px",
-                          p: 0,
-                          m: 0,
-                          backgroundColor: "#1973d3",
-                          ":hover": { backgroundColor: "#084694" },
-                        }}
-                        onClick={() => {
-                          navigateChange(currentChangeIndex - 1);
-                          setDisplayCourses(null);
-                        }}
-                        disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
-                      >
-                        <ArrowBackIosNewIcon />
-                      </Button>
-                      <Paper sx={{ p: "15px", m: "17px" }}>
-                        {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                          <Box sx={{ mb: "15px" }}>
-                            <strong style={{ color: "green", marginRight: "5px" }}> Proposal:</strong>{" "}
-                            <MarkdownRender
-                              text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
-                              sx={{
-                                fontSize: "16px",
-                                fontWeight: 400,
-                                letterSpacing: "inherit",
-                              }}
-                            />
-                          </Box>
-                        )}
-                        <strong style={{ color: "green", marginRight: "5px" }}> Rationale:</strong>{" "}
-                        <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
-                      </Paper>
-                      <Button
-                        variant="contained"
-                        sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
-                        onClick={() => {
-                          navigateChange(currentChangeIndex + 1);
-                          setDisplayCourses(null);
-                        }}
-                        disabled={
-                          currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
-                          Object.keys(currentImprovement).length <= 0
-                        }
-                      >
-                        <ArrowForwardIosIcon />
-                      </Button>
-                    </Box>
-
-                    <Box sx={{ display: "flex", gap: "82px", alignItems: "center", alignContent: "center" }}>
-                      <Button
-                        sx={{ ml: "9px" }}
-                        onClick={handleRejectChange}
-                        color="error"
-                        variant="contained"
-                        disabled={Object.keys(currentImprovement).length <= 0}
-                      >
-                        Delete Proposal
-                      </Button>
-                      <Typography sx={{ mr: "15px", mt: "5px", ml: "5px" }}>
-                        {currentChangeIndex + 1}/{improvements.length}
-                      </Typography>
-                      <Button
-                        onClick={handleAcceptChange}
-                        color="success"
-                        autoFocus
-                        variant="contained"
-                        disabled={Object.keys(currentImprovement).length <= 0}
-                      >
-                        Implement Proposal
-                      </Button>
-                    </Box>
-                  </Box>
-                )}
-                {loadingNodes ? (
-                  <Box>
-                    <Box>
-                      {Array.from(new Array(7)).map((_, index) => (
-                        <Box
-                          key={index}
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-start",
-
-                            px: 2,
-                          }}
-                        >
-                          <Skeleton
-                            variant="rectangular"
-                            width={500}
-                            height={250}
-                            sx={{
-                              bgcolor: "grey.300",
-                              borderRadius: "10px",
-                              mt: "19px",
-                              ml: "5px",
-                            }}
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ gap: "5px", my: "15px", mx: "19px", overflow: "auto" }}>
-                    {selectedTopic &&
-                      (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
-                        <Box key={node.title} sx={{ mb: "10px" }}>
-                          <Accordion
-                            id={node.title}
-                            expanded={true}
-                            sx={{
-                              borderRadius: "13px!important",
-
-                              overflow: "hidden",
-                              listStyle: "none",
-                              transition: "box-shadow 0.3s",
-
-                              border: expandedNode === node.title ? `2px solid orange` : "",
-                              p: "0px !important",
-                            }}
-                          >
-                            <AccordionSummary
-                              sx={{
-                                p: "0px !important",
-                                marginBlock: "-13px !important",
-                              }}
-                            >
-                              <Box sx={{ flexDirection: "column", width: "100%" }}>
-                                <Box
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (expandedNode === node.title) {
-                                      setExpandedNode(null);
-                                    } else {
-                                      setExpandedNode(node.title);
-                                    }
-                                  }}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    m: "15px",
-                                  }}
-                                >
-                                  <Box
+                                {currentImprovement.topic !== tc.topic && currentImprovement.old_topic !== tc.topic && (
+                                  <CloseIcon
+                                    className="close-icon"
                                     sx={{
-                                      pr: "25px",
-                                      // pb: '15px',
-                                      display: "flex",
-                                      gap: "15px",
+                                      // backgroundColor: "grey",
+                                      color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                                      borderRadius: "50%",
+                                      ":hover": {
+                                        backgroundColor: "black",
+                                        color: "white",
+                                      },
+                                      zIndex: 10,
+                                      position: "absolute",
+                                      top: "0px",
+                                      right: "0px",
+                                      padding: "5px",
+                                      fontSize: "35px",
                                     }}
-                                  >
-                                    <NodeTypeIcon
-                                      id={node.title}
-                                      nodeType={node.nodeType}
-                                      tooltipPlacement={"top"}
-                                      fontSize={"medium"}
-                                      // disabled={disabled}
-                                    />
-                                    <MarkdownRender
-                                      text={node?.title}
+                                    onClick={() => handleRemoveTopic(categoryIndex, topicIndex)}
+                                  />
+                                )}
+                                {currentImprovement.action === "move" &&
+                                  currentImprovement.type === "topic" &&
+                                  currentImprovement.topic === tc.topic && (
+                                    <SwapHorizIcon
                                       sx={{
-                                        fontSize: "20px",
-                                        fontWeight: 400,
-                                        letterSpacing: "inherit",
+                                        position: "absolute",
+                                        top: "0px",
+                                        fontSize: "40px",
+                                        color: currentImprovement.new_category === category.category ? "green" : "red",
                                       }}
                                     />
+                                  )}
+                                <Box>
+                                  {currentImprovement.action === "modify" &&
+                                  currentImprovement.old_topic === tc.topic ? (
+                                    <Box>
+                                      <Typography
+                                        variant="h6"
+                                        sx={{
+                                          textAlign: "center",
+                                          color: "red",
+                                          textDecoration: "line-through",
+                                        }}
+                                      >
+                                        {currentImprovement?.old_topic || ""}
+                                      </Typography>
+                                      <Typography
+                                        variant="h6"
+                                        sx={{
+                                          textAlign: "center",
+                                          color: "green",
+                                        }}
+                                      >
+                                        {currentImprovement?.new_topic.topic || ""}
+                                      </Typography>
+                                    </Box>
+                                  ) : (
+                                    <Typography
+                                      variant="h6"
+                                      sx={{
+                                        textAlign: "center",
+                                        color: getTopicColor(category, tc),
+                                        fontWeight: 300,
+                                      }}
+                                    >
+                                      {tc?.topic || ""}
+                                    </Typography>
+                                  )}
+
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      bottom: "0px",
+                                      right: "0px",
+                                      m: 2,
+                                      gap: "5px",
+                                    }}
+                                  >
+                                    <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
+                                    <Chip
+                                      label={tc?.difficulty}
+                                      color={
+                                        tc?.difficulty.toLowerCase() === "easy"
+                                          ? "success"
+                                          : tc?.difficulty.toLowerCase() === "medium"
+                                          ? "warning"
+                                          : "error"
+                                      }
+                                    />
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      bottom: "0px",
+                                      left: "0px",
+                                      m: 2,
+                                      gap: "5px",
+                                    }}
+                                  >
+                                    <Button
+                                      variant="contained"
+                                      sx={{ borderRadius: "40px" }}
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        setEditTopic({
+                                          category: category.category,
+                                          ...tc,
+                                        });
+                                        setNewTopic(tc.topic);
+                                        setDifficulty(tc.difficulty.toLowerCase());
+                                        setHours(tc.hours);
+                                        setTopicDescription(tc.description || "");
+                                        setSkills(tc.skills || []);
+                                        handleOpenDialog(categoryIndex);
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
                                   </Box>
                                 </Box>
-                              </Box>
-                            </AccordionSummary>
-
-                            <AccordionDetails sx={{ p: "0px !important" }}>
-                              <Box sx={{ p: "17px", pt: 0 }}>
+                              </Paper>
+                            </Slide>
+                          </Grid>
+                        ))}
+                        {currentImprovement.category === category.category &&
+                          getNewTopics(currentImprovement).length > 0 &&
+                          getNewTopics(currentImprovement).map(tc => (
+                            <Grid key={tc.topic} item xs={12} sm={6} md={4}>
+                              <Paper
+                                sx={{
+                                  height: "300px",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  backgroundImage: `url(${topicImages[tc]})`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  borderRadius: "15px",
+                                  position: "relative",
+                                  cursor: "pointer",
+                                  border: "2px solid green",
+                                  ":hover": {
+                                    border: "1px solid orange",
+                                  },
+                                }}
+                                elevation={10}
+                              >
+                                <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
+                                  {tc.topic}
+                                </Typography>
                                 <Box
                                   sx={{
-                                    transition: "border 0.3s",
+                                    position: "absolute",
+                                    bottom: "0px",
+                                    right: "0px",
+                                    m: 2,
+                                    gap: "5px",
                                   }}
                                 >
-                                  <MarkdownRender
-                                    text={node.content}
-                                    sx={{
-                                      fontSize: "16px",
-                                      fontWeight: 400,
-                                      letterSpacing: "inherit",
-                                    }}
+                                  <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
+                                  <Chip
+                                    label={tc?.difficulty}
+                                    color={
+                                      tc?.difficulty.toLowerCase() === "easy"
+                                        ? "success"
+                                        : tc?.difficulty.toLowerCase() === "medium"
+                                        ? "warning"
+                                        : "error"
+                                    }
                                   />
                                 </Box>
-                                {/* <FlashcardVideo flashcard={concept} /> */}
-                                {(node?.nodeImage || []).length > 0 && <ImageSlider images={[node?.nodeImage]} />}
-                              </Box>
-                            </AccordionDetails>
-                          </Accordion>
-                        </Box>
-                      ))}
-                  </Box>
+                              </Paper>
+                            </Grid>
+                          ))}
+                        <Grid item xs={12} sm={6} md={4} key="add-topic">
+                          <Paper
+                            sx={{
+                              height: "300px",
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              border: "2px dashed grey",
+                              borderRadius: "15px",
+                              cursor: "pointer",
+                              ":hover": {
+                                border: "2px dashed orange",
+                              },
+                            }}
+                            onClick={() => handleOpenDialog(categoryIndex)}
+                          >
+                            <AddIcon
+                              sx={{
+                                fontSize: 64,
+                                color: "grey",
+                                ":hover": {
+                                  color: "orange",
+                                },
+                              }}
+                            />
+                          </Paper>
+                        </Grid>
+                      </Grid>
+                    }
+                  </AccordionDetails>
                 )}
-              </Paper>
-            )}
+              </Accordion>
+            ))}
           </Box>
 
           <Box
@@ -2001,6 +1812,266 @@ const CourseComponent = () => {
           </Dialog>
         </Box>
       </Box>
+      {sidebarOpen && (
+        <Paper
+          sx={{
+            height: "100vh",
+            backgroundColor: "white",
+            boxShadow: 3,
+            position: "fixed",
+            borderTopLeftRadius: "25px",
+            right: 0,
+            top: 0,
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkBackground : ""),
+            width: sidebarOpen ? "30%" : "0%",
+            transition: "width 0.3s",
+            overflow: "hidden",
+            transform: sidebarOpen ? "translateX(0)" : "translateX(30%)",
+          }}
+          elevation={8}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+              borderBottom: "1px solid lightgrey",
+            }}
+          >
+            <Typography variant="h6">
+              {Object.keys(improvements[currentChangeIndex] || {}).length > 0
+                ? "AI-Proposed Improvements"
+                : selectedTopic.topic}
+            </Typography>
+            <IconButton onClick={handleSidebarClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          {selectedTopic && (
+            <Box sx={{ mx: "15px" }}>
+              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Description:</Typography>
+              <Typography>{selectedTopic.description}</Typography>{" "}
+            </Box>
+          )}
+
+          {selectedTopic && (
+            <Box sx={{ mx: "15px" }}>
+              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
+              <ChipInput
+                tags={selectedTopic.skills}
+                selectedTags={() => {}}
+                fullWidth
+                variant="outlined"
+                readOnly={true}
+              />
+            </Box>
+          )}
+          {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+            <Box>
+              <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    minWidth: "32px",
+                    p: 0,
+                    m: 0,
+                    backgroundColor: "#1973d3",
+                    ":hover": { backgroundColor: "#084694" },
+                  }}
+                  onClick={() => {
+                    navigateChange(currentChangeIndex - 1);
+                    setDisplayCourses(null);
+                  }}
+                  disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
+                >
+                  <ArrowBackIosNewIcon />
+                </Button>
+                <Paper sx={{ p: "15px", m: "17px" }}>
+                  {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                    <Box sx={{ mb: "15px" }}>
+                      <strong style={{ color: "green", marginRight: "5px" }}> Proposal:</strong>{" "}
+                      <MarkdownRender
+                        text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
+                        sx={{
+                          fontSize: "16px",
+                          fontWeight: 400,
+                          letterSpacing: "inherit",
+                        }}
+                      />
+                    </Box>
+                  )}
+                  <strong style={{ color: "green", marginRight: "5px" }}> Rationale:</strong>{" "}
+                  <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
+                </Paper>
+                <Button
+                  variant="contained"
+                  sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
+                  onClick={() => {
+                    navigateChange(currentChangeIndex + 1);
+                    setDisplayCourses(null);
+                  }}
+                  disabled={
+                    currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
+                    Object.keys(currentImprovement).length <= 0
+                  }
+                >
+                  <ArrowForwardIosIcon />
+                </Button>
+              </Box>
+
+              <Box sx={{ display: "flex", gap: "82px", alignItems: "center", alignContent: "center" }}>
+                <Button
+                  sx={{ ml: "9px" }}
+                  onClick={handleRejectChange}
+                  color="error"
+                  variant="contained"
+                  disabled={Object.keys(currentImprovement).length <= 0}
+                >
+                  Delete Proposal
+                </Button>
+                <Typography sx={{ mr: "15px", mt: "5px", ml: "5px" }}>
+                  {currentChangeIndex + 1}/{improvements.length}
+                </Typography>
+                <Button
+                  onClick={handleAcceptChange}
+                  color="success"
+                  autoFocus
+                  variant="contained"
+                  disabled={Object.keys(currentImprovement).length <= 0}
+                >
+                  Implement Proposal
+                </Button>
+              </Box>
+            </Box>
+          )}
+          {loadingNodes ? (
+            <Box>
+              <Box>
+                {Array.from(new Array(7)).map((_, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-start",
+
+                      px: 2,
+                    }}
+                  >
+                    <Skeleton
+                      variant="rectangular"
+                      width={500}
+                      height={250}
+                      sx={{
+                        bgcolor: "grey.300",
+                        borderRadius: "10px",
+                        mt: "19px",
+                        ml: "5px",
+                      }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ gap: "5px", my: "15px", mx: "19px", overflow: "auto" }}>
+              {selectedTopic &&
+                (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
+                  <Box key={node.title} sx={{ mb: "10px" }}>
+                    <Accordion
+                      id={node.title}
+                      expanded={true}
+                      sx={{
+                        borderRadius: "13px!important",
+
+                        overflow: "hidden",
+                        listStyle: "none",
+                        transition: "box-shadow 0.3s",
+
+                        border: expandedNode === node.title ? `2px solid orange` : "",
+                        p: "0px !important",
+                      }}
+                    >
+                      <AccordionSummary
+                        sx={{
+                          p: "0px !important",
+                          marginBlock: "-13px !important",
+                        }}
+                      >
+                        <Box sx={{ flexDirection: "column", width: "100%" }}>
+                          <Box
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (expandedNode === node.title) {
+                                setExpandedNode(null);
+                              } else {
+                                setExpandedNode(node.title);
+                              }
+                            }}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              m: "15px",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                pr: "25px",
+                                // pb: '15px',
+                                display: "flex",
+                                gap: "15px",
+                              }}
+                            >
+                              <NodeTypeIcon
+                                id={node.title}
+                                nodeType={node.nodeType}
+                                tooltipPlacement={"top"}
+                                fontSize={"medium"}
+                                // disabled={disabled}
+                              />
+                              <MarkdownRender
+                                text={node?.title}
+                                sx={{
+                                  fontSize: "20px",
+                                  fontWeight: 400,
+                                  letterSpacing: "inherit",
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+                      </AccordionSummary>
+
+                      <AccordionDetails sx={{ p: "0px !important" }}>
+                        <Box sx={{ p: "17px", pt: 0 }}>
+                          <Box
+                            sx={{
+                              transition: "border 0.3s",
+                            }}
+                          >
+                            <MarkdownRender
+                              text={node.content}
+                              sx={{
+                                fontSize: "16px",
+                                fontWeight: 400,
+                                letterSpacing: "inherit",
+                              }}
+                            />
+                          </Box>
+                          {/* <FlashcardVideo flashcard={concept} /> */}
+                          {(node?.nodeImage || []).length > 0 && <ImageSlider images={[node?.nodeImage]} />}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
+                ))}
+            </Box>
+          )}
+        </Paper>
+      )}
       {ConfirmDialog}
     </Box>
   );

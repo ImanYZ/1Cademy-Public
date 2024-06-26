@@ -23,7 +23,7 @@ import { UserBubble } from "./UserBubble";
 
 type RelativeLivelinessBarProps = {
   variant: RelativeLivelinessTypes;
-  onlineUsers: string[];
+  onlineUsers: any;
   openUserInfoSidebar: (uname: string, imageUrl: string, fullName: string, chooseUname: string) => void;
   onToggleDisplay: () => void;
   open: boolean;
@@ -162,7 +162,7 @@ const RelativeLivelinessBar = ({
                   variant={variant}
                   key={cur.uname}
                   displayEmails={authEmail === "oneweb@umich.edu"}
-                  isOnline={onlineUsers.includes(cur.uname)}
+                  isOnline={!!onlineUsers[cur.uname]}
                   openUserInfoSidebar={openUserInfoSidebar}
                   userInteraction={cur}
                   size={28}

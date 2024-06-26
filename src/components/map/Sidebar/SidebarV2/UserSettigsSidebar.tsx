@@ -115,6 +115,7 @@ type UserSettingsSidebarProps = {
   onChangeNotebook: (notebookId: string) => void;
   onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
   notebookOwner: string;
+  onlineUsers: any;
 };
 
 type UserSettingsTabs = {
@@ -165,7 +166,7 @@ const TabPanel = ({ value, index, children }: TabPanelProps) => {
   return <Box hidden={value !== index}>{value === index && children}</Box>;
 };
 
-const UserSettigsSidebar = ({
+const UserSettingsSidebar = ({
   notebookRef,
   openLinkedNode,
   open,
@@ -181,6 +182,7 @@ const UserSettigsSidebar = ({
   onChangeNotebook,
   onChangeTagOfNotebookById,
   notebookOwner,
+  onlineUsers,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
@@ -1901,6 +1903,7 @@ const UserSettigsSidebar = ({
             lName={user.lName ?? ""}
             chooseUname={user.chooseUname}
             points={totalPoints}
+            online={onlineUsers[user.uname]}
           />
 
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
@@ -2133,4 +2136,4 @@ const ModeOption = ({ image, mode, active, handleSwitchTheme }: ModeOptionProps)
   );
 };
 
-export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar);
+export const MemoizedUserSettingsSidebar = React.memo(UserSettingsSidebar);

@@ -10,7 +10,6 @@ import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import usePrevious from "../../hooks/usePrevious";
-import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
 
@@ -148,19 +147,13 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
             contained={false}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
-          {props.online && (
-            <Box
-              className={"UserStatusOnlineIcon"}
-              sx={{
-                width: "14px",
-                height: "14px",
-                position: "absolute",
-                bottom: "0px",
-                right: "0px",
-                border: `solid 2px ${DESIGN_SYSTEM_COLORS.baseWhite}`,
-              }}
-            />
-          )}
+
+          <Box
+            className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+            sx={{
+              backgroundColor: !props.online ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe") : "",
+            }}
+          />
         </Box>
         {!smallVersion && (
           <Box
