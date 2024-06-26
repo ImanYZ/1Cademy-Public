@@ -752,7 +752,6 @@ const CourseComponent = () => {
     }
     setSelectedTopic(topic);
     setSidebarOpen(true);
-    return;
     if (nodesPerTopic[topic.topic]) return;
     setLoadingNodes(true);
     setImprovements([]);
