@@ -752,6 +752,7 @@ const CourseComponent = () => {
     }
     setSelectedTopic(topic);
     setSidebarOpen(true);
+    return;
     if (nodesPerTopic[topic.topic]) return;
     setLoadingNodes(true);
     setImprovements([]);
@@ -1023,6 +1024,9 @@ const CourseComponent = () => {
     <Box
       sx={{
         height: "100vh",
+        width: sidebarOpen ? "70%" : "100%",
+        flex: sidebarOpen ? 0.7 : 1,
+        transition: "flex 0.3s",
         overflow: "auto",
         background: theme =>
           theme.palette.mode === "dark"
@@ -1040,7 +1044,7 @@ const CourseComponent = () => {
       />
 
       <Box padding="20px">
-        <Box sx={{ flex: sidebarOpen ? 0.7 : 1, transition: "flex 0.3s" }}>
+        <Box>
           <Select
             label={"Select Course"}
             value={courses[selectedCourse].title}
@@ -1565,263 +1569,6 @@ const CourseComponent = () => {
                 </AccordionDetails>
               </Accordion>
             ))}
-            {sidebarOpen && (
-              <Paper
-                sx={{
-                  width: "30%",
-                  height: "100vh",
-                  backgroundColor: "white",
-                  boxShadow: 3,
-                  position: "fixed",
-                  borderTopLeftRadius: "25px",
-                  right: 0,
-                  top: 0,
-                  zIndex: 9999,
-                  display: "flex",
-                  flexDirection: "column",
-                  background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkGrayBackground : ""),
-                }}
-                elevation={8}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    p: 2,
-                    borderBottom: "1px solid lightgrey",
-                  }}
-                >
-                  <Typography variant="h6">
-                    {Object.keys(improvements[currentChangeIndex] || {}).length > 0
-                      ? "AI-Proposed Improvements"
-                      : selectedTopic.topic}
-                  </Typography>
-                  <IconButton onClick={handleSidebarClose}>
-                    <CloseIcon />
-                  </IconButton>
-                </Box>
-                {selectedTopic && (
-                  <Box sx={{ mx: "15px" }}>
-                    <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Description:</Typography>
-                    <Typography>{selectedTopic.description}</Typography>{" "}
-                  </Box>
-                )}
-
-                {selectedTopic && (
-                  <Box sx={{ mx: "15px" }}>
-                    <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
-                    <ChipInput
-                      tags={selectedTopic.skills}
-                      selectedTags={() => {}}
-                      fullWidth
-                      variant="outlined"
-                      readOnly={true}
-                    />
-                  </Box>
-                )}
-                {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                  <Box>
-                    <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          minWidth: "32px",
-                          p: 0,
-                          m: 0,
-                          backgroundColor: "#1973d3",
-                          ":hover": { backgroundColor: "#084694" },
-                        }}
-                        onClick={() => {
-                          navigateChange(currentChangeIndex - 1);
-                          setDisplayCourses(null);
-                        }}
-                        disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
-                      >
-                        <ArrowBackIosNewIcon />
-                      </Button>
-                      <Paper sx={{ p: "15px", m: "17px" }}>
-                        {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                          <Box sx={{ mb: "15px" }}>
-                            <strong style={{ color: "green", marginRight: "5px" }}> Proposal:</strong>{" "}
-                            <MarkdownRender
-                              text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
-                              sx={{
-                                fontSize: "16px",
-                                fontWeight: 400,
-                                letterSpacing: "inherit",
-                              }}
-                            />
-                          </Box>
-                        )}
-                        <strong style={{ color: "green", marginRight: "5px" }}> Rationale:</strong>{" "}
-                        <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
-                      </Paper>
-                      <Button
-                        variant="contained"
-                        sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
-                        onClick={() => {
-                          navigateChange(currentChangeIndex + 1);
-                          setDisplayCourses(null);
-                        }}
-                        disabled={
-                          currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
-                          Object.keys(currentImprovement).length <= 0
-                        }
-                      >
-                        <ArrowForwardIosIcon />
-                      </Button>
-                    </Box>
-
-                    <Box sx={{ display: "flex", gap: "82px", alignItems: "center", alignContent: "center" }}>
-                      <Button
-                        sx={{ ml: "9px" }}
-                        onClick={handleRejectChange}
-                        color="error"
-                        variant="contained"
-                        disabled={Object.keys(currentImprovement).length <= 0}
-                      >
-                        Delete Proposal
-                      </Button>
-                      <Typography sx={{ mr: "15px", mt: "5px", ml: "5px" }}>
-                        {currentChangeIndex + 1}/{improvements.length}
-                      </Typography>
-                      <Button
-                        onClick={handleAcceptChange}
-                        color="success"
-                        autoFocus
-                        variant="contained"
-                        disabled={Object.keys(currentImprovement).length <= 0}
-                      >
-                        Implement Proposal
-                      </Button>
-                    </Box>
-                  </Box>
-                )}
-                {loadingNodes ? (
-                  <Box>
-                    <Box>
-                      {Array.from(new Array(7)).map((_, index) => (
-                        <Box
-                          key={index}
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-start",
-
-                            px: 2,
-                          }}
-                        >
-                          <Skeleton
-                            variant="rectangular"
-                            width={500}
-                            height={250}
-                            sx={{
-                              bgcolor: "grey.300",
-                              borderRadius: "10px",
-                              mt: "19px",
-                              ml: "5px",
-                            }}
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ gap: "5px", my: "15px", mx: "19px", overflow: "auto" }}>
-                    {selectedTopic &&
-                      (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
-                        <Box key={node.title} sx={{ mb: "10px" }}>
-                          <Accordion
-                            id={node.title}
-                            expanded={true}
-                            sx={{
-                              borderRadius: "13px!important",
-
-                              overflow: "hidden",
-                              listStyle: "none",
-                              transition: "box-shadow 0.3s",
-
-                              border: expandedNode === node.title ? `2px solid orange` : "",
-                              p: "0px !important",
-                            }}
-                          >
-                            <AccordionSummary
-                              sx={{
-                                p: "0px !important",
-                                marginBlock: "-13px !important",
-                              }}
-                            >
-                              <Box sx={{ flexDirection: "column", width: "100%" }}>
-                                <Box
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (expandedNode === node.title) {
-                                      setExpandedNode(null);
-                                    } else {
-                                      setExpandedNode(node.title);
-                                    }
-                                  }}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    m: "15px",
-                                  }}
-                                >
-                                  <Box
-                                    sx={{
-                                      pr: "25px",
-                                      // pb: '15px',
-                                      display: "flex",
-                                      gap: "15px",
-                                    }}
-                                  >
-                                    <NodeTypeIcon
-                                      id={node.title}
-                                      nodeType={node.nodeType}
-                                      tooltipPlacement={"top"}
-                                      fontSize={"medium"}
-                                      // disabled={disabled}
-                                    />
-                                    <MarkdownRender
-                                      text={node?.title}
-                                      sx={{
-                                        fontSize: "20px",
-                                        fontWeight: 400,
-                                        letterSpacing: "inherit",
-                                      }}
-                                    />
-                                  </Box>
-                                </Box>
-                              </Box>
-                            </AccordionSummary>
-
-                            <AccordionDetails sx={{ p: "0px !important" }}>
-                              <Box sx={{ p: "17px", pt: 0 }}>
-                                <Box
-                                  sx={{
-                                    transition: "border 0.3s",
-                                  }}
-                                >
-                                  <MarkdownRender
-                                    text={node.content}
-                                    sx={{
-                                      fontSize: "16px",
-                                      fontWeight: 400,
-                                      letterSpacing: "inherit",
-                                    }}
-                                  />
-                                </Box>
-                                {/* <FlashcardVideo flashcard={concept} /> */}
-                                {(node?.nodeImage || []).length > 0 && <ImageSlider images={[node?.nodeImage]} />}
-                              </Box>
-                            </AccordionDetails>
-                          </Accordion>
-                        </Box>
-                      ))}
-                  </Box>
-                )}
-              </Paper>
-            )}
           </Box>
 
           <Box
@@ -2001,6 +1748,266 @@ const CourseComponent = () => {
           </Dialog>
         </Box>
       </Box>
+      {sidebarOpen && (
+        <Paper
+          sx={{
+            height: "100vh",
+            backgroundColor: "white",
+            boxShadow: 3,
+            position: "fixed",
+            borderTopLeftRadius: "25px",
+            right: 0,
+            top: 0,
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkBackground : ""),
+            width: sidebarOpen ? "30%" : "0%",
+            transition: "width 0.3s",
+            overflow: "hidden",
+            transform: sidebarOpen ? "translateX(0)" : "translateX(30%)",
+          }}
+          elevation={8}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+              borderBottom: "1px solid lightgrey",
+            }}
+          >
+            <Typography variant="h6">
+              {Object.keys(improvements[currentChangeIndex] || {}).length > 0
+                ? "AI-Proposed Improvements"
+                : selectedTopic.topic}
+            </Typography>
+            <IconButton onClick={handleSidebarClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          {selectedTopic && (
+            <Box sx={{ mx: "15px" }}>
+              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Description:</Typography>
+              <Typography>{selectedTopic.description}</Typography>{" "}
+            </Box>
+          )}
+
+          {selectedTopic && (
+            <Box sx={{ mx: "15px" }}>
+              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
+              <ChipInput
+                tags={selectedTopic.skills}
+                selectedTags={() => {}}
+                fullWidth
+                variant="outlined"
+                readOnly={true}
+              />
+            </Box>
+          )}
+          {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+            <Box>
+              <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    minWidth: "32px",
+                    p: 0,
+                    m: 0,
+                    backgroundColor: "#1973d3",
+                    ":hover": { backgroundColor: "#084694" },
+                  }}
+                  onClick={() => {
+                    navigateChange(currentChangeIndex - 1);
+                    setDisplayCourses(null);
+                  }}
+                  disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
+                >
+                  <ArrowBackIosNewIcon />
+                </Button>
+                <Paper sx={{ p: "15px", m: "17px" }}>
+                  {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                    <Box sx={{ mb: "15px" }}>
+                      <strong style={{ color: "green", marginRight: "5px" }}> Proposal:</strong>{" "}
+                      <MarkdownRender
+                        text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
+                        sx={{
+                          fontSize: "16px",
+                          fontWeight: 400,
+                          letterSpacing: "inherit",
+                        }}
+                      />
+                    </Box>
+                  )}
+                  <strong style={{ color: "green", marginRight: "5px" }}> Rationale:</strong>{" "}
+                  <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
+                </Paper>
+                <Button
+                  variant="contained"
+                  sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
+                  onClick={() => {
+                    navigateChange(currentChangeIndex + 1);
+                    setDisplayCourses(null);
+                  }}
+                  disabled={
+                    currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
+                    Object.keys(currentImprovement).length <= 0
+                  }
+                >
+                  <ArrowForwardIosIcon />
+                </Button>
+              </Box>
+
+              <Box sx={{ display: "flex", gap: "82px", alignItems: "center", alignContent: "center" }}>
+                <Button
+                  sx={{ ml: "9px" }}
+                  onClick={handleRejectChange}
+                  color="error"
+                  variant="contained"
+                  disabled={Object.keys(currentImprovement).length <= 0}
+                >
+                  Delete Proposal
+                </Button>
+                <Typography sx={{ mr: "15px", mt: "5px", ml: "5px" }}>
+                  {currentChangeIndex + 1}/{improvements.length}
+                </Typography>
+                <Button
+                  onClick={handleAcceptChange}
+                  color="success"
+                  autoFocus
+                  variant="contained"
+                  disabled={Object.keys(currentImprovement).length <= 0}
+                >
+                  Implement Proposal
+                </Button>
+              </Box>
+            </Box>
+          )}
+          {loadingNodes ? (
+            <Box>
+              <Box>
+                {Array.from(new Array(7)).map((_, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-start",
+
+                      px: 2,
+                    }}
+                  >
+                    <Skeleton
+                      variant="rectangular"
+                      width={500}
+                      height={250}
+                      sx={{
+                        bgcolor: "grey.300",
+                        borderRadius: "10px",
+                        mt: "19px",
+                        ml: "5px",
+                      }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ gap: "5px", my: "15px", mx: "19px", overflow: "auto" }}>
+              {selectedTopic &&
+                (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
+                  <Box key={node.title} sx={{ mb: "10px" }}>
+                    <Accordion
+                      id={node.title}
+                      expanded={true}
+                      sx={{
+                        borderRadius: "13px!important",
+
+                        overflow: "hidden",
+                        listStyle: "none",
+                        transition: "box-shadow 0.3s",
+
+                        border: expandedNode === node.title ? `2px solid orange` : "",
+                        p: "0px !important",
+                      }}
+                    >
+                      <AccordionSummary
+                        sx={{
+                          p: "0px !important",
+                          marginBlock: "-13px !important",
+                        }}
+                      >
+                        <Box sx={{ flexDirection: "column", width: "100%" }}>
+                          <Box
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (expandedNode === node.title) {
+                                setExpandedNode(null);
+                              } else {
+                                setExpandedNode(node.title);
+                              }
+                            }}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              m: "15px",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                pr: "25px",
+                                // pb: '15px',
+                                display: "flex",
+                                gap: "15px",
+                              }}
+                            >
+                              <NodeTypeIcon
+                                id={node.title}
+                                nodeType={node.nodeType}
+                                tooltipPlacement={"top"}
+                                fontSize={"medium"}
+                                // disabled={disabled}
+                              />
+                              <MarkdownRender
+                                text={node?.title}
+                                sx={{
+                                  fontSize: "20px",
+                                  fontWeight: 400,
+                                  letterSpacing: "inherit",
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Box>
+                      </AccordionSummary>
+
+                      <AccordionDetails sx={{ p: "0px !important" }}>
+                        <Box sx={{ p: "17px", pt: 0 }}>
+                          <Box
+                            sx={{
+                              transition: "border 0.3s",
+                            }}
+                          >
+                            <MarkdownRender
+                              text={node.content}
+                              sx={{
+                                fontSize: "16px",
+                                fontWeight: 400,
+                                letterSpacing: "inherit",
+                              }}
+                            />
+                          </Box>
+                          {/* <FlashcardVideo flashcard={concept} /> */}
+                          {(node?.nodeImage || []).length > 0 && <ImageSlider images={[node?.nodeImage]} />}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
+                ))}
+            </Box>
+          )}
+        </Paper>
+      )}
       {ConfirmDialog}
     </Box>
   );
