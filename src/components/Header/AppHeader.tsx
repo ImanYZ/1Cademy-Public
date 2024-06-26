@@ -236,7 +236,7 @@ const AppHeader = forwardRef(
                 />
               )}
               {aiCourse && (
-                <Box sx={{ alignItems: "center", textAlign: "center", padding: "20px" }}>
+                <Box sx={{ pl: "400px", ml: "auto" }}>
                   <Typography variant="h2">AI-Enhanced Course Creation</Typography>
                 </Box>
               )}

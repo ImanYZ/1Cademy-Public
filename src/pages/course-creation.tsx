@@ -568,9 +568,9 @@ const CourseComponent = () => {
 
     switch (action) {
       case "add":
-        return `**<span style="color: green;">Add</span>** a new topic called **"${new_topic?.topic}"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take **${new_topic?.hours}** hour(s).`;
+        return `**<span style="color: green;">Add a new topic</span>** called **"${new_topic?.topic}"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take **${new_topic?.hours}** hour(s).`;
       case "modify":
-        return `**<span style="color: orange;">Modify</span>** the topic **"${old_topic}"** under the category **"${category}"** to **"${
+        return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
           new_topic?.topic
         }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
           (new_topic?.hours || 0) > 1 ? "s" : ""
@@ -581,11 +581,11 @@ const CourseComponent = () => {
             nt => `**"${nt.topic}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
           )
           .join(" and ");
-        return `**<span style="color: orange;">Divide</span>** the topic **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
+        return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
       case "move":
-        return `**<span style="color: orange;">Move</span>** the topic **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+        return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
       case "delete":
-        return `**<span style="color: orange;">Move</span>** the topic **"${topic}"** under the category **"${category}"**.`;
+        return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** under the category **"${category}"**.`;
       default:
         return "Invalid action.";
     }
@@ -1025,18 +1025,21 @@ const CourseComponent = () => {
   const handleEditCategory = () => {
     const _courses = [...courses];
     const course = _courses[selectedCourse];
+    let glowIdx = -1;
     if (editCategory === "new") {
       course.syllabus.unshift({
         category: newCategoryTitle,
         topics: [],
       });
+      glowIdx = 0;
     } else {
-      const category: any = course.syllabus.find((s: any) => s.category === editCategory.category);
-      if (category) {
-        category.category = newCategoryTitle;
+      const categoryIdx: any = course.syllabus.findIndex((s: any) => s.category === editCategory.category);
+      if (categoryIdx !== -1) {
+        course.syllabus[categoryIdx].category = newCategoryTitle;
+        glowIdx = categoryIdx;
       }
     }
-    setGlowCategoryGreenIndex(0);
+    setGlowCategoryGreenIndex(glowIdx);
     setTimeout(() => {
       setGlowCategoryGreenIndex(-1);
     }, 1000);
