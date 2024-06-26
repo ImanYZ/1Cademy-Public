@@ -796,7 +796,7 @@ const Notebook = ({}: NotebookProps) => {
   const [notebookChanged, setNotebookChanges] = useState({ updated: true });
 
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ [uname: string]: boolean }>({});
 
   // this object represent the question by practice
   // if practice voice only us enable we have a value on question node
@@ -1159,16 +1159,15 @@ const Notebook = ({}: NotebookProps) => {
     const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
       const docChanges = snapshot.docChanges();
       setOnlineUsers(oldOnlineUsers => {
-        const onlineUsersSet = new Set(oldOnlineUsers);
         for (let change of docChanges) {
           const { user: statusUname } = change.doc.data();
           if (change.type === "removed" && user.uname !== statusUname) {
-            onlineUsersSet.delete(statusUname);
+            delete oldOnlineUsers[statusUname];
           } else if (change.type === "added" || change.type === "modified") {
-            onlineUsersSet.add(statusUname);
+            oldOnlineUsers[statusUname] = true;
           }
         }
-        return Array.from(onlineUsersSet);
+        return oldOnlineUsers;
       });
       setUsersOnlineStatusLoaded(true);
     });
@@ -8068,6 +8067,7 @@ const Notebook = ({}: NotebookProps) => {
                   open={true}
                   onClose={() => setOpenSidebar(null)}
                   selectedUser={nodeBookState.selectedUser}
+                  onlineUsers={onlineUsers}
                 />
               )}
 
@@ -8117,6 +8117,7 @@ const Notebook = ({}: NotebookProps) => {
                   onChangeNotebook={onChangeNotebook}
                   onChangeTagOfNotebookById={onChangeTagOfNotebookById}
                   notebookOwner={selectedNotebook?.owner ?? ""}
+                  onlineUsers={onlineUsers}
                 />
               )}
               {nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
@@ -8527,6 +8528,7 @@ const Notebook = ({}: NotebookProps) => {
                   findDescendantNodes={findDescendantNodes}
                   findAncestorNodes={findAncestorNodes}
                   lockedNodes={lockedNodes}
+                  onlineUsers={onlineUsers}
                 />
               </MapInteractionCSS>
 

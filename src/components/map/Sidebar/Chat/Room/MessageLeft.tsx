@@ -150,10 +150,15 @@ export const MessageLeft = ({
 
           <Box
             sx={{
-              background: onlineUsers.includes(membersInfo[message.sender]?.uname) ? "#12B76A" : "grey",
               fontSize: "1px",
+
+              backgroundColor: !onlineUsers[membersInfo[message.sender]?.uname]
+                ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                : "",
             }}
-            className="UserStatusOnlineIcon"
+            className={
+              onlineUsers[membersInfo[message.sender]?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"
+            }
           />
         </Box>
 
