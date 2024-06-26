@@ -12,17 +12,23 @@ const useDialog = () => {
   const [confirmation, setConfirmation] = useState("");
   const [cancel, setCancel] = useState("");
 
-  const showDialog = useCallback((message: string, prompt = false, confirmation: string, cancel: string) => {
-    setDialogMessage(message);
-    setIsOpen(true);
-    setIsPrompt(prompt);
-    setConfirmation(confirmation);
-    setCancel(cancel);
+  const showDialog = useCallback(
+    (message: string, prompt = false, confirmation: string, cancel: string, fullname?: string) => {
+      setDialogMessage(message);
+      setIsOpen(true);
+      setIsPrompt(prompt);
+      setConfirmation(confirmation);
+      setCancel(cancel);
+      if (fullname) {
+        setInputValue(fullname);
+      }
 
-    return new Promise(resolve => {
-      resolveRef.current = resolve;
-    });
-  }, []);
+      return new Promise(resolve => {
+        resolveRef.current = resolve;
+      });
+    },
+    []
+  );
 
   const closeDialog = useCallback(
     (confirmed: any) => {
@@ -83,7 +89,8 @@ const useDialog = () => {
   );
 
   const promptIt = useCallback(
-    (message: string, confirmation: string, cancel: string) => showDialog(message, true, confirmation, cancel),
+    (message: string, confirmation: string, cancel: string, fullname?: string) =>
+      showDialog(message, true, confirmation, cancel, fullname),
     [showDialog]
   );
   const confirmIt = useCallback(

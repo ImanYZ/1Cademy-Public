@@ -88,11 +88,11 @@ const generateCourseSkills = async (
 };
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, targetLearners, courseDescription, courseObjectives } = req.body;
+    const { courseTitle, targetLearners, courseDescription, courseObjectives, hours } = req.body;
     const courseSkills = await generateCourseSkills(
       courseTitle,
       targetLearners,
-      13,
+      hours,
       courseDescription,
       courseObjectives
     ).catch(console.error);
