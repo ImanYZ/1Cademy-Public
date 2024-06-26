@@ -357,14 +357,10 @@ const ReputationlinessBar = ({ open, setOpen, ...props }: ILivelinessBarProps) =
                             sx={{ border: "none" }}
                           />
                         </Box>
-                        {onlineUsers.includes(uname) && (
-                          <Box
-                            sx={{
-                              background: "#12B76A",
-                            }}
-                            className="UserStatusOnlineIcon"
-                          />
-                        )}
+
+                        <Box
+                          className={onlineUsers.includes(uname) ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+                        />
                       </Box>
                     </Tooltip>
                   );

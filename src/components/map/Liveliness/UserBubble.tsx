@@ -120,7 +120,7 @@ export const UserBubble = ({
             sx={{ border: "none" }}
           />
         </Box>
-        {isOnline && <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />}
+        <Box className={isOnline ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"} />
       </Box>
     </Tooltip>
   );

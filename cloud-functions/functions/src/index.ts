@@ -18,7 +18,7 @@ import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
-// import { trigerNotifications } from "./actions/trigerNotifications";
+import { deleteNotifications } from "./actions/deleteNotifications";
 import { addUserToChannel } from "./actions/addUserToChannel";
 import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 
@@ -236,36 +236,48 @@ export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onC
   }
 });
 
-// export const onDirectMessagesNotification = functions.firestore
-//   .document("/conversationMessages/{cid}/messages/{id}")
-//   .onCreate(async change => {
-//     try {
-//       const message = change.data();
-//       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
-//     } catch (error) {
-//       console.log("error onDirectMessagesNotification:", error);
-//     }
-//   });
-// export const onChannelMessagesNotification = functions.firestore
-//   .document("/channelMessages/{cid}/messages/{id}")
-//   .onCreate(async change => {
-//     try {
-//       const message = change.data();
-//       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "channel" } });
-//     } catch (error) {
-//       console.log("error onChannelMessagesNotification:", error);
-//     }
-//   });
-// export const onAnnouncementsMessagesNotification = functions.firestore
-//   .document("/announcementsMessages/{cid}/messages/{id}")
-//   .onCreate(async change => {
-//     try {
-//       const message = change.data();
-//       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "announcement" } });
-//     } catch (error) {
-//       console.log("error onAnnouncementsMessagesNotification:", error);
-//     }
-//   });
+export const onDirectMessagesNotification = functions.firestore
+  .document("/conversationMessages/{cid}/messages/{id}")
+  .onUpdate(async change => {
+    try {
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "direct" } });
+      }
+    } catch (error) {
+      console.log("error onDirectMessagesNotification:", error);
+    }
+  });
+export const onChannelMessagesNotification = functions.firestore
+  .document("/channelMessages/{cid}/messages/{id}")
+  .onUpdate(async change => {
+    try {
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "channel" } });
+      }
+    } catch (error) {
+      console.log("error onChannelMessagesNotification:", error);
+    }
+  });
+export const onAnnouncementsMessagesNotification = functions.firestore
+  .document("/announcementsMessages/{cid}/messages/{id}")
+  .onUpdate(async change => {
+    try {
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "announcement" } });
+      }
+    } catch (error) {
+      console.log("error onAnnouncementsMessagesNotification:", error);
+    }
+  });
 
 export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate(async change => {
   try {

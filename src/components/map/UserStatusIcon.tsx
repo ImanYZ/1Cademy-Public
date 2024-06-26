@@ -160,9 +160,7 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
               filter: "grayscale(1)",
             }}
           />
-          {!props.inNodeFooter && (
-            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-          )}
+          {<div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>}
         </div>
         {!props.inNodeFooter && (
           <Box className="customUserStatusTotalPoints fromSideBar">
@@ -200,7 +198,7 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
             name={props.fullname}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
-          {!props.inNodeFooter && <>{props.online && <Box className={"UserStatusOnlineIcon"}></Box>}</>}
+          <Box className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></Box>
         </div>
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}

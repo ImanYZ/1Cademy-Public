@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 
 import { CustomBadge } from "@/components/map/CustomBudge";
 
+import { getMessageSummary } from "../../helpers/common";
+
 dayjs.extend(relativeTime);
 type ChannelListProps = {
   openRoom: any;
@@ -90,6 +92,7 @@ export const ChannelsList = ({ openRoom, channels, notifications }: ChannelListP
             >
               {channel.title}
             </Typography>
+
             <Typography
               sx={{
                 fontSize: "12px",
@@ -112,6 +115,11 @@ export const ChannelsList = ({ openRoom, channels, notifications }: ChannelListP
               />
             )}
           </Box>
+          {(notificationHash[channel.id] || []).length > 0 && (
+            <Typography sx={{ fontSize: "13px", color: "grey", pl: "54px" }}>
+              {getMessageSummary(notificationHash[channel.id][0])}
+            </Typography>
+          )}
         </Paper>
       ))}
     </Box>
