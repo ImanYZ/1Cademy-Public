@@ -403,12 +403,13 @@ const CourseComponent = () => {
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
-  const [glowCategoryIIndex, setGlowCategoryIIndex] = useState(-1);
+  const [glowCategoryGreenIndex, setGlowCategoryGreenIndex] = useState(-1);
+  const [glowCategoryRedIndex, setGlowCategoryRedIndex] = useState(-1);
   const [loadingDescription, setLoadingDescription] = useState(false);
   const [loadingObjectives, setLoadingObjectives] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingCourseStructure, setLoadingCourseStructure] = useState(false);
-
+  const [slideIn, setSlideIn] = useState(true);
   const [courses, setCourses] = useState(COURSES);
   const [displayCourses, setDisplayCourses] = useState(null);
 
@@ -567,25 +568,31 @@ const CourseComponent = () => {
 
     switch (action) {
       case "add":
-        return `Add a new topic called **"${new_topic?.topic}"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take **${new_topic?.hours}** hour(s).`;
+        return `**<span style="color: green;">Add</span>** a new topic called **"${new_topic?.topic}"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take **${new_topic?.hours}** hour(s).`;
       case "modify":
-        return `Modify the topic **"${old_topic}"** under the category **"${category}"** to **"${new_topic?.topic}"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour(s).`;
+        return `**<span style="color: orange;">Modify</span>** the topic **"${old_topic}"** under the category **"${category}"** to **"${
+          new_topic?.topic
+        }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
+          (new_topic?.hours || 0) > 1 ? "s" : ""
+        }.`;
       case "divide":
         const dividedTopics = new_topics
-          ?.map(nt => `**"${nt.topic}"** (${nt.hours} hour(s), ${nt.difficulty} difficulty)`)
+          ?.map(
+            nt => `**"${nt.topic}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+          )
           .join(" and ");
-        return `Divide the topic **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
+        return `**<span style="color: orange;">Divide</span>** the topic **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
       case "move":
-        return `Move the topic **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+        return `**<span style="color: orange;">Move</span>** the topic **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
       case "delete":
-        return `Delete the topic **"${topic}"** under the category **"${category}"**.`;
+        return `**<span style="color: orange;">Move</span>** the topic **"${topic}"** under the category **"${category}"**.`;
       default:
         return "Invalid action.";
     }
   };
   const improveCourseStructure = async () => {
     setLoading(true);
-
+    setLoadingNodes(false);
     const courseTitle = courses[selectedCourse].title;
     const courseDescription = courses[selectedCourse].description;
     const targetLearners = courses[selectedCourse].learners;
@@ -727,14 +734,17 @@ const CourseComponent = () => {
         prev.splice(currentChangeIndex, 1);
         return prev;
       });
-      navigateChange(currentChangeIndex + 1);
+      navigateChange(currentChangeIndex);
     }, 3000);
   };
 
   const navigateChange = (index: any) => {
     if (improvements[index]) {
-      setCurrentChangeIndex(index);
-      setCurrentImprovement(improvements[index]);
+      TriggerSlideAnimation();
+      setTimeout(() => {
+        setCurrentChangeIndex(index);
+        setCurrentImprovement(improvements[index]);
+      }, 1000);
     } else {
       setSidebarOpen(false);
       setCurrentImprovement({});
@@ -757,7 +767,6 @@ const CourseComponent = () => {
     }
     setSelectedTopic(topic);
     setSidebarOpen(true);
-    return;
     if (nodesPerTopic[topic.topic]) return;
     setLoadingNodes(true);
     setImprovements([]);
@@ -811,10 +820,16 @@ const CourseComponent = () => {
     }
     return newTopics;
   };
-
+  const scrollToCategory = (category: string) => {
+    const categoryElement = document.getElementById(category);
+    if (categoryElement) {
+      categoryElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
   useEffect(() => {
     if (currentImprovement.type === "topic") {
       setExpanded([currentImprovement.category]);
+      scrollToCategory(currentImprovement.category);
     }
     if (currentImprovement.action === "move" && currentImprovement.type === "topic") {
       const NEW_COURSES: any = JSON.parse(JSON.stringify(courses));
@@ -839,6 +854,7 @@ const CourseComponent = () => {
       }
       setExpanded([currentImprovement.current_category, currentImprovement.new_category]);
       setDisplayCourses(NEW_COURSES);
+      scrollToCategory(currentImprovement.current_category);
     }
   }, [currentImprovement]);
 
@@ -954,7 +970,7 @@ const CourseComponent = () => {
     const courseSkills = courses[selectedCourse].courseSkills;
     const hours = courses[selectedCourse].hours;
 
-    const response = await Post("/generateCourseStructure", {
+    const response: any = await Post("/generateCourseStructure", {
       courseTitle,
       targetLearners,
       courseObjectives,
@@ -966,6 +982,12 @@ const CourseComponent = () => {
       prev[selectedCourse].syllabus = response;
       return prev;
     });
+    if (response.length > 0) {
+      setTimeout(() => {
+        scrollToCategory(response.at(-1).category);
+      }, 1000);
+    }
+
     setLoadingCourseStructure(false);
   };
   const deleteCategory = async (c: any) => {
@@ -990,8 +1012,13 @@ const CourseComponent = () => {
     ) {
       const _courses = [...courses];
       const course = _courses[selectedCourse];
-      course.syllabus = course.syllabus.filter((s: any) => s.category !== c.category);
-      setCourses(_courses);
+      const categoryIdx = course.syllabus.findIndex((s: any) => s.category === c.category);
+      setGlowCategoryRedIndex(categoryIdx);
+      setTimeout(() => {
+        course.syllabus = course.syllabus.filter((s: any) => s.category !== c.category);
+        setGlowCategoryRedIndex(-1);
+        setCourses(_courses);
+      }, 900);
     }
   };
 
@@ -1009,6 +1036,10 @@ const CourseComponent = () => {
         category.category = newCategoryTitle;
       }
     }
+    setGlowCategoryGreenIndex(0);
+    setTimeout(() => {
+      setGlowCategoryGreenIndex(-1);
+    }, 1000);
 
     setCourses(_courses);
     setEditCategory(null);
@@ -1055,14 +1086,23 @@ const CourseComponent = () => {
   const handleSorting = () => {
     const _courses = [...courses];
     const dragItemContent = _courses[selectedCourse].syllabus[dragItem.current];
-    setGlowCategoryIIndex(dragOverItem.current);
+    setGlowCategoryGreenIndex(dragOverItem.current);
     _courses[selectedCourse].syllabus.splice(dragItem.current, 1);
     _courses[selectedCourse].syllabus.splice(dragOverItem.current, 0, dragItemContent);
     setCourses(_courses);
     setTimeout(() => {
-      setGlowCategoryIIndex(-1);
+      setGlowCategoryGreenIndex(-1);
     }, 700);
   };
+  const TriggerSlideAnimation = () => {
+    setSlideIn(false);
+    const timeoutId = setTimeout(() => {
+      setSlideIn(true);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  };
+
   return (
     <Box
       sx={{
@@ -1088,8 +1128,7 @@ const CourseComponent = () => {
 
       <Box padding="20px">
         <Box>
-          <Select
-            label={"Select Course"}
+          <TextField
             value={courses[selectedCourse].title}
             onChange={event => {
               const courseIdx = courses.findIndex(course => course.title === event.target.value);
@@ -1097,19 +1136,8 @@ const CourseComponent = () => {
                 setSelectedCourse(courseIdx);
               }
             }}
-            displayEmpty
-            variant="outlined"
-            sx={{ width: "500px", backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            MenuProps={{
-              sx: {
-                zIndex: "9999",
-              },
-            }}
-            // InputLabelProps={{
-            //   sx: {
-            //     color: "black",
-            //   },
-            // }}
+            select
+            label="Select Course"
           >
             <MenuItem
               value=""
@@ -1127,7 +1155,7 @@ const CourseComponent = () => {
                 {course.title}
               </MenuItem>
             ))}
-          </Select>
+          </TextField>
           <LoadingButton
             variant="contained"
             color="success"
@@ -1158,21 +1186,12 @@ const CourseComponent = () => {
               type="number"
               inputProps={{ min: 0 }}
             />
-            <Select
+
+            <TextField
               value={courses[selectedCourse].references[0]}
-              displayEmpty
-              variant="outlined"
-              sx={{
-                width: "500px",
-                height: "55px",
-                mt: "16px",
-                backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
-              }}
-              MenuProps={{
-                sx: {
-                  zIndex: "9999",
-                },
-              }}
+              select // tell TextField to render select
+              label="Select Book"
+              sx={{ mt: "15px" }}
             >
               <MenuItem
                 value=""
@@ -1190,7 +1209,7 @@ const CourseComponent = () => {
                   {book}
                 </MenuItem>
               ))}
-            </Select>
+            </TextField>
           </Box>
           <TextField
             label="Target Learners"
@@ -1307,6 +1326,7 @@ const CourseComponent = () => {
           <Box ref={containerRef} marginTop="20px">
             {getCourses()[selectedCourse].syllabus.map((category, categoryIndex) => (
               <Accordion
+                id={category.category}
                 key={category.category}
                 expanded={expanded.includes(category.category)}
                 draggable
@@ -1332,7 +1352,12 @@ const CourseComponent = () => {
                     }
                   }}
                   sx={{
-                    animation: categoryIndex === glowCategoryIIndex ? `${glowGreen} 1.5s ease-in-out infinite` : "",
+                    animation:
+                      categoryIndex === glowCategoryGreenIndex
+                        ? `${glowGreen} 1.5s ease-in-out infinite`
+                        : categoryIndex === glowCategoryRedIndex
+                        ? `${glowRed} 1.5s ease-in-out infinite`
+                        : "",
                   }}
                 >
                   <DragIndicatorIcon />
@@ -1635,26 +1660,28 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "20px",
-              position: "sticky",
-              bottom: 24,
-              gap: "5px",
-            }}
-          >
-            <LoadingButton
-              variant="contained"
-              color="success"
-              sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
-              onClick={improveCourseStructure}
-              loading={loading}
+          {courses[selectedCourse].syllabus.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "20px",
+                position: "sticky",
+                bottom: 24,
+                gap: "5px",
+              }}
             >
-              Improve Course Structure
-            </LoadingButton>
-          </Box>
+              <LoadingButton
+                variant="contained"
+                color="success"
+                sx={{ color: "white", zIndex: 9, fontSize: "20px" }}
+                onClick={improveCourseStructure}
+                loading={loading}
+              >
+                Improve Course Structure
+              </LoadingButton>
+            </Box>
+          )}
           <Dialog
             open={!!editCategory}
             onClose={() => {
@@ -1663,10 +1690,10 @@ const CourseComponent = () => {
             }}
             sx={{ zIndex: 9998 }}
           >
-            <DialogTitle>{`${editCategory === "new" ? "Add" : "Edit"} syllabus`}</DialogTitle>
+            <DialogTitle>{`${editCategory === "new" ? "Add" : "Edit"} Category`}</DialogTitle>
             <DialogContent>
               <TextField
-                label={"Syllabus Title"}
+                label={"Category Title"}
                 multiline
                 fullWidth
                 value={newCategoryTitle}
@@ -1686,7 +1713,12 @@ const CourseComponent = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleEditCategory} color="primary" variant="contained">
+              <Button
+                onClick={handleEditCategory}
+                color="primary"
+                variant="contained"
+                disabled={!newCategoryTitle.trim()}
+              >
                 Save
               </Button>
             </DialogActions>
@@ -1883,36 +1915,43 @@ const CourseComponent = () => {
                     ":hover": { backgroundColor: "#084694" },
                   }}
                   onClick={() => {
-                    navigateChange(currentChangeIndex - 1);
                     setDisplayCourses(null);
+
+                    navigateChange(currentChangeIndex - 1);
                   }}
                   disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
                 >
                   <ArrowBackIosNewIcon />
                 </Button>
-                <Paper sx={{ p: "15px", m: "17px" }}>
-                  {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                    <Box sx={{ mb: "15px" }}>
-                      <strong style={{ color: "green", marginRight: "5px" }}> Proposal:</strong>{" "}
-                      <MarkdownRender
-                        text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
-                        sx={{
-                          fontSize: "16px",
-                          fontWeight: 400,
-                          letterSpacing: "inherit",
-                        }}
-                      />
-                    </Box>
-                  )}
-                  <strong style={{ color: "green", marginRight: "5px" }}> Rationale:</strong>{" "}
-                  <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
-                </Paper>
+                <Slide direction="down" timeout={800} in={slideIn}>
+                  <Paper sx={{ p: "15px", m: "17px" }}>
+                    {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                      <Box sx={{ mb: "15px" }}>
+                        <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
+                        <MarkdownRender
+                          text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
+                          sx={{
+                            fontSize: "16px",
+                            fontWeight: 400,
+                            letterSpacing: "inherit",
+                          }}
+                        />
+                      </Box>
+                    )}
+                    <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
+                    <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
+                    <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
+                      {currentChangeIndex + 1}/{improvements.length}
+                    </Typography>
+                  </Paper>
+                </Slide>
                 <Button
                   variant="contained"
                   sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
                   onClick={() => {
-                    navigateChange(currentChangeIndex + 1);
+                    TriggerSlideAnimation();
                     setDisplayCourses(null);
+                    navigateChange(currentChangeIndex + 1);
                   }}
                   disabled={
                     currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
@@ -1923,7 +1962,7 @@ const CourseComponent = () => {
                 </Button>
               </Box>
 
-              <Box sx={{ display: "flex", gap: "82px", alignItems: "center", alignContent: "center" }}>
+              <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
                 <Button
                   sx={{ ml: "9px" }}
                   onClick={handleRejectChange}
@@ -1933,15 +1972,14 @@ const CourseComponent = () => {
                 >
                   Delete Proposal
                 </Button>
-                <Typography sx={{ mr: "15px", mt: "5px", ml: "5px" }}>
-                  {currentChangeIndex + 1}/{improvements.length}
-                </Typography>
+
                 <Button
                   onClick={handleAcceptChange}
                   color="success"
                   autoFocus
                   variant="contained"
                   disabled={Object.keys(currentImprovement).length <= 0}
+                  sx={{ ml: "auto", mr: "11px" }}
                 >
                   Implement Proposal
                 </Button>
@@ -1981,6 +2019,7 @@ const CourseComponent = () => {
               {selectedTopic &&
                 (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
                   <Box key={node.title} sx={{ mb: "10px" }}>
+                    <Typography sx={{ fontWeight: "bold" }}> Related 1Cademy Nodes:</Typography>
                     <Accordion
                       id={node.title}
                       expanded={true}
