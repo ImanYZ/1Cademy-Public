@@ -148,12 +148,14 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
 
-          <Box
-            className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-            sx={{
-              backgroundColor: !props.online ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe") : "",
-            }}
-          />
+          {props.online && (
+            <Box
+              sx={{
+                fontSize: "1px",
+              }}
+              className="UserStatusOnlineIcon"
+            />
+          )}
         </Box>
         {!smallVersion && (
           <Box
