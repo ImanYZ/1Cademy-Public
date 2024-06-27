@@ -147,8 +147,15 @@ export const MessageLeft = ({
             size={!message.parentMessage ? 40 : 30}
             sx={{ border: "none" }}
           />
-
-          <Box
+          {onlineUsers[membersInfo[message.sender]?.uname] && (
+            <Box
+              sx={{
+                fontSize: "1px",
+              }}
+              className="UserStatusOnlineIcon"
+            />
+          )}
+          {/* <Box
             sx={{
               fontSize: "1px",
 
@@ -159,7 +166,7 @@ export const MessageLeft = ({
             className={
               onlineUsers[membersInfo[message.sender]?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"
             }
-          />
+          /> */}
         </Box>
 
         <Box sx={{ width: "90%" }}>

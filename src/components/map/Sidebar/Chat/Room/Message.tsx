@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, LinearProgress, Modal, Paper, Skeleton, Typography } from "@mui/material";
+import { IconButton, Modal, Paper, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -102,7 +102,6 @@ export const Message = ({
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [channelUsers, setChannelUsers] = useState([]);
-  const [loadMore, setLoadMore] = useState<boolean>(false);
   const [messagesByDate, setMessagesByDate] = useState<any>({});
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [replyOnMessage, setReplyOnMessage] = useState<IChannelMessage | null>(null);
@@ -257,7 +256,7 @@ export const Message = ({
   useEffect(() => {
     const messageList: any = messageBoxRef.current;
     const handleScroll = () => {
-      if (messageList.scrollTop === 0) {
+      if (messageList.scrollTop >= 0 && messageList.scrollTop <= 2000) {
         fetchOlderMessages();
       }
     };
@@ -290,10 +289,9 @@ export const Message = ({
   );
 
   const fetchOlderMessages = () => {
-    setLoadMore(true);
+    if (messages.length === 0) return;
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
-      setLoadMore(false);
     };
     const killSnapshot = getChannelMessagesSnapshot(
       db,
@@ -636,7 +634,7 @@ export const Message = ({
               <NotFoundNotification title="Start Chatting" description="" />
             </Box>
           )}
-          {loadMore && <LinearProgress sx={{ width: "100%" }} />}
+          {/* {loadMore && <LinearProgress sx={{ position: "fixed", width: sidebarWidth - 30, zIndex: 9999 }} />} */}
           {Object.keys(messagesByDate).map(date => {
             return (
               <Box key={date}>

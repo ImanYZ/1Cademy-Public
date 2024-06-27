@@ -1,5 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
+import { LoadingButton } from "@mui/lab";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -54,6 +56,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
 import { newId } from "@/lib/utils/newFirestoreId";
 
+import MarkdownRender from "../Markdown/MarkdownRender";
 import StudentDetailHoursTracking from "./StudentDetail";
 
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
@@ -117,7 +120,8 @@ const TrackingHours = () => {
   const [startTime, setStartTime] = useState<any>(null);
   const [endTime, setEndTime] = useState<any>(null);
   const [studentHours, setStudentsHours] = useState<any>({});
-
+  const [addingMeetingInProgress, setAddingMeetingInProgress] = useState(false);
+  const [error, setError] = useState("");
   const adminView = !!user?.claims?.tracking;
 
   const handleDateChange = (date: Dayjs | null) => {
@@ -531,6 +535,7 @@ const TrackingHours = () => {
     const handleCloseDialog = () => {
       setDialogOpen(false);
       setSelectedStudent(null);
+      setAddingMeetingInProgress(false);
     };
     const getActivityTimeStamps = (aDate: Dayjs, sTime: Dayjs, eTime: Dayjs) => {
       const year = aDate.year();
@@ -555,12 +560,16 @@ const TrackingHours = () => {
     const handleSaveShortMeeting = async () => {
       try {
         if (!activityDate) {
+          setError("Please select a valid date");
+          // await confirmIt(`Please select a valid date`, "OK", "");
           return;
         }
         if (!startTime || !endTime) {
-          await confirmIt(`The start and end of the meeting time is required.`, "OK", "");
+          setError("The start and end of the meeting time is required");
+          // await confirmIt(`The start and end of the meeting time is required.`, "OK", "");
           return;
         }
+        setAddingMeetingInProgress(true);
         const { sTimestamp, eTimestamp, formattedDay } = getActivityTimeStamps(activityDate, startTime, endTime);
         const trackingQuery = query(
           collection(db, "trackHours"),
@@ -572,15 +581,19 @@ const TrackingHours = () => {
         const duration = endTime.diff(startTime, "minutes");
 
         if (duration < 0 || isNaN(duration)) {
-          await confirmIt(`The start time cannot be after the end time. Please select another time`, "OK", "");
+          setError("The start time cannot be after the end time. Please select another time");
+          // await confirmIt(`The start time cannot be after the end time. Please select another time`, "OK", "");
+          setAddingMeetingInProgress(false);
           return;
         }
         if (duration === 0) {
-          await confirmIt(
-            `The duration of the meeting must be greater than 0 minutes. Please select another time`,
-            "OK",
-            ""
-          );
+          setError("The duration of the meeting must be greater than 0 minutes. Please select another time");
+          // await confirmIt(
+          //   `The duration of the meeting must be greater than 0 minutes. Please select another time`,
+          //   "OK",
+          //   ""
+          // );
+          setAddingMeetingInProgress(false);
           return;
         }
         const meetingId = newId(db);
@@ -593,16 +606,11 @@ const TrackingHours = () => {
           );
 
           if (overlappingMeeting) {
-            await confirmIt(
-              <Box>
-                The time you've selected overlaps with another meeting starting at{" "}
-                <strong style={{ color: "orange" }}>{formatTime(overlappingMeeting.sTimestamp)}</strong> and ending at{" "}
-                <strong style={{ color: "orange" }}>{formatTime(overlappingMeeting.eTimestamp)}</strong>. Please select
-                another time.
-              </Box>,
-              "OK",
-              ""
-            );
+            setError(`The time you've selected overlaps with another meeting starting at
+            <span style="color: orange;" >${formatTime(overlappingMeeting.sTimestamp)}</span> and ending at
+            <span style="color: orange;" >${formatTime(overlappingMeeting.eTimestamp)}</span>. Please select
+            another time.`);
+            setAddingMeetingInProgress(false);
             return;
           }
           const overlappedDuration = getOverlappedDuration(trackingData.trackedMinutes, sTimestamp, eTimestamp);
@@ -647,6 +655,7 @@ const TrackingHours = () => {
           };
           setDoc(newDocumentRef, newDocument);
         }
+        setAddingMeetingInProgress(false);
         setDialogOpen(false);
         setSelectedStudent(null);
       } catch (error) {
@@ -672,9 +681,9 @@ const TrackingHours = () => {
               {Object.keys(semesters).length > 2 && <TableCell>Course</TableCell>}
               <TableCell>Meetings</TableCell>
               {((user?.claims?.leading as any) || []).length > 0 && <TableCell>1:1 Meetings</TableCell>}
-              <TableCell>Paid</TableCell>
               <TableCell>Nodes</TableCell>
               <TableCell>Proposals</TableCell>
+              <TableCell>Paid</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -783,6 +792,9 @@ const TrackingHours = () => {
                       )}
                     </TableCell>
                   }
+
+                  <TableCell>{student?.totalNodes || 0}</TableCell>
+                  <TableCell>{student?.totalProposals || 0}</TableCell>
                   <TableCell>
                     {student.paid ? (
                       <Checkbox
@@ -810,6 +822,7 @@ const TrackingHours = () => {
                         onChange={() => togglePaidStatus(student.uname, student.semesterId, true)}
                         disabled={!adminView || roundNum(student.hours) === 0}
                         sx={{
+                          cursor: "default",
                           color: !adminView || roundNum(student.hours) === 0 ? "green" : "primary.main",
                           "&.Mui-disabled": {
                             color: student.paid ? "green" : "gray",
@@ -826,8 +839,6 @@ const TrackingHours = () => {
                       />
                     )}
                   </TableCell>
-                  <TableCell>{student?.totalNodes || 0}</TableCell>
-                  <TableCell>{student?.totalProposals || 0}</TableCell>
                 </TableRow>
               );
             })}
@@ -860,6 +871,7 @@ const TrackingHours = () => {
                     value={activityDate}
                     onChange={newValue => {
                       setActivityDate(newValue);
+                      setError("");
                     }}
                     renderInput={params => <TextField {...params} />}
                     PopperProps={{
@@ -876,6 +888,7 @@ const TrackingHours = () => {
                     value={startTime}
                     onChange={newValue => {
                       setStartTime(newValue);
+                      setError("");
                     }}
                     renderInput={params => <TextField {...params} />}
                     PopperProps={{
@@ -892,6 +905,7 @@ const TrackingHours = () => {
                     value={endTime}
                     onChange={newValue => {
                       setEndTime(newValue);
+                      setError("");
                     }}
                     renderInput={params => <TextField {...params} />}
                     PopperProps={{
@@ -903,14 +917,39 @@ const TrackingHours = () => {
                 </Box>
               </Box>
             </LocalizationProvider>
+
+            {error && (
+              <Alert severity="error" sx={{ mt: "5px", fontSize: "16px" }}>
+                <MarkdownRender
+                  text={error}
+                  sx={{
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    letterSpacing: "inherit",
+                  }}
+                />
+              </Alert>
+            )}
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">
+          <DialogActions sx={{ display: "flex", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+            <Button
+              onClick={handleCloseDialog}
+              color="primary"
+              disabled={addingMeetingInProgress}
+              variant="outlined"
+              sx={{ borderRadius: "40px", cursor: "pointer" }}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveShortMeeting} color="primary">
+            <LoadingButton
+              onClick={handleSaveShortMeeting}
+              color="primary"
+              loading={addingMeetingInProgress}
+              variant="contained"
+              sx={{ borderRadius: "40px", cursor: "pointer" }}
+            >
               Add
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </Dialog>
       </TableContainer>
