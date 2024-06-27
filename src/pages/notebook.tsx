@@ -3883,7 +3883,7 @@ const Notebook = ({}: NotebookProps) => {
             }}
           >
             <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
-            <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+            <Typography>You are proposing a node without citing any reference. Are you sure?</Typography>
           </Box>,
           "Yes",
           "cancel"
@@ -4321,7 +4321,19 @@ const Notebook = ({}: NotebookProps) => {
           newNode.references.length === 0
         ) {
           referencesOK = await confirmIt(
-            "You are proposing a node without citing any reference. Are you sure?",
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+              }}
+            >
+              <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+              <Typography>You are proposing a node without citing any reference. Are you sure?</Typography>
+            </Box>,
             "Yes",
             "Cancel"
           );
@@ -4524,7 +4536,19 @@ const Notebook = ({}: NotebookProps) => {
           newNode.references.length === 0
         ) {
           referencesOK = await confirmIt(
-            "You are proposing a node without citing any reference. Are you sure?",
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+              }}
+            >
+              <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+              <Typography>You are proposing a node without citing any reference. Are you sure?</Typography>
+            </Box>,
             "Yes",
             "Cancel"
           );

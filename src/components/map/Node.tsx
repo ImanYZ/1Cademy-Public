@@ -762,9 +762,6 @@ const Node = ({
       if (searchResults.data.length > 0) {
         setSearchResults({ data: [], lastPageLoaded: 0, totalPage: 0, totalResults: 0 });
       }
-      if (ableToPropose) {
-        setAbleToPropose(false);
-      }
     }
     if (editable) {
       setOpenPart("References");

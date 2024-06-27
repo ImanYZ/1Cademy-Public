@@ -234,7 +234,7 @@ const SelectedProposalItem = ({
               <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
             )}
           </Box>
-          {proposal.proposal.trim() && <Typography sx={{ mb: "5px" }}>Explanation: {proposal.proposal}</Typography>}
+          {!!proposal?.proposal?.trim() && <Typography sx={{ mb: "5px" }}>Explanation: {proposal.proposal}</Typography>}
         </Box>
         <Box
           sx={{
