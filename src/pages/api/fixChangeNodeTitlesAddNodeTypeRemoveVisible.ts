@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin";
-import { getTypedCollections, reputationTypes, tagsAndCommPoints } from "../../utils";
+import { getQueryCollections, reputationTypes, tagsAndCommPoints } from "../../utils";
 
 const changeTagTitleInAllDocs = async ({ batch, collName, allDocs, nodeId, newTitle, writeCounts }: any) => {
   let newBatch = batch;
@@ -20,7 +20,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const allVersions: any = [];
 
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsQuery = versionsColl;
     const versionsDocs = await versionsQuery.get();
     for (let versionDoc of versionsDocs.docs) {

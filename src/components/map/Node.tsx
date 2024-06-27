@@ -1305,11 +1305,8 @@ const Node = ({
                       })}
                     </ul>
                     {editable && (
-                      <Box sx={{ alignSelf: "flex-end" }}>
-                        <MemoizedMetaButton
-                          onClick={addChoiceHandler}
-                          tooltip="Click to add a new choice to this question."
-                        >
+                      <Box sx={{ alignSelf: "flex-end", mb: 2 }}>
+                        <MemoizedMetaButton onClick={addChoiceHandler} tooltip="">
                           <>
                             <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
                             <span>Add Choice</span>

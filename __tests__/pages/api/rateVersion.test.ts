@@ -29,7 +29,7 @@ import { ITag } from "src/types/ITag";
 import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
-import { getTypedCollections } from "src/utils";
+import { getQueryCollections } from "src/utils";
 import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, createUserNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
@@ -989,7 +989,7 @@ describe("POST /api/rateVersion", () => {
       let newNodeVersion: DocumentSnapshot<any>;
 
       it("create version for new node that is accepted", async () => {
-        const { versionsColl } = getTypedCollections();
+        const { versionsColl } = getQueryCollections();
         const newNodeVersions = await versionsColl.where("node", "==", newNode.id).get();
         expect(newNodeVersions.docs.length).toEqual(1);
         newNodeVersion = newNodeVersions.docs[0];
@@ -1012,7 +1012,7 @@ describe("POST /api/rateVersion", () => {
       });
 
       it("create user version in relative nodeType user version collection", async () => {
-        const { userVersionsColl } = getTypedCollections();
+        const { userVersionsColl } = getQueryCollections();
         const newUserNodeVersions = await userVersionsColl
           .where("version", "==", newNodeVersion.id)
           .where("user", "==", users[1].uname)
@@ -1036,14 +1036,14 @@ describe("POST /api/rateVersion", () => {
 
       describe("if version is approved and it has childType", () => {
         it("flag version as deleted", async () => {
-          const { versionsColl } = getTypedCollections();
+          const { versionsColl } = getQueryCollections();
           const versions = await versionsColl.where("node", "==", nodes[1].documentId).get();
           const versionData = versions.docs[0].data() as INodeVersion;
           expect(versionData.deleted).toEqual(true);
         });
 
         it("flag user version as deleted", async () => {
-          const { userVersionsColl } = getTypedCollections();
+          const { userVersionsColl } = getQueryCollections();
           const userVersions = await userVersionsColl
             .where("version", "==", nodeVersions[1].documentId)
             .where("user", "==", users[1].uname)

@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import HttpMock from "node-mocks-http";
 import { initFirebaseClientSDK } from "src/lib/firestoreClient/firestoreClient.config";
-import { comPointTypes, getTypedCollections, reputationTypes } from "src/utils";
+import { comPointTypes, getQueryCollections, reputationTypes } from "src/utils";
 import { createCredit } from "testUtils/fakers/credit";
 import {
   createMonthlyReputationPoints,
@@ -375,7 +375,7 @@ describe("POST /api/changeUsername", () => {
   const userNodesLogs: IUserNodeLog[] = [];
   const userVersionsLogs: IUserNodeVersionLog[] = [];
 
-  const { versionsColl, userVersionsColl } = getTypedCollections();
+  const { versionsColl, userVersionsColl } = getQueryCollections();
   const node = createNode({
     admin: users[0],
     corrects: 1,
@@ -598,7 +598,7 @@ describe("POST /api/changeUsername", () => {
 
     describe("change old username in each collection that has usernames:", () => {
       it("{nodeType}Versions, user{nodeType}Versions, {nodeType}VersionsComments (not implemented), user{nodeType}VersionsComments (not implemented)", async () => {
-        const { versionsColl, userVersionsColl } = getTypedCollections();
+        const { versionsColl, userVersionsColl } = getQueryCollections();
         expect((await versionsColl.where("proposer", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
         expect((await userVersionsColl.where("user", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
       });

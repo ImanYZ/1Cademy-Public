@@ -13,7 +13,7 @@ import {
   arrayToChunks,
   convertToTGet,
   getNode,
-  getTypedCollections,
+  getQueryCollections,
   initializeNewReputationData,
   isVersionApproved,
   retrieveAndsignalAllUserNodesChanges,
@@ -139,7 +139,7 @@ export const getVersion = async ({
   let versionRef!: DocumentReference<DocumentData>;
   let versionDoc!: DocumentSnapshot<DocumentData>;
 
-  const { versionsColl }: any = getTypedCollections();
+  const { versionsColl }: any = getQueryCollections();
   versionRef = versionsColl.doc(versionId);
   versionDoc = t ? await t.get(versionRef) : await versionRef.get();
   const versionData: any = versionDoc.data();
@@ -683,7 +683,7 @@ export const changeNodeTitle = async ({
       });
     }
 
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsQuery = versionsColl.where("tagIds", "array-contains", nodeId);
     const versionsDocs = await convertToTGet(versionsQuery, t);
     for (let versionDoc of versionsDocs.docs) {
@@ -1332,7 +1332,7 @@ export const generateTagsData = async ({
 };
 
 export const getUserVersion = async ({ versionId, nodeType, uname, t = false }: any) => {
-  const { userVersionsColl }: any = getTypedCollections();
+  const { userVersionsColl }: any = getQueryCollections();
   const userVersionQuery = userVersionsColl.where("version", "==", versionId).where("user", "==", uname).limit(1);
   const userVersionDoc = t ? await t.get(userVersionQuery) : await userVersionQuery.get();
   let userVersionData = null;
@@ -1407,7 +1407,7 @@ export const getCumulativeProposerVersionRatingsOnNode = async ({
   let imageUrl = aImgUrl;
   let userName = aChooseUname;
   const proposersReputationsOnNode = {};
-  const { versionsColl }: any = getTypedCollections();
+  const { versionsColl }: any = getQueryCollections();
   const versionDocs = await convertToTGet(versionsColl.where("node", "==", nodeId).where("accepted", "==", true), t);
   for (let versionDoc of versionDocs.docs) {
     const versionData = versionDoc.data();
@@ -1728,8 +1728,8 @@ export const transferUserVersionsToNewNode = async ({
   t,
   tWriteOperations,
 }: ITransferUserVersionsToNewNode) => {
-  const { userVersionsColl: oldUserVersionsColl } = getTypedCollections();
-  const { userVersionsColl } = getTypedCollections();
+  const { userVersionsColl: oldUserVersionsColl } = getQueryCollections();
+  const { userVersionsColl } = getQueryCollections();
 
   const oldUserVersions = await oldUserVersionsColl.where("version", "==", versionId).get();
   for (const oldUserVersion of oldUserVersions.docs) {
@@ -2225,7 +2225,7 @@ export const versionCreateUpdate = async ({
           if (childType === "Question") {
             childNode.choices = versionData.choices;
           }
-          const { versionsColl, userVersionsColl }: any = getTypedCollections();
+          const { versionsColl, userVersionsColl }: any = getQueryCollections();
           const versionRef = versionsColl.doc();
           //  before setting childNode version, need to obtain the correct corresponding collection in the database
           const childVersion = {
@@ -2364,7 +2364,7 @@ export const versionCreateUpdate = async ({
           }
 
           //  Delete the old version on the parent.
-          const { versionsCommentsColl }: any = getTypedCollections();
+          const { versionsCommentsColl }: any = getQueryCollections();
 
           let versionsCommentsRef = versionsCommentsColl
             .where("version", "==", versionId)
@@ -2552,7 +2552,7 @@ export const addToPendingPropsNumsExcludingVoters = async ({
   tWriteOperations,
 }: IAddToPendingPropsNumsExcludingVoters) => {
   let newBatch = batch;
-  const { userVersionsColl }: any = getTypedCollections();
+  const { userVersionsColl }: any = getQueryCollections();
   const userVersionsDocs = await convertToTGet(userVersionsColl.where("version", "==", versionId), t);
   const voters = [];
   for (let userVersionDoc of userVersionsDocs.docs) {

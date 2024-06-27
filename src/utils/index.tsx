@@ -7,7 +7,7 @@ export { replaceUsername } from "./replaceUsername";
 export { baseReputationObj } from "./baseReputationObj";
 export { tagsAndCommPoints } from "./tagsAndCommPoints";
 export { doRemoveUnusedTags } from "./doRemoveUnusedTags";
-export { getTypedCollections } from "./getTypedCollections";
+export { getQueryCollections } from "./getTypedCollections";
 export { EDITED_UNIVERSITIES } from "./edited_universities";
 export { rewriteComPointsDocs } from "./rewriteComPointsDocs";
 export { rewriteReputationDocs } from "./rewriteReputationDocs";

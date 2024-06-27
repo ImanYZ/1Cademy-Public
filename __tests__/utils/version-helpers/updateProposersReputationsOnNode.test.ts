@@ -1,5 +1,5 @@
 import { updateProposersReputationsOnNode } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import { versionsData } from "../../../testUtils/mockCollections";
 
 describe("updateProposersReputationsOnNode", () => {
@@ -12,7 +12,7 @@ describe("updateProposersReputationsOnNode", () => {
   });
 
   it("should perform action on  updateProposersReputationsOnNode with new proposer", async () => {
-    let { versionsColl }: any = getTypedCollections();
+    let { versionsColl }: any = getQueryCollections();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();
     let versionRating = versionData.corrects - versionData.wrongs;
@@ -34,7 +34,7 @@ describe("updateProposersReputationsOnNode", () => {
   });
 
   it("should perform action on  updateProposersReputationsOnNode with an existing proposer", async () => {
-    let { versionsColl }: any = getTypedCollections();
+    let { versionsColl }: any = getQueryCollections();
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let versionData = versionDoc.data();
     let versionRating = versionData.corrects - versionData.wrongs;

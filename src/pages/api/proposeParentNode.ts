@@ -19,7 +19,7 @@ import {
   generateTagsData,
   getAllUserNodes,
   getNode,
-  getTypedCollections,
+  getQueryCollections,
   proposalNotification,
   signalAllUserNodesChanges,
   updateReputation,
@@ -449,7 +449,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     }
     console.log("7");
-    const { versionsColl, userVersionsColl }: any = getTypedCollections();
+    const { versionsColl, userVersionsColl }: any = getQueryCollections();
     // Now we have all the data we need in newVersion, so we can set the document.
     const versionRef = versionsColl.doc();
     batch.set(versionRef, newVersion);

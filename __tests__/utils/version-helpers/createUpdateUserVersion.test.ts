@@ -1,7 +1,7 @@
 import { commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { createUpdateUserVersion } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import { MockData, userVersionsData } from "../../../testUtils/mockCollections";
 
 describe("createUpdateUserVersion", () => {
@@ -20,7 +20,7 @@ describe("createUpdateUserVersion", () => {
   it("should perform createUpdateUserVersion action sepecifc nodeType", async () => {
     let batch = db.batch();
     let writeCounts = 0;
-    let { userVersionsColl }: any = getTypedCollections();
+    let { userVersionsColl }: any = getQueryCollections();
     const versionsRef = await userVersionsColl.doc("ehViCqDju0mysa6kgwD1");
     const versionsData = await versionsRef.get();
     let data = { node: versionsData.node, ...versionsData.data() };

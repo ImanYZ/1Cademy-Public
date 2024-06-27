@@ -8,7 +8,7 @@ import { INode } from "src/types/INode";
 import { INodeVersion } from "src/types/INodeVersion";
 import { INotification } from "src/types/INotification";
 import { IUser } from "src/types/IUser";
-import { getTypedCollections, NODE_TYPES } from "src/utils";
+import { getQueryCollections, NODE_TYPES } from "src/utils";
 import { createComMonthlyPoints, createComPoints, createComWeeklyPoints } from "testUtils/fakers/com-point";
 import { createCredit } from "testUtils/fakers/credit";
 import { createMessage } from "testUtils/fakers/message";
@@ -217,7 +217,7 @@ describe("POST /api/updateUserImageInDB", () => {
   ];
 
   for (const NODE_TYPE of NODE_TYPES) {
-    const { versionsColl } = getTypedCollections();
+    const { versionsColl } = getQueryCollections();
     collects.push(
       new MockData(
         nodeVersions.filter(
@@ -351,7 +351,7 @@ describe("POST /api/updateUserImageInDB", () => {
     });
 
     it("{nodeType}Versions", async () => {
-      const { versionsColl } = getTypedCollections();
+      const { versionsColl } = getQueryCollections();
       const nodeTypeVersionDocs = (await versionsColl.where("proposer", "==", users[0].uname).get()).docs;
       expect(nodeTypeVersionDocs.length).toBeGreaterThan(0);
       for (const nodeTypeVersionDoc of nodeTypeVersionDocs) {

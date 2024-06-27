@@ -1,7 +1,7 @@
 import { db } from "@/lib/firestoreServer/admin";
 
 import { getVersion } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import { nodesData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("getVersion", () => {
@@ -16,7 +16,7 @@ describe("getVersion", () => {
   });
 
   it("should return verision of sepecifc nodeType", async () => {
-    let { versionsColl }: any = getTypedCollections();
+    let { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const nodeDoc = await db.collection("nodes").doc(node).get();
     const nodeData = nodeDoc.data();

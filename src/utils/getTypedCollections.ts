@@ -15,7 +15,7 @@ export const USER_VERSIONS: string = "userVersions";
 export const VERSIONS_COMMENTS: string = "versionComments";
 export const USER_VERSIONS_COMMENTS: string = "userVersionComments";
 
-export const getTypedCollections = (): GetTypedCollectionsReturn => {
+export const getQueryCollections = (): GetTypedCollectionsReturn => {
   const versionsColl = db.collection(VERSIONS);
   const userVersionsColl = db.collection(USER_VERSIONS);
   const versionsCommentsColl = db.collection(VERSIONS_COMMENTS);

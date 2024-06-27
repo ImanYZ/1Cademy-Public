@@ -1,5 +1,5 @@
 import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
-import { getTypedCollections, initializeNewReputationData, rewriteReputationDocs } from "../../src/utils";
+import { getQueryCollections, initializeNewReputationData, rewriteReputationDocs } from "../../src/utils";
 import { firstWeekMonthDays } from "../../src/utils";
 import {
   monthlyReputationsData,
@@ -34,7 +34,7 @@ describe("rewriteReputationDocs", () => {
 
   it("Should return write counts grater than 0 in case of reputations", async () => {
     const reputations: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -64,7 +64,7 @@ describe("rewriteReputationDocs", () => {
 
   it("Should return write counts grater than 0 in case of monthlyReputations", async () => {
     const monthlyReputations: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -96,7 +96,7 @@ describe("rewriteReputationDocs", () => {
 
   it("Should return write counts grater than 0 in case of weeklyReputations", async () => {
     const weeklyReputations: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -128,7 +128,7 @@ describe("rewriteReputationDocs", () => {
 
   it("Should return write counts grater than 0 in case of othersReputations", async () => {
     const othersReputations: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -157,7 +157,7 @@ describe("rewriteReputationDocs", () => {
 
   it("Should return write counts grater than 0 in case of othMonReputations", async () => {
     const othMonReputations: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -189,7 +189,7 @@ describe("rewriteReputationDocs", () => {
 
   it("Should return write counts grater than 0 in case of othWeekReputations", async () => {
     const othWeekReputations: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";

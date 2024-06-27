@@ -12,7 +12,7 @@ import { collection, doc, getDoc, getDocs, query, where } from "firebase/firesto
 import { db } from "@/lib/firestoreClient/firestoreClient.config";
 import { arrayToChunks } from "./arrayToChunks";
 import { IUserNode } from "src/types/IUserNode";
-import { USER_VERSIONS, getTypedCollections } from "./getTypedCollections";
+import { USER_VERSIONS, getQueryCollections } from "./getTypedCollections";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 
 export const firstWeekMonthDays = (thisDate?: any) => {

@@ -1,6 +1,6 @@
 import { db } from "@/lib/firestoreServer/admin";
 
-import { getTypedCollections } from "../../src/utils";
+import { getQueryCollections } from "../../src/utils";
 import { replaceUsername } from "../../src/utils/replaceUsername";
 import {
   nodesData,
@@ -48,7 +48,7 @@ describe("getUserNode", () => {
     });
 
     it("Check if version, votes, comments and comment votes are transferred from old username to new username", async () => {
-      const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections();
+      const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getQueryCollections();
       expect((await versionsColl.where("proposer", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
       expect((await userVersionsColl.where("user", "==", newUsername).get()).docs.length).toBeGreaterThan(0);
       expect((await versionsCommentsColl.where("author", "==", newUsername).get()).docs.length).toBeGreaterThan(0);

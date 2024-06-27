@@ -22,7 +22,7 @@ import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
-import { getTypedCollections } from "src/utils";
+import { getQueryCollections } from "src/utils";
 import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
@@ -232,7 +232,7 @@ describe("POST /api/proposeChildNode", () => {
     });
 
     it("proposal should auto tag higher communities", async () => {
-      const { versionsColl } = getTypedCollections();
+      const { versionsColl } = getQueryCollections();
       const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
       const nodeVersion = nodeVersionsResult.docs[0].data() as INodeVersion;
       for (const node of nodes) {

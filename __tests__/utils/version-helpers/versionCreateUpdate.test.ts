@@ -13,7 +13,7 @@ import { createUser, getDefaultUser } from "testUtils/fakers/user";
 import { admin, commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { versionCreateUpdate } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import {
   MockData,
   nodesData,
@@ -66,7 +66,7 @@ describe("versionCreateUpdate", () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let nodeRef: any = db.collection("nodes").doc("tKxTypLrxds");
     let nodeDoc: any = await nodeRef.get();
-    let { versionsColl, userVersionsColl }: any = getTypedCollections();
+    let { versionsColl, userVersionsColl }: any = getQueryCollections();
     const versionsData = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();
     let data = versionsData.data();
     const userVersionsDoc = await userVersionsColl.where("node", "==", data.node).get();
@@ -112,7 +112,7 @@ describe("versionCreateUpdate", () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let nodeRef: any = db.collection("nodes").doc("GJfzAY1zbgQs9jU5XeEL");
     let nodeDoc: any = await nodeRef.get();
-    let { versionsColl, userVersionsColl }: any = getTypedCollections();
+    let { versionsColl, userVersionsColl }: any = getQueryCollections();
     const versionsData = await versionsColl.doc("bkYvkniwziO1Ue6K1gtN").get();
     let data = versionsData.data();
     const userVersionsDoc = await userVersionsColl.where("node", "==", data.node).get();

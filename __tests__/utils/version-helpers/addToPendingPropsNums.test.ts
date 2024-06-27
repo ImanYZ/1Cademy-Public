@@ -1,6 +1,6 @@
 import { commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { addToPendingPropsNums } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import { nodesData, pendingPropsNumsData, usersData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("addToPendingPropsNums", () => {
@@ -22,7 +22,7 @@ describe("addToPendingPropsNums", () => {
     let batch = db.batch();
     let writeCounts = 0;
     let nodeDoc: any = await db.collection("nodes").doc("VnXTRolBGyHF3q8EvxS3").get();
-    let { versionsColl }: any = getTypedCollections();
+    let { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", nodeDoc.id).get();
     for (let versionDoc of versionsDocs.docs) {
       const versionData = versionDoc.data();

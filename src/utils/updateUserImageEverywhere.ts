@@ -1,7 +1,7 @@
 import { checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import {
   comPointTypes,
-  getTypedCollections,
+  getQueryCollections,
   NODE_TYPES,
   retrieveAndsignalAllUserNodesChanges,
   schoolPointTypes,
@@ -165,7 +165,7 @@ export const updateUserImageEverywhere = async ({
     });
   }
 
-  const { versionsColl, versionsCommentsColl } = getTypedCollections();
+  const { versionsColl, versionsCommentsColl } = getQueryCollections();
   [newBatch, writeCounts] = await updateUserImageInCollection({
     batch: newBatch,
     collQuery: versionsColl,

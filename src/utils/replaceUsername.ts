@@ -1,7 +1,7 @@
 import { admin, checkRestartBatchWriteCounts, commitBatch, db } from "../lib/firestoreServer/admin";
 import {
   comPointTypes,
-  getTypedCollections,
+  getQueryCollections,
   NODE_TYPES,
   reputationTypes,
   retrieveAndsignalAllUserNodesChanges,
@@ -56,7 +56,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
   writeCounts += 1;
   console.log(uname + " to " + newUsername);
 
-  const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getTypedCollections();
+  const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } = getQueryCollections();
   [batch, writeCounts] = await replaceUnameInCollection({
     batch,
     collQuery: versionsColl,

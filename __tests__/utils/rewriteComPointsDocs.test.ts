@@ -1,5 +1,5 @@
 import { commitBatch, db } from "../../src/lib/firestoreServer/admin";
-import { getTypedCollections, initializeNewReputationData, rewriteComPointsDocs } from "../../src/utils";
+import { getQueryCollections, initializeNewReputationData, rewriteComPointsDocs } from "../../src/utils";
 import { firstWeekMonthDays } from "../../src/utils";
 import {
   comMonthlyPointsData,
@@ -32,7 +32,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comPoints", async () => {
     const comPoints: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -60,7 +60,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comMonthlyPoints", async () => {
     const comMonthlyPoints: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -92,7 +92,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comOthersPoints", async () => {
     const comOthersPoints: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -125,7 +125,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comOthMonPoints", async () => {
     const comOthMonPoints: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";
@@ -156,7 +156,7 @@ describe("rewriteComPointsDocs", () => {
 
   it("Should return write counts grater than 0 in case of comOthWeekPoints", async () => {
     const comOthWeekPoints: any = {};
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.where("node", "==", node).get();
     const tagId = versionsDocs.docs[0].data().tagIds[0];
     const tag = "Data Science";

@@ -11,7 +11,7 @@ import {
 } from "src/types/ICourse";
 import { arrayToChunks } from "./arrayToChunks";
 import { convertToTGet } from "./convertToTGet";
-import { getTypedCollections } from "./getTypedCollections";
+import { getQueryCollections } from "./getTypedCollections";
 import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 import { SemesterStudentStat, SemesterStudentVoteStat } from "src/instructorsTypes";
 import moment from "moment";
@@ -700,7 +700,7 @@ export const updateStatsOnVersionVote = async ({
       // student to student interactions
       const studentSankeys = await getStudentSankeysBySemesterId(semesterId, t, true);
 
-      const { userVersionsColl } = getTypedCollections();
+      const { userVersionsColl } = getQueryCollections();
       const versionVotesByUser: {
         [uname: string]: FirebaseFirestore.QueryDocumentSnapshot<any>;
       } = {};
@@ -1383,7 +1383,7 @@ export const checkInstantApprovalForProposalVote = async (tagIds: string[], unam
       instantApprove: true,
     };
   }
-  const { userVersionsColl } = getTypedCollections();
+  const { userVersionsColl } = getQueryCollections();
 
   const userVersions = await userVersionsColl.where("version", "==", versionId).get();
 

@@ -3,7 +3,7 @@ import { DocumentData, QueryDocumentSnapshot, WriteBatch } from "firebase-admin/
 import {
   getAllUserNodes,
   getNode,
-  getTypedCollections,
+  getQueryCollections,
   getUserNode,
   signalAllUserNodesChanges,
   updateReputation,
@@ -141,7 +141,7 @@ export const UpDownVoteNode = async ({
   }
 
   //  query versions in order to update the upvotes / downvotes in addition to reputations
-  const { versionsColl }: any = getTypedCollections();
+  const { versionsColl }: any = getQueryCollections();
   const versionsQuery = versionsColl
     .where("node", "==", nodeId)
     .where("accepted", "==", true)

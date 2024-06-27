@@ -1,6 +1,6 @@
 import { admin, commitBatch, db } from "../../../src/lib/firestoreServer/admin";
 import { proposalNotification } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import {
   nodesData,
   notificationNumsData,
@@ -31,7 +31,7 @@ describe("proposalNotification", () => {
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let batch = db.batch();
     let writeCounts = 0;
-    let { versionsColl }: any = getTypedCollections();
+    let { versionsColl }: any = getQueryCollections();
     let nodeDoc: any = await db.collection("nodes").doc("FJfzAX7zbgQS8jU5XcEk").get();
     const versionsDocs: any = await versionsColl.where("node", "==", node).get();
     const versionData = versionsDocs.docs[0].data();

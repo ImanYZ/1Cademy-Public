@@ -1,5 +1,5 @@
 import { db } from "../../src/lib/firestoreServer/admin";
-import { getTypedCollections } from "../../src/utils";
+import { getQueryCollections } from "../../src/utils";
 import { updateUserImageInCollection } from "../../src/utils/updateUserImageInCollection";
 import {
   nodesData,
@@ -33,7 +33,7 @@ describe("updateUserImageEverywhere", () => {
   it("Should be able to update user profile image everywhere", async () => {
     const newImageUrl = "https://lh3.googleusercontent.com/ogw/AOh-ky2UJPA2Md8swcNMKdxNTwtmO0iXtjDRFosHZJqqVw=s32-c-mo";
 
-    const { versionsColl, versionsCommentsColl } = getTypedCollections();
+    const { versionsColl, versionsCommentsColl } = getQueryCollections();
     let writeCounts = 0;
 
     let batch = db.batch();

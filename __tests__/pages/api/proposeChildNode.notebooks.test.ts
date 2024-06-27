@@ -22,7 +22,7 @@ import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 import { IQuestionChoice } from "src/types/IQuestionChoice";
-import { getTypedCollections } from "src/utils";
+import { getQueryCollections } from "src/utils";
 import { createInstitution } from "testUtils/fakers/institution";
 import { createNode, createNodeVersion, getDefaultNode } from "testUtils/fakers/node";
 import { createUser, getDefaultUser } from "testUtils/fakers/user";
@@ -253,7 +253,7 @@ describe("POST /api/proposeChildNode", () => {
     });
 
     it("user nodes should be created for both users", async () => {
-      const { versionsColl } = getTypedCollections();
+      const { versionsColl } = getQueryCollections();
       const nodeVersionsResult = await db
         .collection(versionsColl.id)
         .where("nodeType", "==", "Question")

@@ -1,7 +1,7 @@
 import { commitBatch, db } from "@/lib/firestoreServer/admin";
 
 import { addToPendingPropsNumsExcludingVoters } from "../../../src/utils";
-import { getTypedCollections } from "../../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../../src/utils/getTypedCollections";
 import { pendingPropsNumsData, usersData, userVersionsData, versionsData } from "../../../testUtils/mockCollections";
 
 describe("addToPendingPropsNumsExcludingVoters", () => {
@@ -20,7 +20,7 @@ describe("addToPendingPropsNumsExcludingVoters", () => {
   });
 
   it("should perform action on  addToPendingPropsNumsExcludingVoters", async () => {
-    let { versionsColl }: any = getTypedCollections();
+    let { versionsColl }: any = getQueryCollections();
     let batch = db.batch();
     let writeCounts = 0;
     const versionDoc = await versionsColl.doc("bkZvknixyiO1Ue7K9htZ").get();

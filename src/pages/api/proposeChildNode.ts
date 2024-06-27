@@ -19,7 +19,7 @@ import {
   generateTagsData,
   getAllUserNodes,
   getNode,
-  getTypedCollections,
+  getQueryCollections,
   isVersionApproved,
   proposalNotification,
   signalAllUserNodesChanges,
@@ -426,7 +426,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await commitBatch(batch);
     });
 
-    const { versionsColl, userVersionsColl }: any = getTypedCollections();
+    const { versionsColl, userVersionsColl }: any = getQueryCollections();
     // Now we have all the data we need in newVersion, so we can set the document.
     const versionRef = versionsColl.doc();
     (newVersion.nodeType = newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType),

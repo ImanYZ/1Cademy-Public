@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { commitBatch, db } from "../../lib/firestoreServer/admin";
-import { addToPendingPropsNumsExcludingVoters, getTypedCollections } from "../../utils";
+import { addToPendingPropsNumsExcludingVoters, getQueryCollections } from "../../utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     let batch = db.batch();
     let writeCounts = 0;
 
-    const { versionsColl }: any = getTypedCollections();
+    const { versionsColl }: any = getQueryCollections();
     const versionsDocs = await versionsColl.get();
     for (let versionDoc of versionsDocs.docs) {
       const versionData = versionDoc.data();

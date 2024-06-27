@@ -1,4 +1,4 @@
-import { getTypedCollections } from "../../src/utils/getTypedCollections";
+import { getQueryCollections } from "../../src/utils/getTypedCollections";
 import {
   userVersionCommentsData,
   userVersionsData,
@@ -22,7 +22,7 @@ describe("getTypedCollections", () => {
   });
 
   it("Should point to the correct firebase reference", async () => {
-    let { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl }: any = getTypedCollections();
+    let { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl }: any = getQueryCollections();
     expect(versionsColl._queryOptions).toMatchObject({ collectionId: "versions" });
     expect(userVersionsColl._queryOptions).toMatchObject({ collectionId: "userVersions" });
     expect(versionsCommentsColl._queryOptions).toMatchObject({ collectionId: "versionComments" });
