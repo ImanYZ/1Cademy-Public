@@ -106,11 +106,11 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <div>
             {props.choice.correct ? (
               <IconButton onClick={switchChoiceHandler}>
-                <DoneIcon className="green-text" sx={{ fontSize: "20px" }} />
+                <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
               </IconButton>
             ) : (
               <IconButton onClick={switchChoiceHandler}>
-                <CloseIcon className="red-text" sx={{ fontSize: "20px" }} />
+                <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
               </IconButton>
             )}
           </div>
@@ -128,7 +128,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             <div>
               <Tooltip title={"Delete this choice from this question."}>
                 <IconButton onClick={deleteChoiceHandler}>
-                  <DeleteForeverIcon className="red-text" sx={{ fontSize: "20px" }} />
+                  <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
                 </IconButton>
               </Tooltip>
             </div>
