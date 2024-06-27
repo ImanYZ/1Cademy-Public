@@ -34,7 +34,7 @@ import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import NextImage from "next/image";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -411,8 +411,19 @@ const NodeFooter = ({
   }, [identifier, nodeBookDispatch, notebookRef, selectNode]);
 
   const proposeNodeImprovementClick = useCallback(
-    (event: any) => {
-      displayProposals();
+    async (event: any) => {
+      const userVersionsRef = collection(db, "versions");
+      const q = query(
+        userVersionsRef,
+        where("node", "==", identifier),
+        where("accepted", "==", false),
+        where("deleted", "==", false),
+        limit(1)
+      );
+      const versionDocs = await getDocs(q);
+      if (!versionDocs.empty) {
+        displayProposals();
+      }
       proposeNodeImprovement(event, identifier);
     },
     [displayProposals, identifier, proposeNodeImprovement]
