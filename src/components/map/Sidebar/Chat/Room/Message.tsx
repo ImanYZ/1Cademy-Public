@@ -297,7 +297,7 @@ export const Message = ({
     };
     const killSnapshot = getChannelMessagesSnapshot(
       db,
-      { channelId: selectedChannel.id, lastVisible: messages[0].doc, roomType },
+      { channelId: selectedChannel.id, lastVisible: messages[0]?.doc, roomType },
       onSynchronize
     );
     unsubscribeRefs.current.push(killSnapshot);
