@@ -14,6 +14,10 @@ const removeInvalidTokens = async (invalidTokens: { [key: string]: string[] }) =
     }
   }
 };
+const replaceMentions = (text: string) => {
+  let pattern = /\[@(.*?)\]\(\/mention\/.*?\)/g;
+  return text.replace(pattern, (match, displayText) => `@${displayText}`);
+};
 
 const triggerNotifications = async (newMessage: any) => {
   try {
@@ -69,7 +73,7 @@ const triggerNotifications = async (newMessage: any) => {
               token,
               notification: {
                 title: `${subject} ${membersInfo[sender].fullname}`,
-                body: message,
+                body: replaceMentions(message),
               },
               data: {
                 messageId: newMessage?.parentMessage || newMessage.id,

@@ -351,7 +351,7 @@ export const MessageInput = ({
                 padding: "2px",
                 fontSize: 16,
                 position: "absolute",
-                top: "-120px",
+                top: "-170px",
                 left: "-16px",
                 maxHeight: "150px",
                 overflowY: "auto",
@@ -371,7 +371,7 @@ export const MessageInput = ({
             displayTransform={(id, display) => {
               return `@${display}`;
             }}
-            markup="@[__display__](/mention/__id__)"
+            markup="[@__display__](/mention/__id__)"
             renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
           />
         </MentionsInput>
