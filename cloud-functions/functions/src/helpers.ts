@@ -87,47 +87,43 @@ export const trackHours = async (data: any) => {
       console.log(`Cannot track hours for ${students[data.doer].semesterId} currently in a meeting`);
       return;
     }
-    const trackHoursDayQuery = await db
-      .collection("trackHours")
-      .where("uname", "==", data.doer)
-      .where("day", "==", todayDate)
-      .get();
 
-    if (trackHoursDayQuery.docs.length > 0) {
-      const trackDoc = trackHoursDayQuery.docs[0];
-      const trackData = trackDoc.data();
+    const trackHoursRef = db.collection("trackHours").doc(`${data.doer}-${todayDate}`);
 
-      const lastActionTime = moment(trackData.lastActionTime.toDate());
+    await db.runTransaction(async transaction => {
+      const trackHoursDoc = await transaction.get(trackHoursRef);
 
-      // Calculate the difference in minutes using
+      if (trackHoursDoc.exists) {
+        const trackData: any = trackHoursDoc.data();
 
-      const diffInMinutes = getMinutesDiff(createdAt, lastActionTime);
+        const lastActionTime = moment(trackData.lastActionTime.toDate());
 
-      // Update minutes for each day in the range
-      if (diffInMinutes > 0 && diffInMinutes <= 5) {
-        trackData.totalMinutes += diffInMinutes;
-        trackData.trackedMinutes.push(createdAt);
-        trackData.lastActionTime = createdAt;
+        const diffInMinutes = getMinutesDiff(createdAt, lastActionTime);
+
+        if (diffInMinutes > 0 && diffInMinutes <= 5) {
+          trackData.totalMinutes += diffInMinutes;
+          trackData.trackedMinutes.push(createdAt);
+          trackData.lastActionTime = createdAt;
+        } else if (diffInMinutes > 5) {
+          trackData.totalMinutes += 1;
+          trackData.trackedMinutes.push(createdAt);
+          trackData.lastActionTime = createdAt;
+        }
+
+        transaction.update(trackHoursRef, { ...trackData, paid: false });
+      } else {
+        const newData = {
+          day: todayDate,
+          totalMinutes: 1,
+          trackedMinutes: [data.createdAt],
+          ...students[data.doer],
+          lastActionTime: createdAt,
+          createdAt: new Date(),
+        };
+
+        transaction.set(trackHoursRef, newData);
       }
-      if (diffInMinutes > 5) {
-        trackData.totalMinutes += 1;
-        trackData.trackedMinutes.push(createdAt);
-        trackData.lastActionTime = createdAt;
-      }
-      trackDoc.ref.update({ ...trackData, paid: false });
-    } else {
-      // If it's the first action, just initialize lastActionTime
-      const newData = {
-        day: todayDate,
-        totalMinutes: 1,
-        trackedMinutes: [data.createdAt],
-        ...students[data.doer],
-        lastActionTime: createdAt,
-        createdAt: new Date(),
-      };
-      const trackHoursRef = db.collection("trackHours").doc();
-      trackHoursRef.set(newData);
-    }
+    });
   } catch (error) {
     console.log(error);
   }
