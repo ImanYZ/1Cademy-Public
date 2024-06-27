@@ -141,16 +141,14 @@ export const NewsCard = ({
             sx={{ border: "none" }}
           />
 
-          <Box
-            className={
-              onlineUsers[membersInfo[message.sender]?.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"
-            }
-            sx={{
-              backgroundColor: !onlineUsers[membersInfo[message.sender]?.uname]
-                ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
-                : "",
-            }}
-          />
+          {onlineUsers[membersInfo[message.sender]?.uname] && (
+            <Box
+              sx={{
+                fontSize: "1px",
+              }}
+              className="UserStatusOnlineIcon"
+            />
+          )}
         </Box>
 
         <Box sx={{ width: "90%" }}>

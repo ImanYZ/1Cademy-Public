@@ -203,12 +203,15 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
             name={props.fullname}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
-          <Box
-            className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-            sx={{
-              backgroundColor: !props.online ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe") : "",
-            }}
-          ></Box>
+
+          {props.online && (
+            <Box
+              sx={{
+                fontSize: "1px",
+              }}
+              className="UserStatusOnlineIcon"
+            />
+          )}
         </div>
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}
