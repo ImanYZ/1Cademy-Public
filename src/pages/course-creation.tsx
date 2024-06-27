@@ -2023,10 +2023,10 @@ const CourseComponent = () => {
             </Box>
           ) : (
             <Box sx={{ gap: "5px", my: "15px", mx: "19px", overflow: "auto" }}>
+              <Typography sx={{ fontWeight: "bold" }}> Related 1Cademy Nodes:</Typography>
               {selectedTopic &&
                 (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
                   <Box key={node.title} sx={{ mb: "10px" }}>
-                    <Typography sx={{ fontWeight: "bold" }}> Related 1Cademy Nodes:</Typography>
                     <Accordion
                       id={node.title}
                       expanded={true}
