@@ -18,7 +18,7 @@ import { SignUpPersonalInfo } from "../components/SignUpPersonalInfo";
 import { SignUpProfessionalInfo } from "../components/SignUpProfessionalInfo";
 import { NextPageWithLayout, SignUpData, SignUpFormValues, User } from "../knowledgeTypes";
 
-const getDateBySubstractYears = (years: number, date = new Date()) => {
+const getDateBySubtractYears = (years: number, date = new Date()) => {
   date.setFullYear(date.getFullYear() - years);
   return date;
 };
@@ -27,8 +27,8 @@ const SignUpPage: NextPageWithLayout = () => {
   const router = useRouter();
   const [, { handleError }] = useAuth();
   const { enqueueSnackbar } = useSnackbar();
-  const minDate = getDateBySubstractYears(100);
-  const maxDate = getDateBySubstractYears(10);
+  const minDate = getDateBySubtractYears(100);
+  const maxDate = getDateBySubtractYears(10);
   const steps = ["Account", "Personal", "Education"];
   const mutateSignUp = useMutation<User, unknown, SignUpData>(signUpApi, {
     onSuccess: async (data, variables) => {

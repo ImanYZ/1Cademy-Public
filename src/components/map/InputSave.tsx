@@ -1,7 +1,6 @@
 // import "./InputSave.css";
 
 import DoneIcon from "@mui/icons-material/Done";
-import SaveIcon from "@mui/icons-material/Save";
 import { InputAdornment } from "@mui/material";
 // import InputAdornment from "@material-ui/core/InputAdornment";
 // import DoneIcon from "@material-ui/icons/Done";
@@ -65,9 +64,11 @@ const InputSave = (props: InputSaveProps) => {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <MemoizedMetaButton onClick={onSubmit} tooltip="Save the change." tooltipPosition="bottom-start">
-                {props.initialValue !== value ? <SaveIcon className="SaveIcon" /> : <DoneIcon className="DoneIcon" />}
-              </MemoizedMetaButton>
+              {props.initialValue !== value && (
+                <MemoizedMetaButton onClick={onSubmit} tooltip="Save the change." tooltipPosition="bottom-start">
+                  <DoneIcon className="DoneIcon" />
+                </MemoizedMetaButton>
+              )}
               {valueChanging && (
                 <div className="preloader-wrapper active small ImageUploadButtonLoader">
                   <div className="spinner-layer spinner-yellow-only">

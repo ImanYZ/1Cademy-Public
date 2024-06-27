@@ -150,7 +150,7 @@ const ACCOUNT_OPTIONS: AccountOptions[] = [
     options: [
       {
         type: "Change your Password",
-        icon: <VpnKeyRoundedIcon />,
+        icon: <VpnKeyRoundedIcon sx={{ color: "white" }} />,
       },
       // {
       //   type: "Deactive your Account",
@@ -1122,19 +1122,8 @@ const UserSettingsSidebar = ({
                       renderInput={params => <TextField {...params} label="Gender" />}
                       fullWidth
                     />
-
-                    {(user.gender === "Not listed (Please specify)" || !GENDER_VALUES.includes(user.gender || "")) && (
-                      <MemoizedInputSave
-                        identification="genderOtherValue"
-                        initialValue={genderOtherValue} //TODO: important fill empty user field
-                        onSubmit={(value: any) => changeAttr("gender")(value)}
-                        setState={(value: string) =>
-                          dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })
-                        }
-                        label="Please specify your gender."
-                      />
-                    )}
                   </Stack>
+
                   <LocalizationProvider dateAdapter={AdapterDaysJs}>
                     <DatePicker
                       value={user.birthDate}
@@ -1145,6 +1134,15 @@ const UserSettingsSidebar = ({
                     />
                   </LocalizationProvider>
                 </Box>
+                {user.gender === "Not listed (Please specify)" && (
+                  <MemoizedInputSave
+                    identification="genderOtherValue"
+                    initialValue={genderOtherValue} //TODO: important fill empty user field
+                    onSubmit={(value: any) => changeAttr("gender")(value)}
+                    setState={(value: string) => dispatch({ type: "setAuthUser", payload: { ...user, gender: value } })}
+                    label="Please specify your gender."
+                  />
+                )}
                 <Typography fontWeight={"500"} my="8px">
                   Professional Information
                 </Typography>
