@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, Modal, Paper, Skeleton, Typography } from "@mui/material";
+import { IconButton, LinearProgress, Modal, Paper, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -102,7 +102,6 @@ export const Message = ({
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [selectedMessage, setSelectedMessage] = useState<{ id: string | null; message: string | null } | {}>({});
   const [channelUsers, setChannelUsers] = useState([]);
-  const [lastVisible, setLastVisible] = useState<any>(null);
   const [loadMore, setLoadMore] = useState<boolean>(false);
   const [messagesByDate, setMessagesByDate] = useState<any>({});
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
@@ -115,6 +114,7 @@ export const Message = ({
   const [isRepliesLoaded, setIsRepliesLoaded] = useState<boolean>(true);
   const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
+  const unsubscribeRefs = useRef<any>([]);
 
   useEffect(() => {
     const currentDate = new Date();
@@ -233,10 +233,6 @@ export const Message = ({
   }, [selectedChannel]);
 
   useEffect(() => {
-    setLastVisible(messages[0]?.doc || null);
-  }, [messages]);
-
-  useEffect(() => {
     setIsLoading(true);
     const onSynchronize = (changes: any) => {
       setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
@@ -246,7 +242,7 @@ export const Message = ({
     };
     const killSnapshot = getChannelMessagesSnapshot(
       db,
-      { channelId: selectedChannel.id, lastVisible, roomType },
+      { channelId: selectedChannel.id, lastVisible: null, roomType },
       onSynchronize
     );
     return () => killSnapshot();
@@ -259,26 +255,29 @@ export const Message = ({
   };
 
   useEffect(() => {
-    if (!messageBoxRef.current) return;
     const messageList: any = messageBoxRef.current;
     const handleScroll = () => {
       if (messageList.scrollTop === 0) {
-        setLoadMore(l => !l);
+        fetchOlderMessages();
       }
     };
-
-    messageList.addEventListener("scroll", handleScroll);
-
+    messageList?.addEventListener("scroll", handleScroll);
     return () => {
-      messageList.removeEventListener("scroll", handleScroll);
+      messageList?.removeEventListener("scroll", handleScroll);
     };
-  }, [loadMore, messageBoxRef.current]);
+  }, [messages, messageBoxRef.current]);
 
   useEffect(() => {
     if (!!openReplies) {
       scrollToMessage(openReplies?.id || "", "reply", 100);
     }
   }, [openReplies, replies]);
+
+  useEffect(() => {
+    return () => {
+      unsubscribeRefs.current.forEach((unsubscribe: any) => unsubscribe());
+    };
+  }, []);
 
   const handleMentionUserOpenRoom = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => {
@@ -289,6 +288,20 @@ export const Message = ({
     },
     [selectedChannel]
   );
+
+  const fetchOlderMessages = () => {
+    setLoadMore(true);
+    const onSynchronize = (changes: any) => {
+      setMessages((prev: any) => changes.reduce(synchronizationMessages, [...prev]));
+      setLoadMore(false);
+    };
+    const killSnapshot = getChannelMessagesSnapshot(
+      db,
+      { channelId: selectedChannel.id, lastVisible: messages[0].doc, roomType },
+      onSynchronize
+    );
+    unsubscribeRefs.current.push(killSnapshot);
+  };
 
   const handleDeleteReply = async (curMessage: IChannelMessage, reply: IChannelMessage) => {
     if (
@@ -437,7 +450,16 @@ export const Message = ({
           return [...prevMessages, reply];
         });
         scrollToMessage(curMessage?.id || "", "reply");
-        await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
+
+        const mRef = getMessageRef(curMessage?.id, selectedChannel?.id);
+        const replyRef = collection(mRef, "replies");
+
+        await addDoc(replyRef, reply);
+        updateDoc(mRef, {
+          totalReplies: (curMessage?.totalReplies || 0) + 1,
+        });
+
+        //await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
           newMessage: reply,
@@ -530,43 +552,6 @@ export const Message = ({
   );
 
   if (!selectedChannel) return <></>;
-  if (isLoading) {
-    return (
-      <Box>
-        {Array.from(new Array(7)).map((_, index) => (
-          <Box
-            key={index}
-            sx={{
-              display: "flex",
-              justifyContent: "flex-start",
-              p: 1,
-            }}
-          >
-            <Skeleton
-              variant="circular"
-              width={50}
-              height={50}
-              sx={{
-                bgcolor: "grey.500",
-                borderRadius: "50%",
-              }}
-            />
-            <Skeleton
-              variant="rectangular"
-              width={410}
-              height={90}
-              sx={{
-                bgcolor: "grey.300",
-                borderRadius: "0px 10px 10px 10px",
-                mt: "19px",
-                ml: "5px",
-              }}
-            />
-          </Box>
-        ))}
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -582,6 +567,41 @@ export const Message = ({
         overflow: "auto",
       }}
     >
+      {isLoading && (
+        <Box>
+          {Array.from(new Array(7)).map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                justifyContent: "flex-start",
+                p: 1,
+              }}
+            >
+              <Skeleton
+                variant="circular"
+                width={50}
+                height={50}
+                sx={{
+                  bgcolor: "grey.500",
+                  borderRadius: "50%",
+                }}
+              />
+              <Skeleton
+                variant="rectangular"
+                width={410}
+                height={90}
+                sx={{
+                  bgcolor: "grey.300",
+                  borderRadius: "0px 10px 10px 10px",
+                  mt: "19px",
+                  ml: "5px",
+                }}
+              />
+            </Box>
+          ))}
+        </Box>
+      )}
       {newMemberSection && (
         <Box sx={{ position: "relative", pt: "14px" }}>
           <AddMember
@@ -616,6 +636,7 @@ export const Message = ({
               <NotFoundNotification title="Start Chatting" description="" />
             </Box>
           )}
+          {loadMore && <LinearProgress sx={{ width: "100%" }} />}
           {Object.keys(messagesByDate).map(date => {
             return (
               <Box key={date}>
@@ -773,7 +794,7 @@ export const Message = ({
         </Box>
       )}
 
-      {(leading || replyOnMessage || roomType !== "news") && (
+      {!isLoading && (leading || replyOnMessage || roomType !== "news") && (
         <Box
           sx={{
             position: "fixed",
@@ -856,7 +877,6 @@ export const Message = ({
 const synchronizationMessages = (prevMessages: (IChannelMessage & { id: string })[], messageChange: any) => {
   const docType = messageChange.type;
   const curData = messageChange.data as IChannelMessage & { id: string };
-
   const messageIdx = prevMessages.findIndex((m: IChannelMessage & { id: string }) => m.id === curData.id);
   if (docType === "added" && messageIdx === -1 && !curData.deleted) {
     prevMessages.push({ ...curData, doc: messageChange.doc });
