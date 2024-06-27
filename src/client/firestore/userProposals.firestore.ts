@@ -18,9 +18,9 @@ export const getUserProposalsSnapshot = (
   const { nodeId, uname } = data;
 
   const userVersionsRef = collection(db, "userVersions");
-  let q = query(userVersionsRef, where("user", "==", uname), where("deleted", "==", false));
+  let q = query(userVersionsRef, where("user", "==", uname));
   if (nodeId) {
-    q = query(userVersionsRef, where("node", "==", nodeId), where("user", "==", uname), where("deleted", "==", false));
+    q = query(userVersionsRef, where("node", "==", nodeId), where("user", "==", uname));
   }
 
   const killSnapshot = onSnapshot(q, snapshot => {
