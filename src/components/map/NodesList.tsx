@@ -75,6 +75,7 @@ type NodeListProps = {
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   lockedNodes: { [key: string]: boolean };
+  onlineUsers: { [key: string]: boolean };
 };
 
 const NodesList = ({
@@ -143,6 +144,7 @@ const NodesList = ({
   findDescendantNodes,
   findAncestorNodes,
   lockedNodes,
+  onlineUsers,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -292,7 +294,7 @@ const NodesList = ({
             // notebooks={nodes[nId].notebooks}
             open={nodes[nId].open}
             hideNode={hideNode}
-            nodeHeigth={nodes[nId].height}
+            nodeHeight={nodes[nId].height}
             setAssistantSelectNode={setAssistantSelectNode}
             assistantSelectNode={assistantSelectNode}
             onForceRecalculateGraph={onForceRecalculateGraph}
@@ -303,6 +305,7 @@ const NodesList = ({
             displayParentOptions={displayParentOptions}
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
+            onlineUsers={onlineUsers}
           />
         );
       })}

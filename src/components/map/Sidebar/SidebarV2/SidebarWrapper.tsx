@@ -120,8 +120,13 @@ export const SidebarWrapper = ({
         >
           <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={30} sx={{ border: "none" }} />
           <Box
-            sx={{ background: onlineUsers.includes(userInfo.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-            className="UserStatusOnlineIcon"
+            sx={{
+              backgroundColor: !onlineUsers[userInfo.uname]
+                ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                : "",
+              fontSize: "1px",
+            }}
+            className={onlineUsers[userInfo.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
           />
         </Box>
         <Typography sx={{ pl: 2 }}>{userInfo.fullname}</Typography>

@@ -213,7 +213,7 @@ type NodeProps = {
   // expands: boolean[];
   // selectedNotebookId: string;
   open: boolean;
-  nodeHeigth: number;
+  nodeHeight: number;
   hideNode: boolean;
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
@@ -225,6 +225,7 @@ type NodeProps = {
   displayParentOptions: boolean;
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  onlineUsers: { [uname: string]: boolean };
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -357,7 +358,7 @@ const Node = ({
   openPart,
   setOpenPart,
   hideNode,
-  nodeHeigth,
+  nodeHeight,
   setAssistantSelectNode,
   assistantSelectNode,
   onForceRecalculateGraph,
@@ -368,6 +369,7 @@ const Node = ({
   displayParentOptions,
   findDescendantNodes,
   findAncestorNodes,
+  onlineUsers,
 }: NodeProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
@@ -949,8 +951,8 @@ const Node = ({
           (nodeType === "Reference" ? " Choosable" : "")
         }
         style={{
-          height: nodeHeigth,
-          maxHeight: nodeHeigth,
+          height: nodeHeight,
+          maxHeight: nodeHeight,
           left: left ? left : 1000,
           top: top ? top : 1000,
           width,
@@ -1104,6 +1106,7 @@ const Node = ({
               editOption={option}
               disabled={disableTitle}
               proposalsSelected={isProposalsSelected}
+              focus={true}
             />
             {editable && (
               <Box sx={{ marginTop: "5px" }}>
@@ -1483,7 +1486,7 @@ const Node = ({
             simulated={simulated}
             bookmarked={bookmarked}
             bookmarks={bookmarks}
-            reloadPermanentGrpah={reloadPermanentGraph}
+            reloadPermanentGraph={reloadPermanentGraph}
             onNodeShare={onNodeShare}
             markStudied={markStudiedHandler}
             bookmark={bookmarkHandler}
@@ -1509,6 +1512,7 @@ const Node = ({
             onChangeChosenNode={onChangeChosenNodeHandler}
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
+            onlineUsers={onlineUsers}
           />
         )}
 
@@ -1661,7 +1665,7 @@ const Node = ({
               changedAt={changedAt}
               bookmarked={bookmarked}
               bookmarks={bookmarks}
-              reloadPermanentGrpah={reloadPermanentGraph}
+              reloadPermanentGraph={reloadPermanentGraph}
               onNodeShare={onNodeShare}
               markStudied={markStudiedHandler}
               bookmark={bookmarkHandler}
@@ -1686,6 +1690,7 @@ const Node = ({
               onChangeChosenNode={onChangeChosenNodeHandler}
               findDescendantNodes={findDescendantNodes}
               findAncestorNodes={findAncestorNodes}
+              onlineUsers={onlineUsers}
             />
           </Box>
         )}

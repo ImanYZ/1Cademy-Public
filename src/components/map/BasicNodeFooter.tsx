@@ -488,6 +488,15 @@ BasicNodeFooterProps) => {
               contained={false}
               sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
             />
+            <Box
+              id="OptimizedAvatarUserStatusOnlineIcon"
+              className={true ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+              // sx={{
+              //   backgroundColor: !openedProfile?.online
+              //     ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+              //     : "",
+              // }}
+            />
           </Box>
         )}
 
@@ -500,7 +509,6 @@ BasicNodeFooterProps) => {
             // disabled={disabled}
           />
         )}
-
         {!locked && (
           <NodeTypeIcon
             id={identifier}
@@ -510,7 +518,6 @@ BasicNodeFooterProps) => {
             // disabled={disabled}
           />
         )}
-
         <Tooltip
           title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
             new Date(changedAt)
@@ -532,7 +539,6 @@ BasicNodeFooterProps) => {
               : `${dayjs(new Date(changedAt)).fromNow()}`}
           </span>
         </Tooltip>
-
         {open && (
           <>
             <CustomIconButton

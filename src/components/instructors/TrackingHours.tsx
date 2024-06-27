@@ -144,7 +144,7 @@ const TrackingHours = () => {
 
     while (currentDate.isBefore(now)) {
       const periodStart = currentDate;
-      const periodEnd = moment(periodStart).add(13, "days");
+      const periodEnd = index === 1 ? moment(periodStart).add(14, "days") : moment(periodStart).add(13, "days");
       periods.push({
         start: periodStart,
         end: periodEnd,
@@ -159,6 +159,9 @@ const TrackingHours = () => {
   };
 
   const periods = generateTwoWeekPeriods("2024-06-10");
+  useEffect(() => {
+    setSelectedPeriod(periods.length - 1);
+  }, []);
 
   const loadListOfStudents = async () => {
     const semestersMap: { [key: string]: any } = {};
@@ -503,12 +506,18 @@ const TrackingHours = () => {
 
   const renderTable = () => {
     let studentsList: any = [];
+    let totalNodes: number = 0;
+    let totalProposals: number = 0;
 
     if (selectedSemester && semesters[selectedSemester]) {
       studentsList = semesters[selectedSemester].students;
+      totalNodes = semesters[selectedSemester]?.totalNodes || 0;
+      totalProposals = semesters[selectedSemester]?.totalProposals || 0;
     } else {
       Object.values(semesters).forEach((semester: any) => {
         studentsList = studentsList.concat(semester.students);
+        totalNodes += semester?.totalNodes || 0;
+        totalProposals += semester?.totalProposals || 0;
       });
     }
 
@@ -664,6 +673,8 @@ const TrackingHours = () => {
               <TableCell>Meetings</TableCell>
               {((user?.claims?.leading as any) || []).length > 0 && <TableCell>1:1 Meetings</TableCell>}
               <TableCell>Paid</TableCell>
+              <TableCell>Nodes</TableCell>
+              <TableCell>Proposals</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -815,11 +826,22 @@ const TrackingHours = () => {
                       />
                     )}
                   </TableCell>
+                  <TableCell>{student?.totalNodes || 0}</TableCell>
+                  <TableCell>{student?.totalProposals || 0}</TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
+        <Box sx={{ p: "20px" }}>
+          <Typography>
+            Total number of added nodes: <strong style={{ color: DESIGN_SYSTEM_COLORS.orange400 }}>{totalNodes}</strong>
+          </Typography>
+          <Typography>
+            Total number of added proposals:{" "}
+            <strong style={{ color: DESIGN_SYSTEM_COLORS.orange400 }}>{totalProposals}</strong>
+          </Typography>
+        </Box>
         <Dialog open={dialogOpen} onClose={handleCloseDialog} sx={{ zIndex: 9998 }}>
           <DialogTitle>Add 1:1 Meeting</DialogTitle>
           <DialogContent>

@@ -2,7 +2,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
 import { Avatar, Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getAvatarName } from "@/lib/utils/Map.utils";
@@ -18,11 +18,16 @@ type UserDetailsProps = {
   uname: string;
   points: UserPoints;
   chooseUname?: boolean;
+  online: boolean;
 };
 const DEFAULT_PROFILE_URL = "https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png";
 
-const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }: UserDetailsProps) => {
+const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points, online }: UserDetailsProps) => {
   const [imageSource, setImageSource] = useState(imageUrl);
+  useEffect(() => {
+    setImageSource(imageUrl);
+  }, [imageUrl]);
+
   const handleImageError = useCallback(() => {
     setImageSource("https://storage.googleapis.com/onecademy-1.appspot.com/ProfilePictures/no-img.png");
   }, [imageSource]);
@@ -53,6 +58,14 @@ const UserDetails = ({ id, imageUrl, fName, lName, uname, chooseUname, points }:
             {getAvatarName(fName, lName)}
           </Avatar>
         )}
+        <Box
+          className={online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+          sx={{
+            top: "-10px",
+            right: "-10px",
+            backgroundColor: !online ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe") : "",
+          }}
+        ></Box>
       </Box>
       <Box>
         <Box id={`${id}-username`}>

@@ -1000,7 +1000,14 @@ export const DashboardStudents = ({ currentSemester }: DashboardStudentsProps) =
                           renderAsAvatar={true}
                           contained={false}
                         />
-                        <div className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
+                        <Box
+                          className={row.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+                          sx={{
+                            backgroundColor: !row.online
+                              ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                              : "",
+                          }}
+                        ></Box>
                       </TableCell>
                     )}
                     {columns.map((colmn: string, columnIndex: number) => (

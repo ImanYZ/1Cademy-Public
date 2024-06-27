@@ -111,7 +111,7 @@ type NodeFooterProps = {
   simulated?: boolean;
   bookmarked: any;
   bookmarks: any;
-  reloadPermanentGrpah: any;
+  reloadPermanentGraph: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   markStudied: any;
   bookmark: any;
@@ -138,6 +138,7 @@ type NodeFooterProps = {
   onChangeChosenNode: () => void;
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  onlineUsers: any;
 };
 
 const NodeFooter = ({
@@ -190,7 +191,7 @@ const NodeFooter = ({
   simulated,
   bookmarked,
   bookmarks,
-  reloadPermanentGrpah,
+  reloadPermanentGraph: reloadPermanentGrpah,
   onNodeShare,
   markStudied,
   bookmark,
@@ -215,6 +216,7 @@ const NodeFooter = ({
   onChangeChosenNode,
   findDescendantNodes,
   findAncestorNodes,
+  onlineUsers,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -467,7 +469,7 @@ const NodeFooter = ({
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
                   chooseUname={user.chooseUname}
-                  online={false}
+                  online={!!onlineUsers[user.uname]}
                   inUserBar={false}
                   inNodeFooter={true}
                   reloadPermanentGraph={reloadPermanentGrpah}
@@ -484,7 +486,7 @@ const NodeFooter = ({
                   imageUrl={aImgUrl}
                   fullname={aFullname}
                   chooseUname={aChooseUname}
-                  online={false}
+                  online={!!onlineUsers[admin]}
                   inUserBar={false}
                   inNodeFooter={true}
                   reloadPermanentGraph={reloadPermanentGrpah}
@@ -559,32 +561,34 @@ const NodeFooter = ({
 
             {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
-                <ContainedButton
-                  id={proposeButtonId}
-                  title="Propose/evaluate versions of this node."
-                  onClick={proposeNodeImprovementClick}
-                  tooltipPosition="top"
-                  sx={{
-                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                    fontWeight: 400,
-                    color: "inherit",
-                    ":hover": {
-                      borderWidth: "0px",
-                      background: (theme: any) =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.darkBackground2
-                          : theme.palette.common.lightBackground2,
-                    },
-                    padding: "7px 7px",
-                    minWidth: "30px",
-                    height: "30px",
-                  }}
-                  disabled={disableProposeButton}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                    <CreateIcon sx={{ fontSize: "16px" }} />
-                  </Box>
-                </ContainedButton>
+                {!locked && (
+                  <ContainedButton
+                    id={proposeButtonId}
+                    title="Propose/evaluate versions of this node."
+                    onClick={proposeNodeImprovementClick}
+                    tooltipPosition="top"
+                    sx={{
+                      background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                      fontWeight: 400,
+                      color: "inherit",
+                      ":hover": {
+                        borderWidth: "0px",
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground2
+                            : theme.palette.common.lightBackground2,
+                      },
+                      padding: "7px 7px",
+                      minWidth: "30px",
+                      height: "30px",
+                    }}
+                    disabled={disableProposeButton}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <CreateIcon sx={{ fontSize: "16px" }} />
+                    </Box>
+                  </ContainedButton>
+                )}
 
                 <Box
                   id={`${identifier}-node-footer-votes`}

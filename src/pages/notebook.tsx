@@ -796,7 +796,7 @@ const Notebook = ({}: NotebookProps) => {
   const [notebookChanged, setNotebookChanges] = useState({ updated: true });
 
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ [uname: string]: boolean }>({});
 
   // this object represent the question by practice
   // if practice voice only us enable we have a value on question node
@@ -1159,21 +1159,40 @@ const Notebook = ({}: NotebookProps) => {
     const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
       const docChanges = snapshot.docChanges();
       setOnlineUsers(oldOnlineUsers => {
-        const onlineUsersSet = new Set(oldOnlineUsers);
         for (let change of docChanges) {
           const { user: statusUname } = change.doc.data();
           if (change.type === "removed" && user.uname !== statusUname) {
-            onlineUsersSet.delete(statusUname);
+            delete oldOnlineUsers[statusUname];
           } else if (change.type === "added" || change.type === "modified") {
-            onlineUsersSet.add(statusUname);
+            oldOnlineUsers[statusUname] = true;
           }
         }
-        return Array.from(onlineUsersSet);
+        return oldOnlineUsers;
       });
       setUsersOnlineStatusLoaded(true);
     });
     return () => unsubscribe();
   }, [db, user]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      const userAgent = navigator.userAgent;
+      const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(userAgent);
+      const isCtrlF = event.ctrlKey && event.key === "f";
+      const isCmdF = isMac && event.metaKey && event.key === "f";
+
+      if (isCtrlF || isCmdF) {
+        event.preventDefault();
+        setOpenSidebar("SEARCHER_SIDEBAR");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const onPreLoadNodes = useCallback(
     async (nodeIds: string[], fullNodes: FullNodeData[]) => {
@@ -5046,12 +5065,14 @@ const Notebook = ({}: NotebookProps) => {
         ) {
           confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", "Ok", "");
         } else {
-          let userName = await promptIt(
-            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
-            "Save",
-            ""
+          let fullname = await promptIt(
+            "Consent that you have all the rights to upload this image and the image does not violate any laws.",
+            "I Consent",
+            "",
+            `${user?.fName} ${user?.lName}`
           );
-          if (userName != `${user?.fName} ${user?.lName}`) {
+
+          if (fullname != `${user?.fName} ${user?.lName}`) {
             confirmIt("Entered full name is not correct", "Ok", "");
             return;
           }
@@ -8046,6 +8067,7 @@ const Notebook = ({}: NotebookProps) => {
                   open={true}
                   onClose={() => setOpenSidebar(null)}
                   selectedUser={nodeBookState.selectedUser}
+                  onlineUsers={onlineUsers}
                 />
               )}
 
@@ -8095,6 +8117,7 @@ const Notebook = ({}: NotebookProps) => {
                   onChangeNotebook={onChangeNotebook}
                   onChangeTagOfNotebookById={onChangeTagOfNotebookById}
                   notebookOwner={selectedNotebook?.owner ?? ""}
+                  onlineUsers={onlineUsers}
                 />
               )}
               {nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
@@ -8505,6 +8528,7 @@ const Notebook = ({}: NotebookProps) => {
                   findDescendantNodes={findDescendantNodes}
                   findAncestorNodes={findAncestorNodes}
                   lockedNodes={lockedNodes}
+                  onlineUsers={onlineUsers}
                 />
               </MapInteractionCSS>
 
