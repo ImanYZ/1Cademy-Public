@@ -49,7 +49,7 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { SearchNodesResponse } from "../../knowledgeTypes";
 import { TNodeBookState } from "../../nodeBookTypes";
-import { NodeType } from "../../types";
+// import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import MarkdownRender from "../Markdown/MarkdownRender";
@@ -244,7 +244,7 @@ type Pagination = {
   totalResults: number;
 };
 
-const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+// const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 const Node = ({
   identifier,
@@ -786,44 +786,47 @@ const Node = ({
     [identifier, setNodeParts]
   );
 
-  const onSearch = useCallback(async (page: number, q: string) => {
-    try {
-      setIsFetching(true);
-      if (page < 1) {
-        setSearchResults({
-          data: [],
-          lastPageLoaded: 0,
-          totalPage: 0,
-          totalResults: 0,
+  const onSearch = useCallback(
+    async (page: number, q: string) => {
+      try {
+        setIsFetching(true);
+        if (page < 1) {
+          setSearchResults({
+            data: [],
+            lastPageLoaded: 0,
+            totalPage: 0,
+            totalResults: 0,
+          });
+        }
+        const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
+          q,
+          nodeTypes: [nodeType],
+          tags: [],
+          nodesUpdatedSince: 1000,
+          sortOption: "NOT_SELECTED",
+          sortDirection: "DESCENDING",
+          page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
         });
-      }
-      const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
-        q,
-        nodeTypes: NODE_TYPES_ARRAY,
-        tags: [],
-        nodesUpdatedSince: 1000,
-        sortOption: "NOT_SELECTED",
-        sortDirection: "DESCENDING",
-        page,
-        onlyTitle: nodeBookState.searchByTitleOnly,
-      });
 
-      const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
-      setSearchResults({
-        data: newData,
-        lastPageLoaded: data.page,
-        totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
-        totalResults: data.numResults,
-      });
-      setAbleToPropose(true);
-      if (newData.filter(data => data.title === q).length > 0) {
-        setAbleToPropose(false);
+        const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        setSearchResults({
+          data: newData,
+          lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+          totalResults: data.numResults,
+        });
+        setAbleToPropose(true);
+        if (newData.filter(data => data.title === q).length > 0) {
+          setAbleToPropose(false);
+        }
+        setIsFetching(false);
+      } catch (err) {
+        console.error(err);
       }
-      setIsFetching(false);
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
+    },
+    [nodeType]
+  );
 
   const onBlurNodeTitle = useCallback(
     async (newTitle: string) => {
