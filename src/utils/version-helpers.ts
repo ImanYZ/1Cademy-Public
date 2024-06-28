@@ -45,6 +45,7 @@ import { getNodePageWithDomain } from "@/lib/utils/utils";
 import { IPractice } from "src/types/IPractice";
 import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
 import { ISemester } from "src/types/ICourse";
+import { addToQueue } from "@/pages/api/queue/queue";
 
 export const comPointTypes = [
   "comPoints",
@@ -1857,18 +1858,19 @@ export const versionCreateUpdate = async ({
     wrongs,
     awards,
     deleted,
-    accepted,
+    accepted: acceptedPreviously,
   } = versionData;
 
   let newBatch = batch;
 
   // If the version is deleted, the user should have not been able to vote on it.
   if (!deleted) {
-    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
-    const comReputationUpdates: IComReputationUpdates = {};
-    await detach(async () => {
+    addToQueue(async () => {
       let batch = db.batch();
       let writeCounts = 0;
+
+      const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
+      const comReputationUpdates: IComReputationUpdates = {};
 
       const tWriteOperations: { objRef: any; data: any; operationType: "set" | "update" | "delete" }[] = [];
       //  proposer and voters are the same user, automatic self-vote
@@ -1892,19 +1894,9 @@ export const versionCreateUpdate = async ({
         t: null,
         tWriteOperations,
       });
-      await commitBatch(batch);
-    });
-    for (const tagId in comReputationUpdates) {
-      for (const reputationType of reputationTypes) {
-        if (!comReputationUpdates[tagId][reputationType]) continue;
-
-        if (t) {
-          tWriteOperations.push({
-            objRef: comReputationUpdates[tagId][reputationType].docRef,
-            data: comReputationUpdates[tagId][reputationType].docData,
-            operationType: comReputationUpdates[tagId][reputationType].isNew ? "set" : "update",
-          });
-        } else {
+      for (const tagId in comReputationUpdates) {
+        for (const reputationType of reputationTypes) {
+          if (!comReputationUpdates[tagId][reputationType]) continue;
           if (comReputationUpdates[tagId][reputationType].isNew) {
             batch.set(
               comReputationUpdates[tagId][reputationType].docRef,
@@ -1919,7 +1911,8 @@ export const versionCreateUpdate = async ({
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         }
       }
-    }
+      await commitBatch(batch);
+    });
 
     let { userVersionData } = await getUserVersion({ versionId, nodeType, uname: voter, t });
     // Mark the userNode for the voter as isStudied = true and changed = false,
@@ -1962,7 +1955,7 @@ export const versionCreateUpdate = async ({
           updatingVersionId: versionId,
           updatingVersionData: versionData,
           updatingVersionRating: versionRatings,
-          updatingVersionNotAccepted: !accepted,
+          updatingVersionNotAccepted: !acceptedPreviously,
           t,
           tWriteOperations,
         });
@@ -1980,7 +1973,7 @@ export const versionCreateUpdate = async ({
       };
 
       //  proposal was accepted previously, not accepted just now
-      if (accepted) {
+      if (acceptedPreviously) {
         // When someone votes on an accepted proposal of a node, that person has definitely studied it.
         // So, if previously isStudied was false, we should increment the number of studied and later set isStudied to true for the user.
         if (
@@ -1999,8 +1992,7 @@ export const versionCreateUpdate = async ({
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
         }
-        // TODO: move these to queue
-        await detach(async () => {
+        addToQueue(async () => {
           let batch = db.batch();
           let writeCounts = 0;
           await retrieveAndsignalAllUserNodesChanges({
@@ -2013,6 +2005,7 @@ export const versionCreateUpdate = async ({
           });
           await commitBatch(batch);
         });
+        // TODO: move these to queue
         //  the version we are dealing with is just accepted (nodeDataDoc is not null)
         //  this was a pending proposal that was just accepted
       } else {
@@ -2057,23 +2050,28 @@ export const versionCreateUpdate = async ({
           if (nodeType === "Question") {
             nodeUpdates.choices = versionData.choices;
           }
-          [newBatch, writeCounts] = await generateTagsData({
-            batch: newBatch,
-            nodeId,
-            isTag: nodeData.isTag,
-            nodeUpdates,
-            nodeTagIds: nodeData.tagIds,
-            nodeTags: nodeData.tags,
-            versionTagIds: tagIds,
-            versionTags: tags,
-            proposer,
-            imageUrl,
-            fullname,
-            chooseUname,
-            currentTimestamp,
-            writeCounts,
-            t,
-            tWriteOperations,
+          addToQueue(async () => {
+            let batch = db.batch();
+            let writeCounts = 0;
+            [newBatch, writeCounts] = await generateTagsData({
+              batch: newBatch,
+              nodeId,
+              isTag: nodeData.isTag,
+              nodeUpdates,
+              nodeTagIds: nodeData.tagIds,
+              nodeTags: nodeData.tags,
+              versionTagIds: tagIds,
+              versionTags: tags,
+              proposer,
+              imageUrl,
+              fullname,
+              chooseUname,
+              currentTimestamp,
+              writeCounts,
+              t: null,
+              tWriteOperations,
+            });
+            await commitBatch(batch);
           });
 
           if (t) {
@@ -2105,11 +2103,13 @@ export const versionCreateUpdate = async ({
             });
           }
 
-          // signal search about improvement or new node
-          await indexNodeChange(nodeId, title, "UPDATE");
+          addToQueue(async () => {
+            // signal search about improvement or new node
+            await indexNodeChange(nodeId, title, "UPDATE");
+          });
 
           // TODO: move these to queue
-          await detach(async () => {
+          addToQueue(async () => {
             let linkedNode, linkedNodeChanges;
             let batch = db.batch();
             let writeCounts = 0;
@@ -2260,8 +2260,10 @@ export const versionCreateUpdate = async ({
           newUpdates.nodeId = childNodeRef.id;
           newUpdates.versionData = childVersion;
 
-          // signal search about improvement or new node
-          await indexNodeChange(newUpdates.nodeId, title, "NEW");
+          addToQueue(async () => {
+            // signal search about improvement or new node
+            await indexNodeChange(newUpdates.nodeId, title, "NEW");
+          });
 
           // Because it's a child version, the old version that was proposed on the parent node should be
           // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.
@@ -2280,7 +2282,6 @@ export const versionCreateUpdate = async ({
               wrong: wrong === 1,
             };
           } else {
-            //  do not need to set the nodeType, unique collection per each node, unlike userVersionsLog
             userVersionData = {
               award: userVersionData.award,
               correct: correct === 1 ? true : correct === 0 ? userVersionData.correct : false,
@@ -2291,7 +2292,7 @@ export const versionCreateUpdate = async ({
               wrong: wrong === 1 ? true : wrong === 0 ? userVersionData.wrong : false,
             };
           }
-          await detach(async () => {
+          addToQueue(async () => {
             let newBatch = db.batch();
             let writeCounts: number = 0;
             [newBatch, writeCounts] = await createUpdateUserVersion({
@@ -2340,62 +2341,39 @@ export const versionCreateUpdate = async ({
           }
 
           const userNodeRef = db.collection("userNodes").doc();
-          if (t) {
-            tWriteOperations.push({
-              objRef: userNodeRef,
-              data: newUserNodeObj,
-              operationType: "set",
-            });
-          } else {
-            batch.set(userNodeRef, { ...newUserNodeObj });
-            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          }
-          const userNodeLogRef = db.collection("userNodesLog").doc();
-          delete newUserNodeObj.updatedAt;
-          if (t) {
-            tWriteOperations.push({
-              objRef: userNodeLogRef,
-              data: newUserNodeObj,
-              operationType: "set",
-            });
-          } else {
-            batch.set(userNodeLogRef, newUserNodeObj);
-            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-          }
+          batch.set(userNodeRef, { ...newUserNodeObj });
+          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
 
-          //  Delete the old version on the parent.
-          const { versionsCommentsColl }: any = getQueryCollections();
-
-          let versionsCommentsRef = versionsCommentsColl
-            .where("version", "==", versionId)
-            .where("deleted", "==", false);
-          const versionsCommentsDocs = await convertToTGet(versionsCommentsRef, t);
-          for (let versionCommentDoc of versionsCommentsDocs.docs) {
-            const versionCommentId = versionCommentDoc.Id;
-            const versionCommentData = versionCommentDoc.data();
-            versionsCommentsRef = versionsCommentsColl.doc(versionCommentId);
-            // In this case, we don't need to create a new version.
-            // We can just change the version id from the old version to the new version on the child node.
-            const versionCommentUpdate = {
-              ...versionCommentData,
-              version: versionRef.id,
-              updatedAt: currentTimestamp,
-            };
-            if (t) {
-              tWriteOperations.push({
-                objRef: versionsCommentsRef,
-                data: versionCommentUpdate,
-                operatoinType: "set",
-              });
-            } else {
-              newBatch.set(versionsCommentsRef, versionCommentUpdate);
-              [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-            }
-          }
-          await detach(async () => {
+          addToQueue(async () => {
             let batch = db.batch();
             let writeCounts: number = 0;
 
+            const userNodeLogRef = db.collection("userNodesLog").doc();
+            delete newUserNodeObj.updatedAt;
+            batch.set(userNodeLogRef, newUserNodeObj);
+            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+
+            //  Delete the old version on the parent.
+            const { versionsCommentsColl }: any = getQueryCollections();
+            let versionsCommentsRef = versionsCommentsColl
+              .where("version", "==", versionId)
+              .where("deleted", "==", false);
+            const versionsCommentsDocs = await versionsCommentsRef.get();
+            for (let versionCommentDoc of versionsCommentsDocs.docs) {
+              const versionCommentId = versionCommentDoc.Id;
+              const versionCommentData = versionCommentDoc.data();
+              versionsCommentsRef = versionsCommentsColl.doc(versionCommentId);
+              // In this case, we don't need to create a new version.
+              // We can just change the version id from the old version to the new version on the child node.
+              const versionCommentUpdate = {
+                ...versionCommentData,
+                version: versionRef.id,
+                updatedAt: currentTimestamp,
+              };
+
+              newBatch.set(versionsCommentsRef, versionCommentUpdate);
+              [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+            }
             [batch, writeCounts] = await generateTagsData({
               batch,
               nodeId: childNodeRef.id,
@@ -2433,7 +2411,7 @@ export const versionCreateUpdate = async ({
             aFullname: fullname,
             aChooseUname: chooseUname,
             maxVersionRating: versionRatings > 1 ? versionRatings : 1,
-            comments: versionsCommentsDocs.docs.length,
+            comments: 0,
             createdAt: currentTimestamp,
             changedAt: currentTimestamp,
             updatedAt: currentTimestamp,
@@ -2490,7 +2468,7 @@ export const versionCreateUpdate = async ({
 
           //  add this question to the practice tool for every user with the same default tag
           if (childType === "Question") {
-            await detach(async () => {
+            addToQueue(async () => {
               let batch = db.batch();
               let writeCounts = 0;
               [batch, writeCounts] = await createPractice({
@@ -2509,10 +2487,10 @@ export const versionCreateUpdate = async ({
         }
 
         // TODO: move these to queue
-        await detach(async () => {
+        addToQueue(async () => {
           let batch = db.batch();
           let writeCounts = 0;
-          // In both cases of accepting an improvement proposal and a child proposal,
+          // In both cases of accepting an improvement proposal and child proposal,
           // we need to signal all the users that it's changed.
           await retrieveAndsignalAllUserNodesChanges({
             batch,

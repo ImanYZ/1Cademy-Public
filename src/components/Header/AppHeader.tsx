@@ -366,17 +366,19 @@ const AppHeader = forwardRef(
                         aria-label={`${user.fName}'s Account`}
                         aria-expanded={isProfileMenuOpen ? "true" : undefined}
                       >
-                        <Image
-                          src={user.imageUrl || ""}
-                          alt={user.fName}
-                          width="26px"
-                          height="26px"
-                          quality={40}
-                          objectFit="cover"
-                          style={{
-                            borderRadius: "30px",
-                          }}
-                        />
+                        {user.imageUrl && (
+                          <Image
+                            src={user.imageUrl || ""}
+                            alt={user.fName}
+                            width="26px"
+                            height="26px"
+                            quality={40}
+                            objectFit="cover"
+                            style={{
+                              borderRadius: "30px",
+                            }}
+                          />
+                        )}
                       </Box>
                     </IconButton>
                   </Tooltip>

@@ -1,14 +1,29 @@
-import Queue from "bull";
+let jobQueue: any = [];
+let isProcessing = false;
 
-const redisConfig = {
-  host: "localhost",
-  port: 6379,
-};
+export async function addToQueue(job: any) {
+  jobQueue.push(job);
+  console.log(`New Job added to queue`, isProcessing);
 
-interface DispatchJobData {
-  data: string;
+  if (!isProcessing) {
+    isProcessing = true;
+    await processQueue();
+  }
 }
 
-const dispatchQueue = new Queue<DispatchJobData>("dispatchQueue", { redis: redisConfig });
+async function processQueue() {
+  if (jobQueue.length > 0) {
+    const job = jobQueue.shift();
+    await performDispatch(job);
+    await processQueue();
+  } else {
+    isProcessing = false;
+    console.log("done processing jobs");
+  }
+}
 
-export default dispatchQueue;
+async function performDispatch(job: any) {
+  console.log("processing a job");
+  await job();
+  console.log("job done");
+}

@@ -9,7 +9,7 @@ import {
   convertToTGet,
   createUpdateUserVersion,
   getNode,
-  getTypedCollections,
+  getQueryCollections,
   proposalNotification,
   versionCreateUpdate,
 } from "../../utils";
@@ -23,13 +23,14 @@ import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typ
 import { INodeVersion } from "src/types/INodeVersion";
 import { IActionTrack } from "src/types/IActionTrack";
 import { shouldInstantApprovalForProposal, updateStatsOnProposal } from "src/utils/course-helpers";
+import { addToQueue } from "./queue/queue";
 
 // Logic
 // - getting versionsColl, userVersionsColl based on nodeType
 // - processing versionCreateUpdate based on nodeType
 //   - if version is not deleted then user can perform vote
 //    - calling updating reputation method
-//      - updating reputation and community increment basaed on tag ids
+//      - updating reputation and community increment baaed on tag ids
 //    - getting user version based on nodeType, versionID, uname and voter
 //    - checking is version approved based on wrongs and corrects
 //    - if versionData is accepted
@@ -38,6 +39,16 @@ import { shouldInstantApprovalForProposal, updateStatsOnProposal } from "src/uti
 //        - schoolPoints, schoolMonthlyPoints, schoolWeeklyPoints, schoolOthersPoints, schoolOthMonPoints, schoolOthWeekPoints (not implemented)
 //     - {nodeType}Versions, {nodeType}VersionComments (comments not implemented)
 //     - nodes where this user is Admin
+function removeAmbiguousLinks(addedLinks: INodeLink[], removedLinks: INodeLink[]) {
+  if (Array.isArray(addedLinks) && Array.isArray(removedLinks)) {
+    const addedIds = new Set(addedLinks.map((nodeLink: INodeLink) => String(nodeLink.node)));
+    const removedIds = new Set(removedLinks.map((nodeLink: INodeLink) => String(nodeLink.node)));
+
+    addedLinks = addedLinks.filter((link: INodeLink) => !removedIds.has(String(link.node)));
+    removedLinks = removedLinks.filter((link: INodeLink) => !addedIds.has(String(link.node)));
+  }
+  return [addedLinks, removedLinks];
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -62,50 +73,45 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       summary,
       choices,
     } = data || {};
-
+    /* whet you need to call this endpoint  */
     let { addedParents, addedChildren, removedParents, removedChildren } = data || {};
+    const { userData } = user || {};
+    let { referenceIds, references, referenceLabels } = data || {};
+    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
 
     // remove ambiguous removedParents (if they exist in addedParents)
-    if (Array.isArray(addedParents) && Array.isArray(removedParents)) {
-      const addedParentIds = addedParents.filter((nodeLink: INodeLink) => String(nodeLink.node));
-      const removedParentIds = removedParents.filter((nodeLink: INodeLink) => String(nodeLink.node));
-      addedParents = addedParents.filter((addedParent: INodeLink) => removedParentIds.indexOf(addedParent.node) === -1);
-      removedParents = removedParents.filter(
-        (removedParent: INodeLink) => addedParentIds.indexOf(removedParent.node) === -1
-      );
-    }
-
+    [addedParents, removedParents] = removeAmbiguousLinks(addedParents, removedParents);
     // remove ambiguous removedChildren (if they exist in addedChildren)
-    if (Array.isArray(addedChildren) && Array.isArray(removedChildren)) {
-      const addedChildIds = addedChildren.filter((nodeLink: INodeLink) => String(nodeLink.node));
-      const removedChildIds = removedChildren.filter((nodeLink: INodeLink) => String(nodeLink.node));
-      addedChildren = addedChildren.filter((addedChild: INodeLink) => removedChildIds.indexOf(addedChild.node) === -1);
-      removedChildren = removedChildren.filter(
-        (removedChild: INodeLink) => addedChildIds.indexOf(removedChild.node) === -1
-      );
-    }
+    [addedChildren, removedChildren] = removeAmbiguousLinks(addedChildren, removedChildren);
 
-    const { userData } = user || {};
     let batch = db.batch();
     let writeCounts = 0;
 
-    let { referenceIds, references, referenceLabels } = data || {};
+    // Check if 'references' is an array with at least one element and each element is an object
     if (references.length && typeof references[0] === "object") {
+      // Extract 'node' property from each object in 'references' and store in 'referenceIds'
       referenceIds = references.map((_reference: INodeLink) => _reference.node);
+      // Extract 'label' property from each object in 'references' and store in 'referenceLabels'
       referenceLabels = references.map((_reference: INodeLink) => _reference.label);
+      // Extract 'title' property from each object in 'references' and store in 'references' (overwriting the original)
       references = references.map((_reference: INodeLink) => _reference.title);
     }
+
+    // If 'referenceIds' is not already an array, initialize it as an empty array
     if (!Array.isArray(referenceIds)) {
       referenceIds = [];
     }
+
+    // If 'references' is not already an array, initialize it as an empty array
     if (!Array.isArray(references)) {
       references = [];
     }
+
+    // If 'referenceLabels' is not already an array, initialize it as an empty array
     if (!Array.isArray(referenceLabels)) {
       referenceLabels = [];
     }
 
-    const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     const { nodeData, nodeRef } = await getNode({ nodeId: id });
 
     // remove ambiguous addedParents (if they exist in nodeData)
@@ -120,7 +126,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       addedChildren = addedChildren.filter((nodeLink: INodeLink) => currentChildIds.indexOf(nodeLink.node) === -1);
     }
 
-    const { versionsColl, userVersionsColl }: any = getTypedCollections();
+    const { versionsColl, userVersionsColl }: any = getQueryCollections();
 
     // adding missing tags/tagIds
     let tagUpdates = {
@@ -176,9 +182,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (nodeType === "Question") {
       versionData.choices = choices;
     }
-    if (nodeType !== nodeData.nodeType) {
-      versionData.changedNodeType = true;
-    }
 
     const { isInstructor, courseExist, instantApprove } = await shouldInstantApprovalForProposal(
       tagUpdates.tagIds || [],
@@ -217,93 +220,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     versionData.corrects = 1;
 
-    // From here on, we specify the type of the changes that the user is proposing on this node
-    // using some boolean fields to be added to the version.
-    if (nodeType === "Question" && versionData.choices) {
-      if (versionData?.choices?.length > nodeData?.choices?.length) {
-        versionData.addedChoices = true;
-      } else if (versionData?.choices?.length < nodeData?.choices?.length) {
-        versionData.deletedChoices = true;
-      }
-      if (!compareChoices({ node1: data, node2: nodeData })) {
-        versionData.changedChoices = true;
-      }
-    }
-
-    if (nodeType !== nodeData.nodeType) {
-      const _nodeTypes: string[] = nodeData.nodeTypes || [];
-      _nodeTypes.push(nodeData.nodeType);
-      const nodeTypes = new Set<string>(_nodeTypes);
-      nodeTypes.add(nodeType);
-
-      batch.update(nodeRef, {
-        nodeTypes: Array.from(nodeTypes),
-      });
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-    }
-
-    if (title.trim() !== nodeData.title.trim()) {
-      versionData.changedTitle = true;
-    }
-    if (content.trim() !== nodeData.content.trim()) {
-      versionData.changedContent = true;
-    }
-    if (nodeImage !== "" && nodeData.nodeImage === "") {
-      versionData.addedImage = true;
-    } else if (nodeImage === "" && nodeData.nodeImage !== "") {
-      versionData.deletedImage = true;
-    } else if (nodeImage !== nodeData.nodeImage) {
-      versionData.changedImage = true;
-    }
-    if (nodeVideo !== "" && nodeData.nodeVideo === "") {
-      versionData.addedVideo = true;
-    } else if (nodeVideo === "" && nodeData.nodeVideo !== "") {
-      versionData.deletedVideo = true;
-    } else if (nodeVideo !== nodeData.nodeVideo) {
-      versionData.changedVideo = true;
-    }
-    if (nodeAudio !== "" && nodeData.nodeAudio === "") {
-      versionData.addedAudio = true;
-    } else if (nodeAudio === "" && nodeData.nodeAudio !== "") {
-      versionData.deletedAudio = true;
-    } else if (nodeAudio !== nodeData.nodeAudio) {
-      versionData.changedAudio = true;
-    }
-    if (versionData.referenceIds.length > nodeData.referenceIds.length) {
-      versionData.addedReferences = true;
-    } else if (versionData.referenceIds.length < nodeData.referenceIds.length) {
-      versionData.deletedReferences = true;
-    }
-    if (
-      !compareFlatLinks({ links1: referenceIds, links2: nodeData.referenceIds }) ||
-      !compareFlatLinks({ links1: referenceLabels, links2: nodeData.referenceLabels })
-    ) {
-      versionData.changedReferences = true;
-    }
-    if (versionData.tagIds.length > nodeData.tagIds.length) {
-      versionData.addedTags = true;
-    } else if (versionData.tagIds.length < nodeData.tagIds.length) {
-      versionData.deletedTags = true;
-    }
-    if (!compareFlatLinks({ links1: tagIds, links2: nodeData.tagIds })) {
-      versionData.changedTags = true;
-    }
-    if (addedParents.length > 0) {
-      versionData.addedParents = true;
-    }
-    if (addedChildren.length > 0) {
-      versionData.addedChildren = true;
-    }
-    if (removedParents.length > 0) {
-      versionData.removedParents = true;
-    }
-    if (removedChildren.length > 0) {
-      versionData.removedChildren = true;
-    }
-    batch.set(versionRef, versionData);
-    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
     const userVersionRef = userVersionsColl.doc();
+    //user versions have the logs of votes on each version
+    //we add the current user vote on his own proposal
     const userVersionData = {
       award: false,
       correct: true,
@@ -324,7 +243,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     await commitBatch(batch);
     //  If the proposal is not approved, we do not directly update the node document inside versionCreateUpdate function,
     //  so we have to set nodeData.versions + 1 here
-    await detach(async () => {
+    addToQueue(async () => {
       let batch = db.batch();
       let writeCounts: number = 0;
       if (!versionData.accepted) {
@@ -356,7 +275,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // TODO: move these to queue
     // action tracks
-    await detach(async () => {
+    addToQueue(async () => {
+      console.log("created actionTracks");
       const actionRef = db.collection("actionTracks").doc();
       actionRef.create({
         accepted: !!versionData.accepted,
@@ -370,6 +290,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeId: versionData.node,
         receivers: [userData.uname],
         email: userData.email,
+        bitch: "created actionTracks",
       } as IActionTrack);
 
       const rateActionRef = db.collection("actionTracks").doc();
@@ -387,9 +308,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         email: userData.email,
       } as IActionTrack);
     });
-
-    // TODO: move these to queue
-    await detach(async () => {
+    addToQueue(async () => {
       await updateStatsOnProposal({
         approved: !!versionData.accepted,
         isChild: false,
@@ -408,7 +327,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // update typesense record for node
     // we need update contributors, contribNames, institNames, institutions
     // TODO: move these to queue
-    await detach(async () => {
+    addToQueue(async () => {
       await updateNodeContributions({
         nodeId: versionData.node,
         uname: userData.uname,
