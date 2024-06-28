@@ -691,7 +691,7 @@ const Node = ({
         setEditingModeNode(false);
 
         if (newParent) {
-          await saveProposedParentNode(identifier, "", reason, () => setAbleToPropose(true));
+          await saveProposedParentNode(identifier, "", reason, tagIds, () => setAbleToPropose(true));
           setProposeLoading(false);
           return;
         }

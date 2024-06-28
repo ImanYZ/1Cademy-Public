@@ -222,7 +222,7 @@ export const checkInstantDeleteForNode = async (
     return {
       isInstructor,
       courseExist: false,
-      instantDelete: false,
+      instantDelete: true,
     };
   }
   const userNodes = await getDocs(query(collection(db, "userNodes"), where("node", "==", nodeId)));
