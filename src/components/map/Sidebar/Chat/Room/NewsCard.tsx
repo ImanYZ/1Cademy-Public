@@ -4,6 +4,7 @@ import { Box } from "@mui/system";
 import moment from "moment";
 import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
+import { UserTheme } from "src/knowledgeTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -15,6 +16,7 @@ import { MessageInput } from "./MessageInput";
 
 type NewsCardProps = {
   type?: string;
+  theme: UserTheme;
   notebookRef: any;
   messageRefs: any;
   nodeBookDispatch: any;
@@ -54,6 +56,7 @@ type NewsCardProps = {
 };
 export const NewsCard = ({
   type,
+  theme,
   notebookRef,
   messageRefs,
   nodeBookDispatch,
@@ -199,7 +202,7 @@ export const NewsCard = ({
                   nodeBookDispatch={nodeBookDispatch}
                   db={db}
                   user={user}
-                  theme={"Dark"}
+                  theme={theme}
                   placeholder={"Type your reply..."}
                   channelUsers={channelUsers}
                   sendMessageType={"edit"}
@@ -293,6 +296,7 @@ export const NewsCard = ({
               {replies?.map((reply: any, idx: number) => (
                 <NewsCard
                   type="reply"
+                  theme={theme}
                   notebookRef={notebookRef}
                   messageRefs={messageRefs}
                   nodeBookDispatch={nodeBookDispatch}
@@ -333,7 +337,7 @@ export const NewsCard = ({
                   notebookRef={notebookRef}
                   nodeBookDispatch={nodeBookDispatch}
                   db={db}
-                  theme={"Dark"}
+                  theme={theme}
                   placeholder={"Type your reply..."}
                   channelUsers={channelUsers}
                   sendMessageType={"reply"}

@@ -663,6 +663,7 @@ export const Message = ({
                         nodeBookDispatch={nodeBookDispatch}
                         db={db}
                         user={user}
+                        theme={theme}
                         message={message}
                         membersInfo={selectedChannel.membersInfo}
                         toggleEmojiPicker={toggleEmojiPicker}
@@ -700,6 +701,7 @@ export const Message = ({
                         {message?.node?.id ? (
                           <NodeLink
                             db={db}
+                            theme={theme}
                             notebookRef={notebookRef}
                             messageRefs={messageRefs}
                             nodeBookDispatch={nodeBookDispatch}
@@ -741,6 +743,7 @@ export const Message = ({
                         ) : (
                           <MessageLeft
                             type={"message"}
+                            theme={theme}
                             messageRefs={messageRefs}
                             notebookRef={notebookRef}
                             nodeBookDispatch={nodeBookDispatch}
