@@ -208,6 +208,7 @@ const AppHeader = forwardRef(
               maxWidth: !aiCourse ? "1280px" : "100%",
               margin: !aiCourse ? "auto" : "",
               height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
+              position: "relative",
             }}
           >
             <Stack direction={"row"} alignItems="center" spacing={"16px"}>
@@ -230,15 +231,9 @@ const AppHeader = forwardRef(
                     height: "auto",
                     mr: "auto",
                     borderRadius: 0,
-                    // mb: "50px",
                   }}
                   onClick={() => {}}
                 />
-              )}
-              {aiCourse && (
-                <Box sx={{ pl: "400px", ml: "auto" }}>
-                  <Typography variant="h2">AI-Enhanced Course Creation</Typography>
-                </Box>
               )}
               <Stack
                 direction={"row"}
@@ -283,7 +278,19 @@ const AppHeader = forwardRef(
               </Stack>
             </Stack>
 
-            {/* Navbar Right Options */}
+            {aiCourse && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">AI-Enhanced Course Creation</Typography>
+              </Box>
+            )}
+
             <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
               {!tutorPage && (
                 <Box
@@ -340,7 +347,6 @@ const AppHeader = forwardRef(
                       fontSize: 16,
                       borderRadius: 40,
                       height: "25px",
-                      // width: "60px",
                       textTransform: "capitalize",
                       ":hover": {
                         background: orange900,

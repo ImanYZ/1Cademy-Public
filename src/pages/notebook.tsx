@@ -1432,7 +1432,7 @@ const Notebook = ({}: NotebookProps) => {
       }
       killSnapshot();
     };
-    // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+    // INFO: notebookChanged used in dependencies because of the redraw graph (magic wand button)
   }, [allTagsLoaded, db, userNodesSnapshotFn, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
@@ -4294,7 +4294,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedParentNode = useCallback(
-    async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
+    async (newNodeId: string, summary: string, reason: string, tagIds: string[], onComplete: () => void) => {
       let postData: any = {};
       if (!user) return;
       try {
@@ -4306,12 +4306,6 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-        const firstChildId = graph.nodes[newNodeId].children[0]?.node;
-        type CheckInstantApprovalForProposal = {
-          isInstructor: boolean;
-          courseExist: boolean;
-          instantApprove: boolean;
-        };
         const newNode = graph.nodes[newNodeId];
         let referencesOK: any = true;
 
@@ -4330,10 +4324,10 @@ const Notebook = ({}: NotebookProps) => {
           return;
         }
 
-        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
-          "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: firstChildId }
-        );
+        const { isInstructor, instantApprove } = await shouldInstantApprovalForProposal({
+          tagIds,
+          uname: user.uname,
+        });
 
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
@@ -4404,12 +4398,8 @@ const Notebook = ({}: NotebookProps) => {
           delete postData.top;
           delete postData.height;
 
-          let willBeApproved = false;
-          if (courseExist) {
-            willBeApproved = instantApprove;
-          } else if (isInstructor && !courseExist) {
-            willBeApproved = true;
-          }
+          let willBeApproved = isInstructor && instantApprove;
+
           const nodePartChanges = {
             editable: false,
             unaccepted: true,
@@ -4532,17 +4522,10 @@ const Notebook = ({}: NotebookProps) => {
         if (!referencesOK) {
           return;
         }
-
-        const {
-          instantApprove,
-          isInstructor,
-        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
-          "/instructor/course/checkInstantApprovalForProposal",
-          {
-            tagIds,
-            nodeId: firstParentId,
-          }
-        );
+        const { isInstructor, instantApprove } = await shouldInstantApprovalForProposal({
+          tagIds,
+          uname: user.uname,
+        });
 
         setGraph(graph => {
           // const updatedNodeIds: string[] = [newNodeId];
