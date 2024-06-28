@@ -2,20 +2,17 @@ import AddLinkIcon from "@mui/icons-material/AddLink";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Button, IconButton, Tooltip } from "@mui/material";
+import { Button, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { arrayUnion, collection, doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import NextImage from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
-import { useNodeBook } from "@/context/NodeBookContext";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { newId } from "@/lib/utils/newFirestoreId";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
@@ -40,37 +37,36 @@ type MessageInputProps = {
   scrollToBottom?: any;
   sendMessageType?: string;
   setMessages?: any;
+  sendMessage: any;
+  sendReplyOnMessage: any;
+  parentMessage?: IChannelMessage;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const MessageInput = ({
+  db,
+  user,
   notebookRef,
   nodeBookDispatch,
-  db,
   theme,
   channelUsers,
-  // toggleEmojiPicker,
   placeholder,
   editingMessage,
   setEditingMessage,
   leading,
-  getMessageRef,
-  replyOnMessage,
   setReplyOnMessage,
-  user,
-  selectedChannel,
-  roomType,
-  messages,
-  scrollToBottom,
   sendMessageType,
-  setMessages,
-}: // roomType,
-MessageInputProps) => {
+  sendMessage,
+  parentMessage,
+  setOpenMedia,
+}: MessageInputProps) => {
   const storage = getStorage();
-  const { nodeBookState } = useNodeBook();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputFieldRef = useRef<any>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(editingMessage?.imageUrls || []);
   const [inputValue, setInputValue] = useState<string>("");
   const [important, setImportant] = useState(false);
+  const [isPreview, setIsPreview] = useState<any>(false);
 
   useEffect(() => {
     if (editingMessage) {
@@ -78,136 +74,128 @@ MessageInputProps) => {
     }
   }, [editingMessage]);
 
-  useEffect(() => {
-    (async () => {
-      if (nodeBookState?.chatNode) {
-        const nodeRef = doc(db, "nodes", nodeBookState?.chatNode?.id);
-        const nodeDoc = await getDoc(nodeRef);
-        if (!nodeDoc.exists()) return null;
-        const nodeData = nodeDoc.data();
-        sendMessage(imageUrls, important, inputValue, {
-          id: nodeDoc.id,
-          title: nodeData?.title,
-          content: nodeData?.content,
-        });
-        nodeBookDispatch({ type: "setChatNode", payload: null });
-      }
-    })();
-  }, [nodeBookState?.chatNode]);
+  // const sendReplyOnMessage = useCallback(
+  //   async (
+  //     curMessage: IChannelMessage,
+  //     inputMessage: string,
+  //     imageUrls: string[] = [],
+  //     important = false,
+  //     node = {}
+  //   ) => {
+  //     try {
+  //       setInputValue("");
+  //       setReplyOnMessage(null);
+  //       const reply = {
+  //         id: newId(db),
+  //         parentMessage: curMessage.id,
+  //         pinned: false,
+  //         read_by: [],
+  //         edited: false,
+  //         message: inputMessage,
+  //         node,
+  //         createdAt: Timestamp.fromDate(new Date()),
+  //         replies: [],
+  //         sender: user.uname,
+  //         mentions: [],
+  //         imageUrls,
+  //         editedAt: Timestamp.fromDate(new Date()),
+  //         reactions: [],
+  //         channelId: selectedChannel?.id,
+  //         important,
+  //       };
+  //       setMessages((prevMessages: any) => {
+  //         const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage.id);
+  //         prevMessages[messageIdx].replies.push(reply);
+  //         return prevMessages;
+  //       });
+  //       console.log(roomType, "roomType--roomType");
+  //       await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   },
+  //   [getMessageRef, setInputValue, setReplyOnMessage, updateDoc, arrayUnion, newId, db, user.uname, selectedChannel?.id]
+  // );
 
-  const sendReplyOnMessage = useCallback(
-    async (curMessage: IChannelMessage, inputMessage: string, imageUrls: string[] = [], important = false) => {
-      try {
-        setInputValue("");
-        setReplyOnMessage(null);
-        const reply = {
-          id: newId(db),
-          parentMessage: curMessage.id,
-          pinned: false,
-          read_by: [],
-          edited: false,
-          message: inputMessage,
-          node: {},
-          createdAt: Timestamp.fromDate(new Date()),
-          replies: [],
-          sender: user.uname,
-          mentions: [],
-          imageUrls,
-          editedAt: Timestamp.fromDate(new Date()),
-          reactions: [],
-          channelId: selectedChannel?.id,
-          important,
-        };
-        setMessages((prevMessages: any) => {
-          const messageIdx = prevMessages.findIndex((m: any) => m.id === curMessage.id);
-          prevMessages[messageIdx].replies.push(reply);
-          return prevMessages;
-        });
-        await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [getMessageRef, setInputValue, setReplyOnMessage, updateDoc, arrayUnion, newId, db, user.uname, selectedChannel?.id]
-  );
+  // const saveMessageEdit = async (newMessage: string) => {
+  //   if (!editingMessage?.channelId) return;
+  //   if (editingMessage.parentMessage) {
+  //     const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
+  //     const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
+  //     parentMessage.replies[replyIdx] = {
+  //       ...parentMessage.replies[replyIdx],
+  //       message: newMessage,
+  //       edited: true,
+  //       editedAt: new Date(),
+  //     };
+  //     const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
+  //     await updateDoc(messageRef, {
+  //       replies: parentMessage.replies,
+  //     });
+  //   } else {
+  //     const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
 
-  const saveMessageEdit = async (newMessage: string) => {
-    if (!editingMessage?.channelId) return;
-    if (editingMessage.parentMessage) {
-      const parentMessage = messages.find((m: IChannelMessage) => m.id === editingMessage.parentMessage);
-      const replyIdx = parentMessage.replies.findIndex((r: IChannelMessage) => r.id === editingMessage.id);
-      parentMessage.replies[replyIdx] = {
-        ...parentMessage.replies[replyIdx],
-        message: newMessage,
-        edited: true,
-        editedAt: new Date(),
-      };
-      const messageRef = getMessageRef(editingMessage.parentMessage, editingMessage.channelId);
-      await updateDoc(messageRef, {
-        replies: parentMessage.replies,
-      });
-    } else {
-      const messageRef = getMessageRef(editingMessage.id, editingMessage.channelId);
+  //     await updateDoc(messageRef, {
+  //       message: newMessage,
+  //       edited: true,
+  //       editedAt: new Date(),
+  //     });
+  //   }
+  //   setEditingMessage(null);
+  // };
 
-      await updateDoc(messageRef, {
-        message: newMessage,
-        edited: true,
-        editedAt: new Date(),
-      });
-    }
-    setEditingMessage(null);
-  };
+  // const sendMessage = useCallback(
+  //   async (imageUrls: string[], important = false, inputValue: string, node = {}) => {
+  //     try {
+  //       if (sendMessageType === "edit") {
+  //         saveMessageEdit(inputValue);
+  //       } else if (!!replyOnMessage || sendMessageType === "reply") {
+  //         if (!inputValue.trim() && !imageUrls.length) return;
+  //         sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
+  //         return;
+  //       } else {
+  //         //setLastVisible(null);
+  //         let channelRef = doc(db, "channelMessages", selectedChannel?.id);
+  //         if (roomType === "direct") {
+  //           channelRef = doc(db, "conversationMessages", selectedChannel?.id);
+  //         } else if (roomType === "news") {
+  //           channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
+  //         }
+  //         const messageRef = doc(collection(channelRef, "messages"));
+  //         const newMessage = {
+  //           pinned: false,
+  //           read_by: [],
+  //           edited: false,
+  //           message: inputValue,
+  //           node,
+  //           createdAt: new Date(),
+  //           replies: [],
+  //           sender: user.uname,
+  //           mentions: [],
+  //           imageUrls,
+  //           reactions: [],
+  //           channelId: selectedChannel?.id,
+  //           important,
+  //         };
+  //         console.log(messageRef, "messageRef--messageRef");
+  //         // await updateDoc(channelRef, {
+  //         //   updatedAt: new Date(),
+  //         // });
+  //         console.log(messageRef, "messageRef--messageRef");
+  //         await setDoc(messageRef, newMessage);
 
-  const sendMessage = useCallback(
-    async (imageUrls: string[], important = false, inputValue: string, node = {}) => {
-      try {
-        if (sendMessageType === "edit") {
-          saveMessageEdit(inputValue);
-        } else if (!!replyOnMessage || sendMessageType === "reply") {
-          if (!inputValue.trim() && !imageUrls.length) return;
-          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls);
-          return;
-        } else {
-          //setLastVisible(null);
-          let channelRef = doc(db, "channelMessages", selectedChannel?.id);
-          if (roomType === "direct") {
-            channelRef = doc(db, "conversationMessages", selectedChannel?.id);
-          } else if (roomType === "news") {
-            channelRef = doc(db, "announcementsMessages", selectedChannel?.id);
-          }
-          const messageRef = doc(collection(channelRef, "messages"));
-          const newMessage = {
-            pinned: false,
-            read_by: [],
-            edited: false,
-            message: inputValue,
-            node,
-            createdAt: new Date(),
-            replies: [],
-            sender: user.uname,
-            mentions: [],
-            imageUrls,
-            reactions: [],
-            channelId: selectedChannel?.id,
-            important,
-          };
-          // await updateDoc(channelRef, {
-          //   updatedAt: new Date(),
-          // });
-          await setDoc(messageRef, newMessage);
-
-          scrollToBottom();
-          await Post("/chat/sendNotification", {
-            newMessage,
-            roomType,
-          });
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    [inputValue, messages]
-  );
+  //         scrollToBottom();
+  //         await Post("/chat/sendNotification", {
+  //           newMessage,
+  //           roomType,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   },
+  //   [inputValue, messages]
+  // );
 
   const cancel = useCallback(() => {
     setEditingMessage(null);
@@ -215,13 +203,34 @@ MessageInputProps) => {
 
   const handleKeyPress = useCallback(
     (event: any) => {
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && (imageUrls.length > 0 || inputValue.trim())) {
         event.preventDefault();
         handleSendMessage();
       }
     },
     [inputValue]
   );
+
+  useEffect(() => {
+    if (!inputValue) return;
+    const timeoutId = setTimeout(() => {
+      createActionTrack(
+        db,
+        "MessageTyped",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user.email
+      );
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [inputValue]);
 
   const handleTyping = useCallback(
     async (e: any) => {
@@ -253,16 +262,35 @@ MessageInputProps) => {
       }
       const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
       let imageFileName = new Date().toUTCString();
-      uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
+      uploadImage({ event, path, imageFileName }).then(url => {
+        setImageUrls((prev: string[]) => [...prev, url]);
+        if (!!parentMessage && sendMessageType === "reply") {
+          setReplyOnMessage({ ...parentMessage, notVisible: true });
+        }
+      });
     },
     [setImageUrls]
   );
 
   const handleSendMessage = () => {
-    sendMessage(imageUrls, important, inputValue);
+    sendMessage(imageUrls, important, sendMessageType, inputValue);
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
+    setIsPreview(false);
+    inputFieldRef?.current?.blur();
+  };
+
+  const handleFocus = () => {
+    if (!!parentMessage && sendMessageType === "reply") {
+      setReplyOnMessage({ ...parentMessage, notVisible: true });
+    }
+  };
+
+  const handleBlur = () => {
+    if (!!parentMessage && sendMessageType === "reply") {
+      setReplyOnMessage(null);
+    }
   };
 
   const choosingNewLinkedNode = () => {
@@ -272,6 +300,12 @@ MessageInputProps) => {
     nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: "Node" } });
     nodeBookDispatch({ type: "setSelectedNode", payload: "" });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
+
+    if (!!parentMessage) {
+      setReplyOnMessage({ ...parentMessage, notVisible: true });
+    } else {
+      setReplyOnMessage(null);
+    }
   };
 
   return (
@@ -286,53 +320,62 @@ MessageInputProps) => {
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
-      <MentionsInput
-        placeholder={placeholder}
-        style={{
-          control: {
-            fontSize: 16,
-            padding: "10px",
-            boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
-            border: "none",
-            overFlow: "hidden",
-          },
-          input: {
-            fontSize: 16,
-            border: "none",
-            outline: "none",
-            width: "100%",
-            color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
-            padding: "8px",
-            overFlow: "auto",
-          },
-          suggestions: {
-            list: {
-              background:
-                theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
-              padding: "2px",
+      {isPreview ? (
+        <MarkdownRender sx={{ p: "10px" }} text={inputValue} />
+      ) : (
+        <MentionsInput
+          className="chat__mention"
+          inputRef={inputFieldRef}
+          placeholder={placeholder}
+          style={{
+            control: {
               fontSize: 16,
-              position: "absolute",
-              top: "-120px",
-              left: "-16px",
-              maxHeight: "150px",
+              padding: "10px",
+              boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
+              border: "none",
+              maxHeight: "100px",
+            },
+            input: {
+              fontSize: 16,
+              border: "none",
+              outline: "none",
+              width: "100%",
+              color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.baseBlack,
+              padding: "8px",
               overflowY: "auto",
             },
-          },
-        }}
-        value={inputValue}
-        singleLine={false}
-        onChange={handleTyping}
-        onKeyDown={handleKeyPress}
-      >
-        <Mention
-          trigger="@"
-          data={channelUsers}
-          displayTransform={(id, display) => {
-            return `@${display}`;
+            suggestions: {
+              list: {
+                background:
+                  theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+                padding: "2px",
+                fontSize: 16,
+                position: "absolute",
+                top: "-170px",
+                left: "-16px",
+                maxHeight: "150px",
+                overflowY: "auto",
+              },
+            },
           }}
-          renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
-        />
-      </MentionsInput>
+          value={inputValue}
+          singleLine={false}
+          onChange={handleTyping}
+          onKeyDown={handleKeyPress}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        >
+          <Mention
+            trigger="@"
+            data={channelUsers}
+            displayTransform={(id, display) => {
+              return `@${display}`;
+            }}
+            markup="[@__display__](/mention/__id__)"
+            renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
+          />
+        </MentionsInput>
+      )}
       <Box sx={{ display: "flex" }}>
         {imageUrls.map(imageUrl => (
           <Box
@@ -365,8 +408,14 @@ MessageInputProps) => {
                 onClick={() => setImageUrls((prev: string[]) => prev.filter(image => image !== imageUrl))}
               />
             </Tooltip>
-
-            <NextImage width={"90px"} height={"90px"} style={{ borderRadius: "8px" }} src={imageUrl} alt="" />
+            <img
+              width={"120px"}
+              style={{ borderRadius: "8px", objectFit: "contain" }}
+              src={imageUrl}
+              alt=""
+              key={imageUrl}
+              onClick={() => setOpenMedia(imageUrl)}
+            />
           </Box>
         ))}
       </Box>
@@ -381,35 +430,70 @@ MessageInputProps) => {
         }}
       >
         <input type="file" ref={fileInputRef} onChange={onUploadImage} hidden />
-        {!editingMessage && (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            {isUploading ? (
-              <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
-            ) : (
-              <Tooltip title={"Upload Image"}>
-                <IconButton onClick={uploadImageClicked}>
-                  <CollectionsIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            {leading && (
-              <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
-                <IconButton onClick={() => setImportant(prev => !prev)}>
-                  <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title={"Upload a node from notebook"}>
-              <IconButton onClick={() => choosingNewLinkedNode()}>
-                <AddLinkIcon />
+
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {isUploading ? (
+            <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
+          ) : (
+            <Tooltip title={"Upload Image"}>
+              <IconButton onClick={uploadImageClicked}>
+                <CollectionsIcon />
               </IconButton>
             </Tooltip>
+          )}
+
+          {!editingMessage && (
+            <>
+              {leading && (
+                <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
+                  <IconButton onClick={() => setImportant(prev => !prev)}>
+                    <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title={"Share a node from notebook"}>
+                <IconButton onClick={() => choosingNewLinkedNode()}>
+                  <AddLinkIcon />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+          <Box ml={3} sx={{ display: "flex", justifyContent: "end" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+                borderRadius: "10px",
+              }}
+            >
+              <Typography
+                onClick={() => setIsPreview(false)}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Edit
+              </Typography>
+              <Switch
+                //disabled={disableSwitchPreview}
+                checked={isPreview}
+                onClick={() => setIsPreview(!isPreview)}
+                size="small"
+              />
+              <Typography
+                onClick={() => setIsPreview(true)}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Preview
+              </Typography>
+            </Box>
           </Box>
-        )}
+        </Box>
+
         {!editingMessage ? (
           <Button
             variant="contained"
             onClick={handleSendMessage}
+            disabled={!imageUrls.length && !inputValue.trim()}
             sx={{
               minWidth: "0px",
               width: "36px",

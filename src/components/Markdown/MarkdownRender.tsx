@@ -8,6 +8,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import rehypeKatex from "rehype-katex";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
 import { containsHTMLTags } from "@/lib/utils/utils";
@@ -15,11 +16,12 @@ type Props = {
   text: string;
   customClass?: string;
   sx?: SxProps<Theme>;
+  handleLinkClick?: any;
 };
-const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inherit" } }) => {
+const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inherit" }, handleLinkClick }) => {
   return (
     <ReactMarkdown
-      remarkPlugins={!containsHTMLTags(text) ? [remarkMath] : []}
+      remarkPlugins={!containsHTMLTags(text) ? [remarkMath, remarkGfm] : []}
       rehypePlugins={!containsHTMLTags(text) ? [rehypeKatex, rehypeRaw as any] : [rehypeRaw as any]}
       className={customClass}
       components={{
@@ -27,8 +29,13 @@ const MarkdownRender: FC<Props> = ({ text, customClass, sx = { fontSize: "inheri
           <Typography lineHeight={"inherit"} {...props} sx={{ p: "0px", wordBreak: "break-word", ...sx }} />
         ),
         a: ({ ...props }) => {
-          return (
-            <Link href={props.href} target="_blank" rel="noopener">
+          const isMention = props.href && props.href.startsWith("/mention/");
+          return isMention ? (
+            <Link href={props.href} onClick={event => handleLinkClick(event, props.href)} {...props}>
+              {props.children}
+            </Link>
+          ) : (
+            <Link href={props.href} target="_blank" rel="noopener" {...props}>
               {props.children}
             </Link>
           );

@@ -180,7 +180,16 @@ const SearcherSidebar = ({
     },
     [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data, preLoadNodes]
   );
-
+  useEffect(() => {
+    if (value === 0) {
+      onSearch(1, search, sortOption, sortDirection, nodeTypes);
+    } else if (value === 1) {
+      onSearchPendingProposals(1, search);
+      // onSearchNotebooks(1, search);
+    } /* else if (value === 2) {
+        onSearchPendingProposals(1, search);
+      } */
+  }, []);
   // const onSearchNotebooks = useCallback(
   //   async (page: number, q: string) => {
   //     try {

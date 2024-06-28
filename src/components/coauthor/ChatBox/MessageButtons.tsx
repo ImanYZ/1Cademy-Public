@@ -1,7 +1,8 @@
-import { Box, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
-import React from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import { Box, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
+import React from "react";
+
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type MessageButtonProps = {
@@ -60,7 +61,7 @@ const MessageButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, u
                   background: "transparent",
                 },
               }}
-              onClick={handleDeleteMessage}
+              onClick={() => handleDeleteMessage()}
             >
               <DeleteIcon
                 sx={{

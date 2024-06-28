@@ -132,7 +132,7 @@ const createVersion = async (
       let writeCounts = 0;
       // In both cases of accepting an improvement proposal and a child proposal,
       // we need to signal all the users that it's changed.
-      await retrieveAndsignalAllUserNodesChanges({
+      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
         batch,
         linkedId: nodeRef.id,
         nodeChanges,
@@ -179,7 +179,7 @@ const createVersion = async (
       tags: nodeData?.tags || [],
       tagIds: nodeData?.tagIds || [],
     } as INodeVersion;
-    return { versionRef: db.collection("relationVersions").doc(), versionData };
+    return { versionRef: db.collection("versions").doc(), versionData };
   }
 
   return { versionRef: null, versionData: null };

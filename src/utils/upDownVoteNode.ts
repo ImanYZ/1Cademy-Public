@@ -125,7 +125,9 @@ export const UpDownVoteNode = async ({
       willRemoveNode = doNeedToDeleteNode(
         nodeData.corrects + correctChange,
         nodeData.wrongs + wrongChange,
-        !!nodeData?.locked
+        !!nodeData?.locked,
+        false,
+        false
       );
     }
   }
@@ -138,49 +140,32 @@ export const UpDownVoteNode = async ({
     deleteNode = true;
   }
 
-  let typedVersionDocuments: {
-    [nodeType: string]: {
-      collectionName: string;
-      docs: QueryDocumentSnapshot<DocumentData>[];
-    };
-  } = {};
+  //  query versions in order to update the upvotes / downvotes in addition to reputations
+  const { versionsColl }: any = getTypedCollections();
+  const versionsQuery = versionsColl
+    .where("node", "==", nodeId)
+    .where("accepted", "==", true)
+    .where("deleted", "==", false);
 
-  for (const nodeType of getNodeTypesFromNode(nodeData)) {
-    //  query versions in order to update the upvotes / downvotes in addition to reputations
-    const { versionsColl }: any = getTypedCollections({ nodeType });
-    const versionsQuery = versionsColl
-      .where("node", "==", nodeId)
-      .where("accepted", "==", true)
-      .where("deleted", "==", false);
+  let versionsDocs = await versionsQuery.get();
 
-    let versionsDocs = await versionsQuery.get();
-    typedVersionDocuments[nodeType] = {
-      collectionName: versionsColl.id,
-      docs: versionsDocs.docs,
-    };
-  }
   //  there may be more than one proposal on a node, only one reputation change per user.
   //  which means proposer is the key to the dictionary
   let changedProposers: any = {};
 
   let maxVersionNetVotes = 1;
   // finding max net vote from active proposals
-  for (const nodeType in typedVersionDocuments) {
-    const versionDocuments = typedVersionDocuments[nodeType];
-    for (const versionDoc of versionDocuments.docs) {
+  await detach(async () => {
+    let batch = db.batch();
+    let writeCounts = 0;
+    for (const versionDoc of versionsDocs.docs) {
       const versionData = versionDoc.data();
       const versionNetVote = versionData.corrects - versionData.wrongs || 0;
       if (maxVersionNetVotes < versionNetVote) {
         maxVersionNetVotes = versionNetVote;
       }
     }
-  }
-
-  for (const nodeType in typedVersionDocuments) {
-    const versionDocuments = typedVersionDocuments[nodeType];
-    const versionsColl = db.collection(versionDocuments.collectionName);
-
-    for (const versionDoc of versionDocuments.docs) {
+    for (const versionDoc of versionsDocs.docs) {
       const versionData = versionDoc.data();
       let versionRatingChange =
         Math.max(MIN_ACCEPTED_VERSION_POINT_WEIGHT, versionData.corrects - versionData.wrongs) / maxVersionNetVotes;
@@ -208,6 +193,7 @@ export const UpDownVoteNode = async ({
         maxVersionRating = versionRating;
       }
       //  if proposer not already in the dictionary
+      console.log("changedProposers", changedProposers);
       if (!(versionData.proposer in changedProposers)) {
         //  finding to what extend the upvote or downvote will affect the reputation of the specific proposer
         //  MIN_ACCEPTED_VERSION_POINT_WEIGHT defines the minimum affect a single upvote or downvote will have on a given proposer's reputation
@@ -233,20 +219,20 @@ export const UpDownVoteNode = async ({
         };
       }
     }
-  }
 
-  for (const proposer in changedProposers) {
-    // we need update contributors, contribNames, institNames, institutions
-    // TODO: move these to queue
-    await detach(async () => {
+    for (const proposer in changedProposers) {
+      // we need update contributors, contribNames, institNames, institutions
+      // TODO: move these to queue
+
       await updateNodeContributions({
         nodeId,
         uname: proposer,
         accepted: true,
         contribution: changedProposers[proposer].correctVal - changedProposers[proposer].wrongVal,
       });
-    });
-  }
+    }
+    await commitBatch(batch);
+  });
 
   // TODO: move these to queue
   // action tracks
@@ -306,7 +292,7 @@ export const UpDownVoteNode = async ({
 
   const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
   const comReputationUpdates: IComReputationUpdates = {};
-
+  console.log("==>changedProposers==>", changedProposers);
   for (let proposer in changedProposers) {
     // Updating the proposer reputation points.
     [batch, writeCounts] = await updateReputation({

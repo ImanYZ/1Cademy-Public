@@ -84,6 +84,7 @@ describe("POST /api/deleteVersion", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[1],
@@ -91,6 +92,7 @@ describe("POST /api/deleteVersion", () => {
       proposer: users[1],
       corrects: 0,
       tags: [nodes[0]],
+      nodeType: "Concept",
     }),
   ];
   nodes[1].versions = 1;
@@ -110,7 +112,7 @@ describe("POST /api/deleteVersion", () => {
   const creditsCollection = new MockData(credits, "credits");
   const pendingPropNumsCollection = new MockData(pendingPropNums, "pendingPropsNums");
   const userNodesCollection = new MockData(userNodes, "userNodes");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const reputationsCollection = new MockData(reputations, "reputations");
 
   const collects = [
@@ -178,8 +180,8 @@ describe("POST /api/deleteVersion", () => {
 
     expect(res._getStatusCode()).toEqual(200); // TODO: need to change this behaviour
 
-    const conceptVersionDoc = await db.collection("conceptVersions").doc(String(nodeVersions[1].documentId)).get();
-    expect(conceptVersionDoc.data()?.deleted).toEqual(false);
+    const versionDoc = await db.collection("versions").doc(String(nodeVersions[1].documentId)).get();
+    expect(versionDoc.data()?.deleted).toEqual(false);
   });
 
   describe("Should be able to delete version that is proposed by current user", () => {
@@ -208,8 +210,8 @@ describe("POST /api/deleteVersion", () => {
     it("flag node version document as deleted", async () => {
       expect(res._getStatusCode()).toEqual(200);
 
-      const conceptVersionDoc = await db.collection("conceptVersions").doc(String(nodeVersions[1].documentId)).get();
-      expect(conceptVersionDoc.data()?.deleted).toEqual(true);
+      const versionDoc = await db.collection("versions").doc(String(nodeVersions[1].documentId)).get();
+      expect(versionDoc.data()?.deleted).toEqual(true);
     });
 
     it("decrease node versions attribute by 1", async () => {

@@ -75,7 +75,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { Post } from "@/lib/mapApi";
 import { ETHNICITY_VALUES, FOUND_FROM_VALUES, GENDER_VALUES } from "@/lib/utils/constants";
-import { getTypedCollections } from "@/lib/utils/getTypedCollections";
+import { getCollectionsQuery } from "@/lib/utils/getTypedCollections";
 import { justADate } from "@/lib/utils/justADate";
 import shortenNumber from "@/lib/utils/shortenNumber";
 import { ToUpperCaseEveryWord } from "@/lib/utils/utils";
@@ -115,6 +115,7 @@ type UserSettingsSidebarProps = {
   onChangeNotebook: (notebookId: string) => void;
   onChangeTagOfNotebookById: (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => void;
   notebookOwner: string;
+  onlineUsers: any;
 };
 
 type UserSettingsTabs = {
@@ -165,7 +166,7 @@ const TabPanel = ({ value, index, children }: TabPanelProps) => {
   return <Box hidden={value !== index}>{value === index && children}</Box>;
 };
 
-const UserSettigsSidebar = ({
+const UserSettingsSidebar = ({
   notebookRef,
   openLinkedNode,
   open,
@@ -181,6 +182,7 @@ const UserSettigsSidebar = ({
   onChangeNotebook,
   onChangeTagOfNotebookById,
   notebookOwner,
+  onlineUsers,
 }: UserSettingsSidebarProps) => {
   const db = getFirestore();
   const ELEMENTS_PER_PAGE: number = 13;
@@ -395,61 +397,58 @@ const UserSettigsSidebar = ({
 
   const fetchProposals = useCallback(async () => {
     const versions: { [key: string]: any } = {};
-    for (let nodeType of NODE_TYPE_OPTIONS) {
-      const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
 
-      if (!versionsColl || !userVersionsColl) continue;
+    const { versionsColl, userVersionsColl } = getCollectionsQuery(db);
 
-      const versionCollectionRef = query(
-        versionsColl,
-        where("proposer", "==", user.uname),
-        where("deleted", "==", false)
+    const versionCollectionRef = query(
+      versionsColl,
+      where("proposer", "==", user.uname),
+      where("deleted", "==", false)
+    );
+
+    const versionsData = await getDocs(versionCollectionRef);
+    let versionId;
+    const userVersionsRefs: any[] = [];
+    versionsData.forEach(versionDoc => {
+      const versionData = versionDoc.data();
+
+      versions[versionDoc.id] = {
+        ...versionData,
+        nodeType: versionData.nodeType,
+        id: versionDoc.id,
+        createdAt: versionData.createdAt.toDate(),
+        award: false,
+        correct: false,
+        wrong: false,
+      };
+      delete versions[versionDoc.id].deleted;
+      delete versions[versionDoc.id].updatedAt;
+      const userVersionCollectionRef = query(
+        userVersionsColl,
+        where("version", "==", versionDoc.id),
+        where("user", "==", user.uname)
       );
+      userVersionsRefs.push(userVersionCollectionRef);
+    });
 
-      const versionsData = await getDocs(versionCollectionRef);
-      let versionId;
-      const userVersionsRefs: any[] = [];
-      versionsData.forEach(versionDoc => {
-        const versionData = versionDoc.data();
-
-        versions[versionDoc.id] = {
-          ...versionData,
-          nodeType,
-          id: versionDoc.id,
-          createdAt: versionData.createdAt.toDate(),
-          award: false,
-          correct: false,
-          wrong: false,
-        };
-        delete versions[versionDoc.id].deleted;
-        delete versions[versionDoc.id].updatedAt;
-        const userVersionCollectionRef = query(
-          userVersionsColl,
-          where("version", "==", versionDoc.id),
-          where("user", "==", user.uname)
-        );
-        userVersionsRefs.push(userVersionCollectionRef);
-      });
-
-      if (userVersionsRefs.length > 0) {
-        await Promise.all(
-          userVersionsRefs.map(async userVersionsRef => {
-            const userVersionsDocs = await getDocs(userVersionsRef);
-            userVersionsDocs.forEach((userVersionsDoc: any) => {
-              const userVersion = userVersionsDoc.data();
-              versionId = userVersion.version;
-              delete userVersion.version;
-              delete userVersion.updatedAt;
-              delete userVersion.createdAt;
-              delete userVersion.user;
-              versions[versionId] = {
-                ...versions[versionId],
-                ...userVersion,
-              };
-            });
-          })
-        );
-      }
+    if (userVersionsRefs.length > 0) {
+      await Promise.all(
+        userVersionsRefs.map(async userVersionsRef => {
+          const userVersionsDocs = await getDocs(userVersionsRef);
+          userVersionsDocs.forEach((userVersionsDoc: any) => {
+            const userVersion = userVersionsDoc.data();
+            versionId = userVersion.version;
+            delete userVersion.version;
+            delete userVersion.updatedAt;
+            delete userVersion.createdAt;
+            delete userVersion.user;
+            versions[versionId] = {
+              ...versions[versionId],
+              ...userVersion,
+            };
+          });
+        })
+      );
     }
 
     let orderredProposals = Object.values(versions).sort(
@@ -1904,6 +1903,7 @@ const UserSettigsSidebar = ({
             lName={user.lName ?? ""}
             chooseUname={user.chooseUname}
             points={totalPoints}
+            online={onlineUsers[user.uname]}
           />
 
           <div id="MiniUserPrifileInstitution" style={{ display: "flex", gap: "12px", borderRadius: "6px" }}>
@@ -2136,4 +2136,4 @@ const ModeOption = ({ image, mode, active, handleSwitchTheme }: ModeOptionProps)
   );
 };
 
-export const MemoizedUserSettingsSidebar = React.memo(UserSettigsSidebar);
+export const MemoizedUserSettingsSidebar = React.memo(UserSettingsSidebar);

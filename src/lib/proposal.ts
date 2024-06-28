@@ -13,6 +13,7 @@ export const buildProposal = ({
   tagIds,
   tags,
   title,
+  nodeType,
 }: ProposalInput) => {
   return {
     accepted: false,
@@ -43,5 +44,6 @@ export const buildProposal = ({
     updatedAt: new Date(),
     viewers: 0,
     wrongs: 0,
+    nodeType,
   };
 };

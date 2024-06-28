@@ -14,12 +14,12 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import dynamic from "next/dynamic";
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IChannelMessage, IChannels, IConversation } from "src/chatTypes";
-import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
-import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
+import { getSelectedChannel } from "src/client/firestore/channels.firesrtore";
 import { UserTheme } from "src/knowledgeTypes";
 
 import { AllTagsTreeView, ChosenTag, MemoizedTagsSearcher } from "@/components/TagsSearcher";
@@ -28,15 +28,15 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
 import { Post } from "@/lib/mapApi";
+import { generateChannelName } from "@/lib/utils/chat";
+import { createActionTrack } from "@/lib/utils/Map.utils";
 
 import { CustomBadge } from "../../CustomBudge";
 import { ChannelsList } from "../Chat/List/Channels";
 import { DirectMessagesList } from "../Chat/List/DirectMessages";
 import { NewsList } from "../Chat/List/News";
 import { Summary } from "../Chat/List/Summary";
-//import { NodeLink } from "../Chat/Room/NodeLink";
 import { Message } from "../Chat/Room/Message";
-//import { NewsCard } from "../Chat/Room/NewsCard";
 import { SidebarWrapper } from "./SidebarWrapper";
 
 const DynamicMemoEmojiPicker = dynamic(() => import("../Chat/Common/EmojiPicker"), {
@@ -67,6 +67,10 @@ type ChatSidebarProps = {
   onChangeTagOfNotebookById: any;
   notifications: any;
   openUserInfoSidebar: any;
+  channels: IChannels[];
+  conversations: IConversation[];
+  openChatByNotification: any;
+  setOpenChatByNotification: any;
 };
 
 export const ChatSidebar = ({
@@ -89,19 +93,35 @@ export const ChatSidebar = ({
   openLinkedNode,
   notifications,
   openUserInfoSidebar,
+  channels,
+  conversations,
+  openChatByNotification,
+  setOpenChatByNotification,
 }: ChatSidebarProps) => {
   const db = getFirestore();
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState(2);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+    createActionTrack(
+      db,
+      "MessageTabChanged",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
   };
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("");
   const [selectedChannel, setSelectedChannel] = useState<IChannels | null>(null);
-  const [channels, setChannels] = useState<IChannels[]>([]);
-  const [conversations, setConversations] = useState<IConversation[]>([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const messageBoxRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<any>([]);
@@ -110,33 +130,76 @@ export const ChatSidebar = ({
   }>({
     message: null,
   });
+  const messageRefs = useRef<any>({});
   const [anchorEl, setAnchorEl] = useState(null);
   const [forward, setForward] = useState<boolean>(false);
   const openPicker = Boolean(anchorEl);
   const [chosenTags, setChosenTags] = useState<ChosenTag[]>([]);
   const [openChatInfo, setOpenChatInfo] = useState<boolean>(false);
+  const [leading, setLeading] = useState<any>(user.claims?.leading || []);
   const { allTags, setAllTags } = useTagsTreeView(user?.tagId ? [user?.tagId] : []);
-  const leading = (user.claims?.leading || []).includes(selectedChannel?.id);
+  const [newMemberSection, setNewMemberSection] = useState(false);
+  const [isLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+    if (!openChatByNotification) return;
+    let findChannel = {} as IChannels;
+    if (openChatByNotification.roomType === "direct") {
+      findChannel = conversations.find(
+        conversation => conversation.id === openChatByNotification.channelId
+      ) as IChannels;
+    } else {
+      findChannel = channels.find(channel => channel.id === openChatByNotification.channelId) as IChannels;
+    }
+    if (selectedChannel?.id !== findChannel.id) {
+      openRoom(openChatByNotification.roomType, findChannel);
+      setTimeout(
+        () => scrollToMessage(openChatByNotification.messageId, openChatByNotification.messageType, 500),
+        5000
+      );
+    } else {
+      scrollToMessage(openChatByNotification.messageId, openChatByNotification.messageType, 500);
+    }
+    setOpenChatByNotification(null);
+  }, [openChatByNotification]);
 
   useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+    const listener = (e: any) => {
+      const { user } = e.detail;
+      openDMChannel(user);
     };
-    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+    window.addEventListener("open-chat", listener);
+    return () => window.removeEventListener("open-chat", listener);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const updatedSelectedChannel = await getSelectedChannel(db, roomType, selectedChannel?.id || "");
+      if (updatedSelectedChannel) {
+        setSelectedChannel({ ...updatedSelectedChannel });
+      }
+    })();
+  }, [channels, conversations]);
+
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: channelsChange[]) => {
+  //     setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
+
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: conversationChange[]) => {
+  //     setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
 
   useEffect(() => {
     if (chosenTags.length > 0 && chosenTags[0].id in allTags) {
@@ -255,40 +318,33 @@ export const ChatSidebar = ({
   const addReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId || !user?.uname) return;
 
-    if (message.parentMessage) {
-      setMessages((prevMessages: any) => {
-        const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
-        const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions.push({ user: user?.uname, emoji });
-        return prevMessages;
-      });
-    } else {
+    if (!message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.id);
         prevMessages[messageIdx].reactions.push({ user: user?.uname, emoji });
         return prevMessages;
       });
     }
-    if (message.sender === user?.uname && !message.parentMessage) {
+    if (!message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
     } else {
-      await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
+      const mRef = getMessageRef(message.parentMessage, message.channelId);
+      const replyRef = doc(mRef, "replies", message?.id || "");
+      await updateDoc(replyRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
+      // await updateDoc(replyRef, {
+      //   message: newMessage,
+      //   imageUrls,
+      //   edited: true,
+      //   editedAt: new Date(),
+      // });
+      // await Post("/chat/reactOnMessage/", { message, action: "addReaction", roomType, emoji });
     }
   };
 
   const removeReaction = async (message: IChannelMessage, emoji: string) => {
     if (!message.id || !message.channelId) return;
-    if (message.parentMessage) {
-      setMessages((prevMessages: any) => {
-        const messageIdx = prevMessages.findIndex((m: any) => m.id === message.parentMessage);
-        const replyIdx = prevMessages[messageIdx].replies.findIndex((m: any) => m.id === message.id);
-        prevMessages[messageIdx].replies[replyIdx].reactions = prevMessages[messageIdx].replies[
-          replyIdx
-        ].reactions.filter((r: any) => r.emoji !== emoji && r.user !== user?.uname);
-        return prevMessages;
-      });
-    } else {
+    if (!message.parentMessage) {
       setMessages((prevMessages: any) => {
         const messageIdx = prevMessages.findIndex((m: any) => m.id === message.id);
         prevMessages[messageIdx].reactions = prevMessages[messageIdx].reactions.filter(
@@ -298,11 +354,14 @@ export const ChatSidebar = ({
       });
     }
 
-    if (message.sender === user?.uname && !message.parentMessage) {
+    if (!message.parentMessage) {
       const mRef = getMessageRef(message.id, message.channelId);
       await updateDoc(mRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
     } else {
-      await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
+      const mRef = getMessageRef(message.parentMessage, message.channelId);
+      const replyRef = doc(mRef, "replies", message?.id || "");
+      await updateDoc(replyRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
+      // await Post("/chat/reactOnMessage/", { message, action: "removeReaction", roomType, emoji });
     }
   };
 
@@ -314,6 +373,20 @@ export const ChatSidebar = ({
     } else {
       addReaction(message, emoji);
     }
+    createActionTrack(
+      db,
+      "MessageReacted",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
     setAnchorEl(null);
   };
   const openRoom = (type: string, channel: any) => {
@@ -321,7 +394,22 @@ export const ChatSidebar = ({
     setRoomType(type);
     setSelectedChannel(channel);
     setMessages([]);
-    clearNotifications(notifications.filter((n: any) => n.channelId === channel.id));
+    makeMessageRead(channel.id, type);
+    clearNotifications(notifications.filter((n: any) => n.channelId === channel.id && n.roomType === type));
+    createActionTrack(
+      db,
+      "MessageRoomOpened",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
   };
 
   const moveBack = () => {
@@ -334,6 +422,7 @@ export const ChatSidebar = ({
     } else {
       setOpenChatRoom(false);
       setSelectedChannel(null);
+      setRoomType("");
     }
   };
 
@@ -341,6 +430,14 @@ export const ChatSidebar = ({
 
   const openChatInfoPage = () => {
     setOpenChatInfo(!openChatInfo);
+  };
+
+  const getChannelRef = (channelId: string): DocumentReference<DocumentData> => {
+    let channelRef = doc(db, "channels", channelId);
+    if (roomType === "direct") {
+      channelRef = doc(db, "conversations", channelId);
+    }
+    return channelRef;
   };
 
   const contentSignalState = useMemo(() => {
@@ -361,37 +458,50 @@ export const ChatSidebar = ({
     notifications,
     theme,
     onlineUsers,
+    newMemberSection,
+    leading,
+    isLoadingReaction,
   ]);
 
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: channelsChange[]) => {
-      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: channelsChange[]) => {
+  //     setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
 
-  useEffect(() => {
-    if (!user) return;
-    const onSynchronize = (changes: conversationChange[]) => {
-      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
-      // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
-    };
-    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
-    return () => killSnapshot();
-  }, [db, user]);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const onSynchronize = (changes: conversationChange[]) => {
+  //     setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+  //     // setSelectedChannel(s => synchroniseSelectedChannel(s, changes));
+  //   };
+  //   const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+  //   return () => killSnapshot();
+  // }, [db, user]);
 
   const openDMChannel = async (user2: any) => {
+    if (roomType === "direct") return;
     if (!user?.uname || !user2.uname) return;
-    const findConversation = await getDocs(
-      query(collection(db, "conversations"), where("members", "==", [user2.uname, user?.uname]))
+    let q = query(collection(db, "conversations"), where("members", "array-contains", user.uname));
+    if (user?.uname === user2?.uname) {
+      q = query(collection(db, "conversations"), where("members", "==", [user.uname, user2?.uname]));
+    }
+    const findConversation = await getDocs(q);
+    const filteredResults = findConversation.docs.find(
+      doc => doc.data().members.includes(user2.uname) && doc.data().members.length === 2
     );
-
-    if (findConversation.docs.length > 0) {
-      const conversationData: any = findConversation.docs[0].data();
-      openRoom("direct", { ...conversationData, id: findConversation.docs[0].id });
+    if (filteredResults) {
+      const conversationData: any = filteredResults.data();
+      if (conversationData?.deleted) {
+        await updateDoc(doc(db, "conversations", filteredResults.id), {
+          deleted: false,
+        });
+      }
+      openRoom("direct", { ...conversationData, id: filteredResults.id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
       const membersInfo = {
@@ -399,9 +509,9 @@ export const ChatSidebar = ({
           uname: user2.uname,
           imageUrl: user2.imageUrl,
           chooseUname: !!user2.chooseUname,
-          fullname: `${user2.fName} ${user2.lName}`,
+          fullname: user2?.fName ? `${user2.fName} ${user2.lName}` : user2?.fullname,
           role: "",
-          uid: user2.userId,
+          uid: user2.userId || "",
         },
         [user?.uname]: {
           uname: user?.uname,
@@ -413,51 +523,104 @@ export const ChatSidebar = ({
         },
       };
       const conversationData = {
-        title: generateChannelName(membersInfo),
+        title: generateChannelName(membersInfo, user),
         members: [user2.uname, user?.uname],
         membersInfo,
+        deleted: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       await setDoc(converstionRef, conversationData);
       const docSnap = await getDoc(converstionRef);
+      setLeading([...leading, docSnap.id]);
       Post(`/chat/createChannelLeader`, { channelId: docSnap.id });
       openRoom("direct", { ...conversationData, id: converstionRef.id });
     }
   };
 
-  const generateChannelName = (members: any) => {
-    const name = [];
-    let more = 0;
-    for (let mId in members) {
-      if (Object.keys(members).length === 1) {
-        name.push(members[mId].fullname);
-        break;
-      }
-      if (name.length > 3) {
-        more++;
-      }
-      if (mId !== user?.uname) name.push((name.length > 0 ? ", " : "") + members[mId].fullname);
-    }
-    if (more > 2) {
-      name.push(`...`);
-    }
-
-    return name.join("");
-  };
-
-  const clearNotifications = (notifications: any) => {
+  const clearNotifications = async (notifications: any) => {
     for (let notif of notifications) {
-      const notifRef = doc(collection(db, "notifications"), notif.id);
-      updateDoc(notifRef, {
+      await updateDoc(notif.doc.ref, {
         seen: true,
         seenAt: new Date(),
       });
     }
   };
+
+  const makeMessageUnread = async (message: IChannelMessage) => {
+    if (!selectedChannel) return;
+
+    const channelRef = getChannelRef(selectedChannel.id || "");
+    let updatedMemberInfo: any = { ...selectedChannel?.membersInfo[user.uname], unreadMessageId: message.id };
+    if (roomType === "news") {
+      updatedMemberInfo = { ...selectedChannel?.membersInfo[user.uname], unreadNewsMessageId: message.id };
+    }
+    const membersInfo = {
+      ...(selectedChannel?.membersInfo || {}),
+      [user.uname]: updatedMemberInfo,
+    };
+    await updateDoc(channelRef, {
+      membersInfo,
+    });
+    const batch = writeBatch(db);
+    const q = query(
+      query(collection(db, "notifications")),
+      where("notify", "==", user.uname),
+      where("channelId", "==", message.channelId),
+      where("manualSeen", "==", true),
+      where("roomType", "==", roomType)
+    );
+    const notificatioDoc = await getDocs(q);
+    for (const notification of notificatioDoc.docs) {
+      batch.delete(notification.ref);
+    }
+
+    const messageIdx = messages.findIndex((msg: any) => msg?.id === message?.id);
+    if (messageIdx != -1) {
+      const newMessagesRef = [...messages];
+      const newMessagesArray = newMessagesRef.splice(messageIdx);
+      const numberOfMessages = newMessagesArray.filter((msg: any) => msg?.sender != user?.uname);
+      for (const msg of numberOfMessages) {
+        const messageRef = doc(collection(db, "notifications"));
+        delete msg?.doc;
+        batch.set(messageRef, {
+          ...msg,
+          seen: false,
+          notify: user?.uname,
+          roomType,
+          notificationType: "chat",
+          manualSeen: true,
+          createdAt: new Date(),
+        });
+      }
+      await batch.commit();
+    }
+
+    createActionTrack(
+      db,
+      "MessageMarkUnread",
+      "",
+      {
+        fullname: `${user?.fName} ${user?.lName}`,
+        chooseUname: !!user?.chooseUname,
+        uname: String(user?.uname),
+        imageUrl: String(user?.imageUrl),
+      },
+      "",
+      [],
+      user.email
+    );
+  };
+
+  const makeMessageRead = async (channelId: string, roomType: string) => {
+    await Post("/chat/markAsRead", { roomType, channelId });
+  };
+
   useEffect(() => {
     if (!selectedChannel || !roomType) return;
-    clearNotifications(notifications.filter((n: any) => n.channelId === selectedChannel.id));
+    clearNotifications(
+      notifications.filter((n: any) => n.channelId === selectedChannel.id && n.roomType === roomType && !n?.manualSeen)
+    );
   }, [notifications, selectedChannel]);
 
   const getNotificationsNumbers = useCallback(
@@ -466,6 +629,28 @@ export const ChatSidebar = ({
     },
     [notifications]
   );
+
+  const scrollToMessage = (id: string, type: string = "message", delay: number = 100) => {
+    if (messageRefs.current[id]) {
+      if (type === "reply") {
+        const input = messageRefs.current[id].querySelectorAll("textarea")[0];
+        setTimeout(() => {
+          input.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, delay);
+      } else {
+        setTimeout(() => {
+          messageRefs.current[id].scrollIntoView({
+            behavior: "smooth",
+            block: type === "message" ? "center" : "end",
+          });
+        }, delay);
+      }
+    }
+  };
+
   return (
     <SidebarWrapper
       id="chat"
@@ -483,11 +668,15 @@ export const ChatSidebar = ({
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
       // setDisplayTagSearcher={setDisplayTagSearcher}
+      roomType={roomType}
       openChatInfoPage={openChatInfoPage}
+      setNewMemberSection={setNewMemberSection}
       sidebarType={"chat"}
       onlineUsers={onlineUsers}
       user={user}
       openChatInfo={openChatInfo}
+      leading={leading.includes(selectedChannel?.id)}
+      openDMChannel={openDMChannel}
       SidebarContent={
         <Box sx={{ marginTop: openChatRoom ? "9px" : "22px" }}>
           <Popover
@@ -525,6 +714,8 @@ export const ChatSidebar = ({
                   onlineUsers={onlineUsers}
                   user={user}
                   sidebarWidth={sidebarWidth}
+                  getChannelRef={getChannelRef}
+                  openDMChannel={openDMChannel}
                 />
               ) : (
                 <Message
@@ -542,10 +733,18 @@ export const ChatSidebar = ({
                   setForward={setForward}
                   forward={forward}
                   getMessageRef={getMessageRef}
-                  leading={leading}
+                  leading={leading.includes(selectedChannel?.id)}
                   sidebarWidth={sidebarWidth}
                   openLinkedNode={openLinkedNode}
                   onlineUsers={onlineUsers}
+                  newMemberSection={newMemberSection}
+                  setNewMemberSection={setNewMemberSection}
+                  getChannelRef={getChannelRef}
+                  isLoadingReaction={isLoadingReaction}
+                  makeMessageUnread={makeMessageUnread}
+                  scrollToMessage={scrollToMessage}
+                  messageRefs={messageRefs}
+                  openDMChannel={openDMChannel}
                 />
               )}
             </>
@@ -561,7 +760,7 @@ export const ChatSidebar = ({
               >
                 <Tabs value={value} onChange={handleChange} aria-label={"Bookmarks Tabs"} variant="fullWidth">
                   {[
-                    { title: "News", type: "announcement" },
+                    { title: "News", type: "news" },
                     { title: "Channels", type: "channel" },
                     { title: "Direct", type: "direct" },
                   ].map((tabItem: any, idx: number) => (
@@ -656,31 +855,58 @@ export const ChatSidebar = ({
   );
 };
 
-export const MemoizedChatSidebar = React.memo(ChatSidebar);
-
-const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
-  const docType = change.type;
-  const curData = change.data as any & { id: string };
-
-  const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
-  if (docType === "added" && prevIdx === -1) {
-    prev.push(curData);
-  }
-  if (docType === "modified" && prevIdx !== -1) {
-    prev[prevIdx] = curData;
-  }
-
-  if (docType === "removed" && prevIdx !== -1) {
-    prev.splice(prevIdx, 1);
-  }
-  prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
-  return prev;
+const areEqual = (prevProps: any, nextProps: any) => {
+  return (
+    prevProps.user === nextProps.user &&
+    prevProps.settings === nextProps.settings &&
+    prevProps.open === nextProps.open &&
+    //prevProps.onClose === nextProps.onClose &&
+    prevProps.sidebarWidth === nextProps.sidebarWidth &&
+    prevProps.innerHeight === nextProps.innerHeight &&
+    prevProps.theme === nextProps.theme &&
+    prevProps.notebookRef === nextProps.notebookRef &&
+    prevProps.nodeBookDispatch === nextProps.nodeBookDispatch &&
+    prevProps.nodeBookState === nextProps.nodeBookState &&
+    prevProps.notebooks === nextProps.notebooks &&
+    prevProps.onChangeNotebook === nextProps.onChangeNotebook &&
+    prevProps.selectedNotebook === nextProps.selectedNotebook &&
+    prevProps.dispatch === nextProps.dispatch &&
+    prevProps.onChangeTagOfNotebookById === nextProps.onChangeTagOfNotebookById &&
+    prevProps.onlineUsers === nextProps.onlineUsers &&
+    prevProps.openLinkedNode === nextProps.openLinkedNode &&
+    prevProps.notifications === nextProps.notifications &&
+    prevProps.openUserInfoSidebar === nextProps.openUserInfoSidebar &&
+    prevProps.channels === nextProps.channels &&
+    prevProps.conversations === nextProps.conversations &&
+    prevProps.openChatByNotification === nextProps.openChatByNotification
+  );
 };
 
-const synchroniseSelectedChannel = (selectedChannel: any, changes: any) => {
-  if (!selectedChannel?.id) return null;
-  const newIdx = changes.findIndex((c: any) => c.data.id === selectedChannel.id);
-  if (newIdx !== -1) {
-    return changes[newIdx].data;
-  }
-};
+export const MemoizedChatSidebar = React.memo(ChatSidebar, areEqual);
+
+// const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
+//   const docType = change.type;
+//   const curData = change.data as any & { id: string };
+
+//   const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+//   if (docType === "added" && prevIdx === -1) {
+//     prev.push(curData);
+//   }
+//   if (docType === "modified" && prevIdx !== -1) {
+//     prev[prevIdx] = curData;
+//   }
+
+//   if (docType === "removed" && prevIdx !== -1) {
+//     prev.splice(prevIdx, 1);
+//   }
+//   prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
+//   return prev;
+// };
+
+// const synchroniseSelectedChannel = (selectedChannel: any, changes: any) => {
+//   if (!selectedChannel?.id) return null;
+//   const newIdx = changes.findIndex((c: any) => c.data.id === selectedChannel.id);
+//   if (newIdx !== -1) {
+//     return changes[newIdx].data;
+//   }
+// };

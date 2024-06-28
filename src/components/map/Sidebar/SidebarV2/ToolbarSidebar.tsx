@@ -101,7 +101,7 @@ type MainSidebarProps = {
   pendingProposalsNum: number;
   windowHeight: number;
   reputationSignal: ReputationSignal[];
-  onlineUsers: string[];
+  onlineUsers: { [uname: string]: boolean };
   usersOnlineStatusLoaded: boolean;
   disableToolbar?: boolean;
   enabledToolbarElements?: string[];
@@ -295,7 +295,11 @@ export const ToolbarSidebar = ({
 
   const choosingNodeClick = useCallback(
     (choosingNodeTag: string) => {
-      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: null } });
+      notebookRef.current.choosingNode = { id: choosingNodeTag, type: "Tag" };
+      notebookRef.current.chosenNode = null;
+
+      nodeBookDispatch({ type: "setChosenNode", payload: null });
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: choosingNodeTag, type: "Tag" } });
     },
     [nodeBookDispatch]
   );
@@ -1097,7 +1101,7 @@ export const ToolbarSidebar = ({
                 sx={{
                   "&.MuiModal-root": {
                     top: "100px",
-                    left: "240px",
+                    left: "430px",
                     right: "unset",
                     bottom: "unset",
                   },

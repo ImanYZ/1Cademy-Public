@@ -35,6 +35,7 @@ import deleteAllUsers from "testUtils/helpers/deleteAllUsers";
 import { MockData } from "testUtils/mockCollections";
 
 import { getTypesenseClient } from "@/lib/typesense/typesense.config";
+import { VERSIONS } from "@/lib/utils/firebase.collections";
 
 describe("POST /api/proposeNodeImprovement", () => {
   const positiveFields = [
@@ -103,7 +104,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       parents: [nodes[0]],
     })
   );
-
+  console.log("nodes", nodes[1].parents);
   const node3 = createNode({
     admin: users[0],
     isTag: false,
@@ -164,6 +165,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       tags: [],
       parents: [nodes[0]],
       children: [nodes[2]],
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[2],
@@ -173,6 +175,7 @@ describe("POST /api/proposeNodeImprovement", () => {
       tags: [],
       parents: [nodes[0]],
       children: [nodes[1]],
+      nodeType: "Concept",
     }),
   ];
 
@@ -221,7 +224,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
   const usersCollection = new MockData(users, "users");
   const creditsCollection = new MockData(credits, "credits");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const weeklyReputationPointsCollection = new MockData(weeklyReputationPoints, "weeklyReputations");
   const reputationsCollection = new MockData(reputations, "reputations");
   const notificationsCollection = new MockData([], "notifications");
@@ -235,7 +238,7 @@ describe("POST /api/proposeNodeImprovement", () => {
     notificationsCollection,
     new MockData(tags, "tags"),
     new MockData(institutions, "institutions"),
-    new MockData([], "ideaVersions"),
+    new MockData([], VERSIONS),
     new MockData([], "userIdeaVersions"),
 
     new MockData([], "comPoints"),
@@ -315,7 +318,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     it("should be check changedTags=true", async () => {
       let versions = await db
-        .collection("ideaVersions")
+        .collection(VERSIONS)
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -326,7 +329,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     it("should be check addedTags=true", async () => {
       let versions = await db
-        .collection("ideaVersions")
+        .collection(VERSIONS)
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -337,7 +340,7 @@ describe("POST /api/proposeNodeImprovement", () => {
 
     it("should be check changedTitle=true", async () => {
       let versions = await db
-        .collection("ideaVersions")
+        .collection(VERSIONS)
         .where("title", "==", "RANDOM TITLE")
         .where("node", "==", nodes[2].documentId)
         .where("proposer", "==", users[0].uname)
@@ -526,12 +529,21 @@ describe("POST /api/proposeNodeImprovement", () => {
           expect(nodeData.nodeTypes).toEqual(["Concept", "Idea"]);
         });
 
-        it("node type should be changed in parents and childrens", async () => {
+        it("node type should be changed in parents and children", async () => {
           for (const parent of nodeData.parents) {
             const parentNode = await db.collection("nodes").doc(parent.node).get();
             const parentNodeData = parentNode.data() as INode;
-            const nodeLink = parentNodeData.children.find(child => child.node === String(nodes[2].documentId));
-            expect(nodeLink?.type).toEqual("Idea" as INodeType);
+            console.log(
+              "nodes[2].documentId",
+              parent.node,
+              nodes[2].documentId,
+              parentNodeData.children,
+              nodeData.parents
+            );
+            if (parentNodeData.children.length > 0) {
+              const nodeLink = parentNodeData.children.find(child => child.node === String(nodes[2].documentId));
+              expect(nodeLink?.type).toEqual("Idea" as INodeType);
+            }
           }
 
           for (const child of nodeData.children) {

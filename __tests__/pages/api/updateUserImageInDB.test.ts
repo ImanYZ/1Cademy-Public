@@ -78,12 +78,14 @@ describe("POST /api/updateUserImageInDB", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
     createNodeVersion({
       node: nodes[1],
       accepted: true,
       proposer: users[1],
       corrects: 1,
+      nodeType: "Concept",
     }),
   ];
 
@@ -170,6 +172,7 @@ describe("POST /api/updateUserImageInDB", () => {
         proposer: users[0],
         accepted: true,
         corrects: 1,
+        nodeType: NODE_TYPE,
       })
     );
   }
@@ -181,7 +184,7 @@ describe("POST /api/updateUserImageInDB", () => {
   const nodesCollection = new MockData(nodes, "nodes");
   const creditsCollection = new MockData(credits, "credits");
   const userNodesCollection = new MockData(userNodes, "userNodes");
-  // const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  // const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const reputationsCollection = new MockData(reputations, "reputations");
 
   const messagesCollection = new MockData(messages, "messages");
@@ -214,9 +217,7 @@ describe("POST /api/updateUserImageInDB", () => {
   ];
 
   for (const NODE_TYPE of NODE_TYPES) {
-    const { versionsColl } = getTypedCollections({
-      nodeType: NODE_TYPE,
-    });
+    const { versionsColl } = getTypedCollections();
     collects.push(
       new MockData(
         nodeVersions.filter(
@@ -350,17 +351,12 @@ describe("POST /api/updateUserImageInDB", () => {
     });
 
     it("{nodeType}Versions", async () => {
-      for (const NODE_TYPE of NODE_TYPES) {
-        const { versionsColl } = getTypedCollections({
-          nodeType: NODE_TYPE,
-        });
-        const nodeTypeVersionDocs = (await db.collection(versionsColl.id).where("proposer", "==", users[0].uname).get())
-          .docs;
-        expect(nodeTypeVersionDocs.length).toBeGreaterThan(0);
-        for (const nodeTypeVersionDoc of nodeTypeVersionDocs) {
-          const nodeTypeVersionDocData = nodeTypeVersionDoc.data() as INodeVersion;
-          expect(nodeTypeVersionDocData.imageUrl).toEqual(imageUrl);
-        }
+      const { versionsColl } = getTypedCollections();
+      const nodeTypeVersionDocs = (await versionsColl.where("proposer", "==", users[0].uname).get()).docs;
+      expect(nodeTypeVersionDocs.length).toBeGreaterThan(0);
+      for (const nodeTypeVersionDoc of nodeTypeVersionDocs) {
+        const nodeTypeVersionDocData = nodeTypeVersionDoc.data() as INodeVersion;
+        expect(nodeTypeVersionDocData.imageUrl).toEqual(imageUrl);
       }
     });
 

@@ -55,7 +55,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         parentMessage.replies[replyIdx].reactions.push({ user: uname, emoji });
       } else if (action === "removeReaction") {
         parentMessage.replies[replyIdx].reactions = parentMessage.replies[replyIdx].reactions.filter(
-          (r: { user: string; emoji: string }) => r.user === uname && r.emoji === emoji
+          (r: { user: string; emoji: string }) => r.user === uname && r.emoji !== emoji
         );
       }
       await mDoc.ref.update({ replies: parentMessage.replies });

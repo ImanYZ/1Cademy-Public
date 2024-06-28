@@ -77,19 +77,20 @@ describe("updateStatsOnProposal", () => {
       accepted: true,
       node: nodes[0],
       proposer: users[0],
+      nodeType: "Concept",
     })
   );
 
   const usersCollection = new MockData(users, "users");
   const nodesCollection = new MockData(nodes, "nodes");
-  const conceptVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const versionsCollection = new MockData(nodeVersions, "versions");
   const userNodesCollection = new MockData(userNodes, "userNodes");
   const reputationsCollection = new MockData(reputationPoints, "reputations");
 
   const collects = [
     usersCollection,
     nodesCollection,
-    conceptVersionsCollection,
+    versionsCollection,
     userNodesCollection,
     reputationsCollection,
     new MockData([], "credits"),
@@ -101,7 +102,7 @@ describe("updateStatsOnProposal", () => {
     new MockData([], "semesterStudentSankeys"),
     new MockData([], "semesterStudentStats"),
     new MockData([], "semesterStudentVoteStats"),
-    new MockData([], "userConceptVersions"),
+    new MockData([], "userVersions"),
     new MockData([], "userQuestionVersions"),
   ];
 
@@ -255,9 +256,10 @@ describe("updateStatsOnProposal", () => {
         corrects: 0,
         accepted: false,
         proposer: users[1],
+        nodeType: "Concept",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -333,9 +335,10 @@ describe("updateStatsOnProposal", () => {
         corrects: 0,
         accepted: false,
         proposer: users[1],
+        nodeType: "Concept",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -411,9 +414,10 @@ describe("updateStatsOnProposal", () => {
         corrects: 0,
         accepted: false,
         proposer: users[1],
+        nodeType: "Question",
       }),
     ];
-    await new MockData(_nodeVersions, "questionVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -489,6 +493,7 @@ describe("updateStatsOnProposal", () => {
         corrects: 0,
         accepted: false,
         proposer: users[1],
+        nodeType: "Question",
       }),
     ];
     await new MockData(_nodeVersions, "questionVersions").populate();
@@ -568,9 +573,10 @@ describe("updateStatsOnProposal", () => {
         accepted: false,
         proposer: users[1],
         childType: "Question",
+        nodeType: "Concept",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;
@@ -647,9 +653,10 @@ describe("updateStatsOnProposal", () => {
         accepted: true,
         proposer: users[1],
         childType: "Question",
+        nodeType: "Concept",
       }),
     ];
-    await new MockData(_nodeVersions, "conceptVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;

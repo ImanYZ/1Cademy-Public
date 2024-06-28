@@ -811,6 +811,7 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           open={openSidebar === "USER_INFO"}
           onClose={() => setOpenSidebar(null)}
           selectedUser={selectedUser}
+          onlineUsers={{}}
         />
 
         {Object.keys(graph.nodes).length === 0 && (

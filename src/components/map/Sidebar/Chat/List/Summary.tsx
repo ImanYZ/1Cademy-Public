@@ -1,7 +1,6 @@
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
-// import SearchIcon from "@mui/icons-material/Search";
 import { Tab, Tabs, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
@@ -16,6 +15,7 @@ import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import TagIcon from "../../../../../../public/tag.svg";
+import GroupAvatar from "../Common/GroupAvatar";
 import { Media } from "./Media";
 import { Members } from "./Members";
 import { Nodes } from "./Nodes";
@@ -33,6 +33,8 @@ type SummaryProps = {
   onlineUsers: any;
   user: any;
   sidebarWidth: number;
+  getChannelRef: any;
+  openDMChannel: (user2: any) => void;
 };
 export const Summary = ({
   theme,
@@ -46,6 +48,8 @@ export const Summary = ({
   onlineUsers,
   user,
   sidebarWidth,
+  getChannelRef,
+  openDMChannel,
 }: SummaryProps) => {
   const db = getFirestore();
   const [value, setValue] = React.useState(0);
@@ -135,25 +139,7 @@ export const Summary = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
-      <Box
-        sx={{
-          width: "70px",
-          height: "70px",
-          borderRadius: "200px",
-
-          background: "linear-gradient(to right, #FDC830, #F37335)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {selectedChannel.title
-          .split(" ")
-          .slice(0, 2)
-          .map((word: string) => word[0])
-          .join(" ")}
-      </Box>
-      <Typography sx={{ fontWeight: "500", fontSize: "17px" }}>{selectedChannel.title}</Typography>
+      <GroupAvatar membersInfo={selectedChannel.membersInfo} size={40} openDMChannel={openDMChannel} />
       <Box
         sx={{
           display: "flex",
@@ -213,36 +199,38 @@ export const Summary = ({
           </Box>
           <Typography>Search</Typography>
         </Box> */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100px",
-            height: "100px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            background: theme =>
-              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
-            ":hover": {
+        {roomType === "channel" && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100px",
+              height: "100px",
+              borderRadius: "8px",
+              cursor: "pointer",
               background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
-            },
-          }}
-          onClick={muteChannel}
-        >
-          {" "}
-          {mutingChannel ? (
-            <CircularProgress />
-          ) : (
-            <>
-              <Box>{muted ? <NotificationsOffIcon /> : <NotificationsIcon />}</Box>
-              <Typography>{muted ? "Unmute" : "Mute"}</Typography>
-            </>
-          )}
-        </Box>
-        {!leading && (
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray200,
+              ":hover": {
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
+              },
+            }}
+            onClick={muteChannel}
+          >
+            {" "}
+            {mutingChannel ? (
+              <CircularProgress />
+            ) : (
+              <>
+                <Box>{muted ? <NotificationsOffIcon /> : <NotificationsIcon />}</Box>
+                <Typography>{muted ? "Unmute" : "Mute"}</Typography>
+              </>
+            )}
+          </Box>
+        )}
+        {!leading && roomType === "channel" && (
           <Box
             sx={{
               display: "flex",
@@ -304,8 +292,8 @@ export const Summary = ({
             openUserInfoSidebar={openUserInfoSidebar}
             onlineUsers={onlineUsers}
             leading={leading}
-            roomType={roomType}
             sidebarWidth={sidebarWidth}
+            getChannelRef={getChannelRef}
           />
         )}
         {value === 1 && (

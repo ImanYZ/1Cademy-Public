@@ -1,6 +1,7 @@
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import MarkAsUnreadIcon from "@mui/icons-material/MarkAsUnread";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { IconButton, Tooltip } from "@mui/material";
 import { Box, SxProps, Theme } from "@mui/system";
@@ -12,12 +13,13 @@ type MessageButtonProps = {
   message: any;
   sx?: SxProps<Theme>;
   replyMessage?: (message: any) => void;
-  forwardMessage: (message: any) => void;
+  forwardMessage?: (message: any) => void;
   toggleEmojiPicker: (event: any, message?: IChannelMessage) => void;
   setEditingMessage?: any;
   setInputMessage?: any;
   handleDeleteMessage?: any;
   user: any;
+  makeMessageUnread?: (message: IChannelMessage) => void;
 };
 export const MessageButtons = ({
   message,
@@ -28,6 +30,7 @@ export const MessageButtons = ({
   setEditingMessage,
   handleDeleteMessage,
   user,
+  makeMessageUnread,
 }: MessageButtonProps) => {
   const isSender = user.uname === message.sender;
   // const handleForwardMessage = () => {
@@ -60,16 +63,23 @@ export const MessageButtons = ({
         </Tooltip>
       )}
       <Tooltip title={"react"}>
-        <IconButton>
-          <AddReactionIcon color="secondary" onClick={(e: any) => toggleEmojiPicker(e, message)} />
+        <IconButton onClick={(e: any) => toggleEmojiPicker(e, message)}>
+          <AddReactionIcon color="secondary" />
         </IconButton>
       </Tooltip>
+      {!message.parentMessage && makeMessageUnread && (
+        <Tooltip title={"unread"}>
+          <IconButton onClick={() => makeMessageUnread(message)}>
+            <MarkAsUnreadIcon color="secondary" />
+          </IconButton>
+        </Tooltip>
+      )}
       {/* <Tooltip title={"forward"}>
         <IconButton onClick={handleForwardMessage}>
           <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
         </IconButton>
       </Tooltip> */}
-      {isSender && (
+      {isSender && setEditingMessage && (
         <Tooltip title={"edit"}>
           <IconButton onClick={handleEditMessage}>
             <EditIcon />

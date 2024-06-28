@@ -16,7 +16,7 @@ import { createCredit } from "testUtils/fakers/credit";
 import { createReputationPoints } from "testUtils/fakers/reputation-point";
 initFirebaseClientSDK();
 
-import { admin, db } from "src/lib/firestoreServer/admin";
+import { admin } from "src/lib/firestoreServer/admin";
 import proposeChildNodeHandler, { IProposeChildNodePayload } from "src/pages/api/proposeChildNode";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeType } from "src/types/INodeType";
@@ -97,6 +97,7 @@ describe("POST /api/proposeChildNode", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
   ];
 
@@ -120,7 +121,7 @@ describe("POST /api/proposeChildNode", () => {
 
   const usersCollection = new MockData(users, "users");
   const creditsCollection = new MockData(credits, "credits");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
 
   const reputationsCollection = new MockData(reputations, "reputations");
   const notificationsCollection = new MockData([], "notifications");
@@ -231,10 +232,8 @@ describe("POST /api/proposeChildNode", () => {
     });
 
     it("proposal should auto tag higher communities", async () => {
-      const { versionsColl } = getTypedCollections({
-        nodeType: "Question",
-      });
-      const nodeVersionsResult = await db.collection(versionsColl.id).orderBy("createdAt", "desc").limit(1).get();
+      const { versionsColl } = getTypedCollections();
+      const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
       const nodeVersion = nodeVersionsResult.docs[0].data() as INodeVersion;
       for (const node of nodes) {
         expect(nodeVersion.tagIds.includes(String(node.documentId))).toBeTruthy();

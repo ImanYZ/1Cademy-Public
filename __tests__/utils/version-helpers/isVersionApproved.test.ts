@@ -14,11 +14,13 @@ describe("isVersionApproved", () => {
 
   it("should return isVersionApproved of specifc node", async () => {
     let nodeDoc: any = await db.collection("nodes").doc("tKxTL4lxds").get();
-    let is_approved = await isVersionApproved({
+    let is_approved = isVersionApproved({
       corrects: 1,
       wrongs: 0,
       nodeData: nodeDoc.data(),
+      isInstructor: false,
+      instantApprove: false,
     });
-    expect(Object.keys(is_approved).length).toBeGreaterThan(0);
+    expect(is_approved).toBeTruthy();
   });
 });

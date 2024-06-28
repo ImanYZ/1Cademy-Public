@@ -1,18 +1,19 @@
-import SearchIcon from "@mui/icons-material/Search";
-import { Autocomplete, Paper, TextField, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, Firestore, getDocs, query } from "firebase/firestore";
-import Fuse from "fuse.js";
-import { useEffect, useState } from "react";
+import { doc, Firestore, updateDoc } from "firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
 import { IConversation } from "src/chatTypes";
 
 import { CustomBadge } from "@/components/map/CustomBudge";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { useAuth } from "@/context/AuthContext";
+import { generateChannelName } from "@/lib/utils/chat";
 
 import { getMessageSummary } from "../../helpers/common";
+import UserSuggestion from "../Common/UserSuggestion";
 
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
@@ -32,9 +33,6 @@ export const DirectMessagesList = ({
   notifications,
 }: DirectMessageProps) => {
   const [{ user }] = useAuth();
-  const [users, setUsers] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
-  const fuse = new Fuse(users, { keys: ["uname"] });
   const [notificationHash, setNotificationHash] = useState<any>({});
 
   useEffect(() => {
@@ -49,25 +47,17 @@ export const DirectMessagesList = ({
     );
   }, [notifications]);
 
-  const generateChannelName = (members: any) => {
-    const name = [];
-    let more = 0;
-    for (let mId in members) {
-      if (Object.keys(members).length === 1) {
-        name.push(members[mId].fullname);
-        break;
-      }
-      if (name.length > 3) {
-        more++;
-      }
-      if (mId !== user?.uname) name.push((name.length > 0 ? ", " : "") + members[mId].fullname);
-    }
-    if (more > 2) {
-      name.push(`...`);
-    }
+  const handleDeleteChannel = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>, conversation: IConversation) => {
+      event.stopPropagation();
+      const channelRef = doc(db, "conversations", conversation.id);
+      await updateDoc(channelRef, {
+        deleted: true,
+      });
+    },
+    []
+  );
 
-    return name.join("");
-  };
   const OverlappingAvatars = ({ members }: any) => {
     if (!user?.uname) return <></>;
     const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
@@ -98,132 +88,32 @@ export const DirectMessagesList = ({
         }}
       >
         <OptimizedAvatar2 alt={userInfo?.fullname} imageUrl={userInfo?.imageUrl} size={40} sx={{ border: "none" }} />
-        <Box
-          sx={{ background: onlineUsers.includes(userInfo?.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-          className="UserStatusOnlineIcon"
-        />
+
+        {onlineUsers[userInfo?.uname] && (
+          <Box
+            sx={{
+              fontSize: "1px",
+            }}
+            className="UserStatusOnlineIcon"
+          />
+        )}
       </Box>
     );
   };
-  useEffect(() => {
-    const getUsers = async () => {
-      const usersQuery = query(collection(db, "users"));
-      const usersDocs = await getDocs(usersQuery);
-      const _users: any = [];
-      usersDocs.docs.forEach((userDoc: any) => {
-        _users.push({ ...userDoc.data(), fullname: `${userDoc.data().fName} ${userDoc.data().lName}` });
-      });
-      setUsers(_users);
-    };
-    getUsers();
-  }, [db]);
 
-  const searchWithFuse = (query: string): any => {
-    if (!query) {
-      return [];
-    }
-    return fuse
-      .search(query)
-      .map(result => result.item)
-      .filter((item: any) => !item.deleted);
-  };
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
-        <Autocomplete
-          freeSolo
-          options={searchWithFuse(searchValue)}
-          onInputChange={(event, value) => {
-            setSearchValue(value);
-          }}
-          renderInput={params => (
-            <TextField
-              {...params}
-              label="Search"
-              margin="normal"
-              variant="outlined"
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <Box sx={{ p: 1 }}>
-                    <SearchIcon />
-                    {params.InputProps.startAdornment}
-                  </Box>
-                ),
-              }}
-            />
-          )}
-          renderOption={(props, option: any) => (
-            <li
-              {...props}
-              onClick={() => {
-                openDMChannel(option);
-              }}
-            >
-              {" "}
-              <Box
-                sx={{
-                  width: `40px`,
-                  height: `40px`,
-                  cursor: "pointer",
-                  transition: "all 0.2s 0s ease",
-                  background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-                  borderRadius: "50%",
-                  "& > .user-image": {
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    width: "30px",
-                    height: "30px",
-                  },
-                  "@keyframes slidein": {
-                    from: {
-                      transform: "translateY(0%)",
-                    },
-                    to: {
-                      transform: "translateY(100%)",
-                    },
-                  },
-                }}
-              >
-                <OptimizedAvatar2 alt={option.fullname} imageUrl={option.imageUrl} size={40} sx={{ border: "none" }} />
-                <Box
-                  sx={{ background: onlineUsers.includes(option.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-                  className="UserStatusOnlineIcon"
-                />
-              </Box>
-              <Box>
-                <Typography sx={{ pl: 2 }}>{option.fullname}</Typography>
-                <Typography sx={{ pl: 1, color: "grey", fontSize: "15px" }}>@{option.uname}</Typography>
-              </Box>
-            </li>
-          )}
-          getOptionLabel={(option: any) => (option.fullname ? option.fullname : "")}
-          fullWidth
-        />
-        {/* {conversations.length > 0 && (
-          <IconButton
-            sx={{
-              ml: "5px",
-              background: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
-              borderRadius: "8px",
-              border: theme =>
-                `solid 1px ${
-                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray300
-                }`,
-            }}
-          >
-            <CreateIcon color="primary" />
-          </IconButton>
-        )} */}
+        <UserSuggestion db={db} onlineUsers={onlineUsers} action={openDMChannel} />
       </Box>
       {conversations.map((conversation: IConversation, idx: number) => (
         <Paper
+          className="direct-channel"
           onClick={() => openRoom("direct", conversation)}
           key={idx}
           elevation={3}
-          className="CollapsedProposal collection-item"
           sx={{
+            position: "relative",
             display: "flex",
             flexDirection: "column",
             padding: "12px 16px 10px 16px",
@@ -243,6 +133,7 @@ export const DirectMessagesList = ({
           }}
         >
           <Box
+            className="direct-channel-box"
             sx={{
               display: "flex",
               alignItems: "center",
@@ -260,13 +151,8 @@ export const DirectMessagesList = ({
                   lineHeight: "24px",
                 }}
               >
-                {generateChannelName(conversation.membersInfo)}
+                {generateChannelName(conversation.membersInfo, user)}
               </Typography>
-              {(notificationHash[conversation.id] || []).length > 0 && (
-                <Typography sx={{ fontSize: "13px", color: "grey" }}>
-                  {getMessageSummary(notificationHash[conversation.id][0])}
-                </Typography>
-              )}
             </Box>
 
             <Typography
@@ -289,7 +175,24 @@ export const DirectMessagesList = ({
                 }}
               />
             )}
+            <IconButton
+              className="direct-channel-delete"
+              sx={{
+                display: "none",
+                width: "30px",
+                height: "30px",
+                p: "3px",
+              }}
+              onClick={e => handleDeleteChannel(e, conversation)}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
+          {(notificationHash[conversation.id] || []).length > 0 && (
+            <Typography sx={{ fontSize: "13px", color: "grey", pl: "54px" }}>
+              {getMessageSummary(notificationHash[conversation.id][0])}
+            </Typography>
+          )}
         </Paper>
       ))}
     </Box>

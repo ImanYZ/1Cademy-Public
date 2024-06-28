@@ -245,11 +245,16 @@ export const Members = ({
                   sx={{ border: "none" }}
                 />
                 <Box
+                  className={
+                    onlineUsers[selectedChannel.membersInfo[member].uname]
+                      ? "UserStatusOnlineIcon"
+                      : "UserStatusOfflineIcon"
+                  }
                   sx={{
-                    background: onlineUsers.includes(selectedChannel.membersInfo[member].uname) ? "#12B76A" : "grey",
-                    fontSize: "1px",
+                    backgroundColor: !onlineUsers[selectedChannel.membersInfo[member].uname]
+                      ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                      : "",
                   }}
-                  className="UserStatusOnlineIcon"
                 />
               </Box>
               <Box>

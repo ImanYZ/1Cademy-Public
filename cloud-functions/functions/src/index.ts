@@ -6,23 +6,28 @@ import * as moment from "moment";
 
 admin.initializeApp();
 
-import { signalFlashcardChanges } from "./helpers";
+import { signalFlashcardChanges, trackHours } from "./helpers";
 
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
 const { deleteOntologyLock } = require("./actions/deleteOntologyLock");
+const { cleanOpenAiAssistants } = require("./cleanOpenAiAssistants");
+const { createMeeting } = require("./createMeeting");
+const { updateCoursesNums } = require("./updateCoursesNums");
+const { deleteOldProposals } = require("./deleteOldProposals");
 
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
-import { trigerNotifications } from "./actions/trigerNotifications";
+import { deleteNotifications } from "./actions/deleteNotifications";
 import { addUserToChannel } from "./actions/addUserToChannel";
 import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 
 import { db } from "./admin";
 import { updateSavedCards } from "./actions/updateSavedCards";
 import { sentAlertEmail } from "./actions/sentAlertEmail";
+import { updateImage } from "./actions/updateImage";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -141,6 +146,10 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
     const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
     recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+
+    //track hours
+
+    await trackHours(data);
   } catch (error) {
     console.log("error:", error);
   }
@@ -231,31 +240,42 @@ export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onC
 
 export const onDirectMessagesNotification = functions.firestore
   .document("/conversationMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
+  .onUpdate(async change => {
     try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "direct" } });
+      }
     } catch (error) {
       console.log("error onDirectMessagesNotification:", error);
     }
   });
-
 export const onChannelMessagesNotification = functions.firestore
   .document("/channelMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
+  .onUpdate(async change => {
     try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "channel" } });
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "channel" } });
+      }
     } catch (error) {
       console.log("error onChannelMessagesNotification:", error);
     }
   });
 export const onAnnouncementsMessagesNotification = functions.firestore
   .document("/announcementsMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
+  .onUpdate(async change => {
     try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "announcement" } });
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "announcement" } });
+      }
     } catch (error) {
       console.log("error onAnnouncementsMessagesNotification:", error);
     }
@@ -267,6 +287,13 @@ export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate
     const previousData = change.before.data();
     if (userData.tagId !== previousData.tagId) {
       addUserToChannel({ userData });
+    }
+    if (
+      userData?.imageURL !== previousData?.imageURL ||
+      userData.fName !== previousData?.fName ||
+      userData.lName !== previousData?.lName
+    ) {
+      updateImage({ userData });
     }
   } catch (error) {
     console.log("error onUserUpdate:", error);
@@ -322,3 +349,27 @@ exports.deleteOntologyLock = functions
   .pubsub.schedule("0 * * * *")
   .timeZone("America/Detroit")
   .onRun(deleteOntologyLock);
+
+exports.cleanOpenAiAssistants = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(cleanOpenAiAssistants);
+
+exports.createMeeting = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("0 16 * * 1,5")
+  .timeZone("America/Detroit")
+  .onRun(createMeeting);
+
+exports.updateCoursesNums = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(updateCoursesNums);
+
+exports.deleteOldProposals = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(deleteOldProposals);

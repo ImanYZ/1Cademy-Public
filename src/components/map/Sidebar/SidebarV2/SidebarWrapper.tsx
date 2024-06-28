@@ -3,12 +3,15 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/Info";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Drawer, DrawerProps, IconButton, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
+
+import GroupAvatar from "../Chat/Common/GroupAvatar";
 
 type SidebarWrapperProps = {
   id?: string;
@@ -33,9 +36,13 @@ type SidebarWrapperProps = {
   selectedChannel?: any;
   setDisplayTagSearcher?: any;
   openChatInfoPage?: any;
+  setNewMemberSection?: any;
   onlineUsers?: any;
   user?: any;
   openChatInfo?: boolean;
+  leading?: boolean;
+  roomType?: string;
+  openDMChannel?: (user2: string) => void;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -63,9 +70,13 @@ export const SidebarWrapper = ({
   selectedChannel = null,
   // setDisplayTagSearcher,
   openChatInfoPage,
+  setNewMemberSection,
   onlineUsers,
   user,
   openChatInfo,
+  leading,
+  roomType,
+  openDMChannel,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -109,8 +120,13 @@ export const SidebarWrapper = ({
         >
           <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={30} sx={{ border: "none" }} />
           <Box
-            sx={{ background: onlineUsers.includes(userInfo.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-            className="UserStatusOnlineIcon"
+            sx={{
+              backgroundColor: !onlineUsers[userInfo.uname]
+                ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                : "",
+              fontSize: "1px",
+            }}
+            className={onlineUsers[userInfo.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
           />
         </Box>
         <Typography sx={{ pl: 2 }}>{userInfo.fullname}</Typography>
@@ -151,35 +167,68 @@ export const SidebarWrapper = ({
       }}
     >
       {sidebarType === "chat" && (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "start" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "start", gap: "10px", mt: 2 }}>
           {moveBack && (
             <Tooltip title={"Go Back"}>
-              <IconButton onClick={() => moveBack()} sx={{ mt: 2, ml: 2 }}>
+              <IconButton onClick={() => moveBack()} sx={{ ml: 2 }}>
                 <ArrowBackIcon />
               </IconButton>
             </Tooltip>
           )}
-          <Typography variant="h6" sx={{ ml: 2, p: 3, pb: 0, fontWeight: "bold" }}>
+          {/* <Typography
+            variant="h6"
+            sx={{
+              ml: 2,
+              p: 3,
+              pb: 0,
+              fontWeight: "bold",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              maxWidth: "60%",
+              whiteSpace: "nowrap",
+            }}
+          >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
-          </Typography>
+          </Typography> */}
+          {!!selectedChannel && (
+            <GroupAvatar membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
+          )}
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
-            <Tooltip title={"More Info"}>
-              <IconButton
-                sx={{
-                  width: "2px",
-                  mt: 3,
-                  ":hover": {
-                    background: "transparent",
-                    color: "grey",
-                  },
-                  ml: "5px",
-                }}
-                onClick={() => openChatInfoPage()}
-              >
-                <InfoIcon sx={{ color: "inherit" }} />
-              </IconButton>
-            </Tooltip>
+            <Box sx={{ display: "flex", gap: "10px" }}>
+              <Tooltip title={"More Info"}>
+                <IconButton
+                  sx={{
+                    width: "2px",
+                    ":hover": {
+                      background: "transparent",
+                      color: "grey",
+                    },
+                    ml: "5px",
+                  }}
+                  onClick={() => openChatInfoPage()}
+                >
+                  <InfoIcon sx={{ color: "inherit" }} />
+                </IconButton>
+              </Tooltip>
+              {(leading || roomType === "direct") && (
+                <Tooltip title={"Add New Member"}>
+                  <IconButton
+                    sx={{
+                      width: "2px",
+                      ":hover": {
+                        background: "transparent",
+                        color: "grey",
+                      },
+                      ml: "5px",
+                    }}
+                    onClick={() => setNewMemberSection(true)}
+                  >
+                    <PersonAddIcon sx={{ color: "inherit" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
           )}
         </Box>
       )}
@@ -282,20 +331,18 @@ export const SidebarWrapper = ({
             right: "10px",
           }}
         >
-          <Tooltip title="Close the sidebar." placement="left">
-            <IconButton
-              disabled={disabled}
-              onClick={onClose}
-              sx={{
-                ":hover": {
-                  background: theme =>
-                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            disabled={disabled}
+            onClick={onClose}
+            sx={{
+              ":hover": {
+                background: theme => (theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)"),
+              },
+              zIndex: "5000",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </Box>
       )}
     </Drawer>

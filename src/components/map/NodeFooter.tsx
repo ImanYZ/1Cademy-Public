@@ -34,7 +34,7 @@ import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import NextImage from "next/image";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -92,6 +92,14 @@ type NodeFooterProps = {
   markedWrong: any;
   references: any;
   tags: any;
+  removedTags: string[];
+  addedTags: any;
+  addedReferences: any;
+  removedReferences: any;
+  addedParents: any;
+  removedParents: any;
+  addedChildren: any;
+  removedChildren: any;
   parents: any;
   nodesChildren: any;
   commentsNum: any;
@@ -103,7 +111,7 @@ type NodeFooterProps = {
   simulated?: boolean;
   bookmarked: any;
   bookmarks: any;
-  reloadPermanentGrpah: any;
+  reloadPermanentGraph: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   markStudied: any;
   bookmark: any;
@@ -128,6 +136,9 @@ type NodeFooterProps = {
   setAbleToPropose: any;
   choosingNode: any;
   onChangeChosenNode: () => void;
+  findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
+  findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  onlineUsers: any;
 };
 
 const NodeFooter = ({
@@ -161,6 +172,14 @@ const NodeFooter = ({
   markedWrong,
   references,
   tags,
+  removedTags,
+  addedTags,
+  addedReferences,
+  removedReferences,
+  addedParents,
+  removedParents,
+  addedChildren,
+  removedChildren,
   parents,
   nodesChildren,
   // commentsNum,
@@ -172,7 +191,7 @@ const NodeFooter = ({
   simulated,
   bookmarked,
   bookmarks,
-  reloadPermanentGrpah,
+  reloadPermanentGraph: reloadPermanentGrpah,
   onNodeShare,
   markStudied,
   bookmark,
@@ -195,6 +214,9 @@ const NodeFooter = ({
   setAbleToPropose,
   choosingNode,
   onChangeChosenNode,
+  findDescendantNodes,
+  findAncestorNodes,
+  onlineUsers,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -407,12 +429,34 @@ const NodeFooter = ({
   }, [identifier, nodeBookDispatch, notebookRef, selectNode]);
 
   const proposeNodeImprovementClick = useCallback(
-    (event: any) => {
-      displayProposals();
+    async (event: any) => {
+      const userVersionsRef = collection(db, "versions");
+      const q = query(
+        userVersionsRef,
+        where("node", "==", identifier),
+        where("accepted", "==", false),
+        where("deleted", "==", false),
+        limit(1)
+      );
+      const versionDocs = await getDocs(q);
+      if (!versionDocs.empty) {
+        displayProposals();
+      }
       proposeNodeImprovement(event, identifier);
     },
     [displayProposals, identifier, proposeNodeImprovement]
   );
+  const getNumberColor = (added: any, removed: any) => {
+    if ((removed || []).length > 0 && (added || []).length > 0) {
+      return "orange";
+    } else if ((added || []).length > 0) {
+      return "green";
+    } else if ((removed || []).length > 0) {
+      return "red";
+    }
+    return "";
+  };
+
   return (
     <>
       <Box
@@ -436,7 +480,7 @@ const NodeFooter = ({
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
                   chooseUname={user.chooseUname}
-                  online={false}
+                  online={!!onlineUsers[user.uname]}
                   inUserBar={false}
                   inNodeFooter={true}
                   reloadPermanentGraph={reloadPermanentGrpah}
@@ -453,7 +497,7 @@ const NodeFooter = ({
                   imageUrl={aImgUrl}
                   fullname={aFullname}
                   chooseUname={aChooseUname}
-                  online={false}
+                  online={!!onlineUsers[admin]}
                   inUserBar={false}
                   inNodeFooter={true}
                   reloadPermanentGraph={reloadPermanentGrpah}
@@ -526,34 +570,36 @@ const NodeFooter = ({
               </Box>
             </Tooltip>
 
-            {open && !choosingNode && (
+            {open && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
-                <ContainedButton
-                  id={proposeButtonId}
-                  title="Propose/evaluate versions of this node."
-                  onClick={proposeNodeImprovementClick}
-                  tooltipPosition="top"
-                  sx={{
-                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                    fontWeight: 400,
-                    color: "inherit",
-                    ":hover": {
-                      borderWidth: "0px",
-                      background: (theme: any) =>
-                        theme.palette.mode === "dark"
-                          ? theme.palette.common.darkBackground2
-                          : theme.palette.common.lightBackground2,
-                    },
-                    padding: "7px 7px",
-                    minWidth: "30px",
-                    height: "30px",
-                  }}
-                  disabled={disableProposeButton}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                    <CreateIcon sx={{ fontSize: "16px" }} />
-                  </Box>
-                </ContainedButton>
+                {!locked && (
+                  <ContainedButton
+                    id={proposeButtonId}
+                    title="Propose/evaluate versions of this node."
+                    onClick={proposeNodeImprovementClick}
+                    tooltipPosition="top"
+                    sx={{
+                      background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                      fontWeight: 400,
+                      color: "inherit",
+                      ":hover": {
+                        borderWidth: "0px",
+                        background: (theme: any) =>
+                          theme.palette.mode === "dark"
+                            ? theme.palette.common.darkBackground2
+                            : theme.palette.common.lightBackground2,
+                      },
+                      padding: "7px 7px",
+                      minWidth: "30px",
+                      height: "30px",
+                    }}
+                    disabled={disableProposeButton}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                      <CreateIcon sx={{ fontSize: "16px" }} />
+                    </Box>
+                  </ContainedButton>
+                )}
 
                 <Box
                   id={`${identifier}-node-footer-votes`}
@@ -915,7 +961,9 @@ const NodeFooter = ({
                             src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
                             alt="tag icon"
                           />
-                          <span>{shortenNumber(tags.length, 2, false)}</span>
+                          <span style={{ color: getNumberColor(addedTags, removedTags) }}>
+                            {shortenNumber(tags.length, 2, false)}
+                          </span>
                         </Box>
                       </ContainedButton>
                     </Box>
@@ -947,7 +995,10 @@ const NodeFooter = ({
                           }}
                         >
                           <NextImage width={"22px"} src={ReferenceIcon} alt="tag icon" style={{ marginRight: "2px" }} />
-                          <span className="CitationsSpanBeforeTagIcon">
+                          <span
+                            style={{ color: getNumberColor(addedReferences, removedReferences) }}
+                            className="CitationsSpanBeforeTagIcon"
+                          >
                             {shortenNumber(references.length, 2, false)}
                           </span>
                         </Box>
@@ -962,7 +1013,13 @@ const NodeFooter = ({
                           }}
                         >
                           <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
-                          <span>{shortenNumber(tags.length, 2, false)}</span>
+                          <span
+                            style={{
+                              color: getNumberColor(addedTags, removedTags),
+                            }}
+                          >
+                            {shortenNumber(tags.length, 2, false)}
+                          </span>
                         </Box>
                       </Box>
                     </Box>
@@ -1014,7 +1071,10 @@ const NodeFooter = ({
                               alt="tag icon"
                             />
 
-                            <span className="CitationsSpanBeforeTagIcon" style={{ marginTop: "3px" }}>
+                            <span
+                              style={{ marginTop: "3px", color: getNumberColor(addedReferences, removedReferences) }}
+                              className="CitationsSpanBeforeTagIcon"
+                            >
                               {shortenNumber(references.length, 2, false)}
                             </span>
                           </Box>
@@ -1036,7 +1096,9 @@ const NodeFooter = ({
                               src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
                               alt="tag icon"
                             />
-                            <span style={{ marginTop: "3px" }}>{shortenNumber(tags.length, 2, false)}</span>
+                            <span style={{ marginTop: "3px", color: getNumberColor(addedTags, removedTags) }}>
+                              {shortenNumber(tags.length, 2, false)}
+                            </span>
                           </Box>
                         </Box>
                       </ContainedButton>
@@ -1146,12 +1208,19 @@ const NodeFooter = ({
                     cursor: disableParentChildrenButton ? "not-allowed" : "pointer",
                   }}
                 >
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <span
+                    className="FooterParentNodesOpen"
+                    style={{ color: getNumberColor(addedParents, removedParents) }}
+                  >
+                    {shortenNumber(parents.length, 2, false)}
+                  </span>
                   <SwapHorizIcon
                     sx={{ fontSize: "20px" }}
                     color={openPart === "LinkingWords" ? "primary" : "inherit"}
                   />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                    {shortenNumber(nodesChildren.length, 2, false)}
+                  </span>
                 </Box>
               ) : (
                 <Box
@@ -1182,9 +1251,16 @@ const NodeFooter = ({
                     // disabled={disableParentChildrenButton}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                      <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                      <span
+                        className="FooterParentNodesOpen"
+                        style={{ color: getNumberColor(addedParents, removedParents) }}
+                      >
+                        {shortenNumber(parents.length, 2, false)}
+                      </span>
                       <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                      <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                      <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                        {shortenNumber(nodesChildren.length, 2, false)}
+                      </span>
                     </Box>
                   </ContainedButton>
                 </Box>
@@ -1751,44 +1827,56 @@ const NodeFooter = ({
                 disabled={disableParentChildrenButton}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <span
+                    className="FooterParentNodesOpen"
+                    style={{ color: getNumberColor(addedParents, removedParents) }}
+                  >
+                    {shortenNumber(parents.length, 2, false)}
+                  </span>
                   <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                    {shortenNumber(nodesChildren.length, 2, false)}
+                  </span>
                 </Box>
               </ContainedButton>
             </Box>
           )}
         </Box>
-        {choosingNode && choosingNode?.type && choosingNode?.id !== identifier && (
-          <Button
-            variant="contained"
-            onClick={onChangeChosenNode}
-            sx={{
-              borderRadius: "26px",
-              backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-              mt: "5px",
-              display:
-                (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
-                (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
-                  ? "none"
-                  : "block",
-            }}
-          >
-            {choosingNode?.type === "Reference"
-              ? "Cite It"
-              : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
-              ? "Tag it"
-              : choosingNode?.type === "Child"
-              ? "Link it"
-              : choosingNode?.type === "Parent"
-              ? "Link it"
-              : choosingNode?.type === "Node"
-              ? "Link it"
-              : choosingNode?.type === "Improvement"
-              ? "Choose to improve"
-              : null}
-          </Button>
-        )}
+        {choosingNode &&
+          choosingNode?.type &&
+          choosingNode?.id !== identifier &&
+          (choosingNode?.type === "Child" || choosingNode?.type === "Parent"
+            ? !findDescendantNodes(choosingNode?.id, identifier) && !findAncestorNodes(choosingNode?.id, identifier)
+            : true) && (
+            <Button
+              variant="contained"
+              onClick={onChangeChosenNode}
+              sx={{
+                borderRadius: "26px",
+                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+                mt: "5px",
+                display:
+                  (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
+                  (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
+                    ? "none"
+                    : "block",
+              }}
+            >
+              {choosingNode?.type === "Reference"
+                ? "Cite It"
+                : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
+                ? "Tag it"
+                : choosingNode?.type === "Child"
+                ? "Link it"
+                : choosingNode?.type === "Parent"
+                ? "Link it"
+                : choosingNode?.type === "Node"
+                ? "Link it"
+                : choosingNode?.type === "Improvement"
+                ? "Choose to improve"
+                : null}
+            </Button>
+          )}
       </Box>
       {openSidebar === "USER_INFO" &&
         notebookRef.current.contributorsNodeId?.showContributors &&

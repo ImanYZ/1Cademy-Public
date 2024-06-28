@@ -41,6 +41,7 @@ describe("POST /api/instructor/course/create", () => {
       accepted: true,
       proposer: users[0],
       corrects: 1,
+      nodeType: "Concept",
     }),
   ];
 
@@ -65,7 +66,7 @@ describe("POST /api/instructor/course/create", () => {
 
   const usersCollection = new MockData(users, "users");
   const creditsCollection = new MockData(credits, "credits");
-  const nodeVersionsCollection = new MockData(nodeVersions, "conceptVersions");
+  const nodeVersionsCollection = new MockData(nodeVersions, "versions");
   const reputationsCollection = new MockData(reputations, "reputations");
 
   const coursesCollection = new MockData([], "courses");

@@ -3,7 +3,9 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import HelpCenterIcon from "@mui/icons-material/HelpCenter";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import UndoIcon from "@mui/icons-material/Undo";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
@@ -41,22 +43,26 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import { getMessaging, onMessage } from "firebase/messaging";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import NextImage from "next/image";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 /* eslint-disable */ //This wrapper comments it to use react-map-interaction without types
 // @ts-ignore
 import { MapInteractionCSS } from "react-map-interaction";
+import { IChannels, IConversation } from "src/chatTypes";
+import { channelsChange, getChannelsSnapshot } from "src/client/firestore/channels.firesrtore";
 import {
   channelNotificationChange,
   getchatNotificationsSnapshot,
 } from "src/client/firestore/chatNotifications.firesrtore";
+import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
+import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
 /* eslint-enable */
@@ -65,13 +71,12 @@ import { INotificationNum } from "src/types/INotification";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
-import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
+// import { MemoizedLivelinessBar } from "@/components/map/Liveliness/LivelinessBar";
 // import { Bar } from "@/components/map/Liveliness/Bar";
-import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
+// import { MemoizedRelativeLivelinessBar } from "@/components/map/Liveliness/RelativeLivelinessBar";
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
-import { MemoizedCommentsSidebar } from "@/components/map/Sidebar/SidebarV2/CommentsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsChildrenSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
@@ -86,11 +91,13 @@ import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { useHover } from "@/hooks/userHover";
 // import usePrevious from "@/hooks/usePrevious";
 import { useTagsTreeView } from "@/hooks/useTagsTreeView";
+import { saveMessagingDeviceToken } from "@/lib/firestoreClient/messaging";
 // import { UploadConfirmation, useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { getTutorialTargetIdFromCurrentStep, removeStyleFromTarget } from "@/lib/utils/tutorials/tutorial.utils";
 
 import LoadingImg from "../../public/animated-icon-1cademy.gif";
+import EditIcon from "../../public/edit.svg";
 import { TargetClientRect, TooltipTutorial } from "../components/interactiveTutorial/TooltipTutorial";
 import { Assistant } from "../components/map/Assistant";
 // import nodesData from "../../testUtils/mockCollections/nodes.data";
@@ -119,7 +126,7 @@ import { Post } from "../lib/mapApi";
 import { NO_USER_IMAGE, Z_INDEX } from "../lib/utils/constants";
 import { createGraph, dagreUtils } from "../lib/utils/dagre.util";
 import { devLog } from "../lib/utils/develop.util";
-import { getTypedCollections } from "../lib/utils/getTypedCollections";
+import { getCollectionsQuery } from "../lib/utils/getTypedCollections";
 import {
   changedNodes,
   citations,
@@ -172,10 +179,12 @@ import {
 } from "../nodeBookTypes";
 import { INotebook, NodeType, NotebookDocument, SimpleNode2 } from "../types";
 import {
+  checkInstantApprovalForProposalVote,
+  checkInstantDeleteForNode,
   childrenParentsDifferences,
   doNeedToDeleteNode,
-  getNodeTypesFromNode,
   isVersionApproved,
+  shouldInstantApprovalForProposal,
   showDifferences,
   tagsRefDifferences,
 } from "../utils/helpers";
@@ -202,6 +211,8 @@ export type OnChangeChosenNode = { nodeId: string; title: string };
 type RateProposal = {
   proposals: INodeVersion[];
   setProposals: (proposals: INodeVersion[]) => void;
+  userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
+  setUserVotesOnProposals: any;
   proposalId: string;
   proposalIdx: number;
   correct: boolean;
@@ -227,7 +238,6 @@ export type OpenLeftSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | "CHAT"
-  | "COMMENT"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -269,7 +279,6 @@ const Notebook = ({}: NotebookProps) => {
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
   const db = getFirestore();
-  const messaging = getMessaging();
   // const storage = getStorage();
   const theme = useTheme();
   const router = useRouter();
@@ -373,6 +382,8 @@ const Notebook = ({}: NotebookProps) => {
   const [showNextTutorialStep, setShowNextTutorialStep] = useState(false);
   const [pendingProposalsLoaded /* , setPendingProposalsLoaded */] = useState(true);
 
+  const [pendingProposals, setPendingProposals] = useState<any>([]);
+
   // const previousLengthNodes = useRef(0);
   // const previousLengthEdges = useRef(0);
   const g = useRef(dagreUtils.createGraph());
@@ -382,7 +393,6 @@ const Notebook = ({}: NotebookProps) => {
   //Notifications
   const [uncheckedNotificationsNum, setUncheckedNotificationsNum] = useState(0);
   const [bookmarkUpdatesNum, setBookmarkUpdatesNum] = useState(0);
-  const [pendingProposalsNum, setPendingProposalsNum] = useState(0);
 
   const lastNodeOperation = useRef<{ name: string; data: string } | null>(null);
   const proposalTimer = useRef<any>(null);
@@ -409,7 +419,7 @@ const Notebook = ({}: NotebookProps) => {
     isEnabled: false,
   });
 
-  const [openLivelinessBar, setOpenLivelinessBar] = useState(false);
+  const [openLivelinessBar] = useState(false);
   const [comLeaderboardOpen, setComLeaderboardOpen] = useState(false);
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
 
@@ -451,12 +461,17 @@ const Notebook = ({}: NotebookProps) => {
   const [instructor, setInstructor] = useState<Instructor | null>(null);
 
   const [editingModeNode, setEditingModeNode] = useState(false);
-  const [ratingProposale, setRatingProposale] = useState<boolean>(false);
+  const [ratingProposal, setRatingProposal] = useState<boolean>(false);
 
   // const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
 
   //last interaction date from the user
   const [lastInteractionDate, setLastInteractionDate] = useState<Date>(new Date(Date.now()));
+
+  const [channels, setChannels] = useState<IChannels[]>([]);
+  const [conversations, setConversations] = useState<IConversation[]>([]);
+
+  const [openChatByNotification, setOpenChatByNotification] = useState<any>(null);
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
@@ -498,6 +513,21 @@ const Notebook = ({}: NotebookProps) => {
     },
     [mapInteractionValue.scale, windowHeight, windowInnerLeft, windowInnerRight, windowInnerTop, windowWith]
   );
+  useEffect(() => {
+    if (!user) return;
+    saveMessagingDeviceToken(user.userId);
+  }, [user]);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", event => {
+        if (event.data && event.data.type === "NOTIFICATION_CLICKED") {
+          setOpenSidebar("CHAT");
+          setOpenChatByNotification(event.data);
+        }
+      });
+    }
+  }, []);
 
   //check if the user is instructor
   useEffect(() => {
@@ -766,7 +796,7 @@ const Notebook = ({}: NotebookProps) => {
   const [notebookChanged, setNotebookChanges] = useState({ updated: true });
 
   const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<{ [uname: string]: boolean }>({});
 
   // this object represent the question by practice
   // if practice voice only us enable we have a value on question node
@@ -777,6 +807,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const assistantRef = useRef<DashboardWrapperRef | null>(null);
 
+  const [lockedNodes, setLockedNodes] = useState({});
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
   // FUNCTIONS
@@ -824,40 +855,45 @@ const Notebook = ({}: NotebookProps) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
       const expanded = openWithDefaultValues.hasOwnProperty("open") ? Boolean(openWithDefaultValues.open) : true;
       // update graph with preloaded data, to get changes immediately
-      setGraph(graph => {
-        const preloadedNode = preLoadedNodesRef.current[nodeId];
-        if (!preloadedNode) return graph;
-        const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
-        if (selectedNotebookIdx < 0) {
-          console.error("selectedNotebook property doesn't exist into notebooks property!");
-          return graph;
-        }
-
-        return synchronizeGraph({
-          g: g.current,
-          graph,
-          fullNodes: [
-            {
-              ...preloadedNode,
-              open: expanded,
-              expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
-            },
-          ],
-          selectedNotebookId,
-          allTags,
-          setNodeUpdates,
-          setNoNodesFoundMessage,
-        });
-      });
-
       // update on DB, to save changes
       let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodeFirestore | null = null;
       const nodeRef = doc(db, "nodes", nodeId);
-      const nodeDoc = await getDoc(nodeRef);
+
       const batch = writeBatch(db);
-      if (nodeDoc.exists() && user) {
+      if (/* nodeDoc.exists() && */ user) {
+        setGraph(graph => {
+          const preloadedNode = preLoadedNodesRef.current[nodeId];
+          if (!preloadedNode) return graph;
+          const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
+          if (selectedNotebookIdx < 0) {
+            console.error("selectedNotebook property doesn't exist into notebooks property!");
+            return graph;
+          }
+
+          return synchronizeGraph({
+            g: g.current,
+            graph,
+            fullNodes: [
+              {
+                ...preloadedNode,
+                open: expanded,
+                expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
+              },
+            ],
+            selectedNotebookId,
+            allTags,
+            setNodeUpdates,
+            setNoNodesFoundMessage,
+          });
+        });
+        if (selectNode) {
+          notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
+          nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
+        }
+
+        const nodeDoc = await getDoc(nodeRef);
         const thisNode: any = { ...nodeDoc.data(), id: nodeId };
 
         try {
@@ -935,11 +971,6 @@ const Notebook = ({}: NotebookProps) => {
 
           batch.set(doc(userNodeLogRef), userNodeLogData);
           await batch.commit();
-
-          if (selectNode) {
-            notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
-            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
-          }
         } catch (err) {
           console.error(err);
           const errorData = {
@@ -957,6 +988,7 @@ const Notebook = ({}: NotebookProps) => {
 
   const setNodeParts = useCallback((nodeId: string, innerFunc: (thisNode: FullNodeData) => FullNodeData) => {
     setGraph(({ nodes: oldNodes, edges }) => {
+      if (!oldNodes[nodeId]) return { nodes: oldNodes, edges };
       setSelectedNodeType(oldNodes[nodeId].nodeType);
       const thisNode = { ...oldNodes[nodeId] };
       const newNode = { ...oldNodes, [nodeId]: innerFunc(thisNode) };
@@ -993,6 +1025,17 @@ const Notebook = ({}: NotebookProps) => {
     }, 1000);
   }, [firstScrollToNode, graph.nodes, nodeBookDispatch, openNodeHandler, scrollToNode]);
 
+  useEffect(() => {
+    const getLockedNodes = async () => {
+      const locked: { [key: string]: boolean } = {};
+      const lockedNodesDocs = await getDocs(query(collection(db, "nodes"), where("locked", "==", true)));
+      for (let lockedDoc of lockedNodesDocs.docs) {
+        locked[lockedDoc.id] = true;
+      }
+      setLockedNodes(locked);
+    };
+    getLockedNodes();
+  }, [db]);
   // useEffect(() => {
   //   // fetch user tutorial state first time
 
@@ -1116,21 +1159,40 @@ const Notebook = ({}: NotebookProps) => {
     const unsubscribe = onSnapshot(usersStatusQuery, snapshot => {
       const docChanges = snapshot.docChanges();
       setOnlineUsers(oldOnlineUsers => {
-        const onlineUsersSet = new Set(oldOnlineUsers);
         for (let change of docChanges) {
           const { user: statusUname } = change.doc.data();
           if (change.type === "removed" && user.uname !== statusUname) {
-            onlineUsersSet.delete(statusUname);
+            delete oldOnlineUsers[statusUname];
           } else if (change.type === "added" || change.type === "modified") {
-            onlineUsersSet.add(statusUname);
+            oldOnlineUsers[statusUname] = true;
           }
         }
-        return Array.from(onlineUsersSet);
+        return oldOnlineUsers;
       });
       setUsersOnlineStatusLoaded(true);
     });
     return () => unsubscribe();
   }, [db, user]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      const userAgent = navigator.userAgent;
+      const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(userAgent);
+      const isCtrlF = event.ctrlKey && event.key === "f";
+      const isCmdF = isMac && event.metaKey && event.key === "f";
+
+      if (isCtrlF || isCmdF) {
+        event.preventDefault();
+        setOpenSidebar("SEARCHER_SIDEBAR");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const onPreLoadNodes = useCallback(
     async (nodeIds: string[], fullNodes: FullNodeData[]) => {
@@ -1248,19 +1310,29 @@ const Notebook = ({}: NotebookProps) => {
     const killSnapshot = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
 
-      const newNotebooks = docChanges.map(change => {
-        const userNodeData = change.doc.data() as INotebook;
-        return { type: change.type, id: change.doc.id, data: userNodeData };
-      });
+      setNotebooks((prevNotebooks: any) =>
+        docChanges.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = { id: change.doc.id, ...change.doc.data() };
 
-      setNotebooks(prevNotebooks => {
-        const notesBooksMerged = newNotebooks.reduce((acu: INotebook[], cur) => {
-          if (cur.type === "added") return [...acu, { ...cur.data, id: cur.id }];
-          if (cur.type === "modified") return acu.map(c => (c.id === cur.id ? { ...cur.data, id: cur.id } : c));
-          return acu.filter(c => c.id !== cur.id);
-        }, prevNotebooks);
-        return notesBooksMerged;
-      });
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1 && !curData.conversation) {
+              prev.push({ ...curData, doc: change.doc });
+            }
+            if (docType === "modified" && prevIdx !== -1 && !curData.conversation) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx);
+            }
+            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            return prev;
+          },
+          [...prevNotebooks]
+        )
+      );
     });
 
     return () => {
@@ -1269,11 +1341,12 @@ const Notebook = ({}: NotebookProps) => {
   }, [allTagsLoaded, db, user?.uname, userTutorialLoaded]);
 
   useEffect(() => {
-    if (selectedNotebookId) return;
+    const findSelectedNotebook = notebooks.findIndex(n => n.id === selectedNotebookId);
+    if (findSelectedNotebook !== -1) return;
     if (!notebooks[0]) return;
-
     // first time we set as default the first notebook
     const firstNotebook = notebooks[0].id;
+
     setSelectedNotebookId(firstNotebook);
   }, [notebooks, selectedNotebookId]);
 
@@ -1396,86 +1469,55 @@ const Notebook = ({}: NotebookProps) => {
       bookmarkSnapshot();
     };
   }, [allTagsLoaded, db, user?.uname, currentStep, tutorial]);
-
   useEffect(() => {
-    if (!db) return;
     if (!user?.uname) return;
     if (!user?.tagId) return;
-    if (!allTagsLoaded) return;
-    if (currentStep) return;
 
-    const versionsSnapshots: any[] = [];
-    const versions: { [key: string]: any } = {};
-    const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
-    for (let nodeType of NODE_TYPES_ARRAY) {
-      const { versionsColl, userVersionsColl } = getTypedCollections(db, nodeType);
-      if (!versionsColl || !userVersionsColl) continue;
+    const { versionsColl } = getCollectionsQuery(db);
+    const versionsQuery = query(
+      versionsColl,
+      where("accepted", "==", false),
+      where("tagIds", "array-contains", user?.tagId),
+      where("deleted", "==", false),
+      limit(40)
+    );
 
-      const versionsQuery = query(
-        versionsColl,
-        where("accepted", "==", false),
-        where("tagIds", "array-contains", user.tagId),
-        where("deleted", "==", false)
-      );
+    const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
+      const changes = snapshot.docChanges();
+      if (changes.length > 0) {
+        setPendingProposals((prev: any) =>
+          changes.reduce((prev: any, change: any) => {
+            const docType = change.type;
+            const changeData = change.doc.data();
+            const curData = {
+              ...changeData,
+              id: change.doc.id,
+              createdAt: changeData.createdAt.toDate(),
+              award: false,
+              correct: false,
+              wrong: false,
+            } as any & { id: string };
+            const prevIdx = prev.findIndex((v: any) => v.id === change.doc.id);
 
-      const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
-        const docChanges = snapshot.docChanges();
-        if (docChanges.length > 0) {
-          for (let change of docChanges) {
-            const versionId = change.doc.id;
-            const versionData = change.doc.data();
-            if (change.type === "removed") {
-              delete versions[versionId];
+            if (docType === "added" && prevIdx === -1) {
+              prev.push({ ...curData, doc: change.doc });
             }
-            if (change.type === "added" || change.type === "modified") {
-              versions[versionId] = {
-                ...versionData,
-                id: versionId,
-                createdAt: versionData.createdAt.toDate(),
-                award: false,
-                correct: false,
-                wrong: false,
-              };
-              delete versions[versionId].deleted;
-              delete versions[versionId].updatedAt;
-
-              const q = query(
-                userVersionsColl,
-                where("version", "==", versionId),
-                where("user", "==", user?.uname),
-                limit(1)
-              );
-
-              const userVersionsDocs = await getDocs(q);
-
-              for (let userVersionsDoc of userVersionsDocs.docs) {
-                const userVersion = userVersionsDoc.data();
-                delete userVersion.version;
-                delete userVersion.updatedAt;
-                delete userVersion.createdAt;
-                delete userVersion.user;
-                versions[versionId] = {
-                  ...versions[versionId],
-                  ...userVersion,
-                };
-              }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
             }
-          }
-
-          const pendingProposals = { ...versions };
-          const proposalsTemp = Object.values(pendingProposals);
-          setPendingProposalsNum(proposalsTemp.length);
-        }
-      });
-      versionsSnapshots.push(versionsSnapshot);
-    }
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx, 1);
+            }
+            return prev;
+          }, prev)
+        );
+      }
+    });
 
     return () => {
-      for (let vSnapshot of versionsSnapshots) {
-        vSnapshot();
-      }
+      versionsSnapshot();
     };
-  }, [allTagsLoaded, db, user?.tagId, user?.uname, currentStep]);
+  }, [db, user, user?.tagId]);
 
   useEffect(() => {
     if (!db) return;
@@ -1625,8 +1667,24 @@ const Notebook = ({}: NotebookProps) => {
         uInfo: uname,
         createdAt: Timestamp.fromDate(new Date()),
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "openUserInfoSidebar",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
     },
-    [db, nodeBookDispatch, user?.uname, setOpenSidebar, revertNodesOnGraph]
+    [db, nodeBookDispatch, user, setOpenSidebar, revertNodesOnGraph]
   );
 
   const getFirstParent = (childId: string) => {
@@ -2441,6 +2499,21 @@ const Notebook = ({}: NotebookProps) => {
 
         return graph;
       });
+
+      createActionTrack(
+        db,
+        "openAllChildren",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        [],
+        user.email
+      );
       lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
@@ -2562,6 +2635,21 @@ const Notebook = ({}: NotebookProps) => {
 
         return graph;
       });
+
+      createActionTrack(
+        db,
+        "openAllParent",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        [],
+        user.email
+      );
       lastNodeOperation.current = { name: "OpenAllParent", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
@@ -2659,6 +2747,20 @@ const Notebook = ({}: NotebookProps) => {
       setSelectedNotebookId(notebookId);
       await detectHtmlElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
+      createActionTrack(
+        db,
+        "openNodesOnNotebook",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user.email
+      );
     },
     [db, user]
   );
@@ -2791,10 +2893,25 @@ const Notebook = ({}: NotebookProps) => {
         //   setOpenRecentNodes(true);
         // }
       }
-
       processHeightChange(nodeId);
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       notebookRef.current.selectedNode = nodeId;
+      if (user) {
+        createActionTrack(
+          db,
+          "openNodePart",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2849,6 +2966,22 @@ const Notebook = ({}: NotebookProps) => {
           edges,
         };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "referenceLabelChange",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [setGraph]
   );
@@ -2915,6 +3048,21 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: oldNodes, edges };
       });
       event.currentTarget.blur();
+
+      createActionTrack(
+        db,
+        "markStudied",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        nodeId,
+        [],
+        user?.email
+      );
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3020,6 +3168,22 @@ const Notebook = ({}: NotebookProps) => {
       setNodeParts(nodeId, node => {
         return { ...node, disableVotes: false };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "correctNode",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [setNodeParts]
@@ -3034,10 +3198,11 @@ const Notebook = ({}: NotebookProps) => {
       correct: any,
       wrongs: number,
       corrects: number,
-      locked: boolean
+      locked: boolean,
+      tagIds: string[]
     ) => {
       try {
-        if (notebookRef.current.choosingNode) return;
+        if (notebookRef.current.choosingNode || !user) return;
 
         let deleteOK: any = true;
         notebookRef.current.selectedNode = nodeId;
@@ -3051,24 +3216,17 @@ const Notebook = ({}: NotebookProps) => {
         setNodeParts(nodeId, node => {
           return { ...node, disableVotes: true };
         });
-        const { courseExist, instantDelete }: { courseExist: boolean; instantDelete: boolean } = await Post(
-          "/instructor/course/checkInstantDeleteForNode",
-          {
-            nodeId,
-          }
-        );
+
+        const { instantDelete, isInstructor }: { instantDelete: boolean; isInstructor: boolean } =
+          await checkInstantDeleteForNode(tagIds, user.uname, nodeId);
 
         setNodeParts(nodeId, node => {
           return { ...node, disableVotes: false };
         });
 
         const node = graph.nodes[nodeId];
-        let willRemoveNode = false;
-        if (courseExist) {
-          willRemoveNode = instantDelete;
-        } else {
-          willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked);
-        }
+        let willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked, instantDelete, isInstructor);
+
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             confirmIt(
@@ -3079,7 +3237,20 @@ const Notebook = ({}: NotebookProps) => {
             deleteOK = false;
           } else {
             deleteOK = await confirmIt(
-              "You are going to permanently delete this node by downvoting it. Are you sure?",
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  gap: "10px",
+                }}
+              >
+                <DeleteForeverIcon />
+                <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this node?</Typography>
+                <Typography>Deleting a node will permanently remove it from 1cademy.</Typography>
+              </Box>,
               "Delete Node",
               "Keep Node"
             );
@@ -3145,12 +3316,28 @@ const Notebook = ({}: NotebookProps) => {
           });
           return { nodes, edges };
         });
+        if (user) {
+          createActionTrack(
+            db,
+            "wrongNode",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            [],
+            user?.email
+          );
+        }
       } catch (error) {
         console.error(error);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setNodeParts]
+    [setNodeParts, user]
   );
 
   /////////////////////////////////////////////////////
@@ -3182,6 +3369,22 @@ const Notebook = ({}: NotebookProps) => {
       if (!ableToPropose) {
         setAbleToPropose(true);
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "changeChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [ableToPropose, setNodeParts]
   );
@@ -3199,6 +3402,22 @@ const Notebook = ({}: NotebookProps) => {
       });
       if (!ableToPropose) {
         setAbleToPropose(true);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "changeFeedback",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
       }
     },
     [ableToPropose, setNodeParts]
@@ -3219,6 +3438,22 @@ const Notebook = ({}: NotebookProps) => {
       if (!ableToPropose) {
         setAbleToPropose(true);
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "switchChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [ableToPropose, setNodeParts]
   );
@@ -3235,6 +3470,22 @@ const Notebook = ({}: NotebookProps) => {
       });
       if (!ableToPropose) {
         setAbleToPropose(true);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "deleteChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
       }
     },
     [ableToPropose, setNodeParts]
@@ -3256,6 +3507,22 @@ const Notebook = ({}: NotebookProps) => {
       });
       if (!ableToPropose) {
         setAbleToPropose(true);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "addChoice",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
       }
     },
     [ableToPropose, setNodeParts]
@@ -3294,6 +3561,22 @@ const Notebook = ({}: NotebookProps) => {
       createdAt: Timestamp.fromDate(new Date()),
     });
     setOpenSidebar(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "closeSideBar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [
     user,
     graph.nodes,
@@ -3339,6 +3622,22 @@ const Notebook = ({}: NotebookProps) => {
       processHeightChange(nodeId);
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
+      if (user) {
+        createActionTrack(
+          db,
+          "proposeNodeImprovement",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          nodeId,
+          [],
+          user?.email
+        );
+      }
     },
     [processHeightChange, revertNodesOnGraph, scrollToNode]
   );
@@ -3458,6 +3757,22 @@ const Notebook = ({}: NotebookProps) => {
         });
         return { nodes: newNodes, edges: newEdges };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "proposeNewParent",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, revertNodesOnGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
@@ -3525,6 +3840,22 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectionType", payload: chosenType });
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "selectNode",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
   );
@@ -3541,7 +3872,19 @@ const Notebook = ({}: NotebookProps) => {
         currentNode.references.length === 0
       ) {
         referencesOK = await confirmIt(
-          "You are proposing a node without any reference. Are you sure?",
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              gap: "10px",
+            }}
+          >
+            <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+            <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+          </Box>,
           "Yes",
           "cancel"
         );
@@ -3552,7 +3895,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedImprovement = useCallback(
-    async (summary: string, reason: string, onFail: () => void) => {
+    async (summary: string, reason: string, tagIds: string[], onFail: () => void) => {
       if (!notebookRef.current.selectedNode) return;
       if (!user) return;
 
@@ -3568,15 +3911,13 @@ const Notebook = ({}: NotebookProps) => {
         if (!referencesOK) return;
 
         const {
-          courseExist,
           isInstructor,
           instantApprove,
-        }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } = await Post(
-          "/instructor/course/checkInstantApprovalForProposal",
-          {
-            nodeId: notebookRef.current.selectedNode,
-          }
-        );
+        }: { courseExist: boolean; isInstructor: boolean; instantApprove: boolean } =
+          await shouldInstantApprovalForProposal({
+            tagIds,
+            uname: user.uname,
+          });
 
         setUpdatedLinks(updatedLinks => {
           setGraph(graph => {
@@ -3673,12 +4014,15 @@ const Notebook = ({}: NotebookProps) => {
             delete postData.left;
             delete postData.top;
             delete postData.height;
-            let willBeApproved = false;
-            if (courseExist || isInstructor) {
-              willBeApproved = instantApprove;
-            } else {
-              willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: newNode });
-            }
+
+            const willBeApproved = isVersionApproved({
+              corrects: 1,
+              wrongs: 0,
+              nodeData: newNode,
+              instantApprove,
+              isInstructor,
+            });
+
             lastNodeOperation.current = { name: "ProposeProposals", data: willBeApproved ? "accepted" : "notAccepted" };
 
             if (willBeApproved) {
@@ -3686,6 +4030,7 @@ const Notebook = ({}: NotebookProps) => {
               const newChildIds: string[] = newNode.children.map(child => child.node);
               const oldParentIds: string[] = oldNode.parents.map(parent => parent.node);
               const oldChildIds: string[] = oldNode.children.map(child => child.node);
+              // const newTagsIds: string[] = newNode.parents.map(parent => parent.node);
               const idsToBeRemoved = Array.from(
                 new Set<string>([
                   ...newParentIds,
@@ -3715,7 +4060,7 @@ const Notebook = ({}: NotebookProps) => {
             if (willBeApproved) {
               oldNodes = {
                 ...graph.nodes,
-                [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false }, // e3
+                [selectedNodeId]: { ...graph.nodes[selectedNodeId], editable: false, simulated: true }, // e3
               };
             } else {
               // revertNodesOnGraph()
@@ -3758,6 +4103,22 @@ const Notebook = ({}: NotebookProps) => {
 
           return updatedLinks;
         });
+        if (user) {
+          createActionTrack(
+            db,
+            "saveProposedImprovement",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            notebookRef.current.selectedNode || "",
+            [],
+            user?.email
+          );
+        }
       } catch (err) {
         console.error(err);
         const errorData = {
@@ -3772,6 +4133,16 @@ const Notebook = ({}: NotebookProps) => {
 
   const ProposeNodeImprovement = async ({ postData, flashcard }: any) => {
     const response: any = await Post("/proposeNodeImprovement", postData);
+    setGraph(graph => {
+      const oldNodes = {
+        ...graph.nodes,
+        [postData.id]: { ...graph.nodes[postData.id], editable: false, simulated: false }, // e3
+      };
+      return {
+        nodes: oldNodes,
+        edges: graph.edges,
+      };
+    });
     if (!response) return;
     window.dispatchEvent(
       new CustomEvent("propose-flashcard", {
@@ -3889,6 +4260,22 @@ const Notebook = ({}: NotebookProps) => {
         });
         return { nodes: newNodes, edges: newEdges };
       });
+      if (user) {
+        createActionTrack(
+          db,
+          "proposeNewChild",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, revertNodesOnGraph, db, allTags, settings.showClusterOptions, nodeBookDispatch, scrollToNode]
@@ -4063,6 +4450,22 @@ const Notebook = ({}: NotebookProps) => {
           scrollToNode(newNodeId);
           return { nodes, edges };
         });
+        if (user) {
+          createActionTrack(
+            db,
+            "saveProposedParentNode",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            notebookRef.current.selectedNode || "",
+            [],
+            user?.email
+          );
+        }
       } catch (err) {
         console.error(err);
         const errorData = {
@@ -4130,7 +4533,10 @@ const Notebook = ({}: NotebookProps) => {
           return;
         }
 
-        const { courseExist, instantApprove }: { courseExist: boolean; instantApprove: boolean } = await Post(
+        const {
+          instantApprove,
+          isInstructor,
+        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
           "/instructor/course/checkInstantApprovalForProposal",
           {
             tagIds,
@@ -4212,12 +4618,13 @@ const Notebook = ({}: NotebookProps) => {
 
           const parentNode = graph.nodes[newNode.parents[0].node];
 
-          let willBeApproved = false;
-          if (courseExist) {
-            willBeApproved = instantApprove;
-          } else {
-            willBeApproved = isVersionApproved({ corrects: 1, wrongs: 0, nodeData: parentNode });
-          }
+          const willBeApproved = isVersionApproved({
+            corrects: 1,
+            wrongs: 0,
+            nodeData: parentNode,
+            instantApprove,
+            isInstructor,
+          });
 
           const nodePartChanges = {
             editable: false,
@@ -4294,6 +4701,22 @@ const Notebook = ({}: NotebookProps) => {
         };
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "saveProposedChildNode",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     [selectedNotebookId, user, nodeBookDispatch, graph.nodes, scrollToNode, settings.showClusterOptions, allTags, db]
   );
@@ -4319,173 +4742,6 @@ const Notebook = ({}: NotebookProps) => {
       window.dispatchEvent(new CustomEvent("question-node-proposed"));
     }
   };
-
-  const fetchProposals = useCallback(
-    async (
-      setIsAdmin: (value: boolean) => void,
-      setIsRetrieving: (value: boolean) => void,
-      setProposals: (value: any) => void
-    ) => {
-      if (!user) return;
-      if (!selectedNodeType) return;
-
-      setGraph(({ nodes: oldNodes, edges }) => {
-        (async () => {
-          setIsRetrieving(true);
-          if (nodeBookState.selectedNode && nodeBookState.selectedNode in oldNodes) {
-            setIsAdmin(oldNodes[nodeBookState.selectedNode].admin === user.uname);
-          }
-
-          const currentNode = oldNodes[String(nodeBookState.selectedNode)];
-          if (!currentNode) return;
-
-          const nodeTypes: INodeType[] = getNodeTypesFromNode(currentNode as any);
-
-          const versions: any = {};
-          let versionId;
-          const versionIds: string[] = [];
-          const comments: any = {};
-          const userVersionsRefs: Query<DocumentData>[] = [];
-          const versionsCommentsRefs: Query<DocumentData>[] = [];
-          const userVersionsCommentsRefs: Query<DocumentData>[] = [];
-
-          for (const nodeType of nodeTypes) {
-            const { versionsColl, userVersionsColl, versionsCommentsColl, userVersionsCommentsColl } =
-              getTypedCollections(db, nodeType);
-
-            if (!versionsColl || !userVersionsColl || !versionsCommentsColl || !userVersionsCommentsColl) continue;
-
-            const versionsQuery = query(
-              versionsColl,
-              where("node", "==", nodeBookState.selectedNode),
-              where("deleted", "==", false)
-            );
-
-            const versionsData = await getDocs(versionsQuery);
-
-            // iterate version and push userVersion and versionComments
-            versionsData.forEach(versionDoc => {
-              versionIds.push(versionDoc.id);
-              const versionData = versionDoc.data();
-
-              versions[versionDoc.id] = {
-                ...versionData,
-                nodeType,
-                id: versionDoc.id,
-                createdAt: versionData.createdAt.toDate(),
-                award: false,
-                correct: false,
-                wrong: false,
-                comments: [],
-              };
-              delete versions[versionDoc.id].deleted;
-              delete versions[versionDoc.id].updatedAt;
-              delete versions[versionDoc.id].node;
-              const userVersionsQuery = query(
-                userVersionsColl,
-                where("version", "==", versionDoc.id),
-                where("user", "==", user.uname)
-              );
-              userVersionsRefs.push(userVersionsQuery);
-              const versionsCommentsQuery = query(
-                versionsCommentsColl,
-                where("version", "==", versionDoc.id),
-                where("deleted", "==", false)
-              );
-              versionsCommentsRefs.push(versionsCommentsQuery);
-            });
-
-            // merge version and userVersion: version[id] = {...version[id],userVersion}
-            if (userVersionsRefs.length > 0) {
-              await Promise.all(
-                userVersionsRefs.map(async userVersionsRef => {
-                  const userVersionsDocs = await getDocs(userVersionsRef);
-                  userVersionsDocs.forEach(userVersionsDoc => {
-                    const userVersion = userVersionsDoc.data();
-                    versionId = userVersion.version;
-                    delete userVersion.version;
-                    delete userVersion.updatedAt;
-                    delete userVersion.createdAt;
-                    delete userVersion.user;
-                    if (userVersion.hasOwnProperty("id")) {
-                      delete userVersion.id;
-                    }
-                    versions[versionId] = {
-                      ...versions[versionId],
-                      ...userVersion,
-                    };
-                  });
-                })
-              );
-            }
-
-            // build version comments {}
-            if (versionsCommentsRefs.length > 0) {
-              await Promise.all(
-                versionsCommentsRefs.map(async versionsCommentsRef => {
-                  const versionsCommentsDocs = await getDocs(versionsCommentsRef);
-                  versionsCommentsDocs.forEach(versionsCommentsDoc => {
-                    const versionsComment = versionsCommentsDoc.data();
-                    delete versionsComment.updatedAt;
-                    comments[versionsCommentsDoc.id] = {
-                      ...versionsComment,
-                      id: versionsCommentsDoc.id,
-                      createdAt: versionsComment.createdAt.toDate(),
-                    };
-                    const userVersionsCommentsQuery = query(
-                      userVersionsCommentsColl,
-                      where("versionComment", "==", versionsCommentsDoc.id),
-                      where("user", "==", user.uname)
-                    );
-
-                    userVersionsCommentsRefs.push(userVersionsCommentsQuery);
-                  });
-                })
-              );
-
-              // merge comments and userVersionComment
-              if (userVersionsCommentsRefs.length > 0) {
-                await Promise.all(
-                  userVersionsCommentsRefs.map(async userVersionsCommentsRef => {
-                    const userVersionsCommentsDocs = await getDocs(userVersionsCommentsRef);
-                    userVersionsCommentsDocs.forEach(userVersionsCommentsDoc => {
-                      const userVersionsComment = userVersionsCommentsDoc.data();
-                      const versionCommentId = userVersionsComment.versionComment;
-                      delete userVersionsComment.versionComment;
-                      delete userVersionsComment.updatedAt;
-                      delete userVersionsComment.createdAt;
-                      delete userVersionsComment.user;
-                      comments[versionCommentId] = {
-                        ...comments[versionCommentId],
-                        ...userVersionsComment,
-                      };
-                    });
-                  })
-                );
-              }
-            }
-
-            // merge comments into versions
-            Object.values(comments).forEach((comment: any) => {
-              versionId = comment.version;
-              delete comment.version;
-              versions[versionId].comments.push(comment);
-            });
-          }
-
-          const proposalsTemp = Object.values(versions);
-          const orderedProposals = proposalsTemp.sort(
-            (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
-          );
-          setProposals(orderedProposals);
-          setIsRetrieving(false);
-        })();
-
-        return { nodes: oldNodes, edges };
-      });
-    },
-    [user, selectedNodeType, db, nodeBookState.selectedNode]
-  );
 
   /////////////////////////////////////////////////////
   // Inner functions
@@ -4621,8 +4877,12 @@ const Notebook = ({}: NotebookProps) => {
             thisNode.nodeVideoStartTime = proposal.nodeVideoStartTime;
             thisNode.nodeVideoEndTime = proposal.nodeVideoEndTime;
             thisNode.nodeImage = proposal.nodeImage;
-            thisNode.children = newChildren;
-            thisNode.parents = newParents;
+            thisNode.children = [...thisNode.children, ...newChildren.added];
+            thisNode.addedChildren = newChildren.added;
+            thisNode.removedChildren = newChildren.removed;
+            thisNode.parents = [...thisNode.parents, ...newParents.added];
+            thisNode.addedParents = newParents.added;
+            thisNode.removedParents = newParents.removed;
             thisNode.addedTags = newTags.added;
             thisNode.removedTags = newTags.removed;
             thisNode.references = Array.from(new Set([...thisNode.references, ...proposal.references]));
@@ -4657,6 +4917,22 @@ const Notebook = ({}: NotebookProps) => {
         }, 200);
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
+      if (user) {
+        createActionTrack(
+          db,
+          "onSelectProposal",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
+      }
     },
     [user?.uname, nodeBookState.selectedNode, allTags, revertNodesOnGraph, settings.showClusterOptions]
   );
@@ -4679,6 +4955,22 @@ const Notebook = ({}: NotebookProps) => {
         setProposals(proposalsTemp);
         // setIsSubmitting(false);
         scrollToNode(nodeBookState.selectedNode);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "deleteProposal",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          notebookRef.current.selectedNode || "",
+          [],
+          user?.email
+        );
       }
     },
     [nodeBookState.choosingNode, nodeBookState.selectedNode, revertNodesOnGraph, scrollToNode, selectedNodeType]
@@ -4773,12 +5065,14 @@ const Notebook = ({}: NotebookProps) => {
         ) {
           confirmIt("We only accept JPG, JPEG, PNG, or GIF images. Please upload another image.", "Ok", "");
         } else {
-          let userName = await promptIt(
-            "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
-            "Save",
-            ""
+          let fullname = await promptIt(
+            "Consent that you have all the rights to upload this image and the image does not violate any laws.",
+            "I Consent",
+            "",
+            `${user?.fName} ${user?.lName}`
           );
-          if (userName != `${user?.fName} ${user?.lName}`) {
+
+          if (fullname != `${user?.fName} ${user?.lName}`) {
             confirmIt("Entered full name is not correct", "Ok", "");
             return;
           }
@@ -4829,6 +5123,22 @@ const Notebook = ({}: NotebookProps) => {
             }
           );
         }
+        if (user) {
+          createActionTrack(
+            db,
+            "uploadNodeImage",
+            "",
+            {
+              fullname: `${user?.fName} ${user?.lName}`,
+              chooseUname: !!user?.chooseUname,
+              uname: String(user?.uname),
+              imageUrl: String(user?.imageUrl),
+            },
+            nodeId,
+            [],
+            user?.email
+          );
+        }
       } catch (err) {
         console.error("Image Upload Error: ", err);
         setIsUploading(false);
@@ -4839,36 +5149,62 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const rateProposal = useCallback(
-    async ({ proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId }: RateProposal) => {
+    async ({
+      proposals,
+      setProposals,
+      userVotesOnProposals,
+      setUserVotesOnProposals,
+      proposalId,
+      proposalIdx,
+      correct,
+      wrong,
+      award,
+      newNodeId,
+    }: RateProposal) => {
       if (!selectedNotebookId) return;
       if (!user) return;
       if (!nodeBookState.selectedNode) return;
       if (!selectedNodeType) return;
-      setRatingProposale(true);
-      devLog("RATE_PROPOSAL", { proposals, setProposals, proposalId, proposalIdx, correct, wrong, award, newNodeId });
-
+      setRatingProposal(true);
+      devLog("RATE_PROPOSAL", {
+        proposals,
+        setProposals,
+        proposalId,
+        userVotesOnProposals,
+        proposalIdx,
+        correct,
+        wrong,
+        award,
+        newNodeId,
+      });
+      if (!userVotesOnProposals[proposalId]) {
+        userVotesOnProposals[proposalId] = {
+          correct: false,
+          wrong: false,
+        };
+      }
       if (!nodeBookState.choosingNode) {
         const proposalsTemp = [...proposals];
         let interactionValue = 0;
         let voteType: string = "";
         if (correct) {
-          interactionValue += proposalsTemp[proposalIdx].correct ? -1 : 1;
-          if (!proposalsTemp[proposalIdx].correct) {
+          interactionValue += userVotesOnProposals[proposalId].correct ? -1 : 1;
+          if (!userVotesOnProposals[proposalId].correct) {
             voteType = "Correct";
           }
-          proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 0;
-          proposalsTemp[proposalIdx].wrong = false;
-          proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 1;
-          proposalsTemp[proposalIdx].correct = !proposalsTemp[proposalIdx].correct;
+          proposalsTemp[proposalIdx].wrongs += userVotesOnProposals[proposalId].wrong ? -1 : 0;
+          userVotesOnProposals[proposalId].wrong = false;
+          proposalsTemp[proposalIdx].corrects += userVotesOnProposals[proposalId].correct ? -1 : 1;
+          userVotesOnProposals[proposalId].correct = !proposalsTemp[proposalIdx].correct;
         } else if (wrong) {
           if (!proposalsTemp[proposalIdx].wrong) {
             voteType = "Wrong";
           }
-          interactionValue += proposalsTemp[proposalIdx].wrong ? 1 : -1;
-          proposalsTemp[proposalIdx].corrects += proposalsTemp[proposalIdx].correct ? -1 : 0;
-          proposalsTemp[proposalIdx].correct = false;
-          proposalsTemp[proposalIdx].wrongs += proposalsTemp[proposalIdx].wrong ? -1 : 1;
-          proposalsTemp[proposalIdx].wrong = !proposalsTemp[proposalIdx].wrong;
+          interactionValue += userVotesOnProposals[proposalId].wrong ? 1 : -1;
+          proposalsTemp[proposalIdx].corrects += userVotesOnProposals[proposalId].correct ? -1 : 0;
+          userVotesOnProposals[proposalId].correct = false;
+          proposalsTemp[proposalIdx].wrongs += userVotesOnProposals[proposalId].wrong ? -1 : 1;
+          userVotesOnProposals[proposalId].wrong = !proposalsTemp[proposalIdx].wrong;
         } else if (award) {
           if (!proposalsTemp[proposalIdx].award) {
             voteType = "Award";
@@ -4904,39 +5240,44 @@ const Notebook = ({}: NotebookProps) => {
         };
 
         const updatedNodeIds: string[] = [nodeBookState.selectedNode!, newNodeId];
-        type CheckInstantApproval = {
-          nodeId: string;
-          verisonType: INodeType;
-          versionId: string;
-        };
-        const checkInstantApproval: CheckInstantApproval = {
-          nodeId: nodeBookState.selectedNode,
-          verisonType: selectedNodeType,
-          versionId: proposalId,
-        };
 
         const {
           courseExist,
           instantApprove,
           isInstructor,
-        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
-          "/instructor/course/checkInstantApprovalForProposalVote",
-          checkInstantApproval
-        );
-        let willBeApproved: boolean = false;
-        if (voteType === "Correct" && (courseExist || isInstructor)) {
-          willBeApproved = instantApprove;
-        } else {
-          willBeApproved = isVersionApproved({
-            corrects: proposalsTemp[proposalIdx].corrects,
-            wrongs: proposalsTemp[proposalIdx].wrongs,
-            nodeData: graph.nodes[nodeBookState.selectedNode],
-          });
-        }
-        setRatingProposale(false);
+        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
+          await checkInstantApprovalForProposalVote(nodeBookState.selectedNode, user.uname, proposalId);
+
+        let willBeApproved: boolean = isVersionApproved({
+          corrects: proposalsTemp[proposalIdx].corrects,
+          wrongs: proposalsTemp[proposalIdx].wrongs,
+          nodeData: graph.nodes[nodeBookState.selectedNode],
+          instantApprove: instantApprove && correct,
+          isInstructor,
+        });
+
+        setRatingProposal(false);
 
         if (willBeApproved) {
-          const res = await confirmIt("Are you sure you want to approve this proposal?", "Yes", "Cancel");
+          const res = await confirmIt(
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+                borderRadius: "40px",
+              }}
+            >
+              <NextImage width={"22px"} height={"22px"} src={EditIcon} alt="search icon" />
+              <Typography sx={{ fontWeight: "bold" }}>Approve Proposal</Typography>
+              <Typography>Are you sure you want to approve this proposal?</Typography>
+            </Box>,
+            "Yes",
+            "Cancel"
+          );
           if (!res) return;
         }
 
@@ -4953,7 +5294,7 @@ const Notebook = ({}: NotebookProps) => {
             if (proposalsTemp[proposalIdx].hasOwnProperty("childType") && proposalsTemp[proposalIdx].childType) {
               const previewNode = Object.values(oldNodes).find((node: any) => node.versionId === proposalId);
               if (previewNode) {
-                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: false };
+                oldNodes[newNodeId] = { ...oldNodes[previewNode.node], unaccepted: false, simulated: true };
               }
               if (tempNodes.has(newNodeId)) {
                 tempNodes.delete(newNodeId);
@@ -4961,21 +5302,50 @@ const Notebook = ({}: NotebookProps) => {
             } else {
               oldNodes[nodeBookState.selectedNode].title = proposalsTemp[proposalIdx].title;
               oldNodes[nodeBookState.selectedNode].content = proposalsTemp[proposalIdx].content;
+              oldNodes[nodeBookState.selectedNode].tags = proposalsTemp[proposalIdx].tags;
+              oldNodes[nodeBookState.selectedNode].referenceIds = proposalsTemp[proposalIdx].referenceIds;
+              oldNodes[nodeBookState.selectedNode].referenceLabels = proposalsTemp[proposalIdx].referenceLabels;
+              // oldNodes[nodeBookState.selectedNode].children = proposalsTemp[proposalIdx].children;
+              oldNodes[nodeBookState.selectedNode].tagIds = proposalsTemp[proposalIdx].tagIds;
+              oldNodes[nodeBookState.selectedNode].simulated = true;
             }
             setOpenSidebar(null);
           }
           setProposals(proposalsTemp);
-          try {
-            Post("/rateVersion", postData);
-          } catch (error) {
-            console.error(error);
-          }
+          setUserVotesOnProposals(userVotesOnProposals);
           return { nodes: oldNodes, edges };
         });
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
         });
+        try {
+          await Post("/rateVersion", postData);
+          setGraph(({ nodes: oldNodes, edges }) => {
+            if (oldNodes[postData.nodeId]) {
+              oldNodes[postData.nodeId] = { ...oldNodes[postData.nodeId], unaccepted: false, simulated: false };
+            }
+            return { nodes: oldNodes, edges };
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "rateProposal",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          newNodeId,
+          [],
+          user?.email
+        );
       }
     },
     [selectedNotebookId, user, nodeBookState.selectedNode, nodeBookState.choosingNode, selectedNodeType]
@@ -5000,11 +5370,43 @@ const Notebook = ({}: NotebookProps) => {
 
   const onOpenSideBar = useCallback((sidebar: OpenLeftSidebar) => {
     setOpenSidebar(sidebar);
+    if (user) {
+      createActionTrack(
+        db,
+        "onOpenSideBar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, []);
 
   // this method was required to cleanup editor added, removed child and parent list
   const cleanEditorLink = useCallback(() => {
     updatedLinksRef.current = getInitialUpdateLinks();
+    if (user) {
+      createActionTrack(
+        db,
+        "cleanEditorLink",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, []);
 
   const onScrollToLastNode = () => {
@@ -5016,6 +5418,22 @@ const Notebook = ({}: NotebookProps) => {
     revertNodesOnGraph();
     if (notebookRef.current.selectedNode) scrollToNode(notebookRef.current.selectedNode);
     setOpenSidebar(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "onCloseSidebar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [revertNodesOnGraph, scrollToNode]);
 
   const onRedrawGraph = useCallback(() => {
@@ -5030,6 +5448,22 @@ const Notebook = ({}: NotebookProps) => {
     setTimeout(() => {
       setNotebookChanges({ updated: true });
     }, 200);
+    if (user) {
+      createActionTrack(
+        db,
+        "onRedrawGraph",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [setNotebookChanges]);
 
   const setSelectedNode = useCallback(
@@ -5054,11 +5488,11 @@ const Notebook = ({}: NotebookProps) => {
       defaultScaleDevice = 0.92;
     }
     const userThresholdPercentage = user.scaleThreshold;
-    let userThresholdcurrentScale = 1;
+    let userThresholdCurrentScale = 1;
 
-    userThresholdcurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
+    userThresholdCurrentScale = (userThresholdPercentage * defaultScaleDevice) / 100;
 
-    return mapInteractionValue.scale < userThresholdcurrentScale;
+    return mapInteractionValue.scale < userThresholdCurrentScale;
   }, [mapInteractionValue.scale, user, windowWith]);
 
   // const handleCloseProgressBarMenu = useCallback(() => {
@@ -5068,14 +5502,67 @@ const Notebook = ({}: NotebookProps) => {
   const onCancelTutorial = useCallback(() => {
     if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     setTutorial(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "onCancelTutorial",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [setTutorial, tutorialTargetId]);
 
   const onCloseTableOfContent = useCallback(() => {
     setOpenProgressBar(false);
   }, []);
 
-  const onOnlyCloseSidebar = useCallback(() => setOpenSidebar(null), []);
-  const onDisplayInstructorPage = useCallback(() => setDisplayDashboard(true), []);
+  const onOnlyCloseSidebar = useCallback(() => {
+    setOpenSidebar(null);
+    if (user) {
+      createActionTrack(
+        db,
+        "onOnlyCloseSidebar",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
+  }, [user, db]);
+
+  const onDisplayInstructorPage = useCallback(() => {
+    setDisplayDashboard(true);
+    if (user) {
+      createActionTrack(
+        db,
+        "onDisplayInstructorPage",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
+  }, []);
 
   const onSkipTutorial = useCallback(async () => {
     if (!user) return;
@@ -5107,6 +5594,22 @@ const Notebook = ({}: NotebookProps) => {
       await updateDoc(tutorialRef, userTutorialUpdated);
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
+    }
+    if (user) {
+      createActionTrack(
+        db,
+        "onSkipTutorial",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
     }
   }, [
     user,
@@ -5213,6 +5716,22 @@ const Notebook = ({}: NotebookProps) => {
     } else {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
+    if (user) {
+      createActionTrack(
+        db,
+        "onFinalizeTutorial",
+        "",
+        {
+          fullname: `${user?.fName} ${user?.lName}`,
+          chooseUname: !!user?.chooseUname,
+          uname: String(user?.uname),
+          imageUrl: String(user?.imageUrl),
+        },
+        "",
+        [],
+        user?.email
+      );
+    }
   }, [
     user,
     currentStep,
@@ -5273,7 +5792,22 @@ const Notebook = ({}: NotebookProps) => {
         nodeIds: [targetId],
         updatedAt: new Date(),
       });
-
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndForceTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
       return true;
     },
 
@@ -5289,6 +5823,22 @@ const Notebook = ({}: NotebookProps) => {
       if (!targetIsValid(node)) {
         setTutorial(null);
         setForcedTutorial(null);
+      }
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndRemoveTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
       }
     },
     [graph.nodes, setTutorial, dynamicTargetId, tutorial]
@@ -5314,9 +5864,25 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setIsMenuOpen", payload: true });
       }
       startTutorial(tutorialName);
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndCallSidebarTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
       return true;
     },
-    [forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
+    [db, user, forcedTutorial, nodeBookDispatch, nodeBookState.selectedNode, openSidebar, startTutorial, userTutorial]
   );
 
   const detectAndCallTutorial = useCallback(
@@ -5338,9 +5904,27 @@ const Notebook = ({}: NotebookProps) => {
         notebookRef.current.selectedNode = newTargetId;
         scrollToNode(newTargetId);
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "detectAndCallTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
       return true;
     },
     [
+      db,
+      user,
       forcedTutorial,
       graph.nodes,
       nodeBookDispatch,
@@ -5942,7 +6526,10 @@ const Notebook = ({}: NotebookProps) => {
       ) {
         const acceptedProposalLaunched = detectAndCallTutorial(
           "reconcilingAcceptedProposal",
-          node => node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node })
+          node =>
+            !!node &&
+            !!node.open &&
+            isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false })
         );
         if (acceptedProposalLaunched) return;
       }
@@ -5961,7 +6548,11 @@ const Notebook = ({}: NotebookProps) => {
           lastNodeOperation.current.data === "notAccepted") */
       ) {
         const notAcceptedProposalLaunched = detectAndCallTutorial("reconcilingNotAcceptedProposal", node =>
-          Boolean(node && node.open && !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }))
+          Boolean(
+            node &&
+              node.open &&
+              !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false })
+          )
         );
         setOpenSidebar("PROPOSALS");
         // setDynamicTargetId('')
@@ -6239,10 +6830,28 @@ const Notebook = ({}: NotebookProps) => {
         );
         if (result) return;
       }
+      if (user) {
+        createActionTrack(
+          db,
+          "detectTriggerTutorial",
+          "",
+          {
+            fullname: `${user?.fName} ${user?.lName}`,
+            chooseUname: !!user?.chooseUname,
+            uname: String(user?.uname),
+            imageUrl: String(user?.imageUrl),
+          },
+          "",
+          [],
+          user?.email
+        );
+      }
     };
 
     detectTriggerTutorial();
   }, [
+    db,
+    user,
     detectAndCallSidebarTutorial,
     detectAndCallTutorial,
     detectAndForceTutorial,
@@ -6527,7 +7136,15 @@ const Notebook = ({}: NotebookProps) => {
 
     if (tutorial.name === "reconcilingAcceptedProposal") {
       const reconcilingAcceptedProposalIsValid = (node: FullNodeData) =>
-        node && node.open && isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node });
+        node &&
+        node.open &&
+        isVersionApproved({
+          corrects: 1,
+          wrongs: 0,
+          nodeData: node,
+          isInstructor: false,
+          instantApprove: false,
+        });
 
       const node = graph.nodes[dynamicTargetId];
       if (!reconcilingAcceptedProposalIsValid(node)) {
@@ -6542,7 +7159,7 @@ const Notebook = ({}: NotebookProps) => {
       const reconcilingNotAcceptedProposalIsValid = (node: FullNodeData) =>
         node &&
         node.open &&
-        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node }) &&
+        !isVersionApproved({ corrects: 1, wrongs: 0, nodeData: node, isInstructor: false, instantApprove: false }) &&
         openSidebar === "PROPOSALS";
 
       const node = graph.nodes[dynamicTargetId];
@@ -6736,6 +7353,35 @@ const Notebook = ({}: NotebookProps) => {
     setRootQuery(root);
     setDisplayDashboard(true);
   }, [displayDashboard, router.query.nb, router.query.root, user]);
+
+  // useEffect(() => {
+  //   if ("serviceWorker" in navigator) {
+  //     navigator.serviceWorker.addEventListener("message", event => {
+  //       if (event.data && event.data.type === "PERFORM_ACTION") {
+  //         const data = event.data.data;
+  //         console.log(data, "data-from-notification-worker");
+  //       }
+  //     });
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelsChange[]) => {
+      setChannels((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+    };
+    const killSnapshot = getChannelsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: conversationChange[]) => {
+      setConversations((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+    };
+    const killSnapshot = getConversationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
 
   useEffect(() => {
     const duplicateNotebookFromParams = async () => {
@@ -7016,14 +7662,14 @@ const Notebook = ({}: NotebookProps) => {
 
             const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
             if (docType === "added" && prevIdx === -1) {
-              prev.push(curData);
+              prev.push({ ...curData, doc: change.doc });
             }
             if (docType === "modified" && prevIdx !== -1) {
-              prev[prevIdx] = curData;
+              prev[prevIdx] = { ...curData, doc: change.doc };
             }
 
             if (docType === "removed" && prevIdx !== -1) {
-              prev.splice(prevIdx);
+              prev.splice(prevIdx, 1);
             }
             prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
             return prev;
@@ -7035,15 +7681,6 @@ const Notebook = ({}: NotebookProps) => {
     const killSnapshot = getchatNotificationsSnapshot(db, { username: user.uname }, onSynchronize);
     return () => killSnapshot();
   }, [db, user]);
-
-  useEffect(() => {
-    onMessage(messaging, (message: any) => {
-      console.info("message received", message);
-      setTimeout(() => {
-        new Notification(message.notification.title, { body: message.notification.body });
-      }, 500);
-    });
-  }, [messaging]);
 
   useEffect(() => {
     const handleUserActivity = () => {
@@ -7075,6 +7712,42 @@ const Notebook = ({}: NotebookProps) => {
 
     return () => clearInterval(intervalId);
   }, [lastInteractionDate]);
+
+  const findDescendantNodes = useCallback(
+    (selectedNode: string, searchNode: string) => {
+      const node = graph.nodes[selectedNode] as INode;
+      if (node?.children?.some(child => child.node === searchNode)) {
+        return true;
+      }
+
+      for (const child of node?.children || []) {
+        if (findDescendantNodes(child.node, searchNode)) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [graph.nodes]
+  );
+
+  const findAncestorNodes = useCallback(
+    (selectedNode: string, searchNode: string) => {
+      const node = graph.nodes[selectedNode] as INode;
+      if (node?.parents?.some(parent => parent.node === searchNode)) {
+        return true;
+      }
+
+      for (const parent of node?.parents || []) {
+        if (findAncestorNodes(parent.node, searchNode)) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    [graph.nodes]
+  );
 
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
@@ -7255,8 +7928,8 @@ const Notebook = ({}: NotebookProps) => {
             </Container>
             <Suspense fallback={<div></div>}>
               {(isSubmitting || (!queueFinished && firstLoading)) && (
-                <div className="CenterredLoadingImageContainer">
-                  <Image className="CenterredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
+                <div className="CenteredLoadingImageContainer">
+                  <Image className="CenteredLoadingImage" src={LoadingImg} alt="Loading" width={250} height={250} />
                 </div>
               )}
             </Suspense>
@@ -7286,7 +7959,7 @@ const Notebook = ({}: NotebookProps) => {
                 selectedUser={selectedUser}
                 uncheckedNotificationsNum={uncheckedNotificationsNum}
                 bookmarkUpdatesNum={bookmarkUpdatesNum}
-                pendingProposalsNum={pendingProposalsNum}
+                pendingProposalsNum={pendingProposals.length || 0}
                 windowHeight={windowHeight}
                 onlineUsers={onlineUsers}
                 usersOnlineStatusLoaded={usersOnlineStatusLoaded}
@@ -7306,141 +7979,150 @@ const Notebook = ({}: NotebookProps) => {
                 newMessages={notificationsMessages.length}
               />
 
-              <MemoizedBookmarksSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "BOOKMARKS_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                bookmark={bookmark}
-              />
-              <MemoizedChatSidebar
-                user={user}
-                settings={settings}
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "CHAT"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                bookmark={bookmark}
-                nodeBookDispatch={nodeBookDispatch}
-                notebookRef={notebookRef}
-                nodeBookState={nodeBookState}
-                notebooks={notebooks}
-                onChangeNotebook={onChangeNotebook}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                dispatch={dispatch}
-                selectedNotebook={selectedNotebook}
-                onlineUsers={onlineUsers}
-                notifications={notificationsMessages}
-                openUserInfoSidebar={openUserInfoSidebar}
-              />
+              {openSidebar === "BOOKMARKS_SIDEBAR" && (
+                <MemoizedBookmarksSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  bookmark={bookmark}
+                />
+              )}
+              {openSidebar === "CHAT" && (
+                <MemoizedChatSidebar
+                  user={user}
+                  settings={settings}
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  bookmark={bookmark}
+                  nodeBookDispatch={nodeBookDispatch}
+                  notebookRef={notebookRef}
+                  nodeBookState={nodeBookState}
+                  notebooks={notebooks}
+                  onChangeNotebook={onChangeNotebook}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  dispatch={dispatch}
+                  selectedNotebook={selectedNotebook}
+                  onlineUsers={onlineUsers}
+                  notifications={notificationsMessages}
+                  openUserInfoSidebar={openUserInfoSidebar}
+                  channels={channels}
+                  conversations={conversations}
+                  openChatByNotification={openChatByNotification}
+                  setOpenChatByNotification={setOpenChatByNotification}
+                />
+              )}
+              {openSidebar === "SEARCHER_SIDEBAR" && (
+                <MemoizedSearcherSidebar
+                  notebookRef={notebookRef}
+                  openLinkedNode={openLinkedNode}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  enableElements={[]}
+                  preLoadNodes={onPreLoadNodes}
+                />
+              )}
+              {openSidebar === "NOTIFICATION_SIDEBAR" && (
+                <MemoizedNotificationSidebar
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                />
+              )}
+              {openSidebar === "PENDING_PROPOSALS" && (
+                <MemoizedPendingProposalSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  tagId={user.tagId}
+                  open={true}
+                  onClose={() => onCloseSidebar()}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  pendingProposals={pendingProposals}
+                  // innerWidth={windowWith}
+                />
+              )}
+              {openSidebar === "USER_INFO" && (
+                <MemoizedUserInfoSidebar
+                  theme={settings.theme}
+                  openLinkedNode={openLinkedNode}
+                  username={user.uname}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  selectedUser={nodeBookState.selectedUser}
+                  onlineUsers={onlineUsers}
+                />
+              )}
 
-              <MemoizedCommentsSidebar
-                user={user}
-                theme={settings.theme}
-                open={openSidebar === "COMMENT"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                nodeBookDispatch={nodeBookDispatch}
-                notebookRef={notebookRef}
-                nodeBookState={nodeBookState}
-                onlineUsers={onlineUsers}
-              />
-              <MemoizedSearcherSidebar
-                notebookRef={notebookRef}
-                openLinkedNode={openLinkedNode}
-                open={openSidebar === "SEARCHER_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                enableElements={[]}
-                preLoadNodes={onPreLoadNodes}
-              />
-              <MemoizedNotificationSidebar
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "NOTIFICATION_SIDEBAR"}
-                onClose={() => setOpenSidebar(null)}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-              />
-              <MemoizedPendingProposalSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                tagId={user.tagId}
-                open={openSidebar === "PENDING_PROPOSALS"}
-                onClose={() => onCloseSidebar()}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                // innerWidth={windowWith}
-              />
-              <MemoizedUserInfoSidebar
-                theme={settings.theme}
-                openLinkedNode={openLinkedNode}
-                username={user.uname}
-                open={openSidebar === "USER_INFO"}
-                onClose={() => setOpenSidebar(null)}
-                selectedUser={nodeBookState.selectedUser}
-              />
+              {openSidebar === "PROPOSALS" &&
+                !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "") && (
+                  <MemoizedProposalsSidebar
+                    theme={settings.theme}
+                    open={true}
+                    onClose={() => {
+                      onCloseSidebar();
+                      setEditingModeNode(false);
+                    }}
+                    clearInitialProposal={clearInitialProposal}
+                    initialProposal={nodeBookState.initialProposal}
+                    nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
+                    proposeNodeImprovement={proposeNodeImprovement}
+                    selectedNode={nodeBookState.selectedNode}
+                    rateProposal={rateProposal}
+                    ratingProposal={ratingProposal}
+                    selectProposal={onSelectProposal}
+                    deleteProposal={deleteProposal}
+                    proposeNewChild={proposeNewChild}
+                    openProposal={selectedProposalId}
+                    db={db}
+                    sidebarWidth={sidebarWidth()}
+                    innerHeight={innerHeight}
+                    innerWidth={windowWith}
+                    username={user.uname}
+                  />
+                )}
 
-              <MemoizedProposalsSidebar
-                theme={settings.theme}
-                open={
-                  openSidebar === "PROPOSALS" &&
-                  !["Reference", "Tag", "Parent", "Child"].includes(nodeBookState.choosingNode?.type ?? "")
-                }
-                onClose={() => onCloseSidebar()}
-                clearInitialProposal={clearInitialProposal}
-                initialProposal={nodeBookState.initialProposal}
-                nodeLoaded={graph.nodes.hasOwnProperty(String(nodeBookState.selectedNode))}
-                proposeNodeImprovement={proposeNodeImprovement}
-                fetchProposals={fetchProposals}
-                selectedNode={nodeBookState.selectedNode}
-                rateProposal={rateProposal}
-                ratingProposale={ratingProposale}
-                selectProposal={onSelectProposal}
-                deleteProposal={deleteProposal}
-                proposeNewChild={proposeNewChild}
-                openProposal={selectedProposalId}
-                db={db}
-                sidebarWidth={sidebarWidth()}
-                innerHeight={innerHeight}
-                innerWidth={windowWith}
-                username={user.uname}
-              />
-
-              <MemoizedUserSettingsSidebar
-                notebookRef={notebookRef}
-                openLinkedNode={openLinkedNode}
-                theme={settings.theme}
-                open={openSidebar === "USER_SETTINGS"}
-                onClose={() => setOpenSidebar(null)}
-                dispatch={dispatch}
-                nodeBookDispatch={nodeBookDispatch}
-                nodeBookState={nodeBookState}
-                userReputation={reputation}
-                user={user}
-                scrollToNode={scrollToNode}
-                settings={settings}
-                selectedNotebookId={selectedNotebookId}
-                onChangeNotebook={onChangeNotebook}
-                onChangeTagOfNotebookById={onChangeTagOfNotebookById}
-                notebookOwner={selectedNotebook?.owner ?? ""}
-              />
-              {nodeBookState.selectedNode && (
+              {openSidebar === "USER_SETTINGS" && (
+                <MemoizedUserSettingsSidebar
+                  notebookRef={notebookRef}
+                  openLinkedNode={openLinkedNode}
+                  theme={settings.theme}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  dispatch={dispatch}
+                  nodeBookDispatch={nodeBookDispatch}
+                  nodeBookState={nodeBookState}
+                  userReputation={reputation}
+                  user={user}
+                  scrollToNode={scrollToNode}
+                  settings={settings}
+                  selectedNotebookId={selectedNotebookId}
+                  onChangeNotebook={onChangeNotebook}
+                  onChangeTagOfNotebookById={onChangeTagOfNotebookById}
+                  notebookOwner={selectedNotebook?.owner ?? ""}
+                  onlineUsers={onlineUsers}
+                />
+              )}
+              {nodeBookState.selectedNode && openSidebar === "CITATIONS" && (
                 <CitationsSidebar
-                  open={openSidebar === "CITATIONS"}
+                  open={true}
                   onClose={() => setOpenSidebar(null)}
                   openLinkedNode={openLinkedNode}
                   identifier={nodeBookState.selectedNode}
@@ -7450,53 +8132,60 @@ const Notebook = ({}: NotebookProps) => {
                 />
               )}
 
-              <ReferencesSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Reference"}
-                username={user.uname}
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-              />
+              {nodeBookState.choosingNode?.type === "Reference" && (
+                <ReferencesSidebarMemoized
+                  open={true}
+                  username={user.uname}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                />
+              )}
 
-              <TagsSidebarMemoized
-                open={nodeBookState.choosingNode?.type === "Tag"}
-                username={user.uname}
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-                notebookRef={notebookRef}
-              />
-              <ParentsSidebarMemoized
-                title={
-                  nodeBookState.choosingNode?.type === "Parent"
-                    ? "Parents to Link"
-                    : nodeBookState.choosingNode?.type === "Child"
-                    ? "Children to Link"
-                    : "Nodes to Improve"
-                }
-                open={
-                  nodeBookState.choosingNode?.type === "Parent" ||
-                  nodeBookState.choosingNode?.type === "Child" ||
-                  nodeBookState.choosingNode?.type === "Node" ||
-                  nodeBookState.choosingNode?.type === "Improvement"
-                }
-                onClose={() => {
-                  nodeBookDispatch({ type: "setChoosingNode", payload: null });
-                  notebookRef.current.choosingNode = null;
-                }}
-                linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
-                onChangeChosenNode={onChangeChosenNode}
-                preLoadNodes={onPreLoadNodes}
-                setQueryParentChildren={setQueryParentChildren}
-                queryParentChildren={queryParentChildren}
-                username={""}
-              />
+              {nodeBookState.choosingNode?.type === "Tag" && (
+                <TagsSidebarMemoized
+                  open={true}
+                  username={user.uname}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                  notebookRef={notebookRef}
+                />
+              )}
+              {(nodeBookState.choosingNode?.type === "Parent" ||
+                nodeBookState.choosingNode?.type === "Child" ||
+                nodeBookState.choosingNode?.type === "Node" ||
+                nodeBookState.choosingNode?.type === "Improvement") && (
+                <ParentsSidebarMemoized
+                  notebookRef={notebookRef}
+                  title={
+                    nodeBookState.choosingNode?.type === "Parent"
+                      ? "Parents to Link"
+                      : nodeBookState.choosingNode?.type === "Child"
+                      ? "Children to Link"
+                      : "Nodes to Improve"
+                  }
+                  open={true}
+                  onClose={() => {
+                    nodeBookDispatch({ type: "setChoosingNode", payload: null });
+                    notebookRef.current.choosingNode = null;
+                  }}
+                  linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
+                  onChangeChosenNode={onChangeChosenNode}
+                  preLoadNodes={onPreLoadNodes}
+                  setQueryParentChildren={setQueryParentChildren}
+                  queryParentChildren={queryParentChildren}
+                  username={""}
+                  findAncestorNodes={findAncestorNodes}
+                  findDescendantNodes={findDescendantNodes}
+                />
+              )}
             </Box>
           )}
 
@@ -7659,7 +8348,7 @@ const Notebook = ({}: NotebookProps) => {
 
           {/* end Data from map */}
 
-          {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
+          {/* {window.innerHeight > 399 && user?.livelinessBar === "relativeInteractions" && (
             <MemoizedRelativeLivelinessBar
               onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
               onlineUsers={onlineUsers}
@@ -7701,7 +8390,7 @@ const Notebook = ({}: NotebookProps) => {
               variant="absoluteReputations"
               onToggleDisplay={() => setOpenLivelinessBar(prev => !prev)}
             />
-          )}
+          )} */}
 
           {focusView.isEnabled && (
             <MemoizedFocusedNotebook
@@ -7836,6 +8525,10 @@ const Notebook = ({}: NotebookProps) => {
                   editingModeNode={editingModeNode}
                   setEditingModeNode={setEditingModeNode}
                   displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
+                  findDescendantNodes={findDescendantNodes}
+                  findAncestorNodes={findAncestorNodes}
+                  lockedNodes={lockedNodes}
+                  onlineUsers={onlineUsers}
                 />
               </MapInteractionCSS>
 
@@ -7891,9 +8584,9 @@ const Notebook = ({}: NotebookProps) => {
                   </>
                 </Modal>
                 {(isSubmitting || (!queueFinished && firstLoading)) && (
-                  <div className="CenterredLoadingImageContainer">
+                  <div className="CenteredLoadingImageContainer">
                     <Image
-                      className="CenterredLoadingImage"
+                      className="CenteredLoadingImage"
                       loading="lazy"
                       src={LoadingImg}
                       alt="Loading"
@@ -7906,19 +8599,21 @@ const Notebook = ({}: NotebookProps) => {
             </Box>
           )}
 
-          <MemoizedTutorialTableOfContent
-            open={openProgressBar}
-            reloadPermanentGraph={revertNodesOnGraph}
-            handleCloseProgressBar={onCloseTableOfContent}
-            groupTutorials={tutorialGroup}
-            userTutorialState={userTutorial}
-            onCancelTutorial={onCancelTutorial}
-            onForceTutorial={tutorialKey => {
-              setForcedTutorial(tutorialKey);
-              tutorialStateWasSetUpRef.current = false;
-            }}
-            tutorialProgress={tutorialProgress}
-          />
+          {openProgressBar && (
+            <MemoizedTutorialTableOfContent
+              open={openProgressBar}
+              reloadPermanentGraph={revertNodesOnGraph}
+              handleCloseProgressBar={onCloseTableOfContent}
+              groupTutorials={tutorialGroup}
+              userTutorialState={userTutorial}
+              onCancelTutorial={onCancelTutorial}
+              onForceTutorial={tutorialKey => {
+                setForcedTutorial(tutorialKey);
+                tutorialStateWasSetUpRef.current = false;
+              }}
+              tutorialProgress={tutorialProgress}
+            />
+          )}
         </Box>
 
         {/*
@@ -7977,6 +8672,7 @@ const Notebook = ({}: NotebookProps) => {
             setStartPractice={setStartPractice}
             setDisplayRightSidebar={setDisplaySidebar}
             setUserIsAnsweringPractice={setUserIsAnsweringPractice}
+            confirmIt={confirmIt}
           />
         )}
 
@@ -8309,4 +9005,23 @@ const revertNodeChanges = ({
   resetUpdateLink();
 
   return { newChangedNodes: changedNodes, newEdges, newNodes, newTempNodes: tempNodes, updatedNodeIds };
+};
+
+const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
+  const docType = change.type;
+  const curData = change.data as any & { id: string };
+
+  const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+  if (docType === "added" && prevIdx === -1) {
+    prev.push(curData);
+  }
+  if (docType === "modified" && prevIdx !== -1) {
+    prev[prevIdx] = curData;
+  }
+
+  if (docType === "removed" && prevIdx !== -1) {
+    prev.splice(prevIdx, 1);
+  }
+  prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
+  return prev;
 };

@@ -27,8 +27,11 @@ import React, {
 import { CourseTag, Instructor, Semester, SemesterStudentVoteStat } from "src/instructorsTypes";
 import { VoiceAssistant } from "src/nodeBookTypes";
 
+import StudentDetailHoursTracking from "@/components/instructors/StudentDetail";
+import TrackingHours from "@/components/instructors/TrackingHours";
 import { CoursesResult } from "@/components/layouts/StudentsLayout";
 
+// import { Z_INDEX } from "@/lib/utils/constants";
 import { User } from "../../../knowledgeTypes";
 import { DESIGN_SYSTEM_COLORS } from "../../../lib/theme/colors";
 import { OpenRightSidebar } from "../../../pages/notebook";
@@ -37,7 +40,7 @@ import { NoDataMessage } from "../../instructors/NoDataMessage";
 import PracticeTool, { PracticeToolRef } from "../../practiceTool/PracticeTool";
 import { DashboardToolbar } from "../Dashobard/DashboradToolbar";
 import { Assignments } from "./Assignments";
-import { Dashboard } from "./Dashboard";
+// import { Dashboard } from "./Dashboard";
 import { DashboardSettings } from "./DashboardSettings";
 import { DashboardStudents } from "./DashboardStudents";
 
@@ -53,6 +56,7 @@ type DashboardWrapperProps = {
   setDisplayRightSidebar: (newValue: OpenRightSidebar) => void;
   setUserIsAnsweringPractice: (newValue: { result: boolean }) => void;
   sx?: SxProps<Theme>;
+  confirmIt: any;
 };
 
 export type DashboardWrapperRef = PracticeToolRef;
@@ -72,6 +76,7 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
     setStartPractice,
     setDisplayRightSidebar,
     setUserIsAnsweringPractice,
+    confirmIt,
   } = props;
   const db = getFirestore();
 
@@ -312,7 +317,8 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
           // border: "solid 2px royalBlue",
           overflowY: "auto",
           overflowX: "hidden",
-          p: "40px 32px",
+          p: selectToolbarView === "SETTINGS" ? "" : "40px 32px",
+          px: "40px",
         }}
       >
         {isLoading && (
@@ -321,11 +327,17 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
             <LinearProgress />
           </Stack>
         )}
-        {!isLoading && currentSemester && allCourses[currentSemester.tagId] && (
+        {currentSemester && allCourses[currentSemester.tagId] && (
           <>
-            {selectToolbarView === "DASHBOARD" && (
+            {selectToolbarView === "DASHBOARD" &&
+              (user.role === "INSTRUCTOR" ? (
+                <TrackingHours />
+              ) : (
+                <StudentDetailHoursTracking uname={user.uname} user={selectedStudent ? selectedStudent : user} />
+              ))}
+            {/* {selectToolbarView === "DASHBOARD" && (
               <Dashboard user={selectedStudent ? selectedStudent : user} currentSemester={currentSemester} />
-            )}
+            )} */}
             {selectToolbarView === "PRACTICE" && (
               <PracticeTool
                 voiceAssistant={voiceAssistant}
@@ -342,7 +354,9 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
                 setUserIsAnsweringPractice={setUserIsAnsweringPractice}
               />
             )}
-            {selectToolbarView === "SETTINGS" && <DashboardSettings currentSemester={currentSemester} />}
+            {selectToolbarView === "SETTINGS" && (
+              <DashboardSettings currentSemester={currentSemester} confirmIt={confirmIt} />
+            )}
             {selectToolbarView === "STUDENTS" && (
               <DashboardStudents currentSemester={currentSemester} onSelectUserHandler={onSelectUserHandler} />
             )}
@@ -359,8 +373,12 @@ export const DashboardWrapper = forwardRef<DashboardWrapperRef, DashboardWrapper
 
 DashboardWrapper.displayName = "DashboardWrapper";
 
-export const getCourseTitleFromSemester = (semester: ISemester) => {
-  return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
+export const getCourseTitleFromSemester = (semester: ISemester | null) => {
+  if (!semester) {
+    return "";
+  } else {
+    return `${semester.cTitle} ${semester.pTitle || "- " + semester.uTitle}`;
+  }
 };
 
 const getCoursesByInstructor = (instructor: Instructor): CoursesResult => {

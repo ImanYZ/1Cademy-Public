@@ -97,7 +97,7 @@ type UsersStatusListProps = {
   setOpenSideBar: (sidebar: OpenLeftSidebar) => void;
   sx?: SxProps<Theme>;
   sxUserStatus?: SxProps<Theme>;
-  onlineUsers: string[];
+  onlineUsers: { [uname: string]: boolean };
   usersOnlineStatusLoaded: boolean;
   isSmaller?: boolean;
   disabled?: boolean;
@@ -344,7 +344,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
               userReputation.lterm;
           // only skip small amounts if user status is for all time filter and other filter
           if (((usersStatus !== "All Time" && usersStatus !== "Others Votes") || totalPoints >= 13) && totalPoints) {
-            if (onlineUsers.includes(uname)) {
+            if (onlineUsers[uname]) {
               onlineUsersListTmp.push(usersListObjFromReputationObj(user, userReputation, uname));
             } else {
               usersListTmp.push(usersListObjFromReputationObj(user, userReputation, uname));
@@ -405,6 +405,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
             fullname={user.fullname}
             chooseUname={user.chooseUname}
             online={online}
+            user={user}
             // inUserBar={false}
             // inNodeFooter={false}
             reloadPermanentGrpah={() => console.warn("here should call props.reloadPermanentGrpah")}
@@ -427,6 +428,7 @@ const UsersStatusList = ({ nodeBookDispatch, isSmaller = true, disabled = false,
       alignItems={"center"} // this value is modified by parent in toolbar sidebar when isMenuOpen
       sx={{
         height: "100%",
+        width: "100%",
         // display: "flex",
         // flexDirection: "column",
         // alignItems: "center",

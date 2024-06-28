@@ -8,7 +8,7 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Box, Button, IconButton, Link, Tooltip } from "@mui/material";
-import React, { MutableRefObject, useCallback } from "react";
+import React, { MutableRefObject, useCallback, useMemo } from "react";
 import { DispatchNodeBookActions, TNodeBookState } from "src/nodeBookTypes";
 
 // import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -87,11 +87,25 @@ type LinkingWordsProps = {
 };
 
 const LinkingWords = ({
-  nodeBookDispatch,
   notebookRef,
+  nodeBookDispatch,
+  identifier,
+  editable,
+  isNew,
+  openPart,
+  references,
+  tags,
+  parents,
+  nodesChildren,
+  referenceLabelChange,
+  openLinkedNode,
+  openAllChildren,
+  openAllParent,
+  setAbleToPropose,
   disabled,
   enableChildElements = [],
-  ...props
+  nodeType,
+  deleteLink,
 }: LinkingWordsProps) => {
   const disableAddReference = disabled;
   const disableAddTag = disabled;
@@ -101,34 +115,34 @@ const LinkingWords = ({
   // const referenceLabelChangeHandler = useCallback(
   //   (idx: any) => {
   //     return (event: any) => {
-  //       return props.referenceLabelChange(event, idx);
+  //       return referenceLabelChange(event, idx);
   //     };
   //   },
   //   // TODO: check dependencies to remove eslint-disable-next-line
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   [props.referenceLabelChange]
+  //   [referenceLabelChange]
   // );
   const referenceLabelChangeHandler = useCallback(
     (newLabel: string, idx: number) => {
-      props.referenceLabelChange(newLabel, props.identifier, idx);
-      props.setAbleToPropose(true);
+      referenceLabelChange(newLabel, identifier, idx);
+      setAbleToPropose(true);
     },
-    [props.referenceLabelChange, props.setAbleToPropose]
+    [referenceLabelChange, setAbleToPropose]
   );
 
   const choosingNewLinkedNode = useCallback(
     (linkType: any) => (/*event: any*/) => {
-      // if (!props.isSubmitting) {
+      // if (!isSubmitting) {
       // setChoosingType(linkType);
       {
         // if (linkType === "Reference") {
         //   let nodes = [...graph.nodes];
         //   let edges = [...graph.edges];
         //   const removableNodes = nodes.filter(
-        //     node => node.nodeType !== linkType && node.id !== props.identifier
+        //     node => node.nodeType !== linkType && node.id !== identifier
         //   );
         //   nodes = nodes.filter(
-        //     node => node.nodeType === linkType || node.id === props.identifier
+        //     node => node.nodeType === linkType || node.id === identifier
         //   );
         //   for (let node of removableNodes) {
         //     edges = edges.filter(
@@ -141,32 +155,35 @@ const LinkingWords = ({
       }
       // setChosenNode(null);
       // setChosenNodeTitle(null);
-      notebookRef.current.choosingNode = { id: props.identifier, type: linkType, impact: "node" };
-      notebookRef.current.selectedNode = props.identifier;
+      notebookRef.current.choosingNode = { id: identifier, type: linkType, impact: "node" };
+      notebookRef.current.selectedNode = identifier;
       notebookRef.current.chosenNode = null;
-      nodeBookDispatch({ type: "setChoosingNode", payload: { id: props.identifier, type: linkType } });
-      nodeBookDispatch({ type: "setSelectedNode", payload: props.identifier });
+      nodeBookDispatch({ type: "setChoosingNode", payload: { id: identifier, type: linkType } });
+      nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
       nodeBookDispatch({ type: "setChosenNode", payload: null });
-      // setChoosingNode(props.identifier);
+      // setChoosingNode(identifier);
       // }
     },
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.identifier]
+    [identifier]
   );
 
-  const deleteLink = useCallback(
+  const onDeleteLink = useCallback(
     (idx: any, linkType: any) => (/*event: any*/) => {
-      props.deleteLink(idx, linkType);
-      props.setAbleToPropose(true);
+      deleteLink(idx, linkType);
+      setAbleToPropose(true);
     },
     // TODO: check dependencies to remove eslint-disable-next-line
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.deleteLink, props.setAbleToPropose]
+    [deleteLink, setAbleToPropose]
   );
+  const lockedTags = useMemo(() => {
+    return tags.filter((tag: any) => tag.locked);
+  }, [tags]);
 
-  return props.openPart === "LinkingWords" || props.openPart === "Tags" || props.openPart === "References" ? (
-    <Box id={`${props.identifier}-linking-words`}>
+  return openPart === "LinkingWords" || openPart === "Tags" || openPart === "References" ? (
+    <Box id={`${identifier}-linking-words`}>
       {/* <Box
         sx={{
           mx: "10px",
@@ -190,34 +207,34 @@ const LinkingWords = ({
             p: "10px 6px 10px 13px",
           }}
         >
-          {props.openPart === "LinkingWords" && (
-            <Box id={`${props.identifier}-parents-list`} sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+          {openPart === "LinkingWords" && (
+            <Box id={`${identifier}-parents-list`} sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <strong>Parents (Prerequisites)</strong>
 
-              {props.parents.map((parent: any, idx: number) => {
+              {parents.map((parent: any, idx: number) => {
                 return (
                   <Box
-                    id={`${props.identifier}-parent-button-${idx}`}
+                    id={`${identifier}-parent-button-${idx}`}
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: props.editable && props.parents.length > 1 ? "1fr 32px" : "1fr",
+                      gridTemplateColumns: editable && parents.length > 1 ? "1fr 32px" : "1fr",
                       alignItems: "center",
                     }}
-                    key={props.identifier + "LinkTo" + parent.node}
+                    key={identifier + "LinkTo" + parent.node}
                   >
                     <LinkingButton
-                      onClick={props.openLinkedNode}
-                      // nodeID={props.identifier}
+                      onClick={openLinkedNode}
+                      // nodeID={identifier}
                       linkedNodeID={parent.node}
                       linkedNodeTitle={parent.title}
                       linkedNodeType="parent"
                       nodeType={parent.type}
                       visible={parent.visible}
-                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-parent-button-${idx}`)}
+                      disabled={disabled && !enableChildElements.includes(`${identifier}-parent-button-${idx}`)}
                       removed={parent.removed}
                       added={parent.added}
                     />
-                    {props.editable && props.parents.length > 1 && (
+                    {editable && parents.length > 1 && (
                       <Tooltip
                         title="Delete the link to this parent."
                         placement="right"
@@ -228,7 +245,7 @@ const LinkingWords = ({
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Parent")}>
+                        <IconButton onClick={onDeleteLink(idx, "Parent")}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
                       </Tooltip>
@@ -236,9 +253,9 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-              {props.parents.length > 0 && !props.isNew && !props.editable && (
+              {parents.length > 0 && !isNew && !editable && (
                 <Button
-                  onClick={() => props.openAllParent(props.identifier)}
+                  onClick={() => openAllParent(identifier)}
                   sx={{
                     justifyContent: "stretch",
                     textAlign: "left",
@@ -251,7 +268,7 @@ const LinkingWords = ({
                 </Button>
               )}
 
-              {props.editable && !props.isNew && notebookRef.current.selectedNode === props.identifier && (
+              {editable && !isNew && notebookRef.current.selectedNode === identifier && (
                 <MemoizedMetaButton
                   onClick={choosingNewLinkedNode("Parent")}
                   tooltip="Link to an existing parent node."
@@ -267,14 +284,11 @@ const LinkingWords = ({
             </Box>
           )}
 
-          {props.openPart === "References" && props.nodeType !== "Reference" && (
-            <Box
-              id={`${props.identifier}-node-references`}
-              sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
+          {openPart === "References" && nodeType !== "Reference" && (
+            <Box id={`${identifier}-node-references`} sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <strong>References</strong>
 
-              {props.references.map((reference: any, idx: number) => {
+              {references.map((reference: any, idx: number) => {
                 let refTitle = reference.title;
                 let urlRefLabel = [false, false];
                 if ("label" in reference && reference.label !== "") {
@@ -287,7 +301,7 @@ const LinkingWords = ({
                 }
                 return (
                   <Box
-                    key={props.identifier + "LinkTo" + reference.node + "DIV"}
+                    key={identifier + "LinkTo" + reference.node + "DIV"}
                     sx={{
                       display: "grid",
                       gridTemplateColumns: "1fr 32px",
@@ -296,25 +310,23 @@ const LinkingWords = ({
                       gap: "1px 4px",
                     }}
                   >
-                    <Box sx={{ gridColumn: urlRefLabel[0] || props.editable ? "1 / 2" : "1 / span 2" }}>
+                    <Box sx={{ gridColumn: urlRefLabel[0] || editable ? "1 / 2" : "1 / span 2" }}>
                       <LinkingButton
-                        id={`${props.identifier}-reference-button-${idx}`}
-                        key={props.identifier + "LinkTo" + reference.node}
-                        onClick={props.openLinkedNode}
-                        // nodeID={props.identifier}
+                        id={`${identifier}-reference-button-${idx}`}
+                        key={identifier + "LinkTo" + reference.node}
+                        onClick={openLinkedNode}
+                        // nodeID={identifier}
                         linkedNodeID={reference.node}
                         // linkedNodeTitle={refTitle+(reference.label?':'+{reference.label}:'')}
                         linkedNodeTitle={refTitle}
                         linkedNodeType="reference"
                         iClassName="menu_book"
-                        disabled={
-                          disabled && !enableChildElements.includes(`${props.identifier}-reference-button-${idx}`)
-                        }
+                        disabled={disabled && !enableChildElements.includes(`${identifier}-reference-button-${idx}`)}
                         removed={reference.removed}
                         added={reference.added}
                       />
                     </Box>
-                    {props.editable && (
+                    {editable && (
                       <>
                         <Tooltip
                           title="Delete the link to this reference."
@@ -326,16 +338,16 @@ const LinkingWords = ({
                             },
                           }}
                         >
-                          <IconButton onClick={deleteLink(idx, "Reference")} disabled={disableRemoveReference}>
+                          <IconButton onClick={onDeleteLink(idx, "Reference")} disabled={disableRemoveReference}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                           </IconButton>
                         </Tooltip>
 
                         <ReferenceLabelInput
-                          key={props.identifier + "LinkTo" + reference.node + "Label"}
+                          key={identifier + "LinkTo" + reference.node + "Label"}
                           inputProperties={{
-                            id: props.identifier + "LinkTo" + reference.node + "Label",
-                            name: props.identifier + "LinkTo" + reference.node + "Label",
+                            id: identifier + "LinkTo" + reference.node + "Label",
+                            name: identifier + "LinkTo" + reference.node + "Label",
                           }}
                           referenceLabelChangeHandler={(newLabel: string) => referenceLabelChangeHandler(newLabel, idx)}
                           reference={reference}
@@ -361,9 +373,9 @@ const LinkingWords = ({
                 );
               })}
 
-              {props.editable && (
+              {editable && (
                 <Box
-                  id={`${props.identifier}-link-reference-button`}
+                  id={`${identifier}-link-reference-button`}
                   sx={{ display: "flex", flexDirection: "column", gap: "16px" }}
                 >
                   <MemoizedMetaButton
@@ -394,58 +406,112 @@ const LinkingWords = ({
             p: "10px 13px 10px 13px",
           }}
         >
-          {props.openPart === "References" && (
+          {openPart === "References" && (
             //StyleRef, f-size from Map.css ln 71
             <Box
-              id={`${props.identifier}-node-tags`}
+              id={`${identifier}-node-tags`}
               sx={{ display: "flex", flexDirection: "column", gap: "5px", fontSize: "16px" }}
             >
-              <strong>Tags</strong>
-              {props.tags.map((tag: any, idx: number) => {
-                return (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      //gridTemplateColumns: props.editable && props.tags.length ? "1fr 32px" : "1fr",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                    key={props.identifier + "LinkTo" + tag.node + "DIV"}
-                  >
-                    <LinkingButton
-                      id={`${props.identifier}-tag-button-${idx}`}
-                      key={props.identifier + "LinkTo" + tag.node}
-                      onClick={props.openLinkedNode}
-                      linkedNodeID={tag.node}
-                      linkedNodeTitle={tag.title}
-                      linkedNodeType="tag"
-                      iClassName="local_offer"
-                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
-                      removed={tag.removed}
-                      added={tag.added}
-                    />
-                    {props.editable && (
-                      <Tooltip
-                        title="Delete the link to this tag."
-                        placement="right"
+              {lockedTags.length > 0 && (
+                <Box
+                  sx={{
+                    borderBottom: theme => (theme.palette.mode === "dark" ? `solid 1px #404040` : "solid 1px #D0D5DD"),
+                  }}
+                >
+                  <strong>Courses</strong>
+                  {lockedTags.map((tag: any, idx: number) => {
+                    return (
+                      <Box
                         sx={{
-                          color: "#bebebe",
-                          ":hover": {
-                            color: theme => theme.palette.common.orange,
-                          },
+                          display: "flex",
+                          //gridTemplateColumns: editable && tags.length ? "1fr 32px" : "1fr",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
+                        key={identifier + "LinkTo" + tag.node + "DIV"}
                       >
-                        <IconButton onClick={deleteLink(idx, "Tag")} disabled={disableRemoveTag}>
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                );
-              })}
-              {props.editable && props.openPart === "References" && (
+                        <LinkingButton
+                          id={`${identifier}-tag-button-${idx}`}
+                          key={identifier + "LinkTo" + tag.node}
+                          onClick={openLinkedNode}
+                          linkedNodeID={tag.node}
+                          linkedNodeTitle={tag.title}
+                          linkedNodeType="tag"
+                          iClassName="locked_tag"
+                          disabled={disabled && !enableChildElements.includes(`${identifier}-tag-button-${idx}`)}
+                          removed={tag.removed}
+                          added={tag.added}
+                        />
+                        {editable && (
+                          <Tooltip
+                            title="Delete the link to this tag."
+                            placement="right"
+                            sx={{
+                              color: "#bebebe",
+                              ":hover": {
+                                color: theme => theme.palette.common.orange,
+                              },
+                            }}
+                          >
+                            <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                              <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+              <strong>Tags</strong>
+              {tags
+                .filter((tag: any) => !tag.locked)
+                .map((tag: any, idx: number) => {
+                  return (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        //gridTemplateColumns: editable && tags.length ? "1fr 32px" : "1fr",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                      key={identifier + "LinkTo" + tag.node + "DIV"}
+                    >
+                      <LinkingButton
+                        id={`${identifier}-tag-button-${idx}`}
+                        key={identifier + "LinkTo" + tag.node}
+                        onClick={openLinkedNode}
+                        linkedNodeID={tag.node}
+                        linkedNodeTitle={tag.title}
+                        linkedNodeType="tag"
+                        iClassName="local_offer"
+                        disabled={disabled && !enableChildElements.includes(`${identifier}-tag-button-${idx}`)}
+                        removed={tag.removed}
+                        added={tag.added}
+                      />
+                      {editable && (
+                        <Tooltip
+                          title="Delete the link to this tag."
+                          placement="right"
+                          sx={{
+                            color: "#bebebe",
+                            ":hover": {
+                              color: theme => theme.palette.common.orange,
+                            },
+                          }}
+                        >
+                          <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                            <DeleteForeverIcon sx={{ fontSize: "16px" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
+                  );
+                })}
+
+              {editable && openPart === "References" && (
                 <MemoizedMetaButton
-                  id={`${props.identifier}-tag-node`}
+                  id={`${identifier}-tag-node`}
                   onClick={choosingNewLinkedNode("Tag")}
                   tooltip="Link to a node."
                   tooltipPosition="left"
@@ -461,28 +527,28 @@ const LinkingWords = ({
             </Box>
           )}
 
-          {props.openPart === "Tags" && (
-            <Box id={`${props.identifier}-node-tags`} sx={{ fontSize: "16px" }}>
+          {openPart === "Tags" && (
+            <Box id={`${identifier}-node-tags`} sx={{ fontSize: "16px" }}>
               <strong>Tags</strong>
-              {props.tags.map((tag: any, idx: number) => {
+              {tags.map((tag: any, idx: number) => {
                 return (
-                  <div key={props.identifier + "LinkTo" + tag.node + "DIV"}>
+                  <div key={identifier + "LinkTo" + tag.node + "DIV"}>
                     <LinkingButton
-                      key={props.identifier + "LinkTo" + tag.node}
-                      onClick={props.openLinkedNode}
-                      // nodeID={props.identifier}
+                      key={identifier + "LinkTo" + tag.node}
+                      onClick={openLinkedNode}
+                      // nodeID={identifier}
                       linkedNodeID={tag.node}
                       linkedNodeTitle={tag.title}
                       linkedNodeType="tag"
                       iClassName="local_offer"
-                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-tag-button-${idx}`)}
+                      disabled={disabled && !enableChildElements.includes(`${identifier}-tag-button-${idx}`)}
                       removed={tag.removed}
                       added={tag.added}
                     />
-                    {props.editable && (
+                    {editable && (
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
-                          onClick={deleteLink(idx, "Tag")}
+                          onClick={onDeleteLink(idx, "Tag")}
                           tooltip="Click to delete the link to this tag."
                           tooltipPosition="right"
                         >
@@ -495,35 +561,35 @@ const LinkingWords = ({
               })}
             </Box>
           )}
-          {props.openPart === "LinkingWords" && (
-            <Box id={`${props.identifier}-children-list`} sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+          {openPart === "LinkingWords" && (
+            <Box id={`${identifier}-children-list`} sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
               <strong>Children (Follow-ups)</strong>
-              {props.nodesChildren.map((child: any, idx: number) => {
+              {nodesChildren.map((child: any, idx: number) => {
                 return (
                   <Box
-                    id={`${props.identifier}-child-button-${idx}`}
+                    id={`${identifier}-child-button-${idx}`}
                     sx={{
                       display: "flex",
-                      //gridTemplateColumns: props.editable && props.parents.length ? "1fr 32px" : "1fr",
+                      //gridTemplateColumns: editable && parents.length ? "1fr 32px" : "1fr",
                       alignItems: "center",
                       justifyContent: "space-between",
                     }}
-                    key={props.identifier + "LinkTo" + child.node + "DIV"}
+                    key={identifier + "LinkTo" + child.node + "DIV"}
                   >
                     <LinkingButton
-                      key={props.identifier + "LinkTo" + child.node}
-                      onClick={props.openLinkedNode}
-                      // nodeID={props.identifier}
+                      key={identifier + "LinkTo" + child.node}
+                      onClick={openLinkedNode}
+                      // nodeID={identifier}
                       linkedNodeID={child.node}
                       linkedNodeTitle={child.title}
                       linkedNodeType="child"
                       nodeType={child.type}
                       visible={child.visible}
-                      disabled={disabled && !enableChildElements.includes(`${props.identifier}-child-button-${idx}`)}
+                      disabled={disabled && !enableChildElements.includes(`${identifier}-child-button-${idx}`)}
                       removed={child.removed}
                       added={child.added}
                     />
-                    {props.editable && (
+                    {editable && (
                       <Tooltip
                         title="Delete the link to this child."
                         placement="right"
@@ -534,7 +600,7 @@ const LinkingWords = ({
                           },
                         }}
                       >
-                        <IconButton onClick={deleteLink(idx, "Child")}>
+                        <IconButton onClick={onDeleteLink(idx, "Child")}>
                           <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                         </IconButton>
                       </Tooltip>
@@ -551,9 +617,9 @@ const LinkingWords = ({
                   </Box>
                 );
               })}
-              {props.nodesChildren.length > 0 && !props.isNew && !props.editable && (
+              {nodesChildren.length > 0 && !isNew && !editable && (
                 <Button
-                  onClick={() => props.openAllChildren(props.identifier)}
+                  onClick={() => openAllChildren(identifier)}
                   sx={{
                     justifyContent: "stretch",
                     textAlign: "left",
@@ -565,22 +631,19 @@ const LinkingWords = ({
                   Open All Children
                 </Button>
               )}
-              {props.editable &&
-                !props.isNew &&
-                props.nodeType !== "Reference" &&
-                notebookRef.current.selectedNode === props.identifier && (
-                  <MemoizedMetaButton
-                    onClick={choosingNewLinkedNode("Child")}
-                    tooltip="Link to an existing child node."
-                    tooltipPosition="right"
-                  >
-                    <>
-                      <span>Link to an existing Child node</span>
-                      <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
-                      <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
-                    </>
-                  </MemoizedMetaButton>
-                )}
+              {editable && !isNew && nodeType !== "Reference" && notebookRef.current.selectedNode === identifier && (
+                <MemoizedMetaButton
+                  onClick={choosingNewLinkedNode("Child")}
+                  tooltip="Link to an existing child node."
+                  tooltipPosition="right"
+                >
+                  <>
+                    <span>Link to an existing Child node</span>
+                    <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                    <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
+                  </>
+                </MemoizedMetaButton>
+              )}
             </Box>
           )}
         </Box>
