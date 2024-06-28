@@ -102,7 +102,6 @@ export const MessageLeft = ({
 }: MessageLeftProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
-    setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
@@ -232,7 +231,6 @@ export const MessageLeft = ({
                   user={user}
                   parentMessage={parentMessage}
                   sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
                   setOpenMedia={setOpenMedia}
                 />
               </Box>
@@ -409,8 +407,7 @@ export const MessageLeft = ({
                   user={user}
                   setMessages={setMessages}
                   roomType={roomType}
-                  sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
+                  sendMessage={sendReplyOnMessage}
                   parentMessage={message}
                   setOpenMedia={setOpenMedia}
                 />
