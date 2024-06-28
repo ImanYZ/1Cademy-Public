@@ -4307,21 +4307,32 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
         const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
 
         if (
           newNode?.nodeType &&
           ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
-          referencesOK = await confirmIt(
-            "You are proposing a node without citing any reference. Are you sure?",
+          let referencesOK = await confirmIt(
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+              }}
+            >
+              <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+              <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+            </Box>,
             "Yes",
             "Cancel"
           );
-        }
-        if (!referencesOK) {
-          return;
+          if (!referencesOK) {
+            return;
+          }
         }
 
         const { isInstructor, instantApprove } = await shouldInstantApprovalForProposal({
@@ -4507,21 +4518,34 @@ const Notebook = ({}: NotebookProps) => {
         if (!firstParentId) throw Error("This node has not parent");
         const tagIds = graph.nodes[firstParentId].tagIds ?? [];
         const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
+
         if (
           newNode?.nodeType &&
           ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
-          referencesOK = await confirmIt(
-            "You are proposing a node without citing any reference. Are you sure?",
+          let referencesOK = await confirmIt(
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+              }}
+            >
+              <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+              <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+            </Box>,
             "Yes",
             "Cancel"
           );
+          if (!referencesOK) {
+            return;
+          }
         }
-        if (!referencesOK) {
-          return;
-        }
+
         const { isInstructor, instantApprove } = await shouldInstantApprovalForProposal({
           tagIds,
           uname: user.uname,
