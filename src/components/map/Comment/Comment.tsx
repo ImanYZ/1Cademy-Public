@@ -1,7 +1,7 @@
 //import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
 import { Box, Button, Typography } from "@mui/material";
-import { addDoc, collection, deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import moment from "moment";
 import React, { useCallback, useRef, useState } from "react";
@@ -23,9 +23,10 @@ type CommentProps = {
   confirmIt: any;
   comments: any;
   users: any;
+  commentType: string;
 };
 
-const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) => {
+const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps) => {
   const db = getFirestore();
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,11 +84,26 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
     [setImageUrls, setReplyImageUrls, user]
   );
 
+  const getCommentRef = (commentType: string) => {
+    let commentRef = collection(db, "versionComments");
+    if (commentType === "node") {
+      commentRef = collection(db, "nodeComments");
+    }
+    return commentRef;
+  };
+  const getCommentDocRef = (commentType: string, commentId: string) => {
+    let commentRef = doc(db, "versionComments", commentId);
+    if (commentType === "node") {
+      commentRef = doc(db, "nodeComments", commentId);
+    }
+    return commentRef;
+  };
+
   const addComment = async () => {
     if (!user?.uname) return;
     setIsLoading(true);
-    await addDoc(collection(db, "conceptCardComments"), {
-      conceptId: concept.id,
+    await addDoc(getCommentRef(commentType), {
+      //refId: refId,
       text: commentInput,
       user: {
         uname: user.uname,
@@ -97,7 +113,6 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
       },
       imageUrls,
       createdAt: new Date(),
-      replies: [],
     });
     setCommentInput("");
     setIsLoading(false);
@@ -120,12 +135,9 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
       imageUrls: replyImageUrls,
       createdAt: new Date(),
     };
-    const comment = comments.find((comment: any) => comment.id === commentId);
-    const commentRef = doc(db, "conceptCardComments", commentId);
-    await updateDoc(commentRef, {
-      replies: [...(comment?.replies || []), reply],
-    });
-
+    const commentRef = getCommentDocRef(commentType, commentId);
+    const replyRef = collection(commentRef, "replies");
+    await addDoc(replyRef, reply);
     setReplyInput("");
     setIsLoading(false);
     setReplyImageUrls([]);
@@ -134,7 +146,7 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
   const editComment = async (commentId: string) => {
     const updatedText = editCommentText;
     if (updatedText !== null) {
-      await updateDoc(doc(db, "conceptCardComments", commentId), {
+      await updateDoc(getCommentDocRef(commentType, commentId), {
         text: updatedText,
         edited: true,
       });
@@ -145,7 +157,10 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
 
   const deleteComment = async (commentId: string) => {
     if (await confirmIt("Are you sure you want to delete this comment?", "Delete", "Keep")) {
-      await deleteDoc(doc(db, "conceptCardComments", commentId));
+      const commentRef = getCommentDocRef(commentType, commentId);
+      await updateDoc(commentRef, {
+        deleted: true,
+      });
     }
   };
 
@@ -154,7 +169,8 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
     if (updatedText !== null) {
       const updatedReplies = [...(comments.find((comment: any) => comment.id === commentId)?.replies || [])];
       updatedReplies[replyIndex].text = updatedText;
-      await updateDoc(doc(db, "conceptCardComments", commentId), {
+      const commentRef = getCommentDocRef(commentType, commentId);
+      await updateDoc(commentRef, {
         replies: updatedReplies,
       });
       setEditableReply(null);
@@ -166,7 +182,8 @@ const Comment = ({ user, concept, confirmIt, comments, users }: CommentProps) =>
     if (await confirmIt("Are you sure you want to delete this reply?", "Delete", "Keep")) {
       const updatedReplies = [...(comments.find((comment: any) => comment.id === commentId)?.replies || [])];
       updatedReplies.splice(replyIndex, 1);
-      await updateDoc(doc(db, "conceptCardComments", commentId), {
+      const commentRef = getCommentDocRef(commentType, commentId);
+      await updateDoc(commentRef, {
         replies: updatedReplies,
       });
     }

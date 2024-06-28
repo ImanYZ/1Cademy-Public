@@ -49,7 +49,7 @@ export const CommentsSidebar = ({
       user={user}
       SidebarContent={
         <Box sx={{ marginTop: "22px" }}>
-          <Comment user={user} concept={""} confirmIt={confirmIt} comments={[]} users={[]} />
+          <Comment user={user} concept={""} confirmIt={confirmIt} comments={[]} users={[]} commentType={commentType} />
         </Box>
       }
     />
