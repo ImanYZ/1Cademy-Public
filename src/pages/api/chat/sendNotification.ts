@@ -59,6 +59,7 @@ const triggerNotifications = async (newMessage: any) => {
 
         const newNotification = {
           ...newMessage,
+          message: replaceMentions(message),
           roomType,
           createdAt: new Date(),
           seen: false,
