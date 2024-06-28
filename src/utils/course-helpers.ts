@@ -1425,11 +1425,16 @@ export const checkInstantApprovalForProposalVote = async (tagIds: string[], unam
 
 //we call this function to check if an instructor is deleting a node
 export const checkInstantDeleteForNode = async (tagIds: string[], uname: string, nodeId: string) => {
+  let isInstructor = false;
+  const instructorDocs = await db.collection("instructors").where("uname", "==", uname).get();
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
   const semestersByIds = await getSemestersByIds(tagIds);
   if (!Object.keys(semestersByIds).length) {
     return {
-      courseExist: false,
-      instantDelete: false,
+      isInstructor,
+      instantDelete: true,
     };
   }
   const userNodes = await db.collection("userNodes").where("node", "==", nodeId).get();
@@ -1456,13 +1461,13 @@ export const checkInstantDeleteForNode = async (tagIds: string[], uname: string,
     const semester = semestersByIds[semesterId];
     if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
       return {
-        courseExist: true,
+        isInstructor,
         instantDelete: false,
       };
     }
   }
   return {
-    courseExist: true,
+    isInstructor,
     instantDelete: true,
   };
 };
