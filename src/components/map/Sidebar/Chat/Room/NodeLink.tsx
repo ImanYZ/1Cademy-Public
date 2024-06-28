@@ -109,7 +109,6 @@ export const NodeLink = ({
 }: MessageRightProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
-    setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
@@ -399,8 +398,7 @@ export const NodeLink = ({
                     user={user}
                     setMessages={setMessages}
                     roomType={roomType}
-                    sendMessage={sendMessage}
-                    sendReplyOnMessage={sendReplyOnMessage}
+                    sendMessage={sendReplyOnMessage}
                     parentMessage={message}
                     setOpenMedia={setOpenMedia}
                   />
