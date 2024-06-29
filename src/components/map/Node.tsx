@@ -28,14 +28,13 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
 import moment from "moment";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import {
   ChosenType,
@@ -371,7 +370,6 @@ const Node = ({
   findAncestorNodes,
   onlineUsers,
 }: NodeProps) => {
-  const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
@@ -397,6 +395,7 @@ const Node = ({
     totalPage: 0,
     totalResults: 0,
   });
+  const createActionTrack = useCreateActionTrack();
 
   const [openProposalType, setOpenProposalType] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
@@ -561,20 +560,10 @@ const Node = ({
     if (!user) return;
     if (!editable) return;
     const timeoutId = setTimeout(() => {
-      createActionTrack(
-        db,
-        "NodeTitleChanged",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "NodeTitleChanged",
+        nodeId: identifier,
+      });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [titleCopy]);
@@ -583,20 +572,10 @@ const Node = ({
     if (!user) return;
     if (!editable) return;
     const timeoutId = setTimeout(() => {
-      createActionTrack(
-        db,
-        "NodeContentChanged",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "NodeContentChanged",
+        nodeId: identifier,
+      });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [contentCopy]);
