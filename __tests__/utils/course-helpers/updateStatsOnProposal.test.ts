@@ -494,7 +494,7 @@ describe("updateStatsOnProposal", () => {
         nodeType: "Question",
       }),
     ];
-    await new MockData(_nodeVersions, "questionVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;

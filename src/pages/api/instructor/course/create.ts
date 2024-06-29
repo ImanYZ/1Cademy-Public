@@ -20,7 +20,7 @@ export type InstructorCourseCreatePayload = {
 
 async function createNodeVersion(nodeRef: DocumentReference, node: INode, instructor: IUser) {
   return {
-    versionRef: db.collection("relationVersions").doc(),
+    versionRef: db.collection("versions").doc(),
     versionData: {
       content: node.content,
       title: node.title,
