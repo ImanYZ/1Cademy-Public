@@ -447,7 +447,6 @@ export const Message = ({
           totalReplies: (curMessage?.totalReplies || 0) + 1,
         });
 
-        //await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
           newMessage: reply,
@@ -468,11 +467,6 @@ export const Message = ({
       try {
         if (sendMessageType === "edit") {
           saveMessageEdit(inputValue, imageUrls);
-        } else if (!!replyOnMessage || sendMessageType === "reply") {
-          if (!inputValue.trim() && !imageUrls.length) return;
-          console.log(replyOnMessage, "replyOnMessage");
-          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
-          return;
         } else {
           let channelRef = doc(db, "channelMessages", selectedChannel?.id);
           if (roomType === "direct") {
@@ -627,35 +621,39 @@ export const Message = ({
                 </Box>
                 {messagesByDate[date].map((message: any) => (
                   <Box key={message.id}>
-                    {roomType === "news" && (
-                      <NewsCard
+                    {message?.node?.id ? (
+                      <NodeLink
+                        db={db}
+                        theme={theme}
                         notebookRef={notebookRef}
                         messageRefs={messageRefs}
                         nodeBookDispatch={nodeBookDispatch}
-                        db={db}
+                        replyOnMessage={replyOnMessage}
+                        forwardMessage={forwardMessage}
                         user={user}
                         message={message}
                         membersInfo={selectedChannel.membersInfo}
+                        openLinkedNode={openLinkedNode}
+                        onlineUsers={onlineUsers}
                         toggleEmojiPicker={toggleEmojiPicker}
-                        channelUsers={channelUsers}
-                        replyOnMessage={replyOnMessage}
-                        setReplyOnMessage={setReplyOnMessage}
                         toggleReaction={toggleReaction}
-                        forwardMessage={forwardMessage}
+                        roomType={roomType}
+                        selectedChannel={selectedChannel}
+                        channelUsers={channelUsers}
                         editingMessage={editingMessage}
                         setEditingMessage={setEditingMessage}
-                        selectedMessage={selectedMessage}
-                        roomType={roomType}
                         leading={leading}
                         getMessageRef={getMessageRef}
-                        selectedChannel={selectedChannel}
-                        onlineUsers={onlineUsers}
+                        handleDeleteReply={handleDeleteReply}
+                        isDeleting={isDeleting}
                         sendMessage={sendMessage}
                         sendReplyOnMessage={sendReplyOnMessage}
+                        setReplyOnMessage={setReplyOnMessage}
+                        setMessages={setMessages}
+                        selectedMessage={selectedMessage}
+                        handleDeleteMessage={handleDeleteMessage}
                         isLoadingReaction={isLoadingReaction}
                         makeMessageUnread={makeMessageUnread}
-                        handleDeleteMessage={handleDeleteMessage}
-                        handleDeleteReply={handleDeleteReply}
                         openReplies={openReplies}
                         setOpenReplies={setOpenReplies}
                         replies={replies}
@@ -665,39 +663,40 @@ export const Message = ({
                         handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                         openDMChannel={openDMChannel}
                       />
-                    )}
-                    {roomType !== "news" && (
+                    ) : (
                       <>
-                        {message?.node?.id ? (
-                          <NodeLink
-                            db={db}
-                            notebookRef={notebookRef}
+                        {roomType !== "news" ? (
+                          <MessageLeft
+                            type={"message"}
+                            theme={theme}
                             messageRefs={messageRefs}
+                            notebookRef={notebookRef}
                             nodeBookDispatch={nodeBookDispatch}
-                            replyOnMessage={replyOnMessage}
-                            forwardMessage={forwardMessage}
-                            user={user}
+                            selectedMessage={selectedMessage}
                             message={message}
-                            membersInfo={selectedChannel.membersInfo}
-                            openLinkedNode={openLinkedNode}
-                            onlineUsers={onlineUsers}
                             toggleEmojiPicker={toggleEmojiPicker}
                             toggleReaction={toggleReaction}
-                            roomType={roomType}
-                            selectedChannel={selectedChannel}
+                            membersInfo={selectedChannel.membersInfo}
+                            forwardMessage={forwardMessage}
+                            replyOnMessage={replyOnMessage}
+                            setReplyOnMessage={setReplyOnMessage}
                             channelUsers={channelUsers}
+                            user={user}
+                            db={db}
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
+                            roomType={roomType}
                             leading={leading}
                             getMessageRef={getMessageRef}
+                            selectedChannel={selectedChannel}
+                            setMessages={setMessages}
+                            onlineUsers={onlineUsers}
+                            openLinkedNode={openLinkedNode}
                             handleDeleteReply={handleDeleteReply}
+                            handleDeleteMessage={handleDeleteMessage}
                             isDeleting={isDeleting}
                             sendMessage={sendMessage}
                             sendReplyOnMessage={sendReplyOnMessage}
-                            setReplyOnMessage={setReplyOnMessage}
-                            setMessages={setMessages}
-                            selectedMessage={selectedMessage}
-                            handleDeleteMessage={handleDeleteMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
                             openReplies={openReplies}
@@ -710,38 +709,35 @@ export const Message = ({
                             openDMChannel={openDMChannel}
                           />
                         ) : (
-                          <MessageLeft
-                            type={"message"}
-                            messageRefs={messageRefs}
+                          <NewsCard
                             notebookRef={notebookRef}
+                            messageRefs={messageRefs}
                             nodeBookDispatch={nodeBookDispatch}
-                            selectedMessage={selectedMessage}
+                            db={db}
+                            user={user}
+                            theme={theme}
                             message={message}
-                            toggleEmojiPicker={toggleEmojiPicker}
-                            toggleReaction={toggleReaction}
                             membersInfo={selectedChannel.membersInfo}
-                            forwardMessage={forwardMessage}
+                            toggleEmojiPicker={toggleEmojiPicker}
+                            channelUsers={channelUsers}
                             replyOnMessage={replyOnMessage}
                             setReplyOnMessage={setReplyOnMessage}
-                            channelUsers={channelUsers}
-                            user={user}
-                            db={db}
+                            toggleReaction={toggleReaction}
+                            forwardMessage={forwardMessage}
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
+                            selectedMessage={selectedMessage}
                             roomType={roomType}
                             leading={leading}
                             getMessageRef={getMessageRef}
                             selectedChannel={selectedChannel}
-                            setMessages={setMessages}
                             onlineUsers={onlineUsers}
-                            openLinkedNode={openLinkedNode}
-                            handleDeleteReply={handleDeleteReply}
-                            handleDeleteMessage={handleDeleteMessage}
-                            isDeleting={isDeleting}
                             sendMessage={sendMessage}
                             sendReplyOnMessage={sendReplyOnMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            handleDeleteMessage={handleDeleteMessage}
+                            handleDeleteReply={handleDeleteReply}
                             openReplies={openReplies}
                             setOpenReplies={setOpenReplies}
                             replies={replies}
@@ -750,6 +746,9 @@ export const Message = ({
                             setOpenMedia={setOpenMedia}
                             handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                             openDMChannel={openDMChannel}
+                            isDeleting={isDeleting}
+                            setMessages={setMessages}
+                            openLinkedNode={openLinkedNode}
                           />
                         )}
                       </>
@@ -802,7 +801,6 @@ export const Message = ({
             setMessages={setMessages}
             sendMessageType={"message"}
             sendMessage={sendMessage}
-            sendReplyOnMessage={sendReplyOnMessage}
             setOpenMedia={setOpenMedia}
           />
         </Box>

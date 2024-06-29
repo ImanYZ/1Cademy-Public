@@ -1,6 +1,7 @@
 import AddLinkIcon from "@mui/icons-material/AddLink";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
+import DoneIcon from "@mui/icons-material/Done";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
@@ -38,7 +39,6 @@ type MessageInputProps = {
   sendMessageType?: string;
   setMessages?: any;
   sendMessage: any;
-  sendReplyOnMessage: any;
   parentMessage?: IChannelMessage;
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
@@ -248,35 +248,22 @@ export const MessageInput = ({
       }
       const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
       let imageFileName = new Date().toUTCString();
-      uploadImage({ event, path, imageFileName }).then(url => {
-        setImageUrls((prev: string[]) => [...prev, url]);
-        if (!!parentMessage && sendMessageType === "reply") {
-          setReplyOnMessage({ ...parentMessage, notVisible: true });
-        }
-      });
+      uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
     },
     [setImageUrls]
   );
 
   const handleSendMessage = () => {
-    sendMessage(imageUrls, important, sendMessageType, inputValue);
+    if (!!parentMessage && sendMessageType === "reply") {
+      sendMessage(parentMessage, inputValue, imageUrls, important, {});
+    } else {
+      sendMessage(imageUrls, important, sendMessageType, inputValue);
+    }
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
     setIsPreview(false);
     inputFieldRef?.current?.blur();
-  };
-
-  const handleFocus = () => {
-    if (!!parentMessage && sendMessageType === "reply") {
-      setReplyOnMessage({ ...parentMessage, notVisible: true });
-    }
-  };
-
-  const handleBlur = () => {
-    if (!!parentMessage && sendMessageType === "reply") {
-      setReplyOnMessage(null);
-    }
   };
 
   const choosingNewLinkedNode = () => {
@@ -286,7 +273,6 @@ export const MessageInput = ({
     nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: "Node" } });
     nodeBookDispatch({ type: "setSelectedNode", payload: "" });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
-
     if (!!parentMessage) {
       setReplyOnMessage({ ...parentMessage, notVisible: true });
     } else {
@@ -348,8 +334,6 @@ export const MessageInput = ({
           singleLine={false}
           onChange={handleTyping}
           onKeyDown={handleKeyPress}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
         >
           <Mention
             trigger="@"
@@ -507,34 +491,27 @@ export const MessageInput = ({
           </Button>
         ) : (
           <Box sx={{ ml: "auto" }}>
-            <Button
-              variant="contained"
+            <IconButton
+              color="error"
               onClick={cancel}
               sx={{
-                minWidth: "0px",
-                width: "80px",
-                height: "30px",
-                p: "10px",
+                p: "5px",
                 borderRadius: "8px",
                 mr: "5px",
-                backgroundColor: theme.toLowerCase() === "dark" ? "transparent" : DESIGN_SYSTEM_COLORS.notebookG400,
               }}
             >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
+              <CloseIcon />
+            </IconButton>
+            <IconButton
+              color="success"
               onClick={handleSendMessage}
               sx={{
-                minWidth: "0px",
-                width: "80px",
-                height: "30px",
-                p: "10px",
+                p: "5px",
                 borderRadius: "8px",
               }}
             >
-              Save
-            </Button>
+              <DoneIcon />
+            </IconButton>
           </Box>
         )}
       </Box>
