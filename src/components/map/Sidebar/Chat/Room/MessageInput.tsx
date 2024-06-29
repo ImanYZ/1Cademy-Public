@@ -13,7 +13,7 @@ import { IChannelMessage } from "src/chatTypes";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
@@ -43,8 +43,6 @@ type MessageInputProps = {
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const MessageInput = ({
-  db,
-  user,
   notebookRef,
   nodeBookDispatch,
   theme,
@@ -67,6 +65,7 @@ export const MessageInput = ({
   const [inputValue, setInputValue] = useState<string>("");
   const [important, setImportant] = useState(false);
   const [isPreview, setIsPreview] = useState<any>(false);
+  const createActionTrack = useCreateActionTrack();
 
   useEffect(() => {
     if (editingMessage) {
@@ -214,20 +213,7 @@ export const MessageInput = ({
   useEffect(() => {
     if (!inputValue) return;
     const timeoutId = setTimeout(() => {
-      createActionTrack(
-        db,
-        "MessageTyped",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user.email
-      );
+      createActionTrack({ action: "MessageTyped" });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [inputValue]);

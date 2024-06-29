@@ -1,11 +1,24 @@
 import dagre from "dagre";
-import { collection, doc, Firestore, getDocs, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  Firestore,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
+import { useCallback, useState } from "react";
 import { ReputationSignal } from "src/knowledgeTypes";
 import { IActionTrack /* , IActionTrackType */ } from "src/types/IActionTrack";
 import { INodeVersion } from "src/types/INodeVersion";
 import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
 import { AllTagsTreeView } from "@/components/TagsSearcher";
+import { useAuth } from "@/context/AuthContext";
 
 import { EdgesData, FullNodeData, FullNodesData, NodeFireStore } from "../../nodeBookTypes";
 import { getCollectionsQuery } from "./getTypedCollections";
@@ -1377,35 +1390,45 @@ export const generateReputationSignal = (
   });
 };
 
-export const createActionTrack = (
-  db: Firestore,
-  type: string,
-  action: string,
-  userData: {
-    uname: string;
-    imageUrl: string;
-    chooseUname: boolean;
-    fullname: string;
-  },
-  nodeId: string,
-  receivers: string[],
-  email: string
-) => {
-  if (process.env.NODE_ENV === "development") return;
-  const actionTracksCol = collection(db, "actionTracks");
-  return setDoc(doc(actionTracksCol), {
-    accepted: true,
-    type,
-    action,
-    imageUrl: userData.imageUrl,
-    createdAt: Timestamp.now(),
-    doer: userData.uname,
-    chooseUname: userData.chooseUname,
-    fullname: userData.fullname,
-    nodeId,
-    receivers,
-    email,
-  } as IActionTrack);
+export const useCreateActionTrack = () => {
+  const [{ user }] = useAuth();
+  const db = getFirestore();
+  const [lastRecordedMinute, setLastRecordedMinute] = useState<number>(-1);
+  const createActionTrack = useCallback(
+    async (data: any) => {
+      if (process.env.NODE_ENV === "development") return;
+
+      if (!user) {
+        console.error("User data is not available");
+        return;
+      }
+
+      const currentMinute = new Date().getMinutes();
+      if (currentMinute === lastRecordedMinute && data?.action === "navigateWhenNotScrolling") {
+        return;
+      }
+
+      setLastRecordedMinute(currentMinute);
+      const actionTracksCol = collection(db, "actionTracks");
+      try {
+        console.log(data, "createActionTrack", currentMinute);
+        await setDoc(doc(actionTracksCol), {
+          accepted: true,
+          ...data,
+          imageUrl: user.imageUrl,
+          createdAt: Timestamp.now(),
+          doer: user.uname,
+          chooseUname: user.chooseUname,
+          fullname: user.fullname,
+        } as IActionTrack);
+      } catch (error) {
+        console.error("Error creating action track: ", error);
+      }
+    },
+    [db, user, lastRecordedMinute]
+  );
+
+  return createActionTrack;
 };
 
 export const getAvatarName = (fName: string, lName: string) => {
