@@ -96,14 +96,12 @@ describe("updateStatsOnProposal", () => {
     new MockData([], "credits"),
     new MockData([], "courses"),
     new MockData([], "instructors"),
-    new MockData([], "relationVersions"),
+    new MockData([], "versions"),
     new MockData([], "semesters"),
-    new MockData([], "questionVersions"),
     new MockData([], "semesterStudentSankeys"),
     new MockData([], "semesterStudentStats"),
     new MockData([], "semesterStudentVoteStats"),
     new MockData([], "userVersions"),
-    new MockData([], "userQuestionVersions"),
   ];
 
   const auth = admin.auth();
