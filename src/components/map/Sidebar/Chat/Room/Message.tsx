@@ -28,7 +28,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import { NotFoundNotification } from "../../SidebarV2/NotificationSidebar";
@@ -114,6 +114,7 @@ export const Message = ({
   const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
   const unsubscribeRefs = useRef<any>([]);
+  const createActionTrack = useCreateActionTrack();
 
   useEffect(() => {
     const currentDate = new Date();
@@ -396,20 +397,9 @@ export const Message = ({
       newMessage: { ...editingMessage, message: newMessage },
       roomType,
     });
-    createActionTrack(
-      db,
-      "MessageEdited",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({
+      action: "MessageEdited",
+    });
     setEditingMessage(null);
   };
 
@@ -422,7 +412,6 @@ export const Message = ({
       node = {}
     ) => {
       try {
-        setReplyOnMessage(null);
         const replyId = newId(db);
         const reply = {
           id: replyId,
@@ -444,6 +433,7 @@ export const Message = ({
           important,
           deleted: false,
         };
+        console.log("reply", reply);
         setReplies((prevMessages: any) => {
           return [...prevMessages, reply];
         });
@@ -463,20 +453,9 @@ export const Message = ({
           newMessage: reply,
           roomType,
         });
-        createActionTrack(
-          db,
-          "MessageReplied",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user.email
-        );
+        createActionTrack({
+          action: "MessageReplied",
+        });
       } catch (error) {
         console.error(error);
       }
@@ -491,6 +470,7 @@ export const Message = ({
           saveMessageEdit(inputValue, imageUrls);
         } else if (!!replyOnMessage || sendMessageType === "reply") {
           if (!inputValue.trim() && !imageUrls.length) return;
+          console.log(replyOnMessage, "replyOnMessage");
           sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
           return;
         } else {
@@ -527,20 +507,9 @@ export const Message = ({
             newMessage: { ...newMessage, id: docRef.id },
             roomType,
           });
-          createActionTrack(
-            db,
-            "MessageSent",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            "",
-            [],
-            user.email
-          );
+          createActionTrack({
+            action: "MessageSent",
+          });
         }
       } catch (error) {
         console.error(error);
@@ -600,23 +569,25 @@ export const Message = ({
           ))}
         </Box>
       )}
-      {newMemberSection && (
-        <Box sx={{ position: "relative", pt: "14px" }}>
-          <AddMember
-            db={db}
-            user={user}
-            onlineUsers={onlineUsers}
-            selectedChannel={selectedChannel}
-            getChannelRef={getChannelRef}
-          />
-          <IconButton
-            onClick={() => setNewMemberSection(false)}
-            sx={{ position: "absolute", right: "0px", top: "-10px" }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      )}
+
+      <Box sx={{ position: "relative", pt: "14px" }}>
+        <AddMember
+          db={db}
+          user={user}
+          onlineUsers={onlineUsers}
+          selectedChannel={selectedChannel}
+          getChannelRef={getChannelRef}
+          setOpen={setNewMemberSection}
+          open={newMemberSection}
+        />
+        <IconButton
+          onClick={() => setNewMemberSection(false)}
+          sx={{ position: "absolute", right: "0px", top: "-10px" }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+
       {forward ? (
         <Forward />
       ) : (

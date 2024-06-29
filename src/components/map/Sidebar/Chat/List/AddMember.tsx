@@ -1,3 +1,4 @@
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -5,7 +6,7 @@ import { Firestore, updateDoc } from "firebase/firestore";
 import { IUser } from "src/types/IUser";
 
 import { generateChannelName } from "@/lib/utils/chat";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 
 import UserSuggestion from "../Common/UserSuggestion";
 
@@ -16,8 +17,25 @@ type DirectMessageProps = {
   onlineUsers: any;
   selectedChannel: any;
   getChannelRef: any;
+  open: any;
+  setOpen: any;
 };
-export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRef }: DirectMessageProps) => {
+
+export const AddMember = ({
+  db,
+  user,
+  onlineUsers,
+  selectedChannel,
+  getChannelRef,
+  open,
+  setOpen,
+}: DirectMessageProps) => {
+  const createActionTrack = useCreateActionTrack();
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const addNewMember = (member: any) => {
     if (selectedChannel.members?.includes(member?.uname)) return;
 
@@ -39,26 +57,26 @@ export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRe
       members,
       membersInfo,
     });
-    createActionTrack(
-      db,
-      "MessageMemberAdded",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({ action: "MessageMemberAdded" });
+    handleClose();
   };
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
-        <UserSuggestion db={db} onlineUsers={onlineUsers} action={addNewMember} />
-      </Box>
-    </Box>
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle>Add people to this conversation</DialogTitle>
+      <DialogContent sx={{ height: "100px", width: "600px", overflow: "visible" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
+            <UserSuggestion db={db} onlineUsers={onlineUsers} action={addNewMember} autoFocus={true} />
+          </Box>
+        </Box>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={handleClose} color="primary">
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };

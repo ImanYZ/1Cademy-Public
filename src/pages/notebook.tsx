@@ -137,7 +137,6 @@ import {
   compareLinks,
   compareProperty,
   copyNode,
-  createActionTrack,
   generateReputationSignal,
   getInteractiveMapDefaultScale,
   getSelectionText,
@@ -149,6 +148,7 @@ import {
   setDagNode,
   setNewParentChildrenEdges,
   tempNodes,
+  useCreateActionTrack,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newFirestoreId";
 import {
@@ -278,6 +278,7 @@ const Notebook = ({}: NotebookProps) => {
   const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
+  const createActionTrack = useCreateActionTrack();
   const db = getFirestore();
   // const storage = getStorage();
   const theme = useTheme();
@@ -1668,20 +1669,7 @@ const Notebook = ({}: NotebookProps) => {
         createdAt: Timestamp.fromDate(new Date()),
       });
       if (user) {
-        createActionTrack(
-          db,
-          "openUserInfoSidebar",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({ action: "openUserInfoSidebar" });
       }
     },
     [db, nodeBookDispatch, user, setOpenSidebar, revertNodesOnGraph]
@@ -2187,20 +2175,10 @@ const Notebook = ({}: NotebookProps) => {
 
       if (notebookRef.current.choosingNode) return;
       if (!user) return;
-      createActionTrack(
-        db,
-        "NodeOpen",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        linkedNodeID,
-        [],
-        user.email
-      );
+      createActionTrack({
+        action: "NodeOpen",
+        nodeId: linkedNodeID,
+      });
 
       gtmEvent("Interaction", {
         customType: "NodeOpen",
@@ -2338,20 +2316,10 @@ const Notebook = ({}: NotebookProps) => {
             customType: "NodeHide",
           });
 
-          createActionTrack(
-            db,
-            "NodeHide",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "NodeHide",
             nodeId,
-            [],
-            user.email
-          );
+          });
 
           notebookRef.current.selectedNode = parentNode;
           nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
@@ -2500,20 +2468,10 @@ const Notebook = ({}: NotebookProps) => {
         return graph;
       });
 
-      createActionTrack(
-        db,
-        "openAllChildren",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
+      createActionTrack({
+        action: "openAllChildren",
         nodeId,
-        [],
-        user.email
-      );
+      });
       lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
@@ -2636,20 +2594,10 @@ const Notebook = ({}: NotebookProps) => {
         return graph;
       });
 
-      createActionTrack(
-        db,
-        "openAllParent",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user.email
-      );
+      createActionTrack({
+        action: "openAllParent",
+        nodeId: nodeId,
+      });
       lastNodeOperation.current = { name: "OpenAllParent", data: "" };
     },
     [db, nodeBookDispatch, selectedNotebookId, user]
@@ -2747,20 +2695,9 @@ const Notebook = ({}: NotebookProps) => {
       setSelectedNotebookId(notebookId);
       await detectHtmlElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
-      createActionTrack(
-        db,
-        "openNodesOnNotebook",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user.email
-      );
+      createActionTrack({
+        action: "openNodesOnNotebook",
+      });
     },
     [db, user]
   );
@@ -2826,20 +2763,11 @@ const Notebook = ({}: NotebookProps) => {
           customType: "NodeCollapse",
         });
 
-        createActionTrack(
-          db,
-          "NodeCollapse",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
+        createActionTrack({
+          action: "NodeCollapse",
+
           nodeId,
-          [],
-          user.email
-        );
+        });
         return { nodes: oldNodes, edges };
       });
 
@@ -2897,20 +2825,11 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       notebookRef.current.selectedNode = nodeId;
       if (user) {
-        createActionTrack(
-          db,
-          "openNodePart",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "openNodePart",
+
+          nodeId: nodeId,
+        });
       }
     },
     // TODO: CHECK dependencies
@@ -2934,20 +2853,11 @@ const Notebook = ({}: NotebookProps) => {
         customType: "NodeShare",
       });
 
-      createActionTrack(
-        db,
-        "NodeShare",
+      createActionTrack({
+        action: "NodeShare",
+        nodeId: nodeId,
         platform,
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user.email
-      );
+      });
     },
     [db, user]
   );
@@ -2967,20 +2877,11 @@ const Notebook = ({}: NotebookProps) => {
         };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "referenceLabelChange",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "referenceLabelChange",
+
+          nodeId: nodeId,
+        });
       }
     },
     [setGraph]
@@ -3028,20 +2929,10 @@ const Notebook = ({}: NotebookProps) => {
             customType: "NodeStudied",
           });
 
-          createActionTrack(
-            db,
-            "NodeStudied",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "NodeStudied",
             nodeId,
-            [],
-            user.email
-          );
+          });
         }
 
         setDoc(doc(userNodeLogRef), userNodeLogData);
@@ -3049,20 +2940,10 @@ const Notebook = ({}: NotebookProps) => {
       });
       event.currentTarget.blur();
 
-      createActionTrack(
-        db,
-        "markStudied",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "markStudied",
+        nodeId: nodeId,
+      });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3113,20 +2994,10 @@ const Notebook = ({}: NotebookProps) => {
           customType: "NodeBookmark",
         });
 
-        createActionTrack(
-          db,
-          "NodeBookmark",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
+        createActionTrack({
+          action: "NodeBookmark",
           nodeId,
-          [],
-          user.email
-        );
+        });
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
@@ -3169,20 +3040,10 @@ const Notebook = ({}: NotebookProps) => {
         return { ...node, disableVotes: false };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "correctNode",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "correctNode",
+          nodeId: nodeId,
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3317,20 +3178,10 @@ const Notebook = ({}: NotebookProps) => {
           return { nodes, edges };
         });
         if (user) {
-          createActionTrack(
-            db,
-            "wrongNode",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "wrongNode",
             nodeId,
-            [],
-            user?.email
-          );
+          });
         }
       } catch (error) {
         console.error(error);
@@ -3370,20 +3221,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "changeChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "changeChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3404,20 +3245,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "changeFeedback",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "changeFeedback",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3439,20 +3270,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "switchChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "switchChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3472,20 +3293,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "deleteChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "deleteChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3509,20 +3320,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "addChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "addChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3562,20 +3363,9 @@ const Notebook = ({}: NotebookProps) => {
     });
     setOpenSidebar(null);
     if (user) {
-      createActionTrack(
-        db,
-        "closeSideBar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "closeSideBar",
+      });
     }
   }, [
     user,
@@ -3623,20 +3413,10 @@ const Notebook = ({}: NotebookProps) => {
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
       if (user) {
-        createActionTrack(
-          db,
-          "proposeNodeImprovement",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "proposeNodeImprovement",
+          nodeId: nodeId,
+        });
       }
     },
     [processHeightChange, revertNodesOnGraph, scrollToNode]
@@ -3758,20 +3538,10 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "proposeNewParent",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "proposeNewParent",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3841,20 +3611,10 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
       if (user) {
-        createActionTrack(
-          db,
-          "selectNode",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "selectNode",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
@@ -4104,20 +3864,10 @@ const Notebook = ({}: NotebookProps) => {
           return updatedLinks;
         });
         if (user) {
-          createActionTrack(
-            db,
-            "saveProposedImprovement",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            notebookRef.current.selectedNode || "",
-            [],
-            user?.email
-          );
+          createActionTrack({
+            action: "saveProposedImprovement",
+            nodeId: notebookRef.current.selectedNode || "",
+          });
         }
       } catch (err) {
         console.error(err);
@@ -4261,20 +4011,10 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "proposeNewChild",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "proposeNewChild",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -4452,20 +4192,10 @@ const Notebook = ({}: NotebookProps) => {
           return { nodes, edges };
         });
         if (user) {
-          createActionTrack(
-            db,
-            "saveProposedParentNode",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            notebookRef.current.selectedNode || "",
-            [],
-            user?.email
-          );
+          createActionTrack({
+            action: "saveProposedParentNode",
+            nodeId: notebookRef.current.selectedNode || "",
+          });
         }
       } catch (err) {
         console.error(err);
@@ -4709,20 +4439,10 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
       }
       if (user) {
-        createActionTrack(
-          db,
-          "saveProposedChildNode",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "saveProposedChildNode",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [selectedNotebookId, user, nodeBookDispatch, graph.nodes, scrollToNode, settings.showClusterOptions, allTags, db]
@@ -4925,20 +4645,11 @@ const Notebook = ({}: NotebookProps) => {
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
       if (user) {
-        createActionTrack(
-          db,
-          "onSelectProposal",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "onSelectProposal",
+
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [user?.uname, nodeBookState.selectedNode, allTags, revertNodesOnGraph, settings.showClusterOptions]
@@ -4964,20 +4675,11 @@ const Notebook = ({}: NotebookProps) => {
         scrollToNode(nodeBookState.selectedNode);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "deleteProposal",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "deleteProposal",
+
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [nodeBookState.choosingNode, nodeBookState.selectedNode, revertNodesOnGraph, scrollToNode, selectedNodeType]
@@ -5131,20 +4833,10 @@ const Notebook = ({}: NotebookProps) => {
           );
         }
         if (user) {
-          createActionTrack(
-            db,
-            "uploadNodeImage",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "uploadNodeImage",
             nodeId,
-            [],
-            user?.email
-          );
+          });
         }
       } catch (err) {
         console.error("Image Upload Error: ", err);
@@ -5339,20 +5031,11 @@ const Notebook = ({}: NotebookProps) => {
         }
       }
       if (user) {
-        createActionTrack(
-          db,
-          "rateProposal",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          newNodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "rateProposal",
+
+          nodeId: newNodeId,
+        });
       }
     },
     [selectedNotebookId, user, nodeBookState.selectedNode, nodeBookState.choosingNode, selectedNodeType]
@@ -5371,6 +5054,10 @@ const Notebook = ({}: NotebookProps) => {
 
   const navigateWhenNotScrolling = (newMapInteractionValue: any) => {
     if (!scrollToNodeInitialized.current) {
+      createActionTrack({
+        action: "navigateWhenNotScrolling",
+        mapInteractionValue,
+      });
       return setMapInteractionValue(newMapInteractionValue);
     }
   };
@@ -5378,20 +5065,9 @@ const Notebook = ({}: NotebookProps) => {
   const onOpenSideBar = useCallback((sidebar: OpenLeftSidebar) => {
     setOpenSidebar(sidebar);
     if (user) {
-      createActionTrack(
-        db,
-        "onOpenSideBar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onOpenSideBar",
+      });
     }
   }, []);
 
@@ -5399,20 +5075,9 @@ const Notebook = ({}: NotebookProps) => {
   const cleanEditorLink = useCallback(() => {
     updatedLinksRef.current = getInitialUpdateLinks();
     if (user) {
-      createActionTrack(
-        db,
-        "cleanEditorLink",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "cleanEditorLink",
+      });
     }
   }, []);
 
@@ -5426,20 +5091,9 @@ const Notebook = ({}: NotebookProps) => {
     if (notebookRef.current.selectedNode) scrollToNode(notebookRef.current.selectedNode);
     setOpenSidebar(null);
     if (user) {
-      createActionTrack(
-        db,
-        "onCloseSidebar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onCloseSidebar",
+      });
     }
   }, [revertNodesOnGraph, scrollToNode]);
 
@@ -5456,20 +5110,9 @@ const Notebook = ({}: NotebookProps) => {
       setNotebookChanges({ updated: true });
     }, 200);
     if (user) {
-      createActionTrack(
-        db,
-        "onRedrawGraph",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onRedrawGraph",
+      });
     }
   }, [setNotebookChanges]);
 
@@ -5510,20 +5153,9 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     setTutorial(null);
     if (user) {
-      createActionTrack(
-        db,
-        "onCancelTutorial",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onCancelTutorial",
+      });
     }
   }, [setTutorial, tutorialTargetId]);
 
@@ -5534,40 +5166,18 @@ const Notebook = ({}: NotebookProps) => {
   const onOnlyCloseSidebar = useCallback(() => {
     setOpenSidebar(null);
     if (user) {
-      createActionTrack(
-        db,
-        "onOnlyCloseSidebar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onOnlyCloseSidebar",
+      });
     }
   }, [user, db]);
 
   const onDisplayInstructorPage = useCallback(() => {
     setDisplayDashboard(true);
     if (user) {
-      createActionTrack(
-        db,
-        "onDisplayInstructorPage",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onDisplayInstructorPage",
+      });
     }
   }, []);
 
@@ -5603,20 +5213,9 @@ const Notebook = ({}: NotebookProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
     if (user) {
-      createActionTrack(
-        db,
-        "onSkipTutorial",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onSkipTutorial",
+      });
     }
   }, [
     user,
@@ -5724,20 +5323,9 @@ const Notebook = ({}: NotebookProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
     if (user) {
-      createActionTrack(
-        db,
-        "onFinalizeTutorial",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onFinalizeTutorial",
+      });
     }
   }, [
     user,
@@ -5800,20 +5388,9 @@ const Notebook = ({}: NotebookProps) => {
         updatedAt: new Date(),
       });
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndForceTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndForceTutorial",
+        });
       }
       return true;
     },
@@ -5832,20 +5409,9 @@ const Notebook = ({}: NotebookProps) => {
         setForcedTutorial(null);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndRemoveTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndRemoveTutorial",
+        });
       }
     },
     [graph.nodes, setTutorial, dynamicTargetId, tutorial]
@@ -5872,20 +5438,9 @@ const Notebook = ({}: NotebookProps) => {
       }
       startTutorial(tutorialName);
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndCallSidebarTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndCallSidebarTutorial",
+        });
       }
       return true;
     },
@@ -5912,20 +5467,9 @@ const Notebook = ({}: NotebookProps) => {
         scrollToNode(newTargetId);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndCallTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndCallTutorial",
+        });
       }
       return true;
     },
@@ -6838,20 +6382,9 @@ const Notebook = ({}: NotebookProps) => {
         if (result) return;
       }
       if (user) {
-        createActionTrack(
-          db,
-          "detectTriggerTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectTriggerTutorial",
+        });
       }
     };
 

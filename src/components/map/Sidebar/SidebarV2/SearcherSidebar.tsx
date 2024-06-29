@@ -838,7 +838,7 @@ const SearcherSidebar = ({
                       marginLeft: "auto",
                     }),
                   }}
-                  id="SearchResutlsNum"
+                  id="SearchResultsNum"
                 >
                   {shortenNumber(results, 2, false)} Results
                 </Box>

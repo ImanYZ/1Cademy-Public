@@ -6,7 +6,6 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import { styled } from "@mui/system";
 import { collection, Firestore, getDocs, query } from "firebase/firestore";
-import Fuse from "fuse.js";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { IUser } from "src/types/IUser";
 
@@ -16,10 +15,11 @@ type UserSuggestionProps = {
   db: Firestore;
   onlineUsers: any;
   action: (suggestion: IUser) => void;
+  autoFocus?: boolean;
 };
 
 const SuggestionList = styled(Paper)(({ theme }) => ({
-  position: "absolute",
+  position: "fixed",
   width: "100%",
   maxHeight: "300px",
   overflowY: "auto",
@@ -27,14 +27,11 @@ const SuggestionList = styled(Paper)(({ theme }) => ({
   zIndex: 1,
 }));
 
-const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
+const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [users, setUsers] = useState<IUser[]>([]);
   const [suggestions, setSuggestions] = useState<IUser[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-  const fuse = new Fuse(users, {
-    keys: ["fullName", "uname"],
-  });
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(!!autoFocus);
   const wrapperRef = useRef<any>(null);
 
   useEffect(() => {
@@ -52,25 +49,31 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
   }, [db]);
 
   useEffect(() => {
-    if (!inputValue) return;
+    if (!inputValue.trim()) {
+      setSuggestions(users.slice(0, 10));
+      return;
+    }
     const handler = setTimeout(() => {
-      const filteredOptions = (query: string): any => {
+      const filteredOptions = (query: string): IUser[] => {
         if (!query) {
-          return [];
+          return users.slice(0, 10);
         }
-        return fuse
-          .search(query)
-          .map(result => result.item)
-          .filter((item: any) => !item.deleted);
+        const lowerCaseQuery = query.toLowerCase();
+        return users.filter(
+          (user: IUser) =>
+            user.fName.toLowerCase().startsWith(lowerCaseQuery) ||
+            user.lName.toLowerCase().startsWith(lowerCaseQuery) ||
+            user.uname.toLowerCase().startsWith(lowerCaseQuery)
+        );
       };
-      setSuggestions(filteredOptions(inputValue));
+      setSuggestions(filteredOptions(inputValue.trim()));
       setShowSuggestions(true);
-    }, 1000);
+    }, 300);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [inputValue]);
+  }, [inputValue, users]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -81,7 +84,7 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
   }, []);
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+    if (wrapperRef.current && !wrapperRef.current.contains(event.target) && !autoFocus) {
       setShowSuggestions(false);
     }
   };
@@ -101,9 +104,10 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
         onFocus={() => {
           setShowSuggestions(true);
         }}
+        sx={{ position: "sticky", top: 0 }}
       />
       {showSuggestions && (
-        <SuggestionList>
+        <SuggestionList sx={{ width: "400px" }}>
           <List>
             {suggestions.map((suggestion: IUser, index: number) => (
               <ListItem
@@ -113,11 +117,12 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                   action(suggestion);
                   setShowSuggestions(false);
                 }}
+                sx={{ height: "50px" }}
               >
                 <Box
                   sx={{
-                    width: `40px`,
-                    height: `40px`,
+                    width: `30px`,
+                    height: `30px`,
                     cursor: "pointer",
                     transition: "all 0.2s 0s ease",
                     background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
@@ -125,8 +130,8 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                     "& > .user-image": {
                       borderRadius: "50%",
                       overflow: "hidden",
-                      width: "30px",
-                      height: "30px",
+                      width: "20px",
+                      height: "20px",
                     },
                     "@keyframes slidein": {
                       from: {
@@ -141,7 +146,7 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                   <OptimizedAvatar2
                     alt={suggestion.fullName || ""}
                     imageUrl={suggestion.imageUrl}
-                    size={40}
+                    size={30}
                     sx={{ border: "none" }}
                   />
                   <Box
@@ -151,12 +156,12 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                         ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
                         : "",
                     }}
-                    className={onlineUsers[suggestion.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+                    className={onlineUsers[suggestion.uname] ? "UserStatusOnlineIcon" : ""}
                   />
                 </Box>
                 <Box>
-                  <Typography sx={{ pl: 2 }}>{suggestion.fullName}</Typography>
-                  <Typography sx={{ pl: 1, color: "grey", fontSize: "15px" }}>@{suggestion.uname}</Typography>
+                  <Typography sx={{ pl: 1.5, fontSize: "14px" }}>{suggestion.fullName}</Typography>
+                  <Typography sx={{ pl: 1, color: "grey", fontSize: "12px" }}>@{suggestion.uname}</Typography>
                 </Box>
               </ListItem>
             ))}
