@@ -21,7 +21,7 @@
     "prepare": "husky install .husky",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
-    "test": "NODE_OPTIONS=\"--max_old_space_size=8192\" jest --watch --runInBand",
+    "test": "NODE_OPTIONS=\"--max_old_space_size=8192\" FIRESTORE_EMULATOR_HOST='localhost:8080' FIREBASE_AUTH_EMULATOR_HOST='localhost:9099' GCLOUD_PROJECT=test jest --watch --runInBand",
     "test:client": "npm run test client",
     "test:coverage": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --coverage --all --runInBand'",
     "test:ci": "firebase emulators:exec  --project test --only auth,firestore 'jest --ci --runInBand __tests__/utils && jest --ci --runInBand __tests__/pages'",

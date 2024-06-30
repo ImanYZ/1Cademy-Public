@@ -1,5 +1,6 @@
+import { delay } from "@/lib/utils/utils";
 import axios from "axios";
-import { delay } from "../../src/lib/utils/utils";
+
 export const fetchGoogleMapsGeolocation = async (institution: any) => {
   try {
     const response = await axios.get(

@@ -1,16 +1,16 @@
+import "dotenv/config";
+
 import * as admin from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
 import lodash from "lodash";
 import moment from "moment";
-
 admin.initializeApp();
 
 import { signalFlashcardChanges, trackHours } from "./utils/common";
 
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
-const { deleteOntologyLock } = require("./actions/deleteOntologyLock");
 const { cleanOpenAiAssistants } = require("./cleanOpenAiAssistants");
 const { createMeeting } = require("./createMeeting");
 const { updateCoursesNums } = require("./updateCoursesNums");
@@ -346,12 +346,6 @@ exports.updateInstitutions = functions
   .pubsub.schedule("every 25 hours")
   .timeZone("America/Detroit")
   .onRun(updateInstitutions);
-
-exports.deleteOntologyLock = functions
-  .runWith({ memory: "1GB", timeoutSeconds: 520 })
-  .pubsub.schedule("0 * * * *")
-  .timeZone("America/Detroit")
-  .onRun(deleteOntologyLock);
 
 exports.cleanOpenAiAssistants = functions
   .runWith({ memory: "1GB", timeoutSeconds: 520 })
