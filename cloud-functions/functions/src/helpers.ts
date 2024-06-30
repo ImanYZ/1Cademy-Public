@@ -76,9 +76,9 @@ export const trackHours = async (data: any) => {
       return;
     }
     const createdAt = moment(data.createdAt.toDate());
-    const todayDate = moment().format("DD-MM-YYYY");
 
     const createdAtEST = createdAt.tz("America/New_York");
+    const todayDate = createdAtEST.format("DD-MM-YYYY");
     const hourEST = createdAtEST.hour();
     const dayOfWeekEST = createdAtEST.day();
 
@@ -98,16 +98,16 @@ export const trackHours = async (data: any) => {
 
         const lastActionTime = moment(trackData.lastActionTime.toDate());
 
-        const diffInMinutes = getMinutesDiff(createdAt, lastActionTime);
+        const diffInMinutes = getMinutesDiff(createdAtEST, lastActionTime);
 
         if (diffInMinutes > 0 && diffInMinutes <= 5) {
           trackData.totalMinutes += diffInMinutes;
-          trackData.trackedMinutes.push(createdAt);
-          trackData.lastActionTime = createdAt;
+          trackData.trackedMinutes.push(createdAtEST);
+          trackData.lastActionTime = createdAtEST;
         } else if (diffInMinutes > 5) {
           trackData.totalMinutes += 1;
-          trackData.trackedMinutes.push(createdAt);
-          trackData.lastActionTime = createdAt;
+          trackData.trackedMinutes.push(createdAtEST);
+          trackData.lastActionTime = createdAtEST;
         }
 
         transaction.update(trackHoursRef, { ...trackData, paid: false });
@@ -115,10 +115,10 @@ export const trackHours = async (data: any) => {
         const newData = {
           day: todayDate,
           totalMinutes: 1,
-          trackedMinutes: [data.createdAt],
+          trackedMinutes: [createdAtEST],
           ...students[data.doer],
-          lastActionTime: createdAt,
-          createdAt: new Date(),
+          lastActionTime: createdAtEST,
+          createdAt: createdAtEST,
         };
 
         transaction.set(trackHoursRef, newData);

@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, Modal, Paper, Skeleton, Typography } from "@mui/material";
+import { Modal, Paper, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -563,25 +563,15 @@ export const Message = ({
           ))}
         </Box>
       )}
-
-      <Box sx={{ position: "relative", pt: "14px" }}>
-        <AddMember
-          db={db}
-          user={user}
-          onlineUsers={onlineUsers}
-          selectedChannel={selectedChannel}
-          getChannelRef={getChannelRef}
-          setOpen={setNewMemberSection}
-          open={newMemberSection}
-        />
-        <IconButton
-          onClick={() => setNewMemberSection(false)}
-          sx={{ position: "absolute", right: "0px", top: "-10px" }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
+      <AddMember
+        db={db}
+        user={user}
+        onlineUsers={onlineUsers}
+        selectedChannel={selectedChannel}
+        getChannelRef={getChannelRef}
+        setOpen={setNewMemberSection}
+        open={newMemberSection}
+      />
       {forward ? (
         <Forward />
       ) : (
@@ -761,7 +751,6 @@ export const Message = ({
           })}
         </Box>
       )}
-
       {!isLoading && (leading || replyOnMessage || roomType !== "news") && (
         <Box
           sx={{

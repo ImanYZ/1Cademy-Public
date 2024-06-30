@@ -179,7 +179,6 @@ describe("POST /api/instructor/students/:semesterId/setting", () => {
     coursesCollection,
     semestersCollection,
     instructorsCollection,
-    new MockData([], "relationVersions"),
   ];
 
   const nodesCollection = new MockData(nodes, "nodes");
