@@ -6,7 +6,7 @@ import {
   signalAllUserNodesChanges,
 } from "src/utils";
 
-import { batchUpdate,commitBatch, db } from "./utils/admin";
+import { batchUpdate, commitBatch, db } from "./utils/admin";
 
 type INodeDeletedUpdates = {
   nodeId: string;

@@ -213,7 +213,7 @@ export type DispatchNodeBookActions =
 
 export type NodeBookActions = {
   dispatch: Dispatch<DispatchNodeBookActions>;
-  handleError: (options: ErrorOptions) => void;
+  handleError: (options: any) => void;
 };
 
 export type TutorialState = null | NodeTutorialState;

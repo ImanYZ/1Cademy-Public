@@ -6,12 +6,13 @@
   "scripts": {
     "dev": "next dev",
     "dev:inspect": "NODE_OPTIONS='--inspect' next dev",
-    "build": "tsc -p tsconfig.firebase.json && next build",
+    "cf:build": "tsc -p tsconfig.firebase.json && tsc-alias -p tsconfig.firebase.json",
+    "build": "npm run cf:build && next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write \"src/**/*.ts\" \"__tests__/**/*.ts\"",
     "deploy": "firebase deploy",
-    "cf:serve": "npm run build && npm run run-emulator",
+    "cf:serve": "npm run cf:build && npm run run-emulator",
     "deploy:hosting": "firebase deploy --only hosting",
     "deploy:database": "firebase deploy --only database",
     "deploy:firestore": "firebase deploy --only firestore",
@@ -24,7 +25,7 @@
     "test:client": "npm run test client",
     "test:coverage": "firebase emulators:exec  --project test --only auth,firestore 'jest --watch --coverage --all --runInBand'",
     "test:ci": "firebase emulators:exec  --project test --only auth,firestore 'jest --ci --runInBand __tests__/utils && jest --ci --runInBand __tests__/pages'",
-    "run-emulator": "firebase emulators:start --project test --only auth,firestore"
+    "run-emulator": "firebase emulators:start --project test --only auth,firestore,functions"
   },
   "author": "Iman YeckehZaare",
   "license": "Apache-2.0",
@@ -145,6 +146,7 @@
     "lint-staged": "^13.0.3",
     "node-mocks-http": "^1.11.0",
     "prettier": "^2.7.1",
+    "tsc-alias": "^1.8.10",
     "typescript": "^4.7.4"
   },
   "lint-staged": {
@@ -152,7 +154,7 @@
     "*.{ts|tsx|js,css,md}": "prettier --write"
   },
   "engines": {
-    "node": ">=14.0.0",
+    "node": "18",
     "yarn": "please-use-npm",
     "npm": ">=6.0.0"
   }

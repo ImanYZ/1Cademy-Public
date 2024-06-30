@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "noImplicitReturns": false,
     "esModuleInterop": true,
     "noUnusedLocals": false,
@@ -9,13 +9,13 @@
     "strictNullChecks": false,
     "outDir": "dist",
     "sourceMap": true,
-    "noEmit": true,
     "strict": true,
-    "target": "es2022",
+    "target": "ES2017",
     "skipLibCheck": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-      "@/lib/*": ["src/lib/*"]
+      "@/lib/*": ["src/lib/*"],
+      "src/*": ["src/*"]
     }
   },
   "compileOnSave": true,

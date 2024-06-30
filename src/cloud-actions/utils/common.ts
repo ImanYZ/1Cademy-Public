@@ -1,6 +1,6 @@
 import moment from "moment-timezone";
 
-import { batchUpdate,commitBatch, db } from "./admin";
+import { batchUpdate, commitBatch, db } from "./admin";
 
 export const signalFlashcardChanges = async (nodeId: string, type: string) => {
   const nodeDoc = await db.collection("nodes").doc(nodeId).get();
