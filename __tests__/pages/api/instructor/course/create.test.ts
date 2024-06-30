@@ -77,7 +77,6 @@ describe("POST /api/instructor/course/create", () => {
     usersCollection,
     creditsCollection,
     nodeVersionsCollection,
-    new MockData([], "relationVersions"),
     new MockData([], "semesterStudentSankeys"),
     reputationsCollection,
 
@@ -257,7 +256,7 @@ describe("POST /api/instructor/course/create", () => {
 
     it("check if version documents exists for created nodes", async () => {
       for (const nodeId of nodeIds) {
-        const versionDocs = await db.collection("relationVersions").where("node", "==", nodeId).get();
+        const versionDocs = await db.collection("versions").where("node", "==", nodeId).get();
         expect(versionDocs.docs.length).toEqual(1);
       }
     });

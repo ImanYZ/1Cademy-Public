@@ -59,7 +59,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: npm install and build
         run: |
-          npm install --legacy-peer-deps
+          NODE_OPTIONS=--openssl-legacy-provider npm install --legacy-peer-deps
           cd cloud-functions
           npm install
           cd ..
