@@ -45,6 +45,7 @@ import { getNodePageWithDomain } from "@/lib/utils/utils";
 import { IPractice } from "src/types/IPractice";
 import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
 import { ISemester } from "src/types/ICourse";
+import { INodeLink } from "src/types/INodeLink";
 
 export const comPointTypes = [
   "comPoints",
@@ -2570,4 +2571,70 @@ export const addToPendingPropsNumsExcludingVoters = async ({
     tWriteOperations,
   });
   return [newBatch, writeCounts];
+};
+
+export const compareLinks = ({ oldLinks, newLinks }: { oldLinks: INodeLink[]; newLinks: INodeLink[] }) => {
+  const addedLinks = newLinks.filter(newLink => !oldLinks.some(oldLink => oldLink.node === newLink.node));
+  const removedLinks = oldLinks.filter(oldLink => !newLinks.some(newLink => newLink.node === oldLink.node));
+  return { addedLinks, removedLinks };
+};
+
+export const checkNeedsUpdates = ({ previousValue, newValue }: any) => {
+  const parentCompare = compareLinks({ oldLinks: previousValue.parents, newLinks: newValue.parents });
+  const childCompare = compareLinks({ oldLinks: previousValue.children, newLinks: newValue.children });
+  if (previousValue.title !== newValue.title) {
+    return true;
+  }
+  if (previousValue.content !== newValue.content) {
+    return true;
+  }
+  if (previousValue.nodeImage !== "" && newValue.nodeImage === "") {
+    return true;
+  } else if (previousValue.nodeImage === "" && newValue.nodeImage !== "") {
+    return true;
+  } else if (previousValue.nodeImage !== newValue.nodeImage) {
+    return true;
+  }
+  if (previousValue.nodeVideo !== "" && newValue.nodeVideo === "") {
+    return true;
+  } else if (previousValue.nodeVideo === "" && newValue.nodeVideo !== "") {
+    return true;
+  } else if (previousValue.nodeVideo !== newValue.nodeVideo) {
+    return true;
+  }
+  if (previousValue.nodeAudio !== "" && newValue.nodeAudio === "") {
+    return true;
+  } else if (previousValue.nodeAudio === "" && newValue.nodeAudio !== "") {
+    return true;
+  } else if (previousValue.nodeAudio !== newValue.nodeAudio) {
+    return true;
+  }
+  if (previousValue.referenceIds.length > newValue.referenceIds.length) {
+    return true;
+  } else if (previousValue.referenceIds.length < newValue.referenceIds.length) {
+    return true;
+  }
+  if (
+    !compareFlatLinks({ links1: previousValue.referenceIds, links2: newValue.referenceIds }) ||
+    !compareFlatLinks({ links1: previousValue.referenceLabels, links2: newValue.referenceLabels })
+  ) {
+    return true;
+  }
+  if (previousValue.tagIds.length > newValue.tagIds.length) {
+    return true;
+  } else if (previousValue.tagIds.length < newValue.tagIds.length) {
+    return true;
+  }
+  if (!compareFlatLinks({ links1: previousValue.tagIds, links2: newValue.tagIds })) {
+    return true;
+  }
+  if (
+    parentCompare.addedLinks.length > 0 ||
+    childCompare.addedLinks.length > 0 ||
+    parentCompare.removedLinks.length > 0 ||
+    childCompare.removedLinks.length > 0
+  ) {
+    return true;
+  }
+  return false;
 };

@@ -1,8 +1,8 @@
-import { admin, batchSet, batchUpdate, commitBatch, db } from "../admin";
-type ItrigerNotifications = {
+import { admin, batchSet, batchUpdate, commitBatch, db } from "./utils/admin";
+type ITriggerNotifications = {
   message: any;
 };
-export const trigerNotifications = async ({ message }: ItrigerNotifications) => {
+export const triggerNotifications = async ({ message }: ITriggerNotifications) => {
   try {
     const { channelId } = message;
     const fcmTokensHash: { [key: string]: string } = {};

@@ -1,7 +1,8 @@
 import { Firestore } from "firebase-admin/firestore";
-import { db, commitBatch, batchSet, batchUpdate } from "./admin";
-import { roundNum } from "./helpers";
-import { USER_VERSIONS, USER_VERSIONS_COMMENTS, VERSIONS, VERSIONS_COMMENTS } from "./helpers/getTypedCollections";
+import { roundNum } from "src/utils/common.utils";
+import { USER_VERSIONS, USER_VERSIONS_COMMENTS, VERSIONS, VERSIONS_COMMENTS } from "src/utils/getTypedCollections";
+
+import { batchSet, batchUpdate,commitBatch, db } from "./utils/admin";
 
 // On 1Cademy.com nodes do not have their list of contributors and institutions
 // assigned to them. We should run this function every 25 hours in a PubSub to

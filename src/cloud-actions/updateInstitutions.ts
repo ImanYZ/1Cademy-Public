@@ -1,5 +1,5 @@
 // const { db } = require("./admin");
-import { db } from "./admin";
+import { db } from "./utils/admin";
 const fs = require("fs");
 const axios = require("axios");
 // On 1Cademy.com when users sign up, we do not make the corresponding changes

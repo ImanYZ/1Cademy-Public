@@ -1,5 +1,6 @@
-import moment = require("moment");
-import { db } from "./admin";
+import moment from "moment";
+
+import { db } from "./utils/admin";
 
 const checkMeetingTime = (semesterId: string): boolean => {
   // Get the current day of the week

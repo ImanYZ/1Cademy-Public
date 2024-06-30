@@ -1,4 +1,4 @@
-import { batchUpdate, commitBatch, db } from "./admin";
+import { batchUpdate, commitBatch, db } from "./utils/admin";
 
 exports.deleteOldProposals = async () => {
   try {

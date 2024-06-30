@@ -1,4 +1,4 @@
-import { db } from "../admin";
+import { db } from "./utils/admin";
 exports.deleteOntologyLock = async () => {
   try {
     const currentTimestamp = new Date();

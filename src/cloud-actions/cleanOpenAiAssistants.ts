@@ -1,4 +1,4 @@
-import moment = require("moment");
+import moment from "moment";
 const OpenAI = require("openai");
 
 exports.cleanOpenAiAssistants = async () => {

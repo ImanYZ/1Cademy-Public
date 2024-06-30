@@ -1,4 +1,4 @@
-import { db } from "../admin";
+import { db } from "./utils/admin";
 type IUpdatesNodeViewers = {
   nodeId: string;
   viewers: number;

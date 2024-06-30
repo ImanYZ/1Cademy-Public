@@ -1,4 +1,4 @@
-import { db } from "../admin";
+import { db } from "./utils/admin";
 export const removeReactionFromCard = async (data: any) => {
   try {
     const doer = data.savedBy;

@@ -1,4 +1,4 @@
-import { batchDelete, commitBatch, db } from "../admin";
+import { batchDelete, commitBatch, db } from "./utils/admin";
 type DeleteNotifications = {
   message: any;
 };

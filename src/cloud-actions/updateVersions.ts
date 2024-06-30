@@ -1,10 +1,12 @@
-import { batchUpdate, commitBatch } from "../admin";
-import { getTypedCollections } from "../helpers/getTypedCollections";
-import { compareChoices, compareFlatLinks, compareLinks } from "../helpers/version-helpers";
+import { compareFlatLinks, getTypedCollections } from "src/utils";
+import { compareChoices, compareLinks } from "src/utils/version-helpers";
+
+import { batchUpdate, commitBatch } from "./utils/admin";
 type INodeDeletedUpdates = {
   nodeId: string;
   nodeData: any;
 };
+
 export const updateVersions = async ({ nodeId, nodeData }: INodeDeletedUpdates) => {
   const nodeType = nodeData.nodeType;
   const { versionsColl }: any = getTypedCollections();
