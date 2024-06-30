@@ -1407,18 +1407,16 @@ export const useCreateActionTrack = () => {
       if (currentMinute === lastRecordedMinute && data?.action === "navigateWhenNotScrolling") {
         return;
       }
-
       setLastRecordedMinute(currentMinute);
       const actionTracksCol = collection(db, "actionTracks");
       try {
-        console.log(data, "createActionTrack", currentMinute);
         await setDoc(doc(actionTracksCol), {
           accepted: true,
           ...data,
           imageUrl: user.imageUrl,
           createdAt: Timestamp.now(),
           doer: user.uname,
-          chooseUname: user.chooseUname,
+          chooseUname: !!user.chooseUname,
           fullname: user.fullname,
         } as IActionTrack);
       } catch (error) {
