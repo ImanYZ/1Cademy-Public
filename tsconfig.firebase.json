@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitReturns": false,
+    "esModuleInterop": true,
+    "noUnusedLocals": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "outDir": "dist",
+    "sourceMap": true,
+    "noEmit": true,
+    "strict": true,
+    "target": "es2022",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/lib/*": ["src/lib/*"]
+    }
+  },
+  "compileOnSave": true,
+  "include": ["src", "src/types"],
+  "exclude": [
+    "src/lib/utils",
+    "src/hooks",
+    "src/nodeBookTypes.ts",
+    "src/components",
+    "src/workers",
+    "src/lib/firestoreClient",
+    "src/client",
+    "src/pages/api",
+    "src/lib/utils/tutorials",
+    "src/**/*.tsx"
+  ]
+}
