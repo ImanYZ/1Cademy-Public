@@ -50,9 +50,7 @@ const triggerNotifications = async (newMessage: any) => {
     if (channelData) {
       const membersInfo = channelData.membersInfo;
       console.log(channelData?.members);
-      const _member = channelData.members.filter(
-        (m: string) => m !== sender && fcmTokensHash.hasOwnProperty(membersInfo[m].uid)
-      );
+      const _member = channelData.members.filter((m: string) => m !== sender);
       const invalidTokens: any = {};
       for (let member of _member) {
         const UID = membersInfo[member].uid;
@@ -68,12 +66,14 @@ const triggerNotifications = async (newMessage: any) => {
         };
         const notificationRef = db.collection("notifications").doc();
         try {
-          const tokens = fcmTokensHash[UID];
+          const tokens = fcmTokensHash[UID] || [];
           for (let token of tokens) {
             const payload = {
               token,
               notification: {
-                title: `${subject} ${membersInfo[sender].fullname}`,
+                title: subject.includes("Repl")
+                  ? `${membersInfo[sender].fullname} sent a reply`
+                  : `${subject} ${membersInfo[sender].fullname}`,
                 body: replaceMentions(message),
               },
               data: {

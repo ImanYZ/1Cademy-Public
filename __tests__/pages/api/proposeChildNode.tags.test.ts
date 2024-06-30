@@ -150,10 +150,9 @@ describe("POST /api/proposeChildNode", () => {
 
     new MockData([], "notificationNums"),
     new MockData([], "practice"),
-    new MockData([], "questionVersions"),
-    new MockData([], "userConceptVersions"),
+    new MockData([], "versions"),
+    new MockData([], "userVersions"),
     new MockData([], "userNodesLog"),
-    new MockData([], "userQuestionVersions"),
     new MockData([], "userVersionsLog"),
     new MockData([], "tags"),
     new MockData([], "actionTracks"),

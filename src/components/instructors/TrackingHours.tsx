@@ -873,7 +873,16 @@ const TrackingHours = () => {
                       setActivityDate(newValue);
                       setError("");
                     }}
-                    renderInput={params => <TextField {...params} />}
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        sx={{
+                          svg: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                          input: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                          label: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                        }}
+                      />
+                    )}
                     PopperProps={{
                       sx: {
                         zIndex: "9999",
@@ -890,7 +899,16 @@ const TrackingHours = () => {
                       setStartTime(newValue);
                       setError("");
                     }}
-                    renderInput={params => <TextField {...params} />}
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        sx={{
+                          svg: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                          input: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                          label: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                        }}
+                      />
+                    )}
                     PopperProps={{
                       sx: {
                         zIndex: "9999",
@@ -907,7 +925,16 @@ const TrackingHours = () => {
                       setEndTime(newValue);
                       setError("");
                     }}
-                    renderInput={params => <TextField {...params} />}
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        sx={{
+                          svg: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                          input: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                          label: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                        }}
+                      />
+                    )}
                     PopperProps={{
                       sx: {
                         zIndex: "9999",
@@ -1020,7 +1047,16 @@ const TrackingHours = () => {
                 label="--/--/--"
                 value={selectedDate}
                 onChange={handleDateChange}
-                renderInput={params => <TextField {...params} />}
+                renderInput={params => (
+                  <TextField
+                    {...params}
+                    sx={{
+                      svg: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                      input: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                      label: { color: theme => (theme.palette.mode === "dark" ? "white" : "black") },
+                    }}
+                  />
+                )}
                 PopperProps={{
                   sx: {
                     zIndex: "9999",

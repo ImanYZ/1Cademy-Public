@@ -410,6 +410,7 @@ export type User = {
   imageUrl?: string;
   imgOrColor?: boolean;
   lName?: string;
+  fullname?: string;
   lang?: string;
   practicing?: boolean;
   // stateInfo?: string;// CHECK: I comment and add state

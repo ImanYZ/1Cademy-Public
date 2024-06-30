@@ -21,9 +21,9 @@ export const initFirebaseClientSDK = () => {
         apiKey: "test",
       });
       const db = getFirestore(app);
-      connectFirestoreEmulator(db, "localhost", 8080);
+      connectFirestoreEmulator(db, "127.0.0.1", 8080);
       const auth = getAuth(app);
-      connectAuthEmulator(auth, "http://localhost:9099");
+      connectAuthEmulator(auth, "http://127.0.0.1:9099");
     } else {
       app = initializeApp({
         apiKey: process.env.NEXT_PUBLIC_API_KEY,

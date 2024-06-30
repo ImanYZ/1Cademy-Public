@@ -2,8 +2,9 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import moment from "moment";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, Fragment, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
+import { UserTheme } from "src/knowledgeTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -12,9 +13,11 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { Emoticons } from "../Common/Emoticons";
 import { MessageButtons } from "./MessageButtons";
 import { MessageInput } from "./MessageInput";
+import { NodeLink } from "./NodeLink";
 
 type NewsCardProps = {
   type?: string;
+  theme: UserTheme;
   notebookRef: any;
   messageRefs: any;
   nodeBookDispatch: any;
@@ -51,9 +54,13 @@ type NewsCardProps = {
   setOpenMedia: Dispatch<SetStateAction<string | null>>;
   handleMentionUserOpenRoom: (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, uname: string) => void;
   openDMChannel: (user2: any) => void;
+  isDeleting?: IChannelMessage | null;
+  setMessages?: any;
+  openLinkedNode?: any;
 };
 export const NewsCard = ({
   type,
+  theme,
   notebookRef,
   messageRefs,
   nodeBookDispatch,
@@ -90,10 +97,12 @@ export const NewsCard = ({
   setOpenMedia,
   handleMentionUserOpenRoom,
   openDMChannel,
+  isDeleting,
+  setMessages,
+  openLinkedNode,
 }: NewsCardProps) => {
   const handleReplyOnMessage = () => {
     setOpenReplies(message);
-    setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
@@ -199,7 +208,7 @@ export const NewsCard = ({
                   nodeBookDispatch={nodeBookDispatch}
                   db={db}
                   user={user}
-                  theme={"Dark"}
+                  theme={theme}
                   placeholder={"Type your reply..."}
                   channelUsers={channelUsers}
                   sendMessageType={"edit"}
@@ -212,7 +221,6 @@ export const NewsCard = ({
                   editingMessage={editingMessage}
                   setEditingMessage={setEditingMessage}
                   sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
                   setOpenMedia={setOpenMedia}
                 />
               </Box>
@@ -291,41 +299,85 @@ export const NewsCard = ({
                 </Box>
               )}
               {replies?.map((reply: any, idx: number) => (
-                <NewsCard
-                  type="reply"
-                  notebookRef={notebookRef}
-                  messageRefs={messageRefs}
-                  nodeBookDispatch={nodeBookDispatch}
-                  key={idx}
-                  selectedMessage={selectedMessage}
-                  message={reply}
-                  toggleEmojiPicker={toggleEmojiPicker}
-                  toggleReaction={toggleReaction}
-                  forwardMessage={forwardMessage}
-                  membersInfo={membersInfo}
-                  user={user}
-                  replyOnMessage={replyOnMessage}
-                  setReplyOnMessage={setReplyOnMessage}
-                  channelUsers={channelUsers}
-                  db={db}
-                  editingMessage={editingMessage}
-                  setEditingMessage={setEditingMessage}
-                  roomType={roomType}
-                  leading={leading}
-                  selectedChannel={selectedChannel}
-                  getMessageRef={getMessageRef}
-                  onlineUsers={onlineUsers}
-                  sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
-                  isLoadingReaction={isLoadingReaction}
-                  makeMessageUnread={makeMessageUnread}
-                  handleDeleteMessage={handleDeleteMessage}
-                  handleDeleteReply={handleDeleteReply}
-                  parentMessage={message}
-                  setOpenMedia={setOpenMedia}
-                  handleMentionUserOpenRoom={handleMentionUserOpenRoom}
-                  openDMChannel={openDMChannel}
-                />
+                <Fragment key={reply?.id}>
+                  {reply?.node?.id ? (
+                    <NodeLink
+                      db={db}
+                      type="reply"
+                      theme={theme}
+                      messageRefs={messageRefs}
+                      notebookRef={notebookRef}
+                      nodeBookDispatch={nodeBookDispatch}
+                      replyOnMessage={replyOnMessage}
+                      forwardMessage={forwardMessage}
+                      user={user}
+                      parentMessage={message}
+                      message={reply}
+                      membersInfo={selectedChannel.membersInfo}
+                      openLinkedNode={openLinkedNode}
+                      onlineUsers={onlineUsers}
+                      toggleEmojiPicker={toggleEmojiPicker}
+                      toggleReaction={toggleReaction}
+                      roomType={roomType}
+                      selectedChannel={selectedChannel}
+                      channelUsers={channelUsers}
+                      editingMessage={editingMessage}
+                      setEditingMessage={setEditingMessage}
+                      leading={leading}
+                      getMessageRef={getMessageRef}
+                      handleDeleteReply={handleDeleteReply}
+                      isDeleting={isDeleting}
+                      sendMessage={sendMessage}
+                      sendReplyOnMessage={sendReplyOnMessage}
+                      setReplyOnMessage={setReplyOnMessage}
+                      setMessages={setMessages}
+                      selectedMessage={selectedMessage}
+                      handleDeleteMessage={handleDeleteMessage}
+                      isLoadingReaction={isLoadingReaction}
+                      makeMessageUnread={makeMessageUnread}
+                      setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                      openDMChannel={openDMChannel}
+                    />
+                  ) : (
+                    <NewsCard
+                      type="reply"
+                      theme={theme}
+                      notebookRef={notebookRef}
+                      messageRefs={messageRefs}
+                      nodeBookDispatch={nodeBookDispatch}
+                      key={idx}
+                      selectedMessage={selectedMessage}
+                      message={reply}
+                      toggleEmojiPicker={toggleEmojiPicker}
+                      toggleReaction={toggleReaction}
+                      forwardMessage={forwardMessage}
+                      membersInfo={membersInfo}
+                      user={user}
+                      replyOnMessage={replyOnMessage}
+                      setReplyOnMessage={setReplyOnMessage}
+                      channelUsers={channelUsers}
+                      db={db}
+                      editingMessage={editingMessage}
+                      setEditingMessage={setEditingMessage}
+                      roomType={roomType}
+                      leading={leading}
+                      selectedChannel={selectedChannel}
+                      getMessageRef={getMessageRef}
+                      onlineUsers={onlineUsers}
+                      sendMessage={sendMessage}
+                      sendReplyOnMessage={sendReplyOnMessage}
+                      isLoadingReaction={isLoadingReaction}
+                      makeMessageUnread={makeMessageUnread}
+                      handleDeleteMessage={handleDeleteMessage}
+                      handleDeleteReply={handleDeleteReply}
+                      parentMessage={message}
+                      setOpenMedia={setOpenMedia}
+                      handleMentionUserOpenRoom={handleMentionUserOpenRoom}
+                      openDMChannel={openDMChannel}
+                    />
+                  )}
+                </Fragment>
               ))}
 
               <Box sx={{ ml: "37px", mt: "13px" }}>
@@ -333,7 +385,7 @@ export const NewsCard = ({
                   notebookRef={notebookRef}
                   nodeBookDispatch={nodeBookDispatch}
                   db={db}
-                  theme={"Dark"}
+                  theme={theme}
                   placeholder={"Type your reply..."}
                   channelUsers={channelUsers}
                   sendMessageType={"reply"}
@@ -345,8 +397,7 @@ export const NewsCard = ({
                   setReplyOnMessage={setReplyOnMessage}
                   user={user}
                   roomType={roomType}
-                  sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
+                  sendMessage={sendReplyOnMessage}
                   parentMessage={message}
                   setOpenMedia={setOpenMedia}
                 />

@@ -4,6 +4,7 @@ import { Box } from "@mui/system";
 import moment from "moment";
 import React, { Dispatch, Fragment, SetStateAction } from "react";
 import { IChannelMessage } from "src/chatTypes";
+import { UserTheme } from "src/knowledgeTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -15,6 +16,7 @@ import { MessageInput } from "./MessageInput";
 import { NodeLink } from "./NodeLink";
 type MessageLeftProps = {
   type?: string;
+  theme: UserTheme;
   messageRefs: any;
   notebookRef: any;
   nodeBookDispatch: any;
@@ -57,6 +59,7 @@ type MessageLeftProps = {
 };
 export const MessageLeft = ({
   type,
+  theme,
   messageRefs,
   notebookRef,
   nodeBookDispatch,
@@ -99,7 +102,6 @@ export const MessageLeft = ({
 }: MessageLeftProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
-    setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
@@ -214,7 +216,7 @@ export const MessageLeft = ({
                   notebookRef={notebookRef}
                   nodeBookDispatch={nodeBookDispatch}
                   db={db}
-                  theme={"Dark"}
+                  theme={theme}
                   placeholder={"Type your reply..."}
                   channelUsers={channelUsers}
                   sendMessageType={"edit"}
@@ -229,7 +231,6 @@ export const MessageLeft = ({
                   user={user}
                   parentMessage={parentMessage}
                   sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
                   setOpenMedia={setOpenMedia}
                 />
               </Box>
@@ -311,6 +312,7 @@ export const MessageLeft = ({
                     <NodeLink
                       db={db}
                       type="reply"
+                      theme={theme}
                       messageRefs={messageRefs}
                       notebookRef={notebookRef}
                       nodeBookDispatch={nodeBookDispatch}
@@ -349,6 +351,7 @@ export const MessageLeft = ({
                     <MessageLeft
                       key={idx}
                       type={"reply"}
+                      theme={theme}
                       messageRefs={messageRefs}
                       notebookRef={notebookRef}
                       nodeBookDispatch={nodeBookDispatch}
@@ -391,7 +394,7 @@ export const MessageLeft = ({
                   notebookRef={notebookRef}
                   nodeBookDispatch={nodeBookDispatch}
                   db={db}
-                  theme={"Dark"}
+                  theme={theme}
                   placeholder={"Type your reply..."}
                   channelUsers={channelUsers}
                   sendMessageType={"reply"}
@@ -404,8 +407,7 @@ export const MessageLeft = ({
                   user={user}
                   setMessages={setMessages}
                   roomType={roomType}
-                  sendMessage={sendMessage}
-                  sendReplyOnMessage={sendReplyOnMessage}
+                  sendMessage={sendReplyOnMessage}
                   parentMessage={message}
                   setOpenMedia={setOpenMedia}
                 />
