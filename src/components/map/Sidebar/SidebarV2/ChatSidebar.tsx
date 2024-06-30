@@ -134,7 +134,7 @@ export const ChatSidebar = ({
     let findChannel = {} as IChannels;
     if (openChatByNotification.roomType === "direct") {
       findChannel = conversations.find(
-        conversation => conversation.id === openChatByNotification.channelId
+        conversation => conversation?.id === openChatByNotification.channelId
       ) as IChannels;
     } else {
       findChannel = channels.find(channel => channel.id === openChatByNotification.channelId) as IChannels;

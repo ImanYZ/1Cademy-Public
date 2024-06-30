@@ -562,7 +562,7 @@ export const Message = ({
             </Box>
           ))}
         </Box>
-      )}{" "}
+      )}
       <AddMember
         db={db}
         user={user}
