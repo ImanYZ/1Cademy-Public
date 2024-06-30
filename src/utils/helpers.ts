@@ -233,7 +233,9 @@ export const checkInstantDeleteForNode = async (
 
   for (const semesterId in semestersByIds) {
     const semester = semestersByIds[semesterId];
-    semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    if (!semester.instructors.includes(uname)) {
+      semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    }
   }
 
   instructorVotes[uname] = true;

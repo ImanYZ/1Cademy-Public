@@ -3065,7 +3065,6 @@ const Notebook = ({}: NotebookProps) => {
       try {
         if (notebookRef.current.choosingNode || !user) return;
 
-        let deleteOK: any = true;
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -3095,9 +3094,9 @@ const Notebook = ({}: NotebookProps) => {
               "Ok",
               ""
             );
-            deleteOK = false;
-          } else {
-            deleteOK = await confirmIt(
+            return;
+          } else if (
+            !(await confirmIt(
               <Box
                 sx={{
                   display: "flex",
@@ -3114,7 +3113,9 @@ const Notebook = ({}: NotebookProps) => {
               </Box>,
               "Delete Node",
               "Keep Node"
-            );
+            ))
+          ) {
+            return;
           }
         }
 
@@ -3123,7 +3124,7 @@ const Notebook = ({}: NotebookProps) => {
           const node = graph.nodes[nodeId];
           lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
 
-          if (!deleteOK) return graph;
+          if (!willRemoveNode) return graph;
 
           if (node?.locked) return graph;
           if (!node) return graph;
