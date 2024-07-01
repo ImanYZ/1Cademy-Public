@@ -3086,7 +3086,6 @@ const Notebook = ({}: NotebookProps) => {
 
         const node = graph.nodes[nodeId];
         let willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked, instantDelete, isInstructor);
-
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             confirmIt(
@@ -3123,8 +3122,6 @@ const Notebook = ({}: NotebookProps) => {
           const updatedNodeIds: string[] = [nodeId];
           const node = graph.nodes[nodeId];
           lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
-
-          if (!willRemoveNode) return graph;
 
           if (node?.locked) return graph;
           if (!node) return graph;
