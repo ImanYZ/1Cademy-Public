@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 const GITHUB_API_URL = "https://api.github.com";
 const REPO_OWNER = "ImanYZ";
 const REPO_NAME = "1Cademy-Public";
-const BRANCH = "develop";
+const BRANCH = "main";
 const ACCESS_TOKEN = process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
