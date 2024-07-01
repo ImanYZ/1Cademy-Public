@@ -77,6 +77,7 @@ import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/Focuse
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
+import { MemoizedCommentsSidebar } from "@/components/map/Sidebar/SidebarV2/CommentsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsChildrenSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
@@ -238,6 +239,7 @@ export type OpenLeftSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | "CHAT"
+  | "COMMENT"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -472,6 +474,11 @@ const Notebook = ({}: NotebookProps) => {
   const [conversations, setConversations] = useState<IConversation[]>([]);
 
   const [openChatByNotification, setOpenChatByNotification] = useState<any>(null);
+
+  const [commentSidebarInfo, setCommentSidebarInfo] = useState<{ type: string; id: string }>({
+    type: "",
+    id: "",
+  });
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
@@ -7749,6 +7756,17 @@ const Notebook = ({}: NotebookProps) => {
     [graph.nodes]
   );
 
+  const openComments = useCallback(
+    (refId: string, type: string) => {
+      setCommentSidebarInfo({
+        type: type,
+        id: refId,
+      });
+      setOpenSidebar("COMMENT");
+    },
+    [graph.nodes]
+  );
+
   return (
     <div id="map-container" className="MapContainer" style={{ overflow: "hidden" }}>
       {currentStep?.anchor && (
@@ -8020,6 +8038,22 @@ const Notebook = ({}: NotebookProps) => {
                   conversations={conversations}
                   openChatByNotification={openChatByNotification}
                   setOpenChatByNotification={setOpenChatByNotification}
+                />
+              )}
+              {openSidebar === "COMMENT" && (
+                <MemoizedCommentsSidebar
+                  user={user}
+                  theme={settings.theme}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  nodeBookDispatch={nodeBookDispatch}
+                  notebookRef={notebookRef}
+                  nodeBookState={nodeBookState}
+                  onlineUsers={onlineUsers}
+                  commentSidebarInfo={commentSidebarInfo}
                 />
               )}
               {openSidebar === "SEARCHER_SIDEBAR" && (
@@ -8529,6 +8563,7 @@ const Notebook = ({}: NotebookProps) => {
                   findAncestorNodes={findAncestorNodes}
                   lockedNodes={lockedNodes}
                   onlineUsers={onlineUsers}
+                  openComments={openComments}
                 />
               </MapInteractionCSS>
 

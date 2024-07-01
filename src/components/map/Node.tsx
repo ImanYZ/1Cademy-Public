@@ -226,6 +226,7 @@ type NodeProps = {
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: { [uname: string]: boolean };
+  openComments: (refId: string, type: string) => void;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -370,6 +371,7 @@ const Node = ({
   findDescendantNodes,
   findAncestorNodes,
   onlineUsers,
+  openComments,
 }: NodeProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
@@ -1513,6 +1515,7 @@ const Node = ({
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
             onlineUsers={onlineUsers}
+            openComments={openComments}
           />
         )}
 
@@ -1691,6 +1694,7 @@ const Node = ({
               findDescendantNodes={findDescendantNodes}
               findAncestorNodes={findAncestorNodes}
               onlineUsers={onlineUsers}
+              openComments={openComments}
             />
           </Box>
         )}

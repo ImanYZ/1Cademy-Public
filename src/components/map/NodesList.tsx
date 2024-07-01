@@ -76,6 +76,7 @@ type NodeListProps = {
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   lockedNodes: { [key: string]: boolean };
   onlineUsers: { [key: string]: boolean };
+  openComments: (refId: string, type: string) => void;
 };
 
 const NodesList = ({
@@ -145,6 +146,7 @@ const NodesList = ({
   findAncestorNodes,
   lockedNodes,
   onlineUsers,
+  openComments,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -306,6 +308,7 @@ const NodesList = ({
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
             onlineUsers={onlineUsers}
+            openComments={openComments}
           />
         );
       })}

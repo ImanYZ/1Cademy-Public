@@ -23,10 +23,10 @@ type CommentProps = {
   confirmIt: any;
   comments: any;
   users: any;
-  commentType: string;
+  commentSidebarInfo: { type: string; id: string };
 };
 
-const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps) => {
+const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: CommentProps) => {
   const db = getFirestore();
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -102,7 +102,7 @@ const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps
   const addComment = async () => {
     if (!user?.uname) return;
     setIsLoading(true);
-    await addDoc(getCommentRef(commentType), {
+    await addDoc(getCommentRef(commentSidebarInfo.type), {
       //refId: refId,
       text: commentInput,
       user: {
@@ -135,7 +135,7 @@ const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps
       imageUrls: replyImageUrls,
       createdAt: new Date(),
     };
-    const commentRef = getCommentDocRef(commentType, commentId);
+    const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
     const replyRef = collection(commentRef, "replies");
     await addDoc(replyRef, reply);
     setReplyInput("");
@@ -146,7 +146,7 @@ const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps
   const editComment = async (commentId: string) => {
     const updatedText = editCommentText;
     if (updatedText !== null) {
-      await updateDoc(getCommentDocRef(commentType, commentId), {
+      await updateDoc(getCommentDocRef(commentSidebarInfo?.type, commentId), {
         text: updatedText,
         edited: true,
       });
@@ -157,7 +157,7 @@ const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps
 
   const deleteComment = async (commentId: string) => {
     if (await confirmIt("Are you sure you want to delete this comment?", "Delete", "Keep")) {
-      const commentRef = getCommentDocRef(commentType, commentId);
+      const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
       await updateDoc(commentRef, {
         deleted: true,
       });
@@ -169,7 +169,7 @@ const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps
     if (updatedText !== null) {
       const updatedReplies = [...(comments.find((comment: any) => comment.id === commentId)?.replies || [])];
       updatedReplies[replyIndex].text = updatedText;
-      const commentRef = getCommentDocRef(commentType, commentId);
+      const commentRef = getCommentDocRef(commentSidebarInfo.type, commentId);
       await updateDoc(commentRef, {
         replies: updatedReplies,
       });
@@ -182,7 +182,7 @@ const Comment = ({ user, confirmIt, comments, users, commentType }: CommentProps
     if (await confirmIt("Are you sure you want to delete this reply?", "Delete", "Keep")) {
       const updatedReplies = [...(comments.find((comment: any) => comment.id === commentId)?.replies || [])];
       updatedReplies.splice(replyIndex, 1);
-      const commentRef = getCommentDocRef(commentType, commentId);
+      const commentRef = getCommentDocRef(commentSidebarInfo.type, commentId);
       await updateDoc(commentRef, {
         replies: updatedReplies,
       });
