@@ -53,7 +53,7 @@ export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): 
   });
 };
 
-export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<NodesData[]> => {
+export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<{ [nodeId: string]: NodesData }> => {
   // console.log("[GET NODES]");
   const chunks = arrayToChunks(nodeIds);
   const nodeDocsPromises = chunks.map((nodeIds: string[]) => {
@@ -63,7 +63,9 @@ export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promis
 
   const nodeDocs = await Promise.all(nodeDocsPromises);
   const flatDocs = nodeDocs.flatMap(nd => nd.docs);
-  return flatDocs.map((nodeDoc: any) => {
+  const nodesMap: { [nodeId: string]: NodesData } = {};
+
+  flatDocs.map((nodeDoc: any) => {
     if (!nodeDoc.exists()) return null;
 
     const tmpData = nodeDoc.data();
@@ -72,59 +74,54 @@ export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promis
     delete tmpData?.open; // IMPORTANT: open wont exist on DB, that value is calculated by expands // REMOVE after update backend and DB
     const nData: NodeFireStore = tmpData as NodeFireStore;
     // if (nData.deleted) return null;
-    if (nData.deleted) {
-      return {
-        cType: "removed",
-        nId: nodeDoc.id,
-        nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
-      };
-    }
-
-    return {
-      cType: "added",
+    nodesMap[nodeDoc.id] = {
+      cType: nData.deleted ? "removed" : "added",
       nId: nodeDoc.id,
       nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
     };
   });
+  return nodesMap;
 };
 
-export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
+export const buildFullNodes = (
+  userNodesChanges: UserNodeChanges[],
+  nodesData: { [nodeId: string]: NodesData }
+): FullNodeData[] => {
   // console.log("[BUILD FULL NODES]");
-  const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
+
   const res = userNodesChanges
     .map(cur => {
-      const nodeDataFound = findNodeDataById(cur.uNodeData.node);
-
-      if (!nodeDataFound) return null;
+      const nodeData = nodesData[cur.uNodeData.node];
+      if (!nodeData) return null;
 
       const fullNodeData: FullNodeData = {
         ...cur.uNodeData, // User node data
-        ...nodeDataFound.nData, // Node Data
+        ...nodeData.nData, // Node Data
         userNodeId: cur.uNodeId,
         nodeChangeType: cur.cType, // TODO: improve the names and values
-        userNodeChangeType: nodeDataFound.cType,
+        userNodeChangeType: nodeData.cType,
         editable: false,
         left: 0,
         top: 0,
         firstVisit: cur.uNodeData.createdAt.toDate(),
         lastVisit: cur.uNodeData.updatedAt?.toDate() ?? cur.uNodeData.createdAt.toDate(),
-        changedAt: nodeDataFound.nData.changedAt.toDate(),
-        createdAt: nodeDataFound.nData.createdAt.toDate(),
-        updatedAt: nodeDataFound.nData.updatedAt.toDate(),
-        references: nodeDataFound.nData.references || [],
-        referenceIds: nodeDataFound.nData.referenceIds || [],
-        referenceLabels: nodeDataFound.nData.referenceLabels || [],
-        tags: nodeDataFound.nData.tags || [],
-        tagIds: nodeDataFound.nData.tagIds || [],
-        contributors: nodeDataFound.nData.contributors ?? {},
-        contribNames: nodeDataFound.nData.contribNames ?? [],
-        institutions: nodeDataFound.nData.institutions ?? {},
-        institNames: nodeDataFound.nData.institNames ?? [],
-        bookmarks: nodeDataFound.nData.bookmarks ? Number(nodeDataFound.nData.bookmarks) : 0,
+        changedAt: nodeData.nData.changedAt.toDate(),
+        createdAt: nodeData.nData.createdAt.toDate(),
+        updatedAt: nodeData.nData.updatedAt.toDate(),
+        references: nodeData.nData.references || [],
+        referenceIds: nodeData.nData.referenceIds || [],
+        referenceLabels: nodeData.nData.referenceLabels || [],
+        tags: nodeData.nData.tags || [],
+        tagIds: nodeData.nData.tagIds || [],
+        contributors: nodeData.nData.contributors ?? {},
+        contribNames: nodeData.nData.contribNames ?? [],
+        institutions: nodeData.nData.institutions ?? {},
+        institNames: nodeData.nData.institNames ?? [],
+        bookmarks: nodeData.nData.bookmarks ? Number(nodeData.nData.bookmarks) : 0,
         // parents:nodeDataFound.nData.parents??[],
         // children:node
       };
-      if (nodeDataFound.nData.nodeType !== "Question") {
+      if (nodeData.nData.nodeType !== "Question") {
         fullNodeData.choices = [];
       }
       fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false;
