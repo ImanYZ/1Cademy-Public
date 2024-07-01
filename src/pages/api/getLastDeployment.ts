@@ -4,7 +4,7 @@ const GITHUB_API_URL = "https://api.github.com";
 const REPO_OWNER = "ImanYZ";
 const REPO_NAME = "1Cademy-Public";
 const BRANCH = "main";
-const ACCESS_TOKEN = process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN;
+const ACCESS_TOKEN = process.env.ONECADEMYCRED_GITHUB_ACCESS_TOKEN;
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const url = `${GITHUB_API_URL}/repos/${REPO_OWNER}/${REPO_NAME}/commits?sha=${BRANCH}`;
