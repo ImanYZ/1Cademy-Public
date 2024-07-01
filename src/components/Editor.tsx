@@ -121,7 +121,7 @@ export const Editor = ({
               helperText={helperText}
               InputLabelProps={{
                 style: {
-                  color: "gray", // Change this to the desired color
+                  color: "gray",
                 },
               }}
             />
