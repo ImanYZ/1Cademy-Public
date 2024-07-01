@@ -164,12 +164,13 @@ const CourseComponent = () => {
   }, [db]);
 
   const updateCourses = (course: any) => {
+    if (!course.id) return;
     const courseRef = doc(db, "coursesAI", course.id);
     updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
   };
-  const onCreateCourse = (newCourse: any) => {
+  const onCreateCourse = async (newCourse: any) => {
     const courseRef = doc(collection(db, "coursesAI"));
-    setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date() });
+    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date() });
   };
 
   const handleTitleChange = (e: any) => {
@@ -626,22 +627,8 @@ const CourseComponent = () => {
     setNewCourseLearners("");
     setNewCourseTitle("");
   };
-  const handleSaveCourse = () => {
-    setCourses((prev: any) => {
-      prev.push({
-        title: newCourseTitle,
-        learners: newCourseLearners,
-        hours: 0,
-        courseObjectives: [],
-        courseSkills: [],
-        description: "",
-        syllabus: [],
-        tags: [],
-        references: [],
-      });
-      return prev;
-    });
-    onCreateCourse({
+  const handleSaveCourse = async () => {
+    await onCreateCourse({
       title: newCourseTitle,
       learners: newCourseLearners,
       hours: 0,
@@ -652,8 +639,10 @@ const CourseComponent = () => {
       tags: [],
       references: [],
     });
-    setSelectedCourse(courses.length - 1);
     handleCloseCourseDialog();
+    setTimeout(() => {
+      setSelectedCourse(courses.length);
+    }, 500);
   };
 
   const generateDescription = async () => {
