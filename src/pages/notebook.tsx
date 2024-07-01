@@ -61,7 +61,6 @@ import { conversationChange, getConversationsSnapshot } from "src/client/firesto
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
-import { getLastDeploymentTime } from "src/services/github";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
@@ -7709,7 +7708,7 @@ const Notebook = ({}: NotebookProps) => {
       const userData = userDoc.data();
       const lastDeployment: any = await Post("/getLastDeployment");
       const lastCommitTimestamp = new Date(lastDeployment.lastCommitTime);
-      const lastUserReload = userData?.lastReload ? new Date(userData?.lastReload) : lastCommitTimestamp;
+      const lastUserReload = userData?.lastReload ? userData?.lastReload.toDate() : lastCommitTimestamp;
       const lastCommitTime = lastCommitTimestamp.getTime() + 1000 * 60 * 30;
       const today = new Date();
       if (
