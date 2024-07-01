@@ -7710,20 +7710,20 @@ const Notebook = ({}: NotebookProps) => {
       const lastDeployment: any = await Post("/getLastDeployment");
       const lastCommitTimestamp = new Date(lastDeployment.lastCommitTime);
       const lastUserReload = userData?.lastReload ? new Date(userData?.lastReload) : lastCommitTimestamp;
-      const lastCommitTime = lastCommitTimestamp.getTime() + 1000 * 60 * 20;
+      const lastCommitTime = lastCommitTimestamp.getTime() + 1000 * 60 * 30;
       const today = new Date();
       if (
         today.getDate() !== lastInteractionDate.getDate() ||
         today.getMonth() !== lastInteractionDate.getMonth() ||
         today.getFullYear() !== lastInteractionDate.getFullYear() ||
-        (lastCommitTime >= lastInteractionDate.getTime() && lastCommitTime > lastUserReload.getTime())
+        (lastCommitTime > lastUserReload.getTime() && today.getTime() > lastCommitTime)
       ) {
-        await updateDoc(userRef, { lastReload: lastCommitTime });
+        await updateDoc(userRef, { lastReload: today });
         window.location.reload();
       }
     };
 
-    const intervalId = setInterval(checkIfDifferentDay, 5000);
+    const intervalId = setInterval(checkIfDifferentDay, 1000 * 60 * 5);
 
     return () => clearInterval(intervalId);
   }, [user, lastInteractionDate]);
