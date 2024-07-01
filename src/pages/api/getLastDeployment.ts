@@ -1,11 +1,12 @@
 import axios from "axios";
+import { NextApiRequest, NextApiResponse } from "next";
 const GITHUB_API_URL = "https://api.github.com";
 const REPO_OWNER = "ImanYZ";
 const REPO_NAME = "1Cademy-Public";
-const BRANCH = "main";
+const BRANCH = "develop";
 const ACCESS_TOKEN = process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN;
 
-export const getLastDeploymentTime = async () => {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const url = `${GITHUB_API_URL}/repos/${REPO_OWNER}/${REPO_NAME}/commits?sha=${BRANCH}`;
   const response = await axios.get(url, {
     headers: {
@@ -13,5 +14,7 @@ export const getLastDeploymentTime = async () => {
     },
   });
   const lastCommit = response.data[0];
-  return lastCommit.commit.committer.date;
-};
+  return res.json({ lastCommitTime: lastCommit.commit.committer.date });
+}
+
+export default handler;

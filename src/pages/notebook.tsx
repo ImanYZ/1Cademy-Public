@@ -7707,18 +7707,18 @@ const Notebook = ({}: NotebookProps) => {
         return;
       }
       const userData = userDoc.data();
-      const lastTime = await getLastDeploymentTime();
-      const lastCommitTimestamp = new Date(lastTime);
+      const lastDeployment: any = await Post("/getLastDeployment");
+      const lastCommitTimestamp = new Date(lastDeployment.lastCommitTime);
       const lastUserReload = userData?.lastReload ? new Date(userData?.lastReload) : lastCommitTimestamp;
+      const lastCommitTime = lastCommitTimestamp.getTime() + 1000 * 60 * 20;
       const today = new Date();
       if (
         today.getDate() !== lastInteractionDate.getDate() ||
         today.getMonth() !== lastInteractionDate.getMonth() ||
         today.getFullYear() !== lastInteractionDate.getFullYear() ||
-        (lastCommitTimestamp.getTime() >= lastInteractionDate.getTime() &&
-          lastCommitTimestamp.getTime() > lastUserReload.getTime())
+        (lastCommitTime >= lastInteractionDate.getTime() && lastCommitTime > lastUserReload.getTime())
       ) {
-        await updateDoc(userRef, { lastReload: lastCommitTimestamp });
+        await updateDoc(userRef, { lastReload: lastCommitTime });
         window.location.reload();
       }
     };
