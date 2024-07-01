@@ -435,6 +435,7 @@ export type User = {
   livelinessBar?: LivelinessBarType;
   scaleThreshold?: number;
   ontologyPath?: string[];
+  lastReload?: Timestamp;
 };
 
 export type UserSettings = {

@@ -61,6 +61,7 @@ import { conversationChange, getConversationsSnapshot } from "src/client/firesto
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
+import { getLastDeploymentTime } from "src/services/github";
 import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
@@ -7697,21 +7698,35 @@ const Notebook = ({}: NotebookProps) => {
   }, []);
 
   useEffect(() => {
-    const checkIfDifferentDay = () => {
+    if (!user) return;
+    const checkIfDifferentDay = async () => {
+      const userRef = doc(db, "users", user?.uname);
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        console.error("User document does not exist");
+        return;
+      }
+      const userData = userDoc.data();
+      const lastTime = await getLastDeploymentTime();
+      const lastCommitTimestamp = new Date(lastTime);
+      const lastUserReload = userData?.lastReload ? new Date(userData?.lastReload) : lastCommitTimestamp;
       const today = new Date();
       if (
         today.getDate() !== lastInteractionDate.getDate() ||
         today.getMonth() !== lastInteractionDate.getMonth() ||
-        today.getFullYear() !== lastInteractionDate.getFullYear()
+        today.getFullYear() !== lastInteractionDate.getFullYear() ||
+        (lastCommitTimestamp.getTime() >= lastInteractionDate.getTime() &&
+          lastCommitTimestamp.getTime() > lastUserReload.getTime())
       ) {
+        await updateDoc(userRef, { lastReload: lastCommitTimestamp });
         window.location.reload();
       }
     };
 
-    const intervalId = setInterval(checkIfDifferentDay, 1000);
+    const intervalId = setInterval(checkIfDifferentDay, 5000);
 
     return () => clearInterval(intervalId);
-  }, [lastInteractionDate]);
+  }, [user, lastInteractionDate]);
 
   const findDescendantNodes = useCallback(
     (selectedNode: string, searchNode: string) => {
