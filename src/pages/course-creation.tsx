@@ -46,16 +46,17 @@ import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
+import { newId } from "@/lib/utils/newFirestoreId";
 
 const glowGreen = keyframes`
   0% {
-    box-shadow: 0 0 5px green, 0 0 10px green, 0 0 20px green, 0 0 30px green;
+    box-shadow: 0 0 5px #26C281, 0 0 10px #26C281, 0 0 20px #26C281, 0 0 30px #26C281;
   }
   50% {
-    box-shadow: 0 0 10px green, 0 0 20px green, 0 0 30px green, 0 0 40px green;
+    box-shadow: 0 0 10px #26C281, 0 0 20px #26C281, 0 0 30px #26C281, 0 0 40px #26C281;
   }
   100% {
-    box-shadow: 0 0 5px green, 0 0 10px green, 0 0 20px green, 0 0 30px green;
+    box-shadow: 0 0 5px #26C281, 0 0 10px #26C281, 0 0 20px #26C281, 0 0 30px #26C281;
   }
 `;
 const glowRed = keyframes`
@@ -109,10 +110,7 @@ const CourseComponent = () => {
   const [expandedNode, setExpandedNode] = useState(null);
   const [isChanged, setIsChanged] = useState<string[]>([]);
   const [isRemoved, setIsRemoved] = useState<string[]>([]);
-  const [createCourseModel, setCreateCourseModel] = useState(false);
-
-  const [newCourseTitle, setNewCourseTitle] = useState("");
-  const [newCourseLearners, setNewCourseLearners] = useState("");
+  const [creatingCourseStep, setCreatingCourseStep] = useState<number>(0);
 
   const [editCategory, setEditCategory] = useState<any>(null);
   const [newCategoryTitle, setNewCategoryTitle] = useState<string>("");
@@ -141,10 +139,14 @@ const CourseComponent = () => {
             const curData = { id: change.doc.id, ...change.doc.data() };
 
             const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
-            if (docType === "added" && prevIdx === -1 && !curData.conversation) {
-              prev.push({ ...curData });
+            if (docType === "added") {
+              if (prevIdx === -1) {
+                prev.push({ ...curData });
+              } else {
+                prev[prevIdx] = { ...curData };
+              }
             }
-            if (docType === "modified" && prevIdx !== -1 && !curData.conversation) {
+            if (docType === "modified" && prevIdx !== -1) {
               prev[prevIdx] = { ...curData };
             }
 
@@ -164,13 +166,13 @@ const CourseComponent = () => {
   }, [db]);
 
   const updateCourses = (course: any) => {
-    if (!course.id) return;
+    if (!course.id || course.new) return;
     const courseRef = doc(db, "coursesAI", course.id);
     updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
   };
   const onCreateCourse = async (newCourse: any) => {
-    const courseRef = doc(collection(db, "coursesAI"));
-    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date() });
+    const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
+    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
   };
 
   const handleTitleChange = (e: any) => {
@@ -619,30 +621,34 @@ const CourseComponent = () => {
     return color;
   };
 
-  const createCourse = () => {
-    setCreateCourseModel(true);
-  };
-  const handleCloseCourseDialog = () => {
-    setCreateCourseModel(false);
-    setNewCourseLearners("");
-    setNewCourseTitle("");
-  };
-  const handleSaveCourse = async () => {
-    await onCreateCourse({
-      title: newCourseTitle,
-      learners: newCourseLearners,
-      hours: 0,
-      courseObjectives: [],
-      courseSkills: [],
-      description: "",
-      syllabus: [],
-      tags: [],
-      references: [],
+  const createCourse = async () => {
+    setCourses((prev: any) => {
+      prev.push({
+        id: newId(db),
+        title: "",
+        learners: "",
+        hours: 0,
+        courseObjectives: [],
+        courseSkills: [],
+        description: "",
+        syllabus: [],
+        tags: [],
+        references: [],
+        new: true,
+      });
+      return prev;
     });
-    handleCloseCourseDialog();
     setTimeout(() => {
-      setSelectedCourse(courses.length);
-    }, 500);
+      setSelectedCourse(courses.length - 1);
+    }, 900);
+    setCreatingCourseStep(0);
+  };
+  const cancelCreatingCourse = () => {
+    setCourses((prev: any) => {
+      prev = prev.filter((p: any) => !p.new);
+      return prev;
+    });
+    setSelectedCourse(0);
   };
 
   const generateDescription = async () => {
@@ -653,7 +659,9 @@ const CourseComponent = () => {
     const response = await Post("/generateCourseDescription", { courseTitle, targetLearners, hours });
     setCourses((prev: any) => {
       prev[selectedCourse].description = response;
-      updateCourses(prev[selectedCourse]);
+      if (!prev[selectedCourse].new) {
+        updateCourses(prev[selectedCourse]);
+      }
       return prev;
     });
     setLoadingDescription(false);
@@ -690,7 +698,9 @@ const CourseComponent = () => {
     });
     setCourses((prev: any) => {
       prev[selectedCourse].courseSkills = response;
-      updateCourses(prev[selectedCourse]);
+      if (!prev[selectedCourse].new) {
+        updateCourses(prev[selectedCourse]);
+      }
       return prev;
     });
     setLoadingSkills(false);
@@ -714,7 +724,11 @@ const CourseComponent = () => {
     });
     setCourses((prev: any) => {
       prev[selectedCourse].syllabus = response;
-      updateCourses(prev[selectedCourse]);
+      if (prev[selectedCourse].new) {
+        onCreateCourse(prev[selectedCourse]);
+      } else {
+        updateCourses(prev[selectedCourse]);
+      }
       return prev;
     });
     if (response.length > 0) {
@@ -846,6 +860,44 @@ const CourseComponent = () => {
     return () => clearTimeout(timeoutId);
   };
 
+  const nextStep = () => {
+    if (creatingCourseStep === 2) {
+      generateDescription();
+    }
+    if (creatingCourseStep === 3) {
+      generateObjectives();
+    }
+    if (creatingCourseStep === 4) {
+      generateSkills();
+    }
+    if (creatingCourseStep === 5) {
+      generateCourseStructure();
+    }
+    setCreatingCourseStep(prev => prev + 1);
+  };
+  const nextButtonDisabled = (course: any) => {
+    if (creatingCourseStep === 0) {
+      return !course.title.trim();
+    }
+    if (creatingCourseStep === 1) {
+      return course.hours === 0;
+    }
+    if (creatingCourseStep === 2) {
+      return !course.learners.trim();
+    }
+    if (creatingCourseStep === 3) {
+      return !course.description.trim();
+    }
+    if (creatingCourseStep === 4) {
+      return course.courseObjectives.length <= 0;
+    }
+    if (creatingCourseStep === 5) {
+      return course.courseSkills.length <= 0;
+    }
+
+    return false;
+  };
+
   if (courses.length <= 0) {
     return <LinearProgress />;
   }
@@ -874,215 +926,240 @@ const CourseComponent = () => {
 
       <Box padding="20px">
         <Box>
-          <TextField
-            value={courses[selectedCourse].title}
-            onChange={event => {
-              const courseIdx = courses.findIndex((course: any) => course.title === event.target.value);
-              if (courseIdx !== -1) {
-                setSelectedCourse(courseIdx);
-              }
-            }}
-            select
-            label="Select Course"
-            sx={{ minWidth: "200px" }}
-          >
-            <MenuItem
-              value=""
-              disabled
-              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            >
-              Select Course
-            </MenuItem>
-            {courses.map((course: any) => (
-              <MenuItem
-                key={course.title}
-                value={course.title}
-                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-              >
-                {course.title}
-              </MenuItem>
-            ))}
-          </TextField>
-          <LoadingButton
-            variant="contained"
-            color="success"
-            sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
-            onClick={createCourse}
-            loading={loading}
-          >
-            Create New Course
-          </LoadingButton>
-          <Box sx={{ display: "flex", gap: "15px" }}>
+          {!courses[selectedCourse].new && (
             <TextField
-              label="Course Title"
-              multiline
               value={courses[selectedCourse].title}
-              onChange={handleTitleChange}
-              margin="normal"
-              variant="outlined"
-              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
-            />
-            <TextField
-              label="Number of Hour-long Class Sessions"
-              fullWidth
-              value={courses[selectedCourse].hours || 0}
-              onChange={handleHoursChange}
-              margin="normal"
-              variant="outlined"
-              sx={{ width: "500px" }}
-              type="number"
-              inputProps={{ min: 0 }}
-            />
-
-            <TextField
-              value={courses[selectedCourse].references[0]}
-              select // tell TextField to render select
-              label="Select Book"
-              sx={{ mt: "15px", minWidth: "200px" }}
+              onChange={event => {
+                const courseIdx = courses.findIndex((course: any) => course.title === event.target.value);
+                if (courseIdx !== -1) {
+                  setSelectedCourse(courseIdx);
+                }
+              }}
+              select
+              label="Select Course"
+              sx={{ minWidth: "200px" }}
             >
               <MenuItem
                 value=""
                 disabled
                 sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
               >
-                Select Book
+                Select Course
               </MenuItem>
-              {courses[selectedCourse].references.map((book: any) => (
+              {courses.map((course: any) => (
                 <MenuItem
-                  key={book}
-                  value={book}
+                  key={course.title}
+                  value={course.title}
                   sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
                 >
-                  {book}
+                  {course.title}
                 </MenuItem>
               ))}
             </TextField>
-          </Box>
-          <TextField
-            label="Target Learners"
-            multiline
-            fullWidth
-            value={courses[selectedCourse].learners}
-            onChange={handleLearnersChange}
-            margin="normal"
-            variant="outlined"
-            rows={4}
-            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-          />
-          <TextField
-            label="Course Description"
-            multiline
-            fullWidth
-            value={courses[selectedCourse].description}
-            onChange={handleDescriptionChange}
-            margin="normal"
-            variant="outlined"
-            rows={4}
-            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            InputLabelProps={{
-              style: {
-                color: "gray",
-              },
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {!courses[selectedCourse].description && (
-                    <LoadingButton
-                      onClick={generateDescription}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingDescription}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  )}
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          {(courses[selectedCourse].description.trim() || courses[selectedCourse].courseObjectives?.length > 0) && (
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
-                <Typography sx={{ mt: "5px" }}>Course Objectives:</Typography>
-                <InputAdornment position="end">
-                  {!courses[selectedCourse].courseObjectives?.length && (
-                    <LoadingButton
-                      onClick={generateObjectives}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingObjectives}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  )}
-                </InputAdornment>
-              </Box>
-              <ChipInput
-                tags={courses[selectedCourse].courseObjectives || []}
-                selectedTags={() => {}}
-                setTags={setNewCourseObjectives}
-                fullWidth
-                variant="outlined"
-                placeholder="Add a new course objective..."
-              />
-            </Box>
+          )}
+          {!courses[selectedCourse].new && (
+            <LoadingButton
+              variant="contained"
+              color="success"
+              sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+              onClick={createCourse}
+              loading={loading}
+            >
+              Create New Course
+            </LoadingButton>
           )}
 
-          {(courses[selectedCourse].courseObjectives?.length > 0 ||
-            courses[selectedCourse].courseSkills?.length > 0) && (
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
-                <Typography sx={{ mt: "5px" }}>Course Skills:</Typography>
-                <InputAdornment position="end">
-                  {!courses[selectedCourse].courseSkills?.length && (
-                    <LoadingButton
-                      onClick={generateSkills}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingSkills}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  )}
-                </InputAdornment>
-              </Box>
-              <ChipInput
-                tags={courses[selectedCourse].courseSkills || []}
-                selectedTags={() => {}}
-                setTags={setNewSkills}
-                fullWidth
+          <Box sx={{ display: "flex", gap: "15px" }}>
+            {(!courses[selectedCourse].new || creatingCourseStep >= 0) && (
+              <TextField
+                label="Course Title"
+                multiline
+                value={courses[selectedCourse].title}
+                onChange={handleTitleChange}
+                margin="normal"
                 variant="outlined"
-                placeholder="Add a new course skill..."
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
               />
-            </Box>
-          )}
-
-          {(courses[selectedCourse].syllabus?.length > 0 || courses[selectedCourse].courseSkills?.length > 0) && (
-            <Box sx={{ display: "flex", alignItems: "center", py: "15px", mt: "26px" }}>
-              <Typography variant="h2">Course Structure:</Typography>
-              <Button sx={{ ml: "19px" }} onClick={() => setEditCategory("new")}>
-                Add Category
-              </Button>
-              <InputAdornment position="end">
-                {!courses[selectedCourse].syllabus?.length && (
-                  <LoadingButton
-                    onClick={generateCourseStructure}
-                    sx={{
-                      display: "flex-end",
-                    }}
-                    loading={loadingCourseStructure}
+            )}
+            {(!courses[selectedCourse].new || creatingCourseStep >= 1) && (
+              <TextField
+                label="Number of Hour-long Class Sessions"
+                fullWidth
+                value={courses[selectedCourse].hours || 0}
+                onChange={handleHoursChange}
+                margin="normal"
+                variant="outlined"
+                sx={{ width: "500px" }}
+                type="number"
+                inputProps={{ min: 0 }}
+              />
+            )}
+            {!courses[selectedCourse].new && (
+              <TextField
+                value={courses[selectedCourse].references[0]}
+                select // tell TextField to render select
+                label="Select Book"
+                sx={{ mt: "15px", minWidth: "200px" }}
+              >
+                <MenuItem
+                  value=""
+                  disabled
+                  sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                >
+                  Select Book
+                </MenuItem>
+                {courses[selectedCourse].references.map((book: any) => (
+                  <MenuItem
+                    key={book}
+                    value={book}
+                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
                   >
-                    <AutoFixHighIcon />
-                  </LoadingButton>
-                )}
-              </InputAdornment>
-            </Box>
+                    {book}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
+          </Box>
+          {(!courses[selectedCourse].new || creatingCourseStep >= 2) && (
+            <TextField
+              label="Target Learners"
+              multiline
+              fullWidth
+              value={courses[selectedCourse].learners}
+              onChange={handleLearnersChange}
+              margin="normal"
+              variant="outlined"
+              rows={4}
+              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+            />
           )}
+          {(!courses[selectedCourse].new || creatingCourseStep >= 3) &&
+            (loadingDescription ? (
+              <LinearProgress />
+            ) : (
+              <TextField
+                label="Course Description"
+                multiline
+                fullWidth
+                value={courses[selectedCourse].description}
+                onChange={handleDescriptionChange}
+                margin="normal"
+                variant="outlined"
+                minRows={4}
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                InputLabelProps={{
+                  style: {
+                    color: "gray",
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {!courses[selectedCourse].description && (
+                        <LoadingButton
+                          onClick={generateDescription}
+                          sx={{
+                            display: "flex-end",
+                          }}
+                          loading={loadingDescription}
+                        >
+                          <AutoFixHighIcon />
+                        </LoadingButton>
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            ))}
+
+          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
+            (loadingObjectives ? (
+              <LinearProgress />
+            ) : (
+              <Box>
+                <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
+                  <Typography sx={{ mt: "5px" }}>Course Objectives:</Typography>
+                  <InputAdornment position="end">
+                    {!courses[selectedCourse].courseObjectives?.length && (
+                      <LoadingButton
+                        onClick={generateObjectives}
+                        sx={{
+                          display: "flex-end",
+                        }}
+                        loading={loadingObjectives}
+                      >
+                        <AutoFixHighIcon />
+                      </LoadingButton>
+                    )}
+                  </InputAdornment>
+                </Box>
+                <ChipInput
+                  tags={courses[selectedCourse].courseObjectives || []}
+                  selectedTags={() => {}}
+                  setTags={setNewCourseObjectives}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Add a new course objective..."
+                />
+              </Box>
+            ))}
+
+          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
+            (loadingSkills ? (
+              <LinearProgress />
+            ) : (
+              <Box>
+                <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
+                  <Typography sx={{ mt: "5px" }}>Course Skills:</Typography>
+                  <InputAdornment position="end">
+                    {!courses[selectedCourse].courseSkills?.length && (
+                      <LoadingButton
+                        onClick={generateSkills}
+                        sx={{
+                          display: "flex-end",
+                        }}
+                        loading={loadingSkills}
+                      >
+                        <AutoFixHighIcon />
+                      </LoadingButton>
+                    )}
+                  </InputAdornment>
+                </Box>
+                <ChipInput
+                  tags={courses[selectedCourse].courseSkills || []}
+                  selectedTags={() => {}}
+                  setTags={setNewSkills}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Add a new course skill..."
+                />
+              </Box>
+            ))}
+
+          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
+            (loadingCourseStructure ? (
+              <LinearProgress />
+            ) : (
+              <Box sx={{ display: "flex", alignItems: "center", py: "15px", mt: "26px" }}>
+                <Typography variant="h2">Course Structure:</Typography>
+                <Button sx={{ ml: "19px" }} onClick={() => setEditCategory("new")}>
+                  Add Category
+                </Button>
+                <InputAdornment position="end">
+                  {!courses[selectedCourse].syllabus?.length && (
+                    <LoadingButton
+                      onClick={generateCourseStructure}
+                      sx={{
+                        display: "flex-end",
+                      }}
+                      loading={loadingCourseStructure}
+                    >
+                      <AutoFixHighIcon />
+                    </LoadingButton>
+                  )}
+                </InputAdornment>
+              </Box>
+            ))}
 
           <Box ref={containerRef} marginTop="20px">
             {getCourses()[selectedCourse].syllabus.map((category: any, categoryIndex: any) => (
@@ -1443,6 +1520,38 @@ const CourseComponent = () => {
               </LoadingButton>
             </Box>
           )}
+          {courses[selectedCourse].new && creatingCourseStep <= 5 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "20px",
+                position: "sticky",
+                bottom: 24,
+                gap: "5px",
+              }}
+            >
+              <LoadingButton
+                variant="contained"
+                color="success"
+                sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
+                onClick={nextStep}
+                loading={loading}
+                disabled={nextButtonDisabled(courses[selectedCourse])}
+              >
+                Next
+              </LoadingButton>
+              <LoadingButton
+                variant="contained"
+                color="error"
+                sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+                onClick={cancelCreatingCourse}
+                loading={loading}
+              >
+                Cancel
+              </LoadingButton>
+            </Box>
+          )}
           <Dialog
             open={!!editCategory}
             onClose={() => {
@@ -1484,45 +1593,7 @@ const CourseComponent = () => {
               </Button>
             </DialogActions>
           </Dialog>
-          <Dialog open={createCourseModel} onClose={handleCloseCourseDialog} sx={{ zIndex: 9998 }}>
-            <DialogTitle>{"Create a Course"}</DialogTitle>
-            <DialogContent>
-              <TextField
-                label={"Course Title"}
-                multiline
-                fullWidth
-                value={newCourseTitle}
-                onChange={event => setNewCourseTitle(event.target.value)}
-                margin="normal"
-                variant="outlined"
-                sx={{ width: "500px" }}
-              />
-              <TextField
-                label={"Target Learners"}
-                multiline
-                fullWidth
-                value={newCourseLearners}
-                onChange={event => setNewCourseLearners(event.target.value)}
-                margin="normal"
-                variant="outlined"
-                sx={{ width: "500px" }}
-                rows={4}
-              />{" "}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseCourseDialog} color="primary" variant="contained">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveCourse}
-                color="primary"
-                variant="contained"
-                disabled={!newCourseTitle.trim() || !newCourseLearners.trim()}
-              >
-                Create
-              </Button>
-            </DialogActions>
-          </Dialog>
+
           <Dialog open={dialogOpen} onClose={handleCloseDialog} sx={{ zIndex: 9998 }}>
             <DialogTitle>{editTopic ? "Edit topic" : "Add a topic"}</DialogTitle>
             <DialogContent>
