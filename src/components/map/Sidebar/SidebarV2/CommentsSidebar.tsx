@@ -70,6 +70,7 @@ export const CommentsSidebar = ({
             comments={comments}
             users={[]}
             commentSidebarInfo={commentSidebarInfo}
+            sidebarWidth={sidebarWidth}
           />
         </Box>
       }
@@ -94,6 +95,6 @@ const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
   if (docType === "removed" && prevIdx !== -1) {
     prev.splice(prevIdx, 1);
   }
-  prev.sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime());
+  prev.sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
   return prev;
 };

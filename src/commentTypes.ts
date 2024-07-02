@@ -5,6 +5,16 @@ export type Reaction = {
   emoji: string;
 };
 
+export type senderDetail = {
+  [uname: string]: {
+    uname: string;
+    imageUrl: string;
+    chooseUname: boolean;
+    fullname?: string;
+    role?: string;
+  };
+};
+
 export type IComment = {
   doc?: any;
   heading?: string;
@@ -14,6 +24,7 @@ export type IComment = {
   imageUrls?: string[];
   videoUrls?: string[];
   sender: string;
+  senderDetail: senderDetail;
   read_by?: string[];
   reactions: Reaction[];
   mentions?: string[];
@@ -23,6 +34,5 @@ export type IComment = {
   createdAt: Timestamp;
   updatedAt?: Timestamp;
   deleted: boolean;
-  notVisible?: boolean;
   totalReplies?: number;
 };

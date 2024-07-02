@@ -15,7 +15,7 @@ type CommentButtonsProps = {
   user: IUser;
 };
 const CommentButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, user }: CommentButtonsProps) => {
-  const isSender = user.uname === message.user.uname;
+  const isSender = user.uname === message.senderDetail.uname;
   const editMessage = () => {
     handleEditMessage();
   };

@@ -1,19 +1,20 @@
 //import CloseIcon from "@mui/icons-material/Close";
-import SchoolIcon from "@mui/icons-material/School";
 import { Box, Button, Typography } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getFirestore, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import moment from "moment";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { IComment } from "src/commentTypes";
 
-import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
 import { useUploadImage } from "@/hooks/useUploadImage";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 //import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
+import { NotFoundNotification } from "../Sidebar/SidebarV2/NotificationSidebar";
 import CommentButtons from "./CommentButtons";
 import CommentInput from "./CommentInput";
 
@@ -24,9 +25,10 @@ type CommentProps = {
   comments: any;
   users: any;
   commentSidebarInfo: { type: string; id: string };
+  sidebarWidth: number;
 };
 
-const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: CommentProps) => {
+const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebarWidth }: CommentProps) => {
   const db = getFirestore();
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,13 +37,13 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
   });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [replyImageUrls, setReplyImageUrls] = useState<string[]>([]);
-
   const [commentInput, setCommentInput] = useState<string>("");
   const [replyInput, setReplyInput] = useState<string>("");
   const [showReplies, setShowReplies] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editable, setEditable] = useState<string | null>(null);
   const [editCommentText, setEditCommentText] = useState<string | null>(null);
+  const [replies, setReplies] = useState<IComment[]>([]);
   const [editableReply, setEditableReply] = useState<{
     commentId: string;
     replyIdx: number;
@@ -58,12 +60,12 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
   const onUploadImage = useCallback(
     (event: any, type: string) => {
       try {
-        let bucket: string = process.env.FIREBASE_STORAGE_BUCKET as string;
+        let bucket: string = process.env.NEXT_PUBLIC_STORAGE_BUCKET as string;
         if (isValidHttpUrl(bucket)) {
           const { hostname } = new URL(bucket);
           bucket = hostname;
         }
-        const path = "https://storage.googleapis.com/" + bucket + `/tutor-comment-images/${user.uid}`;
+        const path = "https://storage.googleapis.com/" + bucket + `/nodes-comment-images/${user.uid}`;
         let imageFileName = new Date().toUTCString();
         uploadImage({ event, path, imageFileName }).then(
           (url: string) => {
@@ -84,6 +86,22 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
     [setImageUrls, setReplyImageUrls, user]
   );
 
+  useEffect(() => {
+    if (!showReplies) return;
+    const commentRef = getCommentDocRef(commentSidebarInfo.type, showReplies);
+    const replyRef = collection(commentRef, "replies");
+    const q = query(replyRef, where("deleted", "==", false));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const repliesDocuments: any = snapshot.docs.map(doc => {
+        const document = doc.data();
+        return { ...document, id: doc.id };
+      }) as IComment[];
+      repliesDocuments.sort((a: IComment, b: IComment) => a.createdAt.toMillis() - b.createdAt.toMillis());
+      setReplies(repliesDocuments);
+    });
+    return () => unsubscribe();
+  }, [showReplies]);
+
   const getCommentRef = (commentType: string) => {
     let commentRef = collection(db, "versionComments");
     if (commentType === "node") {
@@ -101,21 +119,24 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
 
   const addComment = async () => {
     if (!user?.uname) return;
-    setIsLoading(true);
+    // setIsLoading(true);
     await addDoc(getCommentRef(commentSidebarInfo.type), {
-      //refId: refId,
+      refId: commentSidebarInfo.id,
       text: commentInput,
-      user: {
+      sender: user.uname,
+      senderDetail: {
         uname: user.uname,
-        fullname: user.fullName,
+        fullname: user.fName + " " + user.lName,
         imageUrl: user.imageUrl,
-        isInstructor: user.instructor,
+        uid: user.userId,
       },
       imageUrls,
+      edited: false,
+      deleted: false,
       createdAt: new Date(),
     });
     setCommentInput("");
-    setIsLoading(false);
+    //setIsLoading(false);
     setImageUrls([]);
     scrollToBottom();
   };
@@ -126,13 +147,16 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
     const replyText = replyInput;
     const reply = {
       text: replyText,
-      user: {
+      sender: user.uname,
+      senderDetail: {
         uname: user.uname,
-        fullname: user.fullName,
+        fullname: user.fName + " " + user.lName,
         imageUrl: user.imageUrl,
-        isInstructor: user.instructor,
+        uid: user.userId,
       },
       imageUrls: replyImageUrls,
+      edited: false,
+      deleted: false,
       createdAt: new Date(),
     };
     const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
@@ -149,6 +173,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
       await updateDoc(getCommentDocRef(commentSidebarInfo?.type, commentId), {
         text: updatedText,
         edited: true,
+        editedAt: new Date(),
       });
       setEditable(null);
       setEditCommentText(null);
@@ -164,14 +189,15 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
     }
   };
 
-  const editReply = async (commentId: string, replyIndex: number) => {
+  const editReply = async (commentId: string, replyId: string) => {
     const updatedText = editReplyText;
     if (updatedText !== null) {
-      const updatedReplies = [...(comments.find((comment: any) => comment.id === commentId)?.replies || [])];
-      updatedReplies[replyIndex].text = updatedText;
-      const commentRef = getCommentDocRef(commentSidebarInfo.type, commentId);
-      await updateDoc(commentRef, {
-        replies: updatedReplies,
+      const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
+      const replyRef = doc(commentRef, "replies", replyId);
+      await updateDoc(replyRef, {
+        text: updatedText,
+        edited: true,
+        editedAt: new Date(),
       });
       setEditableReply(null);
       setEditReplyText(null);
@@ -224,8 +250,8 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
           }}
         >
           <OptimizedAvatar
-            name={reply.user?.fullname || ""}
-            imageUrl={reply.user?.imageUrl || ""}
+            name={reply.senderDetail?.fullname || ""}
+            imageUrl={reply.senderDetail?.imageUrl || ""}
             sx={{ border: "none" }}
           />
           <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
@@ -247,9 +273,8 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                   lineHeight: "24px",
                 }}
               >
-                {reply.user.fullname}
+                {reply.senderDetail.fullname}
               </Typography>
-              {reply.user.isInstructor && <SchoolIcon color="primary" sx={{ pl: "5px" }} />}
             </Box>
             <Typography sx={{ fontSize: "12px" }}>
               {moment(reply.createdAt.toDate().getTime()).format("h:mm a")}
@@ -289,7 +314,8 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                 lineHeight: "24px",
                 p: "10px 14px",
                 borderRadius: "9px",
-                border: reply.user.isInstructor ? "solid 2px orange" : undefined,
+                background: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray200,
               }}
             >
               <Box
@@ -329,7 +355,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                   ))}
                 </Box>
               </Box>
-              {user.uname === reply.user.uname && (
+              {user.uname === reply.senderDetail.uname && (
                 <CommentButtons
                   message={reply}
                   handleEditMessage={() => {
@@ -361,7 +387,6 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
       scrolling.current.scrollIntoView({ behaviour: "smooth" });
     }
   };
-
   const renderComments = () => {
     return (
       <TransitionGroup>
@@ -399,8 +424,8 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                 }}
               >
                 <OptimizedAvatar
-                  name={comment.user?.fullname || ""}
-                  imageUrl={comment.user?.imageUrl || ""}
+                  name={comment.senderDetail?.fullname || ""}
+                  imageUrl={comment.senderDetail?.imageUrl || ""}
                   sx={{ border: "none" }}
                 />
                 <Box sx={{ background: "#12B76A", fontSize: "1px" }} className="UserStatusOnlineIcon" />
@@ -422,9 +447,8 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                         lineHeight: "24px",
                       }}
                     >
-                      {comment.user.fullname}
+                      {comment.senderDetail.fullname}
                     </Typography>
-                    {comment.user.isInstructor && <SchoolIcon color="primary" sx={{ pl: "5px" }} />}
                   </Box>
                   <Typography sx={{ fontSize: "12px" }}>
                     {moment(comment.createdAt.toDate().getTime()).format("h:mm a")}
@@ -445,6 +469,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                       setEditCommentText(null);
                     }}
                     onSubmit={() => editComment(comment.id)}
+                    setImageUrls={setImageUrls}
                     isLoading={isLoading}
                     isEditing={true}
                     isAuthenticated={!!user.uname}
@@ -464,7 +489,10 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                       lineHeight: "24px",
                       p: "10px 14px",
                       borderRadius: "9px",
-                      border: comment.user.isInstructor ? "solid 2px orange" : undefined,
+                      background: theme =>
+                        theme.palette.mode === "dark"
+                          ? DESIGN_SYSTEM_COLORS.notebookG700
+                          : DESIGN_SYSTEM_COLORS.gray200,
                     }}
                   >
                     <Box
@@ -494,17 +522,16 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                       >
                         {(comment.imageUrls || []).map((imageUrl: string) => (
                           <img
-                            width={"200px"}
-                            height={"200px"}
-                            style={{ borderRadius: "8px" }}
+                            width={"100%"}
+                            style={{ borderRadius: "8px", objectFit: "contain" }}
                             src={imageUrl}
-                            alt="news image"
+                            alt="comment image"
                             key={imageUrl}
                           />
                         ))}
                       </Box>
                     </Box>
-                    {user.uname === comment.user.uname && (
+                    {user.uname === comment.senderDetail.uname && (
                       <CommentButtons
                         message={comment}
                         handleEditMessage={() => {
@@ -524,15 +551,15 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
                       onClick={() => setShowReplies(!showReplies ? comment.id : null)}
                       style={{ border: "none", fontSize: "14px" }}
                     >
-                      {showReplies === comment.id ? "Hide" : comment.replies.length || null}{" "}
-                      {comment.replies.length > 1 ? "Replies" : "Reply"}
+                      {showReplies === comment.id ? "Hide" : comment?.replies?.length || null}{" "}
+                      {comment?.replies?.length > 1 ? "Replies" : "Reply"}
                     </Button>
                   </Box>
                 )}
 
                 {showReplies === comment.id && (
                   <Box sx={{ mt: "10px" }}>
-                    {renderReplies(comment.id, comment.replies)}
+                    {renderReplies(comment.id, replies)}
                     <CommentInput
                       fileInputRef={fileInputRef}
                       isUploading={isUploading}
@@ -567,12 +594,9 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
   return (
     <Box
       sx={{
-        height: "99vh",
         p: "10px",
         position: "relative",
-        width: window.innerWidth / 3 + "px",
         borderRadius: "15px",
-        overflow: "auto",
         listStyle: "none",
         transition: "box-shadow 0.3s",
       }}
@@ -582,55 +606,25 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          height: "90%",
         }}
       >
-        {/* <ConceptCard
-          concept={concept}
-          mode={mode}
-          expanded={concept.id}
-          handleOpenConcept={() => {}}
-          sx={{ overflow: 'visible' }}
-          cSx={{ height: '68px', overflowY: 'auto' }}
-          showImagesAndVideos={false}
-        /> */}
         <Box
           id="comments-section"
           sx={{
-            height: "70vh",
+            height: "90vh",
             overflow: "auto",
-            pb: "60px",
-            mt: "160px",
+            pb: "120px",
           }}
         >
           {comments.length === 0 ? (
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                marginTop: "40%",
               }}
             >
-              <Box sx={{ height: "100%", display: "grid", placeItems: "center" }}>
-                <Box>
-                  <Box
-                    sx={{
-                      width: { xs: "250px", sm: "300px" },
-                      height: { xs: "150px", sm: "200px" },
-                    }}
-                  >
-                    <RiveComponentMemoized
-                      src={"/rive-assistant/notification.riv"}
-                      animations={"Timeline 1"}
-                      artboard="New Artboard"
-                      autoplay={true}
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </Box>
-                </Box>
-              </Box>
+              <NotFoundNotification title="Start Commenting" description="" />
             </Box>
           ) : (
             <Box>{renderComments()}</Box>
@@ -642,7 +636,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo }: Comme
             bottom: "13px",
             mt: "15px",
             pr: "15px",
-            width: window.innerWidth / 3 - 4,
+            width: sidebarWidth - 5,
           }}
         >
           <CommentInput

@@ -67,7 +67,7 @@ const CommentInput = ({
           `solid 1px ${
             theme.palette.mode === "light" ? DESIGN_SYSTEM_COLORS.gray300 : DESIGN_SYSTEM_COLORS.notebookG500
           }`,
-        borderRadius: "20px",
+        borderRadius: "10px",
         backgroundColor: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
         ...sx,
