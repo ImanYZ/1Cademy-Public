@@ -8094,9 +8094,27 @@ const Notebook = ({}: NotebookProps) => {
                   aria-labelledby="modal-modal-title"
                   aria-describedby="modal-modal-description"
                 >
-                  <>
+                  <Paper>
                     <CloseIcon
-                      sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+                      sx={{
+                        position: "absolute",
+                        top: "60px",
+                        right: "50px",
+                        zIndex: "99",
+                        height: "40px",
+                        width: "40px",
+                        color: "white",
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark"
+                            ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                            : DESIGN_SYSTEM_COLORS.notebookMainBlack,
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        ":hover": {
+                          backgroundColor: "grey",
+                          color: "white",
+                        },
+                      }}
                       onClick={() => setOpenMedia("")}
                     />
                     <MapInteractionCSS>
@@ -8119,7 +8137,7 @@ const Notebook = ({}: NotebookProps) => {
                         />
                       </Paper>
                     </MapInteractionCSS>
-                  </>
+                  </Paper>
                 </Modal>
                 {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenteredLoadingImageContainer">
