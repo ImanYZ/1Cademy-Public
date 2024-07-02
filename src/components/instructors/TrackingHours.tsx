@@ -690,7 +690,7 @@ const TrackingHours = () => {
             {studentsList.map((student: any) => {
               return (
                 <TableRow key={student.uname} style={{ textDecoration: "none", cursor: "pointer" }}>
-                  <TableCell sx={{ p: 0, width: "250px" }}>
+                  <TableCell sx={{ p: 0, pl: "10px", width: "250px" }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: "0px" }}>
                       <Box
                         id={`${student.uname}-picture`}
@@ -726,6 +726,7 @@ const TrackingHours = () => {
                         }}
                         target="_blank"
                         rel="noreferrer"
+                        sx={{ pl: "10px" }}
                       >
                         {student.fName} {student.lName}
                       </Link>
