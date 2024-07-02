@@ -1024,7 +1024,7 @@ const Node = ({
         <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
       )}
 
-      <Box sx={{ float: "right" }}>
+      <Box>
         {!editable && !unaccepted && !simulated && (
           <MemoizedNodeHeader
             id={identifier}
