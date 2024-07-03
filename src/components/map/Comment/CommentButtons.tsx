@@ -1,61 +1,91 @@
+import AddReactionIcon from "@mui/icons-material/AddReaction";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, IconButton, SxProps, Theme, Tooltip } from "@mui/material";
+import MarkAsUnreadIcon from "@mui/icons-material/MarkAsUnread";
+import ReplyIcon from "@mui/icons-material/Reply";
+import { IconButton, Tooltip } from "@mui/material";
+import { Box, SxProps, Theme } from "@mui/system";
 import React from "react";
-import { IUser } from "src/types/IUser";
+import { IComment } from "src/commentTypes";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-
-type CommentButtonsProps = {
-  message: any;
+type CommentButtonProps = {
+  comment: any;
   sx?: SxProps<Theme>;
-  handleEditMessage: any;
+  replyMessage?: (message: any) => void;
+  forwardMessage?: (message: any) => void;
+  toggleEmojiPicker: (event: any, comment?: IComment) => void;
+  handleEditMessage?: any;
   setInputMessage?: any;
   handleDeleteMessage?: any;
-  user: IUser;
+  user: any;
+  makeMessageUnread?: (comment: IComment) => void;
 };
-const CommentButtons = ({ message, sx, handleEditMessage, handleDeleteMessage, user }: CommentButtonsProps) => {
-  const isSender = user.uname === message.senderDetail.uname;
-  const editMessage = () => {
-    handleEditMessage();
-  };
+export const CommentButtons = ({
+  comment,
+  sx,
+  replyMessage,
+  toggleEmojiPicker,
+  handleEditMessage,
+  handleDeleteMessage,
+  user,
+  makeMessageUnread,
+}: CommentButtonProps) => {
+  const isSender = user.uname === comment.sender;
+
   return (
     <Box
       sx={{
+        display: "flex",
+        alignItems: "center",
         position: "absolute",
         background: theme =>
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
-        right: "20px",
+        top: "-46px",
+        right: "0px",
         borderRadius: "8px",
         p: "3px",
         ...sx,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        {isSender && (
-          <Tooltip title={"edit"}>
-            <IconButton onClick={editMessage}>
-              <EditIcon
-                sx={{
-                  color: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined),
-                }}
-              />
-            </IconButton>
-          </Tooltip>
-        )}
-        {handleDeleteMessage && isSender && (
-          <Tooltip title={"delete"}>
-            <IconButton onClick={handleDeleteMessage}>
-              <DeleteIcon
-                sx={{
-                  color: theme => (theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG200 : undefined),
-                }}
-              />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Box>
+      {replyMessage && !comment.parentMessage && (
+        <Tooltip title={"reply"}>
+          <IconButton onClick={replyMessage}>
+            <ReplyIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      <Tooltip title={"react"}>
+        <IconButton onClick={(e: any) => toggleEmojiPicker(e, comment)}>
+          <AddReactionIcon color="secondary" />
+        </IconButton>
+      </Tooltip>
+      {!comment.parentComment && makeMessageUnread && (
+        <Tooltip title={"unread"}>
+          <IconButton onClick={() => makeMessageUnread(comment)}>
+            <MarkAsUnreadIcon color="secondary" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {/* <Tooltip title={"forward"}>
+        <IconButton onClick={handleForwardMessage}>
+          <ReplyIcon sx={{ transform: "scaleX(-1)" }} />
+        </IconButton>
+      </Tooltip> */}
+      {isSender && handleEditMessage && (
+        <Tooltip title={"edit"}>
+          <IconButton onClick={handleEditMessage}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {handleDeleteMessage && isSender && (
+        <Tooltip title={"delete"}>
+          <IconButton onClick={handleDeleteMessage}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   );
 };
-export default CommentButtons;

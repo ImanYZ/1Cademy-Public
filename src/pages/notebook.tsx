@@ -475,7 +475,11 @@ const Notebook = ({}: NotebookProps) => {
 
   const [openChatByNotification, setOpenChatByNotification] = useState<any>(null);
 
-  const [commentSidebarInfo, setCommentSidebarInfo] = useState<{ type: string; id: string }>({
+  const [commentSidebarInfo, setCommentSidebarInfo] = useState<{
+    type: string;
+    id: string;
+    proposal?: any;
+  }>({
     type: "",
     id: "",
   });
@@ -7757,11 +7761,9 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const openComments = useCallback(
-    (refId: string, type: string) => {
-      setCommentSidebarInfo({
-        type: type,
-        id: refId,
-      });
+    (refId: string, type: string, proposal?: any) => {
+      const sidebarInfo = { type, id: refId, ...(type === "version" && { proposal }) };
+      setCommentSidebarInfo(sidebarInfo);
       setOpenSidebar("COMMENT");
     },
     [graph.nodes]
@@ -8090,6 +8092,7 @@ const Notebook = ({}: NotebookProps) => {
                   sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
                   pendingProposals={pendingProposals}
+                  openComments={openComments}
                   // innerWidth={windowWith}
                 />
               )}
@@ -8130,6 +8133,7 @@ const Notebook = ({}: NotebookProps) => {
                     innerHeight={innerHeight}
                     innerWidth={windowWith}
                     username={user.uname}
+                    openComments={openComments}
                   />
                 )}
 

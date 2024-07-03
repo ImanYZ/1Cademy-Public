@@ -33,12 +33,13 @@ export const getCommentsSnapshot = (
     commentRef = collection(db, "nodeComments");
   }
 
-  let q = query(commentRef, where("refId", "==", refId), limit(pageSize));
+  let q = query(commentRef, where("refId", "==", refId), where("deleted", "==", false), limit(pageSize));
 
   if (lastVisible) {
     q = query(
       commentRef,
       where("refId", "==", refId),
+      where("deleted", "==", false),
       orderBy("createdAt", "desc"),
       startAfter(lastVisible),
       limit(pageSize)

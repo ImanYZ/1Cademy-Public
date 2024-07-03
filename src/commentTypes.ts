@@ -20,7 +20,7 @@ export type IComment = {
   heading?: string;
   id?: string;
   parentComment: string;
-  comment: string;
+  text: string;
   imageUrls?: string[];
   videoUrls?: string[];
   sender: string;

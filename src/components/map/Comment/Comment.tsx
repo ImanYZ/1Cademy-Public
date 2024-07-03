@@ -1,22 +1,39 @@
 //import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, Typography } from "@mui/material";
-import { addDoc, collection, doc, getFirestore, onSnapshot, query, updateDoc, where } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { Box, Button, Divider, Popover, Typography } from "@mui/material";
+import { EmojiClickData } from "emoji-picker-react";
+import {
+  addDoc,
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  getFirestore,
+  increment,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import moment from "moment";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import React, { useEffect, useRef, useState } from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { IComment } from "src/commentTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
-import { useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-//import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { isValidHttpUrl } from "@/lib/utils/utils";
 
+//import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { NotFoundNotification } from "../Sidebar/SidebarV2/NotificationSidebar";
-import CommentButtons from "./CommentButtons";
+import { CommentButtons } from "./CommentButtons";
 import CommentInput from "./CommentInput";
+import { Emoticons } from "./Emoticons";
+import ProposalItem from "./ProposalItem";
+const DynamicMemoEmojiPicker = dynamic(() => import("../Sidebar/Chat/Common/EmojiPicker"), {
+  loading: () => <p>Loading...</p>,
+  ssr: false,
+});
 
 type CommentProps = {
   concept: any;
@@ -24,67 +41,108 @@ type CommentProps = {
   confirmIt: any;
   comments: any;
   users: any;
-  commentSidebarInfo: { type: string; id: string };
+  commentSidebarInfo: { type: string; id: string; proposal?: any };
   sidebarWidth: number;
+  innerHeight: number;
+  setComments: React.Dispatch<React.SetStateAction<IComment[]>>;
 };
 
-const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebarWidth }: CommentProps) => {
+const Comment = ({
+  user,
+  confirmIt,
+  comments,
+  users,
+  commentSidebarInfo,
+  sidebarWidth,
+  innerHeight,
+  setComments,
+}: CommentProps) => {
   const db = getFirestore();
-  const storage = getStorage();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isUploading, percentageUploaded, uploadImage } = useUploadImage({
-    storage,
-  });
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [replyImageUrls, setReplyImageUrls] = useState<string[]>([]);
-  const [commentInput, setCommentInput] = useState<string>("");
-  const [replyInput, setReplyInput] = useState<string>("");
   const [showReplies, setShowReplies] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [editable, setEditable] = useState<string | null>(null);
-  const [editCommentText, setEditCommentText] = useState<string | null>(null);
+  const [editing, setEditing] = useState<IComment | null>(null);
   const [replies, setReplies] = useState<IComment[]>([]);
-  const [editableReply, setEditableReply] = useState<{
-    commentId: string;
-    replyIdx: number;
-  } | null>(null);
-  const [editReplyText, setEditReplyText] = useState<string | null>(null);
   const [isRecording] = useState<boolean>(false);
   const [recordingType] = useState<string | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const commentRef = useRef<{
+    comment: IComment | null;
+  }>({
+    comment: null,
+  });
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openPicker = Boolean(anchorEl);
   const scrolling = useRef<any>();
 
-  const uploadImageClicked = useCallback(() => {
-    fileInputRef?.current?.click();
-  }, [fileInputRef]);
+  const toggleEmojiPicker = (event: any, comment?: IComment) => {
+    commentRef.current.comment = comment || null;
+    setAnchorEl(event.currentTarget);
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+  const handleCloseEmojiPicker = () => {
+    setAnchorEl(null);
+  };
 
-  const onUploadImage = useCallback(
-    (event: any, type: string) => {
-      try {
-        let bucket: string = process.env.NEXT_PUBLIC_STORAGE_BUCKET as string;
-        if (isValidHttpUrl(bucket)) {
-          const { hostname } = new URL(bucket);
-          bucket = hostname;
-        }
-        const path = "https://storage.googleapis.com/" + bucket + `/nodes-comment-images/${user.uid}`;
-        let imageFileName = new Date().toUTCString();
-        uploadImage({ event, path, imageFileName }).then(
-          (url: string) => {
-            if (type === "comment") {
-              setImageUrls((prev: string[]) => [...prev, url]);
-            } else {
-              setReplyImageUrls((prev: string[]) => [...prev, url]);
-            }
-          },
-          (message: any) => {
-            confirmIt(message, "ok", "");
-          }
+  const handleEmojiClick = (emojiObject: EmojiClickData) => {
+    const comment = commentRef.current.comment;
+    if (comment) {
+      toggleReaction(comment, emojiObject.emoji);
+    }
+    setShowEmojiPicker(false);
+  };
+
+  const addReaction = async (comment: IComment, emoji: string) => {
+    if (!comment.id || !user?.uname) return;
+
+    if (!comment.parentComment) {
+      setComments((prevComments: any) => {
+        const commentIdx = prevComments.findIndex((m: any) => m.id === comment.id);
+        prevComments[commentIdx].reactions.push({ user: user?.uname, emoji });
+        return prevComments;
+      });
+    }
+    if (!comment.parentComment) {
+      const mRef = getCommentDocRef(commentSidebarInfo.type, comment.id || "");
+      await updateDoc(mRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
+    } else {
+      const cRef = getCommentDocRef(commentSidebarInfo.type, comment.parentComment);
+      const replyRef = doc(cRef, "replies", comment?.id || "");
+      await updateDoc(replyRef, { reactions: arrayUnion({ user: user?.uname, emoji }) });
+    }
+  };
+
+  const removeReaction = async (comment: IComment, emoji: string) => {
+    if (!comment.id) return;
+    if (!comment.parentComment) {
+      setComments((prevMessages: any) => {
+        const messageIdx = prevMessages.findIndex((m: any) => m.id === comment.id);
+        prevMessages[messageIdx].reactions = prevMessages[messageIdx].reactions.filter(
+          (r: any) => r.emoji !== emoji && r.user !== user?.uname
         );
-      } catch (error) {
-        confirmIt("Sorry, Your image could't get uploaded", "ok", "");
-      }
-    },
-    [setImageUrls, setReplyImageUrls, user]
-  );
+        return prevMessages;
+      });
+    }
+
+    if (!comment.parentComment) {
+      const cRef = getCommentDocRef(commentSidebarInfo.type, comment.id);
+      await updateDoc(cRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
+    } else {
+      const cRef = getCommentDocRef(commentSidebarInfo.type, comment.parentComment);
+      const replyRef = doc(cRef, "replies", comment?.id || "");
+      await updateDoc(replyRef, { reactions: arrayRemove({ user: user?.uname, emoji }) });
+    }
+  };
+
+  const toggleReaction = (comment: IComment, emoji: string) => {
+    if (!comment?.id || !user?.uname) return;
+    const reactionIdx = comment.reactions.findIndex(r => r.user === user?.uname && r.emoji === emoji);
+    if (reactionIdx !== -1) {
+      removeReaction(comment, emoji);
+    } else {
+      addReaction(comment, emoji);
+    }
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     if (!showReplies) return;
@@ -94,7 +152,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
     const unsubscribe = onSnapshot(q, snapshot => {
       const repliesDocuments: any = snapshot.docs.map(doc => {
         const document = doc.data();
-        return { ...document, id: doc.id };
+        return { ...document, parentComment: showReplies, id: doc.id };
       }) as IComment[];
       repliesDocuments.sort((a: IComment, b: IComment) => a.createdAt.toMillis() - b.createdAt.toMillis());
       setReplies(repliesDocuments);
@@ -117,12 +175,12 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
     return commentRef;
   };
 
-  const addComment = async () => {
+  const addComment = async (text: string, imageUrls: string[]) => {
     if (!user?.uname) return;
-    // setIsLoading(true);
+    setIsLoading(true);
     await addDoc(getCommentRef(commentSidebarInfo.type), {
       refId: commentSidebarInfo.id,
-      text: commentInput,
+      text: text,
       sender: user.uname,
       senderDetail: {
         uname: user.uname,
@@ -131,22 +189,21 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
         uid: user.userId,
       },
       imageUrls,
+      reactions: [],
       edited: false,
       deleted: false,
+      totalReplies: 0,
       createdAt: new Date(),
     });
-    setCommentInput("");
-    //setIsLoading(false);
-    setImageUrls([]);
+    setIsLoading(false);
     scrollToBottom();
   };
 
-  const addReply = async (commentId: string) => {
+  const addReply = async (text: string, imageUrls: string[], commentId: string) => {
     if (!user?.uname) return;
     setIsLoading(true);
-    const replyText = replyInput;
     const reply = {
-      text: replyText,
+      text: text,
       sender: user.uname,
       senderDetail: {
         uname: user.uname,
@@ -154,7 +211,8 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
         imageUrl: user.imageUrl,
         uid: user.userId,
       },
-      imageUrls: replyImageUrls,
+      imageUrls: imageUrls,
+      reactions: [],
       edited: false,
       deleted: false,
       createdAt: new Date(),
@@ -162,22 +220,19 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
     const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
     const replyRef = collection(commentRef, "replies");
     await addDoc(replyRef, reply);
-    setReplyInput("");
+    await updateDoc(commentRef, {
+      totalReplies: increment(1),
+    });
     setIsLoading(false);
-    setReplyImageUrls([]);
   };
 
-  const editComment = async (commentId: string) => {
-    const updatedText = editCommentText;
-    if (updatedText !== null) {
-      await updateDoc(getCommentDocRef(commentSidebarInfo?.type, commentId), {
-        text: updatedText,
-        edited: true,
-        editedAt: new Date(),
-      });
-      setEditable(null);
-      setEditCommentText(null);
-    }
+  const editComment = async (text: string, imageUrls: string[], commentId: string) => {
+    await updateDoc(getCommentDocRef(commentSidebarInfo?.type, commentId), {
+      text: text,
+      imageUrls,
+      edited: true,
+      editedAt: new Date(),
+    });
   };
 
   const deleteComment = async (commentId: string) => {
@@ -189,28 +244,26 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
     }
   };
 
-  const editReply = async (commentId: string, replyId: string) => {
-    const updatedText = editReplyText;
-    if (updatedText !== null) {
+  const editReply = async (text: string, imageUrls: string[], commentId: string, replyId: string) => {
+    const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
+    const replyRef = doc(commentRef, "replies", replyId);
+    await updateDoc(replyRef, {
+      text: text,
+      imageUrls,
+      edited: true,
+      editedAt: new Date(),
+    });
+  };
+
+  const deleteReply = async (commentId: string, replyId: string) => {
+    if (await confirmIt("Are you sure you want to delete this reply?", "Delete", "Keep")) {
       const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
       const replyRef = doc(commentRef, "replies", replyId);
       await updateDoc(replyRef, {
-        text: updatedText,
-        edited: true,
-        editedAt: new Date(),
+        deleted: true,
       });
-      setEditableReply(null);
-      setEditReplyText(null);
-    }
-  };
-
-  const deleteReply = async (commentId: string, replyIndex: number) => {
-    if (await confirmIt("Are you sure you want to delete this reply?", "Delete", "Keep")) {
-      const updatedReplies = [...(comments.find((comment: any) => comment.id === commentId)?.replies || [])];
-      updatedReplies.splice(replyIndex, 1);
-      const commentRef = getCommentDocRef(commentSidebarInfo.type, commentId);
       await updateDoc(commentRef, {
-        replies: updatedReplies,
+        totalReplies: increment(-1),
       });
     }
   };
@@ -218,11 +271,11 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
   const renderReplies = (commentId: string, replies: any) => {
     return replies.map((reply: any, index: number) => (
       <Box
-        key={reply.text}
+        key={index}
         sx={{
           display: "flex",
           gap: "10px",
-          pt: 2,
+          pt: 5,
         }}
       >
         <Box
@@ -230,23 +283,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
             width: `40px`,
             height: `40px`,
             cursor: "pointer",
-            transition: "all 0.2s 0s ease",
-            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
             borderRadius: "50%",
-            "& > .user-image": {
-              borderRadius: "50%",
-              overflow: "hidden",
-              width: "30px",
-              height: "30px",
-            },
-            "@keyframes slidein": {
-              from: {
-                transform: "translateY(0%)",
-              },
-              to: {
-                transform: "translateY(100%)",
-              },
-            },
           }}
         >
           <OptimizedAvatar
@@ -280,29 +317,23 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
               {moment(reply.createdAt.toDate().getTime()).format("h:mm a")}
             </Typography>
           </Box>
-          {editableReply?.commentId === commentId && editableReply?.replyIdx === index ? (
+          {editing?.parentComment === commentId && editing?.id === reply.id ? (
             <CommentInput
-              fileInputRef={fileInputRef}
-              isUploading={isUploading}
-              percentageUploaded={percentageUploaded}
-              uploadImageClicked={uploadImageClicked}
-              onUploadImage={onUploadImage}
+              comment={reply}
+              user={user}
               type="reply"
-              value={editReplyText || reply.text}
-              setAction={setEditReplyText}
-              onClose={() => {
-                setEditableReply(null);
-                setEditReplyText(null);
-              }}
-              onSubmit={() => editReply(commentId, index)}
+              onClose={() => setEditing(null)}
+              onSubmit={editReply}
               isLoading={isLoading}
               isEditing={true}
-              isAuthenticated={!!user.uname}
               isRecording={isRecording}
               recordingType={recordingType}
               users={users}
               startListening={() => {}}
               stopListening={() => {}}
+              confirmIt={confirmIt}
+              editing={editing}
+              setEditing={setEditing}
             />
           ) : (
             <Box
@@ -345,36 +376,35 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
                 >
                   {(reply.imageUrls || []).map((imageUrl: string) => (
                     <img
-                      width={"200px"}
-                      height={"200px"}
-                      style={{ borderRadius: "8px" }}
+                      width={"100%"}
+                      style={{ borderRadius: "8px", objectFit: "contain" }}
                       src={imageUrl}
-                      alt="news image"
+                      alt="reply image"
                       key={imageUrl}
                     />
                   ))}
                 </Box>
               </Box>
               {user.uname === reply.senderDetail.uname && (
-                <CommentButtons
-                  message={reply}
-                  handleEditMessage={() => {
-                    setEditableReply({
-                      commentId: commentId,
-                      replyIdx: index,
-                    });
-                    setEditReplyText(reply.text);
-                  }}
-                  handleDeleteMessage={() => deleteReply(commentId, index)}
-                  user={user}
-                  sx={{
-                    background: "transparent",
-                    position: "initial",
-                    display: "flex",
-                    justifyContent: "end",
-                  }}
-                />
+                <Box className="message-buttons" sx={{ display: "none" }}>
+                  <CommentButtons
+                    comment={reply}
+                    handleEditMessage={() => setEditing(reply)}
+                    handleDeleteMessage={() => deleteReply(commentId, reply.id)}
+                    toggleEmojiPicker={toggleEmojiPicker}
+                    user={user}
+                  />
+                </Box>
               )}
+              <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
+                <Emoticons
+                  comment={reply}
+                  reactionsMap={reply.reactions}
+                  toggleEmojiPicker={toggleEmojiPicker}
+                  toggleReaction={toggleReaction}
+                  user={user}
+                />
+              </Box>
             </Box>
           )}
         </Box>
@@ -396,7 +426,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
               sx={{
                 display: "flex",
                 gap: "10px",
-                pt: 2,
+                pt: 5,
               }}
             >
               <Box
@@ -404,23 +434,7 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
                   width: `40px`,
                   height: `40px`,
                   cursor: "pointer",
-                  transition: "all 0.2s 0s ease",
-                  background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
                   borderRadius: "50%",
-                  "& > .user-image": {
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    width: "30px",
-                    height: "30px",
-                  },
-                  "@keyframes slidein": {
-                    from: {
-                      transform: "translateY(0%)",
-                    },
-                    to: {
-                      transform: "translateY(100%)",
-                    },
-                  },
                 }}
               >
                 <OptimizedAvatar
@@ -454,30 +468,23 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
                     {moment(comment.createdAt.toDate().getTime()).format("h:mm a")}
                   </Typography>
                 </Box>
-                {editable === comment.id ? (
+                {editing?.id === comment.id ? (
                   <CommentInput
-                    fileInputRef={fileInputRef}
-                    isUploading={isUploading}
-                    percentageUploaded={percentageUploaded}
-                    uploadImageClicked={uploadImageClicked}
-                    onUploadImage={onUploadImage}
+                    comment={comment}
+                    user={user}
                     type="comment"
-                    value={editCommentText || comment.text}
-                    setAction={setEditCommentText}
-                    onClose={() => {
-                      setEditable(null);
-                      setEditCommentText(null);
-                    }}
-                    onSubmit={() => editComment(comment.id)}
-                    setImageUrls={setImageUrls}
+                    onClose={() => setEditing(null)}
+                    onSubmit={editComment}
                     isLoading={isLoading}
                     isEditing={true}
-                    isAuthenticated={!!user.uname}
                     startListening={() => {}}
                     stopListening={() => {}}
                     isRecording={isRecording}
                     recordingType={recordingType}
                     users={users}
+                    confirmIt={confirmIt}
+                    editing={editing}
+                    setEditing={setEditing}
                   />
                 ) : (
                   <Box
@@ -532,27 +539,32 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
                       </Box>
                     </Box>
                     {user.uname === comment.senderDetail.uname && (
-                      <CommentButtons
-                        message={comment}
-                        handleEditMessage={() => {
-                          setEditable(comment.id);
-                          setEditCommentText(comment.text);
-                        }}
-                        handleDeleteMessage={() => deleteComment(comment.id)}
-                        user={user}
-                        sx={{
-                          background: "transparent",
-                          bottom: "5px",
-                          right: "10px",
-                        }}
-                      />
+                      <Box className="message-buttons" sx={{ display: "none" }}>
+                        <CommentButtons
+                          comment={comment}
+                          handleEditMessage={() => setEditing(comment)}
+                          handleDeleteMessage={() => deleteComment(comment.id)}
+                          toggleEmojiPicker={toggleEmojiPicker}
+                          user={user}
+                        />
+                      </Box>
                     )}
+                    <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
+                      <Emoticons
+                        comment={comment}
+                        reactionsMap={comment.reactions}
+                        toggleEmojiPicker={toggleEmojiPicker}
+                        toggleReaction={toggleReaction}
+                        user={user}
+                      />
+                    </Box>
+
                     <Button
                       onClick={() => setShowReplies(!showReplies ? comment.id : null)}
                       style={{ border: "none", fontSize: "14px" }}
                     >
-                      {showReplies === comment.id ? "Hide" : comment?.replies?.length || null}{" "}
-                      {comment?.replies?.length > 1 ? "Replies" : "Reply"}
+                      {showReplies === comment.id ? "Hide" : comment?.totalReplies || null}{" "}
+                      {comment?.totalReplies > 1 ? "Replies" : "Reply"}
                     </Button>
                   </Box>
                 )}
@@ -561,25 +573,18 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
                   <Box sx={{ mt: "10px" }}>
                     {renderReplies(comment.id, replies)}
                     <CommentInput
-                      fileInputRef={fileInputRef}
-                      isUploading={isUploading}
-                      percentageUploaded={percentageUploaded}
-                      uploadImageClicked={uploadImageClicked}
-                      onUploadImage={onUploadImage}
+                      user={user}
                       type="reply"
-                      message={comment}
-                      value={replyInput}
-                      setAction={setReplyInput}
-                      onSubmit={() => addReply(comment.id)}
+                      comment={comment}
+                      onSubmit={addReply}
                       isLoading={isLoading}
-                      imageUrls={replyImageUrls}
-                      setImageUrls={setReplyImageUrls}
-                      isAuthenticated={!!user.uname}
                       startListening={() => {}}
                       stopListening={() => {}}
                       isRecording={isRecording}
                       recordingType={recordingType}
                       users={users}
+                      confirmIt={confirmIt}
+                      setEditing={setEditing}
                     />
                   </Box>
                 )}
@@ -601,6 +606,35 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
         transition: "box-shadow 0.3s",
       }}
     >
+      <Popover
+        open={openPicker}
+        anchorEl={anchorEl}
+        onClose={handleCloseEmojiPicker}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+      >
+        {openPicker && (
+          <DynamicMemoEmojiPicker
+            width="300px"
+            height="400px"
+            onEmojiClick={handleEmojiClick}
+            lazyLoadEmojis={true}
+            theme={"dark"}
+          />
+        )}
+      </Popover>
+      {commentSidebarInfo.type === "version" && (
+        <Box sx={{ width: sidebarWidth - 20, zIndex: 9999 }}>
+          <ProposalItem
+            proposal={commentSidebarInfo.proposal}
+            showTitle={true}
+            userVotesOnProposals={commentSidebarInfo.proposal.userVotesOnProposals}
+          />
+          <Divider sx={{ mt: 2 }} variant="fullWidth" />
+        </Box>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -611,9 +645,11 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
         <Box
           id="comments-section"
           sx={{
-            height: "90vh",
+            height: innerHeight - 200,
             overflow: "auto",
-            pb: "120px",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
           }}
         >
           {comments.length === 0 ? (
@@ -640,24 +676,17 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
           }}
         >
           <CommentInput
-            fileInputRef={fileInputRef}
-            isUploading={isUploading}
-            percentageUploaded={percentageUploaded}
-            uploadImageClicked={uploadImageClicked}
-            onUploadImage={onUploadImage}
+            user={user}
             type="comment"
-            value={commentInput}
-            setAction={setCommentInput}
             onSubmit={addComment}
             isLoading={isLoading}
-            imageUrls={imageUrls}
-            setImageUrls={setImageUrls}
-            isAuthenticated={!!user.uname}
             startListening={() => {}}
             stopListening={() => {}}
             isRecording={isRecording}
             recordingType={recordingType}
             users={users}
+            confirmIt={confirmIt}
+            setEditing={setEditing}
           />
         </Box>
       </Box>
@@ -665,4 +694,4 @@ const Comment = ({ user, confirmIt, comments, users, commentSidebarInfo, sidebar
   );
 };
 
-export default Comment;
+export default React.memo(Comment);

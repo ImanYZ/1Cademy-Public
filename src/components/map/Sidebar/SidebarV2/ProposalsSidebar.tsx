@@ -32,6 +32,7 @@ type ProposalsSidebarProps = {
   innerHeight?: number;
   innerWidth: number;
   username: string;
+  openComments: (refId: string, type: string, proposal?: any) => void;
 };
 
 const ProposalsSidebar = ({
@@ -53,6 +54,7 @@ const ProposalsSidebar = ({
   innerWidth,
   selectedNode,
   username,
+  openComments,
 }: ProposalsSidebarProps) => {
   const [proposals, setProposals] = useState<any[]>([]);
   const [userVotesOnProposals, setUserVotesOnProposals] = useState<{ [key: string]: any }>({});
@@ -323,6 +325,7 @@ const ProposalsSidebar = ({
                 username={username}
                 userVotesOnProposals={userVotesOnProposals}
                 setUserVotesOnProposals={setUserVotesOnProposals}
+                openComments={openComments}
               />
             </Box>
           )}
@@ -348,6 +351,7 @@ const ProposalsSidebar = ({
                 username={username}
                 userVotesOnProposals={userVotesOnProposals}
                 setUserVotesOnProposals={setUserVotesOnProposals}
+                openComments={openComments}
               />
             </Box>
           )}

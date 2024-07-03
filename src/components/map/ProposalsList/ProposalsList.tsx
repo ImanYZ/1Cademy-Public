@@ -35,6 +35,7 @@ type ProposalsListProps = {
   ratingProposal: boolean;
   userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
   setUserVotesOnProposals: any;
+  openComments: (refId: string, type: string, proposal?: any) => void;
 };
 
 const ProposalsList = ({
@@ -49,6 +50,7 @@ const ProposalsList = ({
   ratingProposal,
   userVotesOnProposals,
   setUserVotesOnProposals,
+  openComments,
 }: ProposalsListProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
@@ -130,6 +132,7 @@ const ProposalsList = ({
                   showTitle={true}
                   openLinkedNode={() => {}}
                   userVotesOnProposals={userVotesOnProposals}
+                  openComments={openComments}
                 />
               </Box>
             );
@@ -355,7 +358,6 @@ const SelectedProposalItem = ({
                   </Typography>
                 </Box>
               </ContainedButton>
-
               {canRemoveProposal && (
                 <React.Fragment>
                   <Divider

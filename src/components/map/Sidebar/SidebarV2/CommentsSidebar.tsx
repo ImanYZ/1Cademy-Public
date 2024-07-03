@@ -1,7 +1,8 @@
 import { Box } from "@mui/material";
 import { getFirestore } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { commentChange, getCommentsSnapshot } from "src/client/firestore/comments.firestore";
+import { IComment } from "src/commentTypes";
 import { UserTheme } from "src/knowledgeTypes";
 
 import useDialog from "@/hooks/useConfirmDialog";
@@ -34,12 +35,13 @@ export const CommentsSidebar = ({
   commentSidebarInfo,
 }: CommentsSidebarProps) => {
   const db = getFirestore();
-  const { confirmIt } = useDialog();
-  const [comments, setComments] = useState<any>([]);
+  const { confirmIt, ConfirmDialog } = useDialog();
+  const [comments, setComments] = useState<IComment[]>([]);
   useEffect(() => {
     if (!user) return;
+    setComments([]);
     const onSynchronize = (changes: commentChange[]) => {
-      setComments((prev: any) => changes.reduce(synchronizeStuff, [...prev]));
+      setComments(prev => changes.reduce(synchronizeStuff, [...prev]));
     };
     const killSnapshot = getCommentsSnapshot(
       db,
@@ -47,38 +49,63 @@ export const CommentsSidebar = ({
       onSynchronize
     );
     return () => killSnapshot();
-  }, [db, user]);
+  }, [db, user, commentSidebarInfo]);
+
+  const contentSignalState = useMemo(() => {
+    return { updates: true };
+  }, [comments, commentSidebarInfo]);
 
   return (
-    <SidebarWrapper
-      id="comment"
-      title={"Comments"}
-      open={open}
-      onClose={onClose}
-      width={sidebarWidth}
-      innerHeight={innerHeight}
-      showScrollUpButton={false}
-      contentSignalState={() => {}}
-      onlineUsers={onlineUsers}
-      user={user}
-      SidebarContent={
-        <Box sx={{ marginTop: "22px" }}>
-          <Comment
-            user={user}
-            concept={""}
-            confirmIt={confirmIt}
-            comments={comments}
-            users={[]}
-            commentSidebarInfo={commentSidebarInfo}
-            sidebarWidth={sidebarWidth}
-          />
-        </Box>
-      }
-    />
+    <>
+      <SidebarWrapper
+        id="comment"
+        title={"Comments"}
+        open={open}
+        onClose={onClose}
+        width={sidebarWidth}
+        innerHeight={innerHeight}
+        showScrollUpButton={false}
+        contentSignalState={contentSignalState}
+        onlineUsers={onlineUsers}
+        user={user}
+        SidebarContent={
+          <Box sx={{ marginTop: "22px" }}>
+            <Comment
+              user={user}
+              concept={""}
+              confirmIt={confirmIt}
+              comments={comments}
+              users={[]}
+              commentSidebarInfo={commentSidebarInfo}
+              sidebarWidth={sidebarWidth}
+              innerHeight={innerHeight || 0}
+              setComments={setComments}
+            />
+          </Box>
+        }
+      />
+      {ConfirmDialog}
+    </>
   );
 };
 
-export const MemoizedCommentsSidebar = React.memo(CommentsSidebar);
+const areEqual = (prevProps: any, nextProps: any) => {
+  return (
+    prevProps.user === nextProps.user &&
+    prevProps.open === nextProps.open &&
+    //prevProps.onClose === nextProps.onClose &&
+    prevProps.sidebarWidth === nextProps.sidebarWidth &&
+    prevProps.innerHeight === nextProps.innerHeight &&
+    prevProps.theme === nextProps.theme &&
+    prevProps.notebookRef === nextProps.notebookRef &&
+    prevProps.nodeBookDispatch === nextProps.nodeBookDispatch &&
+    prevProps.nodeBookState === nextProps.nodeBookState &&
+    prevProps.onlineUsers === nextProps.onlineUsers &&
+    prevProps.commentSidebarInfo === nextProps.commentSidebarInfo
+  );
+};
+
+export const MemoizedCommentsSidebar = React.memo(CommentsSidebar, areEqual);
 
 const synchronizeStuff = (prev: (any & { id: string })[], change: any) => {
   const docType = change.type;

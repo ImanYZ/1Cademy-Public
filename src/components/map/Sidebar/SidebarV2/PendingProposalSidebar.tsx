@@ -18,6 +18,7 @@ type PendingProposalSidebarProps = {
   sidebarWidth: number;
   innerHeight?: number;
   pendingProposals: any;
+  openComments: (refId: string, type: string, proposal?: any) => void;
   // innerWidth: number;
 };
 // const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
@@ -30,6 +31,7 @@ const PendingProposalSidebar = ({
   pendingProposals,
   sidebarWidth,
   innerHeight,
+  openComments,
 }: // innerWidth,
 PendingProposalSidebarProps) => {
   const [userVotesOnProposals, setUserVotesOnProposals] = useState({});
@@ -175,6 +177,7 @@ PendingProposalSidebarProps) => {
                 }
                 openLinkedNode={openLinkedNode}
                 userVotesOnProposals={userVotesOnProposals}
+                openComments={openComments}
               />
             </Box>
           )}
