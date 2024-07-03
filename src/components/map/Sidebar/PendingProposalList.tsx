@@ -14,7 +14,7 @@ type PendingProposalListProps = {
   proposals: any[];
   openLinkedNode: any;
   userVotesOnProposals?: { [key: string]: any };
-  openComments: (refId: string, type: string, proposal?: any) => void;
+  openComments?: (refId: string, type: string, proposal?: any) => void;
 };
 
 const PendingProposalList = ({

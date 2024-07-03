@@ -176,6 +176,7 @@ const CommentInput = ({
           displayTransform={(id, display) => {
             return `@${display}`;
           }}
+          markup="[@__display__](/mention/__id__)"
           renderSuggestion={(suggestion: any) => <MentionUser user={suggestion} />}
         />
       </MentionsInput>

@@ -35,7 +35,7 @@ type ProposalsListProps = {
   ratingProposal: boolean;
   userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
   setUserVotesOnProposals: any;
-  openComments: (refId: string, type: string, proposal?: any) => void;
+  openComments?: (refId: string, type: string, proposal?: any) => void;
 };
 
 const ProposalsList = ({

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { getFirestore } from "firebase/firestore";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { commentChange, getCommentsSnapshot } from "src/client/firestore/comments.firestore";
 import { IComment } from "src/commentTypes";
@@ -22,7 +22,7 @@ type CommentsSidebarProps = {
   notebookRef: any;
   nodeBookDispatch: any;
   nodeBookState: any;
-  commentSidebarInfo: { type: string; id: string };
+  commentSidebarInfo: { type: string; id: string; proposal?: any };
 };
 
 export const CommentsSidebar = ({
@@ -37,6 +37,7 @@ export const CommentsSidebar = ({
   const db = getFirestore();
   const { confirmIt, ConfirmDialog } = useDialog();
   const [comments, setComments] = useState<IComment[]>([]);
+  const [users, setUsers] = useState<any>([]);
   useEffect(() => {
     if (!user) return;
     setComments([]);
@@ -51,9 +52,29 @@ export const CommentsSidebar = ({
     return () => killSnapshot();
   }, [db, user, commentSidebarInfo]);
 
+  useEffect(() => {
+    (async () => {
+      const nodeQ = doc(
+        db,
+        "nodes",
+        commentSidebarInfo.type === "node" ? commentSidebarInfo.id : commentSidebarInfo.proposal.node
+      );
+      const nodeDoc = await getDoc(nodeQ);
+      if (nodeDoc.exists()) {
+        const nodeData = nodeDoc.data();
+        const members: any = Object.values(nodeData.contributors).map((m: any) => {
+          m.display = m.fullname;
+          m.id = m;
+          return m;
+        });
+        setUsers(members);
+      }
+    })();
+  }, [db]);
+
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [comments, commentSidebarInfo]);
+  }, [users, comments, commentSidebarInfo]);
 
   return (
     <>
@@ -75,7 +96,7 @@ export const CommentsSidebar = ({
               concept={""}
               confirmIt={confirmIt}
               comments={comments}
-              users={[]}
+              users={users}
               commentSidebarInfo={commentSidebarInfo}
               sidebarWidth={sidebarWidth}
               innerHeight={innerHeight || 0}

@@ -2,7 +2,7 @@ import { Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 
-import OptimizedAvatar from "@/components/OptimizedAvatar";
+import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 
 type UsersTagProps = {
   user: any;
@@ -15,7 +15,6 @@ export const MentionUser = ({ user }: UsersTagProps) => {
         display: "flex",
         flexDirection: "column",
         p: "10px",
-        boxShadow: "none",
         background: theme =>
           theme.palette.mode === "dark" ? theme.palette.common.notebookG700 : theme.palette.common.gray100,
         cursor: "pointer",
@@ -43,8 +42,7 @@ export const MentionUser = ({ user }: UsersTagProps) => {
               width: `${30}px`,
               height: `${30}px`,
               cursor: "pointer",
-              transition: "all 0.2s 0s ease",
-              background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
+
               borderRadius: "50%",
               "& > .user-image": {
                 borderRadius: "50%",
@@ -52,18 +50,10 @@ export const MentionUser = ({ user }: UsersTagProps) => {
                 width: "30px",
                 height: "30px",
               },
-              "@keyframes slidein": {
-                from: {
-                  transform: "translateY(0%)",
-                },
-                to: {
-                  transform: "translateY(100%)",
-                },
-              },
             }}
           >
             <Box className="user-image">
-              <OptimizedAvatar name={""} imageUrl={user.imageUrl} sx={{ border: "none" }} />
+              <OptimizedAvatar2 alt={""} size={30} imageUrl={user.imageUrl} sx={{ border: "none" }} />
             </Box>
             <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
           </Box>
@@ -74,7 +64,6 @@ export const MentionUser = ({ user }: UsersTagProps) => {
                   fontSize: "16px",
                   fontWeight: "500",
                   lineHeight: "24px",
-                  color: `black!important`,
                 }}
               >
                 {user.display}

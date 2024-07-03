@@ -34,7 +34,7 @@ type ProposalItemProps = {
   proposalSummaries?: any;
   isClickable?: boolean;
   userVotesOnProposals?: { [key: string]: any };
-  openComments: (refId: string, type: string, proposal?: any) => void;
+  openComments?: (refId: string, type: string, proposal?: any) => void;
 };
 
 const ProposalItem = ({
@@ -228,30 +228,32 @@ const ProposalItem = ({
                 </Box>
               </Tooltip>
             </Box>
-            <ContainedButton
-              title="Open comments"
-              onClick={() => openComments(proposal.id, "version", { ...proposal, userVotesOnProposals })}
-              tooltipPosition="top"
-              sx={{
-                background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                fontWeight: 400,
-                color: "inherit",
-                ":hover": {
-                  borderWidth: "0px",
-                  background: (theme: any) =>
-                    theme.palette.mode === "dark"
-                      ? theme.palette.common.darkBackground2
-                      : theme.palette.common.lightBackground2,
-                },
-                padding: "7px 7px",
-                minWidth: "30px",
-                height: "30px",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                <ChatBubbleIcon sx={{ fontSize: "16px" }} />
-              </Box>
-            </ContainedButton>
+            {openComments && (
+              <ContainedButton
+                title="Open comments"
+                onClick={() => openComments(proposal.id, "version", { ...proposal, userVotesOnProposals })}
+                tooltipPosition="top"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  fontWeight: 400,
+                  color: "inherit",
+                  ":hover": {
+                    borderWidth: "0px",
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground2
+                        : theme.palette.common.lightBackground2,
+                  },
+                  padding: "7px 7px",
+                  minWidth: "30px",
+                  height: "30px",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                  <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                </Box>
+              </ContainedButton>
+            )}
           </Box>
           <Button
             sx={{ borderRadius: "20px" }}
