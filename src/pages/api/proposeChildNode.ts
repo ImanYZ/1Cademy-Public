@@ -29,8 +29,8 @@ import { generateAlias } from "@/lib/utils/utils";
 
 export type IProposeChildNodePayload = {
   data: {
+    versionNodeId: string;
     notebookId?: string;
-    versionNodeId?: string;
     parentId: string;
     parentType: INodeType;
     nodeType: INodeType;
@@ -84,6 +84,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   } = req?.body?.data;
   try {
     const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
+    console.log(req?.body?.data, "versionNodeId==>");
     console.log("parentId", {
       parentId,
       tagIds,
@@ -227,6 +228,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           ...(nodeType === "Question" && { choices: choices }),
           ...(nodeVideoStartTime && { nodeVideoStartTime }),
           ...(nodeVideoEndTime && { nodeVideoEndTime }),
+          contribNames: [userData.uname],
+          contributors: {
+            [userData.uname]: {
+              reputation: 1,
+            },
+          },
+          institNames: [userData.deInstit],
+          institutions: {
+            [userData.deInstit]: {
+              reputation: 1,
+            },
+          },
         };
 
         // Set the new node in the transaction
@@ -236,7 +249,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const ParentNodeChanges = {
           changedAt: currentTimestamp,
           updatedAt: currentTimestamp,
-          children: [...parentNodeData.children, { node: parentNodeRef.id, title: title, label: "", type: nodeType }],
+          children: [...parentNodeData.children, { node: versionNodeId, title: title, label: "", type: nodeType }],
           studied: 0,
         };
         t.update(parentNodeRef, ParentNodeChanges);
@@ -273,6 +286,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { versionsColl, userVersionsColl }: any = getTypedCollections();
 
       // Check if the version document already exists
+      console.log("ceated versionNodeId", versionNodeId);
       let versionRef = versionsColl.doc(versionNodeId);
       const versionDoc: any = await t.get(versionRef);
       if (versionDoc.exists) {
@@ -397,7 +411,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         accepted: newVersion.accepted,
         contribution: 1,
       });
-      if (newVersion.accepted) {
+      if (accepted) {
         await signalNodeToTypesense({
           nodeId: newVersion.node,
           currentTimestamp,
