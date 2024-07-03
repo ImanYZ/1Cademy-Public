@@ -559,7 +559,6 @@ const NodeFooter = ({
                 id={`${identifier}-node-footer-timestamp`}
                 component={"span"}
                 sx={{
-                  fontSize: "12px",
                   marginLeft: "10px",
                   display: editable ? "none" : "block",
                   lineHeight: "normal",
