@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { FullNodeData, SortDirection, SortValues } from "src/nodeBookTypes";
+import { SortDirection, SortValues } from "src/nodeBookTypes";
 import { SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -33,10 +33,15 @@ type ReferencesSidebarProps = {
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
-  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  // preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+const ReferencesSidebar = ({
+  username,
+  open,
+  onClose,
+  onChangeChosenNode /* preLoadNodes */,
+}: ReferencesSidebarProps) => {
   const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -105,12 +110,12 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
         totalResults: res.numResults,
       }));
       setIsLoading(false);
-      preLoadNodes(
+      /*      preLoadNodes(
         res.data.map(c => c.id),
         []
-      );
+      ); */
     },
-    [preLoadNodes, selectedTags]
+    [selectedTags]
   );
 
   const onChangeSortDirection = useCallback(

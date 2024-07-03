@@ -255,7 +255,12 @@ const LinkingWords = ({
               })}
               {parents.length > 0 && !isNew && !editable && (
                 <Button
-                  onClick={() => openAllParent(identifier)}
+                  onClick={() =>
+                    openAllParent({
+                      parents,
+                      node: identifier,
+                    })
+                  }
                   sx={{
                     justifyContent: "stretch",
                     textAlign: "left",
@@ -619,7 +624,12 @@ const LinkingWords = ({
               })}
               {nodesChildren.length > 0 && !isNew && !editable && (
                 <Button
-                  onClick={() => openAllChildren(identifier)}
+                  onClick={() =>
+                    openAllChildren({
+                      children: nodesChildren,
+                      node: identifier,
+                    })
+                  }
                   sx={{
                     justifyContent: "stretch",
                     textAlign: "left",

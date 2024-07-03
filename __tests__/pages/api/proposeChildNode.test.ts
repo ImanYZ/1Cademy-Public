@@ -343,7 +343,7 @@ describe("POST /api/proposeChildNode", () => {
 
       it("increase reputation of proposer and add nodeId, accepted=false and childType=payload.nodeType", async () => {
         const { versionsColl } = getTypedCollections();
-        const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
+        const nodeVersionsResult = await versionsColl.where("__name__", "==", "new-id-2").limit(1).get();
         const nodeVersion = nodeVersionsResult.docs[0].data() as INodeVersion;
         expect(nodeVersion.accepted).toEqual(false);
         expect(nodeVersion.childType).toEqual("Question" as INodeType);
@@ -405,7 +405,7 @@ describe("POST /api/proposeChildNode", () => {
 
       it("create version doc (if approved it would be under new node and if not it would be under parent node with childType)", async () => {
         const { versionsColl } = getTypedCollections();
-        const nodeVersionsResult = await versionsColl.orderBy("createdAt", "desc").limit(1).get();
+        const nodeVersionsResult = await versionsColl.where("__name__", "==", "new-id-2").limit(1).get();
         expect(nodeVersionsResult.docs.length).toEqual(1);
         const nodeVersion = nodeVersionsResult.docs[0]?.data() as INodeVersion;
         newNodeVersionId = nodeVersionsResult.docs[0].id;

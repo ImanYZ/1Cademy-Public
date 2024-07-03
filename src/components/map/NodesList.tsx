@@ -23,7 +23,7 @@ type NodeListProps = {
   openAllParent: any;
   hideNodeHandler: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -163,6 +163,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            node={nodes[nId]}
             nodeBookDispatch={nodeBookDispatch}
             nodeUpdates={nodeUpdates}
             setNodeUpdates={setNodeUpdates}
