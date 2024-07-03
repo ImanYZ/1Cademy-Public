@@ -41,45 +41,59 @@ export const arrayToChunks = (inputArray: any[], perChunk: number = 30) => {
   return result;
 };
 export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
-  // const docChanges = snapshot.docChanges();
-  // if (!docChanges.length) return null
-  return docChanges.map(change => {
+  const result: UserNodeChanges[] = new Array(docChanges.length);
+  for (let i = 0; i < docChanges.length; i++) {
+    const change = docChanges[i];
     const userNodeData: UserNodeFirestore = change.doc.data() as UserNodeFirestore;
-    return {
+    result[i] = {
       cType: change.type,
       uNodeId: change.doc.id,
       uNodeData: userNodeData,
     };
-  });
+  }
+  return result;
 };
 
 export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<{ [nodeId: string]: NodesData }> => {
-  // console.log("[GET NODES]");
-  const chunks = arrayToChunks(nodeIds);
-  const nodeDocsPromises = chunks.map((nodeIds: string[]) => {
-    const nodeQuery = query(collection(db, "nodes"), where("__name__", "in", nodeIds));
+  // Firestore limits 'in' queries to a maximum of 30 items per query.
+  const CHUNK_SIZE = 30;
+
+  const arrayToChunks = (array: any[], chunkSize: number) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, chunkSize + i));
+    }
+    return chunks;
+  };
+
+  const chunks = arrayToChunks(nodeIds, CHUNK_SIZE);
+
+  const nodeDocsPromises = chunks.map((nodeIdsChunk: string[]) => {
+    const nodeQuery = query(collection(db, "nodes"), where("__name__", "in", nodeIdsChunk));
     return getDocs(nodeQuery);
   });
 
   const nodeDocs = await Promise.all(nodeDocsPromises);
-  const flatDocs = nodeDocs.flatMap(nd => nd.docs);
   const nodesMap: { [nodeId: string]: NodesData } = {};
 
-  flatDocs.map((nodeDoc: any) => {
-    if (!nodeDoc.exists()) return null;
+  nodeDocs.forEach(nd => {
+    nd.docs.forEach((nodeDoc: any) => {
+      if (!nodeDoc.exists()) return;
 
-    const tmpData = nodeDoc.data();
-    delete tmpData?.height; // IMPORTANT: we are removing height to not spoil height in dagre // DON'T remove this
-    delete tmpData?.visible; // IMPORTANT: visible wont exist on DB, that value is calculated by notebooks // REMOVE after update backend and DB
-    delete tmpData?.open; // IMPORTANT: open wont exist on DB, that value is calculated by expands // REMOVE after update backend and DB
-    const nData: NodeFireStore = tmpData as NodeFireStore;
-    // if (nData.deleted) return null;
-    nodesMap[nodeDoc.id] = {
-      cType: nData.deleted ? "removed" : "added",
-      nId: nodeDoc.id,
-      nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
-    };
+      const tmpData = nodeDoc.data();
+      delete tmpData?.height;
+      delete tmpData?.visible;
+      delete tmpData?.open;
+      const nData: NodeFireStore = tmpData as NodeFireStore;
+
+      nodesMap[nodeDoc.id] = {
+        cType: nData.deleted ? "removed" : "added",
+        nId: nodeDoc.id,
+        nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
+      };
+    });
   });
+
   return nodesMap;
 };
 
@@ -87,16 +101,15 @@ export const buildFullNodes = (
   userNodesChanges: UserNodeChanges[],
   nodesData: { [nodeId: string]: NodesData }
 ): FullNodeData[] => {
-  // console.log("[BUILD FULL NODES]");
+  const res: FullNodeData[] = [];
 
-  const res = userNodesChanges
-    .map(cur => {
-      const nodeData = nodesData[cur.uNodeData.node];
-      if (!nodeData) return null;
-
+  userNodesChanges.forEach(cur => {
+    const nodeData = nodesData[cur.uNodeData.node];
+    if (nodeData) {
+      const nData = nodeData.nData;
       const fullNodeData: FullNodeData = {
         ...cur.uNodeData, // User node data
-        ...nodeData.nData, // Node Data
+        ...nData, // Node Data
         userNodeId: cur.uNodeId,
         nodeChangeType: cur.cType, // TODO: improve the names and values
         userNodeChangeType: nodeData.cType,
@@ -105,50 +118,47 @@ export const buildFullNodes = (
         top: 0,
         firstVisit: cur.uNodeData.createdAt.toDate(),
         lastVisit: cur.uNodeData.updatedAt?.toDate() ?? cur.uNodeData.createdAt.toDate(),
-        changedAt: nodeData.nData.changedAt.toDate(),
-        createdAt: nodeData.nData.createdAt.toDate(),
-        updatedAt: nodeData.nData.updatedAt.toDate(),
-        references: nodeData.nData.references || [],
-        referenceIds: nodeData.nData.referenceIds || [],
-        referenceLabels: nodeData.nData.referenceLabels || [],
-        tags: nodeData.nData.tags || [],
-        tagIds: nodeData.nData.tagIds || [],
-        contributors: nodeData.nData.contributors ?? {},
-        contribNames: nodeData.nData.contribNames ?? [],
-        institutions: nodeData.nData.institutions ?? {},
-        institNames: nodeData.nData.institNames ?? [],
-        bookmarks: nodeData.nData.bookmarks ? Number(nodeData.nData.bookmarks) : 0,
-        // parents:nodeDataFound.nData.parents??[],
-        // children:node
+        changedAt: nData.changedAt.toDate(),
+        createdAt: nData.createdAt.toDate(),
+        updatedAt: nData.updatedAt.toDate(),
+        references: nData.references || [],
+        referenceIds: nData.referenceIds || [],
+        referenceLabels: nData.referenceLabels || [],
+        tags: nData.tags || [],
+        tagIds: nData.tagIds || [],
+        contributors: nData.contributors ?? {},
+        contribNames: nData.contribNames ?? [],
+        institutions: nData.institutions ?? {},
+        institNames: nData.institNames ?? [],
+        bookmarks: nData.bookmarks ? Number(nData.bookmarks) : 0,
       };
-      if (nodeData.nData.nodeType !== "Question") {
+
+      if (nData.nodeType !== "Question") {
         fullNodeData.choices = [];
       }
-      fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false;
-      fullNodeData.nodeChanges = cur.uNodeData?.nodeChanges || null;
 
-      return fullNodeData;
-    })
-    .flatMap(cur => cur || []);
+      fullNodeData.bookmarked = cur.uNodeData.bookmarked || false;
+      fullNodeData.nodeChanges = cur.uNodeData.nodeChanges || null;
+
+      res.push(fullNodeData);
+    }
+  });
 
   return res;
 };
 
 export const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-  return newAllNodes.reduce(
-    (acu, cur) => {
-      if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-        return { ...acu, [cur.node]: cur };
-      }
-      if (cur.nodeChangeType === "removed") {
-        const tmp = { ...acu };
-        delete tmp[cur.node];
-        return tmp;
-      }
-      return acu;
-    },
-    { ...currentAllNodes }
-  );
+  const updatedNodes = { ...currentAllNodes };
+
+  newAllNodes.forEach(cur => {
+    if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+      updatedNodes[cur.node] = cur;
+    } else if (cur.nodeChangeType === "removed") {
+      delete updatedNodes[cur.node];
+    }
+  });
+
+  return updatedNodes;
 };
 
 export const fillDagre = (

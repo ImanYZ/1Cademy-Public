@@ -1258,6 +1258,7 @@ const Node = ({
                       onClick={onImageClick}
                       style={{
                         borderRadius: "11px",
+                        cursor: "pointer",
                       }}
                     />
                     {/* TODO: add loading background */}
