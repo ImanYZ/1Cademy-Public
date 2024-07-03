@@ -55,6 +55,493 @@ export type IProposeChildNodePayload = {
   };
 };
 
+async function handler(req: NextApiRequest, res: NextApiResponse) {
+  let parentNodeRef: any, parentNodeData: any, userNodesParentData: any, userNodesParentRefs: any;
+  const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
+  let writeCounts = 0;
+  let batch = db.batch();
+
+  const userData = req.body.data.user.userData as IUser;
+  const {
+    parentId,
+    tagIds,
+    children,
+    content,
+    nodeImage,
+    nodeVideo,
+    title,
+    parents,
+    proposal,
+    referenceIds,
+    references,
+    referenceLabels,
+    summary,
+    nodeType,
+    choices,
+    parentType,
+    tags,
+    notebookId,
+  } = req?.body?.data;
+  try {
+    const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
+    console.log("parentId", {
+      parentId,
+      tagIds,
+      children,
+      content,
+      nodeImage,
+      nodeVideo,
+      title,
+      parents,
+      proposal,
+      referenceIds,
+      references,
+      referenceLabels,
+      summary,
+      nodeType,
+      choices,
+      parentType,
+      tags,
+      notebookId,
+    });
+
+    ({ nodeData: parentNodeData, nodeRef: parentNodeRef } = await getNode({ nodeId: parentId }));
+
+    ({ userNodesData: userNodesParentData, userNodesRefs: userNodesParentRefs } = await getAllUserNodes({
+      nodeId: parentId,
+    }));
+
+    // adding missing tags/tagIds
+    let tagUpdates = {
+      tags: [],
+      tagIds: [],
+    };
+    const nodesMap: {
+      [nodeId: string]: INode;
+    } = {};
+    const visitedNodeIds: string[] = [];
+    await generateTagsOfTagsWithNodes({
+      nodeId: "", // newer node don't have node id
+      tagIds: tagIds || [],
+      nodeUpdates: tagUpdates,
+      nodes: nodesMap,
+      visitedNodeIds,
+    });
+    //new version node
+
+    const { instantApprove, isInstructor } = await shouldInstantApprovalForProposal(
+      parentNodeData?.tagIds || [],
+      userData.uname
+    );
+
+    const accepted = isVersionApproved({
+      corrects: 1,
+      wrongs: 0,
+      nodeData: parentNodeData,
+      instantApprove,
+      isInstructor,
+    });
+    //build the new version
+    const newVersion: any = {
+      awards: 0,
+      children: children,
+      title: title,
+      content: content,
+      nodeImage: nodeImage,
+      nodeVideo: nodeVideo,
+      nodeVideoStartTime,
+      nodeVideoEndTime,
+      corrects: 1,
+      createdAt: currentTimestamp,
+      deleted: false,
+      proposer: userData.uname,
+      imageUrl: userData.imageUrl,
+      fullname: userData.fName + " " + userData.lName,
+      chooseUname: userData.chooseUname,
+      parents: parents,
+      proposal: proposal,
+      referenceIds: referenceIds,
+      references: references,
+      referenceLabels: referenceLabels,
+      summary: summary,
+      newChild: true,
+      tagIds: tagUpdates.tagIds,
+      tags: tagUpdates.tags,
+      updatedAt: currentTimestamp,
+      viewers: 1,
+      wrongs: 0,
+      node: parentId,
+      accepted,
+      ...(nodeType === "Question" && { choices: choices }),
+      ...(!accepted && { childType: nodeType }),
+    };
+
+    let ParentNodeChanges = {};
+    let newNode = {};
+    // to check if the node or version document already exist or not
+    let nodeAlreadyCreated = false;
+    let versionAlreadyCreated = false;
+    // if the node gets accepted transaction for creating a new node document to make sure we are not creating duplicates
+    if (accepted) {
+      await db.runTransaction(async t => {
+        // Check if node with versionNodeId already exists
+        let newNodeRef = db.collection("nodes").doc(versionNodeId);
+        const newNodeDoc = await t.get(newNodeRef);
+        if (newNodeDoc.exists) {
+          // If node exists, set flag and return early
+          nodeAlreadyCreated = true;
+          return;
+        }
+
+        // Construct the new node object
+        const newNode = {
+          admin: userData.uname,
+          aImgUrl: userData.imageUrl,
+          aFullname: userData.fName + " " + userData.lName,
+          aChooseUname: userData.chooseUname,
+          maxVersionRating: 1,
+          changedAt: currentTimestamp,
+          children: children,
+          comments: 0,
+          content: content,
+          nodeImage: nodeImage,
+          nodeSlug: generateAlias(title),
+          nodeVideo: nodeVideo,
+          corrects: 1,
+          createdAt: currentTimestamp,
+          deleted: false,
+          nodeType: nodeType,
+          parents: parents,
+          referenceIds: referenceIds,
+          references: references,
+          referenceLabels: referenceLabels,
+          studied: 1,
+          tagIds: tagUpdates.tagIds,
+          tags: tagUpdates.tags,
+          title: title,
+          updatedAt: currentTimestamp,
+          versions: 1,
+          viewers: 1,
+          wrongs: 0,
+          isTag: false,
+          ...(nodeType === "Question" && { choices: choices }),
+          ...(nodeVideoStartTime && { nodeVideoStartTime }),
+          ...(nodeVideoEndTime && { nodeVideoEndTime }),
+        };
+
+        // Set the new node in the transaction
+        t.set(newNodeRef, newNode);
+
+        // Update parent node with changes
+        const ParentNodeChanges = {
+          changedAt: currentTimestamp,
+          updatedAt: currentTimestamp,
+          children: [...parentNodeData.children, { node: parentNodeRef.id, title: title, label: "", type: nodeType }],
+          studied: 0,
+        };
+        t.update(parentNodeRef, ParentNodeChanges);
+
+        // Construct and set new user node object
+        const newUserNodeObj: any = {
+          correct: true,
+          createdAt: currentTimestamp as unknown as Date,
+          updatedAt: currentTimestamp as unknown as Date,
+          deleted: false,
+          isStudied: true,
+          bookmarked: false,
+          changed: false,
+          node: newNodeRef.id,
+          open: true,
+          user: userData.uname,
+          wrong: false,
+          nodeChanges: {},
+          notebooks: [notebookId],
+          expands: [true],
+        };
+        const userNodeRef = db.collection("userNodes").doc();
+        t.set(userNodeRef, newUserNodeObj);
+
+        // Log the user node
+        const userNodeLogRef = db.collection("userNodesLog").doc();
+        delete newUserNodeObj.updatedAt; // Remove updatedAt before logging
+        t.set(userNodeLogRef, newUserNodeObj);
+      });
+    }
+    // transaction for creating a new version document to make sure we are not creating duplicates
+    await db.runTransaction(async t => {
+      // Fetching the firestore query
+      const { versionsColl, userVersionsColl }: any = getTypedCollections();
+
+      // Check if the version document already exists
+      let versionRef = versionsColl.doc(versionNodeId);
+      const versionDoc: any = await t.get(versionRef);
+      if (versionDoc.exists) {
+        // If the version document exists, set flag and exit transaction
+        versionAlreadyCreated = true;
+        return;
+      }
+
+      // Determine node type based on conditions
+      newVersion.nodeType = newVersion.accepted ? nodeType : parentType;
+
+      // Set the new version document in the 'versionsColl' collection
+      t.set(versionRef, newVersion);
+
+      // Prepare data for user versions collection
+      const newUserVersion: any = {
+        award: false,
+        correct: true,
+        createdAt: currentTimestamp,
+        updatedAt: currentTimestamp,
+        version: versionRef.id,
+        user: userData.uname,
+        wrong: false,
+        deleted: false,
+      };
+
+      // Set the new user version document in the 'userVersionsColl' collection
+      const userVersionRef = userVersionsColl.doc();
+      t.set(userVersionRef, newUserVersion);
+
+      // Prepare data for user versions log collection
+      const userVersionLogRef = db.collection("userVersionsLog").doc();
+      // Modify newUserVersion before setting in the log collection
+      delete newUserVersion.updatedAt; // Remove updatedAt field
+      newUserVersion.nodeType = nodeType; // Update nodeType field
+      t.set(userVersionLogRef, newUserVersion);
+    });
+
+    if (!accepted) {
+      await db.runTransaction(async t => {
+        let parentNodeRef = db.collection("nodes").doc(parentId);
+        const parentNodeDoc = await t.get(parentNodeRef);
+        const parentNodeData: any = parentNodeDoc.data();
+        // Update the parent node by incrementing the number of versions on it.
+        t.update(parentNodeRef, {
+          versions: parentNodeData.versions + 1,
+        });
+      });
+    }
+
+    //TO:DO detached action that need to be done in queue
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts = 0;
+      [batch, writeCounts] = await proposalNotification({
+        batch,
+        nodeId: newVersion.accepted ? parentNodeRef.id : parentId,
+        nodeTitle: newVersion.accepted ? title : parentNodeData.title,
+        uname: userData.uname,
+        versionData: newVersion,
+        currentTimestamp,
+        writeCounts,
+      });
+      await commitBatch(batch);
+    });
+
+    // TODO: move these to queue
+    // action tracks
+    if (!versionAlreadyCreated) {
+      await detach(async () => {
+        const actionRef = db.collection("actionTracks").doc();
+        actionRef.create({
+          accepted: !!newVersion.accepted,
+          type: "ChildNode",
+          imageUrl: userData.imageUrl,
+          action: versionNodeId,
+          createdAt: currentTimestamp,
+          doer: newVersion.proposer,
+          chooseUname: userData.chooseUname,
+          fullname: `${userData.fName} ${userData.lName}`,
+          nodeId: newVersion.node,
+          receivers: [userData.uname],
+          email: userData.email,
+        } as IActionTrack);
+
+        const rateActionRef = db.collection("actionTracks").doc();
+        rateActionRef.create({
+          accepted: !!newVersion.accepted,
+          type: "RateVersion",
+          imageUrl: userData.imageUrl,
+          action: "Correct-" + versionNodeId,
+          createdAt: currentTimestamp,
+          doer: newVersion.proposer,
+          chooseUname: userData.chooseUname,
+          fullname: `${userData.fName} ${userData.lName}`,
+          nodeId: newVersion.node,
+          receivers: [userData.uname],
+          email: userData.email,
+        } as IActionTrack);
+      });
+    }
+    if (!versionAlreadyCreated) {
+      // TODO: move these to queue
+      await detach(async () => {
+        await updateStatsOnProposal({
+          approved: !!newVersion.accepted,
+          isChild: true,
+          linksUpdated: true,
+          nodeType: nodeType,
+          proposer: newVersion.proposer,
+          tagIds: newVersion.tagIds,
+        });
+      });
+    }
+
+    // we need update contributors, contribNames, institNames, institutions
+    // TODO: move these to queue
+    await detach(async () => {
+      await updateNodeContributions({
+        nodeId: newVersion.node,
+        uname: newVersion.proposer,
+        accepted: newVersion.accepted,
+        contribution: 1,
+      });
+      if (newVersion.accepted) {
+        await signalNodeToTypesense({
+          nodeId: newVersion.node,
+          currentTimestamp,
+          versionData: newVersion,
+        });
+      }
+    });
+
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts: number = 0;
+      if (!accepted) {
+        [batch, writeCounts] = await addToPendingPropsNums({
+          batch,
+          tagIds: parentNodeData.tagIds,
+          value: 1,
+          voters: [userData.uname],
+          writeCounts,
+        });
+      }
+      /*  */
+      if (accepted) {
+        // If a question node gets accepted, it should be added to the practice tool for all
+        // users in the communities with the tags that are used on this node.
+        // That's why we need to get the list of all members of each of these tags (communities).
+        if (nodeType === "Question") {
+          [batch, writeCounts] = await createPractice({
+            batch,
+            tagIds: tagIds,
+            nodeId: parentNodeRef.id,
+            parentId: parents[0].id,
+            currentTimestamp,
+            writeCounts,
+          });
+        }
+      }
+      /*  */
+      // A child node is being created. So, based on the tags on the node, we should make
+      // the corresponding changes in the tags collection. At this point, we generate tagsData
+      // to prepare for the changes.
+      // The new child node id does not exist, so we just pass "1RandomID".
+      if (accepted && !nodeAlreadyCreated) {
+        [batch, writeCounts] = await generateTagsData({
+          batch: batch,
+          nodeId: parentNodeRef.id,
+          isTag: false,
+          nodeUpdates: newNode,
+          nodeTagIds: [],
+          nodeTags: [],
+          versionTagIds: tagIds,
+          versionTags: tags,
+          proposer: userData.uname,
+          aImgUrl: userData.imageUrl,
+          aFullname: userData.fName + " " + userData.lName,
+          aChooseUname: userData.chooseUname,
+          currentTimestamp,
+          writeCounts,
+        });
+      }
+
+      /*  */
+
+      // Signal all userNodes for all the users who have had some kind of interaction with the parent
+      // node that a child is being added to it.
+      if (accepted && !nodeAlreadyCreated) {
+        [batch, writeCounts] = await signalAllUserNodesChanges({
+          batch,
+          userNodesRefs: userNodesParentRefs,
+          userNodesData: userNodesParentData,
+          nodeChanges: ParentNodeChanges,
+          major: true,
+          deleted: false,
+          currentTimestamp,
+          writeCounts,
+        });
+      }
+
+      /*  */
+      if (!versionAlreadyCreated || !nodeAlreadyCreated) {
+        const reputationTypes: string[] = [
+          "All Time",
+          "Monthly",
+          "Weekly",
+          "Others",
+          "Others Monthly",
+          "Others Weekly",
+        ];
+        const comReputationUpdates: IComReputationUpdates = {};
+
+        [batch, writeCounts] = await updateReputation({
+          batch,
+          uname: userData.uname,
+          imageUrl: userData.imageUrl,
+          fullname: userData.fName + " " + userData.lName,
+          chooseUname: userData.chooseUname,
+          tagIds: accepted ? tagIds : parentNodeData.tagIds,
+          tags: accepted ? tags : parentNodeData.tags,
+          nodeType: accepted ? nodeType : parentType,
+          correctVal: 1,
+          wrongVal: 0,
+          instVal: 0,
+          ltermVal: 0,
+          ltermDayVal: 0,
+          voter: userData.uname,
+          writeCounts,
+          comReputationUpdates,
+        });
+
+        for (const tagId in comReputationUpdates) {
+          for (const reputationType of reputationTypes) {
+            if (!comReputationUpdates[tagId][reputationType]) continue;
+
+            if (comReputationUpdates[tagId][reputationType].isNew) {
+              batch.set(
+                comReputationUpdates[tagId][reputationType].docRef,
+                comReputationUpdates[tagId][reputationType].docData
+              );
+            } else {
+              batch.update(
+                comReputationUpdates[tagId][reputationType].docRef,
+                comReputationUpdates[tagId][reputationType].docData
+              );
+            }
+            [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+          }
+        }
+      }
+
+      await commitBatch(batch);
+    });
+
+    return res.status(200).json({
+      node: newVersion.node,
+      proposal: versionNodeId,
+      success: true,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ err, success: false });
+  }
+}
+
+export default fbAuth(handler);
+
 // TODO: why we are increasing reputation in parentType instead of nodeType (line no. 125)
 // TODO: passing parentType from payload (line no. 288)
 // TODO: version-helpers.ts, odd logic at line no. 924 (function only return possible tags and tagIds and haven't used those values)
@@ -81,464 +568,3 @@ export type IProposeChildNodePayload = {
 // - create user node version log for proposer
 // - create notification for proposer, should have aType=newChild and set oType=Propo if version not get accepted and oType=PropoAccept if version get accepted
 // - increment notificationNums +1 for proposer
-async function handler(req: NextApiRequest, res: NextApiResponse) {
-  let nodeRef: any, nodeData: any, userNodesData: any, userNodesRefs: any;
-  const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
-  let writeCounts = 0;
-  let batch = db.batch();
-
-  const userData = req.body.data.user.userData as IUser;
-  try {
-    const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
-    ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.parentId }));
-    ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: req.body.data.parentId }));
-
-    // adding missing tags/tagIds
-    let tagUpdates = {
-      tags: [],
-      tagIds: [],
-    };
-    const nodesMap: {
-      [nodeId: string]: INode;
-    } = {};
-    const visitedNodeIds: string[] = [];
-    await generateTagsOfTagsWithNodes({
-      nodeId: "", // newer node don't have node id
-      tagIds: req.body.data.tagIds || [],
-      nodeUpdates: tagUpdates,
-      nodes: nodesMap,
-      visitedNodeIds,
-    });
-
-    const newVersion: any = {
-      awards: 0,
-      children: req.body.data.children,
-      title: req.body.data.title,
-      content: req.body.data.content,
-      nodeImage: req.body.data.nodeImage,
-      nodeVideo: req.body.data.nodeVideo,
-      nodeVideoStartTime,
-      nodeVideoEndTime,
-      nodeAudio: req.body.data.nodeAudio,
-      corrects: 1,
-      createdAt: currentTimestamp,
-      deleted: false,
-      proposer: req.body.data.user.userData.uname,
-      imageUrl: req.body.data.user.userData.imageUrl,
-      fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-      chooseUname: req.body.data.user.userData.chooseUname,
-      parents: req.body.data.parents,
-      proposal: req.body.data.proposal,
-      referenceIds: req.body.data.referenceIds,
-      references: req.body.data.references,
-      referenceLabels: req.body.data.referenceLabels,
-      summary: req.body.data.summary,
-      newChild: true,
-      subType: req.body.data.subType,
-      tagIds: tagUpdates.tagIds,
-      tags: tagUpdates.tags,
-      updatedAt: currentTimestamp,
-      viewers: 1,
-      wrongs: 0,
-    };
-    if (req.body.data.nodeType === "Question") {
-      newVersion.choices = req.body.data.choices;
-    }
-    const { courseExist, instantApprove, isInstructor } = await shouldInstantApprovalForProposal(
-      nodeData?.tagIds || [],
-      userData.uname
-    );
-    let parentNodeData = isVersionApproved({
-      corrects: newVersion.corrects,
-      wrongs: newVersion.wrongs,
-      nodeData,
-      instantApprove,
-      isInstructor,
-    })
-      ? nodeData
-      : null;
-
-    // TODO: i think we should run transaction here
-    const reputationTypes: string[] = ["All Time", "Monthly", "Weekly", "Others", "Others Monthly", "Others Weekly"];
-    const comReputationUpdates: IComReputationUpdates = {};
-
-    if (!parentNodeData) {
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts: number = 0;
-        [batch, writeCounts] = await updateReputation({
-          batch,
-          uname: req.body.data.user.userData.uname,
-          imageUrl: req.body.data.user.userData.imageUrl,
-          fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-          chooseUname: req.body.data.user.userData.chooseUname,
-          tagIds: nodeData.tagIds,
-          tags: nodeData.tags,
-          nodeType: req.body.data.parentType,
-          correctVal: 1,
-          wrongVal: 0,
-          instVal: 0,
-          ltermVal: 0,
-          ltermDayVal: 0,
-          voter: req.body.data.user.userData.uname,
-          writeCounts,
-          comReputationUpdates,
-        });
-        await commitBatch(batch);
-      });
-      newVersion.childType = req.body.data.nodeType;
-      newVersion.node = req.body.data.parentId;
-      newVersion.accepted = false;
-
-      // Update the parent node by incrementing the number of versions on it.
-      batch.update(nodeRef, {
-        updatedAt: currentTimestamp,
-        versions: nodeData.versions + 1,
-      });
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
-      [batch, writeCounts] = await addToPendingPropsNums({
-        batch,
-        tagIds: nodeData.tagIds,
-        value: 1,
-        voters: [req.body.data.user.userData.uname],
-        writeCounts,
-      });
-    } else {
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts: number = 0;
-        [batch, writeCounts] = await updateReputation({
-          batch,
-          uname: req.body.data.user.userData.uname,
-          imageUrl: req.body.data.user.userData.imageUrl,
-          fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-          chooseUname: req.body.data.user.userData.chooseUname,
-          tagIds: req.body.data.tagIds,
-          tags: req.body.data.tags,
-          nodeType: req.body.data.nodeType,
-          correctVal: 1,
-          wrongVal: 0,
-          instVal: 0,
-          ltermVal: 0,
-          ltermDayVal: 0,
-          voter: req.body.data.user.userData.uname,
-          writeCounts,
-          comReputationUpdates,
-        });
-        await commitBatch(batch);
-      });
-
-      nodeRef = db.collection("nodes").doc();
-      if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
-        nodeRef = db.collection("nodes").doc(versionNodeId);
-      }
-      newVersion.node = nodeRef.id;
-      newVersion.accepted = true;
-      const newNode: any = {
-        admin: req.body.data.user.userData.uname,
-        aImgUrl: req.body.data.user.userData.imageUrl,
-        aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        aChooseUname: req.body.data.user.userData.chooseUname,
-        maxVersionRating: 1,
-        changedAt: currentTimestamp,
-        children: req.body.data.children,
-        comments: 0,
-        content: req.body.data.content,
-        nodeImage: req.body.data.nodeImage,
-        nodeSlug: generateAlias(req.body.data.title),
-        nodeVideo: req.body.data.nodeVideo,
-        nodeAudio: req.body.data.nodeAudio,
-        corrects: 1,
-        createdAt: currentTimestamp,
-        deleted: false,
-        nodeType: req.body.data.nodeType,
-        subType: req.body.data.subType,
-        parents: req.body.data.parents,
-        referenceIds: req.body.data.referenceIds,
-        references: req.body.data.references,
-        referenceLabels: req.body.data.referenceLabels,
-        studied: 1,
-        tagIds: tagUpdates.tagIds,
-        tags: tagUpdates.tags,
-        title: req.body.data.title,
-        updatedAt: currentTimestamp,
-        versions: 1,
-        viewers: 1,
-        wrongs: 0,
-        isTag: false,
-      };
-
-      if (nodeVideoStartTime) {
-        newNode.nodeVideoStartTime = nodeVideoStartTime;
-      }
-      if (nodeVideoEndTime) {
-        newNode.nodeVideoEndTime = nodeVideoEndTime;
-      }
-      // If a question node gets accepted, it should be added to the practice tool for all
-      // users in the communities with the tags that are used on this node.
-      // That's why we need to get the list of all members of each of these tags (communities).
-      if (req.body.data.nodeType === "Question") {
-        newNode.choices = req.body.data.choices;
-        [batch, writeCounts] = await createPractice({
-          batch,
-          tagIds: req.body.data.tagIds,
-          nodeId: nodeRef.id,
-          parentId: req.body.data.parents[0].id,
-          currentTimestamp,
-          writeCounts,
-        });
-      }
-      // A child node is being created. So, based on the tags on the node, we should make
-      // the corresponding changes in the tags collection. At this point, we generate tagsData
-      // to prepare for the changes.
-      // The new child node id does not exist, so we just pass "1RandomID".
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts: number = 0;
-        [batch, writeCounts] = await generateTagsData({
-          batch: batch,
-          nodeId: nodeRef.id,
-          isTag: false,
-          nodeUpdates: newNode,
-          nodeTagIds: [],
-          nodeTags: [],
-          versionTagIds: req.body.data.tagIds,
-          versionTags: req.body.data.tags,
-          proposer: req.body.data.user.userData.uname,
-          aImgUrl: req.body.data.user.userData.imageUrl,
-          aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-          aChooseUname: req.body.data.user.userData.chooseUname,
-          currentTimestamp,
-          writeCounts,
-        });
-        await commitBatch(batch);
-      });
-
-      batch.set(nodeRef, newNode);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      const parentNodeRef = db.doc(`/nodes/${req.body.data.parentId}`);
-      const ParentNodeChanges = {
-        changedAt: currentTimestamp,
-        updatedAt: currentTimestamp,
-        children: [
-          ...parentNodeData.children,
-          { node: nodeRef.id, title: req.body.data.title, label: "", type: req.body.data.nodeType },
-        ],
-        studied: 0,
-      };
-      batch.update(parentNodeRef, ParentNodeChanges);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
-      // Signal all userNodes for all the users who have had some kind of interaction with the parent
-      // node that a child is being added to it.
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts: number = 0;
-        [batch, writeCounts] = await signalAllUserNodesChanges({
-          batch,
-          userNodesRefs,
-          userNodesData,
-          nodeChanges: ParentNodeChanges,
-          major: true,
-          deleted: false,
-          currentTimestamp,
-          writeCounts,
-        });
-        await commitBatch(batch);
-      });
-
-      const newUserNodeObj: IUserNode = {
-        correct: true,
-        createdAt: currentTimestamp as unknown as Date,
-        updatedAt: currentTimestamp as unknown as Date,
-        deleted: false,
-        isStudied: true,
-        bookmarked: false,
-        changed: false,
-        node: nodeRef.id,
-        open: true,
-        user: req.body.data.user.userData.uname,
-        visible: true,
-        wrong: false,
-        nodeChanges: {},
-        notebooks: [req.body.data.notebookId],
-        expands: [true],
-      };
-      const userNodeRef = db.collection("userNodes").doc();
-      batch.set(userNodeRef, newUserNodeObj);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      const userNodeLogRef = db.collection("userNodesLog").doc();
-      delete (newUserNodeObj as unknown as any).updatedAt;
-      batch.set(userNodeLogRef, newUserNodeObj);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
-      // create user nodes for new node
-      // TODO: move these to queue
-      await detach(async () => {
-        if (!req.body.data.notebookId) return;
-
-        let batch = db.batch();
-        let writeCounts = 0;
-        const nodesUserNodes = await db
-          .collection("userNodes")
-          .where("node", "==", req.body.data.parentId)
-          .where("notebooks", "array-contains", req.body.data.notebookId)
-          .get();
-        for (const userNode of nodesUserNodes.docs) {
-          const userNodeData = userNode.data() as IUserNode;
-          if (userNodeData.user === req.body.data.user.userData.uname || userNodeData.deleted) {
-            continue;
-          }
-          const userNodeRef = db.collection("userNodes").doc();
-          const newUserNode = { ...newUserNodeObj };
-          newUserNode.correct = false;
-          newUserNode.user = userNodeData.user;
-          newUserNode.isStudied = false;
-          batch.set(userNodeRef, newUserNode);
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-        }
-
-        await commitBatch(batch);
-      });
-    }
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      for (const tagId in comReputationUpdates) {
-        for (const reputationType of reputationTypes) {
-          if (!comReputationUpdates[tagId][reputationType]) continue;
-
-          if (comReputationUpdates[tagId][reputationType].isNew) {
-            batch.set(
-              comReputationUpdates[tagId][reputationType].docRef,
-              comReputationUpdates[tagId][reputationType].docData
-            );
-          } else {
-            batch.update(
-              comReputationUpdates[tagId][reputationType].docRef,
-              comReputationUpdates[tagId][reputationType].docData
-            );
-          }
-          [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-        }
-      }
-      await commitBatch(batch);
-    });
-
-    const { versionsColl, userVersionsColl }: any = getTypedCollections();
-    // Now we have all the data we need in newVersion, so we can set the document.
-    const versionRef = versionsColl.doc();
-    (newVersion.nodeType = newVersion.accepted ? req.body.data.nodeType : req.body.data.parentType),
-      batch.set(versionRef, newVersion);
-    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-    const newUserVersion: any = {
-      award: false,
-      correct: true,
-      createdAt: currentTimestamp,
-      updatedAt: currentTimestamp,
-      version: versionRef.id,
-      user: req.body.data.user.userData.uname,
-      wrong: false,
-      deleted: false,
-    };
-    const userVersionRef = userVersionsColl.doc();
-    batch.set(userVersionRef, newUserVersion);
-    [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-
-    const userVersionLogRef = db.collection("userVersionsLog").doc();
-    delete newUserVersion.updatedAt;
-    newUserVersion.nodeType = req.body.data.nodeType;
-    batch.set(userVersionLogRef, newUserVersion);
-    await commitBatch(batch);
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      [batch, writeCounts] = await proposalNotification({
-        batch,
-        nodeId: newVersion.accepted ? nodeRef.id : req.body.data.parentId,
-        nodeTitle: newVersion.accepted ? req.body.data.title : nodeData.title,
-        uname: req.body.data.user.userData.uname,
-        versionData: newVersion,
-        currentTimestamp,
-        writeCounts,
-      });
-      await commitBatch(batch);
-    });
-
-    // TODO: move these to queue
-    // action tracks
-    await detach(async () => {
-      const actionRef = db.collection("actionTracks").doc();
-      actionRef.create({
-        accepted: !!newVersion.accepted,
-        type: "ChildNode",
-        imageUrl: req.body.data.user.userData.imageUrl,
-        action: versionRef.id,
-        createdAt: currentTimestamp,
-        doer: newVersion.proposer,
-        chooseUname: userData.chooseUname,
-        fullname: `${userData.fName} ${userData.lName}`,
-        nodeId: newVersion.node,
-        receivers: [req.body.data.user.userData.uname],
-        email: userData.email,
-      } as IActionTrack);
-
-      const rateActionRef = db.collection("actionTracks").doc();
-      rateActionRef.create({
-        accepted: !!newVersion.accepted,
-        type: "RateVersion",
-        imageUrl: req.body.data.user.userData.imageUrl,
-        action: "Correct-" + versionRef.id,
-        createdAt: currentTimestamp,
-        doer: newVersion.proposer,
-        chooseUname: userData.chooseUname,
-        fullname: `${userData.fName} ${userData.lName}`,
-        nodeId: newVersion.node,
-        receivers: [req.body.data.user.userData.uname],
-        email: userData.email,
-      } as IActionTrack);
-    });
-
-    // TODO: move these to queue
-    await detach(async () => {
-      await updateStatsOnProposal({
-        approved: !!newVersion.accepted,
-        isChild: true,
-        linksUpdated: true,
-        nodeType: req.body.data.nodeType,
-        proposer: newVersion.proposer,
-        tagIds: newVersion.tagIds,
-      });
-    });
-
-    // we need update contributors, contribNames, institNames, institutions
-    // TODO: move these to queue
-    await detach(async () => {
-      await updateNodeContributions({
-        nodeId: newVersion.node,
-        uname: newVersion.proposer,
-        accepted: newVersion.accepted,
-        contribution: 1,
-      });
-      if (newVersion.accepted) {
-        await signalNodeToTypesense({
-          nodeId: newVersion.node,
-          currentTimestamp,
-          versionData: newVersion,
-        });
-      }
-    });
-
-    return res.status(200).json({
-      node: newVersion.node,
-      proposal: versionRef.id,
-      success: true,
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ err, success: false });
-  }
-}
-
-export default fbAuth(handler);
