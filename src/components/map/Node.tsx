@@ -1008,7 +1008,6 @@ const Node = ({
         "Node card" +
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
-        (isHiding ? " IsHiding" : "") +
         (toBeEligible ? " Choosable" : " ")
       }
       style={{

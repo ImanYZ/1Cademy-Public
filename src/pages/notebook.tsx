@@ -2048,7 +2048,7 @@ const Notebook = ({}: NotebookProps) => {
               continue;
             }
 
-            const newExpands = (thisNode.expands ?? []).filter((c, idx: number) => idx !== notebookIdx);
+            const newExpands = (thisNode.expands ?? []).filter((c: any, idx: number) => idx !== notebookIdx);
             const newNotebooks = (thisNode.notebooks ?? []).filter((cur: string) => cur !== selectedNotebookId);
             const userNodeData = {
               changed: thisNode.changed,

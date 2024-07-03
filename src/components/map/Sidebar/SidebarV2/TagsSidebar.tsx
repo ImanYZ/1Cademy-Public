@@ -117,7 +117,7 @@ const TagsSidebar = ({
       //   []
       // );
     },
-    [preLoadNodes, selectedTags]
+    [selectedTags]
   );
 
   const onChangeSortDirection = useCallback(

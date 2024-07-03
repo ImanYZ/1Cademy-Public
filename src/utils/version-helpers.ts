@@ -1712,7 +1712,7 @@ type ITransferUserVersionsToNewNode = {
   skipUnames: string[];
   batch: WriteBatch;
   writeCounts: number;
-  t: FirebaseFirestore.Transaction;
+  t: FirebaseFirestore.Transaction | null;
   tWriteOperations: TWriteOperation[];
 };
 
@@ -2300,7 +2300,7 @@ export const versionCreateUpdate = async ({
               userVersionData,
               nodeType: childType,
               writeCounts,
-              t,
+              t: null,
               tWriteOperations,
             });
             [newBatch, writeCounts] = (await transferUserVersionsToNewNode({
@@ -2310,7 +2310,7 @@ export const versionCreateUpdate = async ({
               newVersionId: versionRef.id,
               versionId,
               skipUnames: [voter],
-              t,
+              t: null,
               tWriteOperations,
               versionType: nodeType,
             })) as [WriteBatch, number];
@@ -2411,7 +2411,7 @@ export const versionCreateUpdate = async ({
               aChooseUname: chooseUname,
               currentTimestamp,
               writeCounts,
-              t,
+              t: null,
               tWriteOperations,
             });
             await commitBatch(batch);
@@ -2500,7 +2500,7 @@ export const versionCreateUpdate = async ({
                 parentId: childNode.parents?.[0]?.node || "",
                 currentTimestamp,
                 writeCounts,
-                t,
+                t: null,
                 tWriteOperations,
               });
               await commitBatch(batch);

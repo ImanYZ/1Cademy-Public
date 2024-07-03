@@ -69,15 +69,17 @@ export const BookmarksSidebar = ({
       const docChanges = snapshot.docChanges();
       if (!docChanges.length) return null;
 
-      const bookmarksUserNodes: UserNodeChanges[] = docChanges.map((cur): UserNodeChanges => {
-        return {
+      const bookmarksUserNodes: { [nodeId: string]: UserNodeChanges } = {};
+      const bookmarksNodeIds: string[] = [];
+      docChanges.forEach((cur): any => {
+        bookmarksNodeIds.push(cur.doc.data().node);
+        bookmarksUserNodes[cur.doc.data().node] = {
           cType: cur.type,
           uNodeId: cur.doc.id,
           uNodeData: cur.doc.data() as UserNodeFirestore,
         };
       });
 
-      const bookmarksNodeIds = bookmarksUserNodes.map(cur => cur.uNodeData.node);
       const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
       const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData);
       setBookmarks(oldFullNodes => mergeAllNodes(fullNodes, oldFullNodes));
