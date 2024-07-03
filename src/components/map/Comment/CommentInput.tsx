@@ -310,11 +310,11 @@ const CommentInput = ({
             )}
             <Button
               onClick={() => {
-                if (comment?.parentComment) {
+                if (type === "reply") {
                   if (isEditing) {
                     onSubmit(inputValue, imageUrls, comment?.parentComment, comment?.id);
                   } else {
-                    onSubmit(inputValue, imageUrls, comment?.parentComment);
+                    onSubmit(inputValue, imageUrls, comment?.id);
                   }
                 } else {
                   if (isEditing) {
