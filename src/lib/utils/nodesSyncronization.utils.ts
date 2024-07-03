@@ -40,18 +40,21 @@ export const arrayToChunks = (inputArray: any[], perChunk: number = 30) => {
 
   return result;
 };
-export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
-  const result: UserNodeChanges[] = new Array(docChanges.length);
-  for (let i = 0; i < docChanges.length; i++) {
-    const change = docChanges[i];
+export const getUserNodeChanges = (
+  docChanges: DocumentChange<DocumentData>[]
+): { userNodeChanges: { [nodeId: string]: UserNodeChanges }; nodeIds: string[] } => {
+  const userNodeChanges: { [nodeId: string]: UserNodeChanges } = {};
+  let nodeIds = [];
+  for (let change of docChanges) {
     const userNodeData: UserNodeFirestore = change.doc.data() as UserNodeFirestore;
-    result[i] = {
+    userNodeChanges[userNodeData.node] = {
       cType: change.type,
       uNodeId: change.doc.id,
       uNodeData: userNodeData,
     };
+    nodeIds.push(userNodeData.node);
   }
-  return result;
+  return { userNodeChanges, nodeIds };
 };
 
 export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<{ [nodeId: string]: NodesData }> => {
@@ -98,26 +101,27 @@ export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promis
 };
 
 export const buildFullNodes = (
-  userNodesChanges: UserNodeChanges[],
+  userNodesChanges: { [nodeId: string]: UserNodeChanges },
   nodesData: { [nodeId: string]: NodesData }
 ): FullNodeData[] => {
   const res: FullNodeData[] = [];
-
-  userNodesChanges.forEach(cur => {
-    const nodeData = nodesData[cur.uNodeData.node];
+  for (let nodeId in userNodesChanges) {
+    const nodeData = nodesData[nodeId];
     if (nodeData) {
       const nData = nodeData.nData;
       const fullNodeData: FullNodeData = {
-        ...cur.uNodeData, // User node data
+        ...userNodesChanges[nodeId].uNodeData, // User node data
         ...nData, // Node Data
-        userNodeId: cur.uNodeId,
-        nodeChangeType: cur.cType, // TODO: improve the names and values
+        userNodeId: userNodesChanges[nodeId].uNodeId,
+        nodeChangeType: userNodesChanges[nodeId].cType, // TODO: improve the names and values
         userNodeChangeType: nodeData.cType,
         editable: false,
         left: 0,
         top: 0,
-        firstVisit: cur.uNodeData.createdAt.toDate(),
-        lastVisit: cur.uNodeData.updatedAt?.toDate() ?? cur.uNodeData.createdAt.toDate(),
+        firstVisit: userNodesChanges[nodeId].uNodeData.createdAt.toDate(),
+        lastVisit:
+          userNodesChanges[nodeId].uNodeData.updatedAt?.toDate() ??
+          userNodesChanges[nodeId].uNodeData.createdAt.toDate(),
         changedAt: nData.changedAt.toDate(),
         createdAt: nData.createdAt.toDate(),
         updatedAt: nData.updatedAt.toDate(),
@@ -137,12 +141,12 @@ export const buildFullNodes = (
         fullNodeData.choices = [];
       }
 
-      fullNodeData.bookmarked = cur.uNodeData.bookmarked || false;
-      fullNodeData.nodeChanges = cur.uNodeData.nodeChanges || null;
+      fullNodeData.bookmarked = userNodesChanges[nodeId].uNodeData.bookmarked || false;
+      fullNodeData.nodeChanges = userNodesChanges[nodeId].uNodeData.nodeChanges || null;
 
       res.push(fullNodeData);
     }
-  });
+  }
 
   return res;
 };
