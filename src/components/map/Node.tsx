@@ -227,6 +227,7 @@ type NodeProps = {
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: { [uname: string]: boolean };
   openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -372,6 +373,7 @@ const Node = ({
   findAncestorNodes,
   onlineUsers,
   openComments,
+  commentNotifications,
 }: NodeProps) => {
   const db = getFirestore();
   const [{ user }] = useAuth();
@@ -1516,6 +1518,7 @@ const Node = ({
             findAncestorNodes={findAncestorNodes}
             onlineUsers={onlineUsers}
             openComments={openComments}
+            commentNotifications={commentNotifications}
           />
         )}
 
@@ -1695,6 +1698,7 @@ const Node = ({
               findAncestorNodes={findAncestorNodes}
               onlineUsers={onlineUsers}
               openComments={openComments}
+              commentNotifications={commentNotifications}
             />
           </Box>
         )}
@@ -1832,6 +1836,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
     prev.hideNode === next.hideNode &&
+    prev.commentNotifications === next.commentNotifications &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

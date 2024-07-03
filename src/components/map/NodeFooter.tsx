@@ -17,6 +17,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import {
+  Badge,
   Button,
   ClickAwayListener,
   Divider,
@@ -141,6 +142,7 @@ type NodeFooterProps = {
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: any;
   openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const NodeFooter = ({
@@ -220,6 +222,7 @@ const NodeFooter = ({
   findAncestorNodes,
   onlineUsers,
   openComments,
+  commentNotifications,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -750,7 +753,14 @@ const NodeFooter = ({
                   disabled={disableProposeButton}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                    <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                    <Badge
+                      badgeContent={
+                        commentNotifications.filter((notification: any) => notification.refId === identifier).length
+                      }
+                      color="error"
+                    >
+                      <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                    </Badge>
                   </Box>
                 </ContainedButton>
               </Box>

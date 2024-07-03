@@ -22,6 +22,7 @@ import { IComment } from "src/commentTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar from "@/components/OptimizedAvatar";
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 //import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
@@ -178,7 +179,7 @@ const Comment = ({
   const addComment = async (text: string, imageUrls: string[]) => {
     if (!user?.uname) return;
     setIsLoading(true);
-    await addDoc(getCommentRef(commentSidebarInfo.type), {
+    const commentData = {
       refId: commentSidebarInfo.id,
       text: text,
       sender: user.uname,
@@ -194,8 +195,14 @@ const Comment = ({
       deleted: false,
       totalReplies: 0,
       createdAt: new Date(),
-    });
+    };
+    const docRef = await addDoc(getCommentRef(commentSidebarInfo.type), commentData);
     setIsLoading(false);
+    Post("/comment/sendNotification", {
+      subject: "Comment by",
+      comment: { ...commentData, id: docRef.id },
+      nodeId: commentSidebarInfo.type === "node" ? commentSidebarInfo.id : commentSidebarInfo.proposal.node,
+    });
     scrollToBottom();
   };
 
@@ -219,11 +226,16 @@ const Comment = ({
     };
     const commentRef = getCommentDocRef(commentSidebarInfo?.type, commentId);
     const replyRef = collection(commentRef, "replies");
-    await addDoc(replyRef, reply);
+    const docRef = await addDoc(replyRef, reply);
     await updateDoc(commentRef, {
       totalReplies: increment(1),
     });
     setIsLoading(false);
+    Post("/comment/sendNotification", {
+      subject: "Comment by",
+      comment: { ...reply, id: docRef.id },
+      nodeId: commentSidebarInfo.type === "node" ? commentSidebarInfo.id : commentSidebarInfo.proposal.node,
+    });
   };
 
   const editComment = async (text: string, imageUrls: string[], commentId: string) => {

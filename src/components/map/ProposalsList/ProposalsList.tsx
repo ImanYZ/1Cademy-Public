@@ -36,6 +36,7 @@ type ProposalsListProps = {
   userVotesOnProposals: { [key: string]: { wrong: boolean; correct: boolean } };
   setUserVotesOnProposals: any;
   openComments?: (refId: string, type: string, proposal?: any) => void;
+  commentNotifications?: any;
 };
 
 const ProposalsList = ({
@@ -51,6 +52,7 @@ const ProposalsList = ({
   userVotesOnProposals,
   setUserVotesOnProposals,
   openComments,
+  commentNotifications,
 }: ProposalsListProps) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
@@ -133,6 +135,7 @@ const ProposalsList = ({
                   openLinkedNode={() => {}}
                   userVotesOnProposals={userVotesOnProposals}
                   openComments={openComments}
+                  commentNotifications={commentNotifications}
                 />
               </Box>
             );

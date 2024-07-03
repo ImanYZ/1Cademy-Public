@@ -19,6 +19,7 @@ type PendingProposalSidebarProps = {
   innerHeight?: number;
   pendingProposals: any;
   openComments: (refId: string, type: string, proposal?: any) => void;
+  commentNotifications: any;
   // innerWidth: number;
 };
 // const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
@@ -32,6 +33,7 @@ const PendingProposalSidebar = ({
   sidebarWidth,
   innerHeight,
   openComments,
+  commentNotifications,
 }: // innerWidth,
 PendingProposalSidebarProps) => {
   const [userVotesOnProposals, setUserVotesOnProposals] = useState({});
@@ -71,8 +73,7 @@ PendingProposalSidebarProps) => {
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [type, pendingProposals]);
-
+  }, [commentNotifications, type, pendingProposals]);
   return (
     <SidebarWrapper
       id="sidebar-wrapper-pending-list"
@@ -178,6 +179,7 @@ PendingProposalSidebarProps) => {
                 openLinkedNode={openLinkedNode}
                 userVotesOnProposals={userVotesOnProposals}
                 openComments={openComments}
+                commentNotifications={commentNotifications}
               />
             </Box>
           )}

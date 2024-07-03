@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore, query, where, writeBatch } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { commentChange, getCommentsSnapshot } from "src/client/firestore/comments.firestore";
 import { IComment } from "src/commentTypes";
@@ -71,6 +71,26 @@ export const CommentsSidebar = ({
       }
     })();
   }, [db]);
+
+  useEffect(() => {
+    (async () => {
+      const batch = writeBatch(db);
+      const q = query(
+        query(collection(db, "notifications")),
+        where("notify", "==", user.uname),
+        where("refId", "==", commentSidebarInfo.id),
+        where("notificationType", "==", "comment")
+      );
+      const notificatioDoc = await getDocs(q);
+      for (const notification of notificatioDoc.docs) {
+        batch.update(notification.ref, {
+          seen: true,
+          updatedAt: new Date(),
+        });
+      }
+      await batch.commit();
+    })();
+  }, [db, user]);
 
   const contentSignalState = useMemo(() => {
     return { updates: true };

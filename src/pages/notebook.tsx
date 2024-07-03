@@ -57,6 +57,7 @@ import {
   channelNotificationChange,
   getchatNotificationsSnapshot,
 } from "src/client/firestore/chatNotifications.firesrtore";
+import { getCommentNotificationsSnapshot } from "src/client/firestore/commentNotifications.firestore";
 import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
@@ -426,6 +427,7 @@ const Notebook = ({}: NotebookProps) => {
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
 
   const [notificationsMessages, setNotificationsMessages] = useState<any>([]);
+  const [commentNotifications, setCommentNotifications] = useState<any>([]);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
   const { ref: toolbarRef, isHovered } = useHover();
@@ -7694,6 +7696,37 @@ const Notebook = ({}: NotebookProps) => {
   }, [db, user]);
 
   useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelNotificationChange[]) => {
+      setCommentNotifications((prev: any) =>
+        changes.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = change.data as any & { id: string };
+
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1) {
+              prev.push({ ...curData, doc: change.doc });
+            }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx, 1);
+            }
+            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            return prev;
+          },
+          [...prev]
+        )
+      );
+    };
+    const killSnapshot = getCommentNotificationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
     const handleUserActivity = () => {
       setLastInteractionDate(new Date(Date.now()));
     };
@@ -8093,6 +8126,7 @@ const Notebook = ({}: NotebookProps) => {
                   innerHeight={innerHeight}
                   pendingProposals={pendingProposals}
                   openComments={openComments}
+                  commentNotifications={commentNotifications}
                   // innerWidth={windowWith}
                 />
               )}
@@ -8134,6 +8168,7 @@ const Notebook = ({}: NotebookProps) => {
                     innerWidth={windowWith}
                     username={user.uname}
                     openComments={openComments}
+                    commentNotifications={commentNotifications}
                   />
                 )}
 
@@ -8568,6 +8603,7 @@ const Notebook = ({}: NotebookProps) => {
                   lockedNodes={lockedNodes}
                   onlineUsers={onlineUsers}
                   openComments={openComments}
+                  commentNotifications={commentNotifications}
                 />
               </MapInteractionCSS>
 

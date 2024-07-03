@@ -2,7 +2,7 @@
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import { Badge, Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -35,6 +35,7 @@ type ProposalItemProps = {
   isClickable?: boolean;
   userVotesOnProposals?: { [key: string]: any };
   openComments?: (refId: string, type: string, proposal?: any) => void;
+  commentNotifications?: any;
 };
 
 const ProposalItem = ({
@@ -47,6 +48,7 @@ const ProposalItem = ({
   openLinkedNode,
   proposalSummaries,
   openComments,
+  commentNotifications,
 }: ProposalItemProps) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
@@ -250,7 +252,14 @@ const ProposalItem = ({
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                  <Badge
+                    badgeContent={
+                      commentNotifications.filter((notification: any) => notification.refId === proposal.id).length
+                    }
+                    color="error"
+                  >
+                    <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                  </Badge>
                 </Box>
               </ContainedButton>
             )}

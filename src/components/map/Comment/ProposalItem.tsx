@@ -30,6 +30,11 @@ const ProposalItem = ({ userVotesOnProposals = {}, proposal, showTitle, proposal
     if (element) {
       element.style.height = element.clientHeight - (eRef.current.clientHeight + 10) + "px";
     }
+    return () => {
+      if (element) {
+        element.style.height = window.innerHeight - 200 + "px";
+      }
+    };
   }, []);
   let _proposalSummaries;
 
