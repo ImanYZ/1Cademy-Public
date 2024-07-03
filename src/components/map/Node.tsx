@@ -81,6 +81,7 @@ type Parent = {
 
 type NodeProps = {
   identifier: string;
+  node: any;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeUpdates: TNodeUpdates;
   setNodeUpdates: (updates: TNodeUpdates) => void;
@@ -163,7 +164,7 @@ type NodeProps = {
   openAllParent: any;
   onHideNode: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -247,6 +248,7 @@ type Pagination = {
 
 const Node = ({
   identifier,
+  node,
   nodeBookDispatch,
   setNodeUpdates,
   notebookRef,
@@ -375,7 +377,6 @@ const Node = ({
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [showSimilarNodes, setShowSimilarNodes] = useState(true);
   // const [openPart, setOpenPart] = useState<OpenPart>(null);
-  const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
@@ -533,9 +534,9 @@ const Node = ({
     (event: any) => {
       event.preventDefault();
       event.stopPropagation();
-      onHideNode(identifier, setIsHiding);
+      onHideNode(node);
     },
-    [onHideNode, identifier]
+    [node, onHideNode]
   );
 
   const onSetTitle = (newTitle: string) => {
@@ -589,7 +590,7 @@ const Node = ({
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
-      toggleNode(event, identifier);
+      toggleNode(event, node, identifier);
     },
     [toggleNode, identifier, open]
   );
@@ -929,7 +930,6 @@ const Node = ({
           "Node card" +
           (activeNode ? " active" : "") +
           (changed || !isStudied ? " Changed" : "") +
-          (isHiding ? " IsHiding" : "") +
           (nodeType === "Reference" ? " Choosable" : "")
         }
         style={{
