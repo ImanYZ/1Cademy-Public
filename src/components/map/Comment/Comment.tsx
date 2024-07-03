@@ -397,17 +397,17 @@ const Comment = ({
                   ))}
                 </Box>
               </Box>
-              {user.uname === reply.senderDetail.uname && (
-                <Box className="message-buttons" sx={{ display: "none" }}>
-                  <CommentButtons
-                    comment={reply}
-                    handleEditMessage={() => setEditing(reply)}
-                    handleDeleteMessage={() => deleteReply(commentId, reply.id)}
-                    toggleEmojiPicker={toggleEmojiPicker}
-                    user={user}
-                  />
-                </Box>
-              )}
+
+              <Box className="message-buttons" sx={{ display: "none" }}>
+                <CommentButtons
+                  comment={reply}
+                  handleEditMessage={() => setEditing(reply)}
+                  handleDeleteMessage={() => deleteReply(commentId, reply.id)}
+                  toggleEmojiPicker={toggleEmojiPicker}
+                  user={user}
+                />
+              </Box>
+
               <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
                 <Emoticons
                   comment={reply}
@@ -550,17 +550,17 @@ const Comment = ({
                         ))}
                       </Box>
                     </Box>
-                    {user.uname === comment.senderDetail.uname && (
-                      <Box className="message-buttons" sx={{ display: "none" }}>
-                        <CommentButtons
-                          comment={comment}
-                          handleEditMessage={() => setEditing(comment)}
-                          handleDeleteMessage={() => deleteComment(comment.id)}
-                          toggleEmojiPicker={toggleEmojiPicker}
-                          user={user}
-                        />
-                      </Box>
-                    )}
+
+                    <Box className="message-buttons" sx={{ display: "none" }}>
+                      <CommentButtons
+                        comment={comment}
+                        handleEditMessage={() => setEditing(comment)}
+                        handleDeleteMessage={() => deleteComment(comment.id)}
+                        toggleEmojiPicker={toggleEmojiPicker}
+                        user={user}
+                      />
+                    </Box>
+
                     <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "5px" }}>
                       <Emoticons
                         comment={comment}
