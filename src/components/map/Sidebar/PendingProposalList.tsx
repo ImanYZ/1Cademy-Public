@@ -14,9 +14,17 @@ type PendingProposalListProps = {
   proposals: any[];
   openLinkedNode: any;
   userVotesOnProposals?: { [key: string]: any };
+  openComments?: (refId: string, type: string, proposal?: any) => void;
+  commentNotifications?: any;
 };
 
-const PendingProposalList = ({ proposals, openLinkedNode, userVotesOnProposals = {} }: PendingProposalListProps) => {
+const PendingProposalList = ({
+  proposals,
+  openLinkedNode,
+  userVotesOnProposals = {},
+  openComments,
+  commentNotifications,
+}: PendingProposalListProps) => {
   const theme = useTheme();
   const [isRetrieving, setIsRetrieving] = useState(false);
 
@@ -83,6 +91,8 @@ const PendingProposalList = ({ proposals, openLinkedNode, userVotesOnProposals =
                 openLinkedNode={(nodeId: string) => openLinkedNode(nodeId, "initialProposal-" + proposal.id)}
                 showTitle={true}
                 userVotesOnProposals={userVotesOnProposals}
+                openComments={openComments}
+                commentNotifications={commentNotifications}
               />
             );
           })}

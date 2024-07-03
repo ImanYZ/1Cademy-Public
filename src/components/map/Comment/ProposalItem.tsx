@@ -1,25 +1,16 @@
-// import "./ProposalItem.css";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import { Badge, Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import React, { useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 
+import { Editor } from "@/components/Editor";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-
-import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
-import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { Editor } from "../../../Editor";
-import { ContainedButton } from "../../ContainedButton";
-
-// import shortenNumber from "../../../../../../utils/shortenNumber";
-// import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
-// import MetaButton from "../../../../MetaButton/MetaButton";
-// import proposalSummariesGenerator from "../../proposalSummariesGenerator";
+import { proposalSummariesGenerator } from "@/lib/utils/proposalSummariesGenerator";
+import shortenNumber from "@/lib/utils/shortenNumber";
 
 const doNothing = () => {};
 
@@ -27,41 +18,24 @@ dayjs.extend(relativeTime);
 
 type ProposalItemProps = {
   proposal: any;
-  shouldSelectProposal?: boolean;
   showTitle: boolean;
-  selectProposal?: any;
-  openLinkedNode: any;
   proposalSummaries?: any;
-  isClickable?: boolean;
   userVotesOnProposals?: { [key: string]: any };
-  openComments?: (refId: string, type: string, proposal?: any) => void;
-  commentNotifications?: any;
 };
 
-const ProposalItem = ({
-  isClickable = true,
-  userVotesOnProposals = {},
-  proposal,
-  shouldSelectProposal,
-  showTitle,
-  selectProposal,
-  openLinkedNode,
-  proposalSummaries,
-  openComments,
-  commentNotifications,
-}: ProposalItemProps) => {
-  const openLinkedNodeClick = useCallback(
-    (proposal: any) => (event: any) => {
-      if (shouldSelectProposal) {
-        selectProposal(event, proposal, proposal.newNodeId);
-      } else {
-        openLinkedNode(proposal.node);
+const ProposalItem = ({ userVotesOnProposals = {}, proposal, showTitle, proposalSummaries }: ProposalItemProps) => {
+  const eRef = useRef<any>(null);
+  useEffect(() => {
+    const element = document.getElementById("comments-section") as HTMLElement;
+    if (element) {
+      element.style.height = element.clientHeight - (eRef.current.clientHeight + 10) + "px";
+    }
+    return () => {
+      if (element) {
+        element.style.height = window.innerHeight - 200 + "px";
       }
-    },
-    []
-    // [openLinkedNode, shouldSelectProposal, selectProposal]
-  );
-
+    };
+  }, []);
   let _proposalSummaries;
 
   if (proposalSummaries) {
@@ -72,6 +46,7 @@ const ProposalItem = ({
 
   return (
     <Paper
+      ref={eRef}
       elevation={3}
       className="CollapsedProposal collection-item avatar"
       key={`Proposal${proposal.id}`}
@@ -86,14 +61,11 @@ const ProposalItem = ({
             : undefined,
         cursor: "auto!important",
         background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
-        ...(isClickable && {
-          ":hover": {
-            background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
-          },
-        }),
+        ":hover": {
+          background: theme => (theme.palette.mode === "dark" ? "#2F2F2F" : "#EAECF0"),
+        },
       }}
     >
-      {/* <h6>{proposal.newNodeId}</h6> */}
       <Box>
         <Box>
           {showTitle && (
@@ -103,7 +75,6 @@ const ProposalItem = ({
               sx={{ fontWeight: 400, letterSpacing: "inherit" }}
             />
           )}
-          {/* <p>Proposal Summary:</p> */}
           <Box
             sx={{
               paddingY: "10px",
@@ -230,47 +201,7 @@ const ProposalItem = ({
                 </Box>
               </Tooltip>
             </Box>
-            {openComments && (
-              <ContainedButton
-                title="Open comments"
-                onClick={() => openComments(proposal.id, "version", { ...proposal, userVotesOnProposals })}
-                tooltipPosition="top"
-                sx={{
-                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                  fontWeight: 400,
-                  color: "inherit",
-                  ":hover": {
-                    borderWidth: "0px",
-                    background: (theme: any) =>
-                      theme.palette.mode === "dark"
-                        ? theme.palette.common.darkBackground2
-                        : theme.palette.common.lightBackground2,
-                  },
-                  padding: "7px 7px",
-                  minWidth: "30px",
-                  height: "30px",
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <Badge
-                    badgeContent={
-                      commentNotifications.filter((notification: any) => notification.refId === proposal.id).length
-                    }
-                    color="error"
-                  >
-                    <ChatBubbleIcon sx={{ fontSize: "16px" }} />
-                  </Badge>
-                </Box>
-              </ContainedButton>
-            )}
           </Box>
-          <Button
-            sx={{ borderRadius: "20px" }}
-            variant="contained"
-            onClick={isClickable ? openLinkedNodeClick(proposal) : undefined}
-          >
-            Compare
-          </Button>
         </Box>
       </Box>
     </Paper>

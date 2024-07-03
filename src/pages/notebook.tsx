@@ -57,6 +57,7 @@ import {
   channelNotificationChange,
   getchatNotificationsSnapshot,
 } from "src/client/firestore/chatNotifications.firesrtore";
+import { getCommentNotificationsSnapshot } from "src/client/firestore/commentNotifications.firestore";
 import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
@@ -77,6 +78,7 @@ import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/Focuse
 import { MemoizedBookmarksSidebar } from "@/components/map/Sidebar/SidebarV2/BookmarksSidebar";
 import { MemoizedChatSidebar } from "@/components/map/Sidebar/SidebarV2/ChatSidebar";
 import { CitationsSidebar } from "@/components/map/Sidebar/SidebarV2/CitationsSidebar";
+import { MemoizedCommentsSidebar } from "@/components/map/Sidebar/SidebarV2/CommentsSidebar";
 import { MemoizedNotificationSidebar } from "@/components/map/Sidebar/SidebarV2/NotificationSidebar";
 import { ParentsSidebarMemoized } from "@/components/map/Sidebar/SidebarV2/ParentsChildrenSidebar";
 import { MemoizedPendingProposalSidebar } from "@/components/map/Sidebar/SidebarV2/PendingProposalSidebar";
@@ -238,6 +240,7 @@ export type OpenLeftSidebar =
   | "USER_SETTINGS"
   | "CITATIONS"
   | "CHAT"
+  | "COMMENT"
   | null;
 
 export type OpenRightSidebar = "LEADERBOARD" | "USER_STATUS" | null;
@@ -425,6 +428,7 @@ const Notebook = ({}: NotebookProps) => {
   const [assistantSelectNode, setAssistantSelectNode] = useState<boolean>(false);
 
   const [notificationsMessages, setNotificationsMessages] = useState<any>([]);
+  const [commentNotifications, setCommentNotifications] = useState<any>([]);
 
   const [toolboxExpanded, setToolboxExpanded] = useState(false);
   const { ref: toolbarRef, isHovered } = useHover();
@@ -473,6 +477,15 @@ const Notebook = ({}: NotebookProps) => {
   const [conversations, setConversations] = useState<IConversation[]>([]);
 
   const [openChatByNotification, setOpenChatByNotification] = useState<any>(null);
+
+  const [commentSidebarInfo, setCommentSidebarInfo] = useState<{
+    type: string;
+    id: string;
+    proposal?: any;
+  }>({
+    type: "",
+    id: "",
+  });
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
@@ -7221,6 +7234,37 @@ const Notebook = ({}: NotebookProps) => {
   }, [db, user]);
 
   useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: channelNotificationChange[]) => {
+      setCommentNotifications((prev: any) =>
+        changes.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = change.data as any & { id: string };
+
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added" && prevIdx === -1) {
+              prev.push({ ...curData, doc: change.doc });
+            }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = { ...curData, doc: change.doc };
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx, 1);
+            }
+            prev.sort((a, b) => b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime());
+            return prev;
+          },
+          [...prev]
+        )
+      );
+    };
+    const killSnapshot = getCommentNotificationsSnapshot(db, { username: user.uname }, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
+
+  useEffect(() => {
     const handleUserActivity = () => {
       setLastInteractionDate(new Date(Date.now()));
     };
@@ -7297,6 +7341,15 @@ const Notebook = ({}: NotebookProps) => {
       }
 
       return false;
+    },
+    [graph.nodes]
+  );
+
+  const openComments = useCallback(
+    (refId: string, type: string, proposal?: any) => {
+      const sidebarInfo = { type, id: refId, ...(type === "version" && { proposal }) };
+      setCommentSidebarInfo(sidebarInfo);
+      setOpenSidebar("COMMENT");
     },
     [graph.nodes]
   );
@@ -7574,6 +7627,22 @@ const Notebook = ({}: NotebookProps) => {
                   setOpenChatByNotification={setOpenChatByNotification}
                 />
               )}
+              {openSidebar === "COMMENT" && (
+                <MemoizedCommentsSidebar
+                  user={user}
+                  theme={settings.theme}
+                  open={true}
+                  onClose={() => setOpenSidebar(null)}
+                  sidebarWidth={sidebarWidth()}
+                  innerHeight={innerHeight}
+                  innerWidth={windowWith}
+                  nodeBookDispatch={nodeBookDispatch}
+                  notebookRef={notebookRef}
+                  nodeBookState={nodeBookState}
+                  onlineUsers={onlineUsers}
+                  commentSidebarInfo={commentSidebarInfo}
+                />
+              )}
               {openSidebar === "SEARCHER_SIDEBAR" && (
                 <MemoizedSearcherSidebar
                   notebookRef={notebookRef}
@@ -7608,6 +7677,8 @@ const Notebook = ({}: NotebookProps) => {
                   sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
                   pendingProposals={pendingProposals}
+                  openComments={openComments}
+                  commentNotifications={commentNotifications}
                   // innerWidth={windowWith}
                 />
               )}
@@ -7648,6 +7719,8 @@ const Notebook = ({}: NotebookProps) => {
                     innerHeight={innerHeight}
                     innerWidth={windowWith}
                     username={user.uname}
+                    openComments={openComments}
+                    commentNotifications={commentNotifications}
                   />
                 )}
 
@@ -8081,6 +8154,8 @@ const Notebook = ({}: NotebookProps) => {
                   findAncestorNodes={findAncestorNodes}
                   lockedNodes={lockedNodes}
                   onlineUsers={onlineUsers}
+                  openComments={openComments}
+                  commentNotifications={commentNotifications}
                 />
               </MapInteractionCSS>
 
