@@ -174,7 +174,7 @@ export const getRepBaseQueries = (
   };
 };
 
-export const makeQueryBasewhere = (
+export const makeQueryBaseWhere = (
   reputationType: ReputationType,
   baseCollection: CollectionReference,
   firstWeekDay: string,
@@ -245,13 +245,13 @@ export const updateReputationIncrement = async ({
 
   const { reputationsQueryBase, comPointsQueryBase } = getRepBaseQueries(reputationType as ReputationType);
 
-  const reputationsQueryBaseWhere = makeQueryBasewhere(
+  const reputationsQueryBaseWhere = makeQueryBaseWhere(
     reputationType,
     reputationsQueryBase,
     firstWeekDay,
     firstMonthDay
   );
-  const comPointsQueryBaseWhere = makeQueryBasewhere(reputationType, comPointsQueryBase, firstWeekDay, firstMonthDay);
+  const comPointsQueryBaseWhere = makeQueryBaseWhere(reputationType, comPointsQueryBase, firstWeekDay, firstMonthDay);
 
   reputationsQuery = reputationsQueryBaseWhere.where("uname", "==", uname).where("tagId", "==", tagId);
 

@@ -208,6 +208,7 @@ describe("POST /api/proposeChildNode", () => {
         },
         body: {
           data: {
+            versionNodeId: "new-id-1",
             notebookId,
             parentId: String(node3.documentId),
             parentType: node3.nodeType,

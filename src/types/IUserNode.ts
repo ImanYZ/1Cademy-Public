@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 import { INodeLink } from "./INodeLink";
 
 export type INodeChanges = {
@@ -21,7 +23,7 @@ export type IUserNode = {
   deleted: boolean;
   node: string;
   user: string;
-  visible: boolean;
+  visible?: boolean;
   notebooks?: string[];
   expands?: boolean[];
   correct: boolean;
@@ -29,6 +31,6 @@ export type IUserNode = {
   isStudied: boolean;
   bookmarked?: boolean;
   nodeChanges: INodeChanges;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
 };
