@@ -225,6 +225,8 @@ type NodeProps = {
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: { [uname: string]: boolean };
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -369,6 +371,8 @@ const Node = ({
   findDescendantNodes,
   findAncestorNodes,
   onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
@@ -1496,6 +1500,8 @@ const Node = ({
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
             onlineUsers={onlineUsers}
+            openComments={openComments}
+            commentNotifications={commentNotifications}
           />
         )}
 
@@ -1674,6 +1680,8 @@ const Node = ({
               findDescendantNodes={findDescendantNodes}
               findAncestorNodes={findAncestorNodes}
               onlineUsers={onlineUsers}
+              openComments={openComments}
+              commentNotifications={commentNotifications}
             />
           </Box>
         )}
@@ -1811,6 +1819,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
     prev.hideNode === next.hideNode &&
+    prev.commentNotifications === next.commentNotifications &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

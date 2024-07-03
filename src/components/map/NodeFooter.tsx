@@ -1,6 +1,7 @@
 import { ArrowForwardIos } from "@mui/icons-material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
@@ -16,6 +17,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import {
+  Badge,
   Button,
   ClickAwayListener,
   Divider,
@@ -139,6 +141,8 @@ type NodeFooterProps = {
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: any;
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const NodeFooter = ({
@@ -217,6 +221,8 @@ const NodeFooter = ({
   findDescendantNodes,
   findAncestorNodes,
   onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -553,6 +559,7 @@ const NodeFooter = ({
                 id={`${identifier}-node-footer-timestamp`}
                 component={"span"}
                 sx={{
+                  fontSize: "12px",
                   marginLeft: "10px",
                   display: editable ? "none" : "block",
                   lineHeight: "normal",
@@ -723,6 +730,39 @@ const NodeFooter = ({
                     </Tooltip>
                   </Box>
                 </Box>
+                <ContainedButton
+                  id={proposeButtonId}
+                  title="Open comments"
+                  onClick={() => openComments(identifier, "node")}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    fontWeight: 400,
+                    color: "inherit",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                    padding: "7px 7px",
+                    minWidth: "30px",
+                    height: "30px",
+                  }}
+                  disabled={disableProposeButton}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <Badge
+                      badgeContent={
+                        commentNotifications.filter((notification: any) => notification.refId === identifier).length
+                      }
+                      color="error"
+                    >
+                      <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                    </Badge>
+                  </Box>
+                </ContainedButton>
               </Box>
             )}
             {/* <span
