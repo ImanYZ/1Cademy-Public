@@ -232,6 +232,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           contributors: {
             [userData.uname]: {
               reputation: 1,
+              fullname: userData.fName + " " + userData.lName,
+              imageUrl: userData.imageUrl,
+              chooseUname: userData.chooseUname,
             },
           },
           institNames: [userData.deInstit],
