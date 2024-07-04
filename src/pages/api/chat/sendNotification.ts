@@ -77,6 +77,7 @@ const triggerNotifications = async (newMessage: any) => {
                 body: replaceMentions(message),
               },
               data: {
+                notificationType: "chat",
                 messageId: newMessage?.parentMessage || newMessage.id,
                 roomType,
                 channelId,

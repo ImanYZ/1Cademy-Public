@@ -38,7 +38,9 @@ const triggerNotifications = async (data: any) => {
       const _member = nodeData.contribNames.filter((m: string) => m !== comment.sender);
       const invalidTokens: any = {};
       for (let member of _member) {
-        const UID = contributors[member].uid;
+        const userDoc = await db.collection("users").where("uname", "==", member).get();
+        if (!userDoc.docs.length) continue;
+        const UID = userDoc.docs[0].data().userId;
 
         const newNotification = {
           ...comment,
@@ -54,13 +56,12 @@ const triggerNotifications = async (data: any) => {
             const payload = {
               token,
               notification: {
-                title: `${subject} ${contributors[comment.sender].fullname}`,
+                title: `${subject} on ${nodeData.title} node`,
                 body: replaceMentions(comment.text),
               },
               data: {
-                messageId: comment?.parentComment || comment.id,
+                notificationType: "comment",
                 nodeId,
-                messageType: subject.includes("Repl") ? "reply" : "comment",
               },
             };
             console.log(admin.messaging());
@@ -82,7 +83,9 @@ const triggerNotifications = async (data: any) => {
                 }
               });
           }
-        } catch (error) {}
+        } catch (error) {
+          console.log(error, "error");
+        }
         await notificationRef.set(newNotification);
       }
       await removeInvalidTokens(invalidTokens);
@@ -96,7 +99,7 @@ const triggerNotifications = async (data: any) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { uname } = req.body?.data?.user?.userData;
+    const { uname, fName, lName } = req.body?.data?.user?.userData;
     // const { leading } = req.body?.data?.user?.userData?.customClaims || {};
     const { nodeId, comment, subject } = req.body as any;
     if (uname !== comment.sender) {
