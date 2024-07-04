@@ -608,6 +608,7 @@ export const Message = ({
             onlineUsers={onlineUsers}
             selectedChannel={selectedChannel}
             getChannelRef={getChannelRef}
+            roomType={roomType}
           />
           <IconButton
             onClick={() => setNewMemberSection(false)}

@@ -199,7 +199,7 @@ const Comment = ({
     const docRef = await addDoc(getCommentRef(commentSidebarInfo.type), commentData);
     setIsLoading(false);
     Post("/comment/sendNotification", {
-      subject: "Comment by",
+      subject: "New comment",
       comment: { ...commentData, id: docRef.id },
       nodeId: commentSidebarInfo.type === "node" ? commentSidebarInfo.id : commentSidebarInfo.proposal.node,
     });

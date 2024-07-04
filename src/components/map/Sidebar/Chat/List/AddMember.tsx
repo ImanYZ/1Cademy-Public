@@ -1,9 +1,10 @@
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Firestore, updateDoc } from "firebase/firestore";
+import { addDoc, collection, Firestore, updateDoc } from "firebase/firestore";
 import { IUser } from "src/types/IUser";
 
+import { Post } from "@/lib/mapApi";
 import { generateChannelName } from "@/lib/utils/chat";
 import { createActionTrack } from "@/lib/utils/Map.utils";
 
@@ -16,9 +17,10 @@ type DirectMessageProps = {
   onlineUsers: any;
   selectedChannel: any;
   getChannelRef: any;
+  roomType: string;
 };
-export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRef }: DirectMessageProps) => {
-  const addNewMember = (member: any) => {
+export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRef, roomType }: DirectMessageProps) => {
+  const addNewMember = async (member: any) => {
     if (selectedChannel.members?.includes(member?.uname)) return;
 
     const membersInfo = {
@@ -38,6 +40,21 @@ export const AddMember = ({ db, user, onlineUsers, selectedChannel, getChannelRe
       title: generateChannelName(membersInfo, user),
       members,
       membersInfo,
+    });
+    const docRef = collection(db, "notifications");
+    await addDoc(docRef, {
+      sender: user.uname,
+      channelId: selectedChannel.id,
+      seen: false,
+      notify: member?.uname,
+      roomType,
+      notificationType: "chat",
+      createdAt: new Date(),
+    });
+    await Post("/sendFCMNotification", {
+      title: `Added in group chat by ${user.fName} ${user.lName}`,
+      body: "",
+      receiverUID: member.userId,
     });
     createActionTrack(
       db,
