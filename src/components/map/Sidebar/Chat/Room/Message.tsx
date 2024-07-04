@@ -571,6 +571,7 @@ export const Message = ({
         getChannelRef={getChannelRef}
         setOpen={setNewMemberSection}
         open={newMemberSection}
+        roomType={roomType}
       />
       {forward ? (
         <Forward />
