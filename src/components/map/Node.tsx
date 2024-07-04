@@ -28,14 +28,13 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
 import moment from "moment";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import {
   ChosenType,
@@ -49,7 +48,7 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { SearchNodesResponse } from "../../knowledgeTypes";
 import { TNodeBookState } from "../../nodeBookTypes";
-import { NodeType } from "../../types";
+// import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import MarkdownRender from "../Markdown/MarkdownRender";
@@ -82,6 +81,7 @@ type Parent = {
 
 type NodeProps = {
   identifier: string;
+  node: any;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeUpdates: TNodeUpdates;
   setNodeUpdates: (updates: TNodeUpdates) => void;
@@ -164,7 +164,7 @@ type NodeProps = {
   openAllParent: any;
   onHideNode: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -246,10 +246,11 @@ type Pagination = {
   totalResults: number;
 };
 
-const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+// const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 const Node = ({
   identifier,
+  node,
   nodeBookDispatch,
   setNodeUpdates,
   notebookRef,
@@ -375,13 +376,11 @@ const Node = ({
   openComments,
   commentNotifications,
 }: NodeProps) => {
-  const db = getFirestore();
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [showSimilarNodes, setShowSimilarNodes] = useState(true);
   // const [openPart, setOpenPart] = useState<OpenPart>(null);
-  const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
@@ -401,6 +400,7 @@ const Node = ({
     totalPage: 0,
     totalResults: 0,
   });
+  const createActionTrack = useCreateActionTrack();
 
   const [openProposalType, setOpenProposalType] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
@@ -538,9 +538,9 @@ const Node = ({
     (event: any) => {
       event.preventDefault();
       event.stopPropagation();
-      onHideNode(identifier, setIsHiding);
+      onHideNode(node);
     },
-    [onHideNode, identifier]
+    [node, onHideNode]
   );
 
   const onSetTitle = (newTitle: string) => {
@@ -565,20 +565,10 @@ const Node = ({
     if (!user) return;
     if (!editable) return;
     const timeoutId = setTimeout(() => {
-      createActionTrack(
-        db,
-        "NodeTitleChanged",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "NodeTitleChanged",
+        nodeId: identifier,
+      });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [titleCopy]);
@@ -587,20 +577,10 @@ const Node = ({
     if (!user) return;
     if (!editable) return;
     const timeoutId = setTimeout(() => {
-      createActionTrack(
-        db,
-        "NodeContentChanged",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "NodeContentChanged",
+        nodeId: identifier,
+      });
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [contentCopy]);
@@ -614,7 +594,7 @@ const Node = ({
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
-      toggleNode(event, identifier);
+      toggleNode(event, node, identifier);
     },
     [toggleNode, identifier, open]
   );
@@ -695,7 +675,7 @@ const Node = ({
         setEditingModeNode(false);
 
         if (newParent) {
-          await saveProposedParentNode(identifier, "", reason, () => setAbleToPropose(true));
+          await saveProposedParentNode(identifier, "", reason, tagIds, () => setAbleToPropose(true));
           setProposeLoading(false);
           return;
         }
@@ -790,44 +770,47 @@ const Node = ({
     [identifier, setNodeParts]
   );
 
-  const onSearch = useCallback(async (page: number, q: string) => {
-    try {
-      setIsFetching(true);
-      if (page < 1) {
-        setSearchResults({
-          data: [],
-          lastPageLoaded: 0,
-          totalPage: 0,
-          totalResults: 0,
+  const onSearch = useCallback(
+    async (page: number, q: string) => {
+      try {
+        setIsFetching(true);
+        if (page < 1) {
+          setSearchResults({
+            data: [],
+            lastPageLoaded: 0,
+            totalPage: 0,
+            totalResults: 0,
+          });
+        }
+        const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
+          q,
+          nodeTypes: [nodeType],
+          tags: [],
+          nodesUpdatedSince: 1000,
+          sortOption: "NOT_SELECTED",
+          sortDirection: "DESCENDING",
+          page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
         });
-      }
-      const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
-        q,
-        nodeTypes: NODE_TYPES_ARRAY,
-        tags: [],
-        nodesUpdatedSince: 1000,
-        sortOption: "NOT_SELECTED",
-        sortDirection: "DESCENDING",
-        page,
-        onlyTitle: nodeBookState.searchByTitleOnly,
-      });
 
-      const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
-      setSearchResults({
-        data: newData,
-        lastPageLoaded: data.page,
-        totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
-        totalResults: data.numResults,
-      });
-      setAbleToPropose(true);
-      if (newData.filter(data => data.title === q).length > 0) {
-        setAbleToPropose(false);
+        const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        setSearchResults({
+          data: newData,
+          lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+          totalResults: data.numResults,
+        });
+        setAbleToPropose(true);
+        if (newData.filter(data => data.title === q).length > 0) {
+          setAbleToPropose(false);
+        }
+        setIsFetching(false);
+      } catch (err) {
+        console.error(err);
       }
-      setIsFetching(false);
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
+    },
+    [nodeType]
+  );
 
   const onBlurNodeTitle = useCallback(
     async (newTitle: string) => {
@@ -951,7 +934,6 @@ const Node = ({
           "Node card" +
           (activeNode ? " active" : "") +
           (changed || !isStudied ? " Changed" : "") +
-          (isHiding ? " IsHiding" : "") +
           (nodeType === "Reference" ? " Choosable" : "")
         }
         style={{
@@ -1030,7 +1012,6 @@ const Node = ({
         "Node card" +
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
-        (isHiding ? " IsHiding" : "") +
         (toBeEligible ? " Choosable" : " ")
       }
       style={{
@@ -1046,7 +1027,7 @@ const Node = ({
         <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
       )}
 
-      <Box sx={{ float: "right" }}>
+      <Box>
         {!editable && !unaccepted && !simulated && (
           <MemoizedNodeHeader
             id={identifier}
@@ -1280,6 +1261,7 @@ const Node = ({
                       onClick={onImageClick}
                       style={{
                         borderRadius: "11px",
+                        cursor: "pointer",
                       }}
                     />
                     {/* TODO: add loading background */}

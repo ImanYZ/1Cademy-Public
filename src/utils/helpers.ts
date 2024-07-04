@@ -222,7 +222,7 @@ export const checkInstantDeleteForNode = async (
     return {
       isInstructor,
       courseExist: false,
-      instantDelete: false,
+      instantDelete: true,
     };
   }
   const userNodes = await getDocs(query(collection(db, "userNodes"), where("node", "==", nodeId)));
@@ -233,7 +233,9 @@ export const checkInstantDeleteForNode = async (
 
   for (const semesterId in semestersByIds) {
     const semester = semestersByIds[semesterId];
-    semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    if (!semester.instructors.includes(uname)) {
+      semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    }
   }
 
   instructorVotes[uname] = true;

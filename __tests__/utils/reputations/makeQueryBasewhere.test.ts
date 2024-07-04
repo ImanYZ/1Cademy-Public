@@ -1,12 +1,12 @@
 import { db } from "../../../src/lib/firestoreServer/admin";
-import { makeQueryBasewhere } from "../../../src/utils/reputations";
+import { makeQueryBaseWhere } from "../../../src/utils/reputations";
 
 describe("makeQueryBasewhere", () => {
   it("Should not append any where clause to the query, when reputation type does not exist.", () => {
     const reputationType = "DOES_NOT_EXIST";
     const baseCollection = db.collection("collections");
     baseCollection.where = jest.fn();
-    makeQueryBasewhere(reputationType as any, baseCollection, "firstWeekDay", "firstMonthDay");
+    makeQueryBaseWhere(reputationType as any, baseCollection, "firstWeekDay", "firstMonthDay");
     expect(baseCollection.where).not.toHaveBeenCalled();
   });
 
@@ -16,7 +16,7 @@ describe("makeQueryBasewhere", () => {
       baseCollection.where = jest.fn();
 
       const firstMonthDay = "givenValue";
-      makeQueryBasewhere(reputationType as any, baseCollection, "firstWeekDay", firstMonthDay);
+      makeQueryBaseWhere(reputationType as any, baseCollection, "firstWeekDay", firstMonthDay);
       expect(baseCollection.where).toHaveBeenCalledWith("firstMonthDay", "==", firstMonthDay);
     });
   });
@@ -27,7 +27,7 @@ describe("makeQueryBasewhere", () => {
       baseCollection.where = jest.fn();
 
       const firstWeekDay = "givenValue";
-      makeQueryBasewhere(reputationType as any, baseCollection, firstWeekDay, "firstMonthDay");
+      makeQueryBaseWhere(reputationType as any, baseCollection, firstWeekDay, "firstMonthDay");
       expect(baseCollection.where).toHaveBeenCalledWith("firstWeekDay", "==", firstWeekDay);
     });
   });

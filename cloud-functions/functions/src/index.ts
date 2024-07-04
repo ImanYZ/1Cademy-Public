@@ -128,24 +128,28 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     const twoDaysAgo = new Date(Number(today) - 2 * MILLISECONDS_IN_A_DAY);
 
     const receiversData: any = {};
-
-    for (let receiver of data.receivers) {
-      const receiverDoc = await firestore.collection("users").doc(receiver).get();
-      if (receiverDoc.exists) {
-        const receiverData = receiverDoc.data();
-        receiversData[receiver] = {
-          fullname: receiverData?.fName + " " + receiverData?.lName,
-          chooseUname: receiverData?.chooseUname,
-          imageUrl: receiverData?.imageUrl,
-        };
+    if ((data.receivers || []).length > 0) {
+      for (let receiver of data.receivers) {
+        const receiverDoc = await firestore.collection("users").doc(receiver).get();
+        if (receiverDoc.exists) {
+          const receiverData = receiverDoc.data();
+          receiversData[receiver] = {
+            fullname: receiverData?.fName + " " + receiverData?.lName,
+            chooseUname: receiverData?.chooseUname,
+            imageUrl: receiverData?.imageUrl,
+          };
+        }
       }
+      actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo), receiversData });
     }
-    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo), receiversData });
-    // create recentUserNodes
-    const recentUserNodesRef = firestore.collection("recentUserNodes");
-    // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
-    const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
-    recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+    if (data.nodeId) {
+      // create recentUserNodes
+      const recentUserNodesRef = firestore.collection("recentUserNodes");
+      // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
+      const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
+
+      recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+    }
 
     //track hours
 

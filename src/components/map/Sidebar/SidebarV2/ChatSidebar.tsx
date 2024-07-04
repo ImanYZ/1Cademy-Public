@@ -29,7 +29,7 @@ import { retrieveAuthenticatedUser } from "@/lib/firestoreClient/auth";
 import { updateNotebookTag } from "@/lib/firestoreClient/notebooks.serverless";
 import { Post } from "@/lib/mapApi";
 import { generateChannelName } from "@/lib/utils/chat";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 
 import { CustomBadge } from "../../CustomBudge";
 import { ChannelsList } from "../Chat/List/Channels";
@@ -102,22 +102,10 @@ export const ChatSidebar = ({
   const [value, setValue] = React.useState(2);
   const { confirmIt, ConfirmDialog } = useConfirmationDialog();
   const [displayTagSearcher, setDisplayTagSearcher] = useState<boolean>(false);
+  const createActionTrack = useCreateActionTrack();
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-    createActionTrack(
-      db,
-      "MessageTabChanged",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({ action: "MessageTabChanged" });
   };
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("");
@@ -146,7 +134,7 @@ export const ChatSidebar = ({
     let findChannel = {} as IChannels;
     if (openChatByNotification.roomType === "direct") {
       findChannel = conversations.find(
-        conversation => conversation.id === openChatByNotification.channelId
+        conversation => conversation?.id === openChatByNotification.channelId
       ) as IChannels;
     } else {
       findChannel = channels.find(channel => channel.id === openChatByNotification.channelId) as IChannels;
@@ -373,20 +361,7 @@ export const ChatSidebar = ({
     } else {
       addReaction(message, emoji);
     }
-    createActionTrack(
-      db,
-      "MessageReacted",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({ action: "MessageReacted" });
     setAnchorEl(null);
   };
   const openRoom = (type: string, channel: any) => {
@@ -396,20 +371,7 @@ export const ChatSidebar = ({
     setMessages([]);
     makeMessageRead(channel.id, type);
     clearNotifications(notifications.filter((n: any) => n.channelId === channel.id && n.roomType === type));
-    createActionTrack(
-      db,
-      "MessageRoomOpened",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({ action: "MessageRoomOpened" });
   };
 
   const moveBack = () => {
@@ -596,20 +558,7 @@ export const ChatSidebar = ({
       await batch.commit();
     }
 
-    createActionTrack(
-      db,
-      "MessageMarkUnread",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({ action: "MessageMarkUnread" });
   };
 
   const makeMessageRead = async (channelId: string, roomType: string) => {

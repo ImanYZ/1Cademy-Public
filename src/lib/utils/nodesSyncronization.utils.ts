@@ -40,118 +40,129 @@ export const arrayToChunks = (inputArray: any[], perChunk: number = 30) => {
 
   return result;
 };
-export const getUserNodeChanges = (docChanges: DocumentChange<DocumentData>[]): UserNodeChanges[] => {
-  // const docChanges = snapshot.docChanges();
-  // if (!docChanges.length) return null
-  return docChanges.map(change => {
+export const getUserNodeChanges = (
+  docChanges: DocumentChange<DocumentData>[]
+): { userNodeChanges: { [nodeId: string]: UserNodeChanges }; nodeIds: string[] } => {
+  const userNodeChanges: { [nodeId: string]: UserNodeChanges } = {};
+  let nodeIds = [];
+  for (let change of docChanges) {
     const userNodeData: UserNodeFirestore = change.doc.data() as UserNodeFirestore;
-    return {
+    userNodeChanges[userNodeData.node] = {
       cType: change.type,
       uNodeId: change.doc.id,
       uNodeData: userNodeData,
     };
-  });
+    nodeIds.push(userNodeData.node);
+  }
+  return { userNodeChanges, nodeIds };
 };
 
-export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<NodesData[]> => {
-  // console.log("[GET NODES]");
-  const chunks = arrayToChunks(nodeIds);
-  const nodeDocsPromises = chunks.map((nodeIds: string[]) => {
-    const nodeQuery = query(collection(db, "nodes"), where("__name__", "in", nodeIds));
+export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<{ [nodeId: string]: NodesData }> => {
+  // Firestore limits 'in' queries to a maximum of 30 items per query.
+  const CHUNK_SIZE = 30;
+
+  const arrayToChunks = (array: any[], chunkSize: number) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, chunkSize + i));
+    }
+    return chunks;
+  };
+
+  const chunks = arrayToChunks(nodeIds, CHUNK_SIZE);
+
+  const nodeDocsPromises = chunks.map((nodeIdsChunk: string[]) => {
+    const nodeQuery = query(collection(db, "nodes"), where("__name__", "in", nodeIdsChunk));
     return getDocs(nodeQuery);
   });
 
   const nodeDocs = await Promise.all(nodeDocsPromises);
-  const flatDocs = nodeDocs.flatMap(nd => nd.docs);
-  return flatDocs.map((nodeDoc: any) => {
-    if (!nodeDoc.exists()) return null;
+  const nodesMap: { [nodeId: string]: NodesData } = {};
 
-    const tmpData = nodeDoc.data();
-    delete tmpData?.height; // IMPORTANT: we are removing height to not spoil height in dagre // DON'T remove this
-    delete tmpData?.visible; // IMPORTANT: visible wont exist on DB, that value is calculated by notebooks // REMOVE after update backend and DB
-    delete tmpData?.open; // IMPORTANT: open wont exist on DB, that value is calculated by expands // REMOVE after update backend and DB
-    const nData: NodeFireStore = tmpData as NodeFireStore;
-    // if (nData.deleted) return null;
-    if (nData.deleted) {
-      return {
-        cType: "removed",
+  nodeDocs.forEach(nd => {
+    nd.docs.forEach((nodeDoc: any) => {
+      if (!nodeDoc.exists()) return;
+
+      const tmpData = nodeDoc.data();
+      delete tmpData?.height;
+      delete tmpData?.visible;
+      delete tmpData?.open;
+      const nData: NodeFireStore = tmpData as NodeFireStore;
+
+      nodesMap[nodeDoc.id] = {
+        cType: nData.deleted ? "removed" : "added",
         nId: nodeDoc.id,
         nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
       };
-    }
-
-    return {
-      cType: "added",
-      nId: nodeDoc.id,
-      nData: { ...nData, tagIds: nData.tagIds ?? [], tags: nData.tags ?? [] },
-    };
+    });
   });
+
+  return nodesMap;
 };
 
-export const buildFullNodes = (userNodesChanges: UserNodeChanges[], nodesData: NodesData[]): FullNodeData[] => {
-  // console.log("[BUILD FULL NODES]");
-  const findNodeDataById = (id: string) => nodesData.find(cur => cur && cur.nId === id);
-  const res = userNodesChanges
-    .map(cur => {
-      const nodeDataFound = findNodeDataById(cur.uNodeData.node);
-
-      if (!nodeDataFound) return null;
-
+export const buildFullNodes = (
+  userNodesChanges: { [nodeId: string]: UserNodeChanges },
+  nodesData: { [nodeId: string]: NodesData }
+): FullNodeData[] => {
+  const res: FullNodeData[] = [];
+  for (let nodeId in userNodesChanges) {
+    const nodeData = nodesData[nodeId];
+    if (nodeData) {
+      const nData = nodeData.nData;
       const fullNodeData: FullNodeData = {
-        ...cur.uNodeData, // User node data
-        ...nodeDataFound.nData, // Node Data
-        userNodeId: cur.uNodeId,
-        nodeChangeType: cur.cType, // TODO: improve the names and values
-        userNodeChangeType: nodeDataFound.cType,
+        ...userNodesChanges[nodeId].uNodeData, // User node data
+        ...nData, // Node Data
+        userNodeId: userNodesChanges[nodeId].uNodeId,
+        nodeChangeType: userNodesChanges[nodeId].cType, // TODO: improve the names and values
+        userNodeChangeType: nodeData.cType,
         editable: false,
         left: 0,
         top: 0,
-        firstVisit: cur.uNodeData.createdAt.toDate(),
-        lastVisit: cur.uNodeData.updatedAt?.toDate() ?? cur.uNodeData.createdAt.toDate(),
-        changedAt: nodeDataFound.nData.changedAt.toDate(),
-        createdAt: nodeDataFound.nData.createdAt.toDate(),
-        updatedAt: nodeDataFound.nData.updatedAt.toDate(),
-        references: nodeDataFound.nData.references || [],
-        referenceIds: nodeDataFound.nData.referenceIds || [],
-        referenceLabels: nodeDataFound.nData.referenceLabels || [],
-        tags: nodeDataFound.nData.tags || [],
-        tagIds: nodeDataFound.nData.tagIds || [],
-        contributors: nodeDataFound.nData.contributors ?? {},
-        contribNames: nodeDataFound.nData.contribNames ?? [],
-        institutions: nodeDataFound.nData.institutions ?? {},
-        institNames: nodeDataFound.nData.institNames ?? [],
-        bookmarks: nodeDataFound.nData.bookmarks ? Number(nodeDataFound.nData.bookmarks) : 0,
-        // parents:nodeDataFound.nData.parents??[],
-        // children:node
+        firstVisit: userNodesChanges[nodeId].uNodeData.createdAt.toDate(),
+        lastVisit:
+          userNodesChanges[nodeId].uNodeData.updatedAt?.toDate() ??
+          userNodesChanges[nodeId].uNodeData.createdAt.toDate(),
+        changedAt: nData.changedAt.toDate(),
+        createdAt: nData.createdAt.toDate(),
+        updatedAt: nData.updatedAt.toDate(),
+        references: nData.references || [],
+        referenceIds: nData.referenceIds || [],
+        referenceLabels: nData.referenceLabels || [],
+        tags: nData.tags || [],
+        tagIds: nData.tagIds || [],
+        contributors: nData.contributors ?? {},
+        contribNames: nData.contribNames ?? [],
+        institutions: nData.institutions ?? {},
+        institNames: nData.institNames ?? [],
+        bookmarks: nData.bookmarks ? Number(nData.bookmarks) : 0,
       };
-      if (nodeDataFound.nData.nodeType !== "Question") {
+
+      if (nData.nodeType !== "Question") {
         fullNodeData.choices = [];
       }
-      fullNodeData.bookmarked = cur.uNodeData?.bookmarked || false;
-      fullNodeData.nodeChanges = cur.uNodeData?.nodeChanges || null;
 
-      return fullNodeData;
-    })
-    .flatMap(cur => cur || []);
+      fullNodeData.bookmarked = userNodesChanges[nodeId].uNodeData.bookmarked || false;
+      fullNodeData.nodeChanges = userNodesChanges[nodeId].uNodeData.nodeChanges || null;
+
+      res.push(fullNodeData);
+    }
+  }
 
   return res;
 };
 
 export const mergeAllNodes = (newAllNodes: FullNodeData[], currentAllNodes: FullNodesData): FullNodesData => {
-  return newAllNodes.reduce(
-    (acu, cur) => {
-      if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
-        return { ...acu, [cur.node]: cur };
-      }
-      if (cur.nodeChangeType === "removed") {
-        const tmp = { ...acu };
-        delete tmp[cur.node];
-        return tmp;
-      }
-      return acu;
-    },
-    { ...currentAllNodes }
-  );
+  const updatedNodes = { ...currentAllNodes };
+
+  newAllNodes.forEach(cur => {
+    if (cur.nodeChangeType === "added" || cur.nodeChangeType === "modified") {
+      updatedNodes[cur.node] = cur;
+    } else if (cur.nodeChangeType === "removed") {
+      delete updatedNodes[cur.node];
+    }
+  });
+
+  return updatedNodes;
 };
 
 export const fillDagre = (

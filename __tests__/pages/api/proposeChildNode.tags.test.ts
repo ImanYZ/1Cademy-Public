@@ -150,10 +150,9 @@ describe("POST /api/proposeChildNode", () => {
 
     new MockData([], "notificationNums"),
     new MockData([], "practice"),
-    new MockData([], "questionVersions"),
-    new MockData([], "userConceptVersions"),
+    new MockData([], "versions"),
+    new MockData([], "userVersions"),
     new MockData([], "userNodesLog"),
-    new MockData([], "userQuestionVersions"),
     new MockData([], "userVersionsLog"),
     new MockData([], "tags"),
     new MockData([], "actionTracks"),
@@ -189,6 +188,7 @@ describe("POST /api/proposeChildNode", () => {
         },
         body: {
           data: {
+            versionNodeId: "new-id-1",
             parentId: String(node3.documentId),
             parentType: node3.nodeType,
             nodeType: "Question" as INodeType,

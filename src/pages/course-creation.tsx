@@ -25,6 +25,7 @@ import {
   InputAdornment,
   InputLabel,
   keyframes,
+  LinearProgress,
   // LinearProgress,
   MenuItem,
   Paper,
@@ -34,6 +35,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { collection, doc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
@@ -44,347 +46,17 @@ import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
+import { newId } from "@/lib/utils/newFirestoreId";
 
-const COURSES = [
-  {
-    tags: ["Psychology", "Psychology @ OpenStax"],
-    title: "Introduction to Psychology",
-    description:
-      "This course provides an in-depth look at the concepts, theories, and research methods in psychology. It covers various topics such as biological bases of behavior, cognition, development, personality, social psychology, and psychological disorders. The course aims to go beyond a comprehensive understanding of the field of psychology and its applications.",
-    learners:
-      "Undergraduate students with no prior background in psychology. The course is designed for students from various disciplines who are interested in understanding human behavior and mental processes.",
-    references: ["Psychology (2nd ed.)"],
-    courseObjectives: [
-      "Understand the history and scope of psychology as a scientific discipline",
-      "Identify and describe the major research methods used in psychology",
-      "Explain the biological bases of behavior, including the structure and function of the nervous system",
-      "Differentiate between sensation and perception and describe how they influence human experience",
-      "Understand the principles of learning and memory and their applications",
-      "Describe key cognitive processes such as thinking, problem-solving, and decision-making",
-      "Outline the stages of human development and the factors that influence growth and change across the lifespan",
-      "Identify major theories of personality and assess their contributions to understanding individual differences",
-      "Recognize and describe various psychological disorders and their symptoms",
-      "Understand the principles of social psychology, including group behavior, social influence, and interpersonal relationships",
-      "Apply psychological principles to real-world situations and various professional fields",
-      "Develop critical thinking skills by evaluating psychological research and theories",
-      "Engage in discussions and practical activities to enhance understanding and application of psychological concepts",
-    ],
-    courseSkills: [
-      "Understanding of psychological history and scope",
-      "Knowledge of psychological research methods",
-      "Comprehension of the biological bases of behavior",
-      "Ability to differentiate between sensation and perception",
-      "Understanding of learning and memory principles",
-      "Knowledge of cognitive processes",
-      "Insight into human developmental stages",
-      "Familiarity with major personality theories",
-      "Recognition of psychological disorders and symptoms",
-      "Understanding of social psychology principles",
-      "Application of psychological principles to real-world situations",
-      "Critical evaluation of psychological research and theories",
-      "Engagement in psychological discussions and practical activities",
-    ],
-    hours: 13,
-    syllabus: [
-      {
-        category: "Foundations of Psychology",
-        topics: [
-          {
-            topic: "History and Scope of Psychology",
-            hours: 1,
-            difficulty: "Easy",
-            description:
-              "An overview of the history, major schools of thought, and the scope of psychology as a scientific discipline.",
-            skills: ["Understanding of psychological history and scope"],
-          },
-          {
-            topic: "Research Methods in Psychology",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Introduction to the major research methods used in psychology, including experimental, correlational, and observational techniques.",
-            skills: ["Knowledge of psychological research methods"],
-          },
-        ],
-      },
-      {
-        category: "Biological Bases of Behavior",
-        topics: [
-          {
-            topic: "Structure and Function of the Nervous System",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Understanding the biological bases of behavior, focusing on the structure and function of the nervous system.",
-            skills: ["Comprehension of the biological bases of behavior"],
-          },
-        ],
-      },
-      {
-        category: "Sensation and Perception",
-        topics: [
-          {
-            topic: "Sensation and Perception",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Differentiating between sensation and perception and exploring how they influence human experience.",
-            skills: ["Ability to differentiate between sensation and perception"],
-          },
-        ],
-      },
-      {
-        category: "Learning and Memory",
-        topics: [
-          {
-            topic: "Principles of Learning",
-            hours: 1,
-            difficulty: "Medium",
-            description: "Exploring the principles of learning, including classical and operant conditioning.",
-            skills: ["Understanding of learning principles"],
-          },
-          {
-            topic: "Memory Processes",
-            hours: 1,
-            difficulty: "Medium",
-            description: "Understanding the processes involved in memory, including encoding, storage, and retrieval.",
-            skills: ["Understanding of memory principles"],
-          },
-        ],
-      },
-      {
-        category: "Cognition",
-        topics: [
-          {
-            topic: "Cognitive Processes",
-            hours: 1,
-            difficulty: "Medium",
-            description: "Examining key cognitive processes such as thinking, problem-solving, and decision-making.",
-            skills: ["Knowledge of cognitive processes"],
-          },
-        ],
-      },
-      {
-        category: "Developmental Psychology",
-        topics: [
-          {
-            topic: "Human Development",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Outlining the stages of human development and the factors that influence growth and change across the lifespan.",
-            skills: ["Insight into human developmental stages"],
-          },
-        ],
-      },
-      {
-        category: "Personality",
-        topics: [
-          {
-            topic: "Theories of Personality",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Identifying major theories of personality and assessing their contributions to understanding individual differences.",
-            skills: ["Familiarity with major personality theories"],
-          },
-        ],
-      },
-      {
-        category: "Psychological Disorders",
-        topics: [
-          {
-            topic: "Psychological Disorders",
-            hours: 1,
-            difficulty: "Medium",
-            description: "Recognizing and describing various psychological disorders and their symptoms.",
-            skills: ["Recognition of psychological disorders and symptoms"],
-          },
-        ],
-      },
-      {
-        category: "Social Psychology",
-        topics: [
-          {
-            topic: "Principles of Social Psychology",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Understanding the principles of social psychology, including group behavior, social influence, and interpersonal relationships.",
-            skills: ["Understanding of social psychology principles"],
-          },
-        ],
-      },
-      {
-        category: "Application and Integration",
-        topics: [
-          {
-            topic: "Applying Psychological Principles",
-            hours: 1,
-            difficulty: "Medium",
-            description: "Applying psychological principles to real-world situations and various professional fields.",
-            skills: ["Application of psychological principles to real-world situations"],
-          },
-          {
-            topic: "Critical Evaluation of Psychological Research",
-            hours: 1,
-            difficulty: "Medium",
-            description: "Developing critical thinking skills by evaluating psychological research and theories.",
-            skills: ["Critical evaluation of psychological research and theories"],
-          },
-          {
-            topic: "Engagement in Psychological Discussions",
-            hours: 1,
-            difficulty: "Medium",
-            description:
-              "Engaging in discussions and practical activities to enhance understanding and application of psychological concepts.",
-            skills: ["Engagement in psychological discussions and practical activities"],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    tags: ["Microbiology", "Microbiology @ OpenStax"],
-    title: "Introduction to Microbiology",
-    description:
-      "This course provides an overview of microbiology, focusing on the structure, function, and genetics of microorganisms, as well as their roles in health, disease, and the environment. The course includes both theoretical and practical components, designed for undergraduate students with a basic background in biology.",
-    learners:
-      "Undergraduate students majoring in biology or related fields, with a basic understanding of general biology and chemistry.",
-    references: ["OpenStax Microbiology Textbook"],
-    syllabus: [
-      {
-        category: "Foundations of Microbiology",
-        topics: [
-          { topic: "History of Microbiology", hours: 1, difficulty: "Medium" },
-          { topic: "Introduction to Microbial World", hours: 1, difficulty: "Medium" },
-          { topic: "Microscopy and Staining Techniques", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Microbial Structure and Function",
-        topics: [
-          { topic: "Prokaryotic Cell Structure", hours: 1, difficulty: "Medium" },
-          { topic: "Eukaryotic Cell Structure", hours: 1, difficulty: "Medium" },
-          { topic: "Microbial Metabolism", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Microbial Genetics",
-        topics: [
-          { topic: "DNA Structure and Replication", hours: 1, difficulty: "Medium" },
-          { topic: "Gene Expression and Regulation", hours: 1, difficulty: "Medium" },
-          { topic: "Genetic Mutations and Transfer", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Microbial Growth and Control",
-        topics: [
-          { topic: "Microbial Growth Phases", hours: 1, difficulty: "Medium" },
-          { topic: "Factors Affecting Microbial Growth", hours: 1, difficulty: "Medium" },
-          { topic: "Methods of Microbial Control", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Microbial Interactions",
-        topics: [
-          { topic: "Microbiome and Human Health", hours: 1, difficulty: "Medium" },
-          { topic: "Pathogenic Microorganisms", hours: 1, difficulty: "Medium" },
-          { topic: "Symbiotic Relationships", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Applied Microbiology",
-        topics: [
-          { topic: "Environmental Microbiology", hours: 1, difficulty: "Medium" },
-          { topic: "Industrial Microbiology", hours: 1, difficulty: "Medium" },
-          { topic: "Microbial Biotechnology", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Laboratory Techniques",
-        topics: [
-          { topic: "Aseptic Technique", hours: 1, difficulty: "Medium" },
-          { topic: "Culturing Microorganisms", hours: 1, difficulty: "Medium" },
-          { topic: "Antibiotic Sensitivity Testing", hours: 1, difficulty: "Medium" },
-        ],
-      },
-    ],
-  },
-  {
-    tags: ["Economy", "Economics"],
-    title: "Introduction to Microeconomics",
-    description:
-      "This course provides an introduction to the principles of microeconomics. Students will learn about the behavior of individuals and firms in making decisions regarding the allocation of scarce resources. Topics include supply and demand, elasticity, consumer behavior, production and costs, market structures, and welfare economics.",
-    learners:
-      "Undergraduate students in their first or second year, typically majoring in economics, business, or related fields.",
-    references: ["CORE Econ - The Economy"],
-    syllabus: [
-      {
-        category: "Basic Concepts",
-        topics: [
-          { topic: "Introduction to Microeconomics", hours: 1, difficulty: "Medium" },
-          { topic: "Scarcity and Choice", hours: 1, difficulty: "Medium" },
-          { topic: "Opportunity Cost", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Supply and Demand",
-        topics: [
-          { topic: "Market Demand", hours: 1, difficulty: "Medium" },
-          { topic: "Market Supply", hours: 1, difficulty: "Medium" },
-          { topic: "Equilibrium Price and Quantity", hours: 1, difficulty: "Medium" },
-          { topic: "Elasticity of Demand", hours: 1, difficulty: "Medium" },
-          { topic: "Elasticity of Supply", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Consumer Behavior",
-        topics: [
-          { topic: "Utility and Preferences", hours: 1, difficulty: "Medium" },
-          { topic: "Budget Constraints", hours: 1, difficulty: "Medium" },
-          { topic: "Consumer Choice", hours: 1, difficulty: "Medium" },
-          { topic: "Demand Curve", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Production and Costs",
-        topics: [
-          { topic: "Production Functions", hours: 1, difficulty: "Medium" },
-          { topic: "Short-Run Costs", hours: 1, difficulty: "Medium" },
-          { topic: "Long-Run Costs", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Market Structures",
-        topics: [
-          { topic: "Perfect Competition", hours: 1, difficulty: "Medium" },
-          { topic: "Monopoly", hours: 1, difficulty: "Medium" },
-          { topic: "Monopolistic Competition", hours: 1, difficulty: "Medium" },
-          { topic: "Oligopoly", hours: 1, difficulty: "Medium" },
-        ],
-      },
-      {
-        category: "Welfare Economics",
-        topics: [
-          { topic: "Economic Efficiency", hours: 1, difficulty: "Medium" },
-          { topic: "Market Failure", hours: 1, difficulty: "Medium" },
-          { topic: "Public Goods", hours: 1, difficulty: "Medium" },
-          { topic: "Externalities", hours: 1, difficulty: "Medium" },
-        ],
-      },
-    ],
-  },
-];
 const glowGreen = keyframes`
   0% {
-    box-shadow: 0 0 5px green, 0 0 10px green, 0 0 20px green, 0 0 30px green;
+    box-shadow: 0 0 5px #26C281, 0 0 10px #26C281, 0 0 20px #26C281, 0 0 30px #26C281;
   }
   50% {
-    box-shadow: 0 0 10px green, 0 0 20px green, 0 0 30px green, 0 0 40px green;
+    box-shadow: 0 0 10px #26C281, 0 0 20px #26C281, 0 0 30px #26C281, 0 0 40px #26C281;
   }
   100% {
-    box-shadow: 0 0 5px green, 0 0 10px green, 0 0 20px green, 0 0 30px green;
+    box-shadow: 0 0 5px #26C281, 0 0 10px #26C281, 0 0 20px #26C281, 0 0 30px #26C281;
   }
 `;
 const glowRed = keyframes`
@@ -400,6 +72,8 @@ const glowRed = keyframes`
 `;
 
 const CourseComponent = () => {
+  const db = getFirestore();
+
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
@@ -410,7 +84,7 @@ const CourseComponent = () => {
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingCourseStructure, setLoadingCourseStructure] = useState(false);
   const [slideIn, setSlideIn] = useState(true);
-  const [courses, setCourses] = useState(COURSES);
+  const [courses, setCourses] = useState<any>([]);
   const [displayCourses, setDisplayCourses] = useState(null);
 
   const [selectedCourse, setSelectedCourse] = useState<any>(0);
@@ -436,10 +110,7 @@ const CourseComponent = () => {
   const [expandedNode, setExpandedNode] = useState(null);
   const [isChanged, setIsChanged] = useState<string[]>([]);
   const [isRemoved, setIsRemoved] = useState<string[]>([]);
-  const [createCourseModel, setCreateCourseModel] = useState(false);
-
-  const [newCourseTitle, setNewCourseTitle] = useState("");
-  const [newCourseLearners, setNewCourseLearners] = useState("");
+  const [creatingCourseStep, setCreatingCourseStep] = useState<number>(0);
 
   const [editCategory, setEditCategory] = useState<any>(null);
   const [newCategoryTitle, setNewCategoryTitle] = useState<string>("");
@@ -454,6 +125,56 @@ const CourseComponent = () => {
       "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
   };
 
+  useEffect(() => {
+    const notebooksRef = collection(db, "coursesAI");
+    const q = query(notebooksRef, where("deleted", "==", false));
+
+    const killSnapshot = onSnapshot(q, snapshot => {
+      const docChanges = snapshot.docChanges();
+
+      setCourses((prevCourses: any) =>
+        docChanges.reduce(
+          (prev: (any & { id: string })[], change: any) => {
+            const docType = change.type;
+            const curData = { id: change.doc.id, ...change.doc.data() };
+
+            const prevIdx = prev.findIndex((m: any & { id: string }) => m.id === curData.id);
+            if (docType === "added") {
+              if (prevIdx === -1) {
+                prev.push({ ...curData });
+              } else {
+                prev[prevIdx] = { ...curData };
+              }
+            }
+            if (docType === "modified" && prevIdx !== -1) {
+              prev[prevIdx] = { ...curData };
+            }
+
+            if (docType === "removed" && prevIdx !== -1) {
+              prev.splice(prevIdx);
+            }
+            return prev;
+          },
+          [...prevCourses]
+        )
+      );
+    });
+
+    return () => {
+      killSnapshot();
+    };
+  }, [db]);
+
+  const updateCourses = (course: any) => {
+    if (!course.id || course.new) return;
+    const courseRef = doc(db, "coursesAI", course.id);
+    updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
+  };
+  const onCreateCourse = async (newCourse: any) => {
+    const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
+    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
+  };
+
   const handleTitleChange = (e: any) => {
     const updatedCourses = [...courses];
     updatedCourses[selectedCourse] = {
@@ -461,6 +182,7 @@ const CourseComponent = () => {
       title: e.target.value,
     };
     setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourse]);
   };
   const handleHoursChange = (e: any) => {
     const updatedCourses: any = [...courses];
@@ -469,6 +191,7 @@ const CourseComponent = () => {
       hours: Number(e.target.value),
     };
     setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourse]);
   };
 
   const handleDescriptionChange = (e: any) => {
@@ -478,6 +201,9 @@ const CourseComponent = () => {
       description: e.target.value,
     };
     setCourses(updatedCourses);
+    // setTimeout(() => {
+    updateCourses(updatedCourses[selectedCourse]);
+    // }, 1000);
   };
 
   const handleLearnersChange = (e: any) => {
@@ -487,11 +213,13 @@ const CourseComponent = () => {
       learners: e.target.value,
     };
     setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourse]);
   };
   const handleRemoveTopic = (categoryIndex: number, topicIndex: number) => {
     const updatedCourses = [...courses];
     updatedCourses[selectedCourse].syllabus[categoryIndex].topics.splice(topicIndex, 1);
     setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourse]);
   };
   const handleOpenDialog = (categoryIndex: any) => {
     setSelectedCategory(categoryIndex);
@@ -526,6 +254,7 @@ const CourseComponent = () => {
     }
 
     setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourse]);
     handleCloseDialog();
     setNewTopic("");
     setHours(0);
@@ -892,19 +621,12 @@ const CourseComponent = () => {
     return color;
   };
 
-  const createCourse = () => {
-    setCreateCourseModel(true);
-  };
-  const handleCloseCourseDialog = () => {
-    setCreateCourseModel(false);
-    setNewCourseLearners("");
-    setNewCourseTitle("");
-  };
-  const handleSaveCourse = () => {
-    setCourses(prev => {
+  const createCourse = async () => {
+    setCourses((prev: any) => {
       prev.push({
-        title: newCourseTitle,
-        learners: newCourseLearners,
+        id: newId(db),
+        title: "",
+        learners: "",
         hours: 0,
         courseObjectives: [],
         courseSkills: [],
@@ -912,11 +634,21 @@ const CourseComponent = () => {
         syllabus: [],
         tags: [],
         references: [],
+        new: true,
       });
       return prev;
     });
-    setSelectedCourse(courses.length - 1);
-    handleCloseCourseDialog();
+    setTimeout(() => {
+      setSelectedCourse(courses.length - 1);
+    }, 900);
+    setCreatingCourseStep(0);
+  };
+  const cancelCreatingCourse = () => {
+    setCourses((prev: any) => {
+      prev = prev.filter((p: any) => !p.new);
+      return prev;
+    });
+    setSelectedCourse(0);
   };
 
   const generateDescription = async () => {
@@ -927,6 +659,9 @@ const CourseComponent = () => {
     const response = await Post("/generateCourseDescription", { courseTitle, targetLearners, hours });
     setCourses((prev: any) => {
       prev[selectedCourse].description = response;
+      if (!prev[selectedCourse].new) {
+        updateCourses(prev[selectedCourse]);
+      }
       return prev;
     });
     setLoadingDescription(false);
@@ -940,8 +675,10 @@ const CourseComponent = () => {
     const response = await Post("/generateCourseObjectives", { courseTitle, targetLearners, courseDescription, hours });
     setCourses((prev: any) => {
       prev[selectedCourse].courseObjectives = response;
+      updateCourses(prev[selectedCourse]);
       return prev;
     });
+
     setLoadingObjectives(false);
   };
   const generateSkills = async () => {
@@ -961,6 +698,9 @@ const CourseComponent = () => {
     });
     setCourses((prev: any) => {
       prev[selectedCourse].courseSkills = response;
+      if (!prev[selectedCourse].new) {
+        updateCourses(prev[selectedCourse]);
+      }
       return prev;
     });
     setLoadingSkills(false);
@@ -984,6 +724,11 @@ const CourseComponent = () => {
     });
     setCourses((prev: any) => {
       prev[selectedCourse].syllabus = response;
+      if (prev[selectedCourse].new) {
+        onCreateCourse(prev[selectedCourse]);
+      } else {
+        updateCourses(prev[selectedCourse]);
+      }
       return prev;
     });
     if (response.length > 0) {
@@ -1022,6 +767,7 @@ const CourseComponent = () => {
         course.syllabus = course.syllabus.filter((s: any) => s.category !== c.category);
         setGlowCategoryRedIndex(-1);
         setCourses(_courses);
+        updateCourses(_courses[selectedCourse]);
       }, 900);
     }
   };
@@ -1049,6 +795,7 @@ const CourseComponent = () => {
     }, 1000);
 
     setCourses(_courses);
+    updateCourses(_courses[selectedCourse]);
     setEditCategory(null);
     setNewCategoryTitle("");
   };
@@ -1057,11 +804,13 @@ const CourseComponent = () => {
     const _courses: any = [...courses];
     _courses[selectedCourse].courseSkills = newTags;
     setCourses(_courses);
+    updateCourses(_courses[selectedCourse]);
   };
   const setNewCourseObjectives = (newTags: string[]) => {
     const _courses: any = [...courses];
     _courses[selectedCourse].courseObjectives = newTags;
     setCourses(_courses);
+    updateCourses(_courses[selectedCourse]);
   };
 
   const handleDragOver = (e: any) => {
@@ -1097,6 +846,7 @@ const CourseComponent = () => {
     _courses[selectedCourse].syllabus.splice(dragItem.current, 1);
     _courses[selectedCourse].syllabus.splice(dragOverItem.current, 0, dragItemContent);
     setCourses(_courses);
+    updateCourses(_courses[selectedCourse]);
     setTimeout(() => {
       setGlowCategoryGreenIndex(-1);
     }, 700);
@@ -1110,6 +860,47 @@ const CourseComponent = () => {
     return () => clearTimeout(timeoutId);
   };
 
+  const nextStep = () => {
+    if (creatingCourseStep === 2) {
+      generateDescription();
+    }
+    if (creatingCourseStep === 3) {
+      generateObjectives();
+    }
+    if (creatingCourseStep === 4) {
+      generateSkills();
+    }
+    if (creatingCourseStep === 5) {
+      generateCourseStructure();
+    }
+    setCreatingCourseStep(prev => prev + 1);
+  };
+  const nextButtonDisabled = (course: any) => {
+    if (creatingCourseStep === 0) {
+      return !course.title.trim();
+    }
+    if (creatingCourseStep === 1) {
+      return course.hours === 0;
+    }
+    if (creatingCourseStep === 2) {
+      return !course.learners.trim();
+    }
+    if (creatingCourseStep === 3) {
+      return !course.description.trim();
+    }
+    if (creatingCourseStep === 4) {
+      return course.courseObjectives.length <= 0;
+    }
+    if (creatingCourseStep === 5) {
+      return course.courseSkills.length <= 0;
+    }
+
+    return false;
+  };
+
+  if (courses.length <= 0) {
+    return <LinearProgress />;
+  }
   return (
     <Box
       sx={{
@@ -1135,203 +926,243 @@ const CourseComponent = () => {
 
       <Box padding="20px">
         <Box>
-          <TextField
-            value={courses[selectedCourse].title}
-            onChange={event => {
-              const courseIdx = courses.findIndex(course => course.title === event.target.value);
-              if (courseIdx !== -1) {
-                setSelectedCourse(courseIdx);
-              }
-            }}
-            select
-            label="Select Course"
-          >
-            <MenuItem
-              value=""
-              disabled
-              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            >
-              Select Course
-            </MenuItem>
-            {courses.map((course: any) => (
-              <MenuItem
-                key={course.title}
-                value={course.title}
-                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-              >
-                {course.title}
-              </MenuItem>
-            ))}
-          </TextField>
-          <LoadingButton
-            variant="contained"
-            color="success"
-            sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
-            onClick={createCourse}
-            loading={loading}
-          >
-            Create New Course
-          </LoadingButton>
-          <Box sx={{ display: "flex", gap: "15px" }}>
+          {!courses[selectedCourse].new && (
             <TextField
-              label="Course Title"
-              multiline
               value={courses[selectedCourse].title}
-              onChange={handleTitleChange}
-              margin="normal"
-              variant="outlined"
-              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
-            />
-            <TextField
-              label="Number of Hour-long Class Sessions"
-              fullWidth
-              value={courses[selectedCourse].hours || 0}
-              onChange={handleHoursChange}
-              margin="normal"
-              variant="outlined"
-              sx={{ width: "500px" }}
-              type="number"
-              inputProps={{ min: 0 }}
-            />
-
-            <TextField
-              value={courses[selectedCourse].references[0]}
-              select // tell TextField to render select
-              label="Select Book"
-              sx={{ mt: "15px" }}
+              onChange={event => {
+                const courseIdx = courses.findIndex((course: any) => course.title === event.target.value);
+                if (courseIdx !== -1) {
+                  setSelectedCourse(courseIdx);
+                }
+              }}
+              select
+              label="Select Course"
+              sx={{ minWidth: "200px" }}
             >
               <MenuItem
                 value=""
                 disabled
                 sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
               >
-                Select Book
+                Select Course
               </MenuItem>
-              {courses[selectedCourse].references.map((book: any) => (
+              {courses.map((course: any) => (
                 <MenuItem
-                  key={book}
-                  value={book}
+                  key={course.title}
+                  value={course.title}
                   sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
                 >
-                  {book}
+                  {course.title}
                 </MenuItem>
               ))}
             </TextField>
+          )}
+          {!courses[selectedCourse].new && (
+            <LoadingButton
+              variant="contained"
+              color="success"
+              sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+              onClick={createCourse}
+              loading={loading}
+            >
+              Create New Course
+            </LoadingButton>
+          )}
+
+          <Box sx={{ display: "flex", gap: "15px" }}>
+            {(!courses[selectedCourse].new || creatingCourseStep >= 0) && (
+              <TextField
+                label="Course Title"
+                multiline
+                value={courses[selectedCourse].title}
+                onChange={handleTitleChange}
+                margin="normal"
+                variant="outlined"
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+              />
+            )}
+            {(!courses[selectedCourse].new || creatingCourseStep >= 1) && (
+              <TextField
+                label="Number of Hour-long Class Sessions"
+                fullWidth
+                value={courses[selectedCourse].hours || 0}
+                onChange={handleHoursChange}
+                margin="normal"
+                variant="outlined"
+                sx={{ width: "500px" }}
+                type="number"
+                inputProps={{ min: 0 }}
+              />
+            )}
+            {!courses[selectedCourse].new && (
+              <TextField
+                value={courses[selectedCourse].references[0]}
+                select // tell TextField to render select
+                label="Select Book"
+                sx={{ mt: "15px", minWidth: "200px" }}
+              >
+                <MenuItem
+                  value=""
+                  disabled
+                  sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                >
+                  Select Book
+                </MenuItem>
+                {courses[selectedCourse].references.map((book: any) => (
+                  <MenuItem
+                    key={book}
+                    value={book}
+                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                  >
+                    {book}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
           </Box>
-          <TextField
-            label="Target Learners"
-            multiline
-            fullWidth
-            value={courses[selectedCourse].learners}
-            onChange={handleLearnersChange}
-            margin="normal"
-            variant="outlined"
-            rows={4}
-            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-          />
-          <TextField
-            label="Course Description"
-            multiline
-            fullWidth
-            value={courses[selectedCourse].description}
-            onChange={handleDescriptionChange}
-            margin="normal"
-            variant="outlined"
-            rows={4}
-            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            InputProps={{
-              endAdornment: (
+          {(!courses[selectedCourse].new || creatingCourseStep >= 2) && (
+            <TextField
+              label="Target Learners"
+              multiline
+              fullWidth
+              value={courses[selectedCourse].learners}
+              onChange={handleLearnersChange}
+              margin="normal"
+              variant="outlined"
+              rows={4}
+              sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+            />
+          )}
+          {(!courses[selectedCourse].new || creatingCourseStep >= 3) &&
+            (loadingDescription ? (
+              <LinearProgress />
+            ) : (
+              <TextField
+                label="Course Description"
+                multiline
+                fullWidth
+                value={courses[selectedCourse].description}
+                onChange={handleDescriptionChange}
+                margin="normal"
+                variant="outlined"
+                minRows={4}
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                InputLabelProps={{
+                  style: {
+                    color: "gray",
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {!courses[selectedCourse].description && (
+                        <LoadingButton
+                          onClick={generateDescription}
+                          sx={{
+                            display: "flex-end",
+                          }}
+                          loading={loadingDescription}
+                        >
+                          <AutoFixHighIcon />
+                        </LoadingButton>
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            ))}
+
+          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
+            (loadingObjectives ? (
+              <LinearProgress />
+            ) : (
+              <Box>
+                <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
+                  <Typography sx={{ mt: "5px" }}>Course Objectives:</Typography>
+                  <InputAdornment position="end">
+                    {!courses[selectedCourse].courseObjectives?.length && (
+                      <LoadingButton
+                        onClick={generateObjectives}
+                        sx={{
+                          display: "flex-end",
+                        }}
+                        loading={loadingObjectives}
+                      >
+                        <AutoFixHighIcon />
+                      </LoadingButton>
+                    )}
+                  </InputAdornment>
+                </Box>
+                <ChipInput
+                  tags={courses[selectedCourse].courseObjectives || []}
+                  selectedTags={() => {}}
+                  setTags={setNewCourseObjectives}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Add a new course objective..."
+                />
+              </Box>
+            ))}
+
+          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
+            (loadingSkills ? (
+              <LinearProgress />
+            ) : (
+              <Box>
+                <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
+                  <Typography sx={{ mt: "5px" }}>Course Skills:</Typography>
+                  <InputAdornment position="end">
+                    {!courses[selectedCourse].courseSkills?.length && (
+                      <LoadingButton
+                        onClick={generateSkills}
+                        sx={{
+                          display: "flex-end",
+                        }}
+                        loading={loadingSkills}
+                      >
+                        <AutoFixHighIcon />
+                      </LoadingButton>
+                    )}
+                  </InputAdornment>
+                </Box>
+                <ChipInput
+                  tags={courses[selectedCourse].courseSkills || []}
+                  selectedTags={() => {}}
+                  setTags={setNewSkills}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Add a new course skill..."
+                />
+              </Box>
+            ))}
+
+          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
+            (loadingCourseStructure ? (
+              <LinearProgress />
+            ) : (
+              <Box sx={{ display: "flex", alignItems: "center", py: "15px", mt: "26px" }}>
+                <Typography variant="h2">Course Structure:</Typography>
+                <Button sx={{ ml: "19px" }} onClick={() => setEditCategory("new")}>
+                  Add Category
+                </Button>
                 <InputAdornment position="end">
-                  {!courses[selectedCourse].description && (
+                  {!courses[selectedCourse].syllabus?.length && (
                     <LoadingButton
-                      onClick={generateDescription}
+                      onClick={generateCourseStructure}
                       sx={{
                         display: "flex-end",
                       }}
-                      loading={loadingDescription}
+                      loading={loadingCourseStructure}
                     >
                       <AutoFixHighIcon />
                     </LoadingButton>
                   )}
                 </InputAdornment>
-              ),
-            }}
-          />
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
-              <Typography sx={{ mt: "5px" }}>Course Objectives:</Typography>
-              <InputAdornment position="end">
-                {!courses[selectedCourse].courseObjectives?.length && (
-                  <LoadingButton
-                    onClick={generateObjectives}
-                    sx={{
-                      display: "flex-end",
-                    }}
-                    loading={loadingObjectives}
-                  >
-                    <AutoFixHighIcon />
-                  </LoadingButton>
-                )}
-              </InputAdornment>
-            </Box>
-            <ChipInput
-              tags={courses[selectedCourse].courseObjectives}
-              selectedTags={() => {}}
-              setTags={setNewCourseObjectives}
-              fullWidth
-              variant="outlined"
-              placeholder="Add a new course objective..."
-            />
-          </Box>
-          <Box>
-            <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
-              <Typography sx={{ mt: "5px" }}>Course Skills:</Typography>
-              <InputAdornment position="end">
-                {!courses[selectedCourse].courseSkills?.length && (
-                  <LoadingButton
-                    onClick={generateSkills}
-                    sx={{
-                      display: "flex-end",
-                    }}
-                    loading={loadingSkills}
-                  >
-                    <AutoFixHighIcon />
-                  </LoadingButton>
-                )}
-              </InputAdornment>
-            </Box>
-
-            <ChipInput
-              tags={courses[selectedCourse].courseSkills}
-              selectedTags={() => {}}
-              setTags={setNewSkills}
-              fullWidth
-              variant="outlined"
-              placeholder="Add a new course skill..."
-            />
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", py: "15px", mt: "26px" }}>
-            <Typography variant="h2">Course Structure:</Typography>
-            <Button sx={{ ml: "19px" }} onClick={() => setEditCategory("new")}>
-              Add Category
-            </Button>
-            <InputAdornment position="end">
-              {!courses[selectedCourse].syllabus?.length && (
-                <LoadingButton
-                  onClick={generateCourseStructure}
-                  sx={{
-                    display: "flex-end",
-                  }}
-                  loading={loadingCourseStructure}
-                >
-                  <AutoFixHighIcon />
-                </LoadingButton>
-              )}
-            </InputAdornment>
-          </Box>
+              </Box>
+            ))}
 
           <Box ref={containerRef} marginTop="20px">
-            {getCourses()[selectedCourse].syllabus.map((category, categoryIndex) => (
+            {getCourses()[selectedCourse].syllabus.map((category: any, categoryIndex: any) => (
               <Accordion
                 id={category.category}
                 key={category.category}
@@ -1426,7 +1257,7 @@ const CourseComponent = () => {
                   <AccordionDetails>
                     {
                       <Grid container spacing={2}>
-                        {category.topics.map((tc: any, topicIndex) => (
+                        {category.topics.map((tc: any, topicIndex: any) => (
                           <Grid item xs={12} sm={6} md={4} key={topicIndex}>
                             <Slide direction="down" timeout={800} in={true}>
                               <Paper
@@ -1689,6 +1520,38 @@ const CourseComponent = () => {
               </LoadingButton>
             </Box>
           )}
+          {courses[selectedCourse].new && creatingCourseStep <= 5 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "20px",
+                position: "sticky",
+                bottom: 24,
+                gap: "5px",
+              }}
+            >
+              <LoadingButton
+                variant="contained"
+                color="success"
+                sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
+                onClick={nextStep}
+                loading={loading}
+                disabled={nextButtonDisabled(courses[selectedCourse])}
+              >
+                Next
+              </LoadingButton>
+              <LoadingButton
+                variant="contained"
+                color="error"
+                sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+                onClick={cancelCreatingCourse}
+                loading={loading}
+              >
+                Cancel
+              </LoadingButton>
+            </Box>
+          )}
           <Dialog
             open={!!editCategory}
             onClose={() => {
@@ -1730,45 +1593,7 @@ const CourseComponent = () => {
               </Button>
             </DialogActions>
           </Dialog>
-          <Dialog open={createCourseModel} onClose={handleCloseCourseDialog} sx={{ zIndex: 9998 }}>
-            <DialogTitle>{"Add a Course"}</DialogTitle>
-            <DialogContent>
-              <TextField
-                label={"Course Title"}
-                multiline
-                fullWidth
-                value={newCourseTitle}
-                onChange={event => setNewCourseTitle(event.target.value)}
-                margin="normal"
-                variant="outlined"
-                sx={{ width: "500px" }}
-              />
-              <TextField
-                label={"Target Learners"}
-                multiline
-                fullWidth
-                value={newCourseLearners}
-                onChange={event => setNewCourseLearners(event.target.value)}
-                margin="normal"
-                variant="outlined"
-                sx={{ width: "500px" }}
-                rows={4}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseCourseDialog} color="primary" variant="contained">
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveCourse}
-                color="primary"
-                variant="contained"
-                disabled={!newCourseTitle.trim() || !newCourseLearners.trim()}
-              >
-                Add
-              </Button>
-            </DialogActions>
-          </Dialog>
+
           <Dialog open={dialogOpen} onClose={handleCloseDialog} sx={{ zIndex: 9998 }}>
             <DialogTitle>{editTopic ? "Edit topic" : "Add a topic"}</DialogTitle>
             <DialogContent>
@@ -1795,7 +1620,7 @@ const CourseComponent = () => {
               <Box sx={{ display: "column" }}>
                 <Typography>Skills:</Typography>
                 <ChipInput
-                  tags={skills}
+                  tags={skills || []}
                   setTags={setSkills}
                   selectedTags={() => {}}
                   fullWidth

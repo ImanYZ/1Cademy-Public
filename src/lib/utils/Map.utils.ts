@@ -1,11 +1,24 @@
 import dagre from "dagre";
-import { collection, doc, Firestore, getDocs, onSnapshot, query, setDoc, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  Firestore,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
+import { useCallback, useState } from "react";
 import { ReputationSignal } from "src/knowledgeTypes";
 import { IActionTrack /* , IActionTrackType */ } from "src/types/IActionTrack";
 import { INodeVersion } from "src/types/INodeVersion";
 import { MIN_ACCEPTED_VERSION_POINT_WEIGHT } from "src/utils/helpers";
 
 import { AllTagsTreeView } from "@/components/TagsSearcher";
+import { useAuth } from "@/context/AuthContext";
 
 import { EdgesData, FullNodeData, FullNodesData, NodeFireStore } from "../../nodeBookTypes";
 import { getCollectionsQuery } from "./getTypedCollections";
@@ -15,11 +28,11 @@ import { gtmEvent } from "./utils";
 
 export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setState.
 export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.
-export const NODE_WIDTH = 580; // Default node width
+export const NODE_WIDTH = 595; // Default node width
 export const NODE_HEIGHT = 97; // Default node height
 export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
 export const COLUMN_GAP = 190; // The minimum gap between the node columns.
-export const XOFFSET = 580; // Default X offset to shift all the nodes and relations.
+export const XOFFSET = 595; // Default X offset to shift all the nodes and relations.
 export const YOFFSET = 160; // Default Y offset to shift all the nodes and relations.
 export const LEFT_OFFSET_NEW_CHILDREN_BUTTON = 20; // offset from right border
 
@@ -1377,35 +1390,43 @@ export const generateReputationSignal = (
   });
 };
 
-export const createActionTrack = (
-  db: Firestore,
-  type: string,
-  action: string,
-  userData: {
-    uname: string;
-    imageUrl: string;
-    chooseUname: boolean;
-    fullname: string;
-  },
-  nodeId: string,
-  receivers: string[],
-  email: string
-) => {
-  if (process.env.NODE_ENV === "development") return;
-  const actionTracksCol = collection(db, "actionTracks");
-  return setDoc(doc(actionTracksCol), {
-    accepted: true,
-    type,
-    action,
-    imageUrl: userData.imageUrl,
-    createdAt: Timestamp.now(),
-    doer: userData.uname,
-    chooseUname: userData.chooseUname,
-    fullname: userData.fullname,
-    nodeId,
-    receivers,
-    email,
-  } as IActionTrack);
+export const useCreateActionTrack = () => {
+  const [{ user }] = useAuth();
+  const db = getFirestore();
+  const [lastRecordedMinute, setLastRecordedMinute] = useState<number>(-1);
+  const createActionTrack = useCallback(
+    async (data: any) => {
+      if (process.env.NODE_ENV === "development") return;
+
+      if (!user) {
+        console.error("User data is not available");
+        return;
+      }
+
+      const currentMinute = new Date().getMinutes();
+      if (currentMinute === lastRecordedMinute && data?.action === "navigateWhenNotScrolling") {
+        return;
+      }
+      setLastRecordedMinute(currentMinute);
+      const actionTracksCol = collection(db, "actionTracks");
+      try {
+        await setDoc(doc(actionTracksCol), {
+          accepted: true,
+          ...data,
+          imageUrl: user.imageUrl,
+          createdAt: Timestamp.now(),
+          doer: user.uname,
+          chooseUname: !!user.chooseUname,
+          fullname: user.fullname,
+        } as IActionTrack);
+      } catch (error) {
+        console.error("Error creating action track: ", error);
+      }
+    },
+    [db, user, lastRecordedMinute]
+  );
+
+  return createActionTrack;
 };
 
 export const getAvatarName = (fName: string, lName: string) => {

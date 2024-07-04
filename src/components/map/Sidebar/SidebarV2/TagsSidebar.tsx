@@ -8,7 +8,7 @@ import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useSt
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { FullNodeData, SortDirection, SortValues, TNodeBookState } from "src/nodeBookTypes";
+import { SortDirection, SortValues, TNodeBookState } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -33,11 +33,17 @@ type TagsSidebarProps = {
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
-  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  // preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
   notebookRef?: MutableRefObject<TNodeBookState>;
 };
 
-const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes, notebookRef }: TagsSidebarProps) => {
+const TagsSidebar = ({
+  username,
+  open,
+  onClose,
+  onChangeChosenNode,
+  /* preLoadNodes, */ notebookRef,
+}: TagsSidebarProps) => {
   const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -106,12 +112,12 @@ const TagsSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes
         totalResults: res.numResults,
       }));
       setIsLoading(false);
-      preLoadNodes(
-        res.data.map(c => c.id),
-        []
-      );
+      // preLoadNodes(
+      //   res.data.map(c => c.id),
+      //   []
+      // );
     },
-    [preLoadNodes, selectedTags]
+    [selectedTags]
   );
 
   const onChangeSortDirection = useCallback(

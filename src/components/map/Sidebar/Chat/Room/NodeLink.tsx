@@ -5,6 +5,7 @@ import { Box } from "@mui/system";
 import moment from "moment";
 import React, { Dispatch, SetStateAction } from "react";
 import { IChannelMessage, MembersInfo } from "src/chatTypes";
+import { UserTheme } from "src/knowledgeTypes";
 
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
@@ -16,6 +17,7 @@ import { MessageInput } from "./MessageInput";
 import { MessageLeft } from "./MessageLeft";
 type MessageRightProps = {
   type?: string;
+  theme: UserTheme;
   notebookRef: any;
   messageRefs: any;
   nodeBookDispatch: any;
@@ -64,6 +66,7 @@ type MessageRightProps = {
 };
 export const NodeLink = ({
   db,
+  theme,
   messageRefs,
   parentMessage,
   user,
@@ -106,7 +109,6 @@ export const NodeLink = ({
 }: MessageRightProps) => {
   const handleReplyMessage = () => {
     setOpenReplies(message);
-    setReplyOnMessage(message);
   };
 
   const handleOpenReplies = () => {
@@ -303,6 +305,7 @@ export const NodeLink = ({
                       <NodeLink
                         db={db}
                         type="reply"
+                        theme={theme}
                         notebookRef={notebookRef}
                         messageRefs={messageRefs}
                         nodeBookDispatch={nodeBookDispatch}
@@ -341,6 +344,7 @@ export const NodeLink = ({
                       <MessageLeft
                         key={idx}
                         type={"reply"}
+                        theme={theme}
                         messageRefs={messageRefs}
                         notebookRef={notebookRef}
                         nodeBookDispatch={nodeBookDispatch}
@@ -382,7 +386,7 @@ export const NodeLink = ({
                     notebookRef={notebookRef}
                     nodeBookDispatch={nodeBookDispatch}
                     db={db}
-                    theme={"Dark"}
+                    theme={theme}
                     placeholder={"Type your reply..."}
                     channelUsers={channelUsers}
                     sendMessageType={"reply"}
@@ -395,8 +399,7 @@ export const NodeLink = ({
                     user={user}
                     setMessages={setMessages}
                     roomType={roomType}
-                    sendMessage={sendMessage}
-                    sendReplyOnMessage={sendReplyOnMessage}
+                    sendMessage={sendReplyOnMessage}
                     parentMessage={message}
                     setOpenMedia={setOpenMedia}
                   />

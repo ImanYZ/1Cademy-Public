@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { IconButton, Modal, Paper, Skeleton, Typography } from "@mui/material";
+import { Modal, Paper, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -28,7 +28,7 @@ import { useNodeBook } from "@/context/NodeBookContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { createActionTrack } from "@/lib/utils/Map.utils";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { newId } from "@/lib/utils/newFirestoreId";
 
 import { NotFoundNotification } from "../../SidebarV2/NotificationSidebar";
@@ -114,6 +114,7 @@ export const Message = ({
   const [openMedia, setOpenMedia] = useState<string | null>(null);
   const scrolling = useRef<any>();
   const unsubscribeRefs = useRef<any>([]);
+  const createActionTrack = useCreateActionTrack();
 
   useEffect(() => {
     const currentDate = new Date();
@@ -396,20 +397,9 @@ export const Message = ({
       newMessage: { ...editingMessage, message: newMessage },
       roomType,
     });
-    createActionTrack(
-      db,
-      "MessageEdited",
-      "",
-      {
-        fullname: `${user?.fName} ${user?.lName}`,
-        chooseUname: !!user?.chooseUname,
-        uname: String(user?.uname),
-        imageUrl: String(user?.imageUrl),
-      },
-      "",
-      [],
-      user.email
-    );
+    createActionTrack({
+      action: "MessageEdited",
+    });
     setEditingMessage(null);
   };
 
@@ -422,7 +412,6 @@ export const Message = ({
       node = {}
     ) => {
       try {
-        setReplyOnMessage(null);
         const replyId = newId(db);
         const reply = {
           id: replyId,
@@ -444,6 +433,7 @@ export const Message = ({
           important,
           deleted: false,
         };
+        console.log("reply", reply);
         setReplies((prevMessages: any) => {
           return [...prevMessages, reply];
         });
@@ -457,26 +447,14 @@ export const Message = ({
           totalReplies: (curMessage?.totalReplies || 0) + 1,
         });
 
-        //await Post("/chat/replyOnMessage/", { reply, curMessage, action: "addReaction", roomType });
         await Post("/chat/sendNotification", {
           subject: "Replied from",
           newMessage: reply,
           roomType,
         });
-        createActionTrack(
-          db,
-          "MessageReplied",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user.email
-        );
+        createActionTrack({
+          action: "MessageReplied",
+        });
       } catch (error) {
         console.error(error);
       }
@@ -489,10 +467,6 @@ export const Message = ({
       try {
         if (sendMessageType === "edit") {
           saveMessageEdit(inputValue, imageUrls);
-        } else if (!!replyOnMessage || sendMessageType === "reply") {
-          if (!inputValue.trim() && !imageUrls.length) return;
-          sendReplyOnMessage(replyOnMessage, inputValue, imageUrls, important);
-          return;
         } else {
           let channelRef = doc(db, "channelMessages", selectedChannel?.id);
           if (roomType === "direct") {
@@ -527,20 +501,9 @@ export const Message = ({
             newMessage: { ...newMessage, id: docRef.id },
             roomType,
           });
-          createActionTrack(
-            db,
-            "MessageSent",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            "",
-            [],
-            user.email
-          );
+          createActionTrack({
+            action: "MessageSent",
+          });
         }
       } catch (error) {
         console.error(error);
@@ -600,24 +563,16 @@ export const Message = ({
           ))}
         </Box>
       )}
-      {newMemberSection && (
-        <Box sx={{ position: "relative", pt: "14px" }}>
-          <AddMember
-            db={db}
-            user={user}
-            onlineUsers={onlineUsers}
-            selectedChannel={selectedChannel}
-            getChannelRef={getChannelRef}
-            roomType={roomType}
-          />
-          <IconButton
-            onClick={() => setNewMemberSection(false)}
-            sx={{ position: "absolute", right: "0px", top: "-10px" }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      )}
+      <AddMember
+        db={db}
+        user={user}
+        onlineUsers={onlineUsers}
+        selectedChannel={selectedChannel}
+        getChannelRef={getChannelRef}
+        setOpen={setNewMemberSection}
+        open={newMemberSection}
+        roomType={roomType}
+      />
       {forward ? (
         <Forward />
       ) : (
@@ -657,35 +612,39 @@ export const Message = ({
                 </Box>
                 {messagesByDate[date].map((message: any) => (
                   <Box key={message.id}>
-                    {roomType === "news" && (
-                      <NewsCard
+                    {message?.node?.id ? (
+                      <NodeLink
+                        db={db}
+                        theme={theme}
                         notebookRef={notebookRef}
                         messageRefs={messageRefs}
                         nodeBookDispatch={nodeBookDispatch}
-                        db={db}
+                        replyOnMessage={replyOnMessage}
+                        forwardMessage={forwardMessage}
                         user={user}
                         message={message}
                         membersInfo={selectedChannel.membersInfo}
+                        openLinkedNode={openLinkedNode}
+                        onlineUsers={onlineUsers}
                         toggleEmojiPicker={toggleEmojiPicker}
-                        channelUsers={channelUsers}
-                        replyOnMessage={replyOnMessage}
-                        setReplyOnMessage={setReplyOnMessage}
                         toggleReaction={toggleReaction}
-                        forwardMessage={forwardMessage}
+                        roomType={roomType}
+                        selectedChannel={selectedChannel}
+                        channelUsers={channelUsers}
                         editingMessage={editingMessage}
                         setEditingMessage={setEditingMessage}
-                        selectedMessage={selectedMessage}
-                        roomType={roomType}
                         leading={leading}
                         getMessageRef={getMessageRef}
-                        selectedChannel={selectedChannel}
-                        onlineUsers={onlineUsers}
+                        handleDeleteReply={handleDeleteReply}
+                        isDeleting={isDeleting}
                         sendMessage={sendMessage}
                         sendReplyOnMessage={sendReplyOnMessage}
+                        setReplyOnMessage={setReplyOnMessage}
+                        setMessages={setMessages}
+                        selectedMessage={selectedMessage}
+                        handleDeleteMessage={handleDeleteMessage}
                         isLoadingReaction={isLoadingReaction}
                         makeMessageUnread={makeMessageUnread}
-                        handleDeleteMessage={handleDeleteMessage}
-                        handleDeleteReply={handleDeleteReply}
                         openReplies={openReplies}
                         setOpenReplies={setOpenReplies}
                         replies={replies}
@@ -695,39 +654,40 @@ export const Message = ({
                         handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                         openDMChannel={openDMChannel}
                       />
-                    )}
-                    {roomType !== "news" && (
+                    ) : (
                       <>
-                        {message?.node?.id ? (
-                          <NodeLink
-                            db={db}
-                            notebookRef={notebookRef}
+                        {roomType !== "news" ? (
+                          <MessageLeft
+                            type={"message"}
+                            theme={theme}
                             messageRefs={messageRefs}
+                            notebookRef={notebookRef}
                             nodeBookDispatch={nodeBookDispatch}
-                            replyOnMessage={replyOnMessage}
-                            forwardMessage={forwardMessage}
-                            user={user}
+                            selectedMessage={selectedMessage}
                             message={message}
-                            membersInfo={selectedChannel.membersInfo}
-                            openLinkedNode={openLinkedNode}
-                            onlineUsers={onlineUsers}
                             toggleEmojiPicker={toggleEmojiPicker}
                             toggleReaction={toggleReaction}
-                            roomType={roomType}
-                            selectedChannel={selectedChannel}
+                            membersInfo={selectedChannel.membersInfo}
+                            forwardMessage={forwardMessage}
+                            replyOnMessage={replyOnMessage}
+                            setReplyOnMessage={setReplyOnMessage}
                             channelUsers={channelUsers}
+                            user={user}
+                            db={db}
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
+                            roomType={roomType}
                             leading={leading}
                             getMessageRef={getMessageRef}
+                            selectedChannel={selectedChannel}
+                            setMessages={setMessages}
+                            onlineUsers={onlineUsers}
+                            openLinkedNode={openLinkedNode}
                             handleDeleteReply={handleDeleteReply}
+                            handleDeleteMessage={handleDeleteMessage}
                             isDeleting={isDeleting}
                             sendMessage={sendMessage}
                             sendReplyOnMessage={sendReplyOnMessage}
-                            setReplyOnMessage={setReplyOnMessage}
-                            setMessages={setMessages}
-                            selectedMessage={selectedMessage}
-                            handleDeleteMessage={handleDeleteMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
                             openReplies={openReplies}
@@ -740,38 +700,35 @@ export const Message = ({
                             openDMChannel={openDMChannel}
                           />
                         ) : (
-                          <MessageLeft
-                            type={"message"}
-                            messageRefs={messageRefs}
+                          <NewsCard
                             notebookRef={notebookRef}
+                            messageRefs={messageRefs}
                             nodeBookDispatch={nodeBookDispatch}
-                            selectedMessage={selectedMessage}
+                            db={db}
+                            user={user}
+                            theme={theme}
                             message={message}
-                            toggleEmojiPicker={toggleEmojiPicker}
-                            toggleReaction={toggleReaction}
                             membersInfo={selectedChannel.membersInfo}
-                            forwardMessage={forwardMessage}
+                            toggleEmojiPicker={toggleEmojiPicker}
+                            channelUsers={channelUsers}
                             replyOnMessage={replyOnMessage}
                             setReplyOnMessage={setReplyOnMessage}
-                            channelUsers={channelUsers}
-                            user={user}
-                            db={db}
+                            toggleReaction={toggleReaction}
+                            forwardMessage={forwardMessage}
                             editingMessage={editingMessage}
                             setEditingMessage={setEditingMessage}
+                            selectedMessage={selectedMessage}
                             roomType={roomType}
                             leading={leading}
                             getMessageRef={getMessageRef}
                             selectedChannel={selectedChannel}
-                            setMessages={setMessages}
                             onlineUsers={onlineUsers}
-                            openLinkedNode={openLinkedNode}
-                            handleDeleteReply={handleDeleteReply}
-                            handleDeleteMessage={handleDeleteMessage}
-                            isDeleting={isDeleting}
                             sendMessage={sendMessage}
                             sendReplyOnMessage={sendReplyOnMessage}
                             isLoadingReaction={isLoadingReaction}
                             makeMessageUnread={makeMessageUnread}
+                            handleDeleteMessage={handleDeleteMessage}
+                            handleDeleteReply={handleDeleteReply}
                             openReplies={openReplies}
                             setOpenReplies={setOpenReplies}
                             replies={replies}
@@ -780,6 +737,9 @@ export const Message = ({
                             setOpenMedia={setOpenMedia}
                             handleMentionUserOpenRoom={handleMentionUserOpenRoom}
                             openDMChannel={openDMChannel}
+                            isDeleting={isDeleting}
+                            setMessages={setMessages}
+                            openLinkedNode={openLinkedNode}
                           />
                         )}
                       </>
@@ -792,7 +752,6 @@ export const Message = ({
           })}
         </Box>
       )}
-
       {!isLoading && (leading || replyOnMessage || roomType !== "news") && (
         <Box
           sx={{
@@ -832,7 +791,6 @@ export const Message = ({
             setMessages={setMessages}
             sendMessageType={"message"}
             sendMessage={sendMessage}
-            sendReplyOnMessage={sendReplyOnMessage}
             setOpenMedia={setOpenMedia}
           />
         </Box>

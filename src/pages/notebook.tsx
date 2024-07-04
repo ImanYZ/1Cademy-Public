@@ -139,7 +139,6 @@ import {
   compareLinks,
   compareProperty,
   copyNode,
-  createActionTrack,
   generateReputationSignal,
   getInteractiveMapDefaultScale,
   getSelectionText,
@@ -151,13 +150,13 @@ import {
   setDagNode,
   setNewParentChildrenEdges,
   tempNodes,
+  useCreateActionTrack,
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newFirestoreId";
 import {
   buildFullNodes,
   getNodesPromises,
   getUserNodeChanges,
-  mergeAllNodes,
   synchronizeGraph,
 } from "../lib/utils/nodesSyncronization.utils";
 import { getGroupTutorials, LivelinessBar } from "../lib/utils/tutorials/grouptutorials";
@@ -281,6 +280,7 @@ const Notebook = ({}: NotebookProps) => {
   const [{ user, reputation, settings }, { dispatch }] = useAuth();
   const { allTags, allTagsLoaded } = useTagsTreeView();
   const { confirmIt, promptIt, ConfirmDialog } = useConfirmDialog();
+  const createActionTrack = useCreateActionTrack();
   const db = getFirestore();
   // const storage = getStorage();
   const theme = useTheme();
@@ -866,58 +866,18 @@ const Notebook = ({}: NotebookProps) => {
   const openNodeHandler = useMemoizedCallback(
     async (nodeId: string, openWithDefaultValues: Partial<UserNodeFirestore> = {}, selectNode = true) => {
       devLog("OPEN_NODE_HANDLER", { nodeId, openWithDefaultValues });
-      const expanded = openWithDefaultValues.hasOwnProperty("open") ? Boolean(openWithDefaultValues.open) : true;
+      const expanded = true;
       // update graph with preloaded data, to get changes immediately
       // update on DB, to save changes
-      let linkedNodeRef;
       let userNodeRef = null;
       let userNodeData: UserNodeFirestore | null = null;
-      const nodeRef = doc(db, "nodes", nodeId);
-
-      const batch = writeBatch(db);
-      if (/* nodeDoc.exists() && */ user) {
-        setGraph(graph => {
-          const preloadedNode = preLoadedNodesRef.current[nodeId];
-          if (!preloadedNode) return graph;
-          const selectedNotebookIdx = preloadedNode.notebooks.findIndex(c => c === selectedNotebookId);
-          if (selectedNotebookIdx < 0) {
-            console.error("selectedNotebook property doesn't exist into notebooks property!");
-            return graph;
-          }
-
-          return synchronizeGraph({
-            g: g.current,
-            graph,
-            fullNodes: [
-              {
-                ...preloadedNode,
-                open: expanded,
-                expands: preloadedNode.expands.map((c, i) => (i === selectedNotebookIdx ? expanded : c)),
-              },
-            ],
-            selectedNotebookId,
-            allTags,
-            setNodeUpdates,
-            setNoNodesFoundMessage,
-          });
-        });
+      if (user) {
         if (selectNode) {
           notebookRef.current.selectedNode = nodeId; // CHECK: THIS DOESN'T GUARANTY CORRECT SELECTED NODE, WE NEED TO DETECT WHEN GRAPH UPDATE HIS VALUES
           nodeBookDispatch({ type: "setSelectedNode", payload: nodeId }); // CHECK: SAME FOR THIS
         }
 
-        const nodeDoc = await getDoc(nodeRef);
-        const thisNode: any = { ...nodeDoc.data(), id: nodeId };
-
         try {
-          for (let child of thisNode.children) {
-            linkedNodeRef = doc(db, "nodes", child.node);
-            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-          }
-          for (let parent of thisNode.parents) {
-            linkedNodeRef = doc(db, "nodes", parent.node);
-            batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-          }
           const userNodesRef = collection(db, "userNodes");
           const q = query(
             userNodesRef,
@@ -951,7 +911,7 @@ const Notebook = ({}: NotebookProps) => {
             delete userNodeData?.visible;
             delete userNodeData?.open;
 
-            batch.update(userNodeRef, userNodeData);
+            updateDoc(userNodeRef, userNodeData);
           } else {
             userNodeData = {
               ...openWithDefaultValues,
@@ -971,9 +931,11 @@ const Notebook = ({}: NotebookProps) => {
             };
             userNodeRef = collection(db, "userNodes");
             const preloadedUserNodeId = preLoadedNodesRef.current[nodeId]?.userNodeId;
-            preloadedUserNodeId
-              ? batch.set(doc(userNodeRef, preloadedUserNodeId), userNodeData)
-              : batch.set(doc(userNodeRef), userNodeData);
+            if (preloadedUserNodeId) {
+              setDoc(doc(userNodeRef, preloadedUserNodeId), userNodeData);
+            } else {
+              setDoc(doc(userNodeRef), userNodeData);
+            }
           }
           const userNodeLogRef = collection(db, "userNodesLog");
 
@@ -982,8 +944,7 @@ const Notebook = ({}: NotebookProps) => {
             createdAt: Timestamp.fromDate(new Date()),
           };
 
-          batch.set(doc(userNodeLogRef), userNodeLogData);
-          await batch.commit();
+          setDoc(doc(userNodeLogRef), userNodeLogData);
         } catch (err) {
           console.error(err);
           const errorData = {
@@ -1207,22 +1168,22 @@ const Notebook = ({}: NotebookProps) => {
     };
   }, []);
 
-  const onPreLoadNodes = useCallback(
-    async (nodeIds: string[], fullNodes: FullNodeData[]) => {
-      if (!user?.uname) return;
-      if (!selectedNotebookId) return;
+  // const onPreLoadNodes = useCallback(
+  //   async (nodeIds: string[], fullNodes: FullNodeData[]) => {
+  //     if (!user?.uname) return;
+  //     if (!selectedNotebookId) return;
 
-      const preUserNodes = await getUserNodesByForce(db, nodeIds, user.uname, selectedNotebookId);
-      const preNodesData = await getNodesPromises(db, nodeIds);
-      const preFullNodes = buildFullNodes(
-        preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
-        preNodesData
-      );
-      // Info: keep order of destructured parameters on mergeAllNodes
-      preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
-    },
-    [db, selectedNotebookId, user?.uname]
-  );
+  //     const preUserNodes = await getUserNodesByForce(db, nodeIds, user.uname, selectedNotebookId);
+  //     const preNodesData = await getNodesPromises(db, nodeIds);
+  //     const preFullNodes = buildFullNodes(
+  //       preUserNodes.map(c => ({ cType: "added", uNodeId: c.id, uNodeData: c })),
+  //       preNodesData
+  //     );
+  //     // Info: keep order of destructured parameters on mergeAllNodes
+  //     preLoadedNodesRef.current = mergeAllNodes([...preFullNodes, ...fullNodes], preLoadedNodesRef.current);
+  //   },
+  //   [db, selectedNotebookId, user?.uname]
+  // );
 
   const userNodesSnapshotFn = useCallback(
     (q: Query<DocumentData>, uname: string, notebookId: string) => {
@@ -1240,10 +1201,9 @@ const Notebook = ({}: NotebookProps) => {
           }
           // TODO: set synchronizationIsWorking true
           setNoNodesFoundMessage(false);
-          const userNodeChanges = getUserNodeChanges(docChanges);
+          const { userNodeChanges, nodeIds } = getUserNodeChanges(docChanges);
           devLog("2:Snapshot:userNodes Data", userNodeChanges);
 
-          const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodesPromises(db, nodeIds);
           devLog("3:Snapshot:Nodes Data", nodesData);
 
@@ -1273,24 +1233,24 @@ const Notebook = ({}: NotebookProps) => {
           });
 
           // preload data
-          const otherNodes = fullNodes.reduce(
-            (acu: string[], cur) => [
-              ...acu,
-              ...cur.parents.map(c => c.node),
-              ...cur.children.map(c => c.node),
-              ...cur.tagIds,
-              ...cur.referenceIds,
-            ],
-            []
-          );
-          onPreLoadNodes(otherNodes, fullNodes);
+          // const otherNodes = fullNodes.reduce(
+          //   (acu: string[], cur) => [
+          //     ...acu,
+          //     ...cur.parents.map(c => c.node),
+          //     ...cur.children.map(c => c.node),
+          //     ...cur.tagIds,
+          //     ...cur.referenceIds,
+          //   ],
+          //   []
+          // );
+          // onPreLoadNodes(otherNodes, fullNodes);
         },
         error => console.error(error)
       );
 
       return () => userNodesSnapshot();
     },
-    [allTags, db, onPreLoadNodes]
+    [allTags, db]
   );
 
   // this useEffect manage states when sidebar is opened or closed
@@ -1445,7 +1405,7 @@ const Notebook = ({}: NotebookProps) => {
       }
       killSnapshot();
     };
-    // INFO: notebookChanged used in dependecies because of the redraw graph (magic wand button)
+    // INFO: notebookChanged used in dependencies because of the redraw graph (magic wand button)
   }, [allTagsLoaded, db, userNodesSnapshotFn, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
@@ -1681,32 +1641,11 @@ const Notebook = ({}: NotebookProps) => {
         createdAt: Timestamp.fromDate(new Date()),
       });
       if (user) {
-        createActionTrack(
-          db,
-          "openUserInfoSidebar",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({ action: "openUserInfoSidebar" });
       }
     },
     [db, nodeBookDispatch, user, setOpenSidebar, revertNodesOnGraph]
   );
-
-  const getFirstParent = (childId: string) => {
-    const parents: any = g.current.predecessors(childId);
-
-    if (!parents) return null;
-    if (!parents.length) return null;
-    return parents[0];
-  };
 
   // ---------------------------------------------------------------------
   // ---------------------------------------------------------------------
@@ -2095,36 +2034,35 @@ const Notebook = ({}: NotebookProps) => {
     let descendants: any[] = [];
     if (children && children.length > 0) {
       for (let child of children) {
-        descendants = [...descendants, child, ...recursiveDescendants(child)];
+        if (nodeId === child) continue;
+        descendants = [...descendants, child, ...(child ? recursiveDescendants(child) : [])];
       }
     }
     return descendants;
   }, []);
 
   const hideDescendants = useMemoizedCallback(
-    nodeId => {
+    async nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
+      const descendants = recursiveDescendants(nodeId);
+      notebookRef.current.selectedNode = nodeId;
+      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
-      setGraph(graph => {
-        const updatedNodeIds: string[] = [];
-        const descendants = recursiveDescendants(nodeId);
-
-        notebookRef.current.selectedNode = nodeId;
-        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-
-        const batch = writeBatch(db);
-        try {
+      const batch = writeBatch(db);
+      try {
+        setGraph((graph: any) => {
           for (let descendant of descendants) {
             const thisNode = graph.nodes[descendant];
+            if (!thisNode.userNodeId) continue;
             const { userNodeRef } = initNodeStatusChange(descendant, thisNode.userNodeId);
-            const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
+            const notebookIdx = (thisNode.notebooks ?? []).findIndex((cur: string) => cur === selectedNotebookId);
             if (notebookIdx < 0) {
               console.error("'notebooks' property has invalid values");
               continue;
             }
 
-            const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
-            const newNotebooks = (thisNode.notebooks ?? []).filter((c, idx) => idx !== notebookIdx);
+            const newExpands = (thisNode.expands ?? []).filter((c: any, idx: number) => idx !== notebookIdx);
+            const newNotebooks = (thisNode.notebooks ?? []).filter((cur: string) => cur !== selectedNotebookId);
             const userNodeData = {
               changed: thisNode.changed,
               correct: thisNode.correct,
@@ -2147,45 +2085,23 @@ const Notebook = ({}: NotebookProps) => {
               ...userNodeData,
               createdAt: Timestamp.fromDate(new Date()),
             };
-            // INFO: this was commented because is not used
-            // if (userNodeData.open && "openHeight" in thisNode) {
-            //   changeNode.height = thisNode.openHeight;
-            //   userNodeLogData.height = thisNode.openHeight;
-            // } else if ("closedHeight" in thisNode) {
-            //   changeNode.closedHeight = thisNode.closedHeight;
-            //   userNodeLogData.closedHeight = thisNode.closedHeight;
-            // }
             const userNodeLogRef = collection(db, "userNodesLog");
             batch.set(doc(userNodeLogRef), userNodeLogData);
           }
-          batch.commit();
 
-          setNodeUpdates({
-            nodeIds: updatedNodeIds,
-            updatedAt: new Date(),
-          });
-
-          // simulation
-          const { newEdges, newNodes } = descendants.reduce(
-            (acu: { newNodes: { [key: string]: any }; newEdges: { [key: string]: any } }, cur) => {
-              const tmpEdges = removeDagAllEdges(g.current, cur, acu.newEdges, []);
-              const tmpNodes = removeDagNode(g.current, cur, acu.newNodes);
-              return { newNodes: { ...tmpNodes }, newEdges: { ...tmpEdges } };
-            },
-            { newNodes: { ...graph.nodes }, newEdges: { ...graph.edges } }
-          );
-          return { edges: newEdges, nodes: newNodes };
-        } catch (err) {
-          console.error(err);
-          const errorData = {
-            nodeId,
-            descendants,
-            errorMessage: err instanceof Error ? err.message : "",
-          };
-          addClientErrorLog(db, { title: "HIDE_DESCENDANTS", user: user.uname, data: errorData });
           return graph;
-        }
-      });
+        });
+
+        await batch.commit();
+      } catch (err) {
+        console.error(err);
+        const errorData = {
+          nodeId,
+          descendants,
+          errorMessage: err instanceof Error ? err.message : "",
+        };
+        addClientErrorLog(db, { title: "HIDE_DESCENDANTS", user: user.uname, data: errorData });
+      }
     },
     [recursiveDescendants, selectedNotebookId]
   );
@@ -2200,20 +2116,10 @@ const Notebook = ({}: NotebookProps) => {
 
       if (notebookRef.current.choosingNode) return;
       if (!user) return;
-      createActionTrack(
-        db,
-        "NodeOpen",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        linkedNodeID,
-        [],
-        user.email
-      );
+      createActionTrack({
+        action: "NodeOpen",
+        nodeId: linkedNodeID,
+      });
 
       gtmEvent("Interaction", {
         customType: "NodeOpen",
@@ -2247,18 +2153,7 @@ const Notebook = ({}: NotebookProps) => {
       }
     },
 
-    [
-      db,
-      isPlayingTheTutorialRef,
-      nodeBookDispatch,
-      openNodeHandler,
-      scrollToNode,
-      user?.chooseUname,
-      user?.fName,
-      user?.imageUrl,
-      user?.lName,
-      user?.uname,
-    ]
+    [createActionTrack, isPlayingTheTutorialRef, nodeBookDispatch, openNodeHandler, scrollToNode, user]
   );
 
   const clearInitialProposal = useCallback(() => {
@@ -2275,397 +2170,264 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const hideNodeHandler = useCallback(
-    (nodeId: string) => {
+    (thisNode: any) => {
       /**
        * changes in DB
        * change userNode
        * change node
        * create userNodeLog
        */
+      devLog("HIDE_NODE_HANDLER", { nodeId: thisNode.node }, thisNode);
+      const username = user?.uname;
+      if (notebookRef.current.choosingNode) return;
+      if (!username) return;
+      const notebookIdx = (thisNode.notebooks ?? []).findIndex((cur: any) => cur === selectedNotebookId);
+      const newExpands = (thisNode.expands ?? []).map((cur: any, idx: any) => (idx === notebookIdx ? !cur : cur));
+      const { userNodeRef } = initNodeStatusChange(thisNode.node, thisNode.userNodeId);
+      const userNodeData = {
+        changed: thisNode.changed || false,
+        correct: thisNode.correct,
+        createdAt: Timestamp.fromDate(thisNode.firstVisit),
+        updatedAt: Timestamp.fromDate(new Date()),
+        deleted: false,
+        isStudied: thisNode.isStudied,
+        bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+        node: thisNode.node,
+        // open: thisNode.open,
+        notebooks: (thisNode.notebooks ?? []).filter((cur: any) => cur !== selectedNotebookId),
+        expands: newExpands,
+        user: username,
+        visible: false,
+        wrong: thisNode.wrong,
+      };
+      setDoc(userNodeRef, userNodeData);
+      const userNodeLogData: any = {
+        ...userNodeData,
+        createdAt: Timestamp.fromDate(new Date()),
+      };
 
-      devLog("HIDE_NODE_HANDLER", { nodeId });
-      setGraph(graph => {
-        const parentNode = getFirstParent(nodeId);
+      const userNodeLogRef = collection(db, "userNodesLog");
+      setDoc(doc(userNodeLogRef), userNodeLogData);
 
-        const thisNode = graph.nodes[nodeId];
-        const { userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+      gtmEvent("Interaction", {
+        customType: "NodeHide",
+      });
 
-        // flagged closing node as visible = false in parents
-        for (const parent of thisNode.parents) {
-          if (!graph.nodes[parent.node]) continue;
-          const childIdx = graph.nodes[parent.node].children.findIndex(child => child.node === nodeId);
-          if (childIdx !== -1) {
-            graph.nodes[parent.node] = { ...graph.nodes[parent.node] };
-            graph.nodes[parent.node].children = [...graph.nodes[parent.node].children];
-            const child = graph.nodes[parent.node].children[childIdx];
-            child.visible = false;
+      createActionTrack({
+        action: "NodeHide",
+        nodeId: thisNode.node,
+      });
+
+      setTimeout(() => {
+        setNodeUpdates({
+          nodeIds: [thisNode.node],
+          updatedAt: new Date(),
+        });
+      }, 200);
+    },
+    [createActionTrack, db, initNodeStatusChange, selectedNotebookId, user]
+  );
+
+  const openAllChildren = useCallback(
+    async (thisNode: any) => {
+      devLog("OPEN_ALL_CHILDREN", { thisNode, isWritingOnDB: isWritingOnDBRef.current });
+      if (isWritingOnDBRef.current) return;
+      if (notebookRef.current.choosingNode || !user) return;
+
+      let linkedNodeId = null;
+
+      let userNodeRef = null;
+      let userNodeData = null;
+      const batch = writeBatch(db);
+
+      try {
+        isWritingOnDBRef.current = true;
+        let childrenNotInNotebook: {
+          node: string;
+          label: string;
+          title: string;
+          type: string;
+          visible?: boolean | undefined;
+        }[] = [];
+        thisNode.children.forEach((child: any) => {
+          if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
+        });
+
+        for (const child of childrenNotInNotebook) {
+          linkedNodeId = child.node as string;
+          const userNodesRef = collection(db, "userNodes");
+          const userNodeQuery = query(
+            userNodesRef,
+            where("node", "==", linkedNodeId),
+            where("user", "==", user.uname),
+            limit(1)
+          );
+          const userNodeDoc = await getDocs(userNodeQuery);
+
+          if (userNodeDoc.docs.length > 0) {
+            // if exist documents update the first
+            userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
+            userNodeData = userNodeDoc.docs[0].data();
+            // userNodeData.visible = true;
+            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
+            userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            delete userNodeData?.visible;
+            delete userNodeData?.open;
+            updateDoc(userNodeRef, userNodeData);
+          } else {
+            // if NOT exist documents create a document
+            userNodeData = {
+              changed: true,
+              correct: false,
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: false,
+              bookmarked: false,
+              node: linkedNodeId,
+              // open: true,
+              user: user.uname,
+              // visible: true,
+              wrong: false,
+              notebooks: [selectedNotebookId],
+              expands: [true],
+            };
+            addDoc(collection(db, "userNodes"), userNodeData);
           }
-        }
 
-        (async () => {
-          const batch = writeBatch(db);
-          const username = user?.uname;
-          if (notebookRef.current.choosingNode) return;
-          if (!username) return;
-          if (!user) return;
-
-          const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
-          if (notebookIdx < 0) return console.error("notebook property has invalid values");
-          const newExpands = (thisNode.expands ?? []).filter((c, idx) => idx !== notebookIdx);
-
-          const userNodeData = {
-            changed: thisNode.changed || false,
-            correct: thisNode.correct,
-            createdAt: Timestamp.fromDate(thisNode.firstVisit),
-            updatedAt: Timestamp.fromDate(new Date()),
-            deleted: false,
-            isStudied: thisNode.isStudied,
-            bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-            node: nodeId,
-            // open: thisNode.open,
-            notebooks: (thisNode.notebooks ?? []).filter(cur => cur !== selectedNotebookId),
-            expands: newExpands,
-            user: username,
-            visible: false,
-            wrong: thisNode.wrong,
-          };
-          batch.set(userNodeRef, userNodeData);
-          const userNodeLogData: any = {
+          const userNodeLogRef = collection(db, "userNodesLog");
+          const userNodeLogData = {
             ...userNodeData,
             createdAt: Timestamp.fromDate(new Date()),
           };
 
-          // INFO: this is not used
-          // if (userNodeData.open && "openHeight" in thisNode) {
-          //   changeNode.height = thisNode.openHeight;
-          //   userNodeLogData.height = thisNode.openHeight;
-          // } else if ("closedHeight" in thisNode) {
-          //   changeNode.closedHeight = thisNode.closedHeight;
-          //   userNodeLogData.closedHeight = thisNode.closedHeight;
-          // }
-          const userNodeLogRef = collection(db, "userNodesLog");
           batch.set(doc(userNodeLogRef), userNodeLogData);
-          await batch.commit();
+        }
 
-          gtmEvent("Interaction", {
-            customType: "NodeHide",
-          });
+        notebookRef.current.selectedNode = thisNode.node;
 
-          createActionTrack(
-            db,
-            "NodeHide",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            nodeId,
-            [],
-            user.email
-          );
+        await batch.commit();
+        nodeBookDispatch({ type: "setSelectedNode", payload: thisNode.node });
+        await detectHtmlElements({ ids: childrenNotInNotebook.map(c => c.node) });
+        isWritingOnDBRef.current = false;
+      } catch (err) {
+        isWritingOnDBRef.current = false;
+        console.error(err);
+        const errorData = {
+          nodeId: thisNode.node,
+          errorMessage: err instanceof Error ? err.message : "",
+        };
+        addClientErrorLog(db, { title: "OPEN_ALL_CHILDREN", user: user.uname, data: errorData });
+      }
 
-          notebookRef.current.selectedNode = parentNode;
-          nodeBookDispatch({ type: "setSelectedNode", payload: parentNode });
-
-          setTimeout(() => {
-            setNodeUpdates({
-              nodeIds: [nodeId],
-              updatedAt: new Date(),
-            });
-          }, 200);
-        })();
-
-        return graph;
+      createActionTrack({
+        action: "openAllChildren",
+        nodeId: thisNode.node,
       });
-    },
-    [
-      db,
-      user?.uname,
-      user?.fName,
-      user?.lName,
-      user?.chooseUname,
-      user?.imageUrl,
-      initNodeStatusChange,
-      nodeBookDispatch,
-      selectedNotebookId,
-    ]
-  );
-
-  const openAllChildren = useCallback(
-    (nodeId: string) => {
-      if (isWritingOnDBRef.current) return;
-      if (notebookRef.current.choosingNode || !user) return;
-
-      devLog("OPEN_ALL_CHILDREN", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
-
-      let linkedNodeId = null;
-      let linkedNodeRef = null;
-      let userNodeRef = null;
-      let userNodeData = null;
-      const batch = writeBatch(db);
-
-      setGraph(graph => {
-        const thisNode = graph.nodes[nodeId];
-
-        (async () => {
-          try {
-            isWritingOnDBRef.current = true;
-            let childrenNotInNotebook: {
-              node: string;
-              label: string;
-              title: string;
-              type: string;
-              visible?: boolean | undefined;
-            }[] = [];
-            thisNode.children.forEach(child => {
-              if (!document.getElementById(child.node)) childrenNotInNotebook.push(child);
-            });
-            // for (const child of thisNode.children) {
-            for (const child of childrenNotInNotebook) {
-              linkedNodeId = child.node as string;
-              // linkedNode = document.getElementById(linkedNodeId);
-              // if (linkedNode) continue;
-
-              const nodeRef = doc(db, "nodes", linkedNodeId);
-              const nodeDoc = await getDoc(nodeRef);
-
-              if (!nodeDoc.exists()) continue;
-              const thisNode: any = { ...nodeDoc.data(), id: linkedNodeId };
-
-              for (let chi of thisNode.children) {
-                linkedNodeRef = doc(db, "nodes", chi.node);
-                batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-              }
-
-              for (let parent of thisNode.parents) {
-                linkedNodeRef = doc(db, "nodes", parent.node);
-                batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-              }
-
-              const userNodesRef = collection(db, "userNodes");
-              const userNodeQuery = query(
-                userNodesRef,
-                where("node", "==", linkedNodeId),
-                where("user", "==", user.uname),
-                limit(1)
-              );
-              const userNodeDoc = await getDocs(userNodeQuery);
-
-              if (userNodeDoc.docs.length > 0) {
-                // if exist documents update the first
-                userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
-                userNodeData = userNodeDoc.docs[0].data();
-                // userNodeData.visible = true;
-                userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
-                userNodeData.expands = [...(userNodeData.expands ?? []), true];
-                userNodeData.updatedAt = Timestamp.fromDate(new Date());
-                delete userNodeData?.visible;
-                delete userNodeData?.open;
-                batch.update(userNodeRef, userNodeData);
-              } else {
-                // if NOT exist documents create a document
-                userNodeData = {
-                  changed: true,
-                  correct: false,
-                  createdAt: Timestamp.fromDate(new Date()),
-                  updatedAt: Timestamp.fromDate(new Date()),
-                  deleted: false,
-                  isStudied: false,
-                  bookmarked: false,
-                  node: linkedNodeId,
-                  // open: true,
-                  user: user.uname,
-                  // visible: true,
-                  wrong: false,
-                  notebooks: [selectedNotebookId],
-                  expands: [true],
-                };
-                userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
-              }
-
-              const userNodeLogRef = collection(db, "userNodesLog");
-              const userNodeLogData = {
-                ...userNodeData,
-                createdAt: Timestamp.fromDate(new Date()),
-              };
-
-              batch.set(doc(userNodeLogRef), userNodeLogData);
-            }
-
-            notebookRef.current.selectedNode = nodeId;
-            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-            await batch.commit();
-            await detectHtmlElements({ ids: childrenNotInNotebook.map(c => c.node) });
-            isWritingOnDBRef.current = false;
-          } catch (err) {
-            isWritingOnDBRef.current = false;
-            console.error(err);
-            const errorData = {
-              nodeId,
-              errorMessage: err instanceof Error ? err.message : "",
-            };
-            addClientErrorLog(db, { title: "OPEN_ALL_CHILDREN", user: user.uname, data: errorData });
-          }
-        })();
-
-        return graph;
-      });
-
-      createActionTrack(
-        db,
-        "openAllChildren",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user.email
-      );
       lastNodeOperation.current = { name: "OpenAllChildren", data: "" };
     },
-    [db, nodeBookDispatch, selectedNotebookId, user]
+    [createActionTrack, db, nodeBookDispatch, selectedNotebookId, user]
   );
 
   const openAllParent = useCallback(
-    (nodeId: string) => {
+    async (thisNode: any) => {
       if (isWritingOnDBRef.current) return;
       if (notebookRef.current.choosingNode || !user) return;
 
-      devLog("OPEN_ALL_PARENTS", { nodeId, isWritingOnDB: isWritingOnDBRef.current });
+      devLog("OPEN_ALL_PARENTS", { nodeId: thisNode, isWritingOnDB: isWritingOnDBRef.current });
 
       let linkedNodeId = null;
-      let linkedNodeRef = null;
+
       let userNodeRef = null;
       let userNodeData = null;
       const batch = writeBatch(db);
 
-      setGraph(graph => {
-        const thisNode = graph.nodes[nodeId];
+      try {
+        isWritingOnDBRef.current = true;
+        let parentsNotInNotebook: {
+          node: string;
+          label: string;
+          title: string;
+          type: string;
+          visible?: boolean | undefined;
+        }[] = [];
+        thisNode.parents.forEach((parent: any) => {
+          if (!document.getElementById(parent.node)) parentsNotInNotebook.push(parent);
+        });
+        for (const parent of parentsNotInNotebook) {
+          linkedNodeId = parent.node as string;
 
-        (async () => {
-          try {
-            isWritingOnDBRef.current = true;
-            let parentsNotInNotebook: {
-              node: string;
-              label: string;
-              title: string;
-              type: string;
-              visible?: boolean | undefined;
-            }[] = [];
-            thisNode.parents.forEach(parent => {
-              if (!document.getElementById(parent.node)) parentsNotInNotebook.push(parent);
-            });
-            for (const parent of parentsNotInNotebook) {
-              linkedNodeId = parent.node as string;
-              // linkedNode = document.getElementById(linkedNodeId);
-              // if (linkedNode) continue;
+          const userNodesRef = collection(db, "userNodes");
+          const userNodeQuery = query(
+            userNodesRef,
+            where("node", "==", linkedNodeId),
+            where("user", "==", user.uname),
+            where("delete", "==", false),
+            limit(1)
+          );
+          const userNodeDoc = await getDocs(userNodeQuery);
 
-              const nodeRef = doc(db, "nodes", linkedNodeId);
-              const nodeDoc = await getDoc(nodeRef);
-
-              if (!nodeDoc.exists()) continue;
-              const thisNode: any = { ...nodeDoc.data(), id: linkedNodeId };
-
-              for (let chi of thisNode.children) {
-                linkedNodeRef = doc(db, "nodes", chi.node);
-                batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-              }
-
-              for (let par of thisNode.parents) {
-                linkedNodeRef = doc(db, "nodes", par.node);
-                batch.update(linkedNodeRef, { updatedAt: Timestamp.fromDate(new Date()) });
-              }
-
-              const userNodesRef = collection(db, "userNodes");
-              const userNodeQuery = query(
-                userNodesRef,
-                where("node", "==", linkedNodeId),
-                where("user", "==", user.uname),
-                where("delete", "==", false),
-                limit(1)
-              );
-              const userNodeDoc = await getDocs(userNodeQuery);
-
-              if (userNodeDoc.docs.length > 0) {
-                // if exist documents update the first
-                userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
-                userNodeData = userNodeDoc.docs[0].data();
-                // userNodeData.visible = true;
-                userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
-                userNodeData.expands = [...(userNodeData.expands ?? []), true];
-                userNodeData.updatedAt = Timestamp.fromDate(new Date());
-                batch.update(userNodeRef, userNodeData);
-                delete userNodeData?.visible;
-                delete userNodeData?.open;
-              } else {
-                // if NOT exist documents create a document
-                userNodeData = {
-                  changed: true,
-                  correct: false,
-                  createdAt: Timestamp.fromDate(new Date()),
-                  updatedAt: Timestamp.fromDate(new Date()),
-                  deleted: false,
-                  isStudied: false,
-                  bookmarked: false,
-                  node: linkedNodeId,
-                  // open: true,
-                  user: user.uname,
-                  // visible: true,
-                  wrong: false,
-                  notebooks: [selectedNotebookId],
-                  expands: [true],
-                };
-                userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
-              }
-
-              const userNodeLogRef = collection(db, "userNodesLog");
-              const userNodeLogData = {
-                ...userNodeData,
-                createdAt: Timestamp.fromDate(new Date()),
-              };
-
-              batch.set(doc(userNodeLogRef), userNodeLogData);
-            }
-
-            notebookRef.current.selectedNode = nodeId;
-            nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-            await batch.commit();
-            await detectHtmlElements({ ids: parentsNotInNotebook.map(c => c.node) });
-            isWritingOnDBRef.current = false;
-          } catch (err) {
-            isWritingOnDBRef.current = false;
-            console.error(err);
-            const errorData = { nodeId, errorMessage: err instanceof Error ? err.message : "" };
-            addClientErrorLog(db, { title: "OPEN_ALL_PARENTS", user: user.uname, data: errorData });
+          if (userNodeDoc.docs.length > 0) {
+            // if exist documents update the first
+            userNodeRef = doc(db, "userNodes", userNodeDoc.docs[0].id);
+            userNodeData = userNodeDoc.docs[0].data();
+            // userNodeData.visible = true;
+            userNodeData.notebooks = [...(userNodeData.notebooks ?? []), selectedNotebookId];
+            userNodeData.expands = [...(userNodeData.expands ?? []), true];
+            userNodeData.updatedAt = Timestamp.fromDate(new Date());
+            batch.update(userNodeRef, userNodeData);
+            delete userNodeData?.visible;
+            delete userNodeData?.open;
+          } else {
+            // if NOT exist documents create a document
+            userNodeData = {
+              changed: true,
+              correct: false,
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
+              deleted: false,
+              isStudied: false,
+              bookmarked: false,
+              node: linkedNodeId,
+              // open: true,
+              user: user.uname,
+              // visible: true,
+              wrong: false,
+              notebooks: [selectedNotebookId],
+              expands: [true],
+            };
+            userNodeRef = await addDoc(collection(db, "userNodes"), userNodeData);
           }
-        })();
 
-        return graph;
+          const userNodeLogRef = collection(db, "userNodesLog");
+          const userNodeLogData = {
+            ...userNodeData,
+            createdAt: Timestamp.fromDate(new Date()),
+          };
+
+          batch.set(doc(userNodeLogRef), userNodeLogData);
+        }
+
+        notebookRef.current.selectedNode = thisNode.node;
+        nodeBookDispatch({ type: "setSelectedNode", payload: thisNode.node });
+        await batch.commit();
+        await detectHtmlElements({ ids: parentsNotInNotebook.map(c => c.node) });
+        isWritingOnDBRef.current = false;
+      } catch (err) {
+        isWritingOnDBRef.current = false;
+        console.error(err);
+        const errorData = { nodeId: thisNode.node, errorMessage: err instanceof Error ? err.message : "" };
+        addClientErrorLog(db, { title: "OPEN_ALL_PARENTS", user: user.uname, data: errorData });
+      }
+
+      createActionTrack({
+        action: "openAllParent",
+        nodeId: thisNode.node,
       });
-
-      createActionTrack(
-        db,
-        "openAllParent",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user.email
-      );
       lastNodeOperation.current = { name: "OpenAllParent", data: "" };
     },
-    [db, nodeBookDispatch, selectedNotebookId, user]
+    [createActionTrack, db, nodeBookDispatch, selectedNotebookId, user]
   );
 
   const openNodesOnNotebook = useCallback(
@@ -2760,117 +2522,65 @@ const Notebook = ({}: NotebookProps) => {
       setSelectedNotebookId(notebookId);
       await detectHtmlElements({ ids: nodeIds });
       isWritingOnDBRef.current = false;
-      createActionTrack(
-        db,
-        "openNodesOnNotebook",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user.email
-      );
+      createActionTrack({
+        action: "openNodesOnNotebook",
+      });
     },
     [db, user]
   );
 
   const toggleNode = useCallback(
-    (event: any, nodeId: string) => {
+    (event: any, thisNode: any) => {
       if (notebookRef.current.choosingNode) return;
       if (!user) return;
 
-      notebookRef.current.selectedNode = nodeId; // CHECK: should we remove? the same code bellow in the setState and this doesn't have the dispatch
+      notebookRef.current.selectedNode = thisNode.node; // CHECK: should we remove? the same code bellow in the setState and this doesn't have the dispatch
+      const notebookIdx = (thisNode.notebooks ?? []).findIndex((cur: any) => cur === selectedNotebookId);
 
-      setGraph(({ nodes: oldNodes, edges }) => {
-        const thisNode = oldNodes[nodeId];
+      const { userNodeRef } = initNodeStatusChange(thisNode.node, thisNode.userNodeId);
+      updateDoc(userNodeRef, {
+        // open: !thisNode.open,
+        expands: (thisNode.expands ?? []).map((cur: any, idx: any) => (idx === notebookIdx ? !cur : cur)),
+        updatedAt: Timestamp.fromDate(new Date()),
+      });
 
-        notebookRef.current.selectedNode = nodeId;
-        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-        // lastNodeOperation.current = { name: "ToggleNode", data: thisNode.open ? "closeNode" : "openNode" };
+      const userNodeLogRef = collection(db, "userNodesLog");
+      const userNodeLogData: any = {
+        changed: thisNode.changed,
+        correct: thisNode.correct,
+        createdAt: Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+        deleted: false,
+        isStudied: thisNode.isStudied,
+        bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
+        node: thisNode.node,
+        open: !Boolean((thisNode.expands ?? []).filter((cur: any, idx: any) => idx === notebookIdx)),
+        user: user?.uname,
+        visible: true,
+        wrong: thisNode.wrong,
+      };
+      if ("openHeight" in thisNode) {
+        userNodeLogData.height = thisNode.openHeight;
+      } else if ("closedHeight" in thisNode) {
+        userNodeLogData.closedHeight = thisNode.closedHeight;
+      }
 
-        const { userNodeRef } = initNodeStatusChange(nodeId, thisNode.userNodeId);
+      setDoc(doc(userNodeLogRef), userNodeLogData);
 
-        // INFO: this is commented because is not used
-        // if (thisNode.open && "openHeight" in thisNode) {
-        //   changeNode.height = thisNode.openHeight;
-        // } else if ("closedHeight" in thisNode) {
-        //   changeNode.closedHeight = thisNode.closedHeight;
-        // }
+      gtmEvent("Interaction", {
+        customType: "NodeCollapse",
+      });
 
-        const notebookIdx = (thisNode.notebooks ?? []).findIndex(cur => cur === selectedNotebookId);
-        if (notebookIdx < 0) {
-          console.error("notebook property has invalid values");
-          return { nodes: oldNodes, edges };
-        }
-
-        updateDoc(userNodeRef, {
-          // open: !thisNode.open,
-          expands: (thisNode.expands ?? []).map((cur, idx) => (idx === notebookIdx ? !cur : cur)),
-          updatedAt: Timestamp.fromDate(new Date()),
-        });
-        const userNodeLogRef = collection(db, "userNodesLog");
-        const userNodeLogData: any = {
-          changed: thisNode.changed,
-          correct: thisNode.correct,
-          createdAt: Timestamp.fromDate(new Date()),
-          updatedAt: Timestamp.fromDate(new Date()),
-          deleted: false,
-          isStudied: thisNode.isStudied,
-          bookmarked: "bookmarked" in thisNode ? thisNode.bookmarked : false,
-          node: nodeId,
-          open: !Boolean((thisNode.expands ?? []).filter((cur, idx) => idx === notebookIdx)),
-          user: user?.uname,
-          visible: true,
-          wrong: thisNode.wrong,
-        };
-        if ("openHeight" in thisNode) {
-          userNodeLogData.height = thisNode.openHeight;
-        } else if ("closedHeight" in thisNode) {
-          userNodeLogData.closedHeight = thisNode.closedHeight;
-        }
-
-        setDoc(doc(userNodeLogRef), userNodeLogData);
-
-        gtmEvent("Interaction", {
-          customType: "NodeCollapse",
-        });
-
-        createActionTrack(
-          db,
-          "NodeCollapse",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user.email
-        );
-        return { nodes: oldNodes, edges };
+      createActionTrack({
+        action: "NodeCollapse",
+        nodeId: thisNode.node,
       });
 
       if (event) {
         event.currentTarget.blur();
       }
     },
-    [
-      db,
-      initNodeStatusChange,
-      nodeBookDispatch,
-      selectedNotebookId,
-      user?.chooseUname,
-      user?.fName,
-      user?.imageUrl,
-      user?.lName,
-      user?.uname,
-    ]
+    [createActionTrack, db, initNodeStatusChange, selectedNotebookId, user]
   );
 
   const openNodePart = useCallback(
@@ -2910,20 +2620,11 @@ const Notebook = ({}: NotebookProps) => {
       nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       notebookRef.current.selectedNode = nodeId;
       if (user) {
-        createActionTrack(
-          db,
-          "openNodePart",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "openNodePart",
+
+          nodeId: nodeId,
+        });
       }
     },
     // TODO: CHECK dependencies
@@ -2947,20 +2648,11 @@ const Notebook = ({}: NotebookProps) => {
         customType: "NodeShare",
       });
 
-      createActionTrack(
-        db,
-        "NodeShare",
+      createActionTrack({
+        action: "NodeShare",
+        nodeId: nodeId,
         platform,
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user.email
-      );
+      });
     },
     [db, user]
   );
@@ -2980,20 +2672,11 @@ const Notebook = ({}: NotebookProps) => {
         };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "referenceLabelChange",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "referenceLabelChange",
+
+          nodeId: nodeId,
+        });
       }
     },
     [setGraph]
@@ -3041,20 +2724,10 @@ const Notebook = ({}: NotebookProps) => {
             customType: "NodeStudied",
           });
 
-          createActionTrack(
-            db,
-            "NodeStudied",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "NodeStudied",
             nodeId,
-            [],
-            user.email
-          );
+          });
         }
 
         setDoc(doc(userNodeLogRef), userNodeLogData);
@@ -3062,20 +2735,10 @@ const Notebook = ({}: NotebookProps) => {
       });
       event.currentTarget.blur();
 
-      createActionTrack(
-        db,
-        "markStudied",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        nodeId,
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "markStudied",
+        nodeId: nodeId,
+      });
     },
     // TODO: CHECK dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3126,20 +2789,10 @@ const Notebook = ({}: NotebookProps) => {
           customType: "NodeBookmark",
         });
 
-        createActionTrack(
-          db,
-          "NodeBookmark",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
+        createActionTrack({
+          action: "NodeBookmark",
           nodeId,
-          [],
-          user.email
-        );
+        });
         setNodeUpdates({
           nodeIds: updatedNodeIds,
           updatedAt: new Date(),
@@ -3182,20 +2835,10 @@ const Notebook = ({}: NotebookProps) => {
         return { ...node, disableVotes: false };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "correctNode",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "correctNode",
+          nodeId: nodeId,
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3217,7 +2860,6 @@ const Notebook = ({}: NotebookProps) => {
       try {
         if (notebookRef.current.choosingNode || !user) return;
 
-        let deleteOK: any = true;
         notebookRef.current.selectedNode = nodeId;
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
 
@@ -3239,7 +2881,6 @@ const Notebook = ({}: NotebookProps) => {
 
         const node = graph.nodes[nodeId];
         let willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked, instantDelete, isInstructor);
-
         if (willRemoveNode) {
           if (node?.children.length > 0) {
             confirmIt(
@@ -3247,9 +2888,9 @@ const Notebook = ({}: NotebookProps) => {
               "Ok",
               ""
             );
-            deleteOK = false;
-          } else {
-            deleteOK = await confirmIt(
+            return;
+          } else if (
+            !(await confirmIt(
               <Box
                 sx={{
                   display: "flex",
@@ -3266,7 +2907,9 @@ const Notebook = ({}: NotebookProps) => {
               </Box>,
               "Delete Node",
               "Keep Node"
-            );
+            ))
+          ) {
+            return;
           }
         }
 
@@ -3274,8 +2917,6 @@ const Notebook = ({}: NotebookProps) => {
           const updatedNodeIds: string[] = [nodeId];
           const node = graph.nodes[nodeId];
           lastNodeOperation.current = { name: "downvote", data: willRemoveNode ? "removed" : "" };
-
-          if (!deleteOK) return graph;
 
           if (node?.locked) return graph;
           if (!node) return graph;
@@ -3330,20 +2971,10 @@ const Notebook = ({}: NotebookProps) => {
           return { nodes, edges };
         });
         if (user) {
-          createActionTrack(
-            db,
-            "wrongNode",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "wrongNode",
             nodeId,
-            [],
-            user?.email
-          );
+          });
         }
       } catch (error) {
         console.error(error);
@@ -3383,20 +3014,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "changeChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "changeChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3417,20 +3038,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "changeFeedback",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "changeFeedback",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3452,20 +3063,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "switchChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "switchChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3485,20 +3086,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "deleteChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "deleteChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3522,20 +3113,10 @@ const Notebook = ({}: NotebookProps) => {
         setAbleToPropose(true);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "addChoice",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "addChoice",
+          nodeId: nodeId,
+        });
       }
     },
     [ableToPropose, setNodeParts]
@@ -3575,20 +3156,9 @@ const Notebook = ({}: NotebookProps) => {
     });
     setOpenSidebar(null);
     if (user) {
-      createActionTrack(
-        db,
-        "closeSideBar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "closeSideBar",
+      });
     }
   }, [
     user,
@@ -3636,20 +3206,10 @@ const Notebook = ({}: NotebookProps) => {
       //setOpenSidebar(null);
       scrollToNode(selectedNode);
       if (user) {
-        createActionTrack(
-          db,
-          "proposeNodeImprovement",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          nodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "proposeNodeImprovement",
+          nodeId: nodeId,
+        });
       }
     },
     [processHeightChange, revertNodesOnGraph, scrollToNode]
@@ -3771,20 +3331,10 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "proposeNewParent",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "proposeNewParent",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3854,20 +3404,10 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
       }
       if (user) {
-        createActionTrack(
-          db,
-          "selectNode",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "selectNode",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [openSidebar, revertNodesOnGraph, nodeBookDispatch]
@@ -4117,20 +3657,10 @@ const Notebook = ({}: NotebookProps) => {
           return updatedLinks;
         });
         if (user) {
-          createActionTrack(
-            db,
-            "saveProposedImprovement",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            notebookRef.current.selectedNode || "",
-            [],
-            user?.email
-          );
+          createActionTrack({
+            action: "saveProposedImprovement",
+            nodeId: notebookRef.current.selectedNode || "",
+          });
         }
       } catch (err) {
         console.error(err);
@@ -4274,20 +3804,10 @@ const Notebook = ({}: NotebookProps) => {
         return { nodes: newNodes, edges: newEdges };
       });
       if (user) {
-        createActionTrack(
-          db,
-          "proposeNewChild",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "proposeNewChild",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -4307,7 +3827,7 @@ const Notebook = ({}: NotebookProps) => {
   );
 
   const saveProposedParentNode = useCallback(
-    async (newNodeId: string, summary: string, reason: string, onComplete: () => void) => {
+    async (newNodeId: string, summary: string, reason: string, tagIds: string[], onComplete: () => void) => {
       let postData: any = {};
       if (!user) return;
       try {
@@ -4319,34 +3839,39 @@ const Notebook = ({}: NotebookProps) => {
         nodeBookDispatch({ type: "setChoosingNode", payload: null });
         nodeBookDispatch({ type: "setChosenNode", payload: null });
 
-        const firstChildId = graph.nodes[newNodeId].children[0]?.node;
-        type CheckInstantApprovalForProposal = {
-          isInstructor: boolean;
-          courseExist: boolean;
-          instantApprove: boolean;
-        };
         const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
 
         if (
           newNode?.nodeType &&
           ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
-          referencesOK = await confirmIt(
-            "You are proposing a node without citing any reference. Are you sure?",
+          let referencesOK = await confirmIt(
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+              }}
+            >
+              <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+              <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+            </Box>,
             "Yes",
             "Cancel"
           );
-        }
-        if (!referencesOK) {
-          return;
+          if (!referencesOK) {
+            return;
+          }
         }
 
-        const { isInstructor, courseExist, instantApprove } = await Post<CheckInstantApprovalForProposal>(
-          "/instructor/course/checkInstantApprovalForProposal",
-          { nodeId: firstChildId }
-        );
+        const { isInstructor, instantApprove } = await shouldInstantApprovalForProposal({
+          tagIds,
+          uname: user.uname,
+        });
 
         setGraph(graph => {
           const updatedNodeIds: string[] = [newNodeId];
@@ -4417,12 +3942,8 @@ const Notebook = ({}: NotebookProps) => {
           delete postData.top;
           delete postData.height;
 
-          let willBeApproved = false;
-          if (courseExist) {
-            willBeApproved = instantApprove;
-          } else if (isInstructor && !courseExist) {
-            willBeApproved = true;
-          }
+          let willBeApproved = isInstructor && instantApprove;
+
           const nodePartChanges = {
             editable: false,
             unaccepted: true,
@@ -4464,20 +3985,10 @@ const Notebook = ({}: NotebookProps) => {
           return { nodes, edges };
         });
         if (user) {
-          createActionTrack(
-            db,
-            "saveProposedParentNode",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
-            notebookRef.current.selectedNode || "",
-            [],
-            user?.email
-          );
+          createActionTrack({
+            action: "saveProposedParentNode",
+            nodeId: notebookRef.current.selectedNode || "",
+          });
         }
       } catch (err) {
         console.error(err);
@@ -4530,32 +4041,38 @@ const Notebook = ({}: NotebookProps) => {
         if (!firstParentId) throw Error("This node has not parent");
         const tagIds = graph.nodes[firstParentId].tagIds ?? [];
         const newNode = graph.nodes[newNodeId];
-        let referencesOK: any = true;
+
         if (
           newNode?.nodeType &&
           ["Concept", "Relation", "Question", "News"].includes(newNode.nodeType) &&
           newNode.references.length === 0
         ) {
-          referencesOK = await confirmIt(
-            "You are proposing a node without citing any reference. Are you sure?",
+          let referencesOK = await confirmIt(
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "10px",
+              }}
+            >
+              <MenuBookIcon sx={{ color: "#f9a825", fontSize: "40px" }} />
+              <Typography>You are proposing a node without any reference. Are you sure?</Typography>
+            </Box>,
             "Yes",
             "Cancel"
           );
-        }
-        if (!referencesOK) {
-          return;
+          if (!referencesOK) {
+            return;
+          }
         }
 
-        const {
-          instantApprove,
-          isInstructor,
-        }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } = await Post(
-          "/instructor/course/checkInstantApprovalForProposal",
-          {
-            tagIds,
-            nodeId: firstParentId,
-          }
-        );
+        const { isInstructor, instantApprove } = await shouldInstantApprovalForProposal({
+          tagIds,
+          uname: user.uname,
+        });
 
         setGraph(graph => {
           // const updatedNodeIds: string[] = [newNodeId];
@@ -4660,10 +4177,6 @@ const Notebook = ({}: NotebookProps) => {
           let oldEdges = { ...graph.edges };
           let updatedNodeIds: string[] = [];
 
-          const flashcard = postData.flashcard;
-          delete postData.flashcard;
-          const loadingEvent = new CustomEvent("proposed-node-loading");
-          window.dispatchEvent(loadingEvent);
           notebookRef.current.selectionType = null;
           nodeBookDispatch({ type: "setSelectionType", payload: null });
           if (!willBeApproved) {
@@ -4692,7 +4205,7 @@ const Notebook = ({}: NotebookProps) => {
             oldEdges = newEdges;
             updatedNodeIds = [...updatedNodeIds, ...newUpdatedNodeIds];
           }
-          proposeChildNode({ postData, flashcard });
+          proposeChildNode({ postData });
 
           window.dispatchEvent(new CustomEvent("next-flashcard"));
 
@@ -4715,45 +4228,17 @@ const Notebook = ({}: NotebookProps) => {
         addClientErrorLog(db, { title: "SAVE_PROPOSED_CHILD_NODE", user: user.uname, data: errorData });
       }
       if (user) {
-        createActionTrack(
-          db,
-          "saveProposedChildNode",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "saveProposedChildNode",
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [selectedNotebookId, user, nodeBookDispatch, graph.nodes, scrollToNode, settings.showClusterOptions, allTags, db]
   );
 
-  const proposeChildNode = async ({ postData, flashcard }: any) => {
-    const response: any = await Post("/proposeChildNode", postData);
-    if (!response) return;
-    // save flashcard data
-    if (postData.nodeType !== "Question") {
-      window.dispatchEvent(
-        new CustomEvent("propose-flashcard", {
-          detail: {
-            node: response.node,
-            proposal: response.proposal,
-            flashcard,
-            proposedType: "Parent",
-            token: await getIdToken(),
-          },
-        })
-      );
-    }
-    if (postData.nodeType === "Question") {
-      window.dispatchEvent(new CustomEvent("question-node-proposed"));
-    }
+  const proposeChildNode = async ({ postData }: any) => {
+    await Post("/proposeChildNode", postData);
   };
 
   /////////////////////////////////////////////////////
@@ -4931,20 +4416,11 @@ const Notebook = ({}: NotebookProps) => {
         if (nodeBookState.selectedNode) scrollToNode(nodeBookState.selectedNode);
       }, 1000);
       if (user) {
-        createActionTrack(
-          db,
-          "onSelectProposal",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "onSelectProposal",
+
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [user?.uname, nodeBookState.selectedNode, allTags, revertNodesOnGraph, settings.showClusterOptions]
@@ -4970,20 +4446,11 @@ const Notebook = ({}: NotebookProps) => {
         scrollToNode(nodeBookState.selectedNode);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "deleteProposal",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          notebookRef.current.selectedNode || "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "deleteProposal",
+
+          nodeId: notebookRef.current.selectedNode || "",
+        });
       }
     },
     [nodeBookState.choosingNode, nodeBookState.selectedNode, revertNodesOnGraph, scrollToNode, selectedNodeType]
@@ -4998,53 +4465,6 @@ const Notebook = ({}: NotebookProps) => {
 
     e.preventDefault();
   }, []);
-
-  // const uploadNodeImage = useCallback(
-  //   async (
-  //     event: any,
-  //     nodeRef: any,
-  //     nodeId: string,
-  //     isUploading: boolean,
-  //     setIsUploading: any,
-  //     setPercentageUploaded: any
-  //   ) => {
-  //     if (!user) return;
-
-  //     devLog("UPLOAD NODE IMAGES", { nodeId, isUploading, setIsUploading, setPercentageUploaded });
-  //     if (isUploading || notebookRef.current.choosingNode) return;
-
-  //     try {
-  //       let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
-  //       if (isValidHttpUrl(bucket)) {
-  //         const { hostname } = new URL(bucket);
-  //         bucket = hostname;
-  //       }
-  //       const rootURL = "https://storage.googleapis.com/" + bucket + "/";
-  //       const picturesFolder = rootURL + "UploadedImages";
-  //       let imageFileName = user.userId + "/" + new Date().toUTCString();
-
-  //       const confirmatory: UploadConfirmation = {
-  //         comparator: `${user?.fName} ${user?.lName}`,
-  //         errorMessage: "Entered full name is not correct",
-  //         question:
-  //           "Type your full name below to consent that you have all the rights to upload this image and the image does not violate any laws.",
-  //       };
-  //       const imageGeneratedUrl = await uploadImage({
-  //         event,
-  //         path: picturesFolder,
-  //         imageFileName,
-  //         confirmatory: confirmatory,
-  //       });
-  //       setNodeParts(nodeId, (thisNode: any) => {
-  //         thisNode.nodeImage = imageGeneratedUrl;
-  //         return { ...thisNode };
-  //       });
-  //     } catch (err) {
-  //       console.error("Image Upload Error: ", err);
-  //     }
-  //   },
-  //   [user, uploadImage, setNodeParts]
-  // );
 
   const uploadNodeImage = useCallback(
     async (
@@ -5137,20 +4557,10 @@ const Notebook = ({}: NotebookProps) => {
           );
         }
         if (user) {
-          createActionTrack(
-            db,
-            "uploadNodeImage",
-            "",
-            {
-              fullname: `${user?.fName} ${user?.lName}`,
-              chooseUname: !!user?.chooseUname,
-              uname: String(user?.uname),
-              imageUrl: String(user?.imageUrl),
-            },
+          createActionTrack({
+            action: "uploadNodeImage",
             nodeId,
-            [],
-            user?.email
-          );
+          });
         }
       } catch (err) {
         console.error("Image Upload Error: ", err);
@@ -5345,20 +4755,11 @@ const Notebook = ({}: NotebookProps) => {
         }
       }
       if (user) {
-        createActionTrack(
-          db,
-          "rateProposal",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          newNodeId,
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "rateProposal",
+
+          nodeId: newNodeId,
+        });
       }
     },
     [selectedNotebookId, user, nodeBookState.selectedNode, nodeBookState.choosingNode, selectedNodeType]
@@ -5377,6 +4778,10 @@ const Notebook = ({}: NotebookProps) => {
 
   const navigateWhenNotScrolling = (newMapInteractionValue: any) => {
     if (!scrollToNodeInitialized.current) {
+      createActionTrack({
+        action: "navigateWhenNotScrolling",
+        mapInteractionValue,
+      });
       return setMapInteractionValue(newMapInteractionValue);
     }
   };
@@ -5384,20 +4789,9 @@ const Notebook = ({}: NotebookProps) => {
   const onOpenSideBar = useCallback((sidebar: OpenLeftSidebar) => {
     setOpenSidebar(sidebar);
     if (user) {
-      createActionTrack(
-        db,
-        "onOpenSideBar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onOpenSideBar",
+      });
     }
   }, []);
 
@@ -5405,20 +4799,9 @@ const Notebook = ({}: NotebookProps) => {
   const cleanEditorLink = useCallback(() => {
     updatedLinksRef.current = getInitialUpdateLinks();
     if (user) {
-      createActionTrack(
-        db,
-        "cleanEditorLink",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "cleanEditorLink",
+      });
     }
   }, []);
 
@@ -5432,20 +4815,9 @@ const Notebook = ({}: NotebookProps) => {
     if (notebookRef.current.selectedNode) scrollToNode(notebookRef.current.selectedNode);
     setOpenSidebar(null);
     if (user) {
-      createActionTrack(
-        db,
-        "onCloseSidebar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onCloseSidebar",
+      });
     }
   }, [revertNodesOnGraph, scrollToNode]);
 
@@ -5462,20 +4834,9 @@ const Notebook = ({}: NotebookProps) => {
       setNotebookChanges({ updated: true });
     }, 200);
     if (user) {
-      createActionTrack(
-        db,
-        "onRedrawGraph",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onRedrawGraph",
+      });
     }
   }, [setNotebookChanges]);
 
@@ -5516,20 +4877,9 @@ const Notebook = ({}: NotebookProps) => {
     if (tutorialTargetId) removeStyleFromTarget(tutorialTargetId);
     setTutorial(null);
     if (user) {
-      createActionTrack(
-        db,
-        "onCancelTutorial",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onCancelTutorial",
+      });
     }
   }, [setTutorial, tutorialTargetId]);
 
@@ -5540,40 +4890,18 @@ const Notebook = ({}: NotebookProps) => {
   const onOnlyCloseSidebar = useCallback(() => {
     setOpenSidebar(null);
     if (user) {
-      createActionTrack(
-        db,
-        "onOnlyCloseSidebar",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onOnlyCloseSidebar",
+      });
     }
   }, [user, db]);
 
   const onDisplayInstructorPage = useCallback(() => {
     setDisplayDashboard(true);
     if (user) {
-      createActionTrack(
-        db,
-        "onDisplayInstructorPage",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onDisplayInstructorPage",
+      });
     }
   }, []);
 
@@ -5609,20 +4937,9 @@ const Notebook = ({}: NotebookProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
     if (user) {
-      createActionTrack(
-        db,
-        "onSkipTutorial",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onSkipTutorial",
+      });
     }
   }, [
     user,
@@ -5730,20 +5047,9 @@ const Notebook = ({}: NotebookProps) => {
       await setDoc(tutorialRef, userTutorialUpdated);
     }
     if (user) {
-      createActionTrack(
-        db,
-        "onFinalizeTutorial",
-        "",
-        {
-          fullname: `${user?.fName} ${user?.lName}`,
-          chooseUname: !!user?.chooseUname,
-          uname: String(user?.uname),
-          imageUrl: String(user?.imageUrl),
-        },
-        "",
-        [],
-        user?.email
-      );
+      createActionTrack({
+        action: "onFinalizeTutorial",
+      });
     }
   }, [
     user,
@@ -5806,20 +5112,9 @@ const Notebook = ({}: NotebookProps) => {
         updatedAt: new Date(),
       });
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndForceTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndForceTutorial",
+        });
       }
       return true;
     },
@@ -5838,20 +5133,9 @@ const Notebook = ({}: NotebookProps) => {
         setForcedTutorial(null);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndRemoveTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndRemoveTutorial",
+        });
       }
     },
     [graph.nodes, setTutorial, dynamicTargetId, tutorial]
@@ -5878,20 +5162,9 @@ const Notebook = ({}: NotebookProps) => {
       }
       startTutorial(tutorialName);
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndCallSidebarTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndCallSidebarTutorial",
+        });
       }
       return true;
     },
@@ -5918,20 +5191,9 @@ const Notebook = ({}: NotebookProps) => {
         scrollToNode(newTargetId);
       }
       if (user) {
-        createActionTrack(
-          db,
-          "detectAndCallTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectAndCallTutorial",
+        });
       }
       return true;
     },
@@ -6844,20 +6106,9 @@ const Notebook = ({}: NotebookProps) => {
         if (result) return;
       }
       if (user) {
-        createActionTrack(
-          db,
-          "detectTriggerTutorial",
-          "",
-          {
-            fullname: `${user?.fName} ${user?.lName}`,
-            chooseUname: !!user?.chooseUname,
-            uname: String(user?.uname),
-            imageUrl: String(user?.imageUrl),
-          },
-          "",
-          [],
-          user?.email
-        );
+        createActionTrack({
+          action: "detectTriggerTutorial",
+        });
       }
     };
 
@@ -7741,21 +6992,35 @@ const Notebook = ({}: NotebookProps) => {
   }, []);
 
   useEffect(() => {
-    const checkIfDifferentDay = () => {
+    if (!user) return;
+    const checkIfDifferentDay = async () => {
+      const userRef = doc(db, "users", user?.uname);
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        console.error("User document does not exist");
+        return;
+      }
+      const userData = userDoc.data();
+      const lastDeployment: any = await Post("/getLastDeployment");
+      const lastCommitTimestamp = new Date(lastDeployment.lastCommitTime);
+      const lastUserReload = userData?.lastReload ? userData?.lastReload.toDate() : lastCommitTimestamp;
+      const lastCommitTime = lastCommitTimestamp.getTime() + 1000 * 60 * 30;
       const today = new Date();
       if (
         today.getDate() !== lastInteractionDate.getDate() ||
         today.getMonth() !== lastInteractionDate.getMonth() ||
-        today.getFullYear() !== lastInteractionDate.getFullYear()
+        today.getFullYear() !== lastInteractionDate.getFullYear() ||
+        (lastCommitTime > lastUserReload.getTime() && today.getTime() > lastCommitTime)
       ) {
+        await updateDoc(userRef, { lastReload: today });
         window.location.reload();
       }
     };
 
-    const intervalId = setInterval(checkIfDifferentDay, 1000);
+    const intervalId = setInterval(checkIfDifferentDay, 1000 * 60 * 5);
 
     return () => clearInterval(intervalId);
-  }, [lastInteractionDate]);
+  }, [user, lastInteractionDate]);
 
   const findDescendantNodes = useCallback(
     (selectedNode: string, searchNode: string) => {
@@ -8101,7 +7366,7 @@ const Notebook = ({}: NotebookProps) => {
                   innerHeight={innerHeight}
                   innerWidth={windowWith}
                   enableElements={[]}
-                  preLoadNodes={onPreLoadNodes}
+                  // preLoadNodes={onPreLoadNodes}
                 />
               )}
               {openSidebar === "NOTIFICATION_SIDEBAR" && (
@@ -8214,7 +7479,7 @@ const Notebook = ({}: NotebookProps) => {
                     notebookRef.current.choosingNode = null;
                   }}
                   onChangeChosenNode={onChangeChosenNode}
-                  preLoadNodes={onPreLoadNodes}
+                  // preLoadNodes={onPreLoadNodes}
                 />
               )}
 
@@ -8227,7 +7492,7 @@ const Notebook = ({}: NotebookProps) => {
                     notebookRef.current.choosingNode = null;
                   }}
                   onChangeChosenNode={onChangeChosenNode}
-                  preLoadNodes={onPreLoadNodes}
+                  // preLoadNodes={onPreLoadNodes}
                   notebookRef={notebookRef}
                 />
               )}
@@ -8251,7 +7516,7 @@ const Notebook = ({}: NotebookProps) => {
                   }}
                   linkMessage={nodeBookState.choosingNode?.type === "Improvement" ? "Choose to improve" : "Link it"}
                   onChangeChosenNode={onChangeChosenNode}
-                  preLoadNodes={onPreLoadNodes}
+                  // preLoadNodes={onPreLoadNodes}
                   setQueryParentChildren={setQueryParentChildren}
                   queryParentChildren={queryParentChildren}
                   username={""}
@@ -8631,9 +7896,27 @@ const Notebook = ({}: NotebookProps) => {
                   aria-labelledby="modal-modal-title"
                   aria-describedby="modal-modal-description"
                 >
-                  <>
+                  <Paper>
                     <CloseIcon
-                      sx={{ position: "absolute", top: "60px", right: "50px", zIndex: "99" }}
+                      sx={{
+                        position: "absolute",
+                        top: "60px",
+                        right: "50px",
+                        zIndex: "99",
+                        height: "40px",
+                        width: "40px",
+                        color: "white",
+                        backgroundColor: theme =>
+                          theme.palette.mode === "dark"
+                            ? DESIGN_SYSTEM_COLORS.notebookMainBlack
+                            : DESIGN_SYSTEM_COLORS.notebookMainBlack,
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        ":hover": {
+                          backgroundColor: "grey",
+                          color: "white",
+                        },
+                      }}
                       onClick={() => setOpenMedia("")}
                     />
                     <MapInteractionCSS>
@@ -8656,7 +7939,7 @@ const Notebook = ({}: NotebookProps) => {
                         />
                       </Paper>
                     </MapInteractionCSS>
-                  </>
+                  </Paper>
                 </Modal>
                 {(isSubmitting || (!queueFinished && firstLoading)) && (
                   <div className="CenteredLoadingImageContainer">

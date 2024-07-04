@@ -197,7 +197,7 @@ describe("POST /api/proposeNodeImprovement", () => {
     new MockData([], "comOthWeekPoints"),
 
     new MockData([], "notificationNums"),
-    new MockData([], "userConceptVersions"),
+    new MockData([], "versions"),
     new MockData([], "userVersionsLog"),
 
     new MockData([], "monthlyReputations"),
