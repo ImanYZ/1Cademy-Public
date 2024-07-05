@@ -62,7 +62,7 @@ const ProposalItem = ({
     // [openLinkedNode, shouldSelectProposal, selectProposal]
   );
 
-  let _proposalSummaries;
+  let _proposalSummaries: any;
 
   if (proposalSummaries) {
     _proposalSummaries = proposalSummaries;
