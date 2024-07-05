@@ -1,5 +1,5 @@
 //import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, Divider, Popover, Typography } from "@mui/material";
+import { Box, Button, Divider, Popover, Skeleton, Typography } from "@mui/material";
 import { EmojiClickData } from "emoji-picker-react";
 import {
   addDoc,
@@ -46,6 +46,8 @@ type CommentProps = {
   sidebarWidth: number;
   innerHeight: number;
   setComments: React.Dispatch<React.SetStateAction<IComment[]>>;
+  firstLoad: boolean;
+  isLoading: boolean;
 };
 
 const Comment = ({
@@ -57,10 +59,11 @@ const Comment = ({
   sidebarWidth,
   innerHeight,
   setComments,
+  firstLoad,
+  isLoading,
 }: CommentProps) => {
   const db = getFirestore();
   const [showReplies, setShowReplies] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editing, setEditing] = useState<IComment | null>(null);
   const [replies, setReplies] = useState<IComment[]>([]);
   const [isRecording] = useState<boolean>(false);
@@ -178,7 +181,6 @@ const Comment = ({
 
   const addComment = async (text: string, imageUrls: string[]) => {
     if (!user?.uname) return;
-    setIsLoading(true);
     const commentData = {
       refId: commentSidebarInfo.id,
       text: text,
@@ -197,18 +199,18 @@ const Comment = ({
       createdAt: new Date(),
     };
     const docRef = await addDoc(getCommentRef(commentSidebarInfo.type), commentData);
-    setIsLoading(false);
     Post("/comment/sendNotification", {
       subject: "New comment",
       comment: { ...commentData, id: docRef.id },
       nodeId: commentSidebarInfo.type === "node" ? commentSidebarInfo.id : commentSidebarInfo.proposal.node,
+      commentSidebarInfo,
+      members: users,
     });
     scrollToBottom();
   };
 
   const addReply = async (text: string, imageUrls: string[], commentId: string) => {
     if (!user?.uname) return;
-    setIsLoading(true);
     const reply = {
       text: text,
       sender: user.uname,
@@ -230,11 +232,12 @@ const Comment = ({
     await updateDoc(commentRef, {
       totalReplies: increment(1),
     });
-    setIsLoading(false);
     Post("/comment/sendNotification", {
-      subject: "Comment by",
+      subject: "Reply",
       comment: { ...reply, id: docRef.id },
       nodeId: commentSidebarInfo.type === "node" ? commentSidebarInfo.id : commentSidebarInfo.proposal.node,
+      commentSidebarInfo,
+      members: users,
     });
   };
 
@@ -336,7 +339,6 @@ const Comment = ({
               type="reply"
               onClose={() => setEditing(null)}
               onSubmit={editReply}
-              isLoading={isLoading}
               isEditing={true}
               isRecording={isRecording}
               recordingType={recordingType}
@@ -487,7 +489,6 @@ const Comment = ({
                     type="comment"
                     onClose={() => setEditing(null)}
                     onSubmit={editComment}
-                    isLoading={isLoading}
                     isEditing={true}
                     startListening={() => {}}
                     stopListening={() => {}}
@@ -589,7 +590,6 @@ const Comment = ({
                       type="reply"
                       comment={comment}
                       onSubmit={addReply}
-                      isLoading={isLoading}
                       startListening={() => {}}
                       stopListening={() => {}}
                       isRecording={isRecording}
@@ -664,9 +664,45 @@ const Comment = ({
             },
           }}
         >
-          {comments.length === 0 ? (
+          {isLoading && (
+            <Box>
+              {Array.from(new Array(7)).map((_, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    p: 1,
+                  }}
+                >
+                  <Skeleton
+                    variant="circular"
+                    width={50}
+                    height={50}
+                    sx={{
+                      bgcolor: "grey.500",
+                      borderRadius: "50%",
+                    }}
+                  />
+                  <Skeleton
+                    variant="rectangular"
+                    width={410}
+                    height={90}
+                    sx={{
+                      bgcolor: "grey.300",
+                      borderRadius: "0px 10px 10px 10px",
+                      mt: "19px",
+                      ml: "5px",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          )}
+          {!firstLoad && comments.length === 0 ? (
             <Box
               sx={{
+                mt: "40%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -691,7 +727,6 @@ const Comment = ({
             user={user}
             type="comment"
             onSubmit={addComment}
-            isLoading={isLoading}
             startListening={() => {}}
             stopListening={() => {}}
             isRecording={isRecording}
