@@ -9,7 +9,6 @@ import { Editor } from "@/components/Editor";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeTypeIcon from "@/components/NodeTypeIcon2";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { proposalSummariesGenerator } from "@/lib/utils/proposalSummariesGenerator";
 import shortenNumber from "@/lib/utils/shortenNumber";
 
 const doNothing = () => {};
@@ -23,7 +22,7 @@ type ProposalItemProps = {
   userVotesOnProposals?: { [key: string]: any };
 };
 
-const ProposalItem = ({ userVotesOnProposals = {}, proposal, showTitle, proposalSummaries }: ProposalItemProps) => {
+const ProposalItem = ({ userVotesOnProposals = {}, proposal, showTitle }: ProposalItemProps) => {
   const eRef = useRef<any>(null);
   useEffect(() => {
     const element = document.getElementById("comments-section") as HTMLElement;
@@ -36,13 +35,6 @@ const ProposalItem = ({ userVotesOnProposals = {}, proposal, showTitle, proposal
       }
     };
   }, []);
-  let _proposalSummaries;
-
-  if (proposalSummaries) {
-    _proposalSummaries = proposalSummaries;
-  } else {
-    _proposalSummaries = proposalSummariesGenerator(proposal);
-  }
 
   return (
     <Paper
@@ -80,8 +72,8 @@ const ProposalItem = ({ userVotesOnProposals = {}, proposal, showTitle, proposal
               paddingY: "10px",
             }}
           >
-            {_proposalSummaries.length > 0
-              ? _proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
+            {proposal._proposalSummaries.length > 0
+              ? proposal._proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
                   return (
                     <Box
                       component="p"

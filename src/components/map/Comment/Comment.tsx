@@ -639,11 +639,7 @@ const Comment = ({
       </Popover>
       {commentSidebarInfo.type === "version" && (
         <Box sx={{ width: sidebarWidth - 20, zIndex: 9999 }}>
-          <ProposalItem
-            proposal={commentSidebarInfo.proposal}
-            showTitle={true}
-            userVotesOnProposals={commentSidebarInfo.proposal.userVotesOnProposals}
-          />
+          <ProposalItem proposal={commentSidebarInfo.proposal} showTitle={true} />
           <Divider sx={{ mt: 2 }} variant="fullWidth" />
         </Box>
       )}
