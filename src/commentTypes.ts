@@ -6,13 +6,11 @@ export type Reaction = {
 };
 
 export type senderDetail = {
-  [uname: string]: {
-    uname: string;
-    imageUrl: string;
-    chooseUname: boolean;
-    fullname?: string;
-    role?: string;
-  };
+  uname: string;
+  imageUrl: string;
+  chooseUname: boolean;
+  fullname?: string;
+  role?: string;
 };
 
 export type IComment = {
