@@ -16,3 +16,12 @@ export interface IJob {
   retry?: number;
   createdAt: Timestamp;
 }
+
+export interface ISignalAllNodesJob extends IJob {
+  type: "signal_all_nodes";
+  payload: {
+    nodeIds: string[];
+  };
+}
+
+export type Job = ISignalAllNodesJob | IJob;
