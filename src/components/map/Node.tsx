@@ -649,9 +649,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) =>
-      wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked, tagIds),
-    [wrongNode, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
+    (event: any) => wrongNode(event, node, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked, tagIds),
+    [wrongNode, node, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
   );
 
   const uploadNodeImageHandler = useCallback(

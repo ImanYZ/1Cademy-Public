@@ -255,7 +255,7 @@ export type Graph = { nodes: FullNodesData; edges: EdgesData };
  *         Type: useEffect
  *         Description:
  *
- *  --- render nodes, every node when its heigh is changed will add task
+ *  --- render nodes, every node when its height is changed will add task
  *
  *  4. WORKER QUEUE: will add tasks to a queue
  *     - is working: add task to the queue
@@ -412,6 +412,7 @@ const Notebook = ({}: NotebookProps) => {
   const windowInnerLeft = (windowWith * 10) / 100 + (windowWith > 899 ? (openSidebar ? 430 : 80) : 10);
   const windowInnerRight = (windowWith * 10) / 100;
   const windowInnerBottom = 50;
+
   const [showRegion, setShowRegion] = useState<boolean>(false);
   const [innerHeight, setInnerHeight] = useState<number>(0);
   const [focusView, setFocusView] = useState<{
@@ -461,9 +462,6 @@ const Notebook = ({}: NotebookProps) => {
     forced: false,
   });
 
-  //instructor state
-  const [instructor, setInstructor] = useState<Instructor | null>(null);
-
   const [editingModeNode, setEditingModeNode] = useState(false);
   const [ratingProposal, setRatingProposal] = useState<boolean>(false);
 
@@ -485,6 +483,195 @@ const Notebook = ({}: NotebookProps) => {
     type: "",
     id: "",
   });
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // FLAGS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  const [openDeveloperMenu, setOpenDeveloperMenu] = useState(false);
+  // flag for whether cursor is not on text
+  // for determining whether the map should move if the user clicks and drags
+  const [mapHovered, setMapHovered] = useState(false);
+
+  // flag for whether all tags data is downloaded from server
+  // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
+
+  // // flag for whether tutorial state was loaded
+  // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
+
+  // flag for whether users' nodes data is downloaded from servermessages
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // flag to open proposal sidebar
+  // const [openProposals, setOpenProposals] = useState(false);
+
+  // flag for if pending proposals for a selected node is open
+  // const [openPendingProposals, setOpenPendingProposals] = useState(false);
+
+  // flag for if chat is open
+  // const [openChat, setOpenChat] = useState(false);
+
+  // flag for if notifications is open
+  // const [openNotifications, setOpenNotifications] = useState(false);
+
+  // flag for if presentations is open
+  // const [openPresentations, setOpenPresentations] = useState(false);
+
+  // // flag for is search is open
+  // const [openToolbar, setOpenToolbar] = useState(false);
+
+  // flag for is search is open
+  // const [openSearch, setOpenSearch] = useState(false);
+
+  // flag for whether bookmarks is open
+  // const [openBookmarks, setOpenBookmarks] = useState(false);
+
+  // flag for whether recentNodes is open
+  // const [openRecentNodes, setOpenRecentNodes] = useState(false);
+
+  // flag for whether trends is open
+  // const [openTrends, setOpenTrends] = useState(false);
+
+  // flag for whether media is full-screen
+  const [openMedia, setOpenMedia] = useState<string>("");
+
+  const [firstScrollToNode, setFirstScrollToNode] = useState(false);
+
+  const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
+  const [notebookChanged, setNotebookChanges] = useState({ updated: true });
+
+  const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<{ [uname: string]: boolean }>({});
+
+  // this object represent the question by practice
+  // if practice voice only us enable we have a value on question node
+  // if we have a tag (semester id when user start practice tool), we can continue practicing from notebook
+  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant>({ tagId: "", questionNode: null });
+
+  const [startPractice, setStartPractice] = useState(false);
+
+  const assistantRef = useRef<DashboardWrapperRef | null>(null);
+
+  const [lockedNodes, setLockedNodes] = useState({});
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+  // FUNCTIONS
+  // ---------------------------------------------------------------------
+  // ---------------------------------------------------------------------
+
+  const [urlNodeProcess, setUrlNodeProcess] = useState(false);
+
+  const userNodesSnapshotFn = useCallback(
+    (q: Query<DocumentData>, uname: string, notebookId: string) => {
+      const userNodesSnapshot = onSnapshot(
+        q,
+        async snapshot => {
+          const docChanges = snapshot.docChanges();
+
+          devLog("1:userNodes Snapshot:changes", docChanges);
+          if (!docChanges.length) {
+            setIsSubmitting(false);
+            setFirstLoading(false);
+            setNoNodesFoundMessage(true);
+            return null;
+          }
+          // TODO: set synchronizationIsWorking true
+          setNoNodesFoundMessage(false);
+          const { userNodeChanges, nodeIds } = getUserNodeChanges(docChanges);
+          devLog("2:Snapshot:userNodes Data", userNodeChanges);
+
+          const nodesData = await getNodesPromises(db, nodeIds);
+          devLog("3:Snapshot:Nodes Data", nodesData);
+
+          const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+          devLog("4:Snapshot:Full nodes", fullNodes);
+
+          setGraph(graph => {
+            const nodesInEdition = [
+              ...updatedLinksRef.current.addedParents,
+              ...updatedLinksRef.current.removedParents,
+              ...updatedLinksRef.current.addedChildren,
+              ...updatedLinksRef.current.removedChildren,
+            ];
+
+            const res = synchronizeGraph({
+              g: g.current,
+              graph,
+              fullNodes,
+              selectedNotebookId: notebookId,
+              allTags,
+              setNodeUpdates,
+              setNoNodesFoundMessage,
+              nodesInEdition,
+            });
+            devLog("4:Snapshot:sync result", res);
+            return res;
+          });
+
+          // preload data
+          // const otherNodes = fullNodes.reduce(
+          //   (acu: string[], cur) => [
+          //     ...acu,
+          //     ...cur.parents.map(c => c.node),
+          //     ...cur.children.map(c => c.node),
+          //     ...cur.tagIds,
+          //     ...cur.referenceIds,
+          //   ],
+          //   []
+          // );
+          // onPreLoadNodes(otherNodes, fullNodes);
+        },
+        error => console.error(error)
+      );
+
+      return () => userNodesSnapshot();
+    },
+    [allTags, db]
+  );
+
+  useEffect(() => {
+    if (!db) return;
+    if (!user) return;
+    if (!user.uname) return;
+    if (!allTagsLoaded) return;
+    if (!userTutorialLoaded) return;
+    if (!selectedNotebookId) return;
+
+    devLog("SYNCHRONIZATION", { selectedNotebookId });
+
+    // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
+    const userNodesRef = collection(db, "userNodes");
+    const q = query(
+      userNodesRef,
+      where("user", "==", user.uname),
+      where("notebooks", "array-contains", selectedNotebookId),
+      // where("visible", "==", true),
+      where("deleted", "==", false)
+    );
+
+    const killSnapshot = userNodesSnapshotFn(q, user.uname, selectedNotebookId);
+    return () => {
+      // INFO: if nodes from notebooks are colliding, we cant add a state
+      // to determine when synchronization is complete,
+      // to remove snapshot with previous Graph (nodes, edges)
+      // and add snapshot with new Notebook Id
+      if (selectedPreviousNotebookIdRef.current !== selectedNotebookId) {
+        // if we change notebook, we need to clean graph
+        selectedPreviousNotebookIdRef.current = selectedNotebookId;
+
+        g.current = createGraph();
+        setGraph(prev => {
+          setNodeUpdates({
+            nodeIds: Object.keys(prev.nodes),
+            updatedAt: new Date(),
+          });
+          return { nodes: {}, edges: {} };
+        });
+      }
+      killSnapshot();
+    };
+    // INFO: notebookChanged used in dependencies because of the redraw graph (magic wand button)
+  }, [allTagsLoaded, db, userNodesSnapshotFn, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
@@ -551,30 +738,6 @@ const Notebook = ({}: NotebookProps) => {
       });
     }
   }, []);
-
-  //check if the user is instructor
-  useEffect(() => {
-    if (!user) return console.warn("Not user found, wait please");
-
-    const instructorsRef = collection(db, "instructors");
-    const q = query(instructorsRef, where("uname", "==", user.uname));
-
-    const killSnapshot = onSnapshot(
-      q,
-      async snapshot => {
-        const docChanges = snapshot.docChanges();
-        if (!docChanges.length) {
-          return null;
-        }
-        const intructor = docChanges[0].doc.data() as Instructor;
-        setInstructor(intructor);
-      },
-      error => {
-        console.error(error);
-      }
-    );
-    return () => killSnapshot();
-  }, [db, router, user]);
 
   useEffect(() => {
     setInnerHeight(window.innerHeight);
@@ -760,84 +923,6 @@ const Notebook = ({}: NotebookProps) => {
     setClusterNodes,
     withClusters: settings.showClusterOptions,
   });
-
-  // ---------------------------------------------------------------------
-  // ---------------------------------------------------------------------
-  // FLAGS
-  // ---------------------------------------------------------------------
-  // ---------------------------------------------------------------------
-  const [openDeveloperMenu, setOpenDeveloperMenu] = useState(false);
-  // flag for whether cursor is not on text
-  // for determining whether the map should move if the user clicks and drags
-  const [mapHovered, setMapHovered] = useState(false);
-
-  // flag for whether all tags data is downloaded from server
-  // const [allTagsLoaded, setAllTagsLoaded] = useState(false);
-
-  // // flag for whether tutorial state was loaded
-  // const [userTutorialLoaded, setUserTutorialLoaded] = useState(false);
-
-  // flag for whether users' nodes data is downloaded from servermessages
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // flag to open proposal sidebar
-  // const [openProposals, setOpenProposals] = useState(false);
-
-  // flag for if pending proposals for a selected node is open
-  // const [openPendingProposals, setOpenPendingProposals] = useState(false);
-
-  // flag for if chat is open
-  // const [openChat, setOpenChat] = useState(false);
-
-  // flag for if notifications is open
-  // const [openNotifications, setOpenNotifications] = useState(false);
-
-  // flag for if presentations is open
-  // const [openPresentations, setOpenPresentations] = useState(false);
-
-  // // flag for is search is open
-  // const [openToolbar, setOpenToolbar] = useState(false);
-
-  // flag for is search is open
-  // const [openSearch, setOpenSearch] = useState(false);
-
-  // flag for whether bookmarks is open
-  // const [openBookmarks, setOpenBookmarks] = useState(false);
-
-  // flag for whether recentNodes is open
-  // const [openRecentNodes, setOpenRecentNodes] = useState(false);
-
-  // flag for whether trends is open
-  // const [openTrends, setOpenTrends] = useState(false);
-
-  // flag for whether media is full-screen
-  const [openMedia, setOpenMedia] = useState<string>("");
-
-  const [firstScrollToNode, setFirstScrollToNode] = useState(false);
-
-  const [, /* showNoNodesFoundMessage */ setNoNodesFoundMessage] = useState(false);
-  const [notebookChanged, setNotebookChanges] = useState({ updated: true });
-
-  const [usersOnlineStatusLoaded, setUsersOnlineStatusLoaded] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<{ [uname: string]: boolean }>({});
-
-  // this object represent the question by practice
-  // if practice voice only us enable we have a value on question node
-  // if we have a tag (semester id when user start practice tool), we can continue practicing from notebook
-  const [voiceAssistant, setVoiceAssistant] = useState<VoiceAssistant>({ tagId: "", questionNode: null });
-
-  const [startPractice, setStartPractice] = useState(false);
-
-  const assistantRef = useRef<DashboardWrapperRef | null>(null);
-
-  const [lockedNodes, setLockedNodes] = useState({});
-  // ---------------------------------------------------------------------
-  // ---------------------------------------------------------------------
-  // FUNCTIONS
-  // ---------------------------------------------------------------------
-  // ---------------------------------------------------------------------
-
-  const [urlNodeProcess, setUrlNodeProcess] = useState(false);
 
   /**
    * get Node data
@@ -1195,74 +1280,6 @@ const Notebook = ({}: NotebookProps) => {
   //   [db, selectedNotebookId, user?.uname]
   // );
 
-  const userNodesSnapshotFn = useCallback(
-    (q: Query<DocumentData>, uname: string, notebookId: string) => {
-      const userNodesSnapshot = onSnapshot(
-        q,
-        async snapshot => {
-          const docChanges = snapshot.docChanges();
-
-          devLog("1:userNodes Snapshot:changes", docChanges);
-          if (!docChanges.length) {
-            setIsSubmitting(false);
-            setFirstLoading(false);
-            setNoNodesFoundMessage(true);
-            return null;
-          }
-          // TODO: set synchronizationIsWorking true
-          setNoNodesFoundMessage(false);
-          const { userNodeChanges, nodeIds } = getUserNodeChanges(docChanges);
-          devLog("2:Snapshot:userNodes Data", userNodeChanges);
-
-          const nodesData = await getNodesPromises(db, nodeIds);
-          devLog("3:Snapshot:Nodes Data", nodesData);
-
-          const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-          devLog("4:Snapshot:Full nodes", fullNodes);
-
-          setGraph(graph => {
-            const nodesInEdition = [
-              ...updatedLinksRef.current.addedParents,
-              ...updatedLinksRef.current.removedParents,
-              ...updatedLinksRef.current.addedChildren,
-              ...updatedLinksRef.current.removedChildren,
-            ];
-
-            const res = synchronizeGraph({
-              g: g.current,
-              graph,
-              fullNodes,
-              selectedNotebookId: notebookId,
-              allTags,
-              setNodeUpdates,
-              setNoNodesFoundMessage,
-              nodesInEdition,
-            });
-            devLog("4:Snapshot:sync result", res);
-            return res;
-          });
-
-          // preload data
-          // const otherNodes = fullNodes.reduce(
-          //   (acu: string[], cur) => [
-          //     ...acu,
-          //     ...cur.parents.map(c => c.node),
-          //     ...cur.children.map(c => c.node),
-          //     ...cur.tagIds,
-          //     ...cur.referenceIds,
-          //   ],
-          //   []
-          // );
-          // onPreLoadNodes(otherNodes, fullNodes);
-        },
-        error => console.error(error)
-      );
-
-      return () => userNodesSnapshot();
-    },
-    [allTags, db]
-  );
-
   // this useEffect manage states when sidebar is opened or closed
   useEffect(() => {
     if (openSidebar !== "PROPOSALS") {
@@ -1373,50 +1390,6 @@ const Notebook = ({}: NotebookProps) => {
 
     updateDefaultTag(selectedNotebook.defaultTagId, selectedNotebook.defaultTagName);
   }, [db, dispatch, notebooks, onChangeNotebook, selectedNotebook, selectedNotebookId, user, user?.role, user?.userId]);
-
-  useEffect(() => {
-    if (!db) return;
-    if (!user) return;
-    if (!user.uname) return;
-    if (!allTagsLoaded) return;
-    if (!userTutorialLoaded) return;
-    if (!selectedNotebookId) return;
-
-    devLog("SYNCHRONIZATION", { selectedNotebookId });
-
-    // db.collection("cities").where("regions", "array-contains", "west_coast").where("population", ">", 1000000).where("area", ">", 1000000)
-    const userNodesRef = collection(db, "userNodes");
-    const q = query(
-      userNodesRef,
-      where("user", "==", user.uname),
-      where("notebooks", "array-contains", selectedNotebookId),
-      // where("visible", "==", true),
-      where("deleted", "==", false)
-    );
-
-    const killSnapshot = userNodesSnapshotFn(q, user.uname, selectedNotebookId);
-    return () => {
-      // INFO: if nodes from notebooks are colliding, we cant add a state
-      // to determine when synchronization is complete,
-      // to remove snapshot with previous Graph (nodes, edges)
-      // and add snapshot with new Notebook Id
-      if (selectedPreviousNotebookIdRef.current !== selectedNotebookId) {
-        // if we change notebook, we need to clean graph
-        selectedPreviousNotebookIdRef.current = selectedNotebookId;
-
-        g.current = createGraph();
-        setGraph(prev => {
-          setNodeUpdates({
-            nodeIds: Object.keys(prev.nodes),
-            updatedAt: new Date(),
-          });
-          return { nodes: {}, edges: {} };
-        });
-      }
-      killSnapshot();
-    };
-    // INFO: notebookChanged used in dependencies because of the redraw graph (magic wand button)
-  }, [allTagsLoaded, db, userNodesSnapshotFn, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
 
   useEffect(() => {
     if (!db) return;
@@ -2858,7 +2831,7 @@ const Notebook = ({}: NotebookProps) => {
   const wrongNode = useCallback(
     async (
       event: any,
-      nodeId: string,
+      thisNode: any,
       nodeType: NodeType,
       wrong: any,
       correct: any,
@@ -2868,6 +2841,8 @@ const Notebook = ({}: NotebookProps) => {
       tagIds: string[]
     ) => {
       try {
+        const nodeId = thisNode.node;
+
         if (notebookRef.current.choosingNode || !user) return;
 
         notebookRef.current.selectedNode = nodeId;
@@ -2889,11 +2864,10 @@ const Notebook = ({}: NotebookProps) => {
           return { ...node, disableVotes: false };
         });
 
-        const node = graph.nodes[nodeId];
         let willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked, instantDelete, isInstructor);
         if (willRemoveNode) {
-          if (node?.children.length > 0) {
-            confirmIt(
+          if (thisNode?.children.length > 0) {
+            await confirmIt(
               "To be able to delete this node, you should first delete its children or move them under other parent node.",
               "Ok",
               ""
@@ -7003,6 +6977,7 @@ const Notebook = ({}: NotebookProps) => {
 
   useEffect(() => {
     if (!user) return;
+    if (process.env.NODE_ENV === "development") return;
     const checkIfDifferentDay = async () => {
       const userRef = doc(db, "users", user?.uname);
       const userDoc = await getDoc(userRef);
@@ -7559,7 +7534,7 @@ const Notebook = ({}: NotebookProps) => {
           >
             <>
               {" "}
-              {instructor && user?.role === "INSTRUCTOR" && (
+              {user?.role === "INSTRUCTOR" && (
                 <Tooltip title="Create a new Parent Node" placement="bottom">
                   <IconButton
                     id="toolbox-scroll-to-node"
@@ -7872,7 +7847,7 @@ const Notebook = ({}: NotebookProps) => {
                   onChangeChosenNode={onChangeChosenNode}
                   editingModeNode={editingModeNode}
                   setEditingModeNode={setEditingModeNode}
-                  displayParentOptions={!!instructor && user?.role === "INSTRUCTOR"}
+                  displayParentOptions={user?.role === "INSTRUCTOR"}
                   findDescendantNodes={findDescendantNodes}
                   findAncestorNodes={findAncestorNodes}
                   lockedNodes={lockedNodes}
