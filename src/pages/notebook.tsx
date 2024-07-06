@@ -154,7 +154,6 @@ import {
 } from "../lib/utils/Map.utils";
 import { newId } from "../lib/utils/newFirestoreId";
 import {
-  arrayToChunks,
   buildFullNodes,
   getNodesPromises,
   getUserNodeChanges,
@@ -581,36 +580,33 @@ const Notebook = ({}: NotebookProps) => {
           const { userNodeChanges, nodeIds } = getUserNodeChanges(docChanges);
           devLog("2:Snapshot:userNodes Data", userNodeChanges);
 
-          const chunks = arrayToChunks(nodeIds, 10);
-          for (let chunk of chunks) {
-            const nodesData = await getNodesPromises(db, chunk);
-            devLog("3:Snapshot:Nodes Data", nodesData);
+          const nodesData = await getNodesPromises(db, nodeIds);
+          devLog("3:Snapshot:Nodes Data", nodesData);
 
-            const fullNodes = buildFullNodes(userNodeChanges, nodesData);
-            devLog("4:Snapshot:Full nodes", fullNodes);
+          const fullNodes = buildFullNodes(userNodeChanges, nodesData);
+          devLog("4:Snapshot:Full nodes", fullNodes);
 
-            setGraph(graph => {
-              const nodesInEdition = [
-                ...updatedLinksRef.current.addedParents,
-                ...updatedLinksRef.current.removedParents,
-                ...updatedLinksRef.current.addedChildren,
-                ...updatedLinksRef.current.removedChildren,
-              ];
+          setGraph(graph => {
+            const nodesInEdition = [
+              ...updatedLinksRef.current.addedParents,
+              ...updatedLinksRef.current.removedParents,
+              ...updatedLinksRef.current.addedChildren,
+              ...updatedLinksRef.current.removedChildren,
+            ];
 
-              const res = synchronizeGraph({
-                g: g.current,
-                graph,
-                fullNodes,
-                selectedNotebookId: notebookId,
-                allTags,
-                setNodeUpdates,
-                setNoNodesFoundMessage,
-                nodesInEdition,
-              });
-              devLog("4:Snapshot:sync result", res);
-              return res;
+            const res = synchronizeGraph({
+              g: g.current,
+              graph,
+              fullNodes,
+              selectedNotebookId: notebookId,
+              allTags,
+              setNodeUpdates,
+              setNoNodesFoundMessage,
+              nodesInEdition,
             });
-          }
+            devLog("4:Snapshot:sync result", res);
+            return res;
+          });
 
           // preload data
           // const otherNodes = fullNodes.reduce(
@@ -2825,7 +2821,7 @@ const Notebook = ({}: NotebookProps) => {
   const wrongNode = useCallback(
     async (
       event: any,
-      nodeId: string,
+      thisNode: any,
       nodeType: NodeType,
       wrong: any,
       correct: any,
@@ -2835,6 +2831,8 @@ const Notebook = ({}: NotebookProps) => {
       tagIds: string[]
     ) => {
       try {
+        const nodeId = thisNode.node;
+
         if (notebookRef.current.choosingNode || !user) return;
 
         notebookRef.current.selectedNode = nodeId;
@@ -2856,10 +2854,9 @@ const Notebook = ({}: NotebookProps) => {
           return { ...node, disableVotes: false };
         });
 
-        const node = graph.nodes[nodeId];
         let willRemoveNode = doNeedToDeleteNode(_corrects, _wrongs, locked, instantDelete, isInstructor);
         if (willRemoveNode) {
-          if (node?.children.length > 0) {
+          if (thisNode?.children.length > 0) {
             await confirmIt(
               "To be able to delete this node, you should first delete its children or move them under other parent node.",
               "Ok",
