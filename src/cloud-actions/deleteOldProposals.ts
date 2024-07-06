@@ -1,6 +1,6 @@
 import { batchUpdate, commitBatch, db } from "./utils/admin";
 
-exports.deleteOldProposals = async () => {
+export const deleteOldProposals = async () => {
   try {
     let currentDate = new Date();
 

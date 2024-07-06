@@ -1,6 +1,6 @@
 import { db } from "./utils/admin";
 
-exports.updateCoursesNums = async () => {
+export const updateCoursesNums = async () => {
   try {
     const semsters = await db.collection("semesters").get();
     for (const semster of semsters.docs) {

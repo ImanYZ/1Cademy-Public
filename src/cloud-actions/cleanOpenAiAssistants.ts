@@ -1,7 +1,7 @@
 import moment from "moment";
 const OpenAI = require("openai");
 
-exports.cleanOpenAiAssistants = async () => {
+export const cleanOpenAiAssistants = async () => {
   try {
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,

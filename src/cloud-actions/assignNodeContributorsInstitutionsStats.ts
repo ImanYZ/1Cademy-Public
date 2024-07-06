@@ -8,7 +8,7 @@ import { batchSet, batchUpdate, commitBatch, db } from "./utils/admin";
 // assigned to them. We should run this function every 25 hours in a PubSub to
 // assign these arrays.
 
-exports.assignNodeContributorsInstitutionsStats = async () => {
+export const assignNodeContributorsInstitutionsStats = async () => {
   // First get the list of all users and create an Object to map their ids to their
   // institution names.
   try {

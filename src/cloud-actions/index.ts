@@ -7,26 +7,25 @@ import lodash from "lodash";
 import moment from "moment";
 admin.initializeApp();
 
-import { signalFlashcardChanges, trackHours } from "./utils/common";
-
-const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
-const { updateInstitutions } = require("./updateInstitutions");
-const { cleanOpenAiAssistants } = require("./cleanOpenAiAssistants");
-const { createMeeting } = require("./createMeeting");
-const { updateCoursesNums } = require("./updateCoursesNums");
-const { deleteOldProposals } = require("./deleteOldProposals");
-
 import { checkNeedsUpdates } from "../utils/version-helpers";
 import { addUserToChannel } from "./addUserToChannel";
+import { assignNodeContributorsInstitutionsStats } from "./assignNodeContributorsInstitutionsStats";
+import { cleanOpenAiAssistants } from "./cleanOpenAiAssistants";
+import { createMeeting } from "./createMeeting";
 import { deleteNotifications } from "./deleteNotifications";
+import { deleteOldProposals } from "./deleteOldProposals";
 import { nodeDeletedUpdates } from "./nodeDeletedUpdates";
+import { queuesScheduler } from "./queuesScheduler";
 import { removeReactionFromCard } from "./removeReactionFromCard";
 import { sentAlertEmail } from "./sentAlertEmail";
+import { updateCoursesNums } from "./updateCoursesNums";
 import { updateImage } from "./updateImage";
+import { updateInstitutions } from "./updateInstitutions";
 import { updateSavedCards } from "./updateSavedCards";
 import { updatesNodeViewers } from "./updatesNodeViewers";
 import { updateVersions } from "./updateVersions";
 import { db } from "./utils/admin";
+import { signalFlashcardChanges, trackHours } from "./utils/common";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -370,3 +369,9 @@ exports.deleteOldProposals = functions
   .pubsub.schedule("every 25 hours")
   .timeZone("America/Detroit")
   .onRun(deleteOldProposals);
+
+exports.queuesScheduler = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(queuesScheduler);

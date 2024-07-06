@@ -9,7 +9,7 @@ const checkMeetingTime = (semesterId: string): boolean => {
     (semesterId === "8bMQ51sit8VeFD27TDEt" && today === 1) || (semesterId === "6E1h49QYINasnDOpVpHL" && today === 5)
   );
 };
-exports.createMeeting = async () => {
+export const createMeeting = async () => {
   try {
     const semestersDocs = await db.collection("semesters").get();
     const todayDate = moment().format("DD-MM-YYYY");

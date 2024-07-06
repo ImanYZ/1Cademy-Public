@@ -5,7 +5,7 @@ const axios = require("axios");
 // On 1Cademy.com when users sign up, we do not make the corresponding changes
 // to the institutions collection. We should run this function every 25 hours in
 // a PubSub to assign these arrays.
-exports.updateInstitutions = async () => {
+export const updateInstitutions = async () => {
   const rawdata = fs.readFileSync("./datasets/edited_universities.json");
   const institutionCountries: { [key: string]: any } = {};
   for (let institObj of JSON.parse(rawdata)) {
