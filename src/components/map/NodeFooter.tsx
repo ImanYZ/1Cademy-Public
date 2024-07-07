@@ -463,6 +463,25 @@ const NodeFooter = ({
     return "";
   };
 
+  const checkLinkingNode = useMemo(() => {
+    if (!choosingNode || !choosingNode.type || choosingNode.id === identifier) {
+      return false;
+    }
+
+    if (choosingNode.type === "Child" || choosingNode.type === "Parent") {
+      return !findDescendantNodes(choosingNode.id, identifier) && !findAncestorNodes(choosingNode.id, identifier);
+    }
+
+    if (
+      (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
+      (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [choosingNode, identifier]);
+
   return (
     <>
       <Box
@@ -518,9 +537,9 @@ const NodeFooter = ({
               sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }}
             />
           )} */}
-          <div
+          <Box
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
-            style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
+            sx={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
 
@@ -579,7 +598,7 @@ const NodeFooter = ({
               </Tooltip>
             )}
 
-            {open && !locked && (
+            {!checkLinkingNode && open && !locked && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
                   id={proposeButtonId}
@@ -779,7 +798,7 @@ const NodeFooter = ({
               : "a"}{" "}
             "{nodeType}" node.
           </span> */}
-          </div>
+          </Box>
         </Box>
 
         <LinearProgress
@@ -791,7 +810,10 @@ const NodeFooter = ({
           }}
         />
 
-        <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
+        <Box
+          className="NodeFooter Right"
+          sx={{ display: checkLinkingNode || simulated ? "none" : "flex", alignItems: "center" }}
+        >
           {open ? (
             // REF: Node.css ln 122
             <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
@@ -1889,41 +1911,36 @@ const NodeFooter = ({
             </Box>
           )}
         </Box>
-        {choosingNode &&
-          choosingNode?.type &&
-          choosingNode?.id !== identifier &&
-          (choosingNode?.type === "Child" || choosingNode?.type === "Parent"
-            ? !findDescendantNodes(choosingNode?.id, identifier) && !findAncestorNodes(choosingNode?.id, identifier)
-            : true) && (
-            <Button
-              variant="contained"
-              onClick={onChangeChosenNode}
-              sx={{
-                borderRadius: "26px",
-                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-                mt: "5px",
-                display:
-                  (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
-                  (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
-                    ? "none"
-                    : "block",
-              }}
-            >
-              {choosingNode?.type === "Reference"
-                ? "Cite It"
-                : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
-                ? "Tag it"
-                : choosingNode?.type === "Child"
-                ? "Link it"
-                : choosingNode?.type === "Parent"
-                ? "Link it"
-                : choosingNode?.type === "Node"
-                ? "Link it"
-                : choosingNode?.type === "Improvement"
-                ? "Choose to improve"
-                : null}
-            </Button>
-          )}
+        {checkLinkingNode && (
+          <Button
+            variant="contained"
+            onClick={onChangeChosenNode}
+            sx={{
+              borderRadius: "26px",
+              backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+              mt: "5px",
+              display:
+                (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
+                (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
+                  ? "none"
+                  : "block",
+            }}
+          >
+            {choosingNode?.type === "Reference"
+              ? "Cite It"
+              : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
+              ? "Tag it"
+              : choosingNode?.type === "Child"
+              ? "Link it"
+              : choosingNode?.type === "Parent"
+              ? "Link it"
+              : choosingNode?.type === "Node"
+              ? "Link it"
+              : choosingNode?.type === "Improvement"
+              ? "Choose to improve"
+              : null}
+          </Button>
+        )}
       </Box>
       {openSidebar === "USER_INFO" &&
         notebookRef.current.contributorsNodeId?.showContributors &&
