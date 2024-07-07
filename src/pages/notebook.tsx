@@ -2027,13 +2027,14 @@ const Notebook = ({}: NotebookProps) => {
   const hideDescendants = useMemoizedCallback(
     async nodeId => {
       if (notebookRef.current.choosingNode || !user) return;
-      const descendants = recursiveDescendants(nodeId);
-      notebookRef.current.selectedNode = nodeId;
-      nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
-
-      const batch = writeBatch(db);
+      let descendants: string[] = [];
       try {
-        setGraph((graph: any) => {
+        descendants = recursiveDescendants(nodeId);
+        notebookRef.current.selectedNode = nodeId;
+        nodeBookDispatch({ type: "setSelectedNode", payload: nodeId });
+
+        const updatedGraph = (graph: any) => {
+          const batch = writeBatch(db);
           for (let descendant of descendants) {
             const thisNode = graph.nodes[descendant];
             if (!thisNode.userNodeId) continue;
@@ -2072,10 +2073,11 @@ const Notebook = ({}: NotebookProps) => {
             batch.set(doc(userNodeLogRef), userNodeLogData);
           }
 
+          batch.commit();
           return graph;
-        });
+        };
 
-        await batch.commit();
+        setGraph((graph: any) => updatedGraph(graph));
       } catch (err) {
         console.error(err);
         const errorData = {
@@ -2088,7 +2090,6 @@ const Notebook = ({}: NotebookProps) => {
     },
     [recursiveDescendants, selectedNotebookId]
   );
-
   const openLinkedNode = useCallback(
     (linkedNodeID: string, typeOperation?: string) => {
       devLog("open Linked Node", {
