@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { collection, doc, getDoc, getDocs, getFirestore, query, where, writeBatch } from "firebase/firestore";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { commentChange, getCommentsSnapshot } from "src/client/firestore/comments.firestore";
 import { IComment } from "src/commentTypes";
 import { UserTheme } from "src/knowledgeTypes";
@@ -38,11 +38,15 @@ export const CommentsSidebar = ({
   const { confirmIt, ConfirmDialog } = useDialog();
   const [comments, setComments] = useState<IComment[]>([]);
   const [users, setUsers] = useState<any>([]);
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   useEffect(() => {
     if (!user) return;
+    setIsLoading(true);
     setComments([]);
     const onSynchronize = (changes: commentChange[]) => {
       setComments(prev => changes.reduce(synchronizeStuff, [...prev]));
+      setIsLoading(false);
     };
     const killSnapshot = getCommentsSnapshot(
       db,
@@ -62,15 +66,23 @@ export const CommentsSidebar = ({
       const nodeDoc = await getDoc(nodeQ);
       if (nodeDoc.exists()) {
         const nodeData = nodeDoc.data();
-        const members: any = Object.values(nodeData.contributors).map((m: any) => {
-          m.display = m.fullname;
-          m.id = m;
-          return m;
+        const members: any = nodeData.contribNames.map((contrib: any) => {
+          return {
+            id: contrib,
+            display: nodeData.contributors[contrib].fullname,
+            imageUrl: nodeData.contributors[contrib].imageUrl,
+          };
         });
         setUsers(members);
+        setFirstLoad(false);
       }
     })();
   }, [db]);
+  useEffect(() => {
+    if (!comments.length) return;
+    const mentionUsers = findMentionUsers(users);
+    setUsers(mentionUsers);
+  }, [comments, firstLoad]);
 
   useEffect(() => {
     (async () => {
@@ -92,9 +104,27 @@ export const CommentsSidebar = ({
     })();
   }, [db, user]);
 
+  const findMentionUsers = useCallback(
+    (users: { id: string; display: string; imageUrl: string }[]) => {
+      const newUsers: { id: string; display: string; imageUrl: string }[] = users;
+      comments.map(comment => {
+        const findUser = newUsers.find((user: any) => user.id === comment.sender);
+        if (!findUser) {
+          newUsers.push({
+            id: comment.sender,
+            display: comment?.senderDetail?.fullname || "",
+            imageUrl: comment?.senderDetail?.imageUrl,
+          });
+        }
+      });
+      return newUsers;
+    },
+    [comments, users]
+  );
+
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [users, comments, commentSidebarInfo]);
+  }, [users, comments, commentSidebarInfo, firstLoad]);
 
   return (
     <>
@@ -121,6 +151,8 @@ export const CommentsSidebar = ({
               sidebarWidth={sidebarWidth}
               innerHeight={innerHeight || 0}
               setComments={setComments}
+              firstLoad={firstLoad}
+              isLoading={isLoading}
             />
           </Box>
         }

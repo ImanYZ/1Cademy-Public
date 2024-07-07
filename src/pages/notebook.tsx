@@ -721,9 +721,19 @@ const Notebook = ({}: NotebookProps) => {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener("message", event => {
-        if (event.data && event.data.type === "NOTIFICATION_CLICKED" && event.data.notificationType === "chat") {
-          setOpenSidebar("CHAT");
-          setOpenChatByNotification(event.data);
+        if (event.data && event.data.type === "NOTIFICATION_CLICKED") {
+          if (event.data.notificationType === "chat") {
+            setOpenSidebar("CHAT");
+            setOpenChatByNotification(event.data);
+          } else if (event.data.notificationType === "comment") {
+            try {
+              const sidebarInfoData = JSON.parse(event.data.commentSidebarInfo);
+              setOpenSidebar("COMMENT");
+              setCommentSidebarInfo(sidebarInfoData);
+            } catch (err) {
+              console.error(err, "sidebarInfo-JSON-err");
+            }
+          }
         }
       });
     }
