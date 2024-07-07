@@ -28,11 +28,11 @@ import { gtmEvent } from "./utils";
 
 export const MIN_CHANGE = 4; // The minimum change on the map to initiate a setState.
 export const MAP_RIGHT_GAP = 730; // The gap on the right side of the map for the sidebar area.
-export const NODE_WIDTH = 580; // Default node width
+export const NODE_WIDTH = 595; // Default node width
 export const NODE_HEIGHT = 97; // Default node height
 export const NODE_GAP = 19; // The minimum gap between the stacked nodes.
 export const COLUMN_GAP = 190; // The minimum gap between the node columns.
-export const XOFFSET = 580; // Default X offset to shift all the nodes and relations.
+export const XOFFSET = 595; // Default X offset to shift all the nodes and relations.
 export const YOFFSET = 160; // Default Y offset to shift all the nodes and relations.
 export const LEFT_OFFSET_NEW_CHILDREN_BUTTON = 20; // offset from right border
 

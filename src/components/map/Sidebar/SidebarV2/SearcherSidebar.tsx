@@ -34,7 +34,7 @@ import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
 import { SearchNodesResponse, SearchNotebookResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { FullNodeData, SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
+import { /* FullNodeData, */ SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../../../../types";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
@@ -57,7 +57,7 @@ type SearcherSidebarProps = {
   innerWidth: number;
   disableSearcher?: boolean;
   enableElements: string[];
-  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  // preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
 export type Pagination = {
@@ -80,8 +80,8 @@ const SearcherSidebar = ({
   innerWidth,
   disableSearcher,
   enableElements = [],
-  preLoadNodes,
-}: SearcherSidebarProps) => {
+}: // preLoadNodes,
+SearcherSidebarProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
   const theme = useTheme();
@@ -171,14 +171,14 @@ const SearcherSidebar = ({
         });
         setIsRetrieving(false);
 
-        const mostHelpfulNodes = filteredData.slice(0, 10).map(c => c.id);
-        preLoadNodes(mostHelpfulNodes, []);
+        // const mostHelpfulNodes = filteredData.slice(0, 10).map(c => c.id);
+        // preLoadNodes(mostHelpfulNodes, []);
       } catch (err) {
         console.error(err);
         setIsRetrieving(false);
       }
     },
-    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data, preLoadNodes]
+    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data /* preLoadNodes */]
   );
   useEffect(() => {
     if (value === 0) {

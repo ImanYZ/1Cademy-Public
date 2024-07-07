@@ -1,43 +1,50 @@
 import { db } from "./utils/admin";
 
-type IaddUserToChannel = {
-  userData: any;
-};
+export const updateImage = async ({ userData }: any) => {
+  const { uname, fName, lName, imageUrl } = userData;
+  const fullname = `${fName} ${lName}`;
 
-export const updateImage = async ({ userData }: IaddUserToChannel) => {
   try {
-    const channels = await db.collection("channels").where("members", "array-contains", userData.uname).get();
-    for (const channelDoc of channels.docs) {
-      const channelData: any = channelDoc.data();
-      const membersInfo = channelData.membersInfo;
-      if (channelData.members.includes(userData.uname)) {
-        membersInfo[userData.uname] = {
-          ...membersInfo[userData.uname],
-          fullname: `${userData.fName} ${userData.lName}`,
-          imageUrl: userData.imageUrl,
-        };
-        await channelDoc.ref.update({
-          membersInfo,
-        });
-        console.log("user", userData.uname, "updated");
-      }
-    }
-    const conversations = await db.collection("conversations").where("members", "array-contains", userData.uname).get();
-    for (const conversationDoc of conversations.docs) {
-      const conversationData: any = conversationDoc.data();
-      const membersInfo = conversationData.membersInfo;
-      if (conversationData.members.includes(userData.uname)) {
-        membersInfo[userData.uname] = {
-          ...membersInfo[userData.uname],
-          fullname: `${userData.fName} ${userData.lName}`,
-          imageUrl: userData.imageUrl,
-        };
-        await conversationDoc.ref.update({
-          membersInfo,
-        });
-        console.log("user", userData.uname, "updated");
-      }
-    }
+    await db.runTransaction(async transaction => {
+      // Update channels
+      const channelsQuery = await transaction.get(db.collection("channels").where("members", "array-contains", uname));
+      const conversationsQuery = await transaction.get(
+        db.collection("conversations").where("members", "array-contains", uname)
+      );
+      console.log(channelsQuery.docs.length, "channels.DOCS");
+
+      channelsQuery.forEach(channelDoc => {
+        const channelData = channelDoc.data();
+        if (channelData.members.includes(uname)) {
+          const membersInfo = channelData.membersInfo || {};
+          membersInfo[uname] = {
+            ...membersInfo[uname],
+            fullname,
+            imageUrl,
+          };
+          transaction.update(channelDoc.ref, { membersInfo });
+          console.log("user", uname, "updated in channels");
+        }
+      });
+
+      // Update conversations
+
+      console.log(conversationsQuery.docs.length, "conversations.DOCS");
+
+      conversationsQuery.forEach(conversationDoc => {
+        const conversationData = conversationDoc.data();
+        if (conversationData.members.includes(uname)) {
+          const membersInfo = conversationData.membersInfo || {};
+          membersInfo[uname] = {
+            ...membersInfo[uname],
+            fullname,
+            imageUrl,
+          };
+          transaction.update(conversationDoc.ref, { membersInfo });
+          console.log("user", uname, "updated in conversations");
+        }
+      });
+    });
   } catch (error) {
     console.log(error);
   }

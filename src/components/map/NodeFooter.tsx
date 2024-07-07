@@ -1,6 +1,7 @@
 import { ArrowForwardIos } from "@mui/icons-material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
@@ -16,6 +17,7 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import {
+  Badge,
   Button,
   ClickAwayListener,
   Divider,
@@ -139,6 +141,8 @@ type NodeFooterProps = {
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: any;
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const NodeFooter = ({
@@ -217,6 +221,8 @@ const NodeFooter = ({
   findDescendantNodes,
   findAncestorNodes,
   onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -541,65 +547,66 @@ const NodeFooter = ({
               ) : (
                 <NodeTypeIcon id={identifier} nodeType={nodeType} tooltipPlacement={"top"} sx={{ fontSize: "24px" }} />
               ))}
-            <Tooltip
-              title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
-                new Date(changedAt)
-              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
-                dayjs(new Date(changedAt)).month() + 1
-              }/${dayjs(new Date(changedAt)).year()}`}
-              placement={"top"}
-            >
-              <Box
-                id={`${identifier}-node-footer-timestamp`}
-                component={"span"}
-                sx={{
-                  marginLeft: "10px",
-                  display: editable ? "none" : "block",
-                  lineHeight: "normal",
-                  cursor: "pointer",
-                  ":hover": {
-                    color:
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange400 : DESIGN_SYSTEM_COLORS.orange500,
-                  },
-                }}
-                onClick={displayProposals}
+            {!locked && (
+              <Tooltip
+                title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
+                  new Date(changedAt)
+                ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
+                  dayjs(new Date(changedAt)).month() + 1
+                }/${dayjs(new Date(changedAt)).year()}`}
+                placement={"top"}
               >
-                {dayjs(new Date(changedAt)).fromNow().includes("NaN")
-                  ? "a few minutes ago"
-                  : `${dayjs(new Date(changedAt)).fromNow()}`}
-              </Box>
-            </Tooltip>
+                <Box
+                  id={`${identifier}-node-footer-timestamp`}
+                  component={"span"}
+                  sx={{
+                    fontSize: "13px",
+                    marginLeft: "10px",
+                    display: editable ? "none" : "block",
+                    lineHeight: "normal",
+                    cursor: "pointer",
+                    ":hover": {
+                      color:
+                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange400 : DESIGN_SYSTEM_COLORS.orange500,
+                    },
+                  }}
+                  onClick={displayProposals}
+                >
+                  {dayjs(new Date(changedAt)).fromNow().includes("NaN")
+                    ? "a few minutes ago"
+                    : `${dayjs(new Date(changedAt)).fromNow()}`}
+                </Box>
+              </Tooltip>
+            )}
 
-            {open && (
+            {open && !locked && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
-                {!locked && (
-                  <ContainedButton
-                    id={proposeButtonId}
-                    title="Propose/evaluate versions of this node."
-                    onClick={proposeNodeImprovementClick}
-                    tooltipPosition="top"
-                    sx={{
-                      background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                      fontWeight: 400,
-                      color: "inherit",
-                      ":hover": {
-                        borderWidth: "0px",
-                        background: (theme: any) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.common.darkBackground2
-                            : theme.palette.common.lightBackground2,
-                      },
-                      padding: "7px 7px",
-                      minWidth: "30px",
-                      height: "30px",
-                    }}
-                    disabled={disableProposeButton}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                      <CreateIcon sx={{ fontSize: "16px" }} />
-                    </Box>
-                  </ContainedButton>
-                )}
+                <ContainedButton
+                  id={proposeButtonId}
+                  title="Propose/evaluate versions of this node."
+                  onClick={proposeNodeImprovementClick}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    fontWeight: 400,
+                    color: "inherit",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                    padding: "7px 7px",
+                    minWidth: "30px",
+                    height: "30px",
+                  }}
+                  disabled={disableProposeButton}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <CreateIcon sx={{ fontSize: "16px" }} />
+                  </Box>
+                </ContainedButton>
 
                 <Box
                   id={`${identifier}-node-footer-votes`}
@@ -723,6 +730,39 @@ const NodeFooter = ({
                     </Tooltip>
                   </Box>
                 </Box>
+                <ContainedButton
+                  id={proposeButtonId}
+                  title="Open comments"
+                  onClick={() => openComments(identifier, "node")}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    fontWeight: 400,
+                    color: "inherit",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                    padding: "7px 7px",
+                    minWidth: "30px",
+                    height: "30px",
+                  }}
+                  disabled={disableProposeButton}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <Badge
+                      badgeContent={
+                        commentNotifications.filter((notification: any) => notification.refId === identifier).length
+                      }
+                      color="error"
+                    >
+                      <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                    </Badge>
+                  </Box>
+                </ContainedButton>
               </Box>
             )}
             {/* <span
@@ -755,7 +795,7 @@ const NodeFooter = ({
           {open ? (
             // REF: Node.css ln 122
             <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
-              {!editable && !unaccepted ? (
+              {!locked && !editable && !unaccepted ? (
                 // Accepted nodes
                 <>
                   {/* <MemoizedMetaButton
@@ -789,7 +829,7 @@ const NodeFooter = ({
               ) : (
                 // new Node or unaccepted proposal
                 <>
-                  {nodeType !== "Reference" && editable && (
+                  {!locked && nodeType !== "Reference" && editable && (
                     <Box
                       id={`${identifier}-node-footer-image-video`}
                       sx={{
@@ -857,7 +897,7 @@ const NodeFooter = ({
                   )}
                 </>
               )}
-              {!editable && !unaccepted && nodeType === "Reference" && !choosingNode ? (
+              {!locked && !editable && !unaccepted && nodeType === "Reference" && !choosingNode ? (
                 <>
                   <Box
                     sx={{
@@ -971,7 +1011,7 @@ const NodeFooter = ({
                 </>
               ) : (
                 <>
-                  {openPart === "References" ? (
+                  {!locked && openPart === "References" ? (
                     <Box
                       id={tagsCitationsButtonId}
                       onClick={disableTagsCitationsButton ? undefined : selectReferences}
@@ -1024,89 +1064,96 @@ const NodeFooter = ({
                       </Box>
                     </Box>
                   ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      <ContainedButton
-                        id={tagsCitationsButtonId}
-                        title="View tags and citations used in this node."
-                        onClick={selectReferences}
-                        tooltipPosition="top"
-                        sx={{
-                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                          color: "inherit",
-                          fontWeight: 400,
-                          height: "28.7px",
-                          ":hover": {
-                            borderWidth: "0px",
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.darkBackground2
-                                : theme.palette.common.lightBackground2,
-                          },
-                        }}
-                        disabled={disableTagsCitationsButton}
-                      >
+                    <>
+                      {!locked && (
                         <Box
                           sx={{
                             display: "flex",
+                            alignItems: "center",
                             gap: "5px",
+                            marginRight: "10px",
                           }}
                         >
-                          <Box
+                          <ContainedButton
+                            id={tagsCitationsButtonId}
+                            title="View tags and citations used in this node."
+                            onClick={selectReferences}
+                            tooltipPosition="top"
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
+                              background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                              color: "inherit",
+                              fontWeight: 400,
+                              height: "28.7px",
+                              ":hover": {
+                                borderWidth: "0px",
+                                background: (theme: any) =>
+                                  theme.palette.mode === "dark"
+                                    ? theme.palette.common.darkBackground2
+                                    : theme.palette.common.lightBackground2,
+                              },
                             }}
+                            disabled={disableTagsCitationsButton}
                           >
-                            <NextImage
-                              width={"22px"}
-                              src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
-                              alt="tag icon"
-                            />
-
-                            <span
-                              style={{ marginTop: "3px", color: getNumberColor(addedReferences, removedReferences) }}
-                              className="CitationsSpanBeforeTagIcon"
+                            <Box
+                              sx={{
+                                display: "flex",
+                                gap: "5px",
+                              }}
                             >
-                              {shortenNumber(references.length, 2, false)}
-                            </span>
-                          </Box>
-                          <Divider
-                            orientation="vertical"
-                            variant="middle"
-                            flexItem
-                            sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
-                          />
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <NextImage
-                              width={"22px"}
-                              src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
-                              alt="tag icon"
-                            />
-                            <span style={{ marginTop: "3px", color: getNumberColor(addedTags, removedTags) }}>
-                              {shortenNumber(tags.length, 2, false)}
-                            </span>
-                          </Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <NextImage
+                                  width={"22px"}
+                                  src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
+                                  alt="tag icon"
+                                />
+
+                                <span
+                                  style={{
+                                    marginTop: "3px",
+                                    color: getNumberColor(addedReferences, removedReferences),
+                                  }}
+                                  className="CitationsSpanBeforeTagIcon"
+                                >
+                                  {shortenNumber(references.length, 2, false)}
+                                </span>
+                              </Box>
+                              <Divider
+                                orientation="vertical"
+                                variant="middle"
+                                flexItem
+                                sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+                              />
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <NextImage
+                                  width={"22px"}
+                                  src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
+                                  alt="tag icon"
+                                />
+                                <span style={{ marginTop: "3px", color: getNumberColor(addedTags, removedTags) }}>
+                                  {shortenNumber(tags.length, 2, false)}
+                                </span>
+                              </Box>
+                            </Box>
+                          </ContainedButton>
                         </Box>
-                      </ContainedButton>
-                    </Box>
+                      )}
+                    </>
                   )}
                 </>
               )}
-              {!editable && !unaccepted && (
+              {!locked && !editable && !unaccepted && (
                 <>
                   {/* <MemoizedMetaButton
                   onClick={bookmark}
@@ -1196,7 +1243,7 @@ const NodeFooter = ({
                 </MemoizedMetaButton> */}
                 </>
               )}
-              {openPart === "LinkingWords" ? (
+              {!locked && openPart === "LinkingWords" ? (
                 <Box
                   id={parentChildrenButtonId}
                   onClick={disableParentChildrenButton ? undefined : selectLinkingWords}

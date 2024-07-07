@@ -188,6 +188,7 @@ describe("POST /api/proposeChildNode", () => {
         },
         body: {
           data: {
+            versionNodeId: "new-id-1",
             parentId: String(node3.documentId),
             parentType: node3.nodeType,
             nodeType: "Question" as INodeType,

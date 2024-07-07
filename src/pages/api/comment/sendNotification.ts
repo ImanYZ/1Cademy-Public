@@ -19,50 +19,33 @@ const replaceMentions = (text: string) => {
   return text.replace(pattern, (match, displayText) => `@${displayText}`);
 };
 
-const triggerNotifications = async (newMessage: any) => {
+const triggerNotifications = async (data: any) => {
   try {
-    const { channelId, roomType, sender, message, subject } = newMessage;
+    const { nodeId, comment, subject, commentSidebarInfo, members } = data;
     const fcmTokensHash: { [key: string]: string } = {};
     const fcmTokensDocs = await db.collection("fcmTokens").get();
 
     for (let fcmToken of fcmTokensDocs.docs) {
       fcmTokensHash[fcmToken.id] = fcmToken.data().tokens;
     }
-
-    let channelRef = db.collection("channels").doc(channelId);
-    if (roomType === "direct") {
-      channelRef = db.collection("conversations").doc(channelId);
-    }
-    const channelDoc = await channelRef.get();
-
-    const channelData = channelDoc.data();
-
-    if (roomType === "news") {
-      await channelRef.update({
-        newsUpdatedAt: new Date(),
-      });
-    } else {
-      await channelRef.update({
-        updatedAt: new Date(),
-      });
-    }
+    let nodeRef = db.collection("nodes").doc(nodeId);
+    const nodeDoc = await nodeRef.get();
     console.log(fcmTokensHash);
-    if (channelData) {
-      const membersInfo = channelData.membersInfo;
-      console.log(channelData?.members);
-      const _member = channelData.members.filter((m: string) => m !== sender);
+    if (nodeDoc.exists) {
+      const nodeData = nodeDoc.data();
+      const _member = members.filter((m: any) => m.id !== comment.sender);
       const invalidTokens: any = {};
       for (let member of _member) {
-        const UID = membersInfo[member].uid;
+        const userDoc = await db.collection("users").where("uname", "==", member.id).get();
+        if (!userDoc.docs.length) continue;
+        const UID = userDoc.docs[0].data().userId;
 
         const newNotification = {
-          ...newMessage,
-          message: replaceMentions(message),
-          roomType,
+          ...comment,
           createdAt: new Date(),
           seen: false,
-          notify: member,
-          notificationType: "chat",
+          notify: member.id,
+          notificationType: "comment",
         };
         const notificationRef = db.collection("notifications").doc();
         try {
@@ -71,17 +54,13 @@ const triggerNotifications = async (newMessage: any) => {
             const payload = {
               token,
               notification: {
-                title: subject.includes("Repl")
-                  ? `${membersInfo[sender].fullname} sent a reply`
-                  : `${subject} ${membersInfo[sender].fullname}`,
-                body: replaceMentions(message),
+                title: `${subject} on ${nodeData?.title} node`,
+                body: replaceMentions(comment.text),
               },
               data: {
-                notificationType: "chat",
-                messageId: newMessage?.parentMessage || newMessage.id,
-                roomType,
-                channelId,
-                messageType: subject.includes("Repl") ? "reply" : "message",
+                notificationType: "comment",
+                nodeId,
+                commentSidebarInfo: JSON.stringify(commentSidebarInfo),
               },
             };
             console.log(admin.messaging());
@@ -103,7 +82,9 @@ const triggerNotifications = async (newMessage: any) => {
                 }
               });
           }
-        } catch (error) {}
+        } catch (error) {
+          console.log(error, "error");
+        }
         await notificationRef.set(newNotification);
       }
       await removeInvalidTokens(invalidTokens);
@@ -118,13 +99,11 @@ const triggerNotifications = async (newMessage: any) => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
-    // const { leading } = req.body?.data?.user?.userData?.customClaims || {};
-    const { roomType, newMessage, subject } = req.body as any;
-    if (uname !== newMessage.sender) {
+    const { nodeId, comment, subject, commentSidebarInfo, members } = req.body as any;
+    if (uname !== comment.sender) {
       throw new Error("");
     }
-    console.log({ newMessage, roomType });
-    await triggerNotifications({ ...newMessage, roomType, subject });
+    await triggerNotifications({ nodeId, comment, subject, commentSidebarInfo, members });
     return res.status(200).send({});
   } catch (error) {
     console.log(error);

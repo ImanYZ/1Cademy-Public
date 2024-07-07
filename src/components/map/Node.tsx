@@ -81,6 +81,7 @@ type Parent = {
 
 type NodeProps = {
   identifier: string;
+  node: any;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeUpdates: TNodeUpdates;
   setNodeUpdates: (updates: TNodeUpdates) => void;
@@ -163,7 +164,7 @@ type NodeProps = {
   openAllParent: any;
   onHideNode: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -225,6 +226,8 @@ type NodeProps = {
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   onlineUsers: { [uname: string]: boolean };
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -247,6 +250,7 @@ type Pagination = {
 
 const Node = ({
   identifier,
+  node,
   nodeBookDispatch,
   setNodeUpdates,
   notebookRef,
@@ -369,13 +373,14 @@ const Node = ({
   findDescendantNodes,
   findAncestorNodes,
   onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [showSimilarNodes, setShowSimilarNodes] = useState(true);
   // const [openPart, setOpenPart] = useState<OpenPart>(null);
-  const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
@@ -533,9 +538,9 @@ const Node = ({
     (event: any) => {
       event.preventDefault();
       event.stopPropagation();
-      onHideNode(identifier, setIsHiding);
+      onHideNode(node);
     },
-    [onHideNode, identifier]
+    [node, onHideNode]
   );
 
   const onSetTitle = (newTitle: string) => {
@@ -589,7 +594,7 @@ const Node = ({
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
-      toggleNode(event, identifier);
+      toggleNode(event, node, identifier);
     },
     [toggleNode, identifier, open]
   );
@@ -644,9 +649,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) =>
-      wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked, tagIds),
-    [wrongNode, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
+    (event: any) => wrongNode(event, node, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked, tagIds),
+    [wrongNode, node, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
   );
 
   const uploadNodeImageHandler = useCallback(
@@ -929,7 +933,6 @@ const Node = ({
           "Node card" +
           (activeNode ? " active" : "") +
           (changed || !isStudied ? " Changed" : "") +
-          (isHiding ? " IsHiding" : "") +
           (nodeType === "Reference" ? " Choosable" : "")
         }
         style={{
@@ -1008,7 +1011,6 @@ const Node = ({
         "Node card" +
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
-        (isHiding ? " IsHiding" : "") +
         (toBeEligible ? " Choosable" : " ")
       }
       style={{
@@ -1024,7 +1026,7 @@ const Node = ({
         <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
       )}
 
-      <Box sx={{ float: "right" }}>
+      <Box>
         {!editable && !unaccepted && !simulated && (
           <MemoizedNodeHeader
             id={identifier}
@@ -1258,6 +1260,7 @@ const Node = ({
                       onClick={onImageClick}
                       style={{
                         borderRadius: "11px",
+                        cursor: "pointer",
                       }}
                     />
                     {/* TODO: add loading background */}
@@ -1495,6 +1498,8 @@ const Node = ({
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
             onlineUsers={onlineUsers}
+            openComments={openComments}
+            commentNotifications={commentNotifications}
           />
         )}
 
@@ -1673,6 +1678,8 @@ const Node = ({
               findDescendantNodes={findDescendantNodes}
               findAncestorNodes={findAncestorNodes}
               onlineUsers={onlineUsers}
+              openComments={openComments}
+              commentNotifications={commentNotifications}
             />
           </Box>
         )}
@@ -1810,6 +1817,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
     prev.hideNode === next.hideNode &&
+    prev.commentNotifications === next.commentNotifications &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

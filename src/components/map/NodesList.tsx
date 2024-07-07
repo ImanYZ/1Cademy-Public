@@ -23,7 +23,7 @@ type NodeListProps = {
   openAllParent: any;
   hideNodeHandler: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -76,6 +76,8 @@ type NodeListProps = {
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
   lockedNodes: { [key: string]: boolean };
   onlineUsers: { [key: string]: boolean };
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const NodesList = ({
@@ -145,6 +147,8 @@ const NodesList = ({
   findAncestorNodes,
   lockedNodes,
   onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -152,7 +156,6 @@ const NodesList = ({
     (nodeId: string) => (newOpenPart: OpenPart) => setOpenPart(nodeId, newOpenPart),
     [setOpenPart]
   );
-
   return (
     <>
       {Object.keys(nodes).map(nId => {
@@ -160,6 +163,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            node={nodes[nId]}
             nodeBookDispatch={nodeBookDispatch}
             nodeUpdates={nodeUpdates}
             setNodeUpdates={setNodeUpdates}
@@ -306,6 +310,8 @@ const NodesList = ({
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
             onlineUsers={onlineUsers}
+            openComments={openComments}
+            commentNotifications={commentNotifications}
           />
         );
       })}
@@ -362,6 +368,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.ableToPropose === next.ableToPropose &&
     prev.setNodeParts === next.setNodeParts &&
     prev.hideNode === next.hideNode &&
+    prev.commentNotifications.length === next.commentNotifications.length &&
     // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );

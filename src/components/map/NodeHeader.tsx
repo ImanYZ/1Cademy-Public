@@ -47,8 +47,9 @@ const NodeHeader = ({
         alignItems: "center",
         borderRadius: "4px",
         justifyContent: "flex-end",
-        mt: "-14px",
+        mt: "-13px",
         mb: "-10px",
+        mr: "-13px",
         ...sx,
       }}
     >

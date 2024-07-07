@@ -200,10 +200,9 @@ const NodePage: NextPage<Props> = ({ notebook }) => {
           }
 
           //   setNoNodesFoundMessage(false);
-          const userNodeChanges = getUserNodeChanges(docChanges);
+          const { userNodeChanges, nodeIds } = getUserNodeChanges(docChanges);
           devLog("2:Snapshot:Nodes Data", userNodeChanges);
 
-          const nodeIds = userNodeChanges.map(cur => cur.uNodeData.node);
           const nodesData = await getNodesPromises(db, nodeIds);
           devLog("3:Snapshot:Nodes Data", nodesData);
 

@@ -6,6 +6,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import { styled } from "@mui/system";
 import { collection, Firestore, getDocs, query } from "firebase/firestore";
+import Fuse from "fuse.js";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { IUser } from "src/types/IUser";
 
@@ -33,6 +34,9 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
   const [suggestions, setSuggestions] = useState<IUser[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(!!autoFocus);
   const wrapperRef = useRef<any>(null);
+  const fuse = new Fuse(users, {
+    keys: ["fullName", "uname"],
+  });
 
   useEffect(() => {
     const getUsers = async () => {
@@ -58,17 +62,15 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
         if (!query) {
           return users.slice(0, 10);
         }
-        const lowerCaseQuery = query.toLowerCase();
-        return users.filter(
-          (user: IUser) =>
-            user.fName.toLowerCase().startsWith(lowerCaseQuery) ||
-            user.lName.toLowerCase().startsWith(lowerCaseQuery) ||
-            user.uname.toLowerCase().startsWith(lowerCaseQuery)
-        );
+        return fuse
+          .search(query)
+          .map(result => result.item)
+          .filter((item: any) => !item.deleted)
+          .slice(0, 20);
       };
       setSuggestions(filteredOptions(inputValue.trim()));
       setShowSuggestions(true);
-    }, 300);
+    }, 1000);
 
     return () => {
       clearTimeout(handler);
