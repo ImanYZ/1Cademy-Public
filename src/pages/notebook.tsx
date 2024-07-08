@@ -7352,7 +7352,8 @@ const Notebook = ({}: NotebookProps) => {
                   innerHeight={innerHeight}
                   innerWidth={windowWith}
                   enableElements={[]}
-                  // preLoadNodes={onPreLoadNodes}
+                  //preLoadNodes={onPreLoadNodes}
+                  user={user}
                 />
               )}
               {openSidebar === "NOTIFICATION_SIDEBAR" && (
@@ -7505,7 +7506,7 @@ const Notebook = ({}: NotebookProps) => {
                   // preLoadNodes={onPreLoadNodes}
                   setQueryParentChildren={setQueryParentChildren}
                   queryParentChildren={queryParentChildren}
-                  username={""}
+                  username={user.uname}
                   findAncestorNodes={findAncestorNodes}
                   findDescendantNodes={findDescendantNodes}
                 />
