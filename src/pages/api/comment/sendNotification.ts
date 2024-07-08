@@ -43,9 +43,14 @@ const triggerNotifications = async (data: any) => {
         const newNotification = {
           ...comment,
           createdAt: new Date(),
-          seen: false,
-          notify: member.id,
-          notificationType: "comment",
+          commentSidebarInfo,
+          title: nodeData?.title,
+          nodeId: nodeDoc.id,
+          checked: false,
+          proposer: member.id, // todo: the field would be changed to notify
+          user: member.id,
+          oType: "Comment",
+          aType: commentSidebarInfo?.proposal ? "proposal" : "comment",
         };
         const notificationRef = db.collection("notifications").doc();
         try {

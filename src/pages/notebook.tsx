@@ -66,9 +66,8 @@ import { IAssistantEventDetail } from "src/types/IAssistant";
 import { INode } from "src/types/INode";
 import { INodeType } from "src/types/INodeType";
 import { INodeVersion } from "src/types/INodeVersion";
-/* eslint-enable */
-import { INotificationNum } from "src/types/INotification";
 
+/* eslint-enable */
 import withAuthUser from "@/components/hoc/withAuthUser";
 import { MemoizedCommunityLeaderboard } from "@/components/map/CommunityLeaderboard/CommunityLeaderboard";
 import { MemoizedFocusedNotebook } from "@/components/map/FocusedNotebook/FocusedNotebook";
@@ -1481,19 +1480,10 @@ const Notebook = ({}: NotebookProps) => {
     if (!allTagsLoaded) return;
     if (currentStep) return;
 
-    const notificationNumsCol = collection(db, "notificationNums");
-    const q = query(notificationNumsCol, where("uname", "==", user.uname));
+    const notificationNumsCol = collection(db, "notifications");
+    const q = query(notificationNumsCol, where("proposer", "==", user.uname), where("checked", "==", false));
     const notificationsSnapshot = onSnapshot(q, async snapshot => {
-      if (!snapshot.docs.length) {
-        const notificationNumRef = collection(db, "notificationNums");
-        setDoc(doc(notificationNumRef), {
-          uname: user.uname,
-          nNum: 0,
-        } as INotificationNum);
-      } else {
-        const notificationNum = snapshot.docs[0].data() as INotificationNum;
-        setUncheckedNotificationsNum(notificationNum.nNum);
-      }
+      setUncheckedNotificationsNum(snapshot.docs.length);
     });
     return () => {
       notificationsSnapshot();
@@ -7364,6 +7354,8 @@ const Notebook = ({}: NotebookProps) => {
                   onClose={() => setOpenSidebar(null)}
                   sidebarWidth={sidebarWidth()}
                   innerHeight={innerHeight}
+                  setOpenSidebar={setOpenSidebar}
+                  setCommentSidebarInfo={setCommentSidebarInfo}
                 />
               )}
               {openSidebar === "PENDING_PROPOSALS" && (

@@ -20,9 +20,9 @@ export const getCommentNotificationsSnapshot = (
 
   let q = query(
     chatNotificationsRef,
-    where("notify", "==", username),
-    where("notificationType", "==", "comment"),
-    where("seen", "==", false)
+    where("proposer", "==", username),
+    where("oType", "==", "Comment"),
+    where("checked", "==", false)
   );
 
   const killSnapshot = onSnapshot(q, snapshot => {
