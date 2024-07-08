@@ -3,12 +3,12 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query as firestoreQuery, where } from "firebase/firestore";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { SortDirection, SortValues, TNodeBookState } from "src/nodeBookTypes";
+import { SortDirection, SortValues, TNodeBookState, UserNodeFirestore } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -17,6 +17,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { mapNodeToSimpleNode } from "@/lib/utils/maps.utils";
+import { buildFullNodes, getNodesPromises } from "@/lib/utils/nodesSyncronization.utils";
 
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import RecentNodesList from "../../RecentNodesList";
@@ -67,12 +68,13 @@ const TagsSidebar = ({
     const uniqueNodesIds = Array.from(new Set(nodeIds));
     const nodes = await getNodes(db, uniqueNodesIds);
     const newMostUsedNodes = nodes.flatMap(c => c || []).map((cur): SimpleNode2 => mapNodeToSimpleNode(cur, username));
-
+    const initialBookmarkedNodes = await bookmarkedNodes();
+    const data = [...initialBookmarkedNodes, ...newMostUsedNodes];
     setSearchResults({
-      data: newMostUsedNodes,
+      data,
       lastPageLoaded: 1,
       totalPage: 1,
-      totalResults: newMostUsedNodes.length,
+      totalResults: data.length,
     });
     setIsLoading(false);
   }, [db, username]);
@@ -371,6 +373,42 @@ const TagsSidebar = ({
       searchResults.totalPage,
     ]
   );
+
+  const bookmarkedNodes = useCallback(async () => {
+    const userNodesRef = collection(db, "userNodes");
+    const bookmarkNodeQ = firestoreQuery(
+      userNodesRef,
+      where("user", "==", username),
+      where("bookmarked", "==", true),
+      where("deleted", "==", false)
+    );
+
+    const bookmarkSnapshot = await getDocs(bookmarkNodeQ);
+    const bookmarksUserNodes: { [nodeId: string]: any } = {};
+    const bookmarksNodeIds: string[] = [];
+
+    bookmarkSnapshot.docs.map(cur => {
+      bookmarksNodeIds.push(cur.data().node);
+      bookmarksUserNodes[cur.data().node] = {
+        uNodeData: cur.data() as UserNodeFirestore,
+      };
+    });
+
+    const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
+    const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData) as any;
+    const bookmarkedNodes = fullNodes.map((cur: any) => {
+      const bookmark = {
+        id: cur.node,
+        nodeType: cur.nodeType,
+        title: cur.title,
+        corrects: cur.corrects,
+        wrongs: cur.wrongs,
+        changedAt: cur.changedAt,
+      };
+      return bookmark;
+    });
+    return bookmarkedNodes;
+  }, [open, onGetTheMostUsedNodes]);
 
   useEffect(() => {
     if (!inViewInfinityLoaderTrigger) return;

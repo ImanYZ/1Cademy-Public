@@ -22,11 +22,13 @@ import {
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { filterOnDaysAgo } from "src/utils/dates";
 
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { buildFullNodes, getNodesPromises } from "@/lib/utils/nodesSyncronization.utils";
 
 import { useNodeBook } from "../../../../context/NodeBookContext";
 import { useInView } from "../../../../hooks/useObserver";
@@ -34,7 +36,12 @@ import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
 import { SearchNodesResponse, SearchNotebookResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { /* FullNodeData, */ SortDirection, SortValues, TNodeBookState } from "../../../../nodeBookTypes";
+import {
+  /* FullNodeData, */ SortDirection,
+  SortValues,
+  TNodeBookState,
+  UserNodeFirestore,
+} from "../../../../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../../../../types";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
@@ -57,7 +64,8 @@ type SearcherSidebarProps = {
   innerWidth: number;
   disableSearcher?: boolean;
   enableElements: string[];
-  // preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  //preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  user: any;
 };
 
 export type Pagination = {
@@ -80,8 +88,10 @@ const SearcherSidebar = ({
   innerWidth,
   disableSearcher,
   enableElements = [],
-}: // preLoadNodes,
-SearcherSidebarProps) => {
+  //preLoadNodes,
+  user,
+}: SearcherSidebarProps) => {
+  const db = getFirestore();
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
   const { allTags, setAllTags } = useTagsTreeView();
   const theme = useTheme();
@@ -138,7 +148,8 @@ SearcherSidebarProps) => {
       sortOption: SortValues,
       sortDirection: SortDirection,
       nodeTypes: NodeType[],
-      daysAgo?: number
+      daysAgo?: number,
+      initialBookmarkedNodes: any = []
     ) => {
       try {
         setIsRetrieving(true);
@@ -164,7 +175,7 @@ SearcherSidebarProps) => {
         const newData: SimpleNode2[] = page === 1 ? data.data : [...searchResults.data, ...data.data];
         const filteredData = daysAgo ? filterOnDaysAgo(newData, daysAgo) : newData;
         setSearchResults({
-          data: filteredData,
+          data: [...initialBookmarkedNodes, ...filteredData],
           lastPageLoaded: data.page,
           totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
           totalResults: data.numResults,
@@ -181,14 +192,17 @@ SearcherSidebarProps) => {
     [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data /* preLoadNodes */]
   );
   useEffect(() => {
-    if (value === 0) {
-      onSearch(1, search, sortOption, sortDirection, nodeTypes);
-    } else if (value === 1) {
-      onSearchPendingProposals(1, search);
-      // onSearchNotebooks(1, search);
-    } /* else if (value === 2) {
+    (async () => {
+      if (value === 0) {
+        const initialBookmarkedNodes = await bookmarkedNodes();
+        onSearch(1, search, sortOption, sortDirection, nodeTypes, 0, initialBookmarkedNodes);
+      } else if (value === 1) {
         onSearchPendingProposals(1, search);
-      } */
+        // onSearchNotebooks(1, search);
+      } /* else if (value === 2) {
+          onSearchPendingProposals(1, search);
+        } */
+    })();
   }, []);
   // const onSearchNotebooks = useCallback(
   //   async (page: number, q: string) => {
@@ -517,6 +531,42 @@ SearcherSidebarProps) => {
       return pendingProposals.totalResults;
     } */
   }, [value, searchResults.totalResults, pendingProposals.totalResults]);
+
+  const bookmarkedNodes = useCallback(async () => {
+    const userNodesRef = collection(db, "userNodes");
+    const bookmarkNodeQ = query(
+      userNodesRef,
+      where("user", "==", user.uname),
+      where("bookmarked", "==", true),
+      where("deleted", "==", false)
+    );
+
+    const bookmarkSnapshot = await getDocs(bookmarkNodeQ);
+    const bookmarksUserNodes: { [nodeId: string]: any } = {};
+    const bookmarksNodeIds: string[] = [];
+
+    bookmarkSnapshot.docs.map(cur => {
+      bookmarksNodeIds.push(cur.data().node);
+      bookmarksUserNodes[cur.data().node] = {
+        uNodeData: cur.data() as UserNodeFirestore,
+      };
+    });
+
+    const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
+    const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData) as any;
+    const bookmarkedNodes = fullNodes.map((cur: any) => {
+      const bookmark = {
+        id: cur.node,
+        nodeType: cur.nodeType,
+        title: cur.title,
+        corrects: cur.corrects,
+        wrongs: cur.wrongs,
+        changedAt: cur.changedAt,
+      };
+      return bookmark;
+    });
+    return bookmarkedNodes;
+  }, [open]);
 
   const searcherOptionsMemoized = useMemo(() => {
     return (
