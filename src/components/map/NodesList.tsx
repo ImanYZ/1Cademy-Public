@@ -206,6 +206,7 @@ const NodesList = ({
               removed: (nodes[nId]?.removedReferences || []).includes(nodes[nId].referenceIds[idx]),
             }))}
             tags={nodes[nId].tags.map((cur: string, idx: number) => ({
+              index: idx,
               node: nodes[nId].tagIds[idx],
               title: cur,
               added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
