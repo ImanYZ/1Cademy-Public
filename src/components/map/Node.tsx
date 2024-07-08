@@ -1707,6 +1707,7 @@ const Node = ({
                     disabled={disabled}
                     color="primary"
                     sx={{
+                      mr: "5px",
                       background: "#1F1F1F",
                       ":hover": {
                         background: "#525151",

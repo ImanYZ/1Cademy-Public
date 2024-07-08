@@ -458,7 +458,7 @@ const LinkingWords = ({
                               },
                             }}
                           >
-                            <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                            <IconButton onClick={onDeleteLink(tag.index, "Tag")} disabled={disableRemoveTag}>
                               <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                             </IconButton>
                           </Tooltip>
@@ -505,7 +505,7 @@ const LinkingWords = ({
                             },
                           }}
                         >
-                          <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                          <IconButton onClick={onDeleteLink(tag.index, "Tag")} disabled={disableRemoveTag}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                           </IconButton>
                         </Tooltip>
@@ -553,7 +553,7 @@ const LinkingWords = ({
                     {editable && (
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
-                          onClick={onDeleteLink(idx, "Tag")}
+                          onClick={onDeleteLink(tag.index, "Tag")}
                           tooltip="Click to delete the link to this tag."
                           tooltipPosition="right"
                         >
