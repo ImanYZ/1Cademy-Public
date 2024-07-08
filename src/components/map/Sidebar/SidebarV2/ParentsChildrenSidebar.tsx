@@ -3,12 +3,12 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { SortDirection, SortValues, TNodeBookState } from "src/nodeBookTypes";
+import { SortDirection, SortValues, TNodeBookState, UserNodeFirestore } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -17,6 +17,7 @@ import { useTagsTreeView } from "@/hooks/useTagsTreeView";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { mapNodeToSimpleNode } from "@/lib/utils/maps.utils";
+import { buildFullNodes, getNodesPromises } from "@/lib/utils/nodesSyncronization.utils";
 import { QuerySideBarSearch } from "@/pages/notebook";
 
 import shortenNumber from "../../../../lib/utils/shortenNumber";
@@ -98,6 +99,7 @@ const ParentsChildrenSidebar = ({
       nodesUpdatedSince,
       nodeTypes,
       page = 1,
+      initialBookmarkedNodes = [],
     }: {
       q: string;
       sortOption: SortValues;
@@ -105,6 +107,7 @@ const ParentsChildrenSidebar = ({
       nodesUpdatedSince: number;
       nodeTypes: NodeType[];
       page?: number;
+      initialBookmarkedNodes?: any;
     }) => {
       setIsLoading(true);
       if (page < 2) setSearchResults(INITIAL_SEARCH_RESULT);
@@ -119,7 +122,7 @@ const ParentsChildrenSidebar = ({
         onlyTitle: false,
       });
       setSearchResults(prev => ({
-        data: prev.lastPageLoaded === 1 ? res.data : [...prev.data, ...res.data],
+        data: [...initialBookmarkedNodes, ...(prev.lastPageLoaded === 1 ? res.data : [...prev.data, ...res.data])],
         lastPageLoaded: res.page,
         totalPage: Math.ceil((res.numResults || 0) / (res.perPage || 10)),
         totalResults: res.numResults,
@@ -201,18 +204,58 @@ const ParentsChildrenSidebar = ({
     return searchResults.data;
   }, [searchResults.data]);
 
+  const bookmarkedNodes = useCallback(async () => {
+    const userNodesRef = collection(db, "userNodes");
+    const bookmarkNodeQ = query(
+      userNodesRef,
+      where("user", "==", username),
+      where("bookmarked", "==", true),
+      where("deleted", "==", false)
+    );
+
+    const bookmarkSnapshot = await getDocs(bookmarkNodeQ);
+    const bookmarksUserNodes: { [nodeId: string]: any } = {};
+    const bookmarksNodeIds: string[] = [];
+
+    bookmarkSnapshot.docs.map(cur => {
+      bookmarksNodeIds.push(cur.data().node);
+      bookmarksUserNodes[cur.data().node] = {
+        uNodeData: cur.data() as UserNodeFirestore,
+      };
+    });
+
+    const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
+    const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData) as any;
+    const bookmarkedNodes = fullNodes.map((cur: any) => {
+      const bookmark = {
+        id: cur.node,
+        nodeType: cur.nodeType,
+        title: cur.title,
+        corrects: cur.corrects,
+        wrongs: cur.wrongs,
+        changedAt: cur.changedAt,
+      };
+      return bookmark;
+    });
+    return bookmarkedNodes;
+  }, [open, onGetTheMostUsedNodes]);
+
   // when it's open and we have another query, and it's forced to search
   useEffect(() => {
-    if (!queryParentChildren.forced) return;
-    if (!open) return;
-    onSearchQuery({
-      q: queryParentChildren.query,
-      sortOption,
-      sortDirection,
-      nodeTypes,
-      nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
-      page: 1,
-    });
+    (async () => {
+      if (!queryParentChildren.forced) return;
+      if (!open) return;
+      const initialBookmarkedNodes = await bookmarkedNodes();
+      onSearchQuery({
+        q: queryParentChildren.query,
+        sortOption,
+        sortDirection,
+        nodeTypes,
+        nodesUpdatedSince: mapTimeFilterToDays(timeFilter),
+        page: 1,
+        initialBookmarkedNodes,
+      });
+    })();
   }, [
     nodeTypes,
     onSearchQuery,
