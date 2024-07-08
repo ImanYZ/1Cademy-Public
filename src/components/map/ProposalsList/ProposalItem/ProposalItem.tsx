@@ -62,7 +62,7 @@ const ProposalItem = ({
     // [openLinkedNode, shouldSelectProposal, selectProposal]
   );
 
-  let _proposalSummaries;
+  let _proposalSummaries: any;
 
   if (proposalSummaries) {
     _proposalSummaries = proposalSummaries;
@@ -233,7 +233,19 @@ const ProposalItem = ({
             {openComments && (
               <ContainedButton
                 title="Open comments"
-                onClick={() => openComments(proposal.id, "version", { ...proposal, userVotesOnProposals })}
+                onClick={() =>
+                  openComments(proposal.id, "version", {
+                    id: proposal.id,
+                    title: proposal.title,
+                    node: proposal.node,
+                    summary: proposal.summary,
+                    _proposalSummaries: _proposalSummaries,
+                    corrects: proposal.corrects,
+                    wrongs: proposal.wrongs,
+                    nodeType: proposal.nodeType,
+                    createdAt: proposal.createdAt,
+                  })
+                }
                 tooltipPosition="top"
                 sx={{
                   background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),

@@ -36,7 +36,12 @@ import { useTagsTreeView } from "../../../../hooks/useTagsTreeView";
 import { SearchNodesResponse, SearchNotebookResponse } from "../../../../knowledgeTypes";
 import { Post } from "../../../../lib/mapApi";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
-import { FullNodeData, SortDirection, SortValues, TNodeBookState, UserNodeFirestore } from "../../../../nodeBookTypes";
+import {
+  /* FullNodeData, */ SortDirection,
+  SortValues,
+  TNodeBookState,
+  UserNodeFirestore,
+} from "../../../../nodeBookTypes";
 import { NodeType, SimpleNode2 } from "../../../../types";
 import NodeTypeIcon from "../../../NodeTypeIcon2";
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "../../../TagsSearcher";
@@ -59,7 +64,7 @@ type SearcherSidebarProps = {
   innerWidth: number;
   disableSearcher?: boolean;
   enableElements: string[];
-  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  //preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
   user: any;
 };
 
@@ -83,7 +88,7 @@ const SearcherSidebar = ({
   innerWidth,
   disableSearcher,
   enableElements = [],
-  preLoadNodes,
+  //preLoadNodes,
   user,
 }: SearcherSidebarProps) => {
   const db = getFirestore();
@@ -177,14 +182,14 @@ const SearcherSidebar = ({
         });
         setIsRetrieving(false);
 
-        const mostHelpfulNodes = filteredData.slice(0, 10).map(c => c.id);
-        preLoadNodes(mostHelpfulNodes, []);
+        // const mostHelpfulNodes = filteredData.slice(0, 10).map(c => c.id);
+        // preLoadNodes(mostHelpfulNodes, []);
       } catch (err) {
         console.error(err);
         setIsRetrieving(false);
       }
     },
-    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data, preLoadNodes]
+    [selectedTags, nodesUpdatedSince, nodeBookState.searchByTitleOnly, searchResults.data /* preLoadNodes */]
   );
   useEffect(() => {
     (async () => {
@@ -537,14 +542,16 @@ const SearcherSidebar = ({
     );
 
     const bookmarkSnapshot = await getDocs(bookmarkNodeQ);
+    const bookmarksUserNodes: { [nodeId: string]: any } = {};
+    const bookmarksNodeIds: string[] = [];
 
-    const bookmarksUserNodes: any = bookmarkSnapshot.docs.map(cur => {
-      return {
+    bookmarkSnapshot.docs.map(cur => {
+      bookmarksNodeIds.push(cur.data().node);
+      bookmarksUserNodes[cur.data().node] = {
         uNodeData: cur.data() as UserNodeFirestore,
       };
     });
 
-    const bookmarksNodeIds = bookmarksUserNodes.map((cur: any) => cur.uNodeData.node);
     const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
     const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData) as any;
     const bookmarkedNodes = fullNodes.map((cur: any) => {

@@ -21,7 +21,7 @@ const replaceMentions = (text: string) => {
 
 const triggerNotifications = async (data: any) => {
   try {
-    const { nodeId, comment, subject } = data;
+    const { nodeId, comment, subject, commentSidebarInfo, members } = data;
     const fcmTokensHash: { [key: string]: string } = {};
     const fcmTokensDocs = await db.collection("fcmTokens").get();
 
@@ -30,37 +30,37 @@ const triggerNotifications = async (data: any) => {
     }
     let nodeRef = db.collection("nodes").doc(nodeId);
     const nodeDoc = await nodeRef.get();
-    const nodeData = nodeDoc.data();
-
     console.log(fcmTokensHash);
-    if (nodeData) {
-      const contributors = nodeData.contributors;
-      const _member = nodeData.contribNames.filter((m: string) => m !== comment.sender);
+    if (nodeDoc.exists) {
+      const nodeData = nodeDoc.data();
+      const _member = members.filter((m: any) => m.id !== comment.sender);
       const invalidTokens: any = {};
       for (let member of _member) {
-        const UID = contributors[member].uid;
+        const userDoc = await db.collection("users").where("uname", "==", member.id).get();
+        if (!userDoc.docs.length) continue;
+        const UID = userDoc.docs[0].data().userId;
 
         const newNotification = {
           ...comment,
           createdAt: new Date(),
           seen: false,
-          notify: member,
+          notify: member.id,
           notificationType: "comment",
         };
         const notificationRef = db.collection("notifications").doc();
         try {
-          const tokens = fcmTokensHash[UID];
+          const tokens = fcmTokensHash[UID] || [];
           for (let token of tokens) {
             const payload = {
               token,
               notification: {
-                title: `${subject} ${contributors[comment.sender].fullname}`,
+                title: `${subject} on ${nodeData?.title} node`,
                 body: replaceMentions(comment.text),
               },
               data: {
-                messageId: comment?.parentComment || comment.id,
+                notificationType: "comment",
                 nodeId,
-                messageType: subject.includes("Repl") ? "reply" : "comment",
+                commentSidebarInfo: JSON.stringify(commentSidebarInfo),
               },
             };
             console.log(admin.messaging());
@@ -82,7 +82,9 @@ const triggerNotifications = async (data: any) => {
                 }
               });
           }
-        } catch (error) {}
+        } catch (error) {
+          console.log(error, "error");
+        }
         await notificationRef.set(newNotification);
       }
       await removeInvalidTokens(invalidTokens);
@@ -97,12 +99,11 @@ const triggerNotifications = async (data: any) => {
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
-    // const { leading } = req.body?.data?.user?.userData?.customClaims || {};
-    const { nodeId, comment, subject } = req.body as any;
+    const { nodeId, comment, subject, commentSidebarInfo, members } = req.body as any;
     if (uname !== comment.sender) {
       throw new Error("");
     }
-    await triggerNotifications({ nodeId, comment, subject });
+    await triggerNotifications({ nodeId, comment, subject, commentSidebarInfo, members });
     return res.status(200).send({});
   } catch (error) {
     console.log(error);

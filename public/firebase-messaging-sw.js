@@ -64,7 +64,6 @@ self.addEventListener("notificationclick", function (event) {
         }
       })
       .then(client => {
-        console.log(client, "client--in-second-round");
         if (client) {
           client.postMessage({
             type: "NOTIFICATION_CLICKED",

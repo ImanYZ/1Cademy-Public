@@ -8,7 +8,7 @@ import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useSt
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { FullNodeData, SortDirection, SortValues, TNodeBookState, UserNodeFirestore } from "src/nodeBookTypes";
+import { SortDirection, SortValues, TNodeBookState, UserNodeFirestore } from "src/nodeBookTypes";
 import { NodeType, SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -37,7 +37,7 @@ type ParentsChildrenSidebarProps = {
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
-  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  // preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
   linkMessage: string;
   queryParentChildren: QuerySideBarSearch;
   setQueryParentChildren: (q: QuerySideBarSearch) => void;
@@ -52,7 +52,7 @@ const ParentsChildrenSidebar = ({
   username,
   onClose,
   onChangeChosenNode,
-  preLoadNodes,
+  // preLoadNodes,
   linkMessage,
   queryParentChildren,
   setQueryParentChildren,
@@ -128,12 +128,12 @@ const ParentsChildrenSidebar = ({
         totalResults: res.numResults,
       }));
       setIsLoading(false);
-      preLoadNodes(
-        res.data.map(c => c.id),
-        []
-      );
+      // preLoadNodes(
+      //   res.data.map(c => c.id),
+      //   []
+      // );
     },
-    [preLoadNodes, selectedTags]
+    [selectedTags]
   );
 
   const onChangeSortDirection = useCallback(
@@ -214,14 +214,16 @@ const ParentsChildrenSidebar = ({
     );
 
     const bookmarkSnapshot = await getDocs(bookmarkNodeQ);
+    const bookmarksUserNodes: { [nodeId: string]: any } = {};
+    const bookmarksNodeIds: string[] = [];
 
-    const bookmarksUserNodes: any = bookmarkSnapshot.docs.map(cur => {
-      return {
+    bookmarkSnapshot.docs.map(cur => {
+      bookmarksNodeIds.push(cur.data().node);
+      bookmarksUserNodes[cur.data().node] = {
         uNodeData: cur.data() as UserNodeFirestore,
       };
     });
 
-    const bookmarksNodeIds = bookmarksUserNodes.map((cur: any) => cur.uNodeData.node);
     const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
     const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData) as any;
     const bookmarkedNodes = fullNodes.map((cur: any) => {

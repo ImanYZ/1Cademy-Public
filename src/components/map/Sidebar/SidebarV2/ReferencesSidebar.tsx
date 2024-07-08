@@ -3,12 +3,12 @@ import { Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, getDocs, getFirestore, query as firestoreQuery,where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query as firestoreQuery, where } from "firebase/firestore";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodes } from "src/client/firestore/nodes.firestore";
 import { getRecentUserNodesByUser } from "src/client/firestore/recentUserNodes.firestore";
 import { SearchNodesResponse } from "src/knowledgeTypes";
-import { FullNodeData, SortDirection, SortValues, UserNodeFirestore } from "src/nodeBookTypes";
+import { SortDirection, SortValues, UserNodeFirestore } from "src/nodeBookTypes";
 import { SimpleNode2 } from "src/types";
 
 import { ChosenTag, MemoizedTagsSearcher, TagTreeView } from "@/components/TagsSearcher";
@@ -34,10 +34,15 @@ type ReferencesSidebarProps = {
   open: boolean;
   onClose: () => void;
   onChangeChosenNode: ({ nodeId, title }: { nodeId: string; title: string }) => void;
-  preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
+  // preLoadNodes: (nodeIds: string[], fullNodes: FullNodeData[]) => Promise<void>;
 };
 
-const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoadNodes }: ReferencesSidebarProps) => {
+const ReferencesSidebar = ({
+  username,
+  open,
+  onClose,
+  onChangeChosenNode /* preLoadNodes */,
+}: ReferencesSidebarProps) => {
   const db = getFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -107,12 +112,12 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
         totalResults: res.numResults,
       }));
       setIsLoading(false);
-      preLoadNodes(
+      /*      preLoadNodes(
         res.data.map(c => c.id),
         []
-      );
+      ); */
     },
-    [preLoadNodes, selectedTags]
+    [selectedTags]
   );
 
   const onChangeSortDirection = useCallback(
@@ -356,14 +361,16 @@ const ReferencesSidebar = ({ username, open, onClose, onChangeChosenNode, preLoa
     );
 
     const bookmarkSnapshot = await getDocs(bookmarkNodeQ);
+    const bookmarksUserNodes: { [nodeId: string]: any } = {};
+    const bookmarksNodeIds: string[] = [];
 
-    const bookmarksUserNodes: any = bookmarkSnapshot.docs.map(cur => {
-      return {
+    bookmarkSnapshot.docs.map(cur => {
+      bookmarksNodeIds.push(cur.data().node);
+      bookmarksUserNodes[cur.data().node] = {
         uNodeData: cur.data() as UserNodeFirestore,
       };
     });
 
-    const bookmarksNodeIds = bookmarksUserNodes.map((cur: any) => cur.uNodeData.node);
     const bookmarksNodesData = await getNodesPromises(db, bookmarksNodeIds);
     const fullNodes = buildFullNodes(bookmarksUserNodes, bookmarksNodesData) as any;
     const bookmarkedReferencesNodes = fullNodes

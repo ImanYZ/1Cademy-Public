@@ -22,7 +22,6 @@ type CommentInputProps = {
   message?: any;
   onSubmit: any;
   onClose?: any;
-  isLoading: boolean;
   isEditing?: boolean;
   sx?: SxProps<Theme>;
   startListening: any;
@@ -40,7 +39,6 @@ const CommentInput = ({
   type,
   onSubmit,
   onClose,
-  isLoading,
   isEditing,
   sx,
   // startListening,
@@ -296,7 +294,7 @@ const CommentInput = ({
                 }}
                 variant="contained"
                 color="error"
-                disabled={isLoading || !inputValue}
+                disabled={!inputValue}
                 sx={{
                   minWidth: "0px",
                   width: "36px",
@@ -310,11 +308,11 @@ const CommentInput = ({
             )}
             <Button
               onClick={() => {
-                if (comment?.parentComment) {
+                if (type === "reply") {
                   if (isEditing) {
                     onSubmit(inputValue, imageUrls, comment?.parentComment, comment?.id);
                   } else {
-                    onSubmit(inputValue, imageUrls, comment?.parentComment);
+                    onSubmit(inputValue, imageUrls, comment?.id);
                   }
                 } else {
                   if (isEditing) {
@@ -328,7 +326,7 @@ const CommentInput = ({
                 setInputValue("");
               }}
               variant="contained"
-              disabled={isLoading || (!inputValue && !imageUrls?.length)}
+              disabled={!inputValue && !imageUrls?.length}
               sx={{
                 minWidth: "0px",
                 mr: "10px",
