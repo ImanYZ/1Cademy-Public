@@ -644,11 +644,11 @@ const LinkingWords = ({
               {editable && !isNew && nodeType !== "Reference" && notebookRef.current.selectedNode === identifier && (
                 <MemoizedMetaButton
                   onClick={choosingNewLinkedNode("Child")}
-                  tooltip="Link to an existing child node."
+                  tooltip="Link to an existing Child."
                   tooltipPosition="right"
                 >
                   <>
-                    <span>Link to an existing Child node</span>
+                    <span>Link to an existing Child</span>
                     <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
                     <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
                   </>
