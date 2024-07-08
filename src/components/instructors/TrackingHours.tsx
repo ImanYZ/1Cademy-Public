@@ -155,7 +155,7 @@ const TrackingHours = () => {
         label: `${periodStart.format("MM/DD/YYYY")} - ${periodEnd.format("MM/DD/YYYY")}`,
         index: index,
       });
-      currentDate = moment(periodStart).add(14, "days");
+      currentDate = index === 1 ? moment(periodStart).add(15, "days") : moment(periodStart).add(14, "days");
       index++;
     }
 

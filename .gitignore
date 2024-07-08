@@ -90,3 +90,6 @@ tmp
 
 # docker-compose resources for dev
 tmp
+
+dist
+tsconfig.tsbuildinfo
