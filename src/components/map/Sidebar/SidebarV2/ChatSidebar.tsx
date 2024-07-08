@@ -130,7 +130,7 @@ export const ChatSidebar = ({
   const [isLoadingReaction] = useState<IChannelMessage | null>(null);
 
   useEffect(() => {
-    if (!openChatByNotification) return;
+    if (!openChatByNotification || !conversations.length || !channels.length) return;
     let findChannel = {} as IChannels;
     if (openChatByNotification.roomType === "direct") {
       findChannel = conversations.find(
@@ -139,7 +139,7 @@ export const ChatSidebar = ({
     } else {
       findChannel = channels.find(channel => channel.id === openChatByNotification.channelId) as IChannels;
     }
-    if (selectedChannel?.id !== findChannel.id) {
+    if (selectedChannel?.id !== findChannel?.id) {
       openRoom(openChatByNotification.roomType, findChannel);
       setTimeout(
         () => scrollToMessage(openChatByNotification.messageId, openChatByNotification.messageType, 500),
@@ -149,7 +149,7 @@ export const ChatSidebar = ({
       scrollToMessage(openChatByNotification.messageId, openChatByNotification.messageType, 500);
     }
     setOpenChatByNotification(null);
-  }, [openChatByNotification]);
+  }, [openChatByNotification, conversations, channels]);
 
   useEffect(() => {
     const listener = (e: any) => {
