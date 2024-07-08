@@ -29,7 +29,18 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  increment,
+  limit,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
 import React, {
   ChangeEvent,
   Dispatch,
@@ -168,6 +179,13 @@ const NotificationsList = (props: NotificationsListProps) => {
     setSelectedNotifications([]);
   }, [db, props.checked, props.notifications.length, selectedNotifications, user?.uname]);
 
+  const markAsRead = async (notificationId: string) => {
+    const notificationRef = doc(db, "notifications", notificationId);
+    updateDoc(notificationRef, {
+      checked: true,
+    });
+  };
+
   const openLinkedNodeClick = useCallback(
     (notification: any) => {
       const { oType, aType, nodeId, commentSidebarInfo } = notification;
@@ -177,6 +195,11 @@ const NotificationsList = (props: NotificationsListProps) => {
         props.openLinkedNode(nodeId);
       } else if (aType !== "Delete") {
         props.openLinkedNode(nodeId);
+      }
+      if (!props.checked) {
+        setTimeout(() => {
+          markAsRead(notification.id);
+        }, 1000);
       }
     },
     [props.openLinkedNode]
@@ -252,10 +275,12 @@ const NotificationsList = (props: NotificationsListProps) => {
           return "Your node got an improvement for a new Child!";
         } else {
           return (
-            "Your node got an improvement for " +
-            notification.aType.map((pType: any, index: number) => (
-              <span key={index}>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</span>
-            ))
+            <>
+              Your node got an improvement for{" "}
+              {notification.aType.map((pType: any, index: number) => (
+                <span key={index}>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</span>
+              ))}
+            </>
           );
         }
       case "Comment":
