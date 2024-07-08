@@ -7654,6 +7654,7 @@ const Notebook = ({}: NotebookProps) => {
                   innerWidth={windowWith}
                   enableElements={[]}
                   preLoadNodes={onPreLoadNodes}
+                  user={user}
                 />
               )}
               {openSidebar === "NOTIFICATION_SIDEBAR" && (
@@ -7806,7 +7807,7 @@ const Notebook = ({}: NotebookProps) => {
                   preLoadNodes={onPreLoadNodes}
                   setQueryParentChildren={setQueryParentChildren}
                   queryParentChildren={queryParentChildren}
-                  username={""}
+                  username={user.uname}
                   findAncestorNodes={findAncestorNodes}
                   findDescendantNodes={findDescendantNodes}
                 />
