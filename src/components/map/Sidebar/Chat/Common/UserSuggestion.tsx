@@ -35,7 +35,12 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
   const [showSuggestions, setShowSuggestions] = useState<boolean>(!!autoFocus);
   const wrapperRef = useRef<any>(null);
   const fuse = new Fuse(users, {
-    keys: ["fullName", "uname"],
+    keys: ["fName", "lName", "fullName"],
+    threshold: 0.3,
+    isCaseSensitive: false,
+    shouldSort: true,
+    findAllMatches: true,
+    useExtendedSearch: true,
   });
 
   useEffect(() => {
@@ -44,10 +49,12 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
       const usersDocs = await getDocs(usersQuery);
       const _users: any = [];
       usersDocs.docs.forEach((userDoc: any) => {
-        _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName} ${userDoc.data().lName}` });
+        if (userDoc.id !== "one1" && userDoc.id !== "ImanYakhizzar") {
+          _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName}${userDoc.data().lName}` });
+        }
       });
       setUsers(_users);
-      setSuggestions(_users.splice(0, 10));
+      setSuggestions(_users.slice(0, 10));
     };
     getUsers();
   }, [db]);
@@ -62,10 +69,17 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
         if (!query) {
           return users.slice(0, 10);
         }
+        const lowerCaseQuery = query.toLowerCase();
         return fuse
           .search(query)
           .map(result => result.item)
-          .filter((item: any) => !item.deleted)
+          .filter(
+            user =>
+              user.fName.toLowerCase().startsWith(lowerCaseQuery) ||
+              user.lName.toLowerCase().startsWith(lowerCaseQuery) ||
+              user.uname.toLowerCase().startsWith(lowerCaseQuery) ||
+              (user?.fullName || "").toLowerCase().replace(" ", "").startsWith(lowerCaseQuery.replace(" ", ""))
+          )
           .slice(0, 20);
       };
       setSuggestions(filteredOptions(inputValue.trim()));
