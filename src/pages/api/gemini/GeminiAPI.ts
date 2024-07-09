@@ -73,16 +73,15 @@ const fileToGenerativePart = async (file: File): Promise<any> => {
   };
 };
 
-function isValidJSON(jsonString: string) {
+const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } => {
   try {
-    JSON.parse(jsonString);
-    return true;
+    return { jsonObject: JSON.parse(jsonString), isJSON: true };
   } catch (error) {
-    return false;
+    return { jsonObject: {}, isJSON: false };
   }
-}
+};
 
-export const askGemini = async (files: File[], prompt: string): Promise<string> => {
+export async function askGemini(files: File[], prompt: string) {
   try {
     files.forEach((file, index) => {
       console.log(`File ${index} type:`, file.constructor.name);
@@ -98,6 +97,10 @@ export const askGemini = async (files: File[], prompt: string): Promise<string> 
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     let response = "";
+    let isJSONObject: { jsonObject: any; isJSON: boolean } = {
+      jsonObject: {},
+      isJSON: false,
+    };
     for (let i = 0; i < 4; i++) {
       const result = await model.generateContent({
         contents: [
@@ -115,19 +118,19 @@ export const askGemini = async (files: File[], prompt: string): Promise<string> 
         safetySettings,
       });
       response = result.response.text();
-      if (isValidJSON(response)) {
+      isJSONObject = isValidJSON(response);
+      if (isJSONObject.isJSON) {
         break;
       }
       console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
       console.log("Response: ", response);
     }
 
-    if (!isValidJSON(response)) {
+    if (!isJSONObject.isJSON) {
       throw new Error("Failed to get a complete JSON object");
     }
-    return response;
+    return isJSONObject.jsonObject;
   } catch (error) {
     console.error("Error in askGemini:", error);
-    return "";
   }
-};
+}

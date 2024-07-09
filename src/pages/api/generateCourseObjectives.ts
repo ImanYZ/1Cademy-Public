@@ -72,7 +72,7 @@ const generateCourseObjectives = async (
   };
 
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
-  const objectives = JSON.parse(response).objectives;
+  const objectives = response.objectives;
   console.log(JSON.stringify(objectives, null, 2));
   return objectives;
 };
