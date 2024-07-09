@@ -50,7 +50,7 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
       const _users: any = [];
       usersDocs.docs.forEach((userDoc: any) => {
         if (userDoc.id !== "one1" && userDoc.id !== "ImanYakhizzar") {
-          _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName}${userDoc.data().lName}` });
+          _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName} ${userDoc.data().lName}` });
         }
       });
       setUsers(_users);
