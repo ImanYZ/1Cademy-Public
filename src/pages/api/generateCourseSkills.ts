@@ -82,7 +82,7 @@ const generateCourseSkills = async (
   };
 
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
-  const skills = JSON.parse(response).skills;
+  const skills = response.skills;
   console.log(JSON.stringify(skills, null, 2));
   return skills;
 };
