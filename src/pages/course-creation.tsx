@@ -6,15 +6,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import { LoadingButton } from "@mui/lab";
+import { LoadingButton, Masonry } from "@mui/lab";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -30,7 +28,6 @@ import {
   MenuItem,
   Paper,
   Select,
-  Skeleton,
   Slide,
   TextField,
   Typography,
@@ -77,9 +74,16 @@ const CourseComponent = () => {
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
+
+  const dragTopicItem = useRef<any>(null);
+  // const dragOverTopicItem = useRef<any>(null);
+  // const containerTopicRef = useRef<any>(null);
+
   const [glowCategoryGreenIndex, setGlowCategoryGreenIndex] = useState(-1);
   const [glowCategoryRedIndex, setGlowCategoryRedIndex] = useState(-1);
   const [loadingDescription, setLoadingDescription] = useState(false);
+  const [loadingPrerequisiteKnowledge, setLoadingPrerequisiteKnowledge] = useState(false);
+
   const [loadingObjectives, setLoadingObjectives] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingCourseStructure, setLoadingCourseStructure] = useState(false);
@@ -90,10 +94,10 @@ const CourseComponent = () => {
   const [selectedCourse, setSelectedCourse] = useState<any>(0);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   // const [dialogOpenImp, setDialogOpenImp] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [selectedOpenCategory, setSelectedOpenCategory] = useState<any>(null);
   const [newTopic, setNewTopic] = useState<any>("");
   const [difficulty, setDifficulty] = useState("medium");
-  const [hours, setHours] = useState<number>(1);
+  const [hours, setHours] = useState<number>(0);
   const [skills, setSkills] = useState([]);
   const [topicDescription, setTopicDescription] = useState("");
 
@@ -102,7 +106,7 @@ const CourseComponent = () => {
   const [currentChangeIndex, setCurrentChangeIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
-  const [loadingNodes, setLoadingNodes] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [nodesPerTopic, setNodesPerTopic] = useState<{ [key: string]: any }>({});
   const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState<string[]>([]);
@@ -115,15 +119,16 @@ const CourseComponent = () => {
   const [editCategory, setEditCategory] = useState<any>(null);
   const [newCategoryTitle, setNewCategoryTitle] = useState<string>("");
 
+  const [expandedTopics, setExpandedTopics] = useState<any>([]);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   // const [topicImages /* , setTopicImages */] = useState<any>({
   //   "History and Approaches to Psychology":
   //     "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
   // });
-  const topicImages: any = {
-    "History and Approaches to Psychology":
-      "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
-  };
+  // const topicImages: any = {
+  //   "History and Approaches to Psychology":
+  //     "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
+  // };
 
   useEffect(() => {
     const notebooksRef = collection(db, "coursesAI");
@@ -151,7 +156,7 @@ const CourseComponent = () => {
             }
 
             if (docType === "removed" && prevIdx !== -1) {
-              prev.splice(prevIdx);
+              prev.splice(prevIdx, 1);
             }
             return prev;
           },
@@ -165,10 +170,10 @@ const CourseComponent = () => {
     };
   }, [db]);
 
-  const updateCourses = (course: any) => {
+  const updateCourses = async (course: any) => {
     if (!course.id || course.new) return;
     const courseRef = doc(db, "coursesAI", course.id);
-    updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
+    await updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
   };
   const onCreateCourse = async (newCourse: any) => {
     const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
@@ -205,6 +210,15 @@ const CourseComponent = () => {
     updateCourses(updatedCourses[selectedCourse]);
     // }, 1000);
   };
+  const handlePrerequisiteChange = (e: any) => {
+    const updatedCourses = [...courses];
+    updatedCourses[selectedCourse] = {
+      ...updatedCourses[selectedCourse],
+      prerequisiteKnowledge: e.target.value,
+    };
+    setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourse]);
+  };
 
   const handleLearnersChange = (e: any) => {
     const updatedCourses = [...courses];
@@ -215,12 +229,12 @@ const CourseComponent = () => {
     setCourses(updatedCourses);
     updateCourses(updatedCourses[selectedCourse]);
   };
-  const handleRemoveTopic = (categoryIndex: number, topicIndex: number) => {
-    const updatedCourses = [...courses];
-    updatedCourses[selectedCourse].syllabus[categoryIndex].topics.splice(topicIndex, 1);
-    setCourses(updatedCourses);
-    updateCourses(updatedCourses[selectedCourse]);
-  };
+  // const handleRemoveTopic = (categoryIndex: number, topicIndex: number) => {
+  //   const updatedCourses = [...courses];
+  //   updatedCourses[selectedCourse].syllabus[categoryIndex].topics.splice(topicIndex, 1);
+  //   setCourses(updatedCourses);
+  //   updateCourses(updatedCourses[selectedCourse]);
+  // };
   const handleOpenDialog = (categoryIndex: any) => {
     setSelectedCategory(categoryIndex);
     setDialogOpen(true);
@@ -325,7 +339,6 @@ const CourseComponent = () => {
   };
   const improveCourseStructure = async () => {
     setLoading(true);
-    setLoadingNodes(false);
     const courseTitle = courses[selectedCourse].title;
     const courseDescription = courses[selectedCourse].description;
     const targetLearners = courses[selectedCourse].learners;
@@ -498,10 +511,8 @@ const CourseComponent = () => {
     if (Object.keys(currentImprovement).length > 0) {
       return;
     }
-    setSelectedTopic(topic);
-    setSidebarOpen(true);
+
     if (nodesPerTopic[topic.topic]) return;
-    setLoadingNodes(true);
     setImprovements([]);
     setCurrentImprovement({});
 
@@ -513,15 +524,14 @@ const CourseComponent = () => {
     const references = courses[selectedCourse].references;
 
     const response: { nodes: any } = await Post("/retrieveNodesForCourse", {
+      courseId: courses[selectedCourse].id,
       tags,
       courseTitle,
       courseDescription,
       targetLearners,
       references,
       syllabus,
-      topic: topic.topic,
     });
-    setLoadingNodes(false);
 
     setNodesPerTopic(prev => {
       prev[topic.topic] = response.nodes;
@@ -537,22 +547,22 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
   };
-  const getNewTopics = (currentImprovement: any) => {
-    let newTopics = [];
-    if (!currentImprovement) {
-      return [];
-    }
-    if (
-      currentImprovement.new_topic &&
-      (currentImprovement.action === "add" || currentImprovement.action === "divide")
-    ) {
-      newTopics.push(currentImprovement.new_topic);
-    }
-    if ((currentImprovement.new_topics || []).length > 0) {
-      newTopics = [...newTopics, ...currentImprovement.new_topics];
-    }
-    return newTopics;
-  };
+  // const getNewTopics = (currentImprovement: any) => {
+  //   let newTopics = [];
+  //   if (!currentImprovement) {
+  //     return [];
+  //   }
+  //   if (
+  //     currentImprovement.new_topic &&
+  //     (currentImprovement.action === "add" || currentImprovement.action === "divide")
+  //   ) {
+  //     newTopics.push(currentImprovement.new_topic);
+  //   }
+  //   if ((currentImprovement.new_topics || []).length > 0) {
+  //     newTopics = [...newTopics, ...currentImprovement.new_topics];
+  //   }
+  //   return newTopics;
+  // };
   const scrollToCategory = (category: string) => {
     const categoryElement = document.getElementById(category);
     if (categoryElement) {
@@ -623,9 +633,11 @@ const CourseComponent = () => {
 
   const createCourse = async () => {
     setCourses((prev: any) => {
-      prev.push({
+      const _prev = [...prev];
+      _prev.push({
         id: newId(db),
         title: "",
+        prerequisiteKnowledge: "",
         learners: "",
         hours: 0,
         courseObjectives: [],
@@ -636,12 +648,22 @@ const CourseComponent = () => {
         references: [],
         new: true,
       });
-      return prev;
+      return _prev;
     });
     setTimeout(() => {
-      setSelectedCourse(courses.length - 1);
+      setSelectedCourse(courses.length);
     }, 900);
     setCreatingCourseStep(0);
+  };
+
+  const deleteCourse = async () => {
+    if (
+      courses[selectedCourse].id &&
+      (await confirmIt(`Do you want to delete this course?`, "Delete Course", "Keep Course"))
+    ) {
+      const courseRef = doc(db, "coursesAI", courses[selectedCourse].id);
+      updateDoc(courseRef, { deleted: true });
+    }
   };
   const cancelCreatingCourse = () => {
     setCourses((prev: any) => {
@@ -651,6 +673,21 @@ const CourseComponent = () => {
     setSelectedCourse(0);
   };
 
+  const generatePrerequisiteKnowledge = async () => {
+    setLoadingPrerequisiteKnowledge(true);
+    const courseTitle = courses[selectedCourse].title;
+    const targetLearners = courses[selectedCourse].learners;
+    const hours = courses[selectedCourse].hours;
+    const response = await Post("/generateCoursePrerequisites", { courseTitle, targetLearners, hours });
+    setCourses((prev: any) => {
+      prev[selectedCourse].prerequisiteKnowledge = response;
+      if (!prev[selectedCourse].new) {
+        updateCourses(prev[selectedCourse]);
+      }
+      return prev;
+    });
+    setLoadingPrerequisiteKnowledge(false);
+  };
   const generateDescription = async () => {
     setLoadingDescription(true);
     const courseTitle = courses[selectedCourse].title;
@@ -713,11 +750,13 @@ const CourseComponent = () => {
     const courseDescription = courses[selectedCourse].description;
     const courseSkills = courses[selectedCourse].courseSkills;
     const hours = courses[selectedCourse].hours;
+    const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
 
-    const response: any = await Post("/generateCourseStructure", {
+    const response: any = await Post("/generateCourseSyllabus", {
       courseTitle,
       targetLearners,
       courseObjectives,
+      prerequisiteKnowledge,
       courseDescription,
       courseSkills,
       hours,
@@ -862,15 +901,18 @@ const CourseComponent = () => {
 
   const nextStep = () => {
     if (creatingCourseStep === 2) {
-      generateDescription();
+      generatePrerequisiteKnowledge();
     }
     if (creatingCourseStep === 3) {
-      generateObjectives();
+      generateDescription();
     }
     if (creatingCourseStep === 4) {
-      generateSkills();
+      generateObjectives();
     }
     if (creatingCourseStep === 5) {
+      generateSkills();
+    }
+    if (creatingCourseStep === 6) {
       generateCourseStructure();
     }
     setCreatingCourseStep(prev => prev + 1);
@@ -886,20 +928,56 @@ const CourseComponent = () => {
       return !course.learners.trim();
     }
     if (creatingCourseStep === 3) {
-      return !course.description.trim();
+      return !course.prerequisiteKnowledge.trim();
     }
     if (creatingCourseStep === 4) {
-      return course.courseObjectives.length <= 0;
+      return !course.description.trim();
     }
     if (creatingCourseStep === 5) {
+      return course.courseObjectives.length <= 0;
+    }
+    if (creatingCourseStep === 6) {
       return course.courseSkills.length <= 0;
     }
 
     return false;
   };
+  const handleRemoveNode = (topic: string, node: string) => {
+    const course = courses[selectedCourse];
+    const newNodes = course.nodes[topic].filter((n: any) => n.node !== node);
+    course.nodes[topic] = newNodes;
+    updateCourses(course);
+  };
 
   if (courses.length <= 0) {
-    return <LinearProgress />;
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          width: sidebarOpen ? "70%" : "100%",
+          flex: sidebarOpen ? 0.7 : 1,
+          transition: "flex 0.3s",
+          overflow: "auto",
+          background: theme =>
+            theme.palette.mode === "dark"
+              ? theme.palette.common.darkGrayBackground
+              : theme.palette.common.lightGrayBackground,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <LoadingButton
+          variant="contained"
+          color="success"
+          sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+          onClick={createCourse}
+          loading={loading}
+        >
+          Create New Course
+        </LoadingButton>
+      </Box>
+    );
   }
   return (
     <Box
@@ -926,7 +1004,7 @@ const CourseComponent = () => {
 
       <Box padding="20px">
         <Box>
-          {!courses[selectedCourse].new && (
+          {!courses[selectedCourse]?.new && (
             <TextField
               value={courses[selectedCourse].title}
               onChange={event => {
@@ -960,6 +1038,18 @@ const CourseComponent = () => {
           {!courses[selectedCourse].new && (
             <LoadingButton
               variant="contained"
+              color="error"
+              sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
+              onClick={deleteCourse}
+              loading={loading}
+            >
+              Delete Course
+            </LoadingButton>
+          )}
+
+          {!courses[selectedCourse].new && (
+            <LoadingButton
+              variant="contained"
               color="success"
               sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
               onClick={createCourse}
@@ -979,19 +1069,25 @@ const CourseComponent = () => {
                 margin="normal"
                 variant="outlined"
                 sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
               />
             )}
             {(!courses[selectedCourse].new || creatingCourseStep >= 1) && (
               <TextField
                 label="Number of Hour-long Class Sessions"
                 fullWidth
-                value={courses[selectedCourse].hours || 0}
+                value={courses[selectedCourse].hours || ""}
                 onChange={handleHoursChange}
                 margin="normal"
                 variant="outlined"
                 sx={{ width: "500px" }}
                 type="number"
                 inputProps={{ min: 0 }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
               />
             )}
             {!courses[selectedCourse].new && (
@@ -1020,6 +1116,7 @@ const CourseComponent = () => {
               </TextField>
             )}
           </Box>
+
           {(!courses[selectedCourse].new || creatingCourseStep >= 2) && (
             <TextField
               label="Target Learners"
@@ -1031,9 +1128,31 @@ const CourseComponent = () => {
               variant="outlined"
               rows={4}
               sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+              InputLabelProps={{
+                style: { color: "grey" },
+              }}
             />
           )}
           {(!courses[selectedCourse].new || creatingCourseStep >= 3) &&
+            (loadingPrerequisiteKnowledge ? (
+              <LinearProgress />
+            ) : (
+              <TextField
+                label="Prerequisite Knowledge"
+                multiline
+                fullWidth
+                value={courses[selectedCourse].prerequisiteKnowledge}
+                onChange={handlePrerequisiteChange}
+                margin="normal"
+                variant="outlined"
+                minRows={4}
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
+              />
+            ))}
+          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
             (loadingDescription ? (
               <LinearProgress />
             ) : (
@@ -1072,7 +1191,7 @@ const CourseComponent = () => {
               />
             ))}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
+          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
             (loadingObjectives ? (
               <LinearProgress />
             ) : (
@@ -1104,7 +1223,7 @@ const CourseComponent = () => {
               </Box>
             ))}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
+          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
             (loadingSkills ? (
               <LinearProgress />
             ) : (
@@ -1136,7 +1255,7 @@ const CourseComponent = () => {
               </Box>
             ))}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
+          {(!courses[selectedCourse].new || creatingCourseStep >= 7) &&
             (loadingCourseStructure ? (
               <LinearProgress />
             ) : (
@@ -1162,7 +1281,7 @@ const CourseComponent = () => {
             ))}
 
           <Box ref={containerRef} marginTop="20px">
-            {getCourses()[selectedCourse].syllabus.map((category: any, categoryIndex: any) => (
+            {(getCourses()[selectedCourse].syllabus || []).map((category: any, categoryIndex: any) => (
               <Accordion
                 id={category.category}
                 key={category.category}
@@ -1185,9 +1304,15 @@ const CourseComponent = () => {
                     e.stopPropagation();
                     if (expanded.includes(category.category)) {
                       setExpanded([]);
+                      setSelectedOpenCategory(null);
+                      setSidebarOpen(false);
                     } else {
                       setExpanded([category.category]);
+                      setSelectedTopic(null);
+                      setSelectedOpenCategory({ categoryIndex, ...category });
                     }
+
+                    setSidebarOpen(true);
                   }}
                   sx={{
                     animation:
@@ -1230,7 +1355,7 @@ const CourseComponent = () => {
                       >
                         {category.category}
                       </Typography>
-                      <Box>
+                      {/* <Box>
                         <Button
                           onClick={e => {
                             e.stopPropagation();
@@ -1248,7 +1373,7 @@ const CourseComponent = () => {
                         >
                           Edit
                         </Button>
-                      </Box>
+                      </Box> */}
                     </Box>
                   )}
                 </AccordionSummary>
@@ -1258,215 +1383,256 @@ const CourseComponent = () => {
                     {
                       <Grid container spacing={2}>
                         {category.topics.map((tc: any, topicIndex: any) => (
-                          <Grid item xs={12} sm={6} md={4} key={topicIndex}>
-                            <Slide direction="down" timeout={800} in={true}>
-                              <Paper
+                          <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
+                            <Accordion
+                              expanded={expandedTopics.includes(tc.topic)}
+                              onChange={(e, isExpanded) => {
+                                let newExpanded = [];
+                                if (isExpanded) {
+                                  newExpanded = [...expandedTopics, tc.topic];
+                                  setSidebarOpen(true);
+                                } else {
+                                  setSidebarOpen(false);
+                                  newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
+                                }
+                                handlePaperClick(tc);
+
+                                setSelectedTopic({ categoryIndex, topicIndex, ...tc });
+                                setSelectedOpenCategory(null);
+                                setExpandedTopics(newExpanded);
+                              }}
+                              draggable
+                              onDragStart={() => {
+                                dragTopicItem.current = tc.topic;
+                              }}
+                              onDragOver={handleDragOver}
+                              onDragEnd={handleSorting}
+                              sx={{ backgroundColor: "#161515", borderRadius: "25px" }}
+                            >
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
+                                id={`panel${categoryIndex}-${topicIndex}-header`}
                                 sx={{
-                                  height: "300px",
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  // backgroundImage: `url(${topicImages[tc.topic]})`,
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                                  borderRadius: "15px",
-                                  position: "relative",
-                                  cursor: "pointer",
+                                  borderRadius: "25px",
                                   animation: isRemoved.includes(tc.topic)
                                     ? `${glowRed} 1.5s ease-in-out infinite`
                                     : isChanged.includes(tc.topic)
                                     ? `${glowGreen} 1.5s ease-in-out infinite`
-                                    : "none",
-                                  border: `1px solid ${getTopicColor(category, tc)}`,
+                                    : "",
+                                  // border: `1px solid ${getTopicColor(category, tc)}`,
                                   ":hover": {
                                     border: "1px solid orange",
                                   },
                                 }}
-                                elevation={10}
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handlePaperClick(tc);
-                                }}
                               >
-                                {currentImprovement.topic !== tc.topic && currentImprovement.old_topic !== tc.topic && (
-                                  <CloseIcon
-                                    className="close-icon"
-                                    sx={{
-                                      // backgroundColor: "grey",
-                                      color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                                      borderRadius: "50%",
-                                      ":hover": {
-                                        backgroundColor: "black",
-                                        color: "white",
-                                      },
-                                      zIndex: 10,
-                                      position: "absolute",
-                                      top: "0px",
-                                      right: "0px",
-                                      padding: "5px",
-                                      fontSize: "35px",
-                                    }}
-                                    onClick={() => handleRemoveTopic(categoryIndex, topicIndex)}
-                                  />
-                                )}
-                                {currentImprovement.action === "move" &&
-                                  currentImprovement.type === "topic" &&
-                                  currentImprovement.topic === tc.topic && (
-                                    <SwapHorizIcon
-                                      sx={{
-                                        position: "absolute",
-                                        top: "0px",
-                                        fontSize: "40px",
-                                        color: currentImprovement.new_category === category.category ? "green" : "red",
-                                      }}
-                                    />
-                                  )}
-                                <Box>
-                                  {currentImprovement.action === "modify" &&
-                                  currentImprovement.old_topic === tc.topic ? (
-                                    <Box>
-                                      <Typography
-                                        variant="h6"
-                                        sx={{
-                                          textAlign: "center",
-                                          color: "red",
-                                          textDecoration: "line-through",
-                                        }}
-                                      >
-                                        {currentImprovement?.old_topic || ""}
-                                      </Typography>
-                                      <Typography
-                                        variant="h6"
-                                        sx={{
-                                          textAlign: "center",
-                                          color: "green",
-                                        }}
-                                      >
-                                        {currentImprovement?.new_topic.topic || ""}
-                                      </Typography>
-                                    </Box>
-                                  ) : (
-                                    <Typography
-                                      variant="h6"
-                                      sx={{
-                                        textAlign: "center",
-                                        color: getTopicColor(category, tc),
-                                        fontWeight: 300,
-                                      }}
-                                    >
-                                      {tc?.topic || ""}
-                                    </Typography>
-                                  )}
-
-                                  <Box
-                                    sx={{
-                                      position: "absolute",
-                                      bottom: "0px",
-                                      right: "0px",
-                                      m: 2,
-                                      gap: "5px",
-                                    }}
-                                  >
-                                    <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                                    <Chip
-                                      label={tc?.difficulty}
-                                      color={
-                                        tc?.difficulty.toLowerCase() === "easy"
-                                          ? "success"
-                                          : tc?.difficulty.toLowerCase() === "medium"
-                                          ? "warning"
-                                          : "error"
-                                      }
-                                    />
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      position: "absolute",
-                                      bottom: "0px",
-                                      left: "0px",
-                                      m: 2,
-                                      gap: "5px",
-                                    }}
-                                  >
-                                    <Button
-                                      variant="contained"
-                                      sx={{ borderRadius: "40px" }}
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        setEditTopic({
-                                          category: category.category,
-                                          ...tc,
-                                        });
-                                        setNewTopic(tc.topic);
-                                        setDifficulty(tc.difficulty.toLowerCase());
-                                        setHours(tc.hours);
-                                        setTopicDescription(tc.description || "");
-                                        setSkills(tc.skills || []);
-                                        handleOpenDialog(categoryIndex);
-                                      }}
-                                    >
-                                      Edit
-                                    </Button>
-                                  </Box>
-                                </Box>
-                              </Paper>
-                            </Slide>
-                          </Grid>
-                        ))}
-                        {currentImprovement.category === category.category &&
-                          getNewTopics(currentImprovement).length > 0 &&
-                          getNewTopics(currentImprovement).map(tc => (
-                            <Grid key={tc.topic} item xs={12} sm={6} md={4}>
-                              <Paper
-                                sx={{
-                                  height: "300px",
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  backgroundImage: `url(${topicImages[tc]})`,
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                                  borderRadius: "15px",
-                                  position: "relative",
-                                  cursor: "pointer",
-                                  border: "2px solid green",
-                                  ":hover": {
-                                    border: "1px solid orange",
-                                  },
-                                }}
-                                elevation={10}
-                              >
-                                <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                  {tc.topic}
-                                </Typography>
-                                <Box
+                                {" "}
+                                <DragIndicatorIcon />
+                                <Typography
+                                  variant="h6"
                                   sx={{
-                                    position: "absolute",
-                                    bottom: "0px",
-                                    right: "0px",
-                                    m: 2,
-                                    gap: "5px",
+                                    textAlign: "center",
+                                    color: getTopicColor(category, tc),
+                                    fontWeight: 300,
                                   }}
                                 >
-                                  <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                                  <Chip
-                                    label={tc?.difficulty}
-                                    color={
-                                      tc?.difficulty.toLowerCase() === "easy"
-                                        ? "success"
-                                        : tc?.difficulty.toLowerCase() === "medium"
-                                        ? "warning"
-                                        : "error"
-                                    }
-                                  />
-                                </Box>
-                              </Paper>
+                                  {tc?.topic || ""}
+                                </Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                  {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
+                                    <Box key={n.node} sx={{ mb: "10px" }}>
+                                      <Accordion
+                                        id={n.node}
+                                        expanded={true}
+                                        sx={{
+                                          borderRadius: "13px!important",
+
+                                          overflow: "hidden",
+                                          listStyle: "none",
+                                          transition: "box-shadow 0.3s",
+                                          background: "#1f1f1f",
+                                          border: expandedNode === n.node ? `2px solid orange` : "",
+                                          p: "0px !important",
+                                        }}
+                                      >
+                                        <CloseIcon
+                                          className="close-icon"
+                                          sx={{
+                                            // backgroundColor: "grey",
+                                            color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                                            borderRadius: "50%",
+                                            ":hover": {
+                                              backgroundColor: "black",
+                                              color: "red",
+                                            },
+                                            cursor: "pointer",
+                                            zIndex: 10,
+                                            position: "absolute",
+                                            top: "0px",
+                                            right: "0px",
+                                            padding: "5px",
+                                            fontSize: "35px",
+                                          }}
+                                          onClick={() => handleRemoveNode(tc.topic, n.node)}
+                                        />
+                                        <AccordionSummary
+                                          sx={{
+                                            p: "0px !important",
+                                            marginBlock: "-13px !important",
+                                          }}
+                                        >
+                                          <Box sx={{ flexDirection: "column", width: "100%" }}>
+                                            <Box
+                                              onClick={e => {
+                                                e.stopPropagation();
+                                                if (expandedNode === n.node) {
+                                                  setExpandedNode(null);
+                                                } else {
+                                                  setExpandedNode(n.node);
+                                                }
+                                              }}
+                                              sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                m: "15px",
+                                              }}
+                                            >
+                                              <Box
+                                                sx={{
+                                                  pr: "25px",
+                                                  // pb: '15px',
+                                                  display: "flex",
+                                                  gap: "15px",
+                                                }}
+                                              >
+                                                <NodeTypeIcon
+                                                  id={n.title}
+                                                  nodeType={n.nodeType}
+                                                  tooltipPlacement={"top"}
+                                                  fontSize={"medium"}
+                                                  // disabled={disabled}
+                                                />
+                                                <MarkdownRender
+                                                  text={n?.title}
+                                                  sx={{
+                                                    fontSize: "20px",
+                                                    fontWeight: 400,
+                                                    letterSpacing: "inherit",
+                                                  }}
+                                                />
+                                              </Box>
+                                            </Box>
+                                          </Box>
+                                        </AccordionSummary>
+
+                                        <AccordionDetails /* sx={{ p: "0px !important" }} */>
+                                          <Box sx={{ p: "17px", pt: 0 }}>
+                                            <Box
+                                              sx={{
+                                                transition: "border 0.3s",
+                                              }}
+                                            >
+                                              <MarkdownRender
+                                                text={n.content}
+                                                sx={{
+                                                  fontSize: "16px",
+                                                  fontWeight: 400,
+                                                  letterSpacing: "inherit",
+                                                }}
+                                              />
+                                            </Box>
+                                            {/* <FlashcardVideo flashcard={concept} /> */}
+                                            {(n?.nodeImage || []).length > 0 && (
+                                              <Box sx={{ px: "55px" }}>
+                                                <ImageSlider images={[n?.nodeImage]} />
+                                              </Box>
+                                            )}
+                                          </Box>
+                                        </AccordionDetails>
+                                      </Accordion>
+                                    </Box>
+                                  ))}
+                                </Masonry>
+                              </AccordionDetails>
+                            </Accordion>
+                          </Grid>
+                        ))}
+                        {/* {currentImprovement.category === category.category &&
+                          getNewTopics(currentImprovement).length > 0 &&
+                          getNewTopics(currentImprovement).map(tc => (
+                            <Grid key={tc.topic} item xs={12}>
+                              <Accordion expanded>
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  aria-controls={`panel${categoryIndex}-new-${tc.topic}-content`}
+                                  id={`panel${categoryIndex}-new-${tc.topic}-header`}
+                                  sx={{
+                                    border: "2px solid green",
+                                    ":hover": {
+                                      border: "1px solid orange",
+                                    },
+                                  }}
+                                >
+                                  <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
+                                    {tc.topic}
+                                  </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  <Paper
+                                    sx={{
+                                      height: "300px",
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      backgroundSize: "cover",
+                                      backgroundPosition: "center",
+                                      borderRadius: "15px",
+                                      position: "relative",
+                                      cursor: "pointer",
+                                      border: "2px solid green",
+                                      ":hover": {
+                                        border: "1px solid orange",
+                                      },
+                                    }}
+                                    elevation={10}
+                                  >
+                                    <Box>
+                                      <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
+                                        {tc.topic}
+                                      </Typography>
+                                      <Box
+                                        sx={{
+                                          position: "absolute",
+                                          bottom: "0px",
+                                          right: "0px",
+                                          m: 2,
+                                          gap: "5px",
+                                        }}
+                                      >
+                                        <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
+                                        <Chip
+                                          label={tc?.difficulty}
+                                          color={
+                                            tc?.difficulty.toLowerCase() === "easy"
+                                              ? "success"
+                                              : tc?.difficulty.toLowerCase() === "medium"
+                                              ? "warning"
+                                              : "error"
+                                          }
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Paper>
+                                </AccordionDetails>
+                              </Accordion>
                             </Grid>
-                          ))}
-                        <Grid item xs={12} sm={6} md={4} key="add-topic">
+                          ))} */}
+                        <Grid item xs={12} key="add-topic">
                           <Paper
                             sx={{
-                              height: "300px",
+                              height: "60px",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
@@ -1498,7 +1664,7 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {courses[selectedCourse].syllabus.length > 0 && (
+          {(courses[selectedCourse].syllabus || []).length > 0 && (
             <Box
               sx={{
                 display: "flex",
@@ -1520,7 +1686,7 @@ const CourseComponent = () => {
               </LoadingButton>
             </Box>
           )}
-          {courses[selectedCourse].new && creatingCourseStep <= 5 && (
+          {courses[selectedCourse].new && creatingCourseStep <= 6 && (
             <Box
               sx={{
                 display: "flex",
@@ -1656,7 +1822,7 @@ const CourseComponent = () => {
               <TextField
                 label="Hours"
                 fullWidth
-                value={hours}
+                value={hours || ""}
                 onChange={event => setHours(Number(event.target.value))}
                 margin="normal"
                 variant="outlined"
@@ -1709,16 +1875,265 @@ const CourseComponent = () => {
             <Typography variant="h6">
               {Object.keys(improvements[currentChangeIndex] || {}).length > 0
                 ? "AI-Proposed Improvements"
-                : selectedTopic.topic}
+                : selectedTopic?.topic || selectedOpenCategory?.category || ""}
             </Typography>
             <IconButton onClick={handleSidebarClose}>
               <CloseIcon />
             </IconButton>
           </Box>
+          {selectedOpenCategory && (
+            <Box sx={{ px: "7px", gap: "8px", overflow: "auto", height: "100%" }}>
+              <TextField
+                label="Category Title"
+                multiline
+                value={selectedOpenCategory.category}
+                onChange={e => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                    category: e.target.value,
+                  };
+                  setSelectedOpenCategory({
+                    categoryIndex: selectedOpenCategory.categoryIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                  });
+                  setCourses(updatedCourses);
+                  updateCourses(updatedCourses[selectedCourse]);
+                }}
+                margin="normal"
+                variant="outlined"
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
+              />
+              <TextField
+                label="Description"
+                multiline
+                value={selectedOpenCategory?.description || ""}
+                onChange={e => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                    description: e.target.value,
+                  };
+                  setSelectedOpenCategory({
+                    categoryIndex: selectedOpenCategory.categoryIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                  });
+                  setCourses(updatedCourses);
+
+                  updateCourses({
+                    id: updatedCourses[selectedCourse].id,
+                    syllabus: updatedCourses[selectedCourse].syllabus,
+                  });
+                }}
+                margin="normal"
+                variant="outlined"
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
+              />
+              <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Objectives:</Typography>
+              <ChipInput
+                tags={selectedOpenCategory?.objectives || []}
+                selectedTags={() => {}}
+                setTags={(newTags: string[]) => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                    objectives: newTags,
+                  };
+                  setSelectedOpenCategory({
+                    categoryIndex: selectedOpenCategory.categoryIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                  });
+                  setCourses(updatedCourses);
+                  updateCourses({
+                    id: updatedCourses[selectedCourse].id,
+                    syllabus: updatedCourses[selectedCourse].syllabus,
+                  });
+                }}
+                fullWidth
+                variant="outlined"
+                readOnly={false}
+                placeholder="Type a new skill and click enter ↵ to add it..."
+              />
+              <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Skills:</Typography>
+              <ChipInput
+                tags={selectedOpenCategory?.skills || []}
+                selectedTags={() => {}}
+                setTags={(newTags: string[]) => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                    skills: newTags,
+                  };
+                  setSelectedOpenCategory({
+                    categoryIndex: selectedOpenCategory.categoryIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                  });
+                  setCourses(updatedCourses);
+                  updateCourses({
+                    id: updatedCourses[selectedCourse].id,
+                    syllabus: updatedCourses[selectedCourse].syllabus,
+                  });
+                }}
+                fullWidth
+                variant="outlined"
+                readOnly={false}
+                placeholder="Type a new skill and click enter ↵ to add it..."
+              />
+              <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Prerequisite knowledge:</Typography>
+              <ChipInput
+                tags={selectedOpenCategory?.prerequisiteKnowledge || []}
+                selectedTags={() => {}}
+                setTags={(newTags: string[]) => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                    prerequisiteKnowledge: newTags,
+                  };
+                  setCourses(updatedCourses);
+                  setSelectedOpenCategory({
+                    categoryIndex: selectedOpenCategory.categoryIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                  });
+                  updateCourses({
+                    id: updatedCourses[selectedCourse].id,
+                    syllabus: updatedCourses[selectedCourse].syllabus,
+                  });
+                }}
+                fullWidth
+                variant="outlined"
+                readOnly={false}
+                placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
+              />
+              <Button
+                onClick={() => {
+                  deleteCategory(selectedOpenCategory);
+                }}
+                sx={{
+                  m: 1,
+                }}
+                variant="contained"
+              >
+                Delete
+              </Button>
+            </Box>
+          )}
           {selectedTopic && (
             <Box sx={{ mx: "15px" }}>
-              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Description:</Typography>
-              <Typography>{selectedTopic.description}</Typography>{" "}
+              <TextField
+                label="Topic Description"
+                multiline
+                fullWidth
+                value={selectedTopic.description}
+                onChange={e => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                    selectedTopic.topicIndex
+                  ] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      selectedTopic.topicIndex
+                    ],
+                    description: e.target.value,
+                  };
+                  setSelectedTopic({
+                    categoryIndex: selectedTopic.categoryIndex,
+                    topicIndex: selectedTopic.topicIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      selectedTopic.topicIndex
+                    ],
+                  });
+                  setCourses(updatedCourses);
+                  updateCourses(updatedCourses[selectedCourse]);
+                }}
+                margin="normal"
+                variant="outlined"
+                minRows={4}
+                sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                InputLabelProps={{
+                  style: {
+                    color: "gray",
+                  },
+                }}
+              />
+              <FormControl fullWidth margin="normal" sx={{ width: "500px" }}>
+                <InputLabel id="difficulty-label">Difficulty</InputLabel>
+                <Select
+                  labelId="difficulty-label"
+                  value={selectedTopic.difficulty.toLowerCase()}
+                  onChange={e => {
+                    const updatedCourses = [...courses];
+                    updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      selectedTopic.topicIndex
+                    ] = {
+                      ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        selectedTopic.topicIndex
+                      ],
+                      difficulty: e.target.value,
+                    };
+                    setSelectedTopic({
+                      categoryIndex: selectedTopic.categoryIndex,
+                      topicIndex: selectedTopic.topicIndex,
+                      ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        selectedTopic.topicIndex
+                      ],
+                    });
+                    setCourses(updatedCourses);
+                    updateCourses(updatedCourses[selectedCourse]);
+                  }}
+                  label="Difficulty"
+                  MenuProps={{
+                    sx: {
+                      zIndex: "9999",
+                    },
+                  }}
+                  sx={{ color: difficulty === "easy" ? "#AAFF00" : difficulty === "medium" ? "#ffc071" : "red" }}
+                >
+                  <MenuItem value="easy" sx={{ color: "#AAFF00" }}>
+                    Easy
+                  </MenuItem>
+                  <MenuItem value="medium" sx={{ color: "#ffc071" }}>
+                    Medium
+                  </MenuItem>
+                  <MenuItem value="hard" sx={{ color: "red" }}>
+                    Hard
+                  </MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                label="Hours"
+                fullWidth
+                value={selectedTopic.hours || ""}
+                onChange={e => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                    selectedTopic.topicIndex
+                  ] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      selectedTopic.topicIndex
+                    ],
+                    hours: e.target.value,
+                  };
+                  setSelectedTopic({
+                    categoryIndex: selectedTopic.categoryIndex,
+                    topicIndex: selectedTopic.topicIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      selectedTopic.topicIndex
+                    ],
+                  });
+                  setCourses(updatedCourses);
+                  updateCourses(updatedCourses[selectedCourse]);
+                }}
+                margin="normal"
+                variant="outlined"
+                sx={{ width: "500px" }}
+                type="number"
+                inputProps={{ min: 0 }}
+              />
             </Box>
           )}
 
@@ -1728,9 +2143,29 @@ const CourseComponent = () => {
               <ChipInput
                 tags={selectedTopic.skills}
                 selectedTags={() => {}}
+                setTags={(newTags: string[]) => {
+                  const updatedCourses = [...courses];
+                  updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex] = {
+                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex],
+                    prerequisiteKnowledge: newTags,
+                  };
+                  setCourses(updatedCourses);
+                  setSelectedTopic({
+                    categoryIndex: selectedTopic.categoryIndex,
+                    topicIndex: selectedTopic.topicIndex,
+                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      selectedTopic.topicIndex
+                    ],
+                  });
+                  updateCourses({
+                    id: updatedCourses[selectedCourse].id,
+                    syllabus: updatedCourses[selectedCourse].syllabus,
+                  });
+                }}
                 fullWidth
                 variant="outlined"
-                readOnly={true}
+                readOnly={false}
+                placeholder="Type a new skill and click enter ↵ to add it..."
               />
             </Box>
           )}
@@ -1816,129 +2251,6 @@ const CourseComponent = () => {
                   Implement Proposal
                 </Button>
               </Box>
-            </Box>
-          )}
-          {loadingNodes ? (
-            <Box>
-              <Box>
-                {Array.from(new Array(7)).map((_, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      display: "flex",
-                      justifyContent: "flex-start",
-
-                      px: 2,
-                    }}
-                  >
-                    <Skeleton
-                      variant="rectangular"
-                      width={500}
-                      height={250}
-                      sx={{
-                        bgcolor: "grey.300",
-                        borderRadius: "10px",
-                        mt: "19px",
-                        ml: "5px",
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          ) : (
-            <Box sx={{ gap: "5px", my: "15px", mx: "19px", overflow: "auto" }}>
-              <Typography sx={{ fontWeight: "bold" }}> Related 1Cademy Nodes:</Typography>
-              {selectedTopic &&
-                (nodesPerTopic[selectedTopic.topic] || []).map((node: any) => (
-                  <Box key={node.title} sx={{ mb: "10px" }}>
-                    <Accordion
-                      id={node.title}
-                      expanded={true}
-                      sx={{
-                        borderRadius: "13px!important",
-
-                        overflow: "hidden",
-                        listStyle: "none",
-                        transition: "box-shadow 0.3s",
-
-                        border: expandedNode === node.title ? `2px solid orange` : "",
-                        p: "0px !important",
-                      }}
-                    >
-                      <AccordionSummary
-                        sx={{
-                          p: "0px !important",
-                          marginBlock: "-13px !important",
-                        }}
-                      >
-                        <Box sx={{ flexDirection: "column", width: "100%" }}>
-                          <Box
-                            onClick={e => {
-                              e.stopPropagation();
-                              if (expandedNode === node.title) {
-                                setExpandedNode(null);
-                              } else {
-                                setExpandedNode(node.title);
-                              }
-                            }}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              m: "15px",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                pr: "25px",
-                                // pb: '15px',
-                                display: "flex",
-                                gap: "15px",
-                              }}
-                            >
-                              <NodeTypeIcon
-                                id={node.title}
-                                nodeType={node.nodeType}
-                                tooltipPlacement={"top"}
-                                fontSize={"medium"}
-                                // disabled={disabled}
-                              />
-                              <MarkdownRender
-                                text={node?.title}
-                                sx={{
-                                  fontSize: "20px",
-                                  fontWeight: 400,
-                                  letterSpacing: "inherit",
-                                }}
-                              />
-                            </Box>
-                          </Box>
-                        </Box>
-                      </AccordionSummary>
-
-                      <AccordionDetails sx={{ p: "0px !important" }}>
-                        <Box sx={{ p: "17px", pt: 0 }}>
-                          <Box
-                            sx={{
-                              transition: "border 0.3s",
-                            }}
-                          >
-                            <MarkdownRender
-                              text={node.content}
-                              sx={{
-                                fontSize: "16px",
-                                fontWeight: 400,
-                                letterSpacing: "inherit",
-                              }}
-                            />
-                          </Box>
-                          {/* <FlashcardVideo flashcard={concept} /> */}
-                          {(node?.nodeImage || []).length > 0 && <ImageSlider images={[node?.nodeImage]} />}
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  </Box>
-                ))}
             </Box>
           )}
         </Paper>

@@ -29,7 +29,7 @@ const ImageSlider = ({ images, removeImage, editMode = false }: props) => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center" sx={{ mt: "10px" }}>
       <Box border="2px solid orange" borderRadius="10px" padding="2px">
-        <img src={images[currentIndex]} alt={`Image ${currentIndex}`} />
+        <img src={images[currentIndex]} alt={`Image ${currentIndex}`} width={450} />
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center" }}>
