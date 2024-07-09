@@ -162,7 +162,6 @@ type SelectedProposalItemType = {
 
 const SelectedProposalItem = ({
   proposal,
-  selectProposal,
   proposalSummaries,
   rateProposalClick,
   proposalIdx,
@@ -187,61 +186,67 @@ const SelectedProposalItem = ({
   };
 
   return (
-    <li className="collection-item avatar" key={`Proposal${proposal.id}`}>
-      <Paper
-        onClick={(e: any) => selectProposal(e, "", null)}
-        elevation={3}
+    <Paper
+      key={`Proposal${proposal.id}`}
+      elevation={3}
+      sx={{
+        display: "flex",
+        padding: "15px",
+        flexDirection: "column",
+        position: "relative",
+        border: "2px solid #ff8a33",
+        cursor: "auto!important",
+        ":hover": {
+          boxShadow: theme =>
+            theme.palette.mode === "dark"
+              ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
+              : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
+        },
+        background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+      }}
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
+        <Box className="title Time" sx={{ fontSize: "12px" }}>
+          <MarkdownRender
+            text={proposal.title}
+            customClass={"custom-react-markdown"}
+            sx={{ fontWeight: 400, letterSpacing: "inherit" }}
+          />
+        </Box>
+        <Box
+          sx={{
+            paddingY: "10px",
+          }}
+        >
+          {proposalSummaries.length > 0 ? (
+            proposalSummaries.map((prSummary: any, sIdx: number) => {
+              return (
+                <Box
+                  component="p"
+                  sx={{
+                    margin: "0",
+                    color: theme =>
+                      theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
+                  }}
+                  key={"Summary" + proposal.id + sIdx}
+                >
+                  {prSummary}
+                </Box>
+              );
+            })
+          ) : (
+            <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
+          )}
+        </Box>
+        {proposal.proposal.trim() && <Typography sx={{ mb: "5px" }}>Explanation: {proposal.proposal}</Typography>}
+      </Box>
+      <Box
         sx={{
           display: "flex",
-          padding: "15px",
-          flexDirection: "column",
-          position: "relative",
-          border: "2px solid #ff8a33",
-          cursor: "auto!important",
-          ":hover": {
-            boxShadow: theme =>
-              theme.palette.mode === "dark"
-                ? "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #62544B"
-                : "0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px #ECCFBD",
-          },
-          background: theme => (theme.palette.mode === "dark" ? "#242425" : "#F2F4F7"),
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Box sx={{ display: "flex", flexDirection: "column", flexGrow: "1" }}>
-          <Box className="title Time" sx={{ fontSize: "12px" }}>
-            <MarkdownRender
-              text={proposal.title}
-              customClass={"custom-react-markdown"}
-              sx={{ fontWeight: 400, letterSpacing: "inherit" }}
-            />
-          </Box>
-          <Box
-            sx={{
-              paddingY: "10px",
-            }}
-          >
-            {proposalSummaries.length > 0 ? (
-              proposalSummaries.map((prSummary: any, sIdx: number) => {
-                return (
-                  <Box
-                    component="p"
-                    sx={{
-                      margin: "0",
-                      color: theme =>
-                        theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
-                    }}
-                    key={"Summary" + proposal.id + sIdx}
-                  >
-                    {prSummary}
-                  </Box>
-                );
-              })
-            ) : (
-              <Editor label="" readOnly value={proposal.summary} setValue={() => {}}></Editor>
-            )}
-          </Box>
-          {proposal.proposal.trim() && <Typography sx={{ mb: "5px" }}>Explanation: {proposal.proposal}</Typography>}
-        </Box>
         <Box
           sx={{
             display: "flex",
@@ -251,148 +256,140 @@ const SelectedProposalItem = ({
         >
           <Box
             sx={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              justifyContent: "space-between",
             }}
           >
-            <Box
-              sx={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "50%",
-                background: theme => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <NodeTypeIcon nodeType={proposal.nodeType || ""} fontSize="inherit" />
-            </Box>
-            <Box
-              sx={{
-                fontSize: "12px",
-                marginLeft: "5px",
-                color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
-              }}
-            >
-              {dayjs(proposal.createdAt).fromNow()}
-            </Box>
+            <NodeTypeIcon nodeType={proposal.nodeType || ""} fontSize="inherit" />
           </Box>
-          <Box>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
-                borderRadius: "52px",
-                marginLeft: "15px",
-              }}
-            >
-              <ContainedButton
-                title="Click if you find this proposal helpful."
-                onClick={upVoteProposal}
-                sx={{
-                  borderRadius: "52px 0px 0px 52px",
-                  background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
-                  ":hover": {
-                    borderWidth: "0px",
-                    background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
-                  },
-                }}
-                disabled={ratingProposal}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <DoneIcon
-                    sx={{
-                      fill:
-                        userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].correct
-                          ? "rgb(0, 211, 105)"
-                          : "inherit",
-                      fontSize: "19px",
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                      mt: "3px",
-                    }}
-                  >
-                    {shortenNumber(proposal.corrects, 2, false)}
-                  </Typography>
-                </Box>
-              </ContainedButton>
-              <Divider
-                orientation="vertical"
-                variant="middle"
-                flexItem
-                sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
-              />
-              <ContainedButton
-                title="Click if you find this proposal Unhelpful."
-                onClick={downVoteProposal}
-                sx={{
-                  borderRadius: canRemoveProposal ? "0px" : "0px 52px 52px 0px",
-                  background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
-                  ":hover": {
-                    borderWidth: "0px",
-                    background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <CloseIcon
-                    sx={{
-                      fill:
-                        userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].wrong
-                          ? "rgb(255, 29, 29)"
-                          : "inherit",
-                      fontSize: "19px",
-                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                      mt: "3px",
-                    }}
-                  >
-                    {shortenNumber(proposal.wrongs, 2, false)}
-                  </Typography>
-                </Box>
-              </ContainedButton>
-              {canRemoveProposal && (
-                <React.Fragment>
-                  <Divider
-                    orientation="vertical"
-                    variant="middle"
-                    flexItem
-                    sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
-                  />
-                  <ContainedButton
-                    title={"Delete your proposal"}
-                    onClick={() => deleteProposalClick(proposal, proposalIdx)}
-                    // disabled={isDisabled}
-                    sx={{
-                      borderRadius: "0px 52px 52px 0px",
-                      background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
-                      ":hover": {
-                        borderWidth: "0px",
-                        background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
-                      },
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                      <DeleteIcon sx={{ fill: "inherit", fontSize: "19px" }} />
-                    </Box>
-                  </ContainedButton>
-                </React.Fragment>
-              )}
-            </Box>
+          <Box
+            sx={{
+              fontSize: "12px",
+              marginLeft: "5px",
+              color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
+            }}
+          >
+            {dayjs(proposal.createdAt).fromNow()}
           </Box>
         </Box>
-      </Paper>
-    </li>
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+              borderRadius: "52px",
+              marginLeft: "15px",
+            }}
+          >
+            <ContainedButton
+              title="Click if you find this proposal helpful."
+              onClick={upVoteProposal}
+              sx={{
+                borderRadius: "52px 0px 0px 52px",
+                background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                ":hover": {
+                  borderWidth: "0px",
+                  background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
+                },
+              }}
+              disabled={ratingProposal}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                <DoneIcon
+                  sx={{
+                    fill:
+                      userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].correct
+                        ? "rgb(0, 211, 105)"
+                        : "inherit",
+                    fontSize: "19px",
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                    mt: "3px",
+                  }}
+                >
+                  {shortenNumber(proposal.corrects, 2, false)}
+                </Typography>
+              </Box>
+            </ContainedButton>
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+            />
+            <ContainedButton
+              title="Click if you find this proposal Unhelpful."
+              onClick={downVoteProposal}
+              sx={{
+                borderRadius: canRemoveProposal ? "0px" : "0px 52px 52px 0px",
+                background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                ":hover": {
+                  borderWidth: "0px",
+                  background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
+                },
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                <CloseIcon
+                  sx={{
+                    fill:
+                      userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].wrong
+                        ? "rgb(255, 29, 29)"
+                        : "inherit",
+                    fontSize: "19px",
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                    mt: "3px",
+                  }}
+                >
+                  {shortenNumber(proposal.wrongs, 2, false)}
+                </Typography>
+              </Box>
+            </ContainedButton>
+            {canRemoveProposal && (
+              <React.Fragment>
+                <Divider
+                  orientation="vertical"
+                  variant="middle"
+                  flexItem
+                  sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+                />
+                <ContainedButton
+                  title={"Delete your proposal"}
+                  onClick={() => deleteProposalClick(proposal, proposalIdx)}
+                  // disabled={isDisabled}
+                  sx={{
+                    borderRadius: "0px 52px 52px 0px",
+                    background: theme => (theme.palette.mode === "dark" ? "#404040" : "#E1E4E9"),
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: theme => (theme.palette.mode === "dark" ? "#4E4D4D" : "#D0D5DD"),
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <DeleteIcon sx={{ fill: "inherit", fontSize: "19px" }} />
+                  </Box>
+                </ContainedButton>
+              </React.Fragment>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 
