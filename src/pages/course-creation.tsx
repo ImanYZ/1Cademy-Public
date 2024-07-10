@@ -1,4 +1,3 @@
-import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
@@ -67,6 +66,28 @@ const glowRed = keyframes`
     box-shadow: 0 0 5px red, 0 0 10px red, 0 0 20px red, 0 0 30px red;
   }
 `;
+
+interface Topic {
+  topic: string;
+  hours: number;
+  difficulty: string;
+}
+
+interface Suggestion {
+  action: string;
+  type: string;
+  category?: string | null;
+  after?: string;
+  new_topic?: Topic;
+  old_topic?: string;
+  new_topics?: Topic[];
+  current_category?: string;
+  topic?: string;
+  current_after?: string;
+  new_category?: string;
+  new_after?: string;
+  rationale: string;
+}
 
 const CourseComponent = () => {
   const db = getFirestore();
@@ -274,27 +295,7 @@ const CourseComponent = () => {
     setHours(0);
     setDifficulty("");
   };
-  interface Topic {
-    topic: string;
-    hours: number;
-    difficulty: string;
-  }
 
-  interface Suggestion {
-    action: string;
-    type: string;
-    category?: string | null;
-    after?: string;
-    new_topic?: Topic;
-    old_topic?: string;
-    new_topics?: Topic[];
-    current_category?: string;
-    topic?: string;
-    current_after?: string;
-    new_category?: string;
-    new_after?: string;
-    rationale: string;
-  }
   const generateSuggestionMessage = (suggestion: Suggestion): string => {
     const {
       action,
@@ -1315,6 +1316,9 @@ const CourseComponent = () => {
                     setSidebarOpen(true);
                   }}
                   sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
                     animation:
                       categoryIndex === glowCategoryGreenIndex
                         ? `${glowGreen} 1.5s ease-in-out infinite`
@@ -1323,59 +1327,52 @@ const CourseComponent = () => {
                         : "",
                   }}
                 >
-                  <DragIndicatorIcon />
-                  {currentImprovement.type === "category" &&
-                  currentImprovement.action === "modify" &&
-                  currentImprovement.old_category === category.category ? (
-                    <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
-                      <Box sx={{ display: "flex", gap: "5px" }}>
-                        <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                    <DragIndicatorIcon />
+                    {currentImprovement.type === "category" &&
+                    currentImprovement.action === "modify" &&
+                    currentImprovement.old_category === category.category ? (
+                      <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
+                        <Box sx={{ display: "flex", gap: "5px" }}>
+                          <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
+                            {category.category}
+                          </Typography>
+                          <Typography variant="h6" sx={{ color: "green" }}>
+                            {currentImprovement.new_category.category}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            color:
+                              currentImprovement.type === "topic" && currentImprovement.category === category.category
+                                ? "orange"
+                                : currentImprovement.type === "topic" &&
+                                  currentImprovement.current_category === category.category
+                                ? "red"
+                                : currentImprovement.new_category === category.category
+                                ? "green"
+                                : "",
+                          }}
+                        >
                           {category.category}
                         </Typography>
-                        <Typography variant="h6" sx={{ color: "green" }}>
-                          {currentImprovement.new_category.category}
-                        </Typography>
+                        <Box sx={{ ml: "14px" }}>
+                          <Button
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleOpenDialog(categoryIndex);
+                            }}
+                          >
+                            Add topic
+                          </Button>
+                        </Box>
                       </Box>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: "flex", width: "100%", justifyContent: "space-between" }}>
-                      <Typography
-                        variant="h4"
-                        sx={{
-                          color:
-                            currentImprovement.type === "topic" && currentImprovement.category === category.category
-                              ? "orange"
-                              : currentImprovement.type === "topic" &&
-                                currentImprovement.current_category === category.category
-                              ? "red"
-                              : currentImprovement.new_category === category.category
-                              ? "green"
-                              : "",
-                        }}
-                      >
-                        {category.category}
-                      </Typography>
-                      {/* <Box>
-                        <Button
-                          onClick={e => {
-                            e.stopPropagation();
-                            deleteCategory(category);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                        <Button
-                          onClick={e => {
-                            e.stopPropagation();
-                            setEditCategory(category);
-                            setNewCategoryTitle(category.category);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                      </Box> */}
-                    </Box>
-                  )}
+                    )}
+                  </Box>
                 </AccordionSummary>
 
                 {expanded.includes(category.category) && (
@@ -1407,13 +1404,19 @@ const CourseComponent = () => {
                               }}
                               onDragOver={handleDragOver}
                               onDragEnd={handleSorting}
-                              sx={{ backgroundColor: "#161515", borderRadius: "25px" }}
+                              sx={{
+                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                borderRadius: "25px",
+                              }}
                             >
                               <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
                                 id={`panel${categoryIndex}-${topicIndex}-header`}
                                 sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
                                   borderRadius: "25px",
                                   animation: isRemoved.includes(tc.topic)
                                     ? `${glowRed} 1.5s ease-in-out infinite`
@@ -1427,17 +1430,19 @@ const CourseComponent = () => {
                                 }}
                               >
                                 {" "}
-                                <DragIndicatorIcon />
-                                <Typography
-                                  variant="h6"
-                                  sx={{
-                                    textAlign: "center",
-                                    color: getTopicColor(category, tc),
-                                    fontWeight: 300,
-                                  }}
-                                >
-                                  {tc?.topic || ""}
-                                </Typography>
+                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                  <DragIndicatorIcon />
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      textAlign: "center",
+                                      color: getTopicColor(category, tc),
+                                      fontWeight: 300,
+                                    }}
+                                  >
+                                    {tc?.topic || ""}
+                                  </Typography>
+                                </Box>
                               </AccordionSummary>
                               <AccordionDetails>
                                 <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
@@ -1559,103 +1564,6 @@ const CourseComponent = () => {
                             </Accordion>
                           </Grid>
                         ))}
-                        {/* {currentImprovement.category === category.category &&
-                          getNewTopics(currentImprovement).length > 0 &&
-                          getNewTopics(currentImprovement).map(tc => (
-                            <Grid key={tc.topic} item xs={12}>
-                              <Accordion expanded>
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${categoryIndex}-new-${tc.topic}-content`}
-                                  id={`panel${categoryIndex}-new-${tc.topic}-header`}
-                                  sx={{
-                                    border: "2px solid green",
-                                    ":hover": {
-                                      border: "1px solid orange",
-                                    },
-                                  }}
-                                >
-                                  <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                    {tc.topic}
-                                  </Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  <Paper
-                                    sx={{
-                                      height: "300px",
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      backgroundSize: "cover",
-                                      backgroundPosition: "center",
-                                      borderRadius: "15px",
-                                      position: "relative",
-                                      cursor: "pointer",
-                                      border: "2px solid green",
-                                      ":hover": {
-                                        border: "1px solid orange",
-                                      },
-                                    }}
-                                    elevation={10}
-                                  >
-                                    <Box>
-                                      <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                        {tc.topic}
-                                      </Typography>
-                                      <Box
-                                        sx={{
-                                          position: "absolute",
-                                          bottom: "0px",
-                                          right: "0px",
-                                          m: 2,
-                                          gap: "5px",
-                                        }}
-                                      >
-                                        <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                                        <Chip
-                                          label={tc?.difficulty}
-                                          color={
-                                            tc?.difficulty.toLowerCase() === "easy"
-                                              ? "success"
-                                              : tc?.difficulty.toLowerCase() === "medium"
-                                              ? "warning"
-                                              : "error"
-                                          }
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Paper>
-                                </AccordionDetails>
-                              </Accordion>
-                            </Grid>
-                          ))} */}
-                        <Grid item xs={12} key="add-topic">
-                          <Paper
-                            sx={{
-                              height: "60px",
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              border: "2px dashed grey",
-                              borderRadius: "15px",
-                              cursor: "pointer",
-                              ":hover": {
-                                border: "2px dashed orange",
-                              },
-                            }}
-                            onClick={() => handleOpenDialog(categoryIndex)}
-                          >
-                            <AddIcon
-                              sx={{
-                                fontSize: 64,
-                                color: "grey",
-                                ":hover": {
-                                  color: "orange",
-                                },
-                              }}
-                            />
-                          </Paper>
-                        </Grid>
                       </Grid>
                     }
                   </AccordionDetails>
@@ -1772,6 +1680,9 @@ const CourseComponent = () => {
                 margin="normal"
                 variant="outlined"
                 sx={{ width: "500px" }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
               />
               <TextField
                 label={editTopic ? "Edit Description" : "Enter Description"}
@@ -1782,6 +1693,9 @@ const CourseComponent = () => {
                 margin="normal"
                 variant="outlined"
                 sx={{ width: "500px" }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
               />
               <Box sx={{ display: "column" }}>
                 <Typography>Skills:</Typography>
@@ -1806,7 +1720,6 @@ const CourseComponent = () => {
                       zIndex: "9999",
                     },
                   }}
-                  sx={{ color: difficulty === "easy" ? "#AAFF00" : difficulty === "medium" ? "#ffc071" : "red" }}
                 >
                   <MenuItem value="easy" sx={{ color: "#AAFF00" }}>
                     Easy
@@ -1829,6 +1742,9 @@ const CourseComponent = () => {
                 sx={{ width: "500px" }}
                 type="number"
                 inputProps={{ min: 0 }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
               />
             </DialogContent>
             <DialogActions>
@@ -1836,7 +1752,7 @@ const CourseComponent = () => {
                 Cancel
               </Button>
               <Button onClick={handleSaveTopic} color="primary" variant="contained">
-                Save
+                {editTopic ? "Save" : "Add"}
               </Button>
             </DialogActions>
           </Dialog>
@@ -2281,3 +2197,75 @@ export default withAuthUser({
 //   topic: "Forensic Psychology",
 //   rationale: "To cover the application of psychology in legal and criminal justice settings.",
 // },
+{
+  /* {currentImprovement.category === category.category &&
+                          getNewTopics(currentImprovement).length > 0 &&
+                          getNewTopics(currentImprovement).map(tc => (
+                            <Grid key={tc.topic} item xs={12}>
+                              <Accordion expanded>
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  aria-controls={`panel${categoryIndex}-new-${tc.topic}-content`}
+                                  id={`panel${categoryIndex}-new-${tc.topic}-header`}
+                                  sx={{
+                                    border: "2px solid green",
+                                    ":hover": {
+                                      border: "1px solid orange",
+                                    },
+                                  }}
+                                >
+                                  <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
+                                    {tc.topic}
+                                  </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  <Paper
+                                    sx={{
+                                      height: "300px",
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      backgroundSize: "cover",
+                                      backgroundPosition: "center",
+                                      borderRadius: "15px",
+                                      position: "relative",
+                                      cursor: "pointer",
+                                      border: "2px solid green",
+                                      ":hover": {
+                                        border: "1px solid orange",
+                                      },
+                                    }}
+                                    elevation={10}
+                                  >
+                                    <Box>
+                                      <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
+                                        {tc.topic}
+                                      </Typography>
+                                      <Box
+                                        sx={{
+                                          position: "absolute",
+                                          bottom: "0px",
+                                          right: "0px",
+                                          m: 2,
+                                          gap: "5px",
+                                        }}
+                                      >
+                                        <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
+                                        <Chip
+                                          label={tc?.difficulty}
+                                          color={
+                                            tc?.difficulty.toLowerCase() === "easy"
+                                              ? "success"
+                                              : tc?.difficulty.toLowerCase() === "medium"
+                                              ? "warning"
+                                              : "error"
+                                          }
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Paper>
+                                </AccordionDetails>
+                              </Accordion>
+                            </Grid>
+                          ))} */
+}
