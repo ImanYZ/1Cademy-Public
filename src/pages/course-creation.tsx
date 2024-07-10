@@ -97,7 +97,7 @@ const CourseComponent = () => {
   const containerRef = useRef<any>(null);
 
   const dragTopicItem = useRef<any>(null);
-  // const dragOverTopicItem = useRef<any>(null);
+  const dragOverTopicItem = useRef<any>(null);
   // const containerTopicRef = useRef<any>(null);
 
   const [glowCategoryGreenIndex, setGlowCategoryGreenIndex] = useState(-1);
@@ -344,11 +344,13 @@ const CourseComponent = () => {
     const courseDescription = courses[selectedCourse].description;
     const targetLearners = courses[selectedCourse].learners;
     const syllabus = courses[selectedCourse].syllabus;
+    const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
     const response: any = await Post("/improveCourseSyllabus", {
       courseTitle,
       courseDescription,
       targetLearners,
       syllabus,
+      prerequisiteKnowledge,
     });
 
     setImprovements(response.suggestions);
@@ -903,6 +905,20 @@ const CourseComponent = () => {
   const getStepTitle = () => {
     if (creatingCourseStep === 0) {
       return "Course Title";
+    } else if (creatingCourseStep === 1) {
+      return "Number of Hour-long Class Sessions";
+    } else if (creatingCourseStep === 2) {
+      return "Target Learners";
+    } else if (creatingCourseStep === 3) {
+      return "Prerequisite Knowledge";
+    } else if (creatingCourseStep === 4) {
+      return "Course Description";
+    } else if (creatingCourseStep === 5) {
+      return "Course Objectives";
+    } else if (creatingCourseStep === 6) {
+      return "Course Skills";
+    } else if (creatingCourseStep === 7) {
+      return "Course Structure";
     }
   };
   const nextStep = () => {
@@ -1324,6 +1340,7 @@ const CourseComponent = () => {
                 }}
                 onDragEnter={() => {
                   dragOverItem.current = categoryIndex;
+                  dragOverTopicItem.current = categoryIndex;
                 }}
                 onDragOver={handleDragOver}
                 onDragEnd={handleSorting}
@@ -1432,8 +1449,12 @@ const CourseComponent = () => {
                               onDragStart={() => {
                                 dragTopicItem.current = tc.topic;
                               }}
-                              onDragOver={handleDragOver}
-                              onDragEnd={handleSorting}
+                              onDragOver={() => {
+                                // console.log("onDragOver");
+                              }}
+                              onDragEnd={() => {
+                                // console.log("onDragEnd");
+                              }}
                               sx={{
                                 backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
                                 borderRadius: "25px",
@@ -1487,7 +1508,9 @@ const CourseComponent = () => {
                                           overflow: "hidden",
                                           listStyle: "none",
                                           transition: "box-shadow 0.3s",
-                                          background: "#1f1f1f",
+
+                                          backgroundColor: theme =>
+                                            theme.palette.mode === "dark" ? "#1f1f1f" : "white",
                                           border: expandedNode === n.node ? `2px solid orange` : "",
                                           p: "0px !important",
                                         }}
