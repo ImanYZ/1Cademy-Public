@@ -78,6 +78,7 @@ const ThemeProvider: FC<Props> = ({ children }) => {
     }
 
     return () => {
+      goOffline(db);
       unsubscribeRefs.auth();
       unsubscribeRefs.activityTimer && clearInterval(unsubscribeRefs.activityTimer);
     };

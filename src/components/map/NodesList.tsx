@@ -370,6 +370,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.setNodeParts === next.setNodeParts &&
     prev.hideNode === next.hideNode &&
     prev.commentNotifications.length === next.commentNotifications.length &&
+    prev.onlineUsers === next.onlineUsers &&
     // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );
