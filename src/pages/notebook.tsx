@@ -1235,7 +1235,7 @@ const Notebook = ({}: NotebookProps) => {
             oldOnlineUsers[statusUname] = true;
           }
         }
-        return oldOnlineUsers;
+        return { ...oldOnlineUsers };
       });
       setUsersOnlineStatusLoaded(true);
     });
