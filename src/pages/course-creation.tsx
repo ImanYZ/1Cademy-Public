@@ -1487,7 +1487,9 @@ const CourseComponent = () => {
                                           overflow: "hidden",
                                           listStyle: "none",
                                           transition: "box-shadow 0.3s",
-                                          background: "#1f1f1f",
+
+                                          backgroundColor: theme =>
+                                            theme.palette.mode === "dark" ? "#1f1f1f" : "white",
                                           border: expandedNode === n.node ? `2px solid orange` : "",
                                           p: "0px !important",
                                         }}
