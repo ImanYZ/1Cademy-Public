@@ -899,7 +899,11 @@ const CourseComponent = () => {
 
     return () => clearTimeout(timeoutId);
   };
-
+  const getStepTitle = () => {
+    if (creatingCourseStep === 0) {
+      return "Course Title";
+    }
+  };
   const nextStep = () => {
     if (creatingCourseStep === 2) {
       generatePrerequisiteKnowledge();
@@ -1002,7 +1006,26 @@ const CourseComponent = () => {
         onSwitchSection={() => {}}
         aiCourse={true}
       />
-
+      {courses[selectedCourse].new && creatingCourseStep <= 6 && (
+        <LoadingButton
+          variant="contained"
+          color="error"
+          sx={{
+            color: "white",
+            zIndex: 9,
+            fontSize: "15px",
+            mt: "15px",
+            position: "absolute",
+            right: 0,
+            mr: "4px",
+            height: "34px",
+          }}
+          onClick={cancelCreatingCourse}
+          loading={loading}
+        >
+          Close
+        </LoadingButton>
+      )}
       <Box padding="20px">
         <Box>
           {!courses[selectedCourse]?.new && (
@@ -1611,25 +1634,19 @@ const CourseComponent = () => {
                 gap: "5px",
               }}
             >
-              <LoadingButton
-                variant="contained"
-                color="success"
-                sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
-                onClick={nextStep}
-                loading={loading}
-                disabled={nextButtonDisabled(courses[selectedCourse])}
-              >
-                Next
-              </LoadingButton>
-              <LoadingButton
-                variant="contained"
-                color="error"
-                sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
-                onClick={cancelCreatingCourse}
-                loading={loading}
-              >
-                Cancel
-              </LoadingButton>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                <Typography>Edit {getStepTitle()} OR </Typography>
+                <LoadingButton
+                  variant="contained"
+                  color="success"
+                  sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
+                  onClick={nextStep}
+                  loading={loading}
+                  disabled={nextButtonDisabled(courses[selectedCourse])}
+                >
+                  Continue
+                </LoadingButton>
+              </Box>
             </Box>
           )}
           <Dialog
