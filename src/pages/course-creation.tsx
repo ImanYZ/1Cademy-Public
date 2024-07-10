@@ -106,7 +106,7 @@ const CourseComponent = () => {
   const [loadingPrerequisiteKnowledge, setLoadingPrerequisiteKnowledge] = useState(false);
 
   const [loadingObjectives, setLoadingObjectives] = useState(false);
-  const [loadingSkills, setLoadingSkills] = useState(false);
+  // const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingCourseStructure, setLoadingCourseStructure] = useState(false);
   const [slideIn, setSlideIn] = useState(true);
   const [courses, setCourses] = useState<any>([]);
@@ -119,7 +119,7 @@ const CourseComponent = () => {
   const [newTopic, setNewTopic] = useState<any>("");
   const [difficulty, setDifficulty] = useState("medium");
   const [hours, setHours] = useState<number>(0);
-  const [skills, setSkills] = useState([]);
+  // const [skills, setSkills] = useState([]);
   const [topicDescription, setTopicDescription] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -276,14 +276,14 @@ const CourseComponent = () => {
         topics[topicIndex].topic = newTopic;
         topics[topicIndex].hours = hours;
         topics[topicIndex].difficulty = difficulty;
-        topics[topicIndex].skills = skills;
+        // topics[topicIndex].skills = skills;
       }
     } else {
       topics.push({
         topic: newTopic,
         hours,
         difficulty,
-        skills,
+        // skills,
         description: topicDescription,
       });
     }
@@ -720,7 +720,7 @@ const CourseComponent = () => {
     setLoadingObjectives(false);
   };
   const generateSkills = async () => {
-    setLoadingSkills(true);
+    // setLoadingSkills(true);
     const courseTitle = courses[selectedCourse].title;
     const targetLearners = courses[selectedCourse].learners;
     const courseObjectives = courses[selectedCourse].courseObjectives;
@@ -741,10 +741,11 @@ const CourseComponent = () => {
       }
       return prev;
     });
-    setLoadingSkills(false);
+    // setLoadingSkills(false);
   };
   const generateCourseStructure = async () => {
     setLoadingCourseStructure(true);
+    await generateSkills();
     const courseTitle = courses[selectedCourse].title;
     const targetLearners = courses[selectedCourse].learners;
     const courseObjectives = courses[selectedCourse].courseObjectives;
@@ -840,12 +841,12 @@ const CourseComponent = () => {
     setNewCategoryTitle("");
   };
 
-  const setNewSkills = (newTags: string[]) => {
-    const _courses: any = [...courses];
-    _courses[selectedCourse].courseSkills = newTags;
-    setCourses(_courses);
-    updateCourses(_courses[selectedCourse]);
-  };
+  // const setNewSkills = (newTags: string[]) => {
+  //   const _courses: any = [...courses];
+  //   _courses[selectedCourse].courseSkills = newTags;
+  //   setCourses(_courses);
+  //   updateCourses(_courses[selectedCourse]);
+  // };
   const setNewCourseObjectives = (newTags: string[]) => {
     const _courses: any = [...courses];
     _courses[selectedCourse].courseObjectives = newTags;
@@ -914,10 +915,10 @@ const CourseComponent = () => {
     if (creatingCourseStep === 4) {
       generateObjectives();
     }
+    // if (creatingCourseStep === 5) {
+    //   generateSkills();
+    // }
     if (creatingCourseStep === 5) {
-      generateSkills();
-    }
-    if (creatingCourseStep === 6) {
       generateCourseStructure();
     }
     setCreatingCourseStep(prev => prev + 1);
@@ -1258,7 +1259,7 @@ const CourseComponent = () => {
               </Box>
             ))}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
+          {/* {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
             (loadingSkills ? (
               <LinearProgress />
             ) : (
@@ -1286,7 +1287,7 @@ const CourseComponent = () => {
                   placeholder="Add a new course skill..."
                 />
               </Box>
-            ))}
+            ))} */}
 
           {(!courses[selectedCourse].new || creatingCourseStep >= 7) &&
             (loadingCourseStructure ? (
@@ -1720,7 +1721,7 @@ const CourseComponent = () => {
                   style: { color: "grey" },
                 }}
               />
-              <Box sx={{ display: "column" }}>
+              {/* <Box sx={{ display: "column" }}>
                 <Typography>Skills:</Typography>
                 <ChipInput
                   tags={skills || []}
@@ -1730,7 +1731,7 @@ const CourseComponent = () => {
                   variant="outlined"
                   placeholder="Type a new skill and click enter ↵ to add it..."
                 />
-              </Box>
+              </Box> */}
               <FormControl fullWidth margin="normal" sx={{ width: "500px" }}>
                 <InputLabel id="difficulty-label">Difficulty</InputLabel>
                 <Select
@@ -1899,7 +1900,7 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
               />
-              <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Skills:</Typography>
+              {/* <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Skills:</Typography>
               <ChipInput
                 tags={selectedOpenCategory?.skills || []}
                 selectedTags={() => {}}
@@ -1923,7 +1924,7 @@ const CourseComponent = () => {
                 variant="outlined"
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
-              />
+              /> */}
               <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Prerequisite knowledge:</Typography>
               <ChipInput
                 tags={selectedOpenCategory?.prerequisiteKnowledge || []}
@@ -2076,7 +2077,7 @@ const CourseComponent = () => {
             </Box>
           )}
 
-          {selectedTopic && (
+          {/* {selectedTopic && (
             <Box sx={{ mx: "15px" }}>
               <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
               <ChipInput
@@ -2107,7 +2108,7 @@ const CourseComponent = () => {
                 placeholder="Type a new skill and click enter ↵ to add it..."
               />
             </Box>
-          )}
+          )} */}
           {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
             <Box>
               <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
