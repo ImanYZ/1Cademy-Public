@@ -327,18 +327,17 @@ export const allCommunities = [
 
     description: (
       <>
-        <p>
-          As a community of researchers, we aim to explore the applications of AI language models in education. LLMs,
-          also known as large language models, are a powerful type of artificial intelligence trained to comprehend
-          massive repositories of texts & designed to mimic sophisticated human language patterns. We encourage interns
-          to delve into research that applies LLMs in educational settings through interactive learning, personalized
-          tutoring, automated grading, etc
-        </p>
+        As a community of researchers, we aim to explore the applications of AI language models in education. LLMs, also
+        known as large language models, are a powerful type of artificial intelligence trained to comprehend massive
+        repositories of texts & designed to mimic sophisticated human language patterns. We encourage interns to delve
+        into research that applies LLMs in educational settings through interactive learning, personalized tutoring,
+        automated grading, etc
+        <br />
+        <br />
         After learning how to navigate the 1Cademy platform, researchers should break down complex research articles,
         present them as digestible pieces of information, and communicate their findings with the larger community.
         Ultimately, the internship is designed to encourage independent inquiry, cultivate research skills like
         analyzing and interpreting data, and work towards advancing research.
-        <p></p>
       </>
     ),
     accomplishments: ``,
@@ -396,16 +395,15 @@ export const allCommunities = [
 
     description: (
       <>
-        <p>
-          The Behavioral Sciences is centered on the interdisciplinary study of organisms and their interactions with
-          the world at large, investigating behavioral science topics such as decision-making, addiction, self-esteem,
-          and theory of mind. Interns are tasked with investigating behavioral science topics, summarizing research
-          articles, collaborating with fellow interns, and presenting their work at weekly meetings.
-        </p>
+        The Behavioral Sciences is centered on the interdisciplinary study of organisms and their interactions with the
+        world at large, investigating behavioral science topics such as decision-making, addiction, self-esteem, and
+        theory of mind. Interns are tasked with investigating behavioral science topics, summarizing research articles,
+        collaborating with fellow interns, and presenting their work at weekly meetings.
+        <br />
+        <br />
         We encourage interns to personalize their research to their specific interests within the field. Interning with
         1Cademy provides interns with the opportunity to gain research skills, such as analytical and investigative
         research skills, helping them gain foundational skills for future research endeavors.
-        <p></p>
       </>
     ),
     accomplishments: ``,
