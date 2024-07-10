@@ -9,7 +9,9 @@ import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import ImageIcon from "@mui/icons-material/Image";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MailIcon from "@mui/icons-material/Mail";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RedditIcon from "@mui/icons-material/Reddit";
 import ShareIcon from "@mui/icons-material/Share";
@@ -37,19 +39,12 @@ import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
-import NextImage from "next/image";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { ChosenType, OpenLeftSidebar } from "@/pages/notebook";
 
-import ReferenceIcon from "../../../public/reference.svg";
-import ReferenceDarkIcon from "../../../public/reference-dark.svg";
-import ReferenceLightIcon from "../../../public/reference-light.svg";
-import TagIcon from "../../../public/tag.svg";
-import TagDarkIcon from "../../../public/tag-dark.svg";
-import TagLightIcon from "../../../public/tag-light.svg";
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
@@ -957,16 +952,13 @@ const NodeFooter = ({
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
                         <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                        <NextImage
-                          width={"22px"}
-                          src={
+                        <MenuBookIcon
+                          sx={{ fontSize: "16px" }}
+                          color={
                             openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
-                              ? ReferenceIcon
-                              : theme.palette.mode === "dark"
-                              ? ReferenceLightIcon
-                              : ReferenceDarkIcon
+                              ? "primary"
+                              : "secondary"
                           }
-                          alt="tag icon"
                         />
                       </Box>
                     </ContainedButton>
@@ -980,10 +972,12 @@ const NodeFooter = ({
                         background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
                         border: "none",
                         cursor: "pointer",
+                        display: "flex",
+                        gap: "5px",
                       }}
                     >
                       <>
-                        <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
+                        <LocalOfferIcon color="primary" sx={{ fontSize: "14px" }} />
                         <span>{shortenNumber(tags.length, 2, false)}</span>
                       </>
                     </Box>
@@ -1018,11 +1012,7 @@ const NodeFooter = ({
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
                         >
-                          <NextImage
-                            width={"22px"}
-                            src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
-                            alt="tag icon"
-                          />
+                          <LocalOfferIcon sx={{ fontSize: "14px" }} />
                           <span style={{ color: getNumberColor(addedTags, removedTags) }}>
                             {shortenNumber(tags.length, 2, false)}
                           </span>
@@ -1054,9 +1044,10 @@ const NodeFooter = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            gap: "5px",
                           }}
                         >
-                          <NextImage width={"22px"} src={ReferenceIcon} alt="tag icon" style={{ marginRight: "2px" }} />
+                          <MenuBookIcon color="primary" sx={{ fontSize: "16px" }} />
                           <span
                             style={{ color: getNumberColor(addedReferences, removedReferences) }}
                             className="CitationsSpanBeforeTagIcon"
@@ -1072,9 +1063,10 @@ const NodeFooter = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            gap: "5px",
                           }}
                         >
-                          <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
+                          <LocalOfferIcon color="primary" sx={{ fontSize: "14px" }} />
                           <span
                             style={{
                               color: getNumberColor(addedTags, removedTags),
@@ -1127,14 +1119,10 @@ const NodeFooter = ({
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "space-between",
+                                  gap: "5px",
                                 }}
                               >
-                                <NextImage
-                                  width={"22px"}
-                                  src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
-                                  alt="tag icon"
-                                />
-
+                                <MenuBookIcon sx={{ fontSize: "16px" }} />
                                 <span
                                   style={{
                                     marginTop: "3px",
@@ -1156,13 +1144,10 @@ const NodeFooter = ({
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "space-between",
+                                  gap: "3px",
                                 }}
                               >
-                                <NextImage
-                                  width={"22px"}
-                                  src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
-                                  alt="tag icon"
-                                />
+                                <LocalOfferIcon sx={{ fontSize: "14px" }} />
                                 <span style={{ marginTop: "3px", color: getNumberColor(addedTags, removedTags) }}>
                                   {shortenNumber(tags.length, 2, false)}
                                 </span>

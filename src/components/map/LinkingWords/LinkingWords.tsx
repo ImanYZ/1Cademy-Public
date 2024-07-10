@@ -320,6 +320,7 @@ const LinkingWords = ({
                         id={`${identifier}-reference-button-${idx}`}
                         key={identifier + "LinkTo" + reference.node}
                         onClick={openLinkedNode}
+                        nodeType="Reference"
                         // nodeID={identifier}
                         linkedNodeID={reference.node}
                         // linkedNodeTitle={refTitle+(reference.label?':'+{reference.label}:'')}
@@ -458,7 +459,7 @@ const LinkingWords = ({
                               },
                             }}
                           >
-                            <IconButton onClick={onDeleteLink(tag.index, "Tag")} disabled={disableRemoveTag}>
+                            <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
                               <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                             </IconButton>
                           </Tooltip>
@@ -505,7 +506,7 @@ const LinkingWords = ({
                             },
                           }}
                         >
-                          <IconButton onClick={onDeleteLink(tag.index, "Tag")} disabled={disableRemoveTag}>
+                          <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                           </IconButton>
                         </Tooltip>
@@ -553,7 +554,7 @@ const LinkingWords = ({
                     {editable && (
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
-                          onClick={onDeleteLink(tag.index, "Tag")}
+                          onClick={onDeleteLink(idx, "Tag")}
                           tooltip="Click to delete the link to this tag."
                           tooltipPosition="right"
                         >
