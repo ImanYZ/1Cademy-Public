@@ -313,7 +313,7 @@ export const allCommunities = [
       },
       {
         name: "Jayson Malasig",
-        image: "",
+        image: "Jayson_Malasig.png",
         about: ``,
         websites: [
           {
