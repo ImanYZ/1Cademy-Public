@@ -1695,7 +1695,7 @@ const Node = ({
             top: (parseFloat(String(document.getElementById(identifier)?.clientHeight)) - 396) * 0.5 + "px",
             animation: `${childNodeButtonsAnimation} 1s backwards`,
             borderRadius: "25px",
-            right: "590px",
+            right: "596px",
           }}
         >
           {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(

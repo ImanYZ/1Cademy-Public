@@ -602,8 +602,8 @@ export const Message = ({
                       padding: "8px 20px",
                       fontSize: "14px",
                       fontWeight: "500",
-                      background: DESIGN_SYSTEM_COLORS.orange300,
-                      color: "white",
+                      background: theme => (theme.palette.mode === "dark" ? "rgb(85, 64, 43)" : "rgb(253, 234, 215)"),
+                      color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
                       mt: "15px",
                     }}
                   >
