@@ -899,7 +899,11 @@ const CourseComponent = () => {
 
     return () => clearTimeout(timeoutId);
   };
-
+  const getStepTitle = () => {
+    if (creatingCourseStep === 0) {
+      return "Course Title";
+    }
+  };
   const nextStep = () => {
     if (creatingCourseStep === 2) {
       generatePrerequisiteKnowledge();
@@ -1002,7 +1006,26 @@ const CourseComponent = () => {
         onSwitchSection={() => {}}
         aiCourse={true}
       />
-
+      {courses[selectedCourse].new && creatingCourseStep <= 6 && (
+        <LoadingButton
+          variant="contained"
+          color="error"
+          sx={{
+            color: "white",
+            zIndex: 9,
+            fontSize: "15px",
+            mt: "15px",
+            position: "absolute",
+            right: 0,
+            mr: "4px",
+            height: "34px",
+          }}
+          onClick={cancelCreatingCourse}
+          loading={loading}
+        >
+          Close
+        </LoadingButton>
+      )}
       <Box padding="20px">
         <Box>
           {!courses[selectedCourse]?.new && (
@@ -1151,6 +1174,21 @@ const CourseComponent = () => {
                 InputLabelProps={{
                   style: { color: "grey" },
                 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <LoadingButton
+                        onClick={generatePrerequisiteKnowledge}
+                        sx={{
+                          display: "flex-end",
+                        }}
+                        loading={loadingDescription}
+                      >
+                        <AutoFixHighIcon />
+                      </LoadingButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
             ))}
           {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
@@ -1175,17 +1213,15 @@ const CourseComponent = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      {!courses[selectedCourse].description && (
-                        <LoadingButton
-                          onClick={generateDescription}
-                          sx={{
-                            display: "flex-end",
-                          }}
-                          loading={loadingDescription}
-                        >
-                          <AutoFixHighIcon />
-                        </LoadingButton>
-                      )}
+                      <LoadingButton
+                        onClick={generateDescription}
+                        sx={{
+                          display: "flex-end",
+                        }}
+                        loading={loadingDescription}
+                      >
+                        <AutoFixHighIcon />
+                      </LoadingButton>
                     </InputAdornment>
                   ),
                 }}
@@ -1200,17 +1236,15 @@ const CourseComponent = () => {
                 <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
                   <Typography sx={{ mt: "5px" }}>Course Objectives:</Typography>
                   <InputAdornment position="end">
-                    {!courses[selectedCourse].courseObjectives?.length && (
-                      <LoadingButton
-                        onClick={generateObjectives}
-                        sx={{
-                          display: "flex-end",
-                        }}
-                        loading={loadingObjectives}
-                      >
-                        <AutoFixHighIcon />
-                      </LoadingButton>
-                    )}
+                    <LoadingButton
+                      onClick={generateObjectives}
+                      sx={{
+                        display: "flex-end",
+                      }}
+                      loading={loadingObjectives}
+                    >
+                      <AutoFixHighIcon />
+                    </LoadingButton>
                   </InputAdornment>
                 </Box>
                 <ChipInput
@@ -1232,17 +1266,15 @@ const CourseComponent = () => {
                 <Box sx={{ display: "flex", alignItems: "center", py: "15px" }}>
                   <Typography sx={{ mt: "5px" }}>Course Skills:</Typography>
                   <InputAdornment position="end">
-                    {!courses[selectedCourse].courseSkills?.length && (
-                      <LoadingButton
-                        onClick={generateSkills}
-                        sx={{
-                          display: "flex-end",
-                        }}
-                        loading={loadingSkills}
-                      >
-                        <AutoFixHighIcon />
-                      </LoadingButton>
-                    )}
+                    <LoadingButton
+                      onClick={generateSkills}
+                      sx={{
+                        display: "flex-end",
+                      }}
+                      loading={loadingSkills}
+                    >
+                      <AutoFixHighIcon />
+                    </LoadingButton>
                   </InputAdornment>
                 </Box>
                 <ChipInput
@@ -1266,17 +1298,15 @@ const CourseComponent = () => {
                   Add Category
                 </Button>
                 <InputAdornment position="end">
-                  {!courses[selectedCourse].syllabus?.length && (
-                    <LoadingButton
-                      onClick={generateCourseStructure}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingCourseStructure}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  )}
+                  <LoadingButton
+                    onClick={generateCourseStructure}
+                    sx={{
+                      display: "flex-end",
+                    }}
+                    loading={loadingCourseStructure}
+                  >
+                    <AutoFixHighIcon />
+                  </LoadingButton>
                 </InputAdornment>
               </Box>
             ))}
@@ -1311,9 +1341,8 @@ const CourseComponent = () => {
                       setExpanded([category.category]);
                       setSelectedTopic(null);
                       setSelectedOpenCategory({ categoryIndex, ...category });
+                      setSidebarOpen(true);
                     }
-
-                    setSidebarOpen(true);
                   }}
                   sx={{
                     display: "flex",
@@ -1605,25 +1634,19 @@ const CourseComponent = () => {
                 gap: "5px",
               }}
             >
-              <LoadingButton
-                variant="contained"
-                color="success"
-                sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
-                onClick={nextStep}
-                loading={loading}
-                disabled={nextButtonDisabled(courses[selectedCourse])}
-              >
-                Next
-              </LoadingButton>
-              <LoadingButton
-                variant="contained"
-                color="error"
-                sx={{ color: "white", zIndex: 9, fontSize: "15px", ml: "15px" }}
-                onClick={cancelCreatingCourse}
-                loading={loading}
-              >
-                Cancel
-              </LoadingButton>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                <Typography>Edit {getStepTitle()} OR </Typography>
+                <LoadingButton
+                  variant="contained"
+                  color="success"
+                  sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
+                  onClick={nextStep}
+                  loading={loading}
+                  disabled={nextButtonDisabled(courses[selectedCourse])}
+                >
+                  Continue
+                </LoadingButton>
+              </Box>
             </Box>
           )}
           <Dialog

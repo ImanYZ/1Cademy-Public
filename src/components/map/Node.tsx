@@ -1819,6 +1819,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.openSidebar === next.openSidebar &&
     prev.hideNode === next.hideNode &&
     prev.commentNotifications === next.commentNotifications &&
+    prev.onlineUsers === next.onlineUsers &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||
