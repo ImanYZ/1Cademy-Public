@@ -80,29 +80,44 @@ const convertSyllabusToRelatedNodesString = (
     2
   );
 };
+const getParagraphsLengthString = (paragraphs: string[]): string => {
+  const length = paragraphs.length;
+  if (length === 0) {
+    throw new Error("Paragraphs cannot be empty!");
+  } else if (length >= 3) {
+    return `${length} paragraphs`;
+  } else if (length === 2) {
+    return "two paragraphs";
+  } else {
+    return "a paragraph";
+  }
+};
+
+const getParagraphsCountString = (paragraphs: string[]): string => {
+  const length = paragraphs.length;
+  if (length === 0) {
+    throw new Error("Paragraphs cannot be empty!");
+  } else {
+    return `${getOrdinalString(length)} paragraph`;
+  }
+};
+const getOrdinalString = (n: number): string => {
+  const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+  return ordinals[n - 1] || `${n}th`;
+};
 
 const searchJSONForCourse = async (
   nodesArray: any[],
   courseTitle: string,
   courseDescription: string,
   targetLearners: string,
-  syllabus: Array<
-    | {
-        topic: string;
-        hours: number;
-        difficulty: string;
-        category?: never;
-        topics?: never;
-      }
-    | {
-        category: string;
-        topics: Array<{ topic: string; hours: number; difficulty: string }>;
-      }
-  >
+  syllabus: any[]
 ) => {
   let prompt =
     "Task Summary:\n" +
-    "Search through the JSON array of nodes in 1Cademy and find a maximum of ten most related nodes to each topic in the course syllabus. Return the results in a specified JSON format.\n\n" +
+    "Search through the JSON array of nodes in 1Cademy and find a maximum of ten most related nodes to each topic in the course syllabus.\n" +
+    "For every helpful search result we will pay you $10 and for every irrelevant one, you'll lose $10.\n" +
+    "Return the results in a specified JSON format.\n\n" +
     DEFINITION_OF_1CADEMY +
     "{\n" +
     '"nodes": ' +
@@ -132,7 +147,7 @@ const searchJSONForCourse = async (
   // const startTime = Date.now();
   const response = await askGemini([], prompt);
   // const endTime = Date.now();
-  const searchObj = JSON.parse(response).related_nodes;
+  const searchObj = response.related_nodes;
   // const executionTime = endTime - startTime;
   // console.log("Execution time:", executionTime, "ms");
   return searchObj;
