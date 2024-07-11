@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { callOpenAIChat } from "./openAI/helpers";
 import fbAuth from "src/middlewares/fbAuth";
+import { db } from "@/lib/firestoreServer/admin";
 
 const improveCourseSyllabus = async (
   courseTitle: string,
@@ -1388,7 +1389,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       prerequisiteKnowledge,
       courseSkills,
       hours,
+      courseId,
     } = req.body;
+
     const suggestions = await improveCourseSyllabus(
       courseTitle,
       targetLearners,
@@ -1399,8 +1402,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       courseSkills,
       syllabus
     );
+    const courseRef = db.collection("coursesAI").doc(courseId);
+    console.log("==> courseRef ==>", courseRef);
+    courseRef.update({
+      suggestions,
+    });
     // console.log("suggestions ==>", suggestions);
-
     return res.status(200).json({ suggestions });
   } catch (error) {
     return res.status(500).json({});
