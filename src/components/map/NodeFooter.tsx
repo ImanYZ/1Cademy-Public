@@ -1,5 +1,6 @@
 import { ArrowForwardIos } from "@mui/icons-material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseIcon from "@mui/icons-material/Close";
@@ -21,6 +22,7 @@ import VideoCallIcon from "@mui/icons-material/VideoCall";
 import {
   Badge,
   Button,
+  CircularProgress,
   ClickAwayListener,
   Divider,
   Grid,
@@ -42,6 +44,7 @@ import { collection, getDocs, getFirestore, limit, query, where } from "firebase
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { ChosenType, OpenLeftSidebar } from "@/pages/notebook";
 
@@ -138,6 +141,8 @@ type NodeFooterProps = {
   onlineUsers: any;
   openComments: (refId: string, type: string) => void;
   commentNotifications: any;
+  prevImageUrl: string;
+  setPrevImageUrl: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const NodeFooter = ({
@@ -153,8 +158,8 @@ const NodeFooter = ({
   // commentsSelected,
   editable,
   setNodeParts,
-  // title,
-  // content,
+  title,
+  content,
   unaccepted,
   openPart,
   nodeType,
@@ -218,6 +223,8 @@ const NodeFooter = ({
   onlineUsers,
   openComments,
   commentNotifications,
+  prevImageUrl,
+  setPrevImageUrl,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -228,6 +235,7 @@ const NodeFooter = ({
   const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
   const [openMenu, setOpenMenu] = useState(false);
+  const [imageGenerated, setImageGenerated] = useState<boolean>(false);
   // const [openSocialMenu, setOpenSocialMenu] = useState(false);
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
@@ -476,6 +484,28 @@ const NodeFooter = ({
 
     return true;
   }, [choosingNode, identifier]);
+
+  const generateNodeImage = useCallback(async () => {
+    try {
+      setImageGenerated(true);
+
+      const response: any = await Post("/generateNodeImage", {
+        title,
+        content,
+        nodeId: identifier,
+        prevUrl: prevImageUrl,
+      });
+      setNodeParts(identifier, (thisNode: any) => {
+        thisNode.nodeImage = response?.imageUrl || "";
+        return { ...thisNode };
+      });
+      setPrevImageUrl(response?.filename);
+      setImageGenerated(false);
+    } catch (err) {
+      console.error(err);
+      setImageGenerated(false);
+    }
+  }, [identifier, title, content, prevImageUrl, setNodeParts]);
 
   return (
     <>
@@ -856,6 +886,32 @@ const NodeFooter = ({
                         marginRight: "10px",
                       }}
                     >
+                      <ContainedButton
+                        id={`${identifier}-node-footer-image`}
+                        title="Upload an image to better explain this node."
+                        onClick={async () => generateNodeImage()}
+                        tooltipPosition="top"
+                        sx={{
+                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                          color: "inherit",
+                          fontWeight: 400,
+                          height: "28.7px",
+                          ":hover": {
+                            borderWidth: "0px",
+                            background: (theme: any) =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.darkBackground2
+                                : theme.palette.common.lightBackground2,
+                          },
+                        }}
+                        disabled={disabled}
+                      >
+                        {imageGenerated ? (
+                          <CircularProgress size={15} />
+                        ) : (
+                          <AutoFixHighIcon sx={{ fontSize: "16px" }} />
+                        )}
+                      </ContainedButton>
                       <ContainedButton
                         id={`${identifier}-node-footer-image`}
                         title="Upload an image to better explain this node."
