@@ -88,7 +88,23 @@ interface Suggestion {
   new_after?: string;
   rationale: string;
 }
-
+const books = [
+  {
+    id: "Psychology (2nd ed.)",
+    tags: ["Psychology", "Psychology @ OpenStax"],
+    references: ["Psychology (2nd ed.)"],
+  },
+  {
+    id: "OpenStax Microbiology Textbook",
+    tags: ["Microbiology @ OpenStax", "Microbiology"],
+    references: ["OpenStax Microbiology Textbook"],
+  },
+  {
+    id: "CORE Econ - The Economy",
+    tags: ["Economy", "Economics"],
+    references: ["CORE Econ - The Economy"],
+  },
+];
 const CourseComponent = () => {
   const db = getFirestore();
 
@@ -142,6 +158,7 @@ const CourseComponent = () => {
 
   const [expandedTopics, setExpandedTopics] = useState<any>([]);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
+
   // const [topicImages /* , setTopicImages */] = useState<any>({
   //   "History and Approaches to Psychology":
   //     "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
@@ -666,6 +683,7 @@ const CourseComponent = () => {
     ) {
       const courseRef = doc(db, "coursesAI", courses[selectedCourse].id);
       updateDoc(courseRef, { deleted: true });
+      setSelectedCourse(0);
     }
   };
   const cancelCreatingCourse = () => {
@@ -904,37 +922,39 @@ const CourseComponent = () => {
   };
   const getStepTitle = () => {
     if (creatingCourseStep === 0) {
-      return "Course Title";
+      return "Edit Course Title";
     } else if (creatingCourseStep === 1) {
-      return "Number of Hour-long Class Sessions";
+      return "Edit Number of Hour-long Class Sessions";
     } else if (creatingCourseStep === 2) {
-      return "Target Learners";
+      return "Select Book";
     } else if (creatingCourseStep === 3) {
-      return "Prerequisite Knowledge";
+      return "Edit Target Learners";
     } else if (creatingCourseStep === 4) {
-      return "Course Description";
+      return "Edit Prerequisite Knowledge";
     } else if (creatingCourseStep === 5) {
-      return "Course Objectives";
+      return "Edit Course Description";
     } else if (creatingCourseStep === 6) {
-      return "Course Skills";
+      return "Edit Course Objectives";
     } else if (creatingCourseStep === 7) {
-      return "Course Structure";
+      return "Edit Course Skills";
+    } else if (creatingCourseStep === 8) {
+      return "Edit Course Structure";
     }
   };
   const nextStep = () => {
-    if (creatingCourseStep === 2) {
+    if (creatingCourseStep === 3) {
       generatePrerequisiteKnowledge();
     }
-    if (creatingCourseStep === 3) {
+    if (creatingCourseStep === 4) {
       generateDescription();
     }
-    if (creatingCourseStep === 4) {
+    if (creatingCourseStep === 5) {
       generateObjectives();
     }
     // if (creatingCourseStep === 5) {
     //   generateSkills();
     // }
-    if (creatingCourseStep === 5) {
+    if (creatingCourseStep === 6) {
       generateCourseStructure();
     }
     setCreatingCourseStep(prev => prev + 1);
@@ -947,20 +967,23 @@ const CourseComponent = () => {
       return course.hours === 0;
     }
     if (creatingCourseStep === 2) {
-      return !course.learners.trim();
+      return (course?.tags || []).length <= 0;
     }
     if (creatingCourseStep === 3) {
-      return !course.prerequisiteKnowledge.trim();
+      return !course.learners.trim();
     }
     if (creatingCourseStep === 4) {
-      return !course.description.trim();
+      return !course.prerequisiteKnowledge.trim();
     }
     if (creatingCourseStep === 5) {
-      return course.courseObjectives.length <= 0;
+      return !course.description.trim();
     }
     if (creatingCourseStep === 6) {
-      return course.courseSkills.length <= 0;
+      return course.courseObjectives.length <= 0;
     }
+    // if (creatingCourseStep === 7) {
+    //   return course.courseSkills.length <= 0;
+    // }
 
     return false;
   };
@@ -1131,12 +1154,23 @@ const CourseComponent = () => {
                 }}
               />
             )}
-            {!courses[selectedCourse].new && (
+            {(!courses[selectedCourse].new || creatingCourseStep >= 2) && (
               <TextField
-                value={courses[selectedCourse].references[0]}
-                select // tell TextField to render select
+                value={courses[selectedCourse]?.references[0] || ""}
+                select
                 label="Select Book"
                 sx={{ mt: "15px", minWidth: "200px" }}
+                onChange={event => {
+                  const updatedCourses: any = [...courses];
+                  const bookIdx = books.findIndex(b => b.id === event.target.value);
+                  updatedCourses[selectedCourse] = {
+                    ...updatedCourses[selectedCourse],
+                    tags: books[bookIdx].tags,
+                    references: books[bookIdx].references,
+                  };
+                  setCourses(updatedCourses);
+                  updateCourses(updatedCourses[selectedCourse]);
+                }}
               >
                 <MenuItem
                   value=""
@@ -1145,20 +1179,20 @@ const CourseComponent = () => {
                 >
                   Select Book
                 </MenuItem>
-                {courses[selectedCourse].references.map((book: any) => (
+                {books.map((book: any) => (
                   <MenuItem
-                    key={book}
-                    value={book}
+                    key={book.id}
+                    value={book.id}
                     sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
                   >
-                    {book}
+                    {book.id}
                   </MenuItem>
                 ))}
               </TextField>
             )}
           </Box>
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 2) && (
+          {(!courses[selectedCourse].new || creatingCourseStep >= 3) && (
             <TextField
               label="Target Learners"
               multiline
@@ -1174,7 +1208,7 @@ const CourseComponent = () => {
               }}
             />
           )}
-          {(!courses[selectedCourse].new || creatingCourseStep >= 3) &&
+          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
             (loadingPrerequisiteKnowledge ? (
               <LinearProgress />
             ) : (
@@ -1208,7 +1242,7 @@ const CourseComponent = () => {
                 }}
               />
             ))}
-          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
+          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
             (loadingDescription ? (
               <LinearProgress />
             ) : (
@@ -1245,7 +1279,7 @@ const CourseComponent = () => {
               />
             ))}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
+          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
             (loadingObjectives ? (
               <LinearProgress />
             ) : (
@@ -1659,7 +1693,7 @@ const CourseComponent = () => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
-                <Typography>Edit {getStepTitle()} OR </Typography>
+                <Typography>{getStepTitle()} OR </Typography>
                 <LoadingButton
                   variant="contained"
                   color="success"
