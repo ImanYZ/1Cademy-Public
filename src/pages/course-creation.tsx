@@ -1072,10 +1072,10 @@ const CourseComponent = () => {
             color: "white",
             zIndex: 9,
             fontSize: "15px",
-            mt: "35px",
+            mt: "45px",
             position: "absolute",
-            right: 0,
-            mr: "4px",
+            right: 4,
+            mr: "6px",
             height: "34px",
           }}
           onClick={cancelCreatingCourse}
@@ -1906,6 +1906,19 @@ const CourseComponent = () => {
                 ? "AI-Proposed Improvements"
                 : selectedTopic?.topic || selectedOpenCategory?.category || ""}
             </Typography>
+            {selectedOpenCategory?.category && (
+              <Button
+                onClick={() => {
+                  deleteCategory(selectedOpenCategory);
+                }}
+                sx={{
+                  m: 1,
+                }}
+                variant="contained"
+              >
+                Delete
+              </Button>
+            )}
             <IconButton onClick={handleSidebarClose}>
               <CloseIcon />
             </IconButton>
@@ -2074,7 +2087,9 @@ const CourseComponent = () => {
                         const updatedCourses = [...courses];
                         const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
                         currentCat.prompts[index].type = e.target.value;
-
+                        if (e.target.value !== "Poll") {
+                          delete currentCat.prompts[index].choices;
+                        }
                         setCourses(updatedCourses);
                         setSelectedOpenCategory({
                           categoryIndex: selectedOpenCategory.categoryIndex,
@@ -2118,6 +2133,11 @@ const CourseComponent = () => {
                         });
                       }}
                       sx={{ mb: 2 }}
+                      InputLabelProps={{
+                        style: {
+                          color: "gray",
+                        },
+                      }}
                     />
                     <TextField
                       label="Purpose"
@@ -2149,6 +2169,33 @@ const CourseComponent = () => {
                         },
                       }}
                     />
+                    <Typography gutterBottom>Choices:</Typography>
+                    {prompt.type === "Poll" && (
+                      <ChipInput
+                        tags={prompt.choices}
+                        selectedTags={() => {}}
+                        setTags={(newTags: string[]) => {
+                          const updatedCourses = [...courses];
+                          const currentCat =
+                            updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
+                          currentCat.prompts[index].choices = newTags;
+
+                          setCourses(updatedCourses);
+                          setSelectedOpenCategory({
+                            categoryIndex: selectedOpenCategory.categoryIndex,
+                            ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                          });
+                          updateCourses({
+                            id: updatedCourses[selectedCourse].id,
+                            syllabus: updatedCourses[selectedCourse].syllabus,
+                          });
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        readOnly={false}
+                        placeholder="Type a new choice and click enter ↵ to add it..."
+                      />
+                    )}
                   </Box>
                 </Box>
               ))}
@@ -2176,17 +2223,6 @@ const CourseComponent = () => {
                 }}
               >
                 Add prompt
-              </Button>
-              <Button
-                onClick={() => {
-                  deleteCategory(selectedOpenCategory);
-                }}
-                sx={{
-                  m: 1,
-                }}
-                variant="contained"
-              >
-                Delete
               </Button>
             </Box>
           )}
@@ -2406,7 +2442,9 @@ const CourseComponent = () => {
                             selectedTopic.topicIndex
                           ];
                         currentTopic.prompts[index].type = e.target.value;
-
+                        if (e.target.value !== "Poll") {
+                          delete currentTopic.prompts[index].choices;
+                        }
                         setCourses(updatedCourses);
                         setSelectedTopic({
                           categoryIndex: selectedTopic.categoryIndex,
@@ -2485,6 +2523,36 @@ const CourseComponent = () => {
                       multiline
                       minRows={2}
                     />
+                    <Typography gutterBottom>Choices:</Typography>
+                    {prompt.type === "Poll" && (
+                      <ChipInput
+                        tags={prompt.choices}
+                        selectedTags={() => {}}
+                        setTags={(newTags: string[]) => {
+                          const updatedCourses = [...courses];
+                          const currentTopic =
+                            updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ];
+                          currentTopic.prompts[index].choices = newTags;
+
+                          setCourses(updatedCourses);
+                          setSelectedTopic({
+                            categoryIndex: selectedTopic.categoryIndex,
+                            topicIndex: selectedTopic.topicIndex,
+                            ...currentTopic,
+                          });
+                          updateCourses({
+                            id: updatedCourses[selectedCourse].id,
+                            syllabus: updatedCourses[selectedCourse].syllabus,
+                          });
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        readOnly={false}
+                        placeholder="Type a new choice and click enter ↵ to add it..."
+                      />
+                    )}
                   </Box>
                 </Box>
               ))}
