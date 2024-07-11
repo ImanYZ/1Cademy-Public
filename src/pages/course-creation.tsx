@@ -2162,7 +2162,7 @@ const CourseComponent = () => {
                     purpose: "",
                   });
                   if (!currentCat.prompts) {
-                    currentTopic.prompts = [];
+                    currentCat.prompts = [];
                   }
                   setCourses(updatedCourses);
                   setSelectedOpenCategory({
