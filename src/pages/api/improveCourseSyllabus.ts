@@ -13,6 +13,7 @@ const improveCourseSyllabus = async (
   syllabus: any[]
 ) => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of hour-long class sessions, objectives, skills, and current syllabus, your task is to provide very specific improvements to the syllabus to ensure that the topics are focused, consistent in size, and appropriate for the target students to achieve the course objectives. You can suggest adding, modifying, or deleting topics or categories to enhance the course's effectiveness. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+Your recommended actions will be reviewed by a supervisory team. For every helpful recommended action, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
 **Input:**
 
