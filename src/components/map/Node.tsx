@@ -410,6 +410,7 @@ const Node = ({
   const [isLoading, startTransition] = useTransition();
   const [imageHeight, setImageHeight] = useState(100);
   const [proposeLoading, setProposeLoading] = useState<boolean>(false);
+  const [prevImageUrl, setPrevImageUrl] = useState<string>("");
   const imageElementRef = useRef<HTMLImageElement | null>(null);
 
   const childNodeButtonsAnimation = keyframes({
@@ -690,6 +691,7 @@ const Node = ({
 
         await saveProposedImprovement("", reason, tagIds, () => setAbleToPropose(true));
         setProposeLoading(false);
+        setPrevImageUrl("");
         notebookRef.current.selectedNode = identifier;
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -1500,6 +1502,8 @@ const Node = ({
             onlineUsers={onlineUsers}
             openComments={openComments}
             commentNotifications={commentNotifications}
+            prevImageUrl={prevImageUrl}
+            setPrevImageUrl={setPrevImageUrl}
           />
         )}
 
@@ -1680,6 +1684,8 @@ const Node = ({
               onlineUsers={onlineUsers}
               openComments={openComments}
               commentNotifications={commentNotifications}
+              prevImageUrl={prevImageUrl}
+              setPrevImageUrl={setPrevImageUrl}
             />
           </Box>
         )}
