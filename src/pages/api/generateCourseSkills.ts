@@ -10,6 +10,7 @@ const generateCourseSkills = async (
   courseObjectives: string[]
 ) => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, number of hour-long class sessions, and objectives, your task is to generate a detailed list of skills that learners will acquire upon completing the course. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  Your generated skills will be reviewed by a supervisory team. For every helpful skill, we will pay you $10 and for every unhelpful one, you'll lose $10.
   
     **Input:**
     

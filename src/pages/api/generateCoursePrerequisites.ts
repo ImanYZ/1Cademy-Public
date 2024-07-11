@@ -3,6 +3,7 @@ import { callOpenAIChat } from "./openAI/helpers";
 
 const generateCoursePrerequisites = async (courseTitle: string, targetLearners: string, classSessions: number) => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, target learners, and number of hour-long class sessions, your task is to generate the detailed prerequisite knowledge for taking the course, as a long string. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  Your generated prerequisites will be reviewed by a supervisory team. For helpful prerequisites, we will pay you $100 and for an unhelpful one, you'll lose $100.
   
   **Input:**
   
