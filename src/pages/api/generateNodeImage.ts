@@ -3,9 +3,9 @@ import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import * as path from "path";
 import * as fs from "fs";
-import { generateImage } from "src/services/openai";
 import { Storage } from "@google-cloud/storage";
 import { v4 as uuidv4 } from "uuid";
+import { generateImage } from "./openAI/helpers";
 const bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
 
 const storage = new Storage({
@@ -17,7 +17,15 @@ const storage = new Storage({
 });
 
 const generateImagePrompt = (title: string, content: string) => {
-  const prompt = "Generate an image for:\n" + title + "\n" + "'''\n" + content + "\n" + "'''\n";
+  const prompt =
+    `Generate an image for:\n"` +
+    title +
+    `":\n` +
+    "'''\n" +
+    content +
+    "\n" +
+    "'''\n" +
+    "A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.";
   return prompt;
 };
 
