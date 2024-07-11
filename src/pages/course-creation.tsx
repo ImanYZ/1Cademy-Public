@@ -29,6 +29,7 @@ import {
   Select,
   Slide,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { collection, doc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
@@ -137,6 +138,8 @@ const CourseComponent = () => {
   const [hours, setHours] = useState<number>(0);
   // const [skills, setSkills] = useState([]);
   const [topicDescription, setTopicDescription] = useState("");
+
+  const [loadingImage, setLoadingImage] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [improvements, setImprovements] = useState<any>([]);
@@ -999,6 +1002,36 @@ const CourseComponent = () => {
     const newNodes = course.nodes[topic].filter((n: any) => n.node !== node);
     course.nodes[topic] = newNodes;
     updateCourses(course);
+  };
+
+  const generateImageForTopic = async () => {
+    try {
+      if (selectedTopic) {
+        setLoadingImage(true);
+        const { imageUrl } = (await Post("/generateNodeImage", {
+          title: selectedTopic.topic,
+          content: selectedTopic.description,
+        })) as { imageUrl: string };
+
+        if (imageUrl) {
+          const updatedCourses = [...courses];
+          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex] = {
+            ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+            imageUrl: imageUrl,
+          };
+          setSelectedTopic({
+            categoryIndex: selectedTopic.categoryIndex,
+            topicIndex: selectedTopic.topicIndex,
+            ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+          });
+          setCourses(updatedCourses);
+          updateCourses(updatedCourses[selectedCourse]);
+        }
+        setLoadingImage(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   if (courses.length <= 0) {
@@ -2228,6 +2261,24 @@ const CourseComponent = () => {
           )}
           {selectedTopic && (
             <Box>
+              <Tooltip
+                title=""
+                sx={{
+                  zIndex: "99990",
+                }}
+              >
+                <LoadingButton
+                  onClick={generateImageForTopic}
+                  sx={{
+                    display: "flex-end",
+                  }}
+                  loading={loadingImage}
+                >
+                  <AutoFixHighIcon />
+                </LoadingButton>
+              </Tooltip>
+
+              {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
               <TextField
                 label="Topic Description"
                 multiline
