@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
 import React from "react";
 
-import { sendMessageToChatGPT } from "@/pages/api/openAI/helpers";
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
 
 import { articleTypes } from "../../data/articleTypes";
 

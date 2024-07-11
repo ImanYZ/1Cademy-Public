@@ -282,6 +282,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         delete newUserNodeObj.updatedAt; // Remove updatedAt before logging
         t.set(userNodeLogRef, newUserNodeObj);
       });
+
+      await signalNodeToTypesense({
+        nodeId: newVersion.node,
+        currentTimestamp,
+        versionData: newVersion,
+      });
     }
     // transaction for creating a new version document to make sure we are not creating duplicates
     await db.runTransaction(async t => {
@@ -414,13 +420,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         accepted: newVersion.accepted,
         contribution: 1,
       });
-      if (accepted) {
-        await signalNodeToTypesense({
-          nodeId: newVersion.node,
-          currentTimestamp,
-          versionData: newVersion,
-        });
-      }
     });
 
     await detach(async () => {
