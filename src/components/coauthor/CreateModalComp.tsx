@@ -9,10 +9,10 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import ReactQuill from "react-quill";
-import { sendMessageToChatGPT } from "src/services/openai";
 
 import { getArticleTypes } from "@/lib/coauthor";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { sendMessageToChatGPT } from "@/pages/api/openAI/helpers";
 
 import { useAuth } from "../../context/AuthContext";
 if (typeof window !== "undefined") {
