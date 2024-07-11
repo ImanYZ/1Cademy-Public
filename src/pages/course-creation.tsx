@@ -12,7 +12,6 @@ import {
   AccordionSummary,
   Box,
   Button,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -1044,6 +1043,17 @@ const CourseComponent = () => {
           theme.palette.mode === "dark"
             ? theme.palette.common.darkGrayBackground
             : theme.palette.common.lightGrayBackground,
+        "&::-webkit-scrollbar-track": {
+          background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#888",
+          borderRadius: "10px",
+          border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          background: "#555",
+        },
       }}
     >
       <AppHeaderMemoized
@@ -1062,7 +1072,7 @@ const CourseComponent = () => {
             color: "white",
             zIndex: 9,
             fontSize: "15px",
-            mt: "15px",
+            mt: "35px",
             position: "absolute",
             right: 0,
             mr: "4px",
@@ -1863,8 +1873,23 @@ const CourseComponent = () => {
             background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkBackground : ""),
             width: sidebarOpen ? "30%" : "0%",
             transition: "width 0.3s",
-            overflow: "hidden",
+            overflowX: "hidden",
+            p: 3,
             transform: sidebarOpen ? "translateX(0)" : "translateX(30%)",
+            "&::-webkit-scrollbar": {
+              width: "12px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#888",
+              borderRadius: "10px",
+              border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              background: "#555",
+            },
           }}
           elevation={8}
         >
@@ -1873,7 +1898,6 @@ const CourseComponent = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              p: 2,
               borderBottom: "1px solid lightgrey",
             }}
           >
@@ -1887,7 +1911,7 @@ const CourseComponent = () => {
             </IconButton>
           </Box>
           {selectedOpenCategory && (
-            <Box sx={{ px: "7px", gap: "8px", overflow: "auto", height: "100%" }}>
+            <Box sx={{ gap: "8px" }}>
               <TextField
                 label="Category Title"
                 multiline
@@ -2015,42 +2039,18 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
               />
-              {selectedOpenCategory.prompts.map((prompt: any, index: number) => (
+              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+              {(selectedOpenCategory?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
-                  <Container>
-                    <Box sx={{ marginTop: 4 }}>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography gutterBottom>Prompt {index + 1}:</Typography>
-                        <Button
-                          onClick={() => {
-                            const updatedCourses = [...courses];
-                            const currentTopic =
-                              updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                            currentTopic.prompts.splice(index, 1);
-
-                            setCourses(updatedCourses);
-                            setSelectedOpenCategory({
-                              categoryIndex: selectedOpenCategory.categoryIndex,
-                              ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                            });
-                            updateCourses({
-                              id: updatedCourses[selectedCourse].id,
-                              syllabus: updatedCourses[selectedCourse].syllabus,
-                            });
-                          }}
-                          sx={{ pb: "5px" }}
-                        >
-                          Delete
-                        </Button>
-                      </Box>
-                      <Select
-                        labelId="type-label"
-                        value={prompt.type}
-                        onChange={e => {
+                  <Box sx={{ marginTop: 4 }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Typography gutterBottom>Prompt {index + 1}:</Typography>
+                      <Button
+                        onClick={() => {
                           const updatedCourses = [...courses];
-                          const currentCat =
+                          const currentTopic =
                             updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                          currentCat.prompts[index].type = e.target.value;
+                          currentTopic.prompts.splice(index, 1);
 
                           setCourses(updatedCourses);
                           setSelectedOpenCategory({
@@ -2062,74 +2062,94 @@ const CourseComponent = () => {
                             syllabus: updatedCourses[selectedCourse].syllabus,
                           });
                         }}
-                        label="type"
-                        MenuProps={{
-                          sx: {
-                            zIndex: "9999",
-                          },
-                        }}
-                        sx={{ mb: 2 }}
+                        sx={{ pb: "5px" }}
                       >
-                        <MenuItem value="Poll">Poll</MenuItem>
-                        <MenuItem value="Open-Ended">Open-Ended</MenuItem>
-                      </Select>
-                      <TextField
-                        fullWidth
-                        multiline
-                        label="Text Prompt"
-                        variant="outlined"
-                        value={prompt.text}
-                        onChange={e => {
-                          const updatedCourses = [...courses];
-                          const currentCat =
-                            updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                          currentCat.prompts[index].text = e.target.value;
-
-                          setCourses(updatedCourses);
-                          setSelectedOpenCategory({
-                            categoryIndex: selectedOpenCategory.categoryIndex,
-                            ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                          });
-                          updateCourses({
-                            id: updatedCourses[selectedCourse].id,
-                            syllabus: updatedCourses[selectedCourse].syllabus,
-                          });
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                      <TextField
-                        label="Purpose"
-                        multiline
-                        fullWidth
-                        value={prompt.purpose}
-                        onChange={e => {
-                          const updatedCourses = [...courses];
-                          const currentCat =
-                            updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                          currentCat.prompts[index].purpose = e.target.value;
-
-                          setCourses(updatedCourses);
-                          setSelectedOpenCategory({
-                            categoryIndex: selectedOpenCategory.categoryIndex,
-                            ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                          });
-                          updateCourses({
-                            id: updatedCourses[selectedCourse].id,
-                            syllabus: updatedCourses[selectedCourse].syllabus,
-                          });
-                        }}
-                        margin="normal"
-                        variant="outlined"
-                        minRows={2}
-                        sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-                        InputLabelProps={{
-                          style: {
-                            color: "gray",
-                          },
-                        }}
-                      />
+                        Delete
+                      </Button>
                     </Box>
-                  </Container>
+                    <Select
+                      labelId="type-label"
+                      value={prompt.type}
+                      onChange={e => {
+                        const updatedCourses = [...courses];
+                        const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
+                        currentCat.prompts[index].type = e.target.value;
+
+                        setCourses(updatedCourses);
+                        setSelectedOpenCategory({
+                          categoryIndex: selectedOpenCategory.categoryIndex,
+                          ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      label="type"
+                      MenuProps={{
+                        sx: {
+                          zIndex: "9999",
+                        },
+                      }}
+                      sx={{ mb: 2 }}
+                    >
+                      <MenuItem value="Poll">Poll</MenuItem>
+                      <MenuItem value="Open-Ended">Open-Ended</MenuItem>
+                    </Select>
+                    <TextField
+                      fullWidth
+                      multiline
+                      label="Text Prompt"
+                      variant="outlined"
+                      value={prompt.text}
+                      onChange={e => {
+                        const updatedCourses = [...courses];
+                        const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
+                        currentCat.prompts[index].text = e.target.value;
+
+                        setCourses(updatedCourses);
+                        setSelectedOpenCategory({
+                          categoryIndex: selectedOpenCategory.categoryIndex,
+                          ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      sx={{ mb: 2 }}
+                    />
+                    <TextField
+                      label="Purpose"
+                      multiline
+                      fullWidth
+                      value={prompt.purpose}
+                      onChange={e => {
+                        const updatedCourses = [...courses];
+                        const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
+                        currentCat.prompts[index].purpose = e.target.value;
+
+                        setCourses(updatedCourses);
+                        setSelectedOpenCategory({
+                          categoryIndex: selectedOpenCategory.categoryIndex,
+                          ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      margin="normal"
+                      variant="outlined"
+                      minRows={2}
+                      sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                      InputLabelProps={{
+                        style: {
+                          color: "gray",
+                        },
+                      }}
+                    />
+                  </Box>
                 </Box>
               ))}
               <Button
@@ -2141,7 +2161,9 @@ const CourseComponent = () => {
                     text: "",
                     purpose: "",
                   });
-
+                  if (!currentCat.prompts) {
+                    currentCat.prompts = [];
+                  }
                   setCourses(updatedCourses);
                   setSelectedOpenCategory({
                     categoryIndex: selectedOpenCategory.categoryIndex,
@@ -2169,7 +2191,7 @@ const CourseComponent = () => {
             </Box>
           )}
           {selectedTopic && (
-            <Box sx={{ mx: "15px", overflow: "auto", height: "100%" }}>
+            <Box>
               <TextField
                 label="Topic Description"
                 multiline
@@ -2344,47 +2366,19 @@ const CourseComponent = () => {
                 placeholder="Type a new skill and click enter ↵ to add it..."
               />
               <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-              {selectedTopic.prompts.map((prompt: any, index: number) => (
+              {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
-                  <Container>
-                    <Box sx={{ marginTop: 4 }}>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography gutterBottom>Prompt {index + 1}:</Typography>
-                        <Button
-                          onClick={() => {
-                            const updatedCourses = [...courses];
-                            const currentTopic =
-                              updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
-                                selectedTopic.topicIndex
-                              ];
-                            currentTopic.prompts.splice(index, 1);
-
-                            setCourses(updatedCourses);
-                            setSelectedTopic({
-                              categoryIndex: selectedTopic.categoryIndex,
-                              topicIndex: selectedTopic.topicIndex,
-                              ...currentTopic,
-                            });
-                            updateCourses({
-                              id: updatedCourses[selectedCourse].id,
-                              syllabus: updatedCourses[selectedCourse].syllabus,
-                            });
-                          }}
-                          sx={{ pb: "5px" }}
-                        >
-                          Delete
-                        </Button>
-                      </Box>
-                      <Select
-                        labelId="type-label"
-                        value={prompt.type}
-                        onChange={e => {
+                  <Box sx={{ marginTop: 4 }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Typography gutterBottom>Prompt {index + 1}:</Typography>
+                      <Button
+                        onClick={() => {
                           const updatedCourses = [...courses];
                           const currentTopic =
                             updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
                               selectedTopic.topicIndex
                             ];
-                          currentTopic.prompts[index].type = e.target.value;
+                          currentTopic.prompts.splice(index, 1);
 
                           setCourses(updatedCourses);
                           setSelectedTopic({
@@ -2397,75 +2391,101 @@ const CourseComponent = () => {
                             syllabus: updatedCourses[selectedCourse].syllabus,
                           });
                         }}
-                        label="type"
-                        MenuProps={{
-                          sx: {
-                            zIndex: "9999",
-                          },
-                        }}
-                        sx={{ mb: 2 }}
+                        sx={{ pb: "5px" }}
                       >
-                        <MenuItem value="Poll">Poll</MenuItem>
-                        <MenuItem value="Open-Ended">Open-Ended</MenuItem>
-                      </Select>
-                      <TextField
-                        fullWidth
-                        label="Text Prompt"
-                        variant="outlined"
-                        value={prompt.text}
-                        onChange={e => {
-                          const updatedCourses = [...courses];
-                          const currentTopic =
-                            updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
-                              selectedTopic.topicIndex
-                            ];
-                          currentTopic.prompts[index].text = e.target.value;
-
-                          setCourses(updatedCourses);
-                          setSelectedTopic({
-                            categoryIndex: selectedTopic.categoryIndex,
-                            topicIndex: selectedTopic.topicIndex,
-                            ...currentTopic,
-                          });
-                          updateCourses({
-                            id: updatedCourses[selectedCourse].id,
-                            syllabus: updatedCourses[selectedCourse].syllabus,
-                          });
-                        }}
-                        sx={{ mb: 2 }}
-                        multiline
-                        minRows={2}
-                      />
-                      <TextField
-                        fullWidth
-                        label="Purpose"
-                        variant="outlined"
-                        value={prompt.purpose}
-                        onChange={e => {
-                          const updatedCourses = [...courses];
-                          const currentTopic =
-                            updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
-                              selectedTopic.topicIndex
-                            ];
-                          currentTopic.prompts[index].purpose = e.target.value;
-
-                          setCourses(updatedCourses);
-                          setSelectedTopic({
-                            categoryIndex: selectedTopic.categoryIndex,
-                            topicIndex: selectedTopic.topicIndex,
-                            ...currentTopic,
-                          });
-                          updateCourses({
-                            id: updatedCourses[selectedCourse].id,
-                            syllabus: updatedCourses[selectedCourse].syllabus,
-                          });
-                        }}
-                        sx={{ mb: 2 }}
-                        multiline
-                        minRows={2}
-                      />
+                        Delete
+                      </Button>
                     </Box>
-                  </Container>
+                    <Select
+                      labelId="type-label"
+                      value={prompt.type}
+                      onChange={e => {
+                        const updatedCourses = [...courses];
+                        const currentTopic =
+                          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ];
+                        currentTopic.prompts[index].type = e.target.value;
+
+                        setCourses(updatedCourses);
+                        setSelectedTopic({
+                          categoryIndex: selectedTopic.categoryIndex,
+                          topicIndex: selectedTopic.topicIndex,
+                          ...currentTopic,
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      label="type"
+                      MenuProps={{
+                        sx: {
+                          zIndex: "9999",
+                        },
+                      }}
+                      sx={{ mb: 2 }}
+                    >
+                      <MenuItem value="Poll">Poll</MenuItem>
+                      <MenuItem value="Open-Ended">Open-Ended</MenuItem>
+                    </Select>
+                    <TextField
+                      fullWidth
+                      label="Text Prompt"
+                      variant="outlined"
+                      value={prompt.text}
+                      onChange={e => {
+                        const updatedCourses = [...courses];
+                        const currentTopic =
+                          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ];
+                        currentTopic.prompts[index].text = e.target.value;
+
+                        setCourses(updatedCourses);
+                        setSelectedTopic({
+                          categoryIndex: selectedTopic.categoryIndex,
+                          topicIndex: selectedTopic.topicIndex,
+                          ...currentTopic,
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      sx={{ mb: 2 }}
+                      multiline
+                      minRows={2}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Purpose"
+                      variant="outlined"
+                      value={prompt.purpose}
+                      onChange={e => {
+                        const updatedCourses = [...courses];
+                        const currentTopic =
+                          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ];
+                        currentTopic.prompts[index].purpose = e.target.value;
+
+                        setCourses(updatedCourses);
+                        setSelectedTopic({
+                          categoryIndex: selectedTopic.categoryIndex,
+                          topicIndex: selectedTopic.topicIndex,
+                          ...currentTopic,
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      sx={{ mb: 2 }}
+                      multiline
+                      minRows={2}
+                    />
+                  </Box>
                 </Box>
               ))}
               <Button
@@ -2475,6 +2495,9 @@ const CourseComponent = () => {
                     updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
                       selectedTopic.topicIndex
                     ];
+                  if (!currentTopic.prompts) {
+                    currentTopic.prompts = [];
+                  }
                   currentTopic.prompts.push({
                     type: "Poll",
                     text: "",
