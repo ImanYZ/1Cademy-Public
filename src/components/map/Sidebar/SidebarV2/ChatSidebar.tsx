@@ -108,6 +108,7 @@ export const ChatSidebar = ({
     createActionTrack({ action: "MessageTabChanged" });
   };
   const [openChatRoom, setOpenChatRoom] = useState<boolean>(false);
+  const [openingDMChannel, setOpeningDMChannel] = useState<boolean>(false);
   const [roomType, setRoomType] = useState<string>("");
   const [selectedChannel, setSelectedChannel] = useState<IChannels | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -446,24 +447,26 @@ export const ChatSidebar = ({
   // }, [db, user]);
 
   const openDMChannel = async (user2: any) => {
+    if (openingDMChannel) return;
     if (roomType === "direct") return;
     if (!user?.uname || !user2.uname) return;
+    setOpeningDMChannel(true);
     let q = query(collection(db, "conversations"), where("members", "array-contains", user.uname));
     if (user?.uname === user2?.uname) {
       q = query(collection(db, "conversations"), where("members", "==", [user.uname, user2?.uname]));
     }
     const findConversation = await getDocs(q);
-    const filteredResults = findConversation.docs.find(
+    const filteredResult = findConversation.docs.find(
       doc => doc.data().members.includes(user2.uname) && doc.data().members.length === 2
     );
-    if (filteredResults) {
-      const conversationData: any = filteredResults.data();
+    if (filteredResult) {
+      const conversationData: any = filteredResult.data();
       if (conversationData?.deleted) {
-        await updateDoc(doc(db, "conversations", filteredResults.id), {
+        await updateDoc(doc(db, "conversations", filteredResult.id), {
           deleted: false,
         });
       }
-      openRoom("direct", { ...conversationData, id: filteredResults.id });
+      openRoom("direct", { ...conversationData, id: filteredResult.id });
     } else {
       const converstionRef = doc(collection(db, "conversations"));
       const membersInfo = {
@@ -498,6 +501,7 @@ export const ChatSidebar = ({
       Post(`/chat/createChannelLeader`, { channelId: docSnap.id });
       openRoom("direct", { ...conversationData, id: converstionRef.id });
     }
+    setOpeningDMChannel(false);
   };
 
   const clearNotifications = async (notifications: any) => {

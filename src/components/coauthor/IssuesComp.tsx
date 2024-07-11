@@ -4,8 +4,7 @@ import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-
-import { sendMessageToChatGPT } from "../../services/openai";
+import { sendMessageToChatGPT } from "@/pages/api/openAI/helpers";
 
 interface Props {
   allContent: string;

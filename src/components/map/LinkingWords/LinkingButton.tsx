@@ -1,12 +1,10 @@
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import LockIcon from "@mui/icons-material/Lock";
 import { Box, Button, Tooltip } from "@mui/material";
-import NextImage from "next/image";
 import React, { ReactNode, useCallback } from "react";
 
 import { Editor } from "@/components/Editor";
 
-import ReferenceYellowIcon from "../../../../public/reference-yellow.svg";
-import TagYellowIcon from "../../../../public/tag-yellow.svg";
 import { NodeType } from "../../../types";
 import NodeTypeIcon from "../../NodeTypeIcon2";
 
@@ -58,9 +56,11 @@ const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: Lin
       >
         <Box sx={{ display: "flex", alignItems: "center", fontSize: "16px", justifyContent: "space-between" }}>
           {props.iClassName == "local_offer" ? (
-            <NextImage height={"20px"} width={"22px"} src={TagYellowIcon} alt="tag icon" />
-          ) : props.iClassName == "menu_book" ? (
-            <NextImage width={"22px"} src={ReferenceYellowIcon} alt="reference icon" />
+            <LocalOfferIcon
+              sx={{
+                fontSize: "16px",
+              }}
+            />
           ) : props.iClassName == "locked_tag" ? (
             <LockIcon sx={{ height: "20px", width: "22px", color: "#ff8a33" }} />
           ) : (
@@ -70,8 +70,8 @@ const LinkingButton = ({ disabled = false, id, onClickOnDisable, ...props }: Lin
           <NodeTypeIcon
             nodeType={props.nodeType}
             tooltipPlacement={"left"}
-            fontSize={"inherit"}
             sx={{
+              fontSize: "16px",
               marginRight: "4px",
               color:
                 props.linkedNodeType !== "children" && props.linkedNodeType !== "parents"
