@@ -1,9 +1,11 @@
-import React from "react";
+import { AutoFixHigh as AutoFixHighIcon } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { AutoFixHigh as AutoFixHighIcon } from "@mui/icons-material";
 import { doc, getDoc, getFirestore, setDoc, updateDoc } from "firebase/firestore";
-import { sendMessageToChatGPT } from "../../services/openai";
+import React from "react";
+
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
+
 import { articleTypes } from "../../data/articleTypes";
 
 interface AcademicArticleCategory {

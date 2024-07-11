@@ -2683,3 +2683,14 @@ export async function callOpenAIChat(files: File[], userPrompt: string, systemPr
     throw error;
   }
 }
+
+export const generateImage = async (prompt: string) => {
+  const response = await openai.images.generate({
+    model: "dall-e-3",
+    prompt,
+    n: 1,
+    size: "1024x1024",
+  });
+  const image_url = response.data[0].url;
+  return image_url;
+};
