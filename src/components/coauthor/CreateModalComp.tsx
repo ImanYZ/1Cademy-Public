@@ -12,7 +12,7 @@ import ReactQuill from "react-quill";
 
 import { getArticleTypes } from "@/lib/coauthor";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-import { sendMessageToChatGPT } from "@/pages/api/openAI/helpers";
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
 
 import { useAuth } from "../../context/AuthContext";
 if (typeof window !== "undefined") {
