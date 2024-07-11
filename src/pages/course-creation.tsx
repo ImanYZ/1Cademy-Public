@@ -1072,7 +1072,7 @@ const CourseComponent = () => {
             color: "white",
             zIndex: 9,
             fontSize: "15px",
-            mt: "15px",
+            mt: "35px",
             position: "absolute",
             right: 0,
             mr: "4px",
@@ -2040,7 +2040,7 @@ const CourseComponent = () => {
                 placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
               />
               <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-              {selectedOpenCategory.prompts.map((prompt: any, index: number) => (
+              {(selectedOpenCategory?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -2161,7 +2161,9 @@ const CourseComponent = () => {
                     text: "",
                     purpose: "",
                   });
-
+                  if (!currentCat.prompts) {
+                    currentTopic.prompts = [];
+                  }
                   setCourses(updatedCourses);
                   setSelectedOpenCategory({
                     categoryIndex: selectedOpenCategory.categoryIndex,
@@ -2364,7 +2366,7 @@ const CourseComponent = () => {
                 placeholder="Type a new skill and click enter ↵ to add it..."
               />
               <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-              {selectedTopic.prompts.map((prompt: any, index: number) => (
+              {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -2493,6 +2495,9 @@ const CourseComponent = () => {
                     updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
                       selectedTopic.topicIndex
                     ];
+                  if (!currentTopic.prompts) {
+                    currentTopic.prompts = [];
+                  }
                   currentTopic.prompts.push({
                     type: "Poll",
                     text: "",
