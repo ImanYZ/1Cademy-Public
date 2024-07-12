@@ -44,6 +44,7 @@ import NodeTypeIcon from "@/components/NodeTypeIcon";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { newId } from "@/lib/utils/newFirestoreId";
+//import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
 
 const glowGreen = keyframes`
   0% {
@@ -1673,19 +1674,6 @@ const CourseComponent = () => {
                                 setSelectedOpenCategory(null);
                                 setExpandedTopics(newExpanded);
                               }}
-                              draggable
-                              onDragStart={() => {
-                                dragItem.current = categoryIndex;
-                                dragTopicItem.current = topicIndex;
-                              }}
-                              onDragEnter={() => {
-                                dragOverTopicItem.current = topicIndex;
-                                dragOverItem.current = categoryIndex;
-                              }}
-                              onDragOver={() => {
-                                // console.log("onDragOver");
-                              }}
-                              onDragEnd={handleSortingForItems}
                               sx={{
                                 backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
                                 borderRadius: "25px",
@@ -1710,6 +1698,19 @@ const CourseComponent = () => {
                                     border: "1px solid orange",
                                   },
                                 }}
+                                draggable
+                                onDragStart={() => {
+                                  dragItem.current = categoryIndex;
+                                  dragTopicItem.current = topicIndex;
+                                }}
+                                onDragEnter={() => {
+                                  dragOverTopicItem.current = topicIndex;
+                                  dragOverItem.current = categoryIndex;
+                                }}
+                                onDragOver={() => {
+                                  // console.log("onDragOver");
+                                }}
+                                onDragEnd={handleSortingForItems}
                               >
                                 {" "}
                                 <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
@@ -2458,6 +2459,7 @@ const CourseComponent = () => {
               </Tooltip>
 
               {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+              {/* <MultipleChoices /> */}
               <TextField
                 label="Topic Description"
                 multiline
