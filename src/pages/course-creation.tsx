@@ -162,15 +162,6 @@ const CourseComponent = () => {
   const [expandedTopics, setExpandedTopics] = useState<any>([]);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
-  // const [topicImages /* , setTopicImages */] = useState<any>({
-  //   "History and Approaches to Psychology":
-  //     "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
-  // });
-  // const topicImages: any = {
-  //   "History and Approaches to Psychology":
-  //     "https://firebasestorage.googleapis.com/v0/b/onecademy-1.appspot.com/o/ProfilePictures%2FgVfvxPaZVDNotP9ngdSvuKmZQxn2%2FSat%2C%2017%20Feb%202024%2018%3A39%3A23%20GMT_430x1300.jpeg?alt=media&token=c3b984b6-3c4e-451d-b891-fedd77b8c2f5",
-  // };
-
   useEffect(() => {
     const notebooksRef = collection(db, "coursesAI");
     const q = query(notebooksRef, where("deleted", "==", false));
@@ -577,22 +568,23 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
   };
-  // const getNewTopics = (currentImprovement: any) => {
-  //   let newTopics = [];
-  //   if (!currentImprovement) {
-  //     return [];
-  //   }
-  //   if (
-  //     currentImprovement.new_topic &&
-  //     (currentImprovement.action === "add" || currentImprovement.action === "divide")
-  //   ) {
-  //     newTopics.push(currentImprovement.new_topic);
-  //   }
-  //   if ((currentImprovement.new_topics || []).length > 0) {
-  //     newTopics = [...newTopics, ...currentImprovement.new_topics];
-  //   }
-  //   return newTopics;
-  // };
+  const getNewTopics = (currentImprovement: any) => {
+    let newTopics = [];
+    if (!currentImprovement) {
+      return [];
+    }
+    if (
+      currentImprovement.new_topic &&
+      (currentImprovement.action === "add" || currentImprovement.action === "divide")
+    ) {
+      newTopics.push(currentImprovement.new_topic);
+    }
+    if ((currentImprovement.new_topics || []).length > 0) {
+      newTopics = [...newTopics, ...currentImprovement.new_topics];
+    }
+    newTopics.forEach(t => (t.color = "add"));
+    return newTopics;
+  };
   const scrollToCategory = (category: string) => {
     const categoryElement = document.getElementById(category);
     if (categoryElement) {
@@ -641,7 +633,9 @@ const CourseComponent = () => {
 
   const getTopicColor = (category: any, tc: any) => {
     const color =
-      currentImprovement.old_topic === tc
+      tc.color === "add"
+        ? "green"
+        : currentImprovement.old_topic === tc
         ? "red"
         : selectedTopic === tc.topic
         ? "orange"
@@ -1058,6 +1052,28 @@ const CourseComponent = () => {
     }
   };
 
+  const generateImageForCategory = async () => {
+    if (selectedOpenCategory) {
+      setLoadingImage(true);
+      const { imageUrl } = (await Post("/generateNodeImage", {
+        title: selectedOpenCategory.category,
+        content: selectedOpenCategory.description,
+      })) as { imageUrl: string };
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
+        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+        imageUrl: imageUrl,
+      };
+      setSelectedOpenCategory({
+        categoryIndex: selectedOpenCategory.categoryIndex,
+        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+      });
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourse]);
+      setLoadingImage(false);
+    }
+  };
+
   if (courses.length <= 0) {
     return (
       <Box
@@ -1150,6 +1166,8 @@ const CourseComponent = () => {
                 const courseIdx = courses.findIndex((course: any) => course.title === event.target.value);
                 if (courseIdx !== -1) {
                   setSelectedCourse(courseIdx);
+                  setImprovements([]);
+                  setSidebarOpen(false);
                 }
               }}
               select
@@ -1530,7 +1548,7 @@ const CourseComponent = () => {
                   <AccordionDetails>
                     {
                       <Grid container spacing={2}>
-                        {category.topics.map((tc: any, topicIndex: any) => (
+                        {[...category.topics, ...getNewTopics(currentImprovement)].map((tc: any, topicIndex: any) => (
                           <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
                             <Accordion
                               expanded={expandedTopics.includes(tc.topic)}
@@ -1980,6 +1998,23 @@ const CourseComponent = () => {
           </Box>
           {selectedOpenCategory && (
             <Box sx={{ gap: "8px" }}>
+              <Tooltip
+                title=""
+                sx={{
+                  zIndex: "99990",
+                }}
+              >
+                <LoadingButton
+                  onClick={generateImageForCategory}
+                  sx={{
+                    display: "flex-end",
+                  }}
+                  loading={loadingImage}
+                >
+                  <AutoFixHighIcon />
+                </LoadingButton>
+              </Tooltip>
+              {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
               <TextField
                 label="Category Title"
                 multiline
