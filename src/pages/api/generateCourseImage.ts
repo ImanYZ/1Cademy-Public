@@ -27,24 +27,11 @@ const generateImagePrompt = (
   objectives: any,
   syllabus: any
 ) => {
-  const prompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of hour-long class sessions, objectives, skills, current syllabus, and a specified category, your task is to generate an image to help students understanding of one of the topics or categories of the course syllabus. 
-
-    **Input:**
-    
-    1. **Course Title:** ${courseTitle}
-    2. **Course Description:** ${courseDescription}
-    3. **Target Learners:** ${targetLearners}
-    4. **Number of Hour-long Class Sessions:** ${sessions}
-    5. **Prerequisite Knowledge:** ${JSON.stringify(prerequisiteKnowledge)}
-    6. **Objectives:** ${JSON.stringify(objectives)}
-    7. **Syllabus:** ${JSON.stringify(syllabus)}
-    
-    Please take your time to think carefully and generate an image to help students understand the following topic/category:
-    
-    **title:** ${title}
-    **content:** ${content}
-    
-    A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.`;
+  const prompt = `Generate an image to help students in the course [Course Title goes here] learn the following topic:
+  **title:** ${title}
+  **content:** ${content}
+  The image should be minimalistic and should not include any text.
+  A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.`;
   return prompt;
 };
 
