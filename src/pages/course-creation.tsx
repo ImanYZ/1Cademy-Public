@@ -344,7 +344,7 @@ const CourseComponent = () => {
       case "move":
         return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
       case "delete":
-        return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** under the category **"${category}"**.`;
+        return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
       default:
         return "Invalid action.";
     }
@@ -688,6 +688,8 @@ const CourseComponent = () => {
       const courseRef = doc(db, "coursesAI", courses[selectedCourse].id);
       updateDoc(courseRef, { deleted: true });
       setSelectedCourse(0);
+      setSidebarOpen(false);
+      setCurrentImprovement(null);
     }
   };
   const cancelCreatingCourse = () => {
@@ -1461,8 +1463,10 @@ const CourseComponent = () => {
                     } else {
                       setExpanded([category.category]);
                       setSelectedTopic(null);
-                      setSelectedOpenCategory({ categoryIndex, ...category });
-                      setSidebarOpen(true);
+                      if (!currentImprovement) {
+                        setSelectedOpenCategory({ categoryIndex, ...category });
+                        setSidebarOpen(true);
+                      }
                     }
                   }}
                   sx={{
@@ -2791,6 +2795,13 @@ const CourseComponent = () => {
               </Box>
             </Box>
           )}
+          {/* {currentImprovement?.new_topic &&
+            Object.keys(currentImprovement.new_topic).map((key: string) => (
+              <Box key={key}>
+                <Typography>{key}:</Typography>
+                <Typography>{currentImprovement.new_topic.key}</Typography>
+              </Box>
+            ))} */}
         </Paper>
       )}
       {ConfirmDialog}
