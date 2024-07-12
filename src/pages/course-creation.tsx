@@ -1706,14 +1706,18 @@ const CourseComponent = () => {
                                 let newExpanded = [];
                                 if (isExpanded) {
                                   newExpanded = [...expandedTopics, tc.topic];
-                                  setSidebarOpen(true);
+                                  if (Object.keys(currentImprovement).length <= 0) {
+                                    setSidebarOpen(true);
+                                    setSelectedTopic({ categoryIndex, topicIndex, ...tc });
+                                    handlePaperClick();
+                                  }
                                 } else {
-                                  setSidebarOpen(false);
+                                  if (Object.keys(currentImprovement).length <= 0) {
+                                    setSidebarOpen(false);
+                                  }
                                   newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
                                 }
-                                handlePaperClick();
 
-                                setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                 setSelectedOpenCategory(null);
                                 setExpandedTopics(newExpanded);
                               }}
