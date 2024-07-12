@@ -530,33 +530,38 @@ const CourseComponent = () => {
 
   /*  */
   const handlePaperClick = async () => {
-    if (Object.keys(currentImprovement).length > 0 || loadingNodes) {
-      return;
-    }
+    try {
+      if (Object.keys(currentImprovement).length > 0 || loadingNodes) {
+        return;
+      }
 
-    setImprovements([]);
-    setCurrentImprovement({});
+      setImprovements([]);
+      setCurrentImprovement({});
 
-    const courseTitle = courses[selectedCourse].title;
-    const courseDescription = courses[selectedCourse].description;
-    const targetLearners = courses[selectedCourse].learners;
-    const syllabus = courses[selectedCourse].syllabus;
-    const tags = courses[selectedCourse].tags;
-    const references = courses[selectedCourse].references;
-    if (Object.keys(courses[selectedCourse].nodes).length > 0) {
-      return;
+      const courseTitle = courses[selectedCourse].title;
+      const courseDescription = courses[selectedCourse].description;
+      const targetLearners = courses[selectedCourse].learners;
+      const syllabus = courses[selectedCourse].syllabus;
+      const tags = courses[selectedCourse].tags;
+      const references = courses[selectedCourse].references;
+      if (Object.keys(courses[selectedCourse].nodes).length > 0) {
+        return;
+      }
+      setLoadingNodes(true);
+      await Post("/retrieveNodesForCourse", {
+        courseId: courses[selectedCourse].id,
+        tags,
+        courseTitle,
+        courseDescription,
+        targetLearners,
+        references,
+        syllabus,
+      });
+      setLoadingNodes(false);
+    } catch (error) {
+      setLoadingNodes(false);
+      console.error(error);
     }
-    setLoadingNodes(true);
-    await Post("/retrieveNodesForCourse", {
-      courseId: courses[selectedCourse].id,
-      tags,
-      courseTitle,
-      courseDescription,
-      targetLearners,
-      references,
-      syllabus,
-    });
-    setLoadingNodes(false);
   };
 
   const handleSidebarClose = () => {
@@ -779,6 +784,9 @@ const CourseComponent = () => {
     const hours = courses[selectedCourse].hours;
     const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
 
+    const tags = courses[selectedCourse].tags;
+    const references = courses[selectedCourse].references;
+
     const response: any = await Post("/generateCourseSyllabus", {
       courseTitle,
       targetLearners,
@@ -804,7 +812,44 @@ const CourseComponent = () => {
     }
 
     setLoadingCourseStructure(false);
+    setTimeout(async () => {
+      setLoadingNodes(true);
+      await Post("/retrieveNodesForCourse", {
+        courseId: courses[selectedCourse].id,
+        tags,
+        courseTitle,
+        courseDescription,
+        targetLearners,
+        references,
+        syllabus: response,
+      });
+      setLoadingNodes(false);
+    }, 2000);
   };
+  const retrieveNodesForTopic = async (topic: any) => {
+    try {
+      setLoadingNodes(true);
+      const courseTitle = courses[selectedCourse].title;
+      const targetLearners = courses[selectedCourse].learners;
+      const courseDescription = courses[selectedCourse].description;
+      const syllabus = courses[selectedCourse].syllabus;
+      const tags = courses[selectedCourse].tags;
+      const references = courses[selectedCourse].references;
+
+      await Post("/retrieveNodesForTopic", {
+        courseId: courses[selectedCourse].id,
+        tags,
+        courseTitle,
+        courseDescription,
+        targetLearners,
+        references,
+        syllabus,
+        topic: topic.topic,
+      });
+      setLoadingNodes(false);
+    } catch (error) {}
+  };
+
   const deleteCategory = async (c: any) => {
     if (
       await confirmIt(
@@ -1679,11 +1724,23 @@ const CourseComponent = () => {
                                   >
                                     {tc?.topic || ""}
                                   </Typography>
+                                  <LoadingButton
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      retrieveNodesForTopic(tc);
+                                    }}
+                                    sx={{
+                                      display: "flex-end",
+                                    }}
+                                    loading={loadingDescription}
+                                  >
+                                    <AutoFixHighIcon />
+                                  </LoadingButton>
                                 </Box>
                               </AccordionSummary>
                               <AccordionDetails>
+                                {loadingNodes && <LinearProgress />}
                                 <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                  {loadingNodes && <LinearProgress />}
                                   {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
                                     <Box key={n.node} sx={{ mb: "10px" }}>
                                       <Accordion
