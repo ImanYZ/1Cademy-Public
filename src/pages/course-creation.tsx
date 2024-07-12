@@ -2574,16 +2574,18 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
               />
-              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-              <LoadingButton
-                onClick={generateMorePromptsForTopic}
-                sx={{
-                  display: "flex-end",
-                }}
-                loading={loadingPrompt}
-              >
-                <AutoFixHighIcon />
-              </LoadingButton>
+              <Box sx={{ display: "flex" }}>
+                <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+                <LoadingButton
+                  onClick={generateMorePromptsForTopic}
+                  sx={{
+                    display: "flex-end",
+                  }}
+                  loading={loadingPrompt}
+                >
+                  <AutoFixHighIcon />
+                </LoadingButton>
+              </Box>
               {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
