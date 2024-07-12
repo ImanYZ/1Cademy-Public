@@ -311,6 +311,7 @@ const CourseComponent = () => {
       );
       setCourses(updatedCourses);
       updateCourses(updatedCourses[selectedCourse]);
+      setSidebarOpen(false);
     }
   };
   const handleOpenDialog = (categoryIndex: any) => {
