@@ -1030,9 +1030,16 @@ const CourseComponent = () => {
     try {
       if (selectedTopic) {
         setLoadingImage(true);
-        const { imageUrl } = (await Post("/generateNodeImage", {
+        const { imageUrl } = (await Post("/generateCourseImage", {
           title: selectedTopic.topic,
           content: selectedTopic.description,
+          courseTitle: courses[selectedCourse].title,
+          courseDescription: courses[selectedCourse].description,
+          targetLearners: courses[selectedCourse].learners,
+          syllabus: courses[selectedCourse].syllabus,
+          prerequisiteKnowledge: selectedTopic.prerequisiteKnowledge,
+          sessions: courses[selectedCourse].hours,
+          objectives: selectedTopic.objectives,
         })) as { imageUrl: string };
 
         if (imageUrl) {
@@ -1059,9 +1066,16 @@ const CourseComponent = () => {
   const generateImageForCategory = async () => {
     if (selectedOpenCategory) {
       setLoadingImage(true);
-      const { imageUrl } = (await Post("/generateNodeImage", {
+      const { imageUrl } = (await Post("/generateCourseImage", {
         title: selectedOpenCategory.category,
         content: selectedOpenCategory.description,
+        courseTitle: courses[selectedCourse].title,
+        courseDescription: courses[selectedCourse].description,
+        targetLearners: courses[selectedCourse].learners,
+        syllabus: courses[selectedCourse].syllabus,
+        prerequisiteKnowledge: selectedOpenCategory.prerequisiteKnowledge,
+        sessions: courses[selectedCourse].hours,
+        objectives: selectedOpenCategory.objectives,
       })) as { imageUrl: string };
       const updatedCourses = [...courses];
       updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
