@@ -2233,13 +2233,13 @@ const CourseComponent = () => {
                 <Typography variant="h6">
                   {Object.keys(improvements[currentChangeIndex] || {}).length > 0
                     ? "AI-Proposed Improvements"
-                    : selectedTopic?.topic || selectedOpenCategory?.category || ""}
+                    : selectedTopic?.topic || selectedOpenCategory?.title || ""}
                 </Typography>
 
-                {(selectedOpenCategory?.category || selectedTopic) && (
+                {(selectedOpenCategory?.title || selectedTopic) && (
                   <Button
                     onClick={() => {
-                      if (selectedOpenCategory?.category) {
+                      if (selectedOpenCategory?.title) {
                         deleteCategory(selectedOpenCategory);
                       } else if (selectedTopic) {
                         handleRemoveTopic(selectedTopic);
@@ -2279,12 +2279,12 @@ const CourseComponent = () => {
                   <TextField
                     label="Category Title"
                     multiline
-                    value={selectedOpenCategory.category}
+                    value={selectedOpenCategory.title}
                     onChange={e => {
                       const updatedCourses = [...courses];
                       updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
                         ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                        category: e.target.value,
+                        title: e.target.value,
                       };
                       setSelectedOpenCategory({
                         categoryIndex: selectedOpenCategory.categoryIndex,
