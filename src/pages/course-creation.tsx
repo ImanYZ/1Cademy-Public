@@ -102,7 +102,7 @@ interface Suggestion {
 }
 const books = [
   {
-    id: "Psychology (2nd ed.)",
+    id: "OpenStax Psychology (2nd ed.) Textbook",
     tags: ["Psychology", "Psychology @ OpenStax"],
     references: ["OpenStax Psychology (2nd ed.) Textbook"],
   },
@@ -311,6 +311,7 @@ const CourseComponent = () => {
       );
       setCourses(updatedCourses);
       updateCourses(updatedCourses[selectedCourse]);
+      setSidebarOpen(false);
     }
   };
   const handleOpenDialog = (categoryIndex: any) => {
