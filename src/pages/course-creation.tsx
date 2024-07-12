@@ -33,7 +33,17 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  deleteField,
+  doc,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
@@ -53,7 +63,7 @@ import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
 import { newId } from "@/lib/utils/newFirestoreId";
-import { escapeBreaksQuotes } from "@/lib/utils/utils";
+import { delay, escapeBreaksQuotes } from "@/lib/utils/utils";
 
 const glowGreen = keyframes`
   0% {
@@ -101,9 +111,9 @@ interface Suggestion {
 }
 const books = [
   {
-    id: "Psychology (2nd ed.)",
+    id: "OpenStax Psychology (2nd ed.) Textbook",
     tags: ["Psychology", "Psychology @ OpenStax"],
-    references: ["Psychology (2nd ed.)"],
+    references: ["OpenStax Psychology (2nd ed.) Textbook"],
   },
   {
     id: "OpenStax Microbiology Textbook",
@@ -161,17 +171,14 @@ const CourseComponent = () => {
   const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState<string[]>([]);
   const [editTopic, setEditTopic] = useState<any>(null);
-  const [expandedNode, setExpandedNode] = useState<any>(null);
+  const [expandedNode, setExpandedNode] = useState(null);
   const [isChanged, setIsChanged] = useState<string[]>([]);
   const [isRemoved, setIsRemoved] = useState<string[]>([]);
   const [creatingCourseStep, setCreatingCourseStep] = useState<number>(0);
-
   const [editCategory, setEditCategory] = useState<any>(null);
   const [newCategoryTitle, setNewCategoryTitle] = useState<string>("");
-
   const [expandedTopics, setExpandedTopics] = useState<any>([]);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
-
   const [loadingNodes, setLoadingNodes] = useState(false);
   const [nodePublicView, setNodePublicView] = useState<any>(null);
   const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
@@ -216,11 +223,23 @@ const CourseComponent = () => {
     };
   }, [db]);
 
-  const updateCourses = async (course: any) => {
+  const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
+
     const courseRef = doc(db, "coursesAI", course.id);
-    await updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
+    const updateData: any = { ...course, updateAt: new Date() };
+
+    if (deleteNodes) {
+      updateData.nodes = deleteField();
+    }
+
+    if (deleteImprovements) {
+      updateData.suggestions = deleteField();
+    }
+
+    await updateDoc(courseRef, updateData);
   };
+
   const onCreateCourse = async (newCourse: any) => {
     const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
     await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
@@ -275,12 +294,35 @@ const CourseComponent = () => {
     setCourses(updatedCourses);
     updateCourses(updatedCourses[selectedCourse]);
   };
-  // const handleRemoveTopic = (categoryIndex: number, topicIndex: number) => {
-  //   const updatedCourses = [...courses];
-  //   updatedCourses[selectedCourse].syllabus[categoryIndex].topics.splice(topicIndex, 1);
-  //   setCourses(updatedCourses);
-  //   updateCourses(updatedCourses[selectedCourse]);
-  // };
+  const handleRemoveTopic = async (selectedOpenCategory: any) => {
+    const confirmation = await confirmIt(
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          gap: "10px",
+        }}
+      >
+        <DeleteForeverIcon />
+        <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this topic?</Typography>
+      </Box>,
+      "Delete Topic",
+      "Keep Topic"
+    );
+    if (confirmation) {
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex].topics.splice(
+        selectedOpenCategory.topicIndex,
+        1
+      );
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourse]);
+      setSidebarOpen(false);
+    }
+  };
   const handleOpenDialog = (categoryIndex: any) => {
     setSelectedCategory(categoryIndex);
     setDialogOpen(true);
@@ -393,7 +435,7 @@ const CourseComponent = () => {
 
     setLoading(false);
   };
-  const handleAcceptChange = () => {
+  const handleAcceptChange = async () => {
     let _courses: any = JSON.parse(JSON.stringify(courses));
     let syllabus: any = _courses[selectedCourse].syllabus;
     setDisplayCourses(null);
@@ -503,18 +545,23 @@ const CourseComponent = () => {
     }
 
     _courses[selectedCourse].syllabus = syllabus;
-    setIsChanged(modifiedTopics);
+
     setIsRemoved(removedTopics);
+    await delay(1000);
+    setIsChanged(modifiedTopics);
     setTimeout(() => {
       setCourses(_courses);
     }, 1000);
     setCurrentImprovement({});
 
+    updateCourses(_courses[selectedCourse], false, true);
     setTimeout(() => {
       setImprovements((prev: any) => {
         prev.splice(currentChangeIndex, 1);
         return prev;
       });
+      setIsChanged([]);
+      setIsRemoved([]);
       navigateChange(currentChangeIndex);
     }, 3000);
   };
@@ -585,20 +632,22 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
   };
-  const getNewTopics = (currentImprovement: any) => {
+  const getNewTopics = (currentImprovement: any, category: string) => {
     let newTopics = [];
-    if (!currentImprovement) {
+    const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
+    if (Object.keys(_currentImprovement).length <= 0 || _currentImprovement.category !== category) {
       return [];
     }
     if (
-      currentImprovement.new_topic &&
-      (currentImprovement.action === "add" || currentImprovement.action === "divide")
+      _currentImprovement.new_topic &&
+      (_currentImprovement.action === "add" || _currentImprovement.action === "divide")
     ) {
-      newTopics.push(currentImprovement.new_topic);
+      newTopics.push(_currentImprovement.new_topic);
     }
-    if ((currentImprovement.new_topics || []).length > 0) {
-      newTopics = [...newTopics, ...currentImprovement.new_topics];
+    if ((_currentImprovement.new_topics || []).length > 0) {
+      newTopics = [...newTopics, ..._currentImprovement.new_topics];
     }
+    newTopics = [...newTopics].slice();
     newTopics.forEach(t => (t.color = "add"));
     return newTopics;
   };
@@ -706,7 +755,7 @@ const CourseComponent = () => {
       updateDoc(courseRef, { deleted: true });
       setSelectedCourse(0);
       setSidebarOpen(false);
-      setCurrentImprovement(null);
+      setCurrentImprovement({});
     }
   };
   const cancelCreatingCourse = () => {
@@ -1604,7 +1653,9 @@ const CourseComponent = () => {
                     if (expanded.includes(category.category)) {
                       setExpanded([]);
                       setSelectedOpenCategory(null);
-                      setSidebarOpen(false);
+                      if (!Object.keys(currentImprovement).length) {
+                        setSidebarOpen(false);
+                      }
                     } else {
                       setExpanded([category.category]);
                       setSelectedTopic(null);
@@ -1688,49 +1739,30 @@ const CourseComponent = () => {
                   <AccordionDetails>
                     {
                       <Grid container spacing={2}>
-                        {[...category.topics, ...getNewTopics(currentImprovement)].map((tc: any, topicIndex: any) => (
-                          <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
-                            <Accordion
-                              expanded={expandedTopics.includes(tc.topic)}
-                              onChange={(e, isExpanded) => {
-                                let newExpanded = [];
-                                if (isExpanded) {
-                                  newExpanded = [...expandedTopics, tc.topic];
-                                  setSidebarOpen(true);
-                                } else {
-                                  setSidebarOpen(false);
-                                  newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
-                                }
-                                handlePaperClick();
+                        {[...category.topics, ...getNewTopics(currentImprovement, category.category)].map(
+                          (tc: any, topicIndex: any) => (
+                            <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
+                              <Accordion
+                                expanded={expandedTopics.includes(tc.topic)}
+                                onChange={(e, isExpanded) => {
+                                  let newExpanded = [];
+                                  if (isExpanded) {
+                                    newExpanded = [...expandedTopics, tc.topic];
+                                    if (Object.keys(currentImprovement).length <= 0) {
+                                      setSidebarOpen(true);
+                                      setSelectedTopic({ categoryIndex, topicIndex, ...tc });
+                                      handlePaperClick();
+                                    }
+                                  } else {
+                                    if (Object.keys(currentImprovement).length <= 0) {
+                                      setSidebarOpen(false);
+                                    }
+                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
+                                  }
 
-                                setSelectedTopic({ categoryIndex, topicIndex, ...tc });
-                                setSelectedOpenCategory(null);
-                                setExpandedTopics(newExpanded);
-                                setExpandedNode(null);
-                              }}
-                              sx={{
-                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
-                                borderRadius: "25px",
-                              }}
-                            >
-                              <AccordionSummary
-                                expandIcon={<ExpandMoreIcon />}
-                                aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
-                                id={`panel${categoryIndex}-${topicIndex}-header`}
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  borderRadius: "25px",
-                                  animation: isRemoved.includes(tc.topic)
-                                    ? `${glowRed} 1.5s ease-in-out infinite`
-                                    : isChanged.includes(tc.topic)
-                                    ? `${glowGreen} 1.5s ease-in-out infinite`
-                                    : "",
-                                  // border: `1px solid ${getTopicColor(category, tc)}`,
-                                  ":hover": {
-                                    border: "1px solid orange",
-                                  },
+                                  setSelectedOpenCategory(null);
+                                  setExpandedTopics(newExpanded);
+                                  setExpandedNode(null);
                                 }}
                                 draggable
                                 onDragStart={() => {
@@ -1745,158 +1777,183 @@ const CourseComponent = () => {
                                   // console.log("onDragOver");
                                 }}
                                 onDragEnd={handleSortingForItems}
+                                sx={{
+                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                  borderRadius: "25px",
+                                }}
                               >
-                                {" "}
-                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                  <DragIndicatorIcon />
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: getTopicColor(category, tc),
-                                      fontWeight: 300,
-                                    }}
-                                  >
-                                    {tc?.topic || ""}
-                                  </Typography>
-                                  <LoadingButton
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      retrieveNodesForTopic(tc);
-                                    }}
-                                    sx={{
-                                      display: "flex-end",
-                                    }}
-                                    loading={loadingDescription}
-                                  >
-                                    <AutoFixHighIcon />
-                                  </LoadingButton>
-                                </Box>
-                              </AccordionSummary>
-                              <AccordionDetails>
-                                {loadingNodes && <LinearProgress />}
-                                <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                  {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
-                                    <Box key={n.node} sx={{ mb: "10px" }}>
-                                      <Accordion
-                                        id={n.node}
-                                        expanded={true}
-                                        sx={{
-                                          borderRadius: "13px!important",
-
-                                          overflow: "hidden",
-                                          listStyle: "none",
-                                          transition: "box-shadow 0.3s",
-
-                                          backgroundColor: theme =>
-                                            theme.palette.mode === "dark" ? "#1f1f1f" : "white",
-                                          border: expandedNode === n.node ? `2px solid orange` : "",
-                                          p: "0px !important",
-                                        }}
-                                      >
-                                        <CloseIcon
-                                          className="close-icon"
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
+                                  id={`panel${categoryIndex}-${topicIndex}-header`}
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    borderRadius: "25px",
+                                    animation: isRemoved.includes(tc.topic)
+                                      ? `${glowRed} 1.5s ease-in-out infinite`
+                                      : isChanged.includes(tc.topic)
+                                      ? `${glowGreen} 1.5s ease-in-out infinite`
+                                      : "",
+                                    // border: `1px solid ${getTopicColor(category, tc)}`,
+                                    ":hover": {
+                                      border: "1px solid orange",
+                                    },
+                                  }}
+                                >
+                                  {" "}
+                                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                    <DragIndicatorIcon />
+                                    <Typography
+                                      variant="h6"
+                                      sx={{
+                                        textAlign: "center",
+                                        color: getTopicColor(category, tc),
+                                        fontWeight: 300,
+                                      }}
+                                    >
+                                      {tc?.topic || ""}
+                                    </Typography>
+                                    <LoadingButton
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        retrieveNodesForTopic(tc);
+                                      }}
+                                      sx={{
+                                        display: "flex-end",
+                                      }}
+                                      loading={loadingDescription}
+                                    >
+                                      <AutoFixHighIcon />
+                                    </LoadingButton>
+                                  </Box>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  {loadingNodes && <LinearProgress />}
+                                  <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                    {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
+                                      <Box key={n.node} sx={{ mb: "10px" }}>
+                                        <Accordion
+                                          id={n.node}
+                                          expanded={true}
                                           sx={{
-                                            // backgroundColor: "grey",
-                                            color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                                            borderRadius: "50%",
-                                            ":hover": {
-                                              backgroundColor: "black",
-                                              color: "red",
-                                            },
-                                            cursor: "pointer",
-                                            zIndex: 10,
-                                            position: "absolute",
-                                            top: "0px",
-                                            right: "0px",
-                                            padding: "5px",
-                                            fontSize: "35px",
-                                          }}
-                                          onClick={() => handleRemoveNode(tc.topic, n.node)}
-                                        />
-                                        <AccordionSummary
-                                          sx={{
+                                            borderRadius: "13px!important",
+
+                                            overflow: "hidden",
+                                            listStyle: "none",
+                                            transition: "box-shadow 0.3s",
+
+                                            backgroundColor: theme =>
+                                              theme.palette.mode === "dark" ? "#1f1f1f" : "white",
+                                            border: expandedNode === n.node ? `2px solid orange` : "",
                                             p: "0px !important",
-                                            marginBlock: "-13px !important",
                                           }}
                                         >
-                                          <Box sx={{ flexDirection: "column", width: "100%" }}>
-                                            <Box
-                                              onClick={e => {
-                                                e.stopPropagation();
-                                                if (expandedNode === n.node) {
-                                                  setExpandedNode(null);
-                                                } else {
-                                                  setExpandedNode(n.node);
-                                                  retrieveNodeData(n.node);
-                                                }
-                                              }}
-                                              sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                m: "15px",
-                                              }}
-                                            >
+                                          <CloseIcon
+                                            className="close-icon"
+                                            sx={{
+                                              // backgroundColor: "grey",
+                                              color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                                              borderRadius: "50%",
+                                              ":hover": {
+                                                backgroundColor: "black",
+                                                color: "red",
+                                              },
+                                              cursor: "pointer",
+                                              zIndex: 10,
+                                              position: "absolute",
+                                              top: "0px",
+                                              right: "0px",
+                                              padding: "5px",
+                                              fontSize: "35px",
+                                            }}
+                                            onClick={() => handleRemoveNode(tc.topic, n.node)}
+                                          />
+                                          <AccordionSummary
+                                            sx={{
+                                              p: "0px !important",
+                                              marginBlock: "-13px !important",
+                                            }}
+                                          >
+                                            <Box sx={{ flexDirection: "column", width: "100%" }}>
                                               <Box
+                                                onClick={e => {
+                                                  e.stopPropagation();
+                                                  if (expandedNode === n.node) {
+                                                    setExpandedNode(null);
+                                                  } else {
+                                                    setExpandedNode(n.node);
+                                                    retrieveNodeData(n.node);
+                                                  }
+                                                }}
                                                 sx={{
-                                                  pr: "25px",
-                                                  // pb: '15px',
                                                   display: "flex",
-                                                  gap: "15px",
+                                                  alignItems: "center",
+                                                  m: "15px",
                                                 }}
                                               >
-                                                <NodeTypeIcon
-                                                  id={n.title}
-                                                  nodeType={n.nodeType}
-                                                  tooltipPlacement={"top"}
-                                                  fontSize={"medium"}
-                                                  // disabled={disabled}
-                                                />
-                                                <MarkdownRender
-                                                  text={n?.title}
+                                                <Box
                                                   sx={{
-                                                    fontSize: "20px",
+                                                    pr: "25px",
+                                                    // pb: '15px',
+                                                    display: "flex",
+                                                    gap: "15px",
+                                                  }}
+                                                >
+                                                  <NodeTypeIcon
+                                                    id={n.title}
+                                                    nodeType={n.nodeType}
+                                                    tooltipPlacement={"top"}
+                                                    fontSize={"medium"}
+                                                    // disabled={disabled}
+                                                  />
+                                                  <MarkdownRender
+                                                    text={n?.title}
+                                                    sx={{
+                                                      fontSize: "20px",
+                                                      fontWeight: 400,
+                                                      letterSpacing: "inherit",
+                                                    }}
+                                                  />
+                                                </Box>
+                                              </Box>
+                                            </Box>
+                                          </AccordionSummary>
+
+                                          <AccordionDetails /* sx={{ p: "0px !important" }} */>
+                                            <Box sx={{ p: "17px", pt: 0 }}>
+                                              <Box
+                                                sx={{
+                                                  transition: "border 0.3s",
+                                                }}
+                                              >
+                                                <MarkdownRender
+                                                  text={n.content}
+                                                  sx={{
+                                                    fontSize: "16px",
                                                     fontWeight: 400,
                                                     letterSpacing: "inherit",
                                                   }}
                                                 />
                                               </Box>
+                                              {/* <FlashcardVideo flashcard={concept} /> */}
+                                              {(n?.nodeImage || []).length > 0 && (
+                                                <Box sx={{ px: "55px" }}>
+                                                  <ImageSlider images={[n?.nodeImage]} />
+                                                </Box>
+                                              )}
                                             </Box>
-                                          </Box>
-                                        </AccordionSummary>
-
-                                        <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                          <Box sx={{ p: "17px", pt: 0 }}>
-                                            <Box
-                                              sx={{
-                                                transition: "border 0.3s",
-                                              }}
-                                            >
-                                              <MarkdownRender
-                                                text={n.content}
-                                                sx={{
-                                                  fontSize: "16px",
-                                                  fontWeight: 400,
-                                                  letterSpacing: "inherit",
-                                                }}
-                                              />
-                                            </Box>
-                                            {/* <FlashcardVideo flashcard={concept} /> */}
-                                            {(n?.nodeImage || []).length > 0 && (
-                                              <Box sx={{ px: "55px" }}>
-                                                <ImageSlider images={[n?.nodeImage]} />
-                                              </Box>
-                                            )}
-                                          </Box>
-                                        </AccordionDetails>
-                                      </Accordion>
-                                    </Box>
-                                  ))}
-                                </Masonry>
-                              </AccordionDetails>
-                            </Accordion>
-                          </Grid>
-                        ))}
+                                          </AccordionDetails>
+                                        </Accordion>
+                                      </Box>
+                                    ))}
+                                  </Masonry>
+                                </AccordionDetails>
+                              </Accordion>
+                            </Grid>
+                          )
+                        )}
                       </Grid>
                     }
                   </AccordionDetails>
@@ -2088,9 +2145,6 @@ const CourseComponent = () => {
           </Dialog>
         </Box>
       </Box>
-
-      {/* Sidebar */}
-
       {sidebarOpen && (
         <Paper
           sx={{
@@ -2102,6 +2156,7 @@ const CourseComponent = () => {
             right: 0,
             top: 0,
             zIndex: 9999,
+
             background: theme => (theme.palette.mode === "dark" ? theme.palette.common.darkBackground : ""),
             width: sidebarOpen ? "30%" : "0%",
             transition: "width 0.3s",
@@ -2193,10 +2248,15 @@ const CourseComponent = () => {
                     ? "AI-Proposed Improvements"
                     : selectedTopic?.topic || selectedOpenCategory?.category || ""}
                 </Typography>
-                {selectedOpenCategory?.category && (
+
+                {(selectedOpenCategory?.category || selectedTopic) && (
                   <Button
                     onClick={() => {
-                      deleteCategory(selectedOpenCategory);
+                      if (selectedOpenCategory?.category) {
+                        deleteCategory(selectedOpenCategory);
+                      } else if (selectedTopic) {
+                        handleRemoveTopic(selectedTopic);
+                      }
                     }}
                     sx={{
                       m: 1,
@@ -2248,7 +2308,7 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "100%" }}
+                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
                     InputLabelProps={{
                       style: { color: "grey" },
                     }}
@@ -2276,7 +2336,7 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "100%" }}
+                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
                     InputLabelProps={{
                       style: { color: "grey" },
                     }}
@@ -2921,6 +2981,7 @@ const CourseComponent = () => {
                   </Button>
                 </Box>
               )}
+
               {/* {selectedTopic && (
             <Box sx={{ mx: "15px" }}>
               <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>

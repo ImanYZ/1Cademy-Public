@@ -19,15 +19,15 @@ const storage = new Storage({
 const generateImagePrompt = (
   title: string,
   content: string,
-  courseTitle: string,
-  courseDescription: string,
-  targetLearners: any,
-  sessions: number,
-  prerequisiteKnowledge: any,
-  objectives: any,
-  syllabus: any
+  courseTitle: string
+  // courseDescription: string,
+  // targetLearners: any,
+  // sessions: number,
+  // prerequisiteKnowledge: any,
+  // objectives: any,
+  // syllabus: any
 ) => {
-  const prompt = `Generate an image to help students in the course [Course Title goes here] learn the following topic:
+  const prompt = `Generate an image to help students in the course ${courseTitle} learn the following topic:
   **title:** ${title}
   **content:** ${content}
   The image should be minimalistic and should not include any text.
