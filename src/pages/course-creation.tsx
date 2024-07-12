@@ -32,7 +32,17 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { collection, doc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  deleteField,
+  doc,
+  getFirestore,
+  onSnapshot,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
@@ -203,11 +213,23 @@ const CourseComponent = () => {
     };
   }, [db]);
 
-  const updateCourses = async (course: any) => {
+  const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
+
     const courseRef = doc(db, "coursesAI", course.id);
-    await updateDoc(courseRef, { ...course, updateAt: new Date(), createdAt: new Date() });
+    const updateData: any = { ...course, updateAt: new Date() };
+
+    if (deleteNodes) {
+      updateData.nodes = deleteField();
+    }
+
+    if (deleteImprovements) {
+      updateData.improvements = deleteField();
+    }
+
+    await updateDoc(courseRef, updateData);
   };
+
   const onCreateCourse = async (newCourse: any) => {
     const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
     await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
@@ -262,12 +284,34 @@ const CourseComponent = () => {
     setCourses(updatedCourses);
     updateCourses(updatedCourses[selectedCourse]);
   };
-  // const handleRemoveTopic = (categoryIndex: number, topicIndex: number) => {
-  //   const updatedCourses = [...courses];
-  //   updatedCourses[selectedCourse].syllabus[categoryIndex].topics.splice(topicIndex, 1);
-  //   setCourses(updatedCourses);
-  //   updateCourses(updatedCourses[selectedCourse]);
-  // };
+  const handleRemoveTopic = async (selectedOpenCategory: any) => {
+    const confirmation = await confirmIt(
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          gap: "10px",
+        }}
+      >
+        <DeleteForeverIcon />
+        <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this topic?</Typography>
+      </Box>,
+      "Delete Topic",
+      "Keep Topic"
+    );
+    if (confirmation) {
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex].topics.splice(
+        selectedOpenCategory.topicIndex,
+        1
+      );
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourse]);
+    }
+  };
   const handleOpenDialog = (categoryIndex: any) => {
     setSelectedCategory(categoryIndex);
     setDialogOpen(true);
@@ -693,7 +737,7 @@ const CourseComponent = () => {
       updateDoc(courseRef, { deleted: true });
       setSelectedCourse(0);
       setSidebarOpen(false);
-      setCurrentImprovement(null);
+      setCurrentImprovement({});
     }
   };
   const cancelCreatingCourse = () => {
@@ -2101,10 +2145,15 @@ const CourseComponent = () => {
                 ? "AI-Proposed Improvements"
                 : selectedTopic?.topic || selectedOpenCategory?.category || ""}
             </Typography>
-            {selectedOpenCategory?.category && (
+
+            {(selectedOpenCategory?.category || selectedTopic) && (
               <Button
                 onClick={() => {
-                  deleteCategory(selectedOpenCategory);
+                  if (selectedOpenCategory?.category) {
+                    deleteCategory(selectedOpenCategory);
+                  } else if (selectedTopic) {
+                    handleRemoveTopic(selectedTopic);
+                  }
                 }}
                 sx={{
                   m: 1,
