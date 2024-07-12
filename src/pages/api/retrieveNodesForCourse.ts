@@ -20,7 +20,7 @@ const jsonNodeStructure =
   // '  "tags": [An array of node titles tagged on this node corresponding to tagIds]\n' +
   "}\n\n";
 
-let DEFINITION_OF_1CADEMY =
+export const DEFINITION_OF_1CADEMY =
   "1Cademy Definition:\n" +
   "1Cademy is a knowledge graph with the following characteristics:\n" +
   "- Each node represents a unique piece of knowledge.\n" +
@@ -217,7 +217,9 @@ const retrieveNodesForCourse = async (
     for (let topic of searchResults[category].topics) {
       const nodesArray = [];
       for (let nodeTitle of topic.nodes) {
-        nodesArray.push(nodeHash[nodeTitle]);
+        if (nodeHash[nodeTitle]) {
+          nodesArray.push(nodeHash[nodeTitle]);
+        }
       }
       nodes[topic.topic] = nodesArray;
     }
@@ -233,7 +235,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const courseDoc = await db.collection("coursesAI").doc(courseId).get();
     const courseData: any = courseDoc.data();
-    if ((courseData?.nodes || []).length > 0) {
+    if (Object.keys(courseData?.nodes || {}).length > 0) {
       return res.status(200).json({
         nodes: courseData?.nodes,
       });
