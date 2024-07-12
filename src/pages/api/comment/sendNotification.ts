@@ -2,6 +2,7 @@ import { admin, db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next/types";
 
 import fbAuth from "src/middlewares/fbAuth";
+import { getSemestersByIds } from "src/utils/course-helpers";
 const removeInvalidTokens = async (invalidTokens: { [key: string]: string[] }) => {
   for (let uid in invalidTokens) {
     const fcmTokensDoc = await db.collection("fcmTokens").doc(uid).get();
@@ -29,13 +30,28 @@ const triggerNotifications = async (data: any) => {
       fcmTokensHash[fcmToken.id] = fcmToken.data().tokens;
     }
     let nodeRef = db.collection("nodes").doc(nodeId);
+
     const nodeDoc = await nodeRef.get();
     console.log(fcmTokensHash);
     if (nodeDoc.exists) {
       const nodeData = nodeDoc.data();
-      const _member = members.filter((m: any) => m.id !== comment.sender);
+      const semesters = await getSemestersByIds(nodeData?.tagIds || []);
+      let instructors: any = [];
+      for (const semester in semesters) {
+        instructors = [
+          ...instructors,
+          ...semesters[semester].instructors.map(instructor => {
+            return {
+              id: instructor,
+            };
+          }),
+        ];
+      }
+      const combineMembers = [...instructors, ...members.filter((m: any) => m.id !== comment.sender)];
+      const _member = new Set();
       const invalidTokens: any = {};
-      for (let member of _member) {
+      for (let member of combineMembers) {
+        if (_member.has(member.id)) continue;
         const userDoc = await db.collection("users").where("uname", "==", member.id).get();
         if (!userDoc.docs.length) continue;
         const UID = userDoc.docs[0].data().userId;
@@ -91,6 +107,7 @@ const triggerNotifications = async (data: any) => {
           console.log(error, "error");
         }
         await notificationRef.set(newNotification);
+        _member.add(member.id);
       }
       await removeInvalidTokens(invalidTokens);
     }
