@@ -18,14 +18,14 @@ const storage = new Storage({
 
 const generateImagePrompt = (
   title: string,
-  content: string,
-  courseTitle: string,
-  courseDescription: string,
-  targetLearners: any,
-  sessions: number,
-  prerequisiteKnowledge: any,
-  objectives: any,
-  syllabus: any
+  content: string
+  // courseTitle: string,
+  // courseDescription: string,
+  // targetLearners: any,
+  // sessions: number,
+  // prerequisiteKnowledge: any,
+  // objectives: any,
+  // syllabus: any
 ) => {
   const prompt = `Generate an image to help students in the course [Course Title goes here] learn the following topic:
   **title:** ${title}
@@ -65,8 +65,8 @@ const removeFileFromStorage = async (filename: string) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { title, content, courseTitle, prevUrl } = req.body;
-    const prompt = generateImagePrompt(title, content, courseTitle);
+    const { title, content, prevUrl } = req.body;
+    const prompt = generateImagePrompt(title, content);
     const response: string = (await generateImage(prompt)) || "";
     const axiosInstance = createAxiosInstance();
     const ext = path.extname(response.split("?")[0]);
