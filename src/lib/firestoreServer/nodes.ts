@@ -259,3 +259,92 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     siblings: siblingsConverted,
   };
 };
+
+export const getNodeDataForCourse = async (id: string): Promise<KnowledgeNode | null> => {
+  const nodeData = await retrieveNode(id);
+
+  if (!nodeData) {
+    return null;
+  }
+
+  // Retrieve the content of all the direct children of the node.
+  const childrenConverted: LinkedKnowledgeNode[] = [];
+  for (let child of nodeData.children || []) {
+    const childData = await retrieveNode(child.node || "");
+    if (!childData) {
+      continue;
+    }
+    childrenConverted.push({
+      node: child.node as string,
+      title: childData.title,
+      nodeSlug: childData.nodeSlug as string,
+      content: childData.content,
+      nodeImage: childData.nodeImage,
+      nodeType: childData.nodeType,
+    });
+  }
+  // Retrieve the content of all the direct parents of the node.
+  const parentsConverted: LinkedKnowledgeNode[] = [];
+  for (let parent of nodeData.parents || []) {
+    const parentData = await retrieveNode(parent.node || "");
+    if (!parentData) {
+      continue;
+    }
+    parentsConverted.push({
+      node: parent.node as string,
+      title: parentData.title,
+      nodeSlug: parentData.nodeSlug as string,
+      content: parentData.content,
+      nodeImage: parentData.nodeImage,
+      nodeType: parentData.nodeType,
+    });
+  }
+
+  // Descendingly sort the contributors array based on the reputation points.
+  const contributorsNodes: KnowledgeNodeContributor[] = Object.entries(nodeData.contributors || {})
+    .sort(([, aObj], [, bObj]) => {
+      return (bObj.reputation || 0) - (aObj.reputation || 0);
+    })
+    .reduce<KnowledgeNodeContributor[]>(
+      (previousValue, currentValue) => [...previousValue, { ...currentValue[1], username: currentValue[0] }],
+      []
+    );
+
+  // Descendingly sort the contributors array based on the reputation points.
+  const institObjs = Object.entries(nodeData.institutions || {}).sort(([, aObj], [, bObj]) => {
+    return (bObj.reputation || 0) - (aObj.reputation || 0);
+  });
+  const institutionsNodes: KnowledgeNodeInstitution[] = [];
+  for (let [name, obj] of institObjs) {
+    const institutionDocs = await db.collection("institutions").where("name", "==", name).get();
+    if (!institutionDocs.docs.length) continue;
+
+    const institutionDoc = institutionDocs.docs[0];
+    const logoURL = institutionDocs.docs.length > 0 ? institutionDoc.data().logoURL : "";
+    institutionsNodes.push({ ...obj, logoURL, name, id: institutionDoc.id });
+  }
+  const {
+    /* eslint-disable */
+    updatedAt,
+    changedAt,
+    createdAt,
+    tags,
+    references,
+    contributors,
+    institutions,
+    children,
+    parents,
+    /* eslint-enable */
+    ...rest
+  } = nodeData;
+  nodeData;
+  return {
+    id,
+    ...rest,
+    ...convertDateFieldsToString(nodeData),
+    children: childrenConverted,
+    parents: parentsConverted,
+    contributors: contributorsNodes,
+    institutions: institutionsNodes,
+  };
+};
