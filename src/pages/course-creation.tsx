@@ -54,7 +54,7 @@ import NodeTypeIcon from "@/components/NodeTypeIcon";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { newId } from "@/lib/utils/newFirestoreId";
-//import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
+import { delay } from "@/lib/utils/utils";
 
 const glowGreen = keyframes`
   0% {
@@ -225,7 +225,7 @@ const CourseComponent = () => {
     }
 
     if (deleteImprovements) {
-      updateData.improvements = deleteField();
+      updateData.suggestions = deleteField();
     }
 
     await updateDoc(courseRef, updateData);
@@ -425,7 +425,7 @@ const CourseComponent = () => {
 
     setLoading(false);
   };
-  const handleAcceptChange = () => {
+  const handleAcceptChange = async () => {
     let _courses: any = JSON.parse(JSON.stringify(courses));
     let syllabus: any = _courses[selectedCourse].syllabus;
     setDisplayCourses(null);
@@ -535,18 +535,23 @@ const CourseComponent = () => {
     }
 
     _courses[selectedCourse].syllabus = syllabus;
-    setIsChanged(modifiedTopics);
+
     setIsRemoved(removedTopics);
+    await delay(1000);
+    setIsChanged(modifiedTopics);
     setTimeout(() => {
       setCourses(_courses);
     }, 1000);
     setCurrentImprovement({});
 
+    updateCourses(_courses[selectedCourse], false, true);
     setTimeout(() => {
       setImprovements((prev: any) => {
         prev.splice(currentChangeIndex, 1);
         return prev;
       });
+      setIsChanged([]);
+      setIsRemoved([]);
       navigateChange(currentChangeIndex);
     }, 3000);
   };
@@ -617,20 +622,22 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
   };
-  const getNewTopics = (currentImprovement: any) => {
+  const getNewTopics = (currentImprovement: any, category: string) => {
     let newTopics = [];
-    if (!currentImprovement) {
+    const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
+    if (Object.keys(_currentImprovement).length <= 0 || _currentImprovement.category !== category) {
       return [];
     }
     if (
-      currentImprovement.new_topic &&
-      (currentImprovement.action === "add" || currentImprovement.action === "divide")
+      _currentImprovement.new_topic &&
+      (_currentImprovement.action === "add" || _currentImprovement.action === "divide")
     ) {
-      newTopics.push(currentImprovement.new_topic);
+      newTopics.push(_currentImprovement.new_topic);
     }
-    if ((currentImprovement.new_topics || []).length > 0) {
-      newTopics = [...newTopics, ...currentImprovement.new_topics];
+    if ((_currentImprovement.new_topics || []).length > 0) {
+      newTopics = [...newTopics, ..._currentImprovement.new_topics];
     }
+    newTopics = [...newTopics].slice();
     newTopics.forEach(t => (t.color = "add"));
     return newTopics;
   };
@@ -1616,7 +1623,9 @@ const CourseComponent = () => {
                     if (expanded.includes(category.category)) {
                       setExpanded([]);
                       setSelectedOpenCategory(null);
-                      setSidebarOpen(false);
+                      if (!Object.keys(currentImprovement).length) {
+                        setSidebarOpen(false);
+                      }
                     } else {
                       setExpanded([category.category]);
                       setSelectedTopic(null);
@@ -1699,48 +1708,29 @@ const CourseComponent = () => {
                   <AccordionDetails>
                     {
                       <Grid container spacing={2}>
-                        {[...category.topics, ...getNewTopics(currentImprovement)].map((tc: any, topicIndex: any) => (
-                          <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
-                            <Accordion
-                              expanded={expandedTopics.includes(tc.topic)}
-                              onChange={(e, isExpanded) => {
-                                let newExpanded = [];
-                                if (isExpanded) {
-                                  newExpanded = [...expandedTopics, tc.topic];
-                                  setSidebarOpen(true);
-                                } else {
-                                  setSidebarOpen(false);
-                                  newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
-                                }
-                                handlePaperClick();
+                        {[...category.topics, ...getNewTopics(currentImprovement, category.category)].map(
+                          (tc: any, topicIndex: any) => (
+                            <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
+                              <Accordion
+                                expanded={expandedTopics.includes(tc.topic)}
+                                onChange={(e, isExpanded) => {
+                                  let newExpanded = [];
+                                  if (isExpanded) {
+                                    newExpanded = [...expandedTopics, tc.topic];
+                                    if (Object.keys(currentImprovement).length <= 0) {
+                                      setSidebarOpen(true);
+                                      setSelectedTopic({ categoryIndex, topicIndex, ...tc });
+                                      handlePaperClick();
+                                    }
+                                  } else {
+                                    if (Object.keys(currentImprovement).length <= 0) {
+                                      setSidebarOpen(false);
+                                    }
+                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
+                                  }
 
-                                setSelectedTopic({ categoryIndex, topicIndex, ...tc });
-                                setSelectedOpenCategory(null);
-                                setExpandedTopics(newExpanded);
-                              }}
-                              sx={{
-                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
-                                borderRadius: "25px",
-                              }}
-                            >
-                              <AccordionSummary
-                                expandIcon={<ExpandMoreIcon />}
-                                aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
-                                id={`panel${categoryIndex}-${topicIndex}-header`}
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  borderRadius: "25px",
-                                  animation: isRemoved.includes(tc.topic)
-                                    ? `${glowRed} 1.5s ease-in-out infinite`
-                                    : isChanged.includes(tc.topic)
-                                    ? `${glowGreen} 1.5s ease-in-out infinite`
-                                    : "",
-                                  // border: `1px solid ${getTopicColor(category, tc)}`,
-                                  ":hover": {
-                                    border: "1px solid orange",
-                                  },
+                                  setSelectedOpenCategory(null);
+                                  setExpandedTopics(newExpanded);
                                 }}
                                 draggable
                                 onDragStart={() => {
@@ -1755,157 +1745,182 @@ const CourseComponent = () => {
                                   // console.log("onDragOver");
                                 }}
                                 onDragEnd={handleSortingForItems}
+                                sx={{
+                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                  borderRadius: "25px",
+                                }}
                               >
-                                {" "}
-                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                  <DragIndicatorIcon />
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: getTopicColor(category, tc),
-                                      fontWeight: 300,
-                                    }}
-                                  >
-                                    {tc?.topic || ""}
-                                  </Typography>
-                                  <LoadingButton
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      retrieveNodesForTopic(tc);
-                                    }}
-                                    sx={{
-                                      display: "flex-end",
-                                    }}
-                                    loading={loadingDescription}
-                                  >
-                                    <AutoFixHighIcon />
-                                  </LoadingButton>
-                                </Box>
-                              </AccordionSummary>
-                              <AccordionDetails>
-                                {loadingNodes && <LinearProgress />}
-                                <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                  {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
-                                    <Box key={n.node} sx={{ mb: "10px" }}>
-                                      <Accordion
-                                        id={n.node}
-                                        expanded={true}
-                                        sx={{
-                                          borderRadius: "13px!important",
-
-                                          overflow: "hidden",
-                                          listStyle: "none",
-                                          transition: "box-shadow 0.3s",
-
-                                          backgroundColor: theme =>
-                                            theme.palette.mode === "dark" ? "#1f1f1f" : "white",
-                                          border: expandedNode === n.node ? `2px solid orange` : "",
-                                          p: "0px !important",
-                                        }}
-                                      >
-                                        <CloseIcon
-                                          className="close-icon"
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
+                                  id={`panel${categoryIndex}-${topicIndex}-header`}
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    borderRadius: "25px",
+                                    animation: isRemoved.includes(tc.topic)
+                                      ? `${glowRed} 1.5s ease-in-out infinite`
+                                      : isChanged.includes(tc.topic)
+                                      ? `${glowGreen} 1.5s ease-in-out infinite`
+                                      : "",
+                                    // border: `1px solid ${getTopicColor(category, tc)}`,
+                                    ":hover": {
+                                      border: "1px solid orange",
+                                    },
+                                  }}
+                                >
+                                  {" "}
+                                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                    <DragIndicatorIcon />
+                                    <Typography
+                                      variant="h6"
+                                      sx={{
+                                        textAlign: "center",
+                                        color: getTopicColor(category, tc),
+                                        fontWeight: 300,
+                                      }}
+                                    >
+                                      {tc?.topic || ""}
+                                    </Typography>
+                                    <LoadingButton
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        retrieveNodesForTopic(tc);
+                                      }}
+                                      sx={{
+                                        display: "flex-end",
+                                      }}
+                                      loading={loadingDescription}
+                                    >
+                                      <AutoFixHighIcon />
+                                    </LoadingButton>
+                                  </Box>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  {loadingNodes && <LinearProgress />}
+                                  <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                    {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
+                                      <Box key={n.node} sx={{ mb: "10px" }}>
+                                        <Accordion
+                                          id={n.node}
+                                          expanded={true}
                                           sx={{
-                                            // backgroundColor: "grey",
-                                            color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                                            borderRadius: "50%",
-                                            ":hover": {
-                                              backgroundColor: "black",
-                                              color: "red",
-                                            },
-                                            cursor: "pointer",
-                                            zIndex: 10,
-                                            position: "absolute",
-                                            top: "0px",
-                                            right: "0px",
-                                            padding: "5px",
-                                            fontSize: "35px",
-                                          }}
-                                          onClick={() => handleRemoveNode(tc.topic, n.node)}
-                                        />
-                                        <AccordionSummary
-                                          sx={{
+                                            borderRadius: "13px!important",
+
+                                            overflow: "hidden",
+                                            listStyle: "none",
+                                            transition: "box-shadow 0.3s",
+
+                                            backgroundColor: theme =>
+                                              theme.palette.mode === "dark" ? "#1f1f1f" : "white",
+                                            border: expandedNode === n.node ? `2px solid orange` : "",
                                             p: "0px !important",
-                                            marginBlock: "-13px !important",
                                           }}
                                         >
-                                          <Box sx={{ flexDirection: "column", width: "100%" }}>
-                                            <Box
-                                              onClick={e => {
-                                                e.stopPropagation();
-                                                if (expandedNode === n.node) {
-                                                  setExpandedNode(null);
-                                                } else {
-                                                  setExpandedNode(n.node);
-                                                }
-                                              }}
-                                              sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                m: "15px",
-                                              }}
-                                            >
+                                          <CloseIcon
+                                            className="close-icon"
+                                            sx={{
+                                              // backgroundColor: "grey",
+                                              color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                                              borderRadius: "50%",
+                                              ":hover": {
+                                                backgroundColor: "black",
+                                                color: "red",
+                                              },
+                                              cursor: "pointer",
+                                              zIndex: 10,
+                                              position: "absolute",
+                                              top: "0px",
+                                              right: "0px",
+                                              padding: "5px",
+                                              fontSize: "35px",
+                                            }}
+                                            onClick={() => handleRemoveNode(tc.topic, n.node)}
+                                          />
+                                          <AccordionSummary
+                                            sx={{
+                                              p: "0px !important",
+                                              marginBlock: "-13px !important",
+                                            }}
+                                          >
+                                            <Box sx={{ flexDirection: "column", width: "100%" }}>
                                               <Box
+                                                onClick={e => {
+                                                  e.stopPropagation();
+                                                  if (expandedNode === n.node) {
+                                                    setExpandedNode(null);
+                                                  } else {
+                                                    setExpandedNode(n.node);
+                                                  }
+                                                }}
                                                 sx={{
-                                                  pr: "25px",
-                                                  // pb: '15px',
                                                   display: "flex",
-                                                  gap: "15px",
+                                                  alignItems: "center",
+                                                  m: "15px",
                                                 }}
                                               >
-                                                <NodeTypeIcon
-                                                  id={n.title}
-                                                  nodeType={n.nodeType}
-                                                  tooltipPlacement={"top"}
-                                                  fontSize={"medium"}
-                                                  // disabled={disabled}
-                                                />
-                                                <MarkdownRender
-                                                  text={n?.title}
+                                                <Box
                                                   sx={{
-                                                    fontSize: "20px",
+                                                    pr: "25px",
+                                                    // pb: '15px',
+                                                    display: "flex",
+                                                    gap: "15px",
+                                                  }}
+                                                >
+                                                  <NodeTypeIcon
+                                                    id={n.title}
+                                                    nodeType={n.nodeType}
+                                                    tooltipPlacement={"top"}
+                                                    fontSize={"medium"}
+                                                    // disabled={disabled}
+                                                  />
+                                                  <MarkdownRender
+                                                    text={n?.title}
+                                                    sx={{
+                                                      fontSize: "20px",
+                                                      fontWeight: 400,
+                                                      letterSpacing: "inherit",
+                                                    }}
+                                                  />
+                                                </Box>
+                                              </Box>
+                                            </Box>
+                                          </AccordionSummary>
+
+                                          <AccordionDetails /* sx={{ p: "0px !important" }} */>
+                                            <Box sx={{ p: "17px", pt: 0 }}>
+                                              <Box
+                                                sx={{
+                                                  transition: "border 0.3s",
+                                                }}
+                                              >
+                                                <MarkdownRender
+                                                  text={n.content}
+                                                  sx={{
+                                                    fontSize: "16px",
                                                     fontWeight: 400,
                                                     letterSpacing: "inherit",
                                                   }}
                                                 />
                                               </Box>
+                                              {/* <FlashcardVideo flashcard={concept} /> */}
+                                              {(n?.nodeImage || []).length > 0 && (
+                                                <Box sx={{ px: "55px" }}>
+                                                  <ImageSlider images={[n?.nodeImage]} />
+                                                </Box>
+                                              )}
                                             </Box>
-                                          </Box>
-                                        </AccordionSummary>
-
-                                        <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                          <Box sx={{ p: "17px", pt: 0 }}>
-                                            <Box
-                                              sx={{
-                                                transition: "border 0.3s",
-                                              }}
-                                            >
-                                              <MarkdownRender
-                                                text={n.content}
-                                                sx={{
-                                                  fontSize: "16px",
-                                                  fontWeight: 400,
-                                                  letterSpacing: "inherit",
-                                                }}
-                                              />
-                                            </Box>
-                                            {/* <FlashcardVideo flashcard={concept} /> */}
-                                            {(n?.nodeImage || []).length > 0 && (
-                                              <Box sx={{ px: "55px" }}>
-                                                <ImageSlider images={[n?.nodeImage]} />
-                                              </Box>
-                                            )}
-                                          </Box>
-                                        </AccordionDetails>
-                                      </Accordion>
-                                    </Box>
-                                  ))}
-                                </Masonry>
-                              </AccordionDetails>
-                            </Accordion>
-                          </Grid>
-                        ))}
+                                          </AccordionDetails>
+                                        </Accordion>
+                                      </Box>
+                                    ))}
+                                  </Masonry>
+                                </AccordionDetails>
+                              </Accordion>
+                            </Grid>
+                          )
+                        )}
                       </Grid>
                     }
                   </AccordionDetails>
@@ -2508,7 +2523,6 @@ const CourseComponent = () => {
               </Tooltip>
 
               {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
-              {/* <MultipleChoices /> */}
               <TextField
                 label="Topic Description"
                 multiline
