@@ -554,7 +554,7 @@ const LinkingWords = ({
                     {editable && (
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
-                          onClick={onDeleteLink(idx, "Tag")}
+                          onClick={onDeleteLink(tag.index, "Tag")}
                           tooltip="Click to delete the link to this tag."
                           tooltipPosition="right"
                         >
