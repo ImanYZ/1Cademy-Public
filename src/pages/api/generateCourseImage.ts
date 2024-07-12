@@ -65,29 +65,8 @@ const removeFileFromStorage = async (filename: string) => {
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const {
-      title,
-      content,
-      courseTitle,
-      courseDescription,
-      targetLearners,
-      sessions,
-      prerequisiteKnowledge,
-      objectives,
-      syllabus,
-      prevUrl,
-    } = req.body;
-    const prompt = generateImagePrompt(
-      title,
-      content,
-      courseTitle,
-      courseDescription,
-      targetLearners,
-      sessions,
-      prerequisiteKnowledge,
-      syllabus,
-      objectives
-    );
+    const { title, content, courseTitle, prevUrl } = req.body;
+    const prompt = generateImagePrompt(title, content, courseTitle);
     const response: string = (await generateImage(prompt)) || "";
     const axiosInstance = createAxiosInstance();
     const ext = path.extname(response.split("?")[0]);
