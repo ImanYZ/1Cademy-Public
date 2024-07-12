@@ -2162,7 +2162,7 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
               />
-              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+              {/* <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
               {(selectedOpenCategory?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
@@ -2308,7 +2308,7 @@ const CourseComponent = () => {
                     )}
                   </Box>
                 </Box>
-              ))}
+              ))} */}
               <Button
                 onClick={() => {
                   const updatedCourses = [...courses];
