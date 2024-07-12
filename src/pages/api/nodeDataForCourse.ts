@@ -1,9 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { getNodeData } from "@/lib/firestoreServer/nodes";
+import { getNodeDataForCourse } from "@/lib/firestoreServer/nodes";
 
 import { ResponseNodeData } from "../../knowledgeTypes";
-import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseNodeData>) {
   try {

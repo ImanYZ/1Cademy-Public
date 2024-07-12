@@ -49,7 +49,7 @@ import NodeTypeIcon from "@/components/NodeTypeIcon";
 import { ReferencesList } from "@/components/ReferencesList";
 import { TagsList } from "@/components/TagsList";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
-import { getNodeData } from "@/lib/knowledgeApi";
+import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
 import { newId } from "@/lib/utils/newFirestoreId";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
@@ -180,7 +180,7 @@ const CourseComponent = () => {
     (async () => {
       if (expandedNode) {
         setNodePublicViewLoader(true);
-        const nodeData = await getNodeData(expandedNode || "");
+        const nodeData = await getNodeDataForCourse(expandedNode || "");
 
         if (nodeData) {
           let keywords = "";
@@ -196,6 +196,7 @@ const CourseComponent = () => {
       }
     })();
   }, [expandedNode]);
+
   useEffect(() => {
     const notebooksRef = collection(db, "coursesAI");
     const q = query(notebooksRef, where("deleted", "==", false));
@@ -1613,6 +1614,7 @@ const CourseComponent = () => {
                         setSidebarOpen(true);
                       }
                     }
+                    setExpandedNode(null);
                   }}
                   sx={{
                     display: "flex",
@@ -1705,6 +1707,7 @@ const CourseComponent = () => {
                                 setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                 setSelectedOpenCategory(null);
                                 setExpandedTopics(newExpanded);
+                                setExpandedNode(null);
                               }}
                               sx={{
                                 backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
@@ -2136,7 +2139,7 @@ const CourseComponent = () => {
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
                       {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.parents || []} header="Learn Before" />
+                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
                       )}
                     </Grid>
                     <Grid item xs={12} sm={12}>
@@ -2158,7 +2161,7 @@ const CourseComponent = () => {
                     </Grid>
                     <Grid item xs={12} sm={12}>
                       {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.children || []} header="Learn After" />
+                        <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
                       )}
                     </Grid>
                   </Grid>
