@@ -34,9 +34,10 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { collection, doc, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
+import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import ImageSlider from "@/components/ImageSlider";
@@ -53,7 +54,6 @@ import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
 import { newId } from "@/lib/utils/newFirestoreId";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
-//import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
 
 const glowGreen = keyframes`
   0% {
@@ -175,27 +175,6 @@ const CourseComponent = () => {
   const [loadingNodes, setLoadingNodes] = useState(false);
   const [nodePublicView, setNodePublicView] = useState<any>(null);
   const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
-
-  useEffect(() => {
-    (async () => {
-      if (expandedNode) {
-        setNodePublicViewLoader(true);
-        const nodeData = await getNodeDataForCourse(expandedNode || "");
-
-        if (nodeData) {
-          let keywords = "";
-          for (let tag of nodeData.tags || []) {
-            keywords += escapeBreaksQuotes(tag.title) + ", ";
-          }
-
-          const updatedStr = nodeData.changedAt ? dayjs(new Date(nodeData.changedAt)).format("YYYY-MM-DD") : "";
-          const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
-          setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
-          setNodePublicViewLoader(false);
-        }
-      }
-    })();
-  }, [expandedNode]);
 
   useEffect(() => {
     const notebooksRef = collection(db, "coursesAI");
@@ -1212,6 +1191,26 @@ const CourseComponent = () => {
       console.error(error);
     }
   };
+
+  const retrieveNodeData = useCallback(
+    async (nodeId: string) => {
+      setNodePublicViewLoader(true);
+      const nodeData = await getNodeDataForCourse(nodeId);
+
+      if (nodeData) {
+        let keywords = "";
+        for (let tag of nodeData.tags || []) {
+          keywords += escapeBreaksQuotes(tag.title) + ", ";
+        }
+
+        const updatedStr = nodeData.changedAt ? dayjs(new Date(nodeData.changedAt)).format("YYYY-MM-DD") : "";
+        const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
+        setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
+        setNodePublicViewLoader(false);
+      }
+    },
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode]
+  );
   if (courses.length <= 0) {
     return (
       <Box
@@ -1829,6 +1828,7 @@ const CourseComponent = () => {
                                                   setExpandedNode(null);
                                                 } else {
                                                   setExpandedNode(n.node);
+                                                  retrieveNodeData(n.node);
                                                 }
                                               }}
                                               sx={{
@@ -2159,6 +2159,11 @@ const CourseComponent = () => {
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
                     </Grid>
+
+                    <Grid item xs={12} sm={12}>
+                      <MultipleChoices sx={{ mt: 3, p: 1 }} choices={[]} />
+                    </Grid>
+
                     <Grid item xs={12} sm={12}>
                       {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
                         <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
@@ -2545,7 +2550,6 @@ const CourseComponent = () => {
                   </Tooltip>
 
                   {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
-                  {/* <MultipleChoices /> */}
                   <TextField
                     label="Topic Description"
                     multiline
