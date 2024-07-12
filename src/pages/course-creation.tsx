@@ -147,7 +147,6 @@ const CourseComponent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [nodesPerTopic, setNodesPerTopic] = useState<{ [key: string]: any }>({});
   const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState<string[]>([]);
   const [editTopic, setEditTopic] = useState<any>(null);
@@ -529,12 +528,11 @@ const CourseComponent = () => {
   };
 
   /*  */
-  const handlePaperClick = async (topic: any) => {
+  const handlePaperClick = async () => {
     if (Object.keys(currentImprovement).length > 0 || loadingNodes) {
       return;
     }
 
-    if (nodesPerTopic[topic.topic]) return;
     setImprovements([]);
     setCurrentImprovement({});
 
@@ -544,8 +542,11 @@ const CourseComponent = () => {
     const syllabus = courses[selectedCourse].syllabus;
     const tags = courses[selectedCourse].tags;
     const references = courses[selectedCourse].references;
+    if (Object.keys(courses[selectedCourse].nodes).length > 0) {
+      return;
+    }
     setLoadingNodes(true);
-    const response: { nodes: any } = await Post("/retrieveNodesForCourse", {
+    await Post("/retrieveNodesForCourse", {
       courseId: courses[selectedCourse].id,
       tags,
       courseTitle,
@@ -555,11 +556,6 @@ const CourseComponent = () => {
       syllabus,
     });
     setLoadingNodes(false);
-
-    setNodesPerTopic(prev => {
-      prev[topic.topic] = response.nodes;
-      return prev;
-    });
   };
 
   const handleSidebarClose = () => {
@@ -1030,9 +1026,16 @@ const CourseComponent = () => {
     try {
       if (selectedTopic) {
         setLoadingImage(true);
-        const { imageUrl } = (await Post("/generateNodeImage", {
+        const { imageUrl } = (await Post("/generateCourseImage", {
           title: selectedTopic.topic,
           content: selectedTopic.description,
+          courseTitle: courses[selectedCourse].title,
+          courseDescription: courses[selectedCourse].description,
+          targetLearners: courses[selectedCourse].learners,
+          syllabus: courses[selectedCourse].syllabus,
+          prerequisiteKnowledge: selectedTopic.prerequisiteKnowledge,
+          sessions: courses[selectedCourse].hours,
+          objectives: selectedTopic.objectives,
         })) as { imageUrl: string };
 
         if (imageUrl) {
@@ -1059,9 +1062,16 @@ const CourseComponent = () => {
   const generateImageForCategory = async () => {
     if (selectedOpenCategory) {
       setLoadingImage(true);
-      const { imageUrl } = (await Post("/generateNodeImage", {
+      const { imageUrl } = (await Post("/generateCourseImage", {
         title: selectedOpenCategory.category,
         content: selectedOpenCategory.description,
+        courseTitle: courses[selectedCourse].title,
+        courseDescription: courses[selectedCourse].description,
+        targetLearners: courses[selectedCourse].learners,
+        syllabus: courses[selectedCourse].syllabus,
+        prerequisiteKnowledge: selectedOpenCategory.prerequisiteKnowledge,
+        sessions: courses[selectedCourse].hours,
+        objectives: selectedOpenCategory.objectives,
       })) as { imageUrl: string };
       const updatedCourses = [...courses];
       updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
@@ -1475,7 +1485,7 @@ const CourseComponent = () => {
                     } else {
                       setExpanded([category.category]);
                       setSelectedTopic(null);
-                      if (!currentImprovement) {
+                      if (!Object.keys(currentImprovement).length) {
                         setSelectedOpenCategory({ categoryIndex, ...category });
                         setSidebarOpen(true);
                       }
@@ -1567,7 +1577,7 @@ const CourseComponent = () => {
                                   setSidebarOpen(false);
                                   newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
                                 }
-                                handlePaperClick(tc);
+                                handlePaperClick();
 
                                 setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                 setSelectedOpenCategory(null);
@@ -1791,7 +1801,10 @@ const CourseComponent = () => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
-                <Typography>{getStepTitle()} OR </Typography>
+                {!loadingCourseStructure &&
+                  !loadingDescription &&
+                  !loadingObjectives &&
+                  !loadingPrerequisiteKnowledge && <Typography>{getStepTitle()} OR </Typography>}
                 <LoadingButton
                   variant="contained"
                   color="success"

@@ -254,7 +254,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodes,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({});
   }
 }
 export default fbAuth(handler);
