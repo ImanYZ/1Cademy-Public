@@ -153,7 +153,7 @@ const searchJSONForCourse = async (
   return searchObj;
 };
 
-const retrieveNodesForCourse = async (
+export const retrieveNodesForCourse = async (
   tags: string[],
   courseTitle: string,
   courseDescription: string,
