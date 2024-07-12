@@ -1120,7 +1120,7 @@ const CourseComponent = () => {
       if (selectedTopic) {
         setLoadingImage(true);
         const { imageUrl } = (await Post("/generateCourseImage", {
-          title: selectedTopic.topic,
+          title: selectedTopic.title,
           content: selectedTopic.description,
           courseTitle: courses[selectedCourse].title,
           courseDescription: courses[selectedCourse].description,
@@ -1191,7 +1191,7 @@ const CourseComponent = () => {
       const courseObjectives = courses[selectedCourse].objectives;
       const courseSkills = courses[selectedCourse].skills;
       const syllabus = courses[selectedCourse].syllabus;
-      const topic = selectedTopic.topic;
+      const topic = selectedTopic.title;
 
       const { prompts } = (await Post("/generateMorePromptsForTopic", {
         courseTitle,
@@ -1737,6 +1737,7 @@ const CourseComponent = () => {
                         </Box>
                       </Box>
                     )}
+                    {!category.hasOwnProperty("topics") && <LinearProgress sx={{ width: "100%" }} />}
                   </Box>
                 </AccordionSummary>
                 {expanded.includes(category.title) && (
@@ -2252,7 +2253,7 @@ const CourseComponent = () => {
                 <Typography variant="h6">
                   {Object.keys(improvements[currentChangeIndex] || {}).length > 0
                     ? "AI-Proposed Improvements"
-                    : selectedTopic?.topic || selectedOpenCategory?.title || ""}
+                    : selectedTopic?.title || selectedOpenCategory?.title || ""}
                 </Typography>
 
                 {(selectedOpenCategory?.title || selectedTopic) && (
