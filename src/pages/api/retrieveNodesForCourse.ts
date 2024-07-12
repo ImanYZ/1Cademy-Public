@@ -233,11 +233,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const courseDoc = await db.collection("coursesAI").doc(courseId).get();
     const courseData: any = courseDoc.data();
-    // if ((courseData?.nodes || []).length > 0) {
-    //   return res.status(200).json({
-    //     nodes: courseData?.nodes,
-    //   });
-    // }
+    if ((courseData?.nodes || []).length > 0) {
+      return res.status(200).json({
+        nodes: courseData?.nodes,
+      });
+    }
     const nodes = await retrieveNodesForCourse(
       tags,
       courseTitle,

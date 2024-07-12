@@ -162,6 +162,7 @@ const CourseComponent = () => {
   const [expandedTopics, setExpandedTopics] = useState<any>([]);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
+  const [loadingNodes, setLoadingNodes] = useState(false);
   useEffect(() => {
     const notebooksRef = collection(db, "coursesAI");
     const q = query(notebooksRef, where("deleted", "==", false));
@@ -529,7 +530,7 @@ const CourseComponent = () => {
 
   /*  */
   const handlePaperClick = async (topic: any) => {
-    if (Object.keys(currentImprovement).length > 0) {
+    if (Object.keys(currentImprovement).length > 0 || loadingNodes) {
       return;
     }
 
@@ -543,7 +544,7 @@ const CourseComponent = () => {
     const syllabus = courses[selectedCourse].syllabus;
     const tags = courses[selectedCourse].tags;
     const references = courses[selectedCourse].references;
-
+    setLoadingNodes(true);
     const response: { nodes: any } = await Post("/retrieveNodesForCourse", {
       courseId: courses[selectedCourse].id,
       tags,
@@ -553,6 +554,7 @@ const CourseComponent = () => {
       references,
       syllabus,
     });
+    setLoadingNodes(false);
 
     setNodesPerTopic(prev => {
       prev[topic.topic] = response.nodes;
@@ -1604,6 +1606,7 @@ const CourseComponent = () => {
                               </AccordionSummary>
                               <AccordionDetails>
                                 <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                  {loadingNodes && <LinearProgress />}
                                   {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
                                     <Box key={n.node} sx={{ mb: "10px" }}>
                                       <Accordion
