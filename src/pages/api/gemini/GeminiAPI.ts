@@ -82,55 +82,51 @@ const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } =
 };
 
 export async function askGemini(files: File[], prompt: string) {
-  try {
-    files.forEach((file, index) => {
-      console.log(`File ${index} type:`, file.constructor.name);
-    });
+  files.forEach((file, index) => {
+    console.log(`File ${index} type:`, file.constructor.name);
+  });
 
-    const validFiles = files.filter(file => file instanceof File);
-    if (validFiles.length !== files.length) {
-      console.error("Some objects are not File instances:", files);
-      throw new Error("Some provided objects are not File instances");
-    }
-
-    const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    let response = "";
-    let isJSONObject: { jsonObject: any; isJSON: boolean } = {
-      jsonObject: {},
-      isJSON: false,
-    };
-    for (let i = 0; i < 4; i++) {
-      const result = await model.generateContent({
-        contents: [
-          {
-            parts: [
-              ...imageParts,
-              {
-                text: prompt,
-              },
-            ],
-            role: "user",
-          },
-        ],
-        generationConfig,
-        safetySettings,
-      });
-      response = result.response.text();
-      isJSONObject = isValidJSON(response);
-      if (isJSONObject.isJSON) {
-        break;
-      }
-      console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
-      console.log("Response: ", response);
-    }
-
-    if (!isJSONObject.isJSON) {
-      throw new Error("Failed to get a complete JSON object");
-    }
-    return isJSONObject.jsonObject;
-  } catch (error) {
-    console.error("Error in askGemini:", error);
+  const validFiles = files.filter(file => file instanceof File);
+  if (validFiles.length !== files.length) {
+    console.error("Some objects are not File instances:", files);
+    throw new Error("Some provided objects are not File instances");
   }
+
+  const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  let response = "";
+  let isJSONObject: { jsonObject: any; isJSON: boolean } = {
+    jsonObject: {},
+    isJSON: false,
+  };
+  for (let i = 0; i < 4; i++) {
+    const result = await model.generateContent({
+      contents: [
+        {
+          parts: [
+            ...imageParts,
+            {
+              text: prompt,
+            },
+          ],
+          role: "user",
+        },
+      ],
+      generationConfig,
+      safetySettings,
+    });
+    response = result.response.text();
+    isJSONObject = isValidJSON(response);
+    if (isJSONObject.isJSON) {
+      break;
+    }
+    console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
+    console.log("Response: ", response);
+  }
+
+  if (!isJSONObject.isJSON) {
+    throw new Error("Failed to get a complete JSON object");
+  }
+  return isJSONObject.jsonObject;
 }
