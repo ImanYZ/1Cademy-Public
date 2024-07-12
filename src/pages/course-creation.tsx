@@ -117,6 +117,7 @@ const CourseComponent = () => {
   const dragOverTopicItem = useRef<any>(null);
   // const containerTopicRef = useRef<any>(null);
 
+  const [loadingPrompt, setLoadingPrompt] = useState(false);
   const [glowCategoryGreenIndex, setGlowCategoryGreenIndex] = useState(-1);
   const [glowCategoryRedIndex, setGlowCategoryRedIndex] = useState(-1);
   const [loadingDescription, setLoadingDescription] = useState(false);
@@ -1087,7 +1088,51 @@ const CourseComponent = () => {
       setLoadingImage(false);
     }
   };
+  const generateMorePromptsForTopic = async () => {
+    try {
+      setLoadingPrompt(true);
+      const courseTitle = courses[selectedCourse].title;
+      const targetLearners = courses[selectedCourse].targetLearners;
+      const hours = selectedTopic.hours;
+      const prerequisiteKnowledge = selectedTopic.prerequisiteKnowledge;
+      const courseDescription = courses[selectedCourse].description;
+      const courseObjectives = courses[selectedCourse].objectives;
+      const courseSkills = courses[selectedCourse].skills;
+      const syllabus = courses[selectedCourse].syllabus;
+      const topic = selectedTopic.topic;
 
+      const { prompts } = (await Post("/generateMorePromptsForTopic", {
+        courseTitle,
+        targetLearners,
+        hours,
+        prerequisiteKnowledge,
+        courseDescription,
+        courseObjectives,
+        courseSkills,
+        syllabus,
+        topic,
+      })) as { prompts: any };
+      const updatedCourses = [...courses];
+      const currentTopic =
+        updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex];
+      currentTopic.prompts = prompts;
+
+      setCourses(updatedCourses);
+      setSelectedTopic({
+        categoryIndex: selectedTopic.categoryIndex,
+        topicIndex: selectedTopic.topicIndex,
+        ...currentTopic,
+      });
+      updateCourses({
+        id: updatedCourses[selectedCourse].id,
+        syllabus: updatedCourses[selectedCourse].syllabus,
+      });
+      setLoadingPrompt(false);
+    } catch (error) {
+      setLoadingPrompt(false);
+      console.error(error);
+    }
+  };
   if (courses.length <= 0) {
     return (
       <Box
@@ -2162,7 +2207,7 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
               />
-              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+              {/* <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
               {(selectedOpenCategory?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
@@ -2308,8 +2353,8 @@ const CourseComponent = () => {
                     )}
                   </Box>
                 </Box>
-              ))}
-              <Button
+              ))} */}
+              {/* <Button
                 onClick={() => {
                   const updatedCourses = [...courses];
                   const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
@@ -2333,7 +2378,7 @@ const CourseComponent = () => {
                 }}
               >
                 Add prompt
-              </Button>
+              </Button> */}
             </Box>
           )}
           {selectedTopic && (
@@ -2529,7 +2574,18 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
               />
-              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+              <Box sx={{ display: "flex" }}>
+                <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+                <LoadingButton
+                  onClick={generateMorePromptsForTopic}
+                  sx={{
+                    display: "flex-end",
+                  }}
+                  loading={loadingPrompt}
+                >
+                  <AutoFixHighIcon />
+                </LoadingButton>
+              </Box>
               {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
