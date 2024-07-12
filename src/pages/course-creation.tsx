@@ -103,7 +103,7 @@ const books = [
   {
     id: "Psychology (2nd ed.)",
     tags: ["Psychology", "Psychology @ OpenStax"],
-    references: ["Psychology (2nd ed.)"],
+    references: ["OpenStax Psychology (2nd ed.) Textbook"],
   },
   {
     id: "OpenStax Microbiology Textbook",
