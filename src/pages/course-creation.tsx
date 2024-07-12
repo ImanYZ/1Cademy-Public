@@ -1805,7 +1805,10 @@ const CourseComponent = () => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
-                <Typography>{getStepTitle()} OR </Typography>
+                {!loadingCourseStructure &&
+                  !loadingDescription &&
+                  !loadingObjectives &&
+                  !loadingPrerequisiteKnowledge && <Typography>{getStepTitle()} OR </Typography>}
                 <LoadingButton
                   variant="contained"
                   color="success"
