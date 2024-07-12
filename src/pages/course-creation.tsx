@@ -147,7 +147,6 @@ const CourseComponent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [nodesPerTopic, setNodesPerTopic] = useState<{ [key: string]: any }>({});
   const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState<string[]>([]);
   const [editTopic, setEditTopic] = useState<any>(null);
@@ -529,12 +528,11 @@ const CourseComponent = () => {
   };
 
   /*  */
-  const handlePaperClick = async (topic: any) => {
+  const handlePaperClick = async () => {
     if (Object.keys(currentImprovement).length > 0 || loadingNodes) {
       return;
     }
 
-    if (nodesPerTopic[topic.topic]) return;
     setImprovements([]);
     setCurrentImprovement({});
 
@@ -544,8 +542,11 @@ const CourseComponent = () => {
     const syllabus = courses[selectedCourse].syllabus;
     const tags = courses[selectedCourse].tags;
     const references = courses[selectedCourse].references;
+    if (Object.keys(courses[selectedCourse].nodes).length > 0) {
+      return;
+    }
     setLoadingNodes(true);
-    const response: { nodes: any } = await Post("/retrieveNodesForCourse", {
+    await Post("/retrieveNodesForCourse", {
       courseId: courses[selectedCourse].id,
       tags,
       courseTitle,
@@ -555,11 +556,6 @@ const CourseComponent = () => {
       syllabus,
     });
     setLoadingNodes(false);
-
-    setNodesPerTopic(prev => {
-      prev[topic.topic] = response.nodes;
-      return prev;
-    });
   };
 
   const handleSidebarClose = () => {
@@ -1465,7 +1461,7 @@ const CourseComponent = () => {
                     } else {
                       setExpanded([category.category]);
                       setSelectedTopic(null);
-                      if (!currentImprovement) {
+                      if (!Object.keys(currentImprovement).length) {
                         setSelectedOpenCategory({ categoryIndex, ...category });
                         setSidebarOpen(true);
                       }
@@ -1548,7 +1544,7 @@ const CourseComponent = () => {
                                   setSidebarOpen(false);
                                   newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
                                 }
-                                handlePaperClick(tc);
+                                handlePaperClick();
 
                                 setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                 setSelectedOpenCategory(null);
