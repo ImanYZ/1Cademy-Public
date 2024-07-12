@@ -1,3 +1,5 @@
+import { arrayToChunks } from "src/utils";
+
 import {
   KnowledgeNode,
   KnowledgeNodeContributor,
@@ -35,6 +37,20 @@ const retrieveNode = async (nodeId: string): Promise<NodeFireStore | null> => {
     return null;
   }
   return nodeData as NodeFireStore;
+};
+
+const retrieveNodes = async (nodeIds: string[]): Promise<Record<string, NodeFireStore>> => {
+  const chunks = arrayToChunks(nodeIds, 30);
+  const nodesList: Record<string, NodeFireStore> = {};
+
+  for (const nodeIds of chunks) {
+    const { docs: nodes } = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+    for (const node of nodes) {
+      nodesList[node.id] = node.data() as NodeFireStore;
+    }
+  }
+
+  return nodesList;
 };
 
 const convertDateFieldsToString = (
@@ -267,10 +283,15 @@ export const getNodeDataForCourse = async (id: string): Promise<KnowledgeNode | 
     return null;
   }
 
+  const nodeIds: string[] = (nodeData.children || []).map(link => link.node!).filter(nodeId => nodeId);
+  nodeIds.push(...(nodeData.parents || []).map(link => link.node!).filter(nodeId => nodeId));
+
+  const nodesMap: Record<string, NodeFireStore> = await retrieveNodes(nodeIds);
+
   // Retrieve the content of all the direct children of the node.
   const childrenConverted: LinkedKnowledgeNode[] = [];
   for (let child of nodeData.children || []) {
-    const childData = await retrieveNode(child.node || "");
+    const childData = nodesMap[child.node!];
     if (!childData) {
       continue;
     }
@@ -286,7 +307,7 @@ export const getNodeDataForCourse = async (id: string): Promise<KnowledgeNode | 
   // Retrieve the content of all the direct parents of the node.
   const parentsConverted: LinkedKnowledgeNode[] = [];
   for (let parent of nodeData.parents || []) {
-    const parentData = await retrieveNode(parent.node || "");
+    const parentData = nodesMap[parent.node!];
     if (!parentData) {
       continue;
     }

@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getNodeData } from "@/lib/firestoreServer/nodes";
 
 import { ResponseNodeData } from "../../knowledgeTypes";
+import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 
 async function handler(req: NextApiRequest, res: NextApiResponse<ResponseNodeData>) {
   try {
@@ -11,7 +12,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<ResponseNodeDat
       throw Error("invalid node");
     }
 
-    const data = await getNodeData(nodeId);
+    const data = await getNodeDataForCourse(nodeId);
     if (!data) {
       throw Error("invalid node");
     }
