@@ -371,13 +371,13 @@ const CourseComponent = () => {
     switch (action) {
       case "add":
         return `**<span style="color: green;">Add a new topic</span>** called **"${
-          new_topic?.topic
+          new_topic?.title
         }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
           new_topic?.difficulty
         }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
       case "modify":
         return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
-          new_topic?.topic
+          new_topic?.title
         }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
           (new_topic?.hours || 0) > 1 ? "s" : ""
         }.`;
@@ -694,19 +694,19 @@ const CourseComponent = () => {
         ? "green"
         : currentImprovement.old_topic === tc
         ? "red"
-        : selectedTopic === tc.topic
+        : selectedTopic === tc.title
         ? "orange"
         : currentImprovement.action === "move" &&
           currentImprovement.type === "topic" &&
-          currentImprovement.topic === tc.topic &&
-          currentImprovement.new_category === category.category
+          currentImprovement.topic === tc.title &&
+          currentImprovement.new_category === category.title
         ? "green"
         : (currentImprovement.action === "move" ||
             currentImprovement.action === "delete" ||
             currentImprovement.action === "divide") &&
           currentImprovement.type === "topic" &&
-          (currentImprovement.topic === tc.topic || currentImprovement.old_topic === tc.topic) &&
-          (currentImprovement.current_category === category.category || !currentImprovement.current_category)
+          (currentImprovement.topic === tc.title || currentImprovement.old_topic === tc.title) &&
+          (currentImprovement.current_category === category.title || !currentImprovement.current_category)
         ? "red"
         : "";
     return color;
@@ -819,7 +819,9 @@ const CourseComponent = () => {
     });
     setCourses((prev: any) => {
       prev[selectedCourse].courseSkills = response;
-      if (!prev[selectedCourse].new) {
+      if (prev[selectedCourse].new) {
+        onCreateCourse(prev[selectedCourse]);
+      } else {
         updateCourses(prev[selectedCourse]);
       }
       return prev;
@@ -829,6 +831,7 @@ const CourseComponent = () => {
   const generateCourseStructure = async () => {
     setLoadingCourseStructure(true);
     await generateSkills();
+
     const courseTitle = courses[selectedCourse].title;
     const targetLearners = courses[selectedCourse].learners;
     const courseObjectives = courses[selectedCourse].courseObjectives;
@@ -841,6 +844,7 @@ const CourseComponent = () => {
     const references = courses[selectedCourse].references;
 
     const response: any = await Post("/generateCourseSyllabus", {
+      courseId: courses[selectedCourse].id,
       courseTitle,
       targetLearners,
       courseObjectives,
@@ -848,16 +852,10 @@ const CourseComponent = () => {
       courseDescription,
       courseSkills,
       hours,
+      tags,
+      references,
     });
-    setCourses((prev: any) => {
-      prev[selectedCourse].syllabus = response;
-      if (prev[selectedCourse].new) {
-        onCreateCourse(prev[selectedCourse]);
-      } else {
-        updateCourses(prev[selectedCourse]);
-      }
-      return prev;
-    });
+
     if (response.length > 0) {
       setTimeout(() => {
         scrollToCategory(response.at(-1).category);
@@ -865,19 +863,6 @@ const CourseComponent = () => {
     }
 
     setLoadingCourseStructure(false);
-    setTimeout(async () => {
-      setLoadingNodes(true);
-      await Post("/retrieveNodesForCourse", {
-        courseId: courses[selectedCourse].id,
-        tags,
-        courseTitle,
-        courseDescription,
-        targetLearners,
-        references,
-        syllabus: response,
-      });
-      setLoadingNodes(false);
-    }, 2000);
   };
   const retrieveNodesForTopic = async (topic: any) => {
     try {
@@ -897,7 +882,7 @@ const CourseComponent = () => {
         targetLearners,
         references,
         syllabus,
-        topic: topic.topic,
+        topic: topic.title,
       });
       setLoadingNodes(false);
     } catch (error) {}
@@ -1024,7 +1009,7 @@ const CourseComponent = () => {
       _courses[selectedCourse].syllabus[dragItem.current].topics[dragTopicItem.current] = toTopic;
       _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current] = fromTopic;
       const modifiedTopic =
-        _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current]?.topic;
+        _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current]?.title;
       setIsChanged([...isChanged, modifiedTopic]);
     } else {
       _courses[selectedCourse].syllabus[dragItem.current].topics.splice(dragTopicItem.current, 1);
@@ -1162,7 +1147,7 @@ const CourseComponent = () => {
     if (selectedOpenCategory) {
       setLoadingImage(true);
       const { imageUrl } = (await Post("/generateCourseImage", {
-        title: selectedOpenCategory.category,
+        title: selectedOpenCategory.title,
         content: selectedOpenCategory.description,
         courseTitle: courses[selectedCourse].title,
         courseDescription: courses[selectedCourse].description,
@@ -1614,21 +1599,21 @@ const CourseComponent = () => {
 
           <Box ref={containerRef} marginTop="20px">
             {(getCourses()[selectedCourse].syllabus || []).map((category: any, categoryIndex: any) => (
-              <Accordion id={category.category} key={category.category} expanded={expanded.includes(category.category)}>
+              <Accordion id={category.title} key={category.title} expanded={expanded.includes(category.title)}>
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
                   aria-controls={`panel${categoryIndex}-content`}
                   id={`panel${categoryIndex}-header`}
                   onClick={e => {
                     e.stopPropagation();
-                    if (expanded.includes(category.category)) {
+                    if (expanded.includes(category.title)) {
                       setExpanded([]);
                       setSelectedOpenCategory(null);
                       if (!Object.keys(currentImprovement).length) {
                         setSidebarOpen(false);
                       }
                     } else {
-                      setExpanded([category.category]);
+                      setExpanded([category.title]);
                       setSelectedTopic(null);
                       if (!Object.keys(currentImprovement).length) {
                         setSelectedOpenCategory({ categoryIndex, ...category });
@@ -1662,14 +1647,14 @@ const CourseComponent = () => {
                     <DragIndicatorIcon />
                     {currentImprovement.type === "category" &&
                     currentImprovement.action === "modify" &&
-                    currentImprovement.old_category === category.category ? (
+                    currentImprovement.old_category === category.title ? (
                       <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
                         <Box sx={{ display: "flex", gap: "5px" }}>
                           <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
-                            {category.category}
+                            {category.title}
                           </Typography>
                           <Typography variant="h6" sx={{ color: "green" }}>
-                            {currentImprovement.new_category.category}
+                            {currentImprovement.new_category.title}
                           </Typography>
                         </Box>
                       </Box>
@@ -1679,17 +1664,17 @@ const CourseComponent = () => {
                           variant="h4"
                           sx={{
                             color:
-                              currentImprovement.type === "topic" && currentImprovement.category === category.category
+                              currentImprovement.type === "topic" && currentImprovement.category === category.title
                                 ? "orange"
                                 : currentImprovement.type === "topic" &&
-                                  currentImprovement.current_category === category.category
+                                  currentImprovement.current_category === category.title
                                 ? "red"
-                                : currentImprovement.new_category === category.category
+                                : currentImprovement.new_category === category.title
                                 ? "green"
                                 : "",
                           }}
                         >
-                          {category.category}
+                          {category.title}
                         </Typography>
                         <Box sx={{ ml: "14px" }}>
                           <Button
@@ -1705,19 +1690,21 @@ const CourseComponent = () => {
                     )}
                   </Box>
                 </AccordionSummary>
-                {expanded.includes(category.category) && (
+                {expanded.includes(category.title) && (
                   <AccordionDetails>
-                    {
+                    {!category.hasOwnProperty("topics") ? (
+                      <LinearProgress />
+                    ) : (
                       <Grid container spacing={2}>
-                        {[...category.topics, ...getNewTopics(currentImprovement, category.category)].map(
+                        {[...category.topics, ...getNewTopics(currentImprovement, category.title)].map(
                           (tc: any, topicIndex: any) => (
                             <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
                               <Accordion
-                                expanded={expandedTopics.includes(tc.topic)}
+                                expanded={expandedTopics.includes(tc.title)}
                                 onChange={(e, isExpanded) => {
                                   let newExpanded = [];
                                   if (isExpanded) {
-                                    newExpanded = [...expandedTopics, tc.topic];
+                                    newExpanded = [...expandedTopics, tc.title];
                                     if (Object.keys(currentImprovement).length <= 0) {
                                       setSidebarOpen(true);
                                       setSelectedTopic({ categoryIndex, topicIndex, ...tc });
@@ -1727,7 +1714,7 @@ const CourseComponent = () => {
                                     if (Object.keys(currentImprovement).length <= 0) {
                                       setSidebarOpen(false);
                                     }
-                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.topic);
+                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
                                   }
 
                                   setSelectedOpenCategory(null);
@@ -1760,9 +1747,9 @@ const CourseComponent = () => {
                                     alignItems: "center",
                                     justifyContent: "space-between",
                                     borderRadius: "25px",
-                                    animation: isRemoved.includes(tc.topic)
+                                    animation: isRemoved.includes(tc.title)
                                       ? `${glowRed} 1.5s ease-in-out infinite`
-                                      : isChanged.includes(tc.topic)
+                                      : isChanged.includes(tc.title)
                                       ? `${glowGreen} 1.5s ease-in-out infinite`
                                       : "",
                                     // border: `1px solid ${getTopicColor(category, tc)}`,
@@ -1782,7 +1769,7 @@ const CourseComponent = () => {
                                         fontWeight: 300,
                                       }}
                                     >
-                                      {tc?.topic || ""}
+                                      {tc?.title || ""}
                                     </Typography>
                                     <LoadingButton
                                       onClick={e => {
@@ -1801,7 +1788,7 @@ const CourseComponent = () => {
                                 <AccordionDetails>
                                   {loadingNodes && <LinearProgress />}
                                   <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                    {((courses[selectedCourse].nodes || {})[tc.topic] || []).map((n: any) => (
+                                    {((courses[selectedCourse].nodes || {})[tc.title] || []).map((n: any) => (
                                       <Box key={n.node} sx={{ mb: "10px" }}>
                                         <Accordion
                                           id={n.node}
@@ -1837,7 +1824,7 @@ const CourseComponent = () => {
                                               padding: "5px",
                                               fontSize: "35px",
                                             }}
-                                            onClick={() => handleRemoveNode(tc.topic, n.node)}
+                                            onClick={() => handleRemoveNode(tc.title, n.node)}
                                           />
                                           <AccordionSummary
                                             sx={{
@@ -1923,7 +1910,7 @@ const CourseComponent = () => {
                           )
                         )}
                       </Grid>
-                    }
+                    )}
                   </AccordionDetails>
                 )}
               </Accordion>
@@ -2160,7 +2147,7 @@ const CourseComponent = () => {
             <Typography variant="h6">
               {Object.keys(improvements[currentChangeIndex] || {}).length > 0
                 ? "AI-Proposed Improvements"
-                : selectedTopic?.topic || selectedOpenCategory?.category || ""}
+                : selectedTopic?.title || selectedOpenCategory?.title || ""}
             </Typography>
 
             {(selectedOpenCategory?.category || selectedTopic) && (
@@ -2206,12 +2193,12 @@ const CourseComponent = () => {
               <TextField
                 label="Category Title"
                 multiline
-                value={selectedOpenCategory.category}
+                value={selectedOpenCategory.title}
                 onChange={e => {
                   const updatedCourses = [...courses];
                   updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
                     ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                    category: e.target.value,
+                    title: e.target.value,
                   };
                   setSelectedOpenCategory({
                     categoryIndex: selectedOpenCategory.categoryIndex,
@@ -3048,15 +3035,15 @@ export default withAuthUser({
 //   rationale: "To cover the application of psychology in legal and criminal justice settings.",
 // },
 {
-  /* {currentImprovement.category === category.category &&
+  /* {currentImprovement.category === category.title &&
                           getNewTopics(currentImprovement).length > 0 &&
                           getNewTopics(currentImprovement).map(tc => (
-                            <Grid key={tc.topic} item xs={12}>
+                            <Grid key={tc.title} item xs={12}>
                               <Accordion expanded>
                                 <AccordionSummary
                                   expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${categoryIndex}-new-${tc.topic}-content`}
-                                  id={`panel${categoryIndex}-new-${tc.topic}-header`}
+                                  aria-controls={`panel${categoryIndex}-new-${tc.title}-content`}
+                                  id={`panel${categoryIndex}-new-${tc.title}-header`}
                                   sx={{
                                     border: "2px solid green",
                                     ":hover": {
@@ -3065,7 +3052,7 @@ export default withAuthUser({
                                   }}
                                 >
                                   <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                    {tc.topic}
+                                    {tc.title}
                                   </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
@@ -3089,7 +3076,7 @@ export default withAuthUser({
                                   >
                                     <Box>
                                       <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                        {tc.topic}
+                                        {tc.title}
                                       </Typography>
                                       <Box
                                         sx={{
