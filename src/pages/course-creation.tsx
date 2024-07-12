@@ -916,6 +916,30 @@ const CourseComponent = () => {
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
+
+  const handleSortingForItems = () => {
+    const _courses = [...courses];
+    const fromTopic = _courses[selectedCourse].syllabus[dragItem.current].topics[dragTopicItem.current];
+    if (dragItem.current === dragOverItem.current) {
+      const toTopic = _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current];
+      _courses[selectedCourse].syllabus[dragItem.current].topics[dragTopicItem.current] = toTopic;
+      _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current] = fromTopic;
+      const modifiedTopic =
+        _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current]?.topic;
+      setIsChanged([...isChanged, modifiedTopic]);
+    } else {
+      _courses[selectedCourse].syllabus[dragItem.current].topics.splice(dragTopicItem.current, 1);
+      _courses[selectedCourse].syllabus[dragOverItem.current].topics.push(fromTopic);
+      setGlowCategoryGreenIndex(dragOverItem.current);
+    }
+
+    setCourses(_courses);
+    updateCourses(_courses[selectedCourse]);
+    setTimeout(() => {
+      setIsChanged([]);
+      setGlowCategoryGreenIndex(-1);
+    }, 700);
+  };
   const TriggerSlideAnimation = () => {
     setSlideIn(false);
     const timeoutId = setTimeout(() => {
@@ -1002,9 +1026,16 @@ const CourseComponent = () => {
     try {
       if (selectedTopic) {
         setLoadingImage(true);
-        const { imageUrl } = (await Post("/generateNodeImage", {
+        const { imageUrl } = (await Post("/generateCourseImage", {
           title: selectedTopic.topic,
           content: selectedTopic.description,
+          courseTitle: courses[selectedCourse].title,
+          courseDescription: courses[selectedCourse].description,
+          targetLearners: courses[selectedCourse].learners,
+          syllabus: courses[selectedCourse].syllabus,
+          prerequisiteKnowledge: selectedTopic.prerequisiteKnowledge,
+          sessions: courses[selectedCourse].hours,
+          objectives: selectedTopic.objectives,
         })) as { imageUrl: string };
 
         if (imageUrl) {
@@ -1031,9 +1062,16 @@ const CourseComponent = () => {
   const generateImageForCategory = async () => {
     if (selectedOpenCategory) {
       setLoadingImage(true);
-      const { imageUrl } = (await Post("/generateNodeImage", {
+      const { imageUrl } = (await Post("/generateCourseImage", {
         title: selectedOpenCategory.category,
         content: selectedOpenCategory.description,
+        courseTitle: courses[selectedCourse].title,
+        courseDescription: courses[selectedCourse].description,
+        targetLearners: courses[selectedCourse].learners,
+        syllabus: courses[selectedCourse].syllabus,
+        prerequisiteKnowledge: selectedOpenCategory.prerequisiteKnowledge,
+        sessions: courses[selectedCourse].hours,
+        objectives: selectedOpenCategory.objectives,
       })) as { imageUrl: string };
       const updatedCourses = [...courses];
       updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
@@ -1433,21 +1471,7 @@ const CourseComponent = () => {
 
           <Box ref={containerRef} marginTop="20px">
             {(getCourses()[selectedCourse].syllabus || []).map((category: any, categoryIndex: any) => (
-              <Accordion
-                id={category.category}
-                key={category.category}
-                expanded={expanded.includes(category.category)}
-                draggable
-                onDragStart={() => {
-                  dragItem.current = categoryIndex;
-                }}
-                onDragEnter={() => {
-                  dragOverItem.current = categoryIndex;
-                  dragOverTopicItem.current = categoryIndex;
-                }}
-                onDragOver={handleDragOver}
-                onDragEnd={handleSorting}
-              >
+              <Accordion id={category.category} key={category.category} expanded={expanded.includes(category.category)}>
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
                   aria-controls={`panel${categoryIndex}-content`}
@@ -1478,6 +1502,16 @@ const CourseComponent = () => {
                         ? `${glowRed} 1.5s ease-in-out infinite`
                         : "",
                   }}
+                  draggable
+                  onDragStart={() => {
+                    dragItem.current = categoryIndex;
+                  }}
+                  onDragEnter={() => {
+                    dragOverItem.current = categoryIndex;
+                    //dragOverTopicItem.current = categoryIndex;
+                  }}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleSorting}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <DragIndicatorIcon />
@@ -1526,7 +1560,6 @@ const CourseComponent = () => {
                     )}
                   </Box>
                 </AccordionSummary>
-
                 {expanded.includes(category.category) && (
                   <AccordionDetails>
                     {
@@ -1552,14 +1585,17 @@ const CourseComponent = () => {
                               }}
                               draggable
                               onDragStart={() => {
-                                dragTopicItem.current = tc.topic;
+                                dragItem.current = categoryIndex;
+                                dragTopicItem.current = topicIndex;
+                              }}
+                              onDragEnter={() => {
+                                dragOverTopicItem.current = topicIndex;
+                                dragOverItem.current = categoryIndex;
                               }}
                               onDragOver={() => {
                                 // console.log("onDragOver");
                               }}
-                              onDragEnd={() => {
-                                // console.log("onDragEnd");
-                              }}
+                              onDragEnd={handleSortingForItems}
                               sx={{
                                 backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
                                 borderRadius: "25px",
@@ -1765,7 +1801,10 @@ const CourseComponent = () => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
-                <Typography>{getStepTitle()} OR </Typography>
+                {!loadingCourseStructure &&
+                  !loadingDescription &&
+                  !loadingObjectives &&
+                  !loadingPrerequisiteKnowledge && <Typography>{getStepTitle()} OR </Typography>}
                 <LoadingButton
                   variant="contained"
                   color="success"
