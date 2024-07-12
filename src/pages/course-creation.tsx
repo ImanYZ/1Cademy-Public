@@ -1120,7 +1120,7 @@ const CourseComponent = () => {
       if (selectedTopic) {
         setLoadingImage(true);
         const { imageUrl } = (await Post("/generateCourseImage", {
-          title: selectedTopic.topic,
+          title: selectedTopic.title,
           content: selectedTopic.description,
           courseTitle: courses[selectedCourse].title,
           courseDescription: courses[selectedCourse].description,
@@ -1191,7 +1191,7 @@ const CourseComponent = () => {
       const courseObjectives = courses[selectedCourse].objectives;
       const courseSkills = courses[selectedCourse].skills;
       const syllabus = courses[selectedCourse].syllabus;
-      const topic = selectedTopic.topic;
+      const topic = selectedTopic.title;
 
       const { prompts } = (await Post("/generateMorePromptsForTopic", {
         courseTitle,
@@ -1207,7 +1207,7 @@ const CourseComponent = () => {
       const updatedCourses = [...courses];
       const currentTopic =
         updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex];
-      currentTopic.prompts = prompts;
+      currentTopic.prompts = [...currentTopic.prompts, ...prompts];
 
       setCourses(updatedCourses);
       setSelectedTopic({
@@ -1328,7 +1328,26 @@ const CourseComponent = () => {
           Close
         </LoadingButton>
       )}
-      <Box padding="20px">
+      <Box
+        padding="20px"
+        sx={{
+          background: theme =>
+            theme.palette.mode === "dark"
+              ? theme.palette.common.darkGrayBackground
+              : theme.palette.common.lightGrayBackground,
+          "&::-webkit-scrollbar-track": {
+            background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#888",
+            borderRadius: "10px",
+            border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: "#555",
+          },
+        }}
+      >
         <Box>
           {!courses[selectedCourse]?.new && (
             <TextField
@@ -1718,6 +1737,7 @@ const CourseComponent = () => {
                         </Box>
                       </Box>
                     )}
+                    {!category.hasOwnProperty("topics") && <LinearProgress sx={{ width: "100%" }} />}
                   </Box>
                 </AccordionSummary>
                 {expanded.includes(category.title) && (
@@ -2233,7 +2253,7 @@ const CourseComponent = () => {
                 <Typography variant="h6">
                   {Object.keys(improvements[currentChangeIndex] || {}).length > 0
                     ? "AI-Proposed Improvements"
-                    : selectedTopic?.topic || selectedOpenCategory?.title || ""}
+                    : selectedTopic?.title || selectedOpenCategory?.title || ""}
                 </Typography>
 
                 {(selectedOpenCategory?.title || selectedTopic) && (
