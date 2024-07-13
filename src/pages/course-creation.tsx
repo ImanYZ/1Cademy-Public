@@ -1737,16 +1737,18 @@ const CourseComponent = () => {
                         </Box>
                       </Box>
                     )}
-                    {!category.hasOwnProperty("topics") && <LinearProgress sx={{ width: "100%" }} />}
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
+                      <LinearProgress sx={{ width: "100%" }} />
+                    )}
                   </Box>
                 </AccordionSummary>
                 {expanded.includes(category.title) && (
                   <AccordionDetails>
-                    {!category.hasOwnProperty("topics") ? (
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done ? (
                       <LinearProgress />
                     ) : (
                       <Grid container spacing={2}>
-                        {[...category.topics, ...getNewTopics(currentImprovement, category.title)].map(
+                        {[...(category.topics || []), ...getNewTopics(currentImprovement, category.title)].map(
                           (tc: any, topicIndex: any) => (
                             <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
                               <Accordion
