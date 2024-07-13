@@ -515,6 +515,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log("categories", categories);
     await courseRef.update({
       syllabus: _categories,
+      done: false,
     });
 
     await detach(async () => {
@@ -542,6 +543,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           t.update(courseRef, courseData);
         });
       }
+      await courseRef.update({
+        done: true,
+      });
       if (syllabus) {
         const nodes = await retrieveNodesForCourse(
           tags,
