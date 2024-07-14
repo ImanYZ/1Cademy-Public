@@ -6,7 +6,7 @@ import { delay } from "@/lib/utils/utils";
 import { MODEL } from "@/lib/utils/constants";
 
 const OpenAI = require("openai");
-const fileToGenerativePart = require('./fileToGenerativePart');
+const fileToGenerativePart = require("./fileToGenerativePart");
 
 // Create a OpenAI connection
 export const secretKey = process.env.OPENAI_API_KEY;
