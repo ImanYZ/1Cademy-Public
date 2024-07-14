@@ -1,5 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 
+import { INode } from "./INode";
+
 export interface IQueue {
   name: string;
   type: "parallel" | "series";
@@ -8,7 +10,7 @@ export interface IQueue {
   jobStartedAt?: Timestamp;
 }
 
-export interface IJob {
+export interface BaseJob {
   type: string;
   queue: string;
   payload: Record<string, any>;
@@ -17,11 +19,40 @@ export interface IJob {
   createdAt: Timestamp;
 }
 
-export interface ISignalAllNodesJob extends IJob {
-  type: "signal_all_nodes";
+export interface SignalAllNodesJob extends BaseJob {
+  type: "signal_all_node_changes";
+  // signalAllNodeChanges
   payload: {
-    nodeIds: string[];
+    nodeId: string;
+    nodeChanges: Partial<INode>;
+    major: boolean;
   };
 }
 
-export type Job = ISignalAllNodesJob | IJob;
+export interface UpdatedNodeLinksJob extends BaseJob {
+  type: "updated_node_links";
+  payload: {
+    nodeId: string;
+    title: string;
+    nodeType: string;
+    addedParents: string[];
+    addedChildren: string[];
+    removedParents: string[];
+    removedChildren: string[];
+  };
+}
+
+export interface LogActionTrackJob extends BaseJob {
+  type: "log_action_track";
+  payload: {
+    nodeId: string;
+    title: string;
+    nodeType: string;
+    addedParents: string[];
+    addedChildren: string[];
+    removedParents: string[];
+    removedChildren: string[];
+  };
+}
+
+export type Job = SignalAllNodesJob | UpdatedNodeLinksJob | BaseJob;

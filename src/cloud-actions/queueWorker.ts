@@ -21,6 +21,6 @@ export const queueWorker = async (
       }
     }
   } catch (error) {
-    console.log("deleteOldProposals", error);
+    console.log("queueWorker", error);
   }
 };

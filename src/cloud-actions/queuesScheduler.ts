@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore";
-import { IJob, IQueue } from "src/types/IQueue";
+import { BaseJob, IQueue } from "src/types/IQueue";
 
 import { db } from "./utils/admin";
 
@@ -61,7 +61,7 @@ export const queuesScheduler = async () => {
         if (isTimeout) {
           const jobRef = db.collection("jobs").doc(queue.jobId!);
           const jobDoc = await t.get(jobRef);
-          const job = jobDoc.data() as IJob;
+          const job = jobDoc.data() as BaseJob;
           const retry = job.retry || 0;
           passedRetries = maxRetry < retry;
 
@@ -129,6 +129,6 @@ export const queuesScheduler = async () => {
       }
     });
   } catch (error) {
-    console.log(error);
+    console.log(error, "queuesScheduler");
   }
 };
