@@ -2,6 +2,7 @@ import Cors from "cors";
 import { getAuth } from "firebase-admin/auth";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
+import { IRequestLog } from "src/types/IRequestLog";
 
 import { admin, db } from "../lib/firestoreServer/admin";
 import { runMiddleware } from "./cors";
@@ -153,6 +154,17 @@ const fbAuth = (handler: NextApiHandler) => {
       const { status, data } = await retrieveAuthenticatedUser({ uname: null, uid: user.uid });
       if (status !== 200) return res.status(status).send({ error: data });
       //authenticated
+
+      if (req.method === "POST") {
+        const requestLog = db.collection("requestLogs").doc();
+        await requestLog.set({
+          method: req.method,
+          uname: data.uname as string,
+          uri: req.url,
+          body: req.body,
+          createdAt: Timestamp.now(),
+        } as IRequestLog);
+      }
 
       if (!req.body) req.body = {};
       if (!req.body.data) req.body.data = { ...req.body };
