@@ -206,6 +206,7 @@ const NodesList = ({
               removed: (nodes[nId]?.removedReferences || []).includes(nodes[nId].referenceIds[idx]),
             }))}
             tags={nodes[nId].tags.map((cur: string, idx: number) => ({
+              index: idx,
               node: nodes[nId].tagIds[idx],
               title: cur,
               added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
@@ -369,6 +370,7 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.setNodeParts === next.setNodeParts &&
     prev.hideNode === next.hideNode &&
     prev.commentNotifications.length === next.commentNotifications.length &&
+    prev.onlineUsers === next.onlineUsers &&
     // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );

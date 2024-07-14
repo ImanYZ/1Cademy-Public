@@ -9,9 +9,11 @@
 
 const path = require("path");
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
+const fileToGenerativePart = require('../openAI/fileToGenerativePart');
 require("dotenv").config({
   path: path.join(__dirname, "../", ".env.prod"),
 });
+
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -49,85 +51,60 @@ const safetySettings = [
   },
 ];
 
-// Function to convert File to Base64 string and then to the required part structure
-const fileToGenerativePart = async (file: File): Promise<any> => {
-  const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        resolve(reader.result.toString().split(",")[1] || "");
-      } else {
-        reject("Failed to read file");
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } => {
+  try {
+    return { jsonObject: JSON.parse(jsonString), isJSON: true };
+  } catch (error) {
+    return { jsonObject: {}, isJSON: false };
+  }
+};
+
+export async function askGemini(files: File[], prompt: string) {
+  files.forEach((file, index) => {
+    console.log(`File ${index} type:`, file.constructor.name);
   });
 
-  const base64Data = await base64EncodedDataPromise;
-  return {
-    inlineData: {
-      mimeType: file.type,
-      data: base64Data,
-    },
+  const validFiles = files.filter(file => file instanceof File);
+  if (validFiles.length !== files.length) {
+    console.error("Some objects are not File instances:", files);
+    throw new Error("Some provided objects are not File instances");
+  }
+
+  const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  let response = "";
+  let isJSONObject: { jsonObject: any; isJSON: boolean } = {
+    jsonObject: {},
+    isJSON: false,
   };
-};
-
-function isValidJSON(jsonString: string) {
-  try {
-    JSON.parse(jsonString);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-export const askGemini = async (files: File[], prompt: string): Promise<string> => {
-  try {
-    files.forEach((file, index) => {
-      console.log(`File ${index} type:`, file.constructor.name);
+  for (let i = 0; i < 4; i++) {
+    const result = await model.generateContent({
+      contents: [
+        {
+          parts: [
+            ...imageParts,
+            {
+              text: prompt,
+            },
+          ],
+          role: "user",
+        },
+      ],
+      generationConfig,
+      safetySettings,
     });
-
-    const validFiles = files.filter(file => file instanceof File);
-    if (validFiles.length !== files.length) {
-      console.error("Some objects are not File instances:", files);
-      throw new Error("Some provided objects are not File instances");
+    response = result.response.text();
+    isJSONObject = isValidJSON(response);
+    if (isJSONObject.isJSON) {
+      break;
     }
-
-    const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    let response = "";
-    for (let i = 0; i < 4; i++) {
-      const result = await model.generateContent({
-        contents: [
-          {
-            parts: [
-              ...imageParts,
-              {
-                text: prompt,
-              },
-            ],
-            role: "user",
-          },
-        ],
-        generationConfig,
-        safetySettings,
-      });
-      response = result.response.text();
-      if (isValidJSON(response)) {
-        break;
-      }
-      console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
-      console.log("Response: ", response);
-    }
-
-    if (!isValidJSON(response)) {
-      throw new Error("Failed to get a complete JSON object");
-    }
-    return response;
-  } catch (error) {
-    console.error("Error in askGemini:", error);
-    return "";
+    console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
+    console.log("Response: ", response);
   }
-};
+
+  if (!isJSONObject.isJSON) {
+    throw new Error("Failed to get a complete JSON object");
+  }
+  return isJSONObject.jsonObject;
+}

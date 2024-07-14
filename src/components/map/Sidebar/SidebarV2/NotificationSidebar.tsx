@@ -10,11 +10,12 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { Dispatch, ReactNode, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 import { ReactElement } from "react-markdown/lib/react-markdown";
 
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { CustomBadge } from "../../CustomBudge";
 import NotificationsList from "../NotificationsList";
@@ -28,6 +29,8 @@ type NotificationSidebarProps = {
   username: string;
   sidebarWidth: number;
   innerHeight?: number;
+  setOpenSidebar: Dispatch<SetStateAction<OpenLeftSidebar>>;
+  setCommentSidebarInfo: any;
 };
 export type Notification = {
   id: string;
@@ -55,6 +58,8 @@ const NotificationSidebar = ({
   username,
   sidebarWidth,
   innerHeight,
+  setOpenSidebar,
+  setCommentSidebarInfo,
 }: NotificationSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [checkedNotifications, setCheckedNotifications] = useState<Notification[]>([]);
@@ -73,8 +78,19 @@ const NotificationSidebar = ({
 
       for (let change of docChanges) {
         const notificationId = change.doc.id;
-        const { aType, checked, createdAt, imageUrl, fullname, chooseUname, nodeId, title, oType, uname } =
-          change.doc.data();
+        const {
+          aType,
+          checked,
+          createdAt,
+          imageUrl,
+          fullname,
+          chooseUname,
+          nodeId,
+          title,
+          oType,
+          uname,
+          commentSidebarInfo,
+        } = change.doc.data();
         if (change.type === "removed") {
           if (checked) {
             delete checkedNotificationsDict[notificationId];
@@ -95,6 +111,7 @@ const NotificationSidebar = ({
               title,
               oType,
               uname,
+              commentSidebarInfo: commentSidebarInfo || null,
             };
             if (notificationId in uncheckedNotificationsDict) {
               delete uncheckedNotificationsDict[notificationId];
@@ -111,6 +128,7 @@ const NotificationSidebar = ({
               title,
               oType,
               uname,
+              commentSidebarInfo: commentSidebarInfo || null,
             };
             if (notificationId in checkedNotificationsDict) {
               delete checkedNotificationsDict[notificationId];
@@ -242,6 +260,8 @@ const NotificationSidebar = ({
                 notifications={uncheckedNotifications}
                 openLinkedNode={openLinkedNode}
                 checked={false}
+                setOpenSidebar={setOpenSidebar}
+                setCommentSidebarInfo={setCommentSidebarInfo}
               />
             ) : (
               <NotFoundNotification
@@ -264,7 +284,13 @@ const NotificationSidebar = ({
         content: (
           <>
             {checkedNotifications.length > 0 ? (
-              <NotificationsList notifications={checkedNotifications} openLinkedNode={openLinkedNode} checked={true} />
+              <NotificationsList
+                notifications={checkedNotifications}
+                openLinkedNode={openLinkedNode}
+                checked={true}
+                setOpenSidebar={setOpenSidebar}
+                setCommentSidebarInfo={setCommentSidebarInfo}
+              />
             ) : (
               <NotFoundNotification
                 title="You've not checked off any notifications"

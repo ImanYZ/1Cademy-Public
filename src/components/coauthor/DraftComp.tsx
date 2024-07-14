@@ -6,8 +6,7 @@ import TextareaAutosize from "@mui/material/TextareaAutosize";
 import React, { useEffect, useState } from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
-
-import { sendMessageToChatGPT } from "../../services/openai";
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
 
 interface Props {
   theme: any;

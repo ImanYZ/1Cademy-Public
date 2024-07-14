@@ -320,6 +320,7 @@ const LinkingWords = ({
                         id={`${identifier}-reference-button-${idx}`}
                         key={identifier + "LinkTo" + reference.node}
                         onClick={openLinkedNode}
+                        nodeType="Reference"
                         // nodeID={identifier}
                         linkedNodeID={reference.node}
                         // linkedNodeTitle={refTitle+(reference.label?':'+{reference.label}:'')}
@@ -458,7 +459,7 @@ const LinkingWords = ({
                               },
                             }}
                           >
-                            <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                            <IconButton onClick={onDeleteLink(tag.index, "Tag")} disabled={disableRemoveTag}>
                               <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                             </IconButton>
                           </Tooltip>
@@ -505,7 +506,7 @@ const LinkingWords = ({
                             },
                           }}
                         >
-                          <IconButton onClick={onDeleteLink(idx, "Tag")} disabled={disableRemoveTag}>
+                          <IconButton onClick={onDeleteLink(tag.index, "Tag")} disabled={disableRemoveTag}>
                             <DeleteForeverIcon sx={{ fontSize: "16px" }} />
                           </IconButton>
                         </Tooltip>
@@ -553,7 +554,7 @@ const LinkingWords = ({
                     {editable && (
                       <div className="LinkDeleteButton">
                         <MemoizedMetaButton
-                          onClick={onDeleteLink(idx, "Tag")}
+                          onClick={onDeleteLink(tag.index, "Tag")}
                           tooltip="Click to delete the link to this tag."
                           tooltipPosition="right"
                         >
@@ -644,11 +645,11 @@ const LinkingWords = ({
               {editable && !isNew && nodeType !== "Reference" && notebookRef.current.selectedNode === identifier && (
                 <MemoizedMetaButton
                   onClick={choosingNewLinkedNode("Child")}
-                  tooltip="Link to an existing child node."
+                  tooltip="Link to an existing Child."
                   tooltipPosition="right"
                 >
                   <>
-                    <span>Link to an existing Child node</span>
+                    <span>Link to an existing Child</span>
                     <AddIcon sx={{ color: "#00E676", fontSize: "16px" }} />
                     <ArrowForwardIcon sx={{ color: "#00E676", fontSize: "16px" }} />
                   </>

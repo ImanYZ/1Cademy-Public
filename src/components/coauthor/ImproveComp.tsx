@@ -18,7 +18,8 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
-import { sendMessageToChatGPT } from "../../services/openai";
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
+
 import ImproveItemComp from "./ImproveItemComp";
 
 interface Improvement {

@@ -89,14 +89,15 @@ export const CommentsSidebar = ({
       const batch = writeBatch(db);
       const q = query(
         query(collection(db, "notifications")),
-        where("notify", "==", user.uname),
+        where("proposer", "==", user.uname),
         where("refId", "==", commentSidebarInfo.id),
-        where("notificationType", "==", "comment")
+        where("checked", "==", false),
+        where("oType", "==", "Comment")
       );
       const notificatioDoc = await getDocs(q);
       for (const notification of notificatioDoc.docs) {
         batch.update(notification.ref, {
-          seen: true,
+          checked: true,
           updatedAt: new Date(),
         });
       }

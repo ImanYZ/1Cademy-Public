@@ -410,6 +410,7 @@ const Node = ({
   const [isLoading, startTransition] = useTransition();
   const [imageHeight, setImageHeight] = useState(100);
   const [proposeLoading, setProposeLoading] = useState<boolean>(false);
+  const [prevImageUrl, setPrevImageUrl] = useState<string>("");
   const imageElementRef = useRef<HTMLImageElement | null>(null);
 
   const childNodeButtonsAnimation = keyframes({
@@ -690,6 +691,7 @@ const Node = ({
 
         await saveProposedImprovement("", reason, tagIds, () => setAbleToPropose(true));
         setProposeLoading(false);
+        setPrevImageUrl("");
         notebookRef.current.selectedNode = identifier;
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -1500,6 +1502,8 @@ const Node = ({
             onlineUsers={onlineUsers}
             openComments={openComments}
             commentNotifications={commentNotifications}
+            prevImageUrl={prevImageUrl}
+            setPrevImageUrl={setPrevImageUrl}
           />
         )}
 
@@ -1680,6 +1684,8 @@ const Node = ({
               onlineUsers={onlineUsers}
               openComments={openComments}
               commentNotifications={commentNotifications}
+              prevImageUrl={prevImageUrl}
+              setPrevImageUrl={setPrevImageUrl}
             />
           </Box>
         )}
@@ -1695,7 +1701,7 @@ const Node = ({
             top: (parseFloat(String(document.getElementById(identifier)?.clientHeight)) - 396) * 0.5 + "px",
             animation: `${childNodeButtonsAnimation} 1s backwards`,
             borderRadius: "25px",
-            right: "590px",
+            right: "596px",
           }}
         >
           {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
@@ -1707,6 +1713,7 @@ const Node = ({
                     disabled={disabled}
                     color="primary"
                     sx={{
+                      mr: "5px",
                       background: "#1F1F1F",
                       ":hover": {
                         background: "#525151",
@@ -1818,6 +1825,7 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.openSidebar === next.openSidebar &&
     prev.hideNode === next.hideNode &&
     prev.commentNotifications === next.commentNotifications &&
+    prev.onlineUsers === next.onlineUsers &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

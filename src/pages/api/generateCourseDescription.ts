@@ -52,7 +52,8 @@ const generateCourseDescription = async (courseTitle: string, targetLearners: st
   };
 
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
-  const description = JSON.parse(response).description;
+  console.log("==> response ==>", response);
+  const description = response.description;
   console.log(JSON.stringify(description, null, 2));
   return description;
 };

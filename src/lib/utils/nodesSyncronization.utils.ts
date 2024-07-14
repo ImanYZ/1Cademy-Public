@@ -59,17 +59,8 @@ export const getUserNodeChanges = (
 
 export const getNodesPromises = async (db: Firestore, nodeIds: string[]): Promise<{ [nodeId: string]: NodesData }> => {
   // Firestore limits 'in' queries to a maximum of 30 items per query.
-  const CHUNK_SIZE = 30;
 
-  const arrayToChunks = (array: any[], chunkSize: number) => {
-    const chunks = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-      chunks.push(array.slice(i, chunkSize + i));
-    }
-    return chunks;
-  };
-
-  const chunks = arrayToChunks(nodeIds, CHUNK_SIZE);
+  const chunks = arrayToChunks(nodeIds);
 
   const nodeDocsPromises = chunks.map((nodeIdsChunk: string[]) => {
     const nodeQuery = query(collection(db, "nodes"), where("__name__", "in", nodeIdsChunk));

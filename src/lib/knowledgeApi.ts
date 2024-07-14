@@ -91,6 +91,15 @@ export const getNodeData = async (nodeId: string): Promise<KnowledgeNode> => {
   return res.data.results;
 };
 
+export const getNodeDataForCourse = async (nodeId: string): Promise<KnowledgeNode> => {
+  const res = await API.post("/api/nodeDataForCourse", { nodeId });
+  if (!res?.data) {
+    throw Error("invalid node");
+  }
+
+  return res.data.results;
+};
+
 export const getFullTagAutocomplete = async (searchText: string): Promise<ResponseAutocompleteFullTag> => {
   const response = await API.get("/api/fullTagsAutocomplete", { params: { q: searchText } });
   return response.data;

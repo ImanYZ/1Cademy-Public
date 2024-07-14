@@ -8,6 +8,7 @@ const generateCourseObjectives = async (
   courseDescription: string
 ) => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, and number of hour-long class sessions, your task is to generate a detailed list of course objectives. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  Your generated description will be reviewed by a supervisory team. For a helpful description, we will pay you $1000 and for an unhelpful one, you'll lose $1000.
   
     **Input:**
     
@@ -72,7 +73,7 @@ const generateCourseObjectives = async (
   };
 
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
-  const objectives = JSON.parse(response).objectives;
+  const objectives = response.objectives;
   console.log(JSON.stringify(objectives, null, 2));
   return objectives;
 };

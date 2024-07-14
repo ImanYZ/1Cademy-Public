@@ -6,6 +6,7 @@ import { delay } from "@/lib/utils/utils";
 import { MODEL } from "@/lib/utils/constants";
 
 const OpenAI = require("openai");
+const fileToGenerativePart = require('./fileToGenerativePart');
 
 // Create a OpenAI connection
 export const secretKey = process.env.OPENAI_API_KEY;
@@ -2171,28 +2172,362 @@ function isValidJSON(jsonString: string) {
     return false;
   }
 }
-export const fileToGenerativePart = async (file: File): Promise<any> => {
-  const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        resolve(reader.result.toString().split(",")[1] || "");
-      } else {
-        reject("Failed to read file");
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 
-  const base64Data = await base64EncodedDataPromise;
-  return {
-    inlineData: {
-      mimeType: file.type,
-      data: base64Data,
+const improverPrompt = `
+Given your previous complex, nested, and truncated JSON response, generate a JSON object with detailed instructions to complete your previous truncated JSON response by implementing the following actions on it:
+
+**Output:**
+A JSON object with the following structure:
+{
+  "actions": [An array of actions to complete the JSON response. Each element of this array should be an object with the following structure: 
+    { 
+      "action": "replace or add", 
+      "type": "type of incompleteness (e.g., 'missing value', 'missing subfield', 'incomplete value', 'incomplete subfield')", 
+      "reason": "Explain why you think this field or sub-field is incomplete.", 
+      "location": "location of the field or subfields in the JSON object", 
+      "value": "value to replace or add"
+    }
+  ]
+}
+
+**Actions:**
+- \`replace\`: If a field or subfield already exists but its value is incomplete, you should recommend a \`replace\` action to replace the existing value of a field with a more complete value at the specified location in your previous JSON response.
+- \`add\`: If a field or subfield is missing, you should recommend an \`add\` action to add a new field and its corresponding value at the specified location in your previous JSON response to expand it.
+
+Important rules:
+- Do not add new field names to the JSON object that did not exist in the original JSON object data structure.
+- You can add and replace all the fields that are used in the original data structure.
+- Only recommend the addition or replacement of fields at the end of the JSON string; do not recommend modifications to fields in the middle of the JSON string.
+- For arrays, use \`.last\` to specify the last element in the array.
+
+###Example input:
+
+\`\`\`json
+{
+  "users": 
+  [
+    {
+      "id": 1,
+      "name": "Jeff Smith",
+      "address": {
+        "street": "789 State St",
+        "city": "Ann Arbor",
+        "state": "MI",
+        "zip": "48104",
+        "country": "US"
+      },
+      "contacts": [
+        {
+          "type": "email",
+          "value": "jeff.smith@gmail.com"
+        },
+        {
+          "type": "phone",
+          "value": "+1234567890"
+        }
+      ],
+      "settings": {
+        "theme": "dark",
+        "notifications": {
+          "email": true,
+          "sms": false
+        },
+        "preferences": [
+          {
+            "currency": "EURO",
+            "measurementSystem": "imperial"
+          }
+        ],
+        "language": "en",
+      },
+      "additionalInfo": {
+        "lastUpdated": "2024-06-28T12:00:00Z"
+      }
     },
-  };
+    {
+      "id": 1,
+      "name": "John Doe",
+      "address": {
+        "street": "123 Main St",
+        "city": "Chicago",
+        "state": "IL",
+        "zip": "60601",
+        "country": "US"
+      },
+      "contacts": [
+        {
+          "type": "email",
+          "value": "john.doe@gmail.com"
+        },
+        {
+          "type": "phone",
+          "value": "+1234567890"
+        }
+      ],
+      "settings": {
+        "theme": "light",
+        "notifications": {
+          "email": true,
+          "sms": true
+        },
+        "preferences": [
+          {
+            "currency": "US"
+          }
+        ]
+      }
+    }
+  ]
+}
+\`\`\`
+
+###Example output:
+
+\`\`\`json
+{
+  "actions": [
+    { 
+      "action": "replace"
+      "type": "incomplete value", 
+      "reason": "The 'currency' has the value of 'US' that is missing the last 'D'.", 
+      "location": "users.last.settings.preferences.currency", 
+      "value": "USD"
+    },
+    { 
+      "action": "add",
+      "type": "missing subfield", 
+      "reason": "In consistency with the previous user object, the 'preferences' should have another subfield 'measurementSystem'.",
+      "location": "users.last.settings.preferences.measurementSystem", 
+      "value": "metric"
+    },
+    {
+      "action": "add",
+      "type": "missing subfield",
+      "reason": "In consistency with the previous user object, the 'settings' object is missing the 'language' field.",
+      "location": "users.last.settings.language",
+      "value": "en"
+    },
+    {
+      "action": "add",
+      "type": "missing subfield",
+      "reason": "In consistency with the previous user object, the last user object is missing the 'additionalInfo' field.",
+      "location": "users.last.additionalInfo",
+      "value": {
+        "lastUpdated": "2024-06-28T12:00:00Z"
+      }
+    }
+  ],
+}
+\`\`\`
+IMPORTANT Note that you should always:
+- Start your recommendations with a "replace" action.
+- Recommend a 'replace' action if the field or subfield already exists but its value is incomplete. DO NOT recommend an 'add' action in this case. Replacing the whole value of a field with existing subfields is forbidden.
+- Start from the most inner sub-fields to make the changes. In the above example, the 'currency' field is the most inner sub-field that needs to be replaced, So, instead of replacing the "preferences" or "settings" object, you should start from the "currency" field.
+The input JSON object may have multiple nested levels, and your task is to ensure that only the incomplete or missing fields at the end of these levels are addressed.
+Your goal is to generate a similar output JSON object containing the actions needed to complete and expand your previous JSON response. Analyze the structure, identify missing or incomplete fields, and provide the necessary \`replace\` and \`add\` actions. Remember, you can only use field names that already exist in your previous JSON response object.
+Please take your time and carefully generate only a JSON response.
+`;
+
+type Action = {
+  action: "replace" | "add";
+  location: string;
+  value: any;
 };
+
+type LLMResponse = {
+  actions: Action[];
+};
+
+export const applyImprovementInstructions = (originalJsonString: string, llmResponse: LLMResponse): any => {
+  const updatedJson = JSON.parse(originalJsonString);
+
+  for (const action of llmResponse.actions) {
+    const { action: actionType, location, value } = action;
+    const pathSegments = location.split(/[\.\[\]]/).filter(segment => segment !== "");
+    let current: any = updatedJson;
+
+    // Traverse the JSON object to the parent of the target field
+    for (let i = 0; i < pathSegments.length - 1; i++) {
+      const segment = pathSegments[i];
+      const index = segment === "last" ? current.length - 1 : parseInt(segment, 10);
+      if (!isNaN(index)) {
+        if (!Array.isArray(current) || index >= current.length) {
+          return new Error(`Invalid array index '${segment}' in path`);
+        }
+        current = current[index];
+      } else {
+        if (!(segment in current)) {
+          current[segment] = {}; // Create missing path segments as empty objects
+        }
+        current = current[segment];
+      }
+    }
+
+    const finalSegment = pathSegments[pathSegments.length - 1];
+    const finalIndex = finalSegment === "last" ? current.length - 1 : parseInt(finalSegment, 10);
+
+    if (actionType === "replace") {
+      if (!isNaN(finalIndex)) {
+        if (!Array.isArray(current) || finalIndex >= current.length) {
+          return new Error(`Invalid array index '${finalSegment}' in path for replace action`);
+        }
+        current[finalIndex] = value;
+      } else {
+        if (!(finalSegment in current)) {
+          return new Error(`Field '${finalSegment}' not found for replace action`);
+        }
+        current[finalSegment] = value;
+      }
+    } else if (actionType === "add") {
+      if (!isNaN(finalIndex)) {
+        if (!Array.isArray(current)) {
+          return new Error(`Path segment '${finalSegment}' is not an array for add action`);
+        }
+        current.splice(finalIndex + 1, 0, value); // Add after the last element
+      } else {
+        if (finalSegment in current) {
+          if (Array.isArray(current[finalSegment])) {
+            current[finalSegment].push(value); // Append to array
+          } else if (typeof current[finalSegment] === "object") {
+            Object.assign(current[finalSegment], value); // Merge objects
+          } else {
+            return new Error(`Field '${finalSegment}' already exists for add action and is not an object or array`);
+          }
+        } else {
+          current[finalSegment] = value;
+        }
+      }
+    } else {
+      return new Error(`Invalid action type '${actionType}'`);
+    }
+  }
+
+  return updatedJson;
+};
+
+export const completeJsonString = (truncatedJson: string): string => {
+  const removeTrailingIncompleteElements = (jsonStr: string): string => {
+    // Remove trailing commas, incomplete elements, and whitespace
+    return jsonStr
+      .replace(/,\s*([}\]])/g, "$1")
+      .replace(/,\s*$/, "")
+      .trim();
+  };
+
+  const fixUnclosedStrings = (jsonStr: string): string => {
+    // Find all occurrences of unclosed strings and fix them
+    const stringPattern = /"(?:\\.|[^"\\])*$/;
+    const match = jsonStr.match(stringPattern);
+    if (match) {
+      const index = match.index;
+      if (index !== undefined) {
+        jsonStr = jsonStr.slice(0, index) + '"';
+      }
+    }
+    return jsonStr;
+  };
+
+  const handleIncompleteFieldNames = (jsonStr: string): string => {
+    // Remove incomplete field names
+    const fieldPattern = /"[^"]*$|:[^,\}\]]*$/;
+    const match = jsonStr.match(fieldPattern);
+    if (match) {
+      const index = match.index;
+      if (index !== undefined) {
+        jsonStr = jsonStr.slice(0, index).replace(/:$/, "").trim();
+      }
+    }
+    return jsonStr;
+  };
+
+  const handleIncompleteQuotes = (jsonStr: string): string => {
+    // Remove incomplete fields with starting double quote
+    const quotePattern = /"[^"]*$/;
+    const match = jsonStr.match(quotePattern);
+    if (match) {
+      const index = match.index;
+      if (index !== undefined) {
+        jsonStr = jsonStr.slice(0, index).trim();
+      }
+    }
+    return jsonStr;
+  };
+
+  const handleTrailingCommas = (jsonStr: string): string => {
+    // Remove trailing commas before incomplete fields
+    const commaPattern = /,(?!\s*["\{\[])/g;
+    const match = jsonStr.match(commaPattern);
+    if (match) {
+      const index = jsonStr.lastIndexOf(",");
+      if (index !== -1) {
+        jsonStr = jsonStr.slice(0, index).trim();
+      }
+    }
+    return jsonStr;
+  };
+
+  const addMissingBrackets = (jsonStr: string): string => {
+    const stack: string[] = [];
+    let cleanedJson = jsonStr.trim();
+
+    // Push opening brackets and braces to the stack
+    for (const char of cleanedJson) {
+      if (char === "{" || char === "[") {
+        stack.push(char);
+      } else if (char === "}" || char === "]") {
+        stack.pop();
+      }
+    }
+
+    // Append the necessary closing brackets and braces in the correct order
+    while (stack.length) {
+      const lastOpened = stack.pop();
+      if (lastOpened === "{") {
+        cleanedJson += "}";
+      } else if (lastOpened === "[") {
+        cleanedJson += "]";
+      }
+    }
+
+    return cleanedJson;
+  };
+
+  try {
+    // Try parsing the input directly first to check if it's already valid JSON
+    return JSON.parse(truncatedJson);
+  } catch (e) {
+    // Continue with the completion process
+  }
+
+  // Step 1: Remove trailing incomplete elements
+  let cleanedJson = removeTrailingIncompleteElements(truncatedJson);
+
+  // Step 2: Fix unclosed strings
+  cleanedJson = fixUnclosedStrings(cleanedJson);
+
+  // Step 3: Handle incomplete field names
+  cleanedJson = handleIncompleteFieldNames(cleanedJson);
+
+  // Step 4: Handle incomplete quotes
+  cleanedJson = handleIncompleteQuotes(cleanedJson);
+
+  // Step 5: Handle trailing commas
+  cleanedJson = handleTrailingCommas(cleanedJson);
+
+  // Step 6: Add missing brackets
+  cleanedJson = addMissingBrackets(cleanedJson);
+
+  // Step 7: Try parsing the cleaned JSON
+  try {
+    JSON.parse(cleanedJson);
+  } catch (e) {
+    console.log("Truncated JSON:", truncatedJson);
+    console.log("Completed JSON:", cleanedJson.slice(-250));
+    throw new Error("Unable to complete and parse the JSON string.");
+  }
+  return cleanedJson;
+};
+
 export async function callOpenAIChat(files: File[], userPrompt: string, systemPrompt: string = "") {
   try {
     files.forEach((file, index) => {
@@ -2207,54 +2542,135 @@ export async function callOpenAIChat(files: File[], userPrompt: string, systemPr
 
     const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
 
-    const systemPrompts = [];
-    if (systemPrompt) {
-      systemPrompts.push({
-        role: "system",
-        content: [
-          {
-            type: "text",
-            text: systemPrompt,
-          },
-        ],
-      });
-    }
     let response = "";
+    let finish_reason = "";
+    let isJSONObject: { jsonObject: any; isJSON: boolean } = {
+      jsonObject: {},
+      isJSON: false,
+    };
     for (let i = 0; i < 4; i++) {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          ...systemPrompts,
-          {
-            role: "user",
-            content: [
-              ...imageParts,
-              {
-                type: "text",
-                text: userPrompt,
-              },
-            ],
-          },
-        ],
-        temperature: 0,
-        response_format: { type: "json_object" },
-      });
+      let completion: any = {};
+      if (finish_reason === "length") {
+        let improvedJSON: any = {};
+        for (let j = 0; j < 4; j++) {
+          try {
+            completion = await openai.chat.completions.create({
+              model: "gpt-4o",
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    ...imageParts,
+                    {
+                      type: "text",
+                      text: systemPrompt + "\n\n\n" + userPrompt,
+                    },
+                  ],
+                },
+                {
+                  role: "assistant",
+                  content: [
+                    {
+                      type: "text",
+                      text: response,
+                    },
+                  ],
+                },
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: improverPrompt,
+                    },
+                  ],
+                },
+              ],
+              temperature: 0,
+              response_format: { type: "json_object" },
+            });
 
-      response = completion.choices[0].message.content || "";
-      if (isValidJSON(response)) {
-        break;
+            console.log("Original JSON:");
+            console.log(response);
+            console.log("RECOMMENDED IMPROVEMENTS:");
+            console.log(completion.choices[0].message.content);
+
+            improvedJSON = applyImprovementInstructions(response, JSON.parse(completion.choices[0].message.content));
+            console.log("IMPROVED JSON:");
+            console.log(improvedJSON);
+            return improvedJSON;
+          } catch (error) {
+            console.error("Error in applyImprovementInstructions:", error);
+          }
+        }
+      } else {
+        completion = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: [
+                {
+                  type: "text",
+                  text: systemPrompt,
+                },
+              ],
+            },
+            {
+              role: "user",
+              content: [
+                ...imageParts,
+                {
+                  type: "text",
+                  text: userPrompt,
+                },
+              ],
+            },
+          ],
+          temperature: 0,
+          response_format: { type: "json_object" },
+        });
+        response = completion.choices[0].message.content || "";
+        isJSONObject.isJSON = isValidJSON(response);
+        // console.log("\n\n\nThe completion object is:");
+        // console.log(completion);
+        finish_reason = completion.choices[0].finish_reason;
+        if (isJSONObject.isJSON) {
+          isJSONObject.jsonObject = JSON.parse(response);
+          break;
+        }
+        console.log(
+          `\nFailed to get a complete JSON object. The finish_reason is "${finish_reason}". Retrying for the ${
+            i + 1
+          } time.\n\n\n`
+        );
+        if (finish_reason !== "length") {
+          console.log("Response: ", response);
+        } else {
+          response = completeJsonString(response);
+          i--;
+        }
       }
-      console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
-      console.log("Response: ", response);
     }
 
-    if (!isValidJSON(response)) {
+    if (!isJSONObject.isJSON) {
       throw new Error("Failed to get a complete JSON object");
     }
 
-    return response;
+    return isJSONObject.jsonObject;
   } catch (error) {
     console.error("Error in callOpenAIChat:", error);
     throw error;
   }
 }
+
+export const generateImage = async (prompt: string) => {
+  const response = await openai.images.generate({
+    model: "dall-e-3",
+    prompt,
+    n: 1,
+    size: "1024x1024",
+  });
+  const image_url = response.data[0].url;
+  return image_url;
+};
