@@ -5,5 +5,5 @@ import { INode } from "./INode";
 export interface INodeChange {
   nodeId: string;
   nodeData: Partial<INode>;
-  createdAt: Timestamp;
+  changedAt: Timestamp;
 }
