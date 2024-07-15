@@ -28,6 +28,7 @@ import { db } from "./admin";
 import { updateSavedCards } from "./actions/updateSavedCards";
 import { sentAlertEmail } from "./actions/sentAlertEmail";
 import { updateImage } from "./actions/updateImage";
+import { signalChangesToUsers } from "./helpers/signalChangesToUsers";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -180,13 +181,25 @@ export const onNodeUpdated = functions.firestore.document("/nodes/{id}").onUpdat
 
 export const onNodeUpdatedVersions = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
   try {
-    const newValue = change.after.data();
-    const previousValue = change.before.data();
+    const newNode = change.after.data();
+    const previousNode = change.before.data();
     const nodeId = change.after.id;
-    const needsUpdates = checkNeedsUpdates({ previousValue, newValue });
+    const needsUpdates = checkNeedsUpdates({ previousValue: previousNode, newValue: newNode });
     if (needsUpdates) {
-      updateVersions({ nodeId, nodeData: newValue });
+      updateVersions({ nodeId, nodeData: newNode });
     }
+    console.log("Done Updating Versions");
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
+
+export const signalNodeChanges = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const newNode = change.after.data();
+    const previousNode = change.before.data();
+    const nodeId = change.after.id;
+    await signalChangesToUsers(newNode, previousNode, nodeId);
     console.log("Done Updating Versions");
   } catch (error) {
     console.log("error:", error);

@@ -1712,8 +1712,8 @@ type ITransferUserVersionsToNewNode = {
   skipUnames: string[];
   batch: WriteBatch;
   writeCounts: number;
-  t: FirebaseFirestore.Transaction;
-  tWriteOperations: TWriteOperation[];
+  t?: FirebaseFirestore.Transaction;
+  tWriteOperations?: TWriteOperation[];
 };
 
 // helper to transfer user versions (votes) from old node to newely created node on approval
@@ -1728,6 +1728,7 @@ export const transferUserVersionsToNewNode = async ({
   t,
   tWriteOperations,
 }: ITransferUserVersionsToNewNode) => {
+  let newBatch = batch;
   const { userVersionsColl: oldUserVersionsColl } = getTypedCollections();
   const { userVersionsColl } = getTypedCollections();
 
@@ -1744,7 +1745,7 @@ export const transferUserVersionsToNewNode = async ({
     const oldUserVersionRef = db.collection(oldUserVersionsColl.id).doc(oldUserVersion.id);
     const newUserVersionRef = db.collection(userVersionsColl.id).doc();
 
-    if (t) {
+    if (t && tWriteOperations) {
       tWriteOperations.push({
         objRef: newUserVersionRef,
         data: newUserVersionData,
@@ -1758,17 +1759,17 @@ export const transferUserVersionsToNewNode = async ({
         operationType: "update",
       });
     } else {
-      batch.set(newUserVersionRef, newUserVersionData);
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      newBatch.set(newUserVersionRef, newUserVersionData);
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
 
-      batch.update(oldUserVersionRef, {
+      newBatch.update(oldUserVersionRef, {
         deleted: true,
       });
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
   }
 
-  return [batch, writeCounts];
+  return [newBatch, writeCounts];
 };
 
 type IVersionCreateUpdate = {
@@ -1857,7 +1858,7 @@ export const versionCreateUpdate = async ({
     wrongs,
     awards,
     deleted,
-    accepted,
+    accepted: previouslyAccepted,
   } = versionData;
 
   let newBatch = batch;
@@ -1962,7 +1963,7 @@ export const versionCreateUpdate = async ({
           updatingVersionId: versionId,
           updatingVersionData: versionData,
           updatingVersionRating: versionRatings,
-          updatingVersionNotAccepted: !accepted,
+          updatingVersionNotAccepted: !previouslyAccepted,
           t,
           tWriteOperations,
         });
@@ -1980,7 +1981,7 @@ export const versionCreateUpdate = async ({
       };
 
       //  proposal was accepted previously, not accepted just now
-      if (accepted) {
+      if (previouslyAccepted) {
         // When someone votes on an accepted proposal of a node, that person has definitely studied it.
         // So, if previously isStudied was false, we should increment the number of studied and later set isStudied to true for the user.
         if (
