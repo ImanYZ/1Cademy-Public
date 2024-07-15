@@ -12,6 +12,8 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Card,
+  CardHeader,
   Dialog,
   DialogActions,
   DialogContent,
@@ -58,7 +60,7 @@ import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import { ReferencesList } from "@/components/ReferencesList";
-import { TagsList } from "@/components/TagsList";
+import TypographyUnderlined from "@/components/TypographyUnderlined";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
@@ -2201,14 +2203,7 @@ const CourseComponent = () => {
                       <NodeItemFull
                         nodeId={nodePublicView?.id}
                         node={nodePublicView}
-                        contributors={
-                          <NodeItemContributors
-                            contributors={nodePublicView?.contributors || []}
-                            institutions={nodePublicView?.institutions || []}
-                          />
-                        }
                         references={<ReferencesList references={nodePublicView?.references || []} sx={{ mt: 3 }} />}
-                        tags={<TagsList tags={nodePublicView?.tags || []} sx={{ mt: 3 }} />}
                       />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
@@ -2223,7 +2218,35 @@ const CourseComponent = () => {
                           }
                         })}
                     </Grid>
-
+                    <Grid item xs={12} sm={12}>
+                      <Card sx={{ mt: 3, p: 2 }}>
+                        <CardHeader
+                          sx={{
+                            backgroundColor: theme =>
+                              theme.palette.mode === "light"
+                                ? theme.palette.common.darkGrayBackground
+                                : theme.palette.common.black,
+                          }}
+                          title={
+                            <Box sx={{ textAlign: "center", color: "inherit" }}>
+                              <TypographyUnderlined
+                                variant="h6"
+                                fontWeight="300"
+                                gutterBottom
+                                align="center"
+                                sx={{ color: theme => theme.palette.common.white }}
+                              >
+                                Contributors
+                              </TypographyUnderlined>
+                            </Box>
+                          }
+                        ></CardHeader>
+                        <NodeItemContributors
+                          contributors={nodePublicView?.contributors || []}
+                          institutions={nodePublicView?.institutions || []}
+                        />
+                      </Card>
+                    </Grid>
                     <Grid item xs={12} sm={12}>
                       {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
                         <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
