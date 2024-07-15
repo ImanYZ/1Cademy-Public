@@ -4,6 +4,6 @@ import { INode } from "./INode";
 
 export interface INodeChange {
   nodeId: string;
-  nodeChanges?: Partial<INode>;
+  nodeData: Partial<INode>;
   createdAt: Timestamp;
 }
