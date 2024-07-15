@@ -60,6 +60,7 @@ import {
 import { getCommentNotificationsSnapshot } from "src/client/firestore/commentNotifications.firestore";
 import { conversationChange, getConversationsSnapshot } from "src/client/firestore/conversations.firesrtore";
 import { addClientErrorLog } from "src/client/firestore/errors.firestore";
+import { getNodeChangesSnapshot } from "src/client/firestore/nodeChanges.firestore";
 import { getUserNodesByForce } from "src/client/firestore/userNodes.firestore";
 import { Instructor } from "src/instructorsTypes";
 import { IAssistantEventDetail } from "src/types/IAssistant";
@@ -671,6 +672,27 @@ const Notebook = ({}: NotebookProps) => {
     };
     // INFO: notebookChanged used in dependencies because of the redraw graph (magic wand button)
   }, [allTagsLoaded, db, userNodesSnapshotFn, user, userTutorialLoaded, notebookChanged, selectedNotebookId]);
+
+  useEffect(() => {
+    if (!user) return;
+    const onSynchronize = (changes: any) => {
+      setGraph(graph => {
+        const fullNodes = { ...graph.nodes };
+        if (Object.keys(fullNodes).length <= 0) return graph;
+
+        for (let change of changes) {
+          if (fullNodes[change.data.id]) {
+            fullNodes[change.data.id] = { ...fullNodes[change.data.id], ...change.data.nodeData };
+          }
+        }
+        const res = { nodes: fullNodes, edges: graph.edges };
+        devLog("4:Snapshot:sync result", res);
+        return res;
+      });
+    };
+    const killSnapshot = getNodeChangesSnapshot(db, onSynchronize);
+    return () => killSnapshot();
+  }, [db, user]);
 
   const onChangeTagOfNotebookById = useCallback(
     (notebookId: string, data: { defaultTagId: string; defaultTagName: string }) => {
