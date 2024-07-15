@@ -2156,7 +2156,7 @@ const Notebook = ({}: NotebookProps) => {
       if (notebookRef.current.choosingNode) return;
       if (!username) return;
       const notebookIdx = (thisNode.notebooks ?? []).findIndex((cur: any) => cur === selectedNotebookId);
-      const newExpands = (thisNode.expands ?? []).map((cur: any, idx: any) => (idx === notebookIdx ? !cur : cur));
+      const newExpands = (thisNode.expands ?? []).filter((c: any, idx: number) => idx !== notebookIdx);
       const { userNodeRef } = initNodeStatusChange(thisNode.node, thisNode.userNodeId);
       const userNodeData = {
         changed: thisNode.changed || false,

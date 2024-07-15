@@ -1,5 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton, Paper, Typography } from "@mui/material";
+import { Button, IconButton, Paper, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -14,6 +14,7 @@ import { generateChannelName } from "@/lib/utils/chat";
 
 import { getMessageSummary } from "../../helpers/common";
 import UserSuggestion from "../Common/UserSuggestion";
+import { CreateDirectChannel } from "./CreateDirectChannel";
 
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
@@ -34,6 +35,7 @@ export const DirectMessagesList = ({
 }: DirectMessageProps) => {
   const [{ user }] = useAuth();
   const [notificationHash, setNotificationHash] = useState<any>({});
+  const [newChannel, setNewChannel] = useState(false);
 
   useEffect(() => {
     setNotificationHash(
@@ -106,6 +108,7 @@ export const DirectMessagesList = ({
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
         <UserSuggestion db={db} onlineUsers={onlineUsers} action={openDMChannel} />
       </Box>
+      <Button onClick={() => setNewChannel(true)}>Create Channel</Button>
       {conversations.map((conversation: IConversation, idx: number) => (
         <Paper
           className="direct-channel"
@@ -195,6 +198,14 @@ export const DirectMessagesList = ({
           )}
         </Paper>
       ))}
+      <CreateDirectChannel
+        db={db}
+        user={user}
+        onlineUsers={onlineUsers}
+        setOpen={setNewChannel}
+        open={newChannel}
+        roomType={"direct"}
+      />
     </Box>
   );
 };
