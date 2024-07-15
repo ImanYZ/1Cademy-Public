@@ -1241,9 +1241,22 @@ const CourseComponent = () => {
         const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
         setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
         setNodePublicViewLoader(false);
+        const response: any = await Post("/retrieveGenerateQuestions", {
+          courseTitle: courses[selectedCourse].title,
+          courseDescription: courses[selectedCourse].description,
+          targetLearners: courses[selectedCourse].learners,
+          nodeId,
+        });
+        const updatedCourses = [...courses];
+        updatedCourses[selectedCourse]["questions"] = {
+          ...updatedCourses[selectedCourse]["questions"],
+          [nodeId]: response?.questions || [],
+        };
+
+        setCourses(updatedCourses);
       }
     },
-    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode]
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
   );
   if (courses.length <= 0) {
     return (
@@ -2203,7 +2216,12 @@ const CourseComponent = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={12}>
-                      <MultipleChoices sx={{ mt: 3, p: 1 }} choices={[]} />
+                      {courses[selectedCourse]?.questions &&
+                        courses[selectedCourse]?.questions[nodePublicView?.id]?.map((question: any, idx: number) => {
+                          if (question?.question_type === "Multiple Choice") {
+                            return <MultipleChoices key={idx} sx={{ mt: 3, p: 1 }} choices={question?.choices} />;
+                          }
+                        })}
                     </Grid>
 
                     <Grid item xs={12} sm={12}>

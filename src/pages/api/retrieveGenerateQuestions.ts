@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { askGemini } from "./gemini/GeminiAPI";
 import { db } from "@/lib/firestoreServer/admin";
+import fbAuth from "src/middlewares/fbAuth";
 
 const retrieveGenerateQuestions = async (
   courseTitle: string,
@@ -205,19 +206,19 @@ const retrieveGenerateQuestions = async (
   
   Your generated questions will be reviewed by a supervisory team. For every helpful question, we will pay you $10 and for every unhelpful one, you'll lose $10.
   `;
-    const response = await askGemini([], prompt);
+    const response: any = await askGemini([], prompt);
     const generatedQs = response.questions;
     return generatedQs;
   }
 };
 
-export function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseTitle, courseDescription, targetLearners, nodeId } = req.body;
-
-    const questions = retrieveGenerateQuestions(courseTitle, courseDescription, targetLearners, nodeId);
+    const questions = await retrieveGenerateQuestions(courseTitle, courseDescription, targetLearners, nodeId);
     return res.status(200).json({ questions });
   } catch (error) {
     return res.status(500).json({ error: error });
   }
 }
+export default fbAuth(handler);
