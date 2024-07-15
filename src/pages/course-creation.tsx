@@ -184,6 +184,7 @@ const CourseComponent = () => {
   const [loadingNodes, setLoadingNodes] = useState(false);
   const [nodePublicView, setNodePublicView] = useState<any>(null);
   const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
+  const [questionsLoader, setQuestionsLoader] = useState<any>(false);
 
   useEffect(() => {
     const notebooksRef = collection(db, "coursesAI");
@@ -1243,6 +1244,7 @@ const CourseComponent = () => {
         const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
         setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
         setNodePublicViewLoader(false);
+        setQuestionsLoader(true);
         const response: any = await Post("/retrieveGenerateQuestions", {
           courseTitle: courses[selectedCourse].title,
           courseDescription: courses[selectedCourse].description,
@@ -1256,6 +1258,7 @@ const CourseComponent = () => {
         };
 
         setCourses(updatedCourses);
+        setQuestionsLoader(false);
       }
     },
     [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
@@ -2211,10 +2214,11 @@ const CourseComponent = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={12}>
+                      {questionsLoader && <LinearProgress sx={{ width: "100%" }} />}
                       {courses[selectedCourse]?.questions &&
                         courses[selectedCourse]?.questions[nodePublicView?.id]?.map((question: any, idx: number) => {
                           if (question?.question_type === "Multiple Choice") {
-                            return <MultipleChoices key={idx} sx={{ mt: 3, p: 1 }} choices={question?.choices} />;
+                            return <MultipleChoices key={idx} sx={{ mt: 3, p: 2 }} choices={question?.choices} />;
                           }
                         })}
                     </Grid>
