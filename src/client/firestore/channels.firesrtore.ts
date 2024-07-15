@@ -19,7 +19,6 @@ export const getChannelsSnapshot = (
   let q = query(channelRef, where("members", "array-contains", data.username));
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
-    console.log(docChanges);
 
     const channelDocuments: channelsChange[] = docChanges.map(change => {
       const document = change.doc.data() as IChannels;
