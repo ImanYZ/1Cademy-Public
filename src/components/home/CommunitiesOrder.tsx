@@ -208,72 +208,72 @@ export const allCommunities = [
       `All interactions, task fulfillment, and communications will be remote.`,
     ],
   },
-  {
-    id: "health-psychology",
-    name: "Health_Psychology",
-    tags: [
-      {
-        title: "Psychology",
-        node: "owiurXq2sPdbHTC3zWHq",
-      },
-      {
-        title: "Health Psychology",
-        node: "7kScwzjwIaxgBv1RyjVM",
-      },
-    ],
-    allTime: [],
-    weekly: [],
-    url: "/static/Communities/Health_Psychology.png",
-    title: "Health Psychology",
-    width: "34%",
-    leaders: [
-      {
-        name: "Isabella Griesmaier",
-        image: "Isabella_Griesmaier.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/isabella-griesmaier-090900",
-          },
-        ],
-      },
-      {
-        name: "Carson James Clark",
-        image: "Carson_James_Clark.jpeg",
-        about: ``,
-        websites: [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/carson-clark-b393b7243/",
-          },
-        ],
-      },
-    ],
-    YouTube: "3aacjlSdmq4",
-    description: `The goal of the health psychology community is to inspire the development of key research skills while conducting a review of health psychology literature. Using credible, scholarly articles, we are exploring various topics within the field of health psychology, including: behavioral therapies for mental illness, the intersection of race and gender in the healthcare industry, what motivates people to maintain a healthy lifestyle, and the complex role of the media in health. As we compile our research using 1Cademy, we hope to discover patterns and gaps in the literature that could be addressed in a future study of our own design. Each week, interns read an article, summarize it using 1Cademy, present their findings to the group, and engage in thoughtful discussion about themes present in their article.`,
-    accomplishments: `We are still in the preliminary stages of our exploration into the current literature in health psychology. Our team has investigated various topics including the many applications of cognitive-behavioral therapy, the emerging problem of climate grief, the effectiveness of telehealth as a psychotherapy alternative, and LGBTQ+ experiences in healthcare. Recently, we have shifted our attention to reorganizing our section of the larger map, creating an easy-to-follow outline of topics in health psychology. Our next steps will be researching articles relating to other general subsections of the field, such as patient-provider relationships, the psychological impact of chronic illnesses, and impacts of nutrition on overall health.`,
-    gains: [
-      `Develop key research skills, such as paper analysis, summarization, and making connections between disciplines `,
-      `Explore recent health psychology literature, with topics including (but not limited to): Behavioral therapies for medical disorders, race and gender in healthcare, mental health, or the psychological component of maintaining a healthy lifestyle. `,
-      `Experience a flexible and collaborative work environment, with all work being done remotely `,
-      `Work towards publishing research on health psychology.`,
-    ],
-    requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in health psychology or a related field, and complete a Coursera MOOC and give us access to their certificate.`,
-    // coursera: "https://www.coursera.org/learn/positive-psychiatry",
-    hasTest: true,
-    qualifications: [
-      `Knowledge and interest in topics related to the field of health psychology `,
-      `Fluency in reading and writing in English (written summaries of research articles necessary) `,
-      `Ability to work successfully in a collaborative environment and willingness to present findings to the team each week.`,
-    ],
-    responsibilities: [
-      `Regularly study textbooks and research papers, summarize them, and add notes to the collaborative platform `,
-      `Must be prepared and excited to collaborate with our team of computer scientists, web developers, UX researchers, UI designers, epidemiologists, and cognitive and behavioral scientists. `,
-      `Attend weekly meetings and engage in meaningful discussion about the articles presented. `,
-      `All interactions, task fulfillment, and communications will be remote.`,
-    ],
-  },
+  // {
+  //   id: "health-psychology",
+  //   name: "Health_Psychology",
+  //   tags: [
+  //     {
+  //       title: "Psychology",
+  //       node: "owiurXq2sPdbHTC3zWHq",
+  //     },
+  //     {
+  //       title: "Health Psychology",
+  //       node: "7kScwzjwIaxgBv1RyjVM",
+  //     },
+  //   ],
+  //   allTime: [],
+  //   weekly: [],
+  //   url: "/static/Communities/Health_Psychology.png",
+  //   title: "Health Psychology",
+  //   width: "34%",
+  //   leaders: [
+  //     {
+  //       name: "Isabella Griesmaier",
+  //       image: "Isabella_Griesmaier.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/isabella-griesmaier-090900",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       name: "Carson James Clark",
+  //       image: "Carson_James_Clark.jpeg",
+  //       about: ``,
+  //       websites: [
+  //         {
+  //           name: "LinkedIn",
+  //           url: "https://www.linkedin.com/in/carson-clark-b393b7243/",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   YouTube: "3aacjlSdmq4",
+  //   description: `The goal of the health psychology community is to inspire the development of key research skills while conducting a review of health psychology literature. Using credible, scholarly articles, we are exploring various topics within the field of health psychology, including: behavioral therapies for mental illness, the intersection of race and gender in the healthcare industry, what motivates people to maintain a healthy lifestyle, and the complex role of the media in health. As we compile our research using 1Cademy, we hope to discover patterns and gaps in the literature that could be addressed in a future study of our own design. Each week, interns read an article, summarize it using 1Cademy, present their findings to the group, and engage in thoughtful discussion about themes present in their article.`,
+  //   accomplishments: `We are still in the preliminary stages of our exploration into the current literature in health psychology. Our team has investigated various topics including the many applications of cognitive-behavioral therapy, the emerging problem of climate grief, the effectiveness of telehealth as a psychotherapy alternative, and LGBTQ+ experiences in healthcare. Recently, we have shifted our attention to reorganizing our section of the larger map, creating an easy-to-follow outline of topics in health psychology. Our next steps will be researching articles relating to other general subsections of the field, such as patient-provider relationships, the psychological impact of chronic illnesses, and impacts of nutrition on overall health.`,
+  //   gains: [
+  //     `Develop key research skills, such as paper analysis, summarization, and making connections between disciplines `,
+  //     `Explore recent health psychology literature, with topics including (but not limited to): Behavioral therapies for medical disorders, race and gender in healthcare, mental health, or the psychological component of maintaining a healthy lifestyle. `,
+  //     `Experience a flexible and collaborative work environment, with all work being done remotely `,
+  //     `Work towards publishing research on health psychology.`,
+  //   ],
+  //   requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5/4.0 GPA to apply for this position. Interns are required to have a degree path in health psychology or a related field, and complete a Coursera MOOC and give us access to their certificate.`,
+  //   // coursera: "https://www.coursera.org/learn/positive-psychiatry",
+  //   hasTest: true,
+  //   qualifications: [
+  //     `Knowledge and interest in topics related to the field of health psychology `,
+  //     `Fluency in reading and writing in English (written summaries of research articles necessary) `,
+  //     `Ability to work successfully in a collaborative environment and willingness to present findings to the team each week.`,
+  //   ],
+  //   responsibilities: [
+  //     `Regularly study textbooks and research papers, summarize them, and add notes to the collaborative platform `,
+  //     `Must be prepared and excited to collaborate with our team of computer scientists, web developers, UX researchers, UI designers, epidemiologists, and cognitive and behavioral scientists. `,
+  //     `Attend weekly meetings and engage in meaningful discussion about the articles presented. `,
+  //     `All interactions, task fulfillment, and communications will be remote.`,
+  //   ],
+  // },
   {
     id: "ai-language-models-in-education",
     name: "AI_Language_Models_in_Education",
