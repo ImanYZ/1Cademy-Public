@@ -132,10 +132,10 @@ export const DirectMessagesList = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
+      <Box
+        sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", paddingY: "10px" }}
+      >
         <TextField fullWidth placeholder="Search Conversation" value={searchQuery} onChange={handleSearch} />
-      </Box>
-      <Box mb={1} sx={{ display: "flex", justifyContent: "end" }}>
         <IconButton
           sx={{
             background: theme =>
@@ -143,9 +143,10 @@ export const DirectMessagesList = ({
           }}
           onClick={() => setNewChannel(true)}
         >
-          <AddIcon />
+          <AddIcon sx={{ color: "white" }} />
         </IconButton>
       </Box>
+
       {searchedConversations.map((conversation: IConversation, idx: number) => (
         <Paper
           className="direct-channel"
