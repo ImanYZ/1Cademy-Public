@@ -490,6 +490,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       tags,
       references,
     } = req.body;
+
     const categories = await generateCourseSyllabus(
       courseTitle,
       targetLearners,
@@ -506,13 +507,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     for (let category of _categories) {
       delete category.topics;
     }
-    // await db.runTransaction(async (t: any) => {
-    //   const courseDoc = t.get(courseRef);
-    //   const courseData = courseDoc.data();
-    //   courseData.syllabus = _categories;
-    //   t.set(courseRef, courseData);
-    // });
-    console.log("categories", categories);
+
     await courseRef.update({
       syllabus: _categories,
       done: false,
@@ -520,7 +515,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await detach(async () => {
       let syllabus = null;
-      for (let category of categories) {
+      const categoryPromises = categories.map(async (category: { title: string; topics: string[] }) => {
         const topics = await generateCourseCategory(
           courseTitle,
           targetLearners,
@@ -532,6 +527,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           categories,
           category
         );
+
         console.log("topics", topics);
 
         await db.runTransaction(async (t: any) => {
@@ -542,10 +538,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           syllabus = courseData.syllabus;
           t.update(courseRef, courseData);
         });
-      }
+      });
+
+      await Promise.all(categoryPromises);
+
       await courseRef.update({
         done: true,
       });
+
       if (syllabus) {
         const nodes = await retrieveNodesForCourse(
           tags,
@@ -571,4 +571,5 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({});
   }
 }
+
 export default fbAuth(handler);
