@@ -19,6 +19,8 @@ type UserSuggestionProps = {
   autoFocus?: boolean;
   chips?: { id: string; fullName: string }[];
   handleDeleteChip?: (item: string) => void;
+  error?: boolean;
+  helperText?: string;
 };
 
 const SuggestionList = styled(Paper)(({ theme }) => ({
@@ -33,16 +35,28 @@ const SuggestionList = styled(Paper)(({ theme }) => ({
 const StyledTextField: any = styled(TextField)(() => ({
   "& .MuiInputBase-root": {
     display: "flex",
+    alignItems: "center",
     flexWrap: "wrap",
     gap: "5px",
+    padding: "16px 0px 16px 10px",
   },
   "& .MuiInputBase-input": {
     flex: 1,
     minWidth: "120px",
+    padding: "0px",
   },
 }));
 
-const UserSuggestion = ({ db, onlineUsers, action, autoFocus, chips = [], handleDeleteChip }: UserSuggestionProps) => {
+const UserSuggestion = ({
+  db,
+  onlineUsers,
+  action,
+  autoFocus,
+  chips = [],
+  handleDeleteChip,
+  error,
+  helperText,
+}: UserSuggestionProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [users, setUsers] = useState<IUser[]>([]);
   const [suggestions, setSuggestions] = useState<IUser[]>([]);
@@ -147,6 +161,8 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus, chips = [], handle
             </>
           )),
         }}
+        error={error}
+        helperText={error ? helperText : null}
       />
       {showSuggestions && (
         <SuggestionList sx={{ width: "400px" }}>

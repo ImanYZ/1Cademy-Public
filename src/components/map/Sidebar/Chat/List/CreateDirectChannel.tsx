@@ -32,6 +32,7 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
     },
   });
   const [titleError, setTitleError] = useState<boolean>(false);
+  const [userError, setUserError] = useState<boolean>(false);
 
   const handleClose = () => {
     setOpen(false);
@@ -56,6 +57,15 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
     if (!title) {
       setTitleError(true);
       return;
+    } else if (titleError) {
+      setTitleError(false);
+    }
+
+    if (Object.keys(members).length < 2) {
+      setUserError(true);
+      return;
+    } else if (userError) {
+      setUserError(false);
     }
     const memberUnames = [];
     for (const member in members) {
@@ -71,7 +81,8 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-    setTitleError(false);
+    setTitle("");
+    setMembers({});
     createActionTrack({ action: "MessageMemberAdded" });
     handleClose();
   };
@@ -93,6 +104,7 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
             onChange={e => setTitle(e.target.value)}
             fullWidth
             error={titleError}
+            helperText={titleError ? "Title is required" : null}
           />
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
             <UserSuggestion
@@ -106,6 +118,8 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
                   return { id: member, fullName: members[member].fullname };
                 })}
               handleDeleteChip={handleDeleteChip}
+              error={userError}
+              helperText={"User is required"}
             />
           </Box>
         </Box>

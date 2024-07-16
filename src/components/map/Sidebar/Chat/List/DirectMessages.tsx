@@ -12,6 +12,7 @@ import { IConversation } from "src/chatTypes";
 import { CustomBadge } from "@/components/map/CustomBudge";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
 import { useAuth } from "@/context/AuthContext";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { generateChannelName } from "@/lib/utils/chat";
 
 import { getMessageSummary } from "../../helpers/common";
@@ -38,7 +39,7 @@ export const DirectMessagesList = ({
   const [{ user }] = useAuth();
   const [notificationHash, setNotificationHash] = useState<any>({});
   const [newChannel, setNewChannel] = useState(false);
-  const [searchedConversations, setSearchedConversations] = useState<IConversation[]>(conversations);
+  const [searchedConversations, setSearchedConversations] = useState<IConversation[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const fuse = new Fuse(conversations, {
     keys: ["title"],
@@ -48,6 +49,10 @@ export const DirectMessagesList = ({
     findAllMatches: true,
     useExtendedSearch: true,
   });
+
+  useEffect(() => {
+    setSearchedConversations(conversations);
+  }, [conversations]);
 
   useEffect(() => {
     setNotificationHash(
@@ -132,7 +137,10 @@ export const DirectMessagesList = ({
       </Box>
       <Box mb={1} sx={{ display: "flex", justifyContent: "end" }}>
         <IconButton
-          sx={{ background: theme => (theme.palette.mode === "dark" ? "rgb(85, 64, 43)" : "rgb(253, 234, 215)") }}
+          sx={{
+            background: theme =>
+              theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange400 : DESIGN_SYSTEM_COLORS.primary500,
+          }}
           onClick={() => setNewChannel(true)}
         >
           <AddIcon />
