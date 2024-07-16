@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -17,6 +17,8 @@ type UserSuggestionProps = {
   onlineUsers: any;
   action: (suggestion: IUser) => void;
   autoFocus?: boolean;
+  chips?: { id: string; fullName: string }[];
+  handleDeleteChip?: (item: string) => void;
 };
 
 const SuggestionList = styled(Paper)(({ theme }) => ({
@@ -28,7 +30,19 @@ const SuggestionList = styled(Paper)(({ theme }) => ({
   zIndex: 1,
 }));
 
-const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionProps) => {
+const StyledTextField: any = styled(TextField)(() => ({
+  "& .MuiInputBase-root": {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "5px",
+  },
+  "& .MuiInputBase-input": {
+    flex: 1,
+    minWidth: "120px",
+  },
+}));
+
+const UserSuggestion = ({ db, onlineUsers, action, autoFocus, chips = [], handleDeleteChip }: UserSuggestionProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [users, setUsers] = useState<IUser[]>([]);
   const [suggestions, setSuggestions] = useState<IUser[]>([]);
@@ -111,7 +125,7 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
 
   return (
     <Box ref={wrapperRef} style={{ position: "relative", width: "100%" }}>
-      <TextField
+      <StyledTextField
         value={inputValue}
         onChange={handleInputChange}
         placeholder="Search User"
@@ -121,6 +135,18 @@ const UserSuggestion = ({ db, onlineUsers, action, autoFocus }: UserSuggestionPr
           setShowSuggestions(true);
         }}
         sx={{ position: "sticky", top: 0 }}
+        InputProps={{
+          startAdornment: chips.map((item: any) => (
+            <>
+              <Chip
+                key={item.id}
+                tabIndex={-1}
+                label={item.fullName}
+                onDelete={() => handleDeleteChip && handleDeleteChip(item.id)}
+              />
+            </>
+          )),
+        }}
       />
       {showSuggestions && (
         <SuggestionList sx={{ width: "400px" }}>

@@ -1,9 +1,11 @@
+import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import { Button, IconButton, Paper, Typography } from "@mui/material";
+import { IconButton, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { doc, Firestore, updateDoc } from "firebase/firestore";
+import Fuse from "fuse.js";
 import { useCallback, useEffect, useState } from "react";
 import { IConversation } from "src/chatTypes";
 
@@ -13,7 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { generateChannelName } from "@/lib/utils/chat";
 
 import { getMessageSummary } from "../../helpers/common";
-import UserSuggestion from "../Common/UserSuggestion";
+import GroupAvatar from "../Common/GroupAvatar";
 import { CreateDirectChannel } from "./CreateDirectChannel";
 
 dayjs.extend(relativeTime);
@@ -30,12 +32,22 @@ export const DirectMessagesList = ({
   conversations,
   db,
   onlineUsers,
-  openDMChannel,
+  // openDMChannel,
   notifications,
 }: DirectMessageProps) => {
   const [{ user }] = useAuth();
   const [notificationHash, setNotificationHash] = useState<any>({});
   const [newChannel, setNewChannel] = useState(false);
+  const [searchedConversations, setSearchedConversations] = useState<IConversation[]>(conversations);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const fuse = new Fuse(conversations, {
+    keys: ["title"],
+    threshold: 0.3,
+    isCaseSensitive: false,
+    shouldSort: true,
+    findAllMatches: true,
+    useExtendedSearch: true,
+  });
 
   useEffect(() => {
     setNotificationHash(
@@ -103,13 +115,30 @@ export const DirectMessagesList = ({
     );
   };
 
+  const handleSearch = (e: any) => {
+    setSearchQuery(e.target.value);
+    if (!e.target.value) {
+      setSearchedConversations(conversations);
+      return;
+    }
+    const results = fuse.search(e.target.value).map(result => result.item);
+    setSearchedConversations([...results]);
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
-        <UserSuggestion db={db} onlineUsers={onlineUsers} action={openDMChannel} />
+        <TextField fullWidth placeholder="Search Conversation" value={searchQuery} onChange={handleSearch} />
       </Box>
-      <Button onClick={() => setNewChannel(true)}>Create Channel</Button>
-      {conversations.map((conversation: IConversation, idx: number) => (
+      <Box mb={1} sx={{ display: "flex", justifyContent: "end" }}>
+        <IconButton
+          sx={{ background: theme => (theme.palette.mode === "dark" ? "rgb(85, 64, 43)" : "rgb(253, 234, 215)") }}
+          onClick={() => setNewChannel(true)}
+        >
+          <AddIcon />
+        </IconButton>
+      </Box>
+      {searchedConversations.map((conversation: IConversation, idx: number) => (
         <Paper
           className="direct-channel"
           onClick={() => openRoom("direct", conversation)}
@@ -144,7 +173,11 @@ export const DirectMessagesList = ({
             }}
           >
             <Box sx={{ mr: "7px" }}>
-              <OverlappingAvatars members={conversation.membersInfo} />
+              {Object.keys(conversation.membersInfo).length > 2 ? (
+                <GroupAvatar membersInfo={conversation.membersInfo} size={35} max={2} />
+              ) : (
+                <OverlappingAvatars members={conversation.membersInfo} />
+              )}
             </Box>
             <Box sx={{ display: "block" }}>
               <Typography
@@ -154,7 +187,7 @@ export const DirectMessagesList = ({
                   lineHeight: "24px",
                 }}
               >
-                {generateChannelName(conversation.membersInfo, user)}
+                {conversation?.title || generateChannelName(conversation.membersInfo, user)}
               </Typography>
             </Box>
 
@@ -198,14 +231,7 @@ export const DirectMessagesList = ({
           )}
         </Paper>
       ))}
-      <CreateDirectChannel
-        db={db}
-        user={user}
-        onlineUsers={onlineUsers}
-        setOpen={setNewChannel}
-        open={newChannel}
-        roomType={"direct"}
-      />
+      <CreateDirectChannel db={db} user={user} onlineUsers={onlineUsers} setOpen={setNewChannel} open={newChannel} />
     </Box>
   );
 };

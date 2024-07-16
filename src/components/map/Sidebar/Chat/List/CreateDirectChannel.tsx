@@ -1,11 +1,10 @@
-import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { addDoc, collection, Firestore } from "firebase/firestore";
 import { useState } from "react";
 
-import { Post } from "@/lib/mapApi";
 import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 
 import UserSuggestion from "../Common/UserSuggestion";
@@ -17,10 +16,9 @@ type DirectMessageProps = {
   onlineUsers: any;
   open: any;
   setOpen: any;
-  roomType: string;
 };
 
-export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen, roomType }: DirectMessageProps) => {
+export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: DirectMessageProps) => {
   const createActionTrack = useCreateActionTrack();
   const [title, setTitle] = useState<string>("");
   const [members, setMembers] = useState<any>({
@@ -54,7 +52,7 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen, room
     setMembers(membersInfo);
   };
 
-  const createNewChannel = async (member: any) => {
+  const createNewChannel = async () => {
     if (!title) {
       setTitleError(true);
       return;
@@ -65,33 +63,20 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen, room
     }
 
     const channelRef = collection(db, "conversations");
-    const newDoc = await addDoc(channelRef, {
+    await addDoc(channelRef, {
       title: title,
       members: memberUnames,
       membersInfo: members,
+      deleted: false,
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
     setTitleError(false);
-    const docRef = collection(db, "notifications");
-    await addDoc(docRef, {
-      sender: user.uname,
-      channelId: newDoc.id,
-      seen: false,
-      notify: member?.uname,
-      roomType,
-      notificationType: "chat",
-      createdAt: new Date(),
-    });
-    await Post("/sendFCMNotification", {
-      title: `Added in group chat by ${user.fName} ${user.lName}`,
-      body: "",
-      receiverUID: member.userId,
-    });
     createActionTrack({ action: "MessageMemberAdded" });
     handleClose();
   };
 
-  const removeMember = (member: string) => {
+  const handleDeleteChip = (member: string) => {
     const prevMembers = { ...members };
     delete prevMembers[member];
     setMembers(prevMembers);
@@ -110,23 +95,21 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen, room
             error={titleError}
           />
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
-            <UserSuggestion db={db} onlineUsers={onlineUsers} action={handleMembers} autoFocus={true} />
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            {Object.keys(members).map((member: any, idx: number) => {
-              return (
-                <Chip
-                  key={idx}
-                  label={members[member].fullname}
-                  variant="outlined"
-                  onDelete={() => removeMember(member)}
-                />
-              );
-            })}
+            <UserSuggestion
+              db={db}
+              onlineUsers={onlineUsers}
+              action={handleMembers}
+              autoFocus={true}
+              chips={Object.keys(members)
+                .filter((member: any) => member !== user.uname)
+                .map((member: any) => {
+                  return { id: member, fullName: members[member].fullname };
+                })}
+              handleDeleteChip={handleDeleteChip}
+            />
           </Box>
         </Box>
       </DialogContent>
-
       <DialogActions>
         <Button onClick={createNewChannel} color="primary">
           Create
