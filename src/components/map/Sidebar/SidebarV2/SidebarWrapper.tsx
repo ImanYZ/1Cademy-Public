@@ -211,7 +211,7 @@ export const SidebarWrapper = ({
                   <InfoIcon sx={{ color: "inherit" }} />
                 </IconButton>
               </Tooltip>
-              {(leading || roomType === "direct") && (
+              {leading && roomType !== "direct" && (
                 <Tooltip title={"Add New Member"}>
                   <IconButton
                     sx={{

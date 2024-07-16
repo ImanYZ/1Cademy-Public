@@ -91,6 +91,7 @@ export type IChannels = {
   newsUpdatedAt: Timestamp;
   tag: string;
   channelType: "directMessage" | "group";
+  deletedBy: string[];
 };
 
 export type IChatNotification = {
@@ -110,6 +111,7 @@ export type IConversation = {
   membersInfo: MembersInfo;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  deletedBy: string[];
 };
 
 export type IConversationMessage = {

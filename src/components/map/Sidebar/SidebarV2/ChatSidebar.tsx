@@ -760,6 +760,7 @@ export const ChatSidebar = ({
                 )}
                 {value === 2 && (
                   <DirectMessagesList
+                    user={user}
                     openRoom={openRoom}
                     conversations={conversations}
                     db={db}
