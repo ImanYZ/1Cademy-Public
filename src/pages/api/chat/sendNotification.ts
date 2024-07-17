@@ -50,17 +50,16 @@ const triggerNotifications = async (newMessage: any) => {
     if (channelData) {
       const membersInfo = channelData.membersInfo;
       console.log(channelData?.members);
-      let _member: string[] = [];
-      if (roomType === "direct") {
-        _member = channelData.visibleFor.filter((m: string) => m !== sender);
-      } else {
-        _member = channelData.members.filter((m: string) => m !== sender);
-      }
-
+      const _member = channelData.members.filter((m: string) => m !== sender);
       const invalidTokens: any = {};
       for (let member of _member) {
         const UID = membersInfo[member].uid;
-
+        if (!channelData.visibleFor.includes(member)) {
+          const visibleFor = [...channelData.visibleFor, member];
+          await channelRef.update({
+            visibleFor,
+          });
+        }
         const newNotification = {
           ...newMessage,
           message: replaceMentions(message),
@@ -112,6 +111,7 @@ const triggerNotifications = async (newMessage: any) => {
         } catch (error) {}
         await notificationRef.set(newNotification);
       }
+
       await removeInvalidTokens(invalidTokens);
     }
 
