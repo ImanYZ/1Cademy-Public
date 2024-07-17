@@ -15,7 +15,7 @@ export const getConversationsSnapshot = (
   callback: (changes: conversationChange[]) => void
 ): Unsubscribe => {
   const channelRef = collection(db, "conversations");
-  let q = query(channelRef, where("members", "array-contains", data.username));
+  let q = query(channelRef, where("visibleFor", "array-contains", data.username));
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 
@@ -23,6 +23,7 @@ export const getConversationsSnapshot = (
       const data = { id: change.doc.id, ...change.doc.data() } as IConversation;
       return { type: change.type, data, doc: change.doc };
     });
+
     callback(convDocuments);
   });
   return killSnapshot;

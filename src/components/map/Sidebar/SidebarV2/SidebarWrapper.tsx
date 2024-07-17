@@ -42,6 +42,7 @@ type SidebarWrapperProps = {
   openChatInfo?: boolean;
   leading?: boolean;
   roomType?: string;
+  channelTitle?: string;
   openDMChannel?: (user2: string) => void;
 };
 /**
@@ -76,6 +77,7 @@ export const SidebarWrapper = ({
   openChatInfo,
   leading,
   roomType,
+  channelTitle,
   openDMChannel,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
@@ -194,6 +196,19 @@ export const SidebarWrapper = ({
             <GroupAvatar membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
           )}
           {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
+          {!!channelTitle && (
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                maxWidth: "30%",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {channelTitle}
+            </Typography>
+          )}
           {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
             <Box sx={{ display: "flex", gap: "10px" }}>
               <Tooltip title={"More Info"}>

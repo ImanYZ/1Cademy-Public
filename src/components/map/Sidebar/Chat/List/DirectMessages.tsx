@@ -4,7 +4,7 @@ import { IconButton, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { arrayUnion, doc, Firestore, updateDoc } from "firebase/firestore";
+import { arrayRemove, doc, Firestore, updateDoc } from "firebase/firestore";
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useState } from "react";
 import { IConversation } from "src/chatTypes";
@@ -51,8 +51,8 @@ export const DirectMessagesList = ({
   });
 
   useEffect(() => {
-    setSearchedConversations(conversations.filter(conversation => !conversation.deletedBy?.includes(user?.uname)));
-  }, [user, conversations]);
+    setSearchedConversations(conversations);
+  }, [conversations]);
 
   useEffect(() => {
     setNotificationHash(
@@ -71,7 +71,7 @@ export const DirectMessagesList = ({
       event.stopPropagation();
       const channelRef = doc(db, "conversations", conversation.id);
       await updateDoc(channelRef, {
-        deletedBy: arrayUnion(user.uname),
+        visibleFor: arrayRemove(user.uname),
       });
     },
     []
