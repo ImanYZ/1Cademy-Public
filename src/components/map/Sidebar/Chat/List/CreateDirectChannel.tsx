@@ -67,7 +67,7 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
 
     const channelRef = collection(db, "conversations");
     await addDoc(channelRef, {
-      title: title || "",
+      title: title,
       members: memberUnames,
       membersInfo: members,
       visibleFor: memberUnames,
