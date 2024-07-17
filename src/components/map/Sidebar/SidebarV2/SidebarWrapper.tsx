@@ -9,8 +9,6 @@ import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 
-import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
-
 import GroupAvatar from "../Chat/Common/GroupAvatar";
 
 type SidebarWrapperProps = {
@@ -72,8 +70,8 @@ export const SidebarWrapper = ({
   // setDisplayTagSearcher,
   openChatInfoPage,
   setNewMemberSection,
-  onlineUsers,
-  user,
+  // onlineUsers,
+  // user,
   openChatInfo,
   leading,
   roomType,
@@ -91,50 +89,6 @@ export const SidebarWrapper = ({
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
-  const AvatarUser = ({ members }: any) => {
-    const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
-    const userInfo = members[otherUser] || members[user?.uname];
-    return (
-      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-        <Box
-          sx={{
-            width: `30px`,
-            height: `30px`,
-            cursor: "pointer",
-            transition: "all 0.2s 0s ease",
-            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-            borderRadius: "50%",
-            "& > .user-image": {
-              borderRadius: "50%",
-              overflow: "hidden",
-              width: "30px",
-              height: "30px",
-            },
-            "@keyframes slidein": {
-              from: {
-                transform: "translateY(0%)",
-              },
-              to: {
-                transform: "translateY(100%)",
-              },
-            },
-          }}
-        >
-          <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={30} sx={{ border: "none" }} />
-          <Box
-            sx={{
-              backgroundColor: !onlineUsers[userInfo.uname]
-                ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
-                : "",
-              fontSize: "1px",
-            }}
-            className={onlineUsers[userInfo.uname] ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
-          />
-        </Box>
-        <Typography sx={{ pl: 2 }}>{userInfo.fullname}</Typography>
-      </Box>
-    );
-  };
   return (
     <Drawer
       id="sidebarDrawer"
@@ -195,7 +149,6 @@ export const SidebarWrapper = ({
           {!!selectedChannel && (
             <GroupAvatar membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
           )}
-          {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
           {!!channelTitle && (
             <Typography
               sx={{
@@ -209,7 +162,7 @@ export const SidebarWrapper = ({
               {channelTitle}
             </Typography>
           )}
-          {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
+          {!!selectedChannel && !!channelTitle && !openChatInfo && (
             <Box sx={{ display: "flex", gap: "10px" }}>
               <Tooltip title={"More Info"}>
                 <IconButton
