@@ -1,18 +1,22 @@
+import CloseIcon from "@mui/icons-material/Close";
+import CreateIcon from "@mui/icons-material/Create";
+import DoneIcon from "@mui/icons-material/Done";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsOffIcon from "@mui/icons-material/NotificationsOff";
-import { Tab, Tabs, Typography } from "@mui/material";
+import { IconButton, InputAdornment, Tab, Tabs, TextField, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getFirestore } from "firebase/firestore";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import NextImage from "next/image";
 import React, { useCallback, useState } from "react";
 
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { generateChannelName } from "@/lib/utils/chat";
 
 import TagIcon from "../../../../../../public/tag.svg";
 import GroupAvatar from "../Common/GroupAvatar";
@@ -56,6 +60,10 @@ export const Summary = ({
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [leavingChannel, setLeavingChannel] = useState(false);
   const [mutingChannel, setMutingChannel] = useState(false);
+  const [titleEditable, setTitleEditable] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>(
+    selectedChannel.title || generateChannelName(selectedChannel.membersInfo, user)
+  );
   const muted = !selectedChannel?.membersInfo[user.uname].muteChannel;
 
   const handleChange = useCallback(
@@ -137,9 +145,68 @@ export const Summary = ({
     }
   }, [selectedChannel, roomType]);
 
+  const handleUpdateTitle = async () => {
+    const channelRef = doc(db, "conversations", selectedChannel?.id);
+    await updateDoc(channelRef, {
+      title,
+    });
+    setTitleEditable(false);
+  };
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "9px", alignItems: "center" }}>
       <GroupAvatar membersInfo={selectedChannel.membersInfo} size={40} openDMChannel={openDMChannel} />
+      {titleEditable ? (
+        <Box>
+          <TextField
+            sx={{
+              "& .MuiInputBase-root": {
+                padding: "10px 0px 10px 10px",
+              },
+              "& .MuiInputBase-input": {
+                width: "150px",
+                padding: "0px",
+              },
+            }}
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end" sx={{ mr: "5px" }}>
+                  <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "end" }}>
+                    <IconButton color="error" size="small" onClick={() => setTitleEditable(false)} edge="end">
+                      <CloseIcon fontSize="small" onClick={() => setTitleEditable(false)} />
+                    </IconButton>
+                    <IconButton color="success" size="small" onClick={() => handleUpdateTitle()} edge="end">
+                      <DoneIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+      ) : (
+        <Box sx={{ width: "30%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography
+            sx={{
+              textAlign: !(leading || roomType === "direct") ? "center" : undefined,
+              fontWeight: "bold",
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              width: "90%",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {selectedChannel.title || generateChannelName(selectedChannel.membersInfo, user)}
+          </Typography>
+          {(leading || roomType === "direct") && (
+            <IconButton size="small" onClick={() => setTitleEditable(true)}>
+              <CreateIcon sx={{ color: "gray", fontSize: "16px" }} />
+            </IconButton>
+          )}
+        </Box>
+      )}
       <Box
         sx={{
           display: "flex",

@@ -4,14 +4,13 @@ import { IconButton, Paper, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { doc, Firestore, updateDoc } from "firebase/firestore";
+import { arrayRemove, doc, Firestore, updateDoc } from "firebase/firestore";
 import Fuse from "fuse.js";
 import { useCallback, useEffect, useState } from "react";
 import { IConversation } from "src/chatTypes";
 
 import { CustomBadge } from "@/components/map/CustomBudge";
 import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
-import { useAuth } from "@/context/AuthContext";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { generateChannelName } from "@/lib/utils/chat";
 
@@ -21,6 +20,7 @@ import { CreateDirectChannel } from "./CreateDirectChannel";
 
 dayjs.extend(relativeTime);
 type DirectMessageProps = {
+  user: any;
   openRoom: any;
   conversations: IConversation[];
   db: Firestore;
@@ -29,6 +29,7 @@ type DirectMessageProps = {
   notifications: any;
 };
 export const DirectMessagesList = ({
+  user,
   openRoom,
   conversations,
   db,
@@ -36,7 +37,6 @@ export const DirectMessagesList = ({
   // openDMChannel,
   notifications,
 }: DirectMessageProps) => {
-  const [{ user }] = useAuth();
   const [notificationHash, setNotificationHash] = useState<any>({});
   const [newChannel, setNewChannel] = useState(false);
   const [searchedConversations, setSearchedConversations] = useState<IConversation[]>([]);
@@ -71,7 +71,7 @@ export const DirectMessagesList = ({
       event.stopPropagation();
       const channelRef = doc(db, "conversations", conversation.id);
       await updateDoc(channelRef, {
-        deleted: true,
+        visibleFor: arrayRemove(user.uname),
       });
     },
     []

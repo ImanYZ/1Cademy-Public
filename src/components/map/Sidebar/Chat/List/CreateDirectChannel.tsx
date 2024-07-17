@@ -5,6 +5,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { addDoc, collection, Firestore } from "firebase/firestore";
 import { useState } from "react";
 
+import { generateChannelName } from "@/lib/utils/chat";
 import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 
 import UserSuggestion from "../Common/UserSuggestion";
@@ -19,9 +20,7 @@ type DirectMessageProps = {
 };
 
 export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: DirectMessageProps) => {
-  const createActionTrack = useCreateActionTrack();
-  const [title, setTitle] = useState<string>("");
-  const [members, setMembers] = useState<any>({
+  const initialUser = {
     [user.uname]: {
       uname: user.uname,
       imageUrl: user.imageUrl,
@@ -30,8 +29,10 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
       role: "",
       uid: user.userId,
     },
-  });
-  const [titleError, setTitleError] = useState<boolean>(false);
+  };
+  const createActionTrack = useCreateActionTrack();
+  const [title, setTitle] = useState<string>("");
+  const [members, setMembers] = useState<any>(initialUser);
   const [userError, setUserError] = useState<boolean>(false);
 
   const handleClose = () => {
@@ -54,13 +55,6 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
   };
 
   const createNewChannel = async () => {
-    if (!title) {
-      setTitleError(true);
-      return;
-    } else if (titleError) {
-      setTitleError(false);
-    }
-
     if (Object.keys(members).length < 2) {
       setUserError(true);
       return;
@@ -74,15 +68,16 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
 
     const channelRef = collection(db, "conversations");
     await addDoc(channelRef, {
-      title: title,
+      title: title || generateChannelName(members, user),
       members: memberUnames,
       membersInfo: members,
+      visibleFor: memberUnames,
       deleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
     setTitle("");
-    setMembers({});
+    setMembers(initialUser);
     createActionTrack({ action: "MessageMemberAdded" });
     handleClose();
   };
@@ -98,14 +93,7 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
       <DialogTitle>Create channel</DialogTitle>
       <DialogContent sx={{ height: "100%", width: "600px", overflow: "visible" }}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          <TextField
-            placeholder="Title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            fullWidth
-            error={titleError}
-            helperText={titleError ? "Title is required" : null}
-          />
+          <TextField placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} fullWidth />
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingY: "10px" }}>
             <UserSuggestion
               db={db}
