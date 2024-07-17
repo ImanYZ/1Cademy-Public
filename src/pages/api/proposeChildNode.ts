@@ -284,7 +284,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       await signalNodeToTypesense({
-        nodeId: newVersion.node,
+        nodeId: versionNodeId,
         currentTimestamp,
         versionData: newVersion,
       });
