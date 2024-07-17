@@ -621,6 +621,7 @@ export const ChatSidebar = ({
       moveBack={selectedChannel ? moveBack : null}
       selectedChannel={selectedChannel}
       // setDisplayTagSearcher={setDisplayTagSearcher}
+      channelTitle={selectedChannel?.title}
       roomType={roomType}
       openChatInfoPage={openChatInfoPage}
       setNewMemberSection={setNewMemberSection}
@@ -660,7 +661,7 @@ export const ChatSidebar = ({
                   roomType={roomType}
                   selectedChannel={selectedChannel}
                   openLinkedNode={openLinkedNode}
-                  leading={leading}
+                  leading={leading.includes(selectedChannel?.id)}
                   openUserInfoSidebar={openUserInfoSidebar}
                   moveBack={moveBack}
                   setOpenChatRoom={setOpenChatRoom}
@@ -760,6 +761,7 @@ export const ChatSidebar = ({
                 )}
                 {value === 2 && (
                   <DirectMessagesList
+                    user={user}
                     openRoom={openRoom}
                     conversations={conversations}
                     db={db}
