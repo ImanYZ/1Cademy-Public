@@ -27,6 +27,7 @@ import {
   setOrIncrementNotificationNums,
   versionCreateUpdate,
 } from "../../utils";
+import { TransactionWrite } from "src/types";
 
 /*
   This function gets invoked when the user clicks on the 
@@ -118,10 +119,11 @@ export type IRateVersionPayload = {
 // - aType values according voting action
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { uname } = req.body?.data?.user?.userData;
+    const userData = req.body?.data?.user?.userData;
+    const { uname } = userData;
     const payload = req.body as IRateVersionPayload;
 
-    const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
+    const tWriteOperations: TransactionWrite[] = [];
 
     let writeCounts = 0;
     let nodeData: INode,
@@ -144,9 +146,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const removedParents = [];
       const removedChildren = [];
 
-      ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }));
+      ({ nodeData, nodeRef } = await getNode({ nodeId: payload.nodeId, t }));
       ({ versionData, versionRef, nodeType } = await getVersion({
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         nodeData,
         t,
       }));
@@ -185,13 +187,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       let { userVersionData, userVersionRef } = await getUserVersion({
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         nodeType,
         uname,
         t,
       });
 
-      if (req.body.correct) {
+      if (payload.correct) {
         correct = userVersionData?.correct ? -1 : 1;
         wrong = !userVersionData?.correct && userVersionData?.wrong ? -1 : 0;
       } else {
@@ -199,7 +201,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrong = userVersionData?.wrong ? -1 : 1;
       }
 
-      award = nodeData.admin === uname && versionData.proposer !== uname && req.body.award ? 1 : 0;
+      award = nodeData.admin === uname && versionData.proposer !== uname && payload.award ? 1 : 0;
 
       if (correct === 1) {
         actionName = "Correct";
@@ -224,7 +226,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         instantApprove,
         isInstructor,
       }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
-        await checkInstantApprovalForProposalVote(nodeData?.tagIds || [], uname, req.body.versionId);
+        await checkInstantApprovalForProposalVote(nodeData?.tagIds || [], uname, payload.versionId);
 
       isApproved = isVersionApproved({
         corrects: versionData.corrects + correct,
@@ -236,16 +238,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
-        versionNodeId: req.body.versionNodeId,
+        versionNodeId: payload.versionNodeId,
         notebookId: payload.notebookId ? payload.notebookId : "",
-        nodeId: req.body.nodeId,
+        nodeId: payload.nodeId,
         nodeData,
         nodeRef,
         nodeType: nodeType,
         instantApprove: isApproved,
         courseExist,
         isInstructor,
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         versionData,
         newVersion: false,
         childType,
@@ -266,7 +268,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // let choices: any[] = [];
-      // if ((!childType && req.body.nodeType === "Question") || childType === "Question") {
+      // if ((!childType && payload.nodeType === "Question") || childType === "Question") {
       //   choices = versionData.choices;
       // }
       const versionUpdates: any = {
@@ -285,7 +287,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           correct: correct === 1,
           createdAt: currentTimestamp,
           updatedAt: currentTimestamp,
-          version: req.body.versionId,
+          version: payload.versionId,
           user: uname,
           wrong: wrong === 1,
         };
@@ -328,10 +330,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let notificationData = {
         proposer: versionData.proposer,
         uname,
-        imageUrl: req.body.data.user.userData.imageUrl,
-        fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        chooseUname: req.body.data.user.userData.chooseUname,
-        nodeId: req.body.nodeId,
+        imageUrl: userData.imageUrl,
+        fullname: userData.fName + " " + userData.lName,
+        chooseUname: userData.chooseUname,
+        nodeId: payload.nodeId,
         title: versionData.accepted ? versionData.title : nodeData.title,
         // Origin type
         oType: "Proposal",
@@ -352,7 +354,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         // This was a pending proposal for a child/improvement that just got accepted. So, we need to decrement the number of pending proposals for all the members of this community.
         await addToPendingPropsNumsExcludingVoters({
           nodeType: !!childType ? childType : nodeType,
-          versionId: req.body.versionId,
+          versionId: payload.versionId,
           tagIds: versionData.tagIds,
           value: -1,
           writeCounts,
@@ -426,7 +428,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       actionRef.create({
         accepted: isAccepted,
         type: "RateVersion",
-        action: actionName + "-" + req.body.versionId,
+        action: actionName + "-" + payload.versionId,
         imageUrl: userData.imageUrl,
         createdAt: currentTimestamp,
         doer: userData.uname,
@@ -493,7 +495,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         parentType: versionData.childType ? (nodeType as INodeType) : undefined,
         proposer: versionData.proposer,
         tagIds: versionData.tagIds,
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         voter: uname,
         voterCorrect: correct,
         voterWrong: wrong,
@@ -503,7 +505,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // we need update contributors, contribNames, institNames, institutions
     // TODO: move these to queue
     await detach(async () => {
-      let contribution: number = req.body.correct ? correct : wrong;
+      let contribution: number = payload.correct ? correct : wrong;
       if (!accepted && isApproved) {
         contribution = versionData.corrects + correct - (versionData.wrongs + wrong);
       }

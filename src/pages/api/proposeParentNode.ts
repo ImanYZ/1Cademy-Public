@@ -291,6 +291,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         newNode.choices = req.body.data.choices;
         [batch, writeCounts] = await createPractice({
           batch,
+          unames: [],
           tagIds: req.body.data.tagIds,
           nodeId: nodeRef.id,
           parentId: req.body.data.parents[0].id,

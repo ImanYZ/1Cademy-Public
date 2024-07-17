@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase/firestore";
+import { DocumentReference } from "firebase-admin/firestore";
 
 import { KnowledgeChoice } from "./knowledgeTypes";
 
@@ -92,3 +93,5 @@ export type TryRubricResponse = {
 };
 
 export type LivelinessBarType = "relativeInteractions" | "relativeReputations" | "interaction" | "reputation";
+
+export type TransactionWrite = { objRef: DocumentReference; data: any; operationType: "update" | "set" | "delete" };
