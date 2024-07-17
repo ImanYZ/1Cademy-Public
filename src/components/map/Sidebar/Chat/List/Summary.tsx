@@ -214,25 +214,27 @@ export const Summary = ({
           justifyContent: "space-between",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <NextImage width={"20px"} src={TagIcon} alt="tag icon" />
+        {roomType !== "direct" && (
           <Box
             sx={{
-              fontSize: "12px",
-              marginLeft: "5px",
-              color: theme =>
-                theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            {selectedChannel.tagLabel}
+            <NextImage width={"20px"} src={TagIcon} alt="tag icon" />
+            <Box
+              sx={{
+                fontSize: "12px",
+                marginLeft: "5px",
+                color: theme =>
+                  theme.palette.mode === "dark" ? theme.palette.common.notebookG200 : theme.palette.common.gray500,
+              }}
+            >
+              {selectedChannel.tagLabel}
+            </Box>
           </Box>
-        </Box>
+        )}
       </Box>
       <Typography
         sx={{
