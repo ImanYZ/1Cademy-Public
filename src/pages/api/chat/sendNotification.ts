@@ -52,17 +52,9 @@ const triggerNotifications = async (newMessage: any) => {
       console.log(channelData?.members);
       const _member = channelData.members.filter((m: string) => m !== sender);
       const invalidTokens: any = {};
-      if (channelData?.members?.length !== channelData?.visibleFor?.length) {
-        const visibleFor: string[] = [];
-        for (const member of _member) {
-          if (!channelData.visibleFor.includes(member)) {
-            visibleFor.push(member);
-          }
-        }
-        await channelRef.update({
-          visibleFor,
-        });
-      }
+      await channelRef.update({
+        visibleFor: channelData?.members,
+      });
       for (const member of _member) {
         const UID = membersInfo[member].uid;
         const newNotification = {
