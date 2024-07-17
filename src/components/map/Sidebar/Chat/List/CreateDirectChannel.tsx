@@ -5,7 +5,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { addDoc, collection, Firestore } from "firebase/firestore";
 import { useState } from "react";
 
-import { generateChannelName } from "@/lib/utils/chat";
 import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 
 import UserSuggestion from "../Common/UserSuggestion";
@@ -68,7 +67,7 @@ export const CreateDirectChannel = ({ db, user, onlineUsers, open, setOpen }: Di
 
     const channelRef = collection(db, "conversations");
     await addDoc(channelRef, {
-      title: title || generateChannelName(members, user),
+      title: title || "",
       members: memberUnames,
       membersInfo: members,
       visibleFor: memberUnames,
