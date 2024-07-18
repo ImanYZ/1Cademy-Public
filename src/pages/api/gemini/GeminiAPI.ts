@@ -61,16 +61,16 @@ const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } =
 
 export async function askGemini(files: File[], prompt: string) {
   files.forEach((file, index) => {
-    console.log(`File ${index} type:`, file.constructor.name);
-  });
+    console.log(`File ${index} type:`, file.constructor.name)
+  })
 
-  const validFiles = files.filter(file => file instanceof File);
+  const validFiles = files.filter((file) => file instanceof File)
   if (validFiles.length !== files.length) {
-    console.error("Some objects are not File instances:", files);
-    throw new Error("Some provided objects are not File instances");
+    console.error('Some objects are not File instances:', files)
+    throw new Error('Some provided objects are not File instances')
   }
 
-  const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
+  const fileParts = await Promise.all(validFiles.map(fileToGenerativePart))
 
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   let response = "";
@@ -83,7 +83,7 @@ export async function askGemini(files: File[], prompt: string) {
       contents: [
         {
           parts: [
-            ...imageParts,
+            ...fileParts,
             {
               text: prompt,
             },

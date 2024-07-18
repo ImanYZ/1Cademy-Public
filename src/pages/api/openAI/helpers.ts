@@ -2531,16 +2531,16 @@ export const completeJsonString = (truncatedJson: string): string => {
 export async function callOpenAIChat(files: File[], userPrompt: string, systemPrompt: string = "") {
   try {
     files.forEach((file, index) => {
-      console.log(`File ${index} type:`, file.constructor.name);
-    });
+      console.log(`File ${index} type:`, file.constructor.name)
+    })
 
-    const validFiles = files.filter(file => file instanceof File);
+    const validFiles = files.filter((file) => file instanceof File)
     if (validFiles.length !== files.length) {
-      console.error("Some objects are not File instances:", files);
-      throw new Error("Some provided objects are not File instances");
+      console.error('Some objects are not File instances:', files)
+      throw new Error('Some provided objects are not File instances')
     }
 
-    const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
+    const fileParts = await Promise.all(validFiles.map(fileToGenerativePart))
 
     let response = "";
     let finish_reason = "";
@@ -2560,7 +2560,7 @@ export async function callOpenAIChat(files: File[], userPrompt: string, systemPr
                 {
                   role: "user",
                   content: [
-                    ...imageParts,
+                    ...fileParts,
                     {
                       type: "text",
                       text: systemPrompt + "\n\n\n" + userPrompt,
@@ -2619,7 +2619,7 @@ export async function callOpenAIChat(files: File[], userPrompt: string, systemPr
             {
               role: "user",
               content: [
-                ...imageParts,
+                ...fileParts,
                 {
                   type: "text",
                   text: userPrompt,
