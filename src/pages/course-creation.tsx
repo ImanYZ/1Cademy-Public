@@ -652,7 +652,7 @@ const CourseComponent = () => {
   const getNewTopics = (currentImprovement: any, category: string) => {
     let newTopics = [];
     const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
-    if (Object.keys(_currentImprovement).length <= 0 || _currentImprovement.category !== category) {
+    if (Object.keys(_currentImprovement || {}).length <= 0 || _currentImprovement.category !== category) {
       return [];
     }
     if (
@@ -1674,13 +1674,13 @@ const CourseComponent = () => {
                     if (expanded.includes(category.title)) {
                       setExpanded([]);
                       setSelectedOpenCategory(null);
-                      if (!Object.keys(currentImprovement).length) {
+                      if (!Object.keys(currentImprovement || {}).length) {
                         setSidebarOpen(false);
                       }
                     } else {
                       setExpanded([category.title]);
                       setSelectedTopic(null);
-                      if (!Object.keys(currentImprovement).length) {
+                      if (!Object.keys(currentImprovement || {}).length) {
                         setSelectedOpenCategory({ categoryIndex, ...category });
                         setSidebarOpen(true);
                       }
@@ -1774,13 +1774,13 @@ const CourseComponent = () => {
                                   let newExpanded = [];
                                   if (isExpanded) {
                                     newExpanded = [...expandedTopics, tc.title];
-                                    if (Object.keys(currentImprovement).length <= 0) {
+                                    if (Object.keys(currentImprovement || {}).length <= 0) {
                                       setSidebarOpen(true);
                                       setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                       handlePaperClick();
                                     }
                                   } else {
-                                    if (Object.keys(currentImprovement).length <= 0) {
+                                    if (Object.keys(currentImprovement || {}).length <= 0) {
                                       setSidebarOpen(false);
                                     }
                                     newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
@@ -3057,7 +3057,7 @@ const CourseComponent = () => {
 
                         navigateChange(currentChangeIndex - 1);
                       }}
-                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
+                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement || {}).length <= 0}
                     >
                       <ArrowBackIosNewIcon />
                     </Button>
@@ -3093,7 +3093,7 @@ const CourseComponent = () => {
                       }}
                       disabled={
                         currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
-                        Object.keys(currentImprovement).length <= 0
+                        Object.keys(currentImprovement || {}).length <= 0
                       }
                     >
                       <ArrowForwardIosIcon />
