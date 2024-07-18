@@ -1971,7 +1971,7 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {(courses[selectedCourse].syllabus || []).length > 0 && (
+          {(courses[selectedCourse].syllabus || []).length > 0 && courses[selectedCourse].done && (
             <Box
               sx={{
                 display: "flex",
