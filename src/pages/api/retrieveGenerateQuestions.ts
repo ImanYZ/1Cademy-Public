@@ -18,14 +18,13 @@ const retrieveGenerateQuestions = async (
     const questions = [];
     for (let child of node.children) {
       if (child.type === "Question") {
-        console.log("Question found:", child.title + "\n" + child.content);
-        for (let choice of child.choices) {
-          console.log("Choice:", choice.choice);
-        }
+        const childDoc = await db.collection("nodes").doc(child.node).get();
+        const childData = childDoc.data() as INode;
+        console.log("Question found:", child.title + "\n" + childData.content);
         questions.push({
           question_type: "Multiple Choice",
-          question_text: child.title + "\n" + child.content,
-          options: child.choices,
+          question_text: child.title + "\n" + childData.content,
+          options: childData.choices,
           nodeImage: node.nodeImage,
           nodeVideo: node.nodeVideo,
         });

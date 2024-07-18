@@ -2634,6 +2634,7 @@ export async function callOpenAIChat(files: string[], userPrompt: string, system
         // console.log(completion);
         finish_reason = completion.choices[0].finish_reason;
         if (isJSONObject.isJSON) {
+          isJSONObject.jsonObject = JSON.parse(response);
           break;
         }
         if (finish_reason !== "length") {
