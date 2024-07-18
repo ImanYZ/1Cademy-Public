@@ -59,6 +59,7 @@ import { NodeItemFull } from "@/components/NodeItemFull";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import { ReferencesList } from "@/components/ReferencesList";
 import { TagsList } from "@/components/TagsList";
+import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
@@ -89,7 +90,7 @@ const glowRed = keyframes`
 `;
 
 interface Topic {
-  topic: string;
+  title: string;
   hours: number;
   difficulty: string;
 }
@@ -128,7 +129,7 @@ const books = [
 ];
 const CourseComponent = () => {
   const db = getFirestore();
-
+  const [{ user }] = useAuth();
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
@@ -184,8 +185,9 @@ const CourseComponent = () => {
   const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
 
   useEffect(() => {
+    if (!user?.uname) return;
     const notebooksRef = collection(db, "coursesAI");
-    const q = query(notebooksRef, where("deleted", "==", false));
+    const q = query(notebooksRef, where("deleted", "==", false), where("uname", "==", user.uname));
 
     const killSnapshot = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
@@ -221,7 +223,7 @@ const CourseComponent = () => {
     return () => {
       killSnapshot();
     };
-  }, [db]);
+  }, [db, user]);
 
   const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
@@ -380,20 +382,20 @@ const CourseComponent = () => {
     switch (action) {
       case "add":
         return `**<span style="color: green;">Add a new topic</span>** called **"${
-          new_topic?.topic
+          new_topic?.title
         }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
           new_topic?.difficulty
         }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
       case "modify":
         return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
-          new_topic?.topic
+          new_topic?.title
         }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
           (new_topic?.hours || 0) > 1 ? "s" : ""
         }.`;
       case "divide":
         const dividedTopics = new_topics
           ?.map(
-            nt => `**"${nt.topic}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+            nt => `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
           )
           .join(" and ");
         return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
@@ -1971,7 +1973,7 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {(courses[selectedCourse].syllabus || []).length > 0 && (
+          {(courses[selectedCourse].syllabus || []).length > 0 && courses[selectedCourse].done && (
             <Box
               sx={{
                 display: "flex",
