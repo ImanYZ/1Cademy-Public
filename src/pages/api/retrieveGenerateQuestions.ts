@@ -243,7 +243,7 @@ export function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseTitle, courseDescription, targetLearners, nodeId } = req.body;
 
-    const questions = retrieveGenerateQuestions(courseTitle, courseDescription, targetLearners, nodeId);
+    const questions = await retrieveGenerateQuestions(courseTitle, courseDescription, targetLearners, nodeId);
     return res.status(200).json({ questions });
   } catch (error) {
     return res.status(500).json({ error: error });

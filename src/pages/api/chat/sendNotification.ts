@@ -46,6 +46,7 @@ const triggerNotifications = async (newMessage: any) => {
         updatedAt: new Date(),
       });
     }
+
     console.log(fcmTokensHash);
     if (channelData) {
       const membersInfo = channelData.membersInfo;
