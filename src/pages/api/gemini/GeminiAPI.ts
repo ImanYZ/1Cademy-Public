@@ -70,7 +70,7 @@ export async function askGemini(files: File[], prompt: string) {
   }
 
   const fileParts = await Promise.all(validFiles.map(fileToGenerativePart))
-
+  
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   let response = "";
   let isJSONObject: { jsonObject: any; isJSON: boolean } = {

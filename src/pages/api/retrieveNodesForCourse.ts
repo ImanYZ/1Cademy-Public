@@ -249,6 +249,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       syllabus
     );
     console.log("response", nodes);
+    await db.runTransaction(async (t: any) => {
+      const courseDoc = await t.get(db.collection("coursesAI").doc(courseId));
+      const courseData = courseDoc.data();
+      courseData.nodes = nodes;
+      t.update(courseDoc.ref, courseData);
+    });
+
     await courseDoc.ref.update({
       nodes,
     });

@@ -243,8 +243,16 @@ const CourseComponent = () => {
   };
 
   const onCreateCourse = async (newCourse: any) => {
+    if (!user) return;
     const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
-    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
+    await setDoc(courseRef, {
+      ...newCourse,
+      deleted: false,
+      updateAt: new Date(),
+      createdAt: new Date(),
+      new: false,
+      uname: user.uname,
+    });
   };
 
   const handleTitleChange = (e: any) => {
@@ -408,34 +416,40 @@ const CourseComponent = () => {
     }
   };
   const improveCourseStructure = async () => {
-    setLoading(true);
-    const courseTitle = courses[selectedCourse].title;
-    const courseDescription = courses[selectedCourse].description;
-    const targetLearners = courses[selectedCourse].learners;
-    const syllabus = courses[selectedCourse].syllabus;
-    const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
-    const suggestions = courses[selectedCourse].suggestions;
-    let response: any = { suggestions };
-    if (!suggestions) {
-      response = await Post("/improveCourseSyllabus", {
-        courseTitle,
-        courseDescription,
-        targetLearners,
-        syllabus,
-        prerequisiteKnowledge,
-        courseId: courses[selectedCourse].id,
-      });
-    }
+    try {
+      setLoading(true);
+      const courseTitle = courses[selectedCourse].title;
+      const courseDescription = courses[selectedCourse].description;
+      const targetLearners = courses[selectedCourse].learners;
+      const syllabus = courses[selectedCourse].syllabus;
+      const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
+      const suggestions = courses[selectedCourse].suggestions;
+      let response: any = { suggestions };
+      if (!suggestions) {
+        response = await Post("/improveCourseSyllabus", {
+          courseTitle,
+          courseDescription,
+          targetLearners,
+          syllabus,
+          prerequisiteKnowledge,
+          courseId: courses[selectedCourse].id,
+        });
+      }
 
-    setImprovements(response.suggestions);
-    setSidebarOpen(true);
-    if (response.suggestions.length > 0) {
-      setCurrentImprovement(response.suggestions[0]);
-      setSelectedOpenCategory(null);
-      setSelectedTopic(null);
-    }
+      setImprovements(response.suggestions);
+      setSidebarOpen(true);
+      if (response.suggestions.length > 0) {
+        setCurrentImprovement(response.suggestions[0]);
+        setSelectedOpenCategory(null);
+        setSelectedTopic(null);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      await confirmIt("There is a error with the request, please try again.", "Ok", "");
+      console.error(error);
+    }
   };
   const handleAcceptChange = async () => {
     let _courses: any = JSON.parse(JSON.stringify(courses));
@@ -622,6 +636,7 @@ const CourseComponent = () => {
       setLoadingNodes(false);
     } catch (error) {
       setLoadingNodes(false);
+      await confirmIt("There is a error with the request for retrieving nodes, please try again.", "Ok", "");
       console.error(error);
     }
   };
@@ -637,7 +652,7 @@ const CourseComponent = () => {
   const getNewTopics = (currentImprovement: any, category: string) => {
     let newTopics = [];
     const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
-    if (Object.keys(_currentImprovement).length <= 0 || _currentImprovement.category !== category) {
+    if (Object.keys(_currentImprovement || {}).length <= 0 || _currentImprovement.category !== category) {
       return [];
     }
     if (
@@ -1659,13 +1674,13 @@ const CourseComponent = () => {
                     if (expanded.includes(category.title)) {
                       setExpanded([]);
                       setSelectedOpenCategory(null);
-                      if (!Object.keys(currentImprovement).length) {
+                      if (!Object.keys(currentImprovement || {}).length) {
                         setSidebarOpen(false);
                       }
                     } else {
                       setExpanded([category.title]);
                       setSelectedTopic(null);
-                      if (!Object.keys(currentImprovement).length) {
+                      if (!Object.keys(currentImprovement || {}).length) {
                         setSelectedOpenCategory({ categoryIndex, ...category });
                         setSidebarOpen(true);
                       }
@@ -1759,13 +1774,13 @@ const CourseComponent = () => {
                                   let newExpanded = [];
                                   if (isExpanded) {
                                     newExpanded = [...expandedTopics, tc.title];
-                                    if (Object.keys(currentImprovement).length <= 0) {
+                                    if (Object.keys(currentImprovement || {}).length <= 0) {
                                       setSidebarOpen(true);
                                       setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                       handlePaperClick();
                                     }
                                   } else {
-                                    if (Object.keys(currentImprovement).length <= 0) {
+                                    if (Object.keys(currentImprovement || {}).length <= 0) {
                                       setSidebarOpen(false);
                                     }
                                     newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
@@ -3042,7 +3057,7 @@ const CourseComponent = () => {
 
                         navigateChange(currentChangeIndex - 1);
                       }}
-                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
+                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement || {}).length <= 0}
                     >
                       <ArrowBackIosNewIcon />
                     </Button>
@@ -3078,7 +3093,7 @@ const CourseComponent = () => {
                       }}
                       disabled={
                         currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
-                        Object.keys(currentImprovement).length <= 0
+                        Object.keys(currentImprovement || {}).length <= 0
                       }
                     >
                       <ArrowForwardIosIcon />
