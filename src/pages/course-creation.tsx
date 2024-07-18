@@ -243,8 +243,16 @@ const CourseComponent = () => {
   };
 
   const onCreateCourse = async (newCourse: any) => {
+    if (!user) return;
     const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
-    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
+    await setDoc(courseRef, {
+      ...newCourse,
+      deleted: false,
+      updateAt: new Date(),
+      createdAt: new Date(),
+      new: false,
+      uname: user.uname,
+    });
   };
 
   const handleTitleChange = (e: any) => {
