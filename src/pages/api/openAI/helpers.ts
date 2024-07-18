@@ -2530,7 +2530,7 @@ export const completeJsonString = (truncatedJson: string): string => {
 
 export async function callOpenAIChat(files: File[] = [], userPrompt: string, systemPrompt: string = "") {
   let imageParts = [];
-  if (files.length <= 0) {
+  if ((files || []).length > 0) {
     files.forEach((file, index) => {
       console.log(`File ${index} type:`, file.constructor.name);
     });
