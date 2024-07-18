@@ -1281,14 +1281,16 @@ const CourseComponent = () => {
   const retrieveNodeQuestions = useCallback(
     async (nodeId: string) => {
       setQuestionsLoader(true);
+      const updatedCourses = [...courses];
+      const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
       const response: any = await Post("/retrieveGenerateQuestions", {
         courseTitle: courses[selectedCourse].title,
         courseDescription: courses[selectedCourse].description,
         targetLearners: courses[selectedCourse].learners,
         nodeId,
+        previousQuestions: prevQuestions,
       });
-      const updatedCourses = [...courses];
-      const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
+
       updatedCourses[selectedCourse]["questions"] = {
         ...updatedCourses[selectedCourse]["questions"],
         [nodeId]: [...prevQuestions, ...(response?.questions || [])],
