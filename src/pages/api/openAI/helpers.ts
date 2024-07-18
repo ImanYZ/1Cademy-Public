@@ -2528,31 +2528,25 @@ export const completeJsonString = (truncatedJson: string): string => {
   return cleanedJson;
 };
 
-export async function callOpenAIChat(files: File[] = [], userPrompt: string, systemPrompt: string = "") {
-  let imageParts = [];
-  if ((files || []).length > 0) {
-    files.forEach((file, index) => {
-      console.log(`File ${index} type:`, file.constructor.name)
-    })
-
-    const validFiles = files.filter((file) => file instanceof File)
-    if (validFiles.length !== files.length) {
-      console.error('Some objects are not File instances:', files)
-      throw new Error('Some provided objects are not File instances')
+export async function callOpenAIChat(files: string[], userPrompt: string, systemPrompt: string = "") {
+  let response = "";
+  let finish_reason = "";
+  let isJSONObject: { jsonObject: any; isJSON: boolean } = {
+    jsonObject: {},
+    isJSON: false,
+  };
+  let filesParts = [];
+  for (let file of files) {
+    try {
+      const fileContent = await fileToGenerativePart(file);
+      filesParts.push(fileContent);
+    } catch (error) {
+      console.error(error);
     }
-    console.log("validFiles", validFiles);
-    imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
   }
 
-    const fileParts = await Promise.all(validFiles.map(fileToGenerativePart))
-
-    let response = "";
-    let finish_reason = "";
-    let isJSONObject: { jsonObject: any; isJSON: boolean } = {
-      jsonObject: {},
-      isJSON: false,
-    };
-    for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 4; i++) {
+    try {
       let completion: any = {};
       if (finish_reason === "length") {
         let improvedJSON: any = {};
@@ -2564,7 +2558,7 @@ export async function callOpenAIChat(files: File[] = [], userPrompt: string, sys
                 {
                   role: "user",
                   content: [
-                    ...fileParts,
+                    ...filesParts,
                     {
                       type: "text",
                       text: systemPrompt + "\n\n\n" + userPrompt,
@@ -2612,31 +2606,21 @@ export async function callOpenAIChat(files: File[] = [], userPrompt: string, sys
           model: "gpt-4o",
           messages: [
             {
-              role: "user",
-              content: [
-                ...imageParts,
-                {
-                  type: "text",
-                  text: systemPrompt + "\n\n\n" + userPrompt,
-                },
-              ],
-            },
-            {
-              role: "assistant",
+              role: "system",
               content: [
                 {
                   type: "text",
-                  text: response,
+                  text: systemPrompt,
                 },
               ],
             },
             {
               role: "user",
               content: [
-                ...fileParts,
+                ...filesParts,
                 {
                   type: "text",
-                  text: improverPrompt,
+                  text: userPrompt,
                 },
               ],
             },
@@ -2644,71 +2628,34 @@ export async function callOpenAIChat(files: File[] = [], userPrompt: string, sys
           temperature: 0,
           response_format: { type: "json_object" },
         });
-
-        console.log("Original JSON:");
-        console.log(response);
-        console.log("RECOMMENDED IMPROVEMENTS:");
-        console.log(completion.choices[0].message.content);
-
-        improvedJSON = applyImprovementInstructions(response, JSON.parse(completion.choices[0].message.content));
-        console.log("IMPROVED JSON:");
-        console.log(improvedJSON);
-        return improvedJSON;
+        response = completion.choices[0].message.content || "";
+        isJSONObject.isJSON = isValidJSON(response);
+        // console.log("\n\n\nThe completion object is:");
+        // console.log(completion);
+        finish_reason = completion.choices[0].finish_reason;
+        if (isJSONObject.isJSON) {
+          break;
+        }
+        if (finish_reason !== "length") {
+          console.log("Response: ", response);
+        } else {
+          response = completeJsonString(response);
+          i--;
+        }
       }
-    } else {
-      completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: [
-              {
-                type: "text",
-                text: systemPrompt,
-              },
-            ],
-          },
-          {
-            role: "user",
-            content: [
-              ...imageParts,
-              {
-                type: "text",
-                text: userPrompt,
-              },
-            ],
-          },
-        ],
-        temperature: 0,
-        response_format: { type: "json_object" },
-      });
-      response = completion.choices[0].message.content || "";
-      isJSONObject.isJSON = isValidJSON(response);
-      // console.log("\n\n\nThe completion object is:");
-      // console.log(completion);
-      finish_reason = completion.choices[0].finish_reason;
-      if (isJSONObject.isJSON) {
-        isJSONObject.jsonObject = JSON.parse(response);
-        break;
+      if (!isJSONObject.isJSON) {
+        throw new Error("Failed to get a complete JSON object");
       }
-      console.log(
-        `\nFailed to get a complete JSON object. The finish_reason is "${finish_reason}". Retrying for the ${
-          i + 1
-        } time.\n\n\n`
-      );
-      if (finish_reason !== "length") {
-        console.log("Response: ", response);
-      } else {
-        response = completeJsonString(response);
-        i--;
-      }
+    } catch (error) {
+      console.error("Error in callOpenAIChat:", error);
+      throw error;
     }
+    console.log(
+      `\nFailed to get a complete JSON object. The finish_reason is "${finish_reason}". Retrying for the ${
+        i + 1
+      } time.\n\n\n`
+    );
   }
-
-  if (!isJSONObject.isJSON) {
-    throw new Error("Failed to get a complete JSON object");
-  }
-
   return isJSONObject.jsonObject;
 }
 
