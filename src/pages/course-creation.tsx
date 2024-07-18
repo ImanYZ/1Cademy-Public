@@ -622,7 +622,7 @@ const CourseComponent = () => {
   /*  */
   const handlePaperClick = async () => {
     try {
-      if (Object.keys(currentImprovement).length > 0 || loadingNodes) {
+      if (Object.keys(currentImprovement || {}).length > 0 || loadingNodes) {
         return;
       }
 
@@ -635,7 +635,7 @@ const CourseComponent = () => {
       const syllabus = courses[selectedCourse].syllabus;
       const tags = courses[selectedCourse].tags;
       const references = courses[selectedCourse].references;
-      if (Object.keys(courses[selectedCourse].nodes).length > 0) {
+      if (Object.keys(courses[selectedCourse].nodes || {}).length > 0) {
         return;
       }
       setLoadingNodes(true);

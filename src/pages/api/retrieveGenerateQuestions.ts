@@ -1,6 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { askGemini } from "./gemini/GeminiAPI";
 import { db } from "@/lib/firestoreServer/admin";
+import { INodeType } from "src/types/INodeType";
+import { INode } from "src/types/INode";
+import { fileToGenerativePart } from "./openAI/fileToGenerativePart";
 
 const retrieveGenerateQuestions = async (
   courseTitle: string,
@@ -10,23 +13,18 @@ const retrieveGenerateQuestions = async (
   previousQuestions: any[] = []
 ) => {
   const nodeDoc = await db.collection("nodes").doc(nodeId).get();
-  const node = nodeDoc.data();
-  if (
-    node.title &&
-    node.content &&
-    (node.nodeType === "Concept" || node.nodeType === "Relation")
-  ) {
+  const node = nodeDoc.data() as INode;
+  if (node.title && node.content && (node.nodeType === "Concept" || node.nodeType === "Relation")) {
     const questions = [];
     for (let child of node.children) {
       if (child.type === "Question") {
-        console.log("Question found:", child.title + "\n" + child.content);
-        for (let choice of child.choices) {
-          console.log("Choice:", choice.choice);
-        }
+        const childDoc = await db.collection("nodes").doc(child.node).get();
+        const childData = childDoc.data() as INode;
+        console.log("Question found:", child.title + "\n" + childData.content);
         questions.push({
           question_type: "Multiple Choice",
-          question_text: child.title + "\n" + child.content,
-          options: child.choices,
+          question_text: child.title + "\n" + childData.content,
+          options: childData.choices,
           nodeImage: node.nodeImage,
           nodeVideo: node.nodeVideo,
         });
@@ -228,12 +226,9 @@ Please do not generate similar questions. Fewer questions of higher quality are 
 Your generated questions will be reviewed by a supervisory team. For every helpful question, we will pay you $10 and for every unhelpful one, you'll lose $10.
 `;
     // Check if there is a nodeImage and create a file object if so
-    const files = [];
+    let files = [];
     if (node.nodeImage) {
-      const response = await fetch(node.nodeImage);
-      const blob = await response.blob();
-      const file = new File([blob], "nodeImage.png", { type: blob.type });
-      files.push(file);
+      files.push(node.nodeImage);
     }
 
     const response = await askGemini(files, prompt);
