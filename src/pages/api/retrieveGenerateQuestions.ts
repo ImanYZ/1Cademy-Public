@@ -4,6 +4,7 @@ import { db } from "@/lib/firestoreServer/admin";
 import { INodeType } from "src/types/INodeType";
 import { INode } from "src/types/INode";
 import { fileToGenerativePart } from "./openAI/fileToGenerativePart";
+import fbAuth from "src/middlewares/fbAuth";
 
 const retrieveGenerateQuestions = async (
   courseTitle: string,
@@ -239,13 +240,21 @@ Your generated questions will be reviewed by a supervisory team. For every helpf
   }
 };
 
-export function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, courseDescription, targetLearners, nodeId } = req.body;
+    const { courseTitle, courseDescription, targetLearners, nodeId, previousQuestions } = req.body;
 
-    const questions = await retrieveGenerateQuestions(courseTitle, courseDescription, targetLearners, nodeId);
+    const questions = await retrieveGenerateQuestions(
+      courseTitle,
+      courseDescription,
+      targetLearners,
+      nodeId,
+      previousQuestions
+    );
     return res.status(200).json({ questions });
   } catch (error) {
     return res.status(500).json({ error: error });
   }
 }
+
+export default fbAuth(handler);
