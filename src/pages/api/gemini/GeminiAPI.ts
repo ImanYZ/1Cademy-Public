@@ -7,14 +7,10 @@
  * https://ai.google.dev/gemini-api/docs/get-started/node
  */
 
-const path = require("path");
-const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
-const fileToGenerativePart = require("../openAI/fileToGenerativePart");
-require("dotenv").config({
-  path: path.join(__dirname, "../", ".env.prod"),
-});
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
+import { fileToGenerativePart } from "../openAI/fileToGenerativePart";
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = process.env.GEMINI_API_KEY as string;
 const genAI = new GoogleGenerativeAI(apiKey);
 
 /**
@@ -58,33 +54,30 @@ const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } =
   }
 };
 
-export async function askGemini(files: File[] = [], prompt: string) {
-  let imageParts: any = [];
-  if ((files || []).length > 0) {
-    files.forEach((file, index) => {
-      console.log(`File ${index} type:`, file.constructor.name);
-    });
-
-    const validFiles = files.filter(file => file instanceof File);
-    if (validFiles.length !== files.length) {
-      console.error("Some objects are not File instances:", files);
-      throw new Error("Some provided objects are not File instances");
-    }
-
-    imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
-  }
+export async function askGemini(files: string[], prompt: string) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   let response = "";
   let isJSONObject: { jsonObject: any; isJSON: boolean } = {
     jsonObject: {},
     isJSON: false,
   };
+  let filesParts = [];
+
+  for (let file of files) {
+    try {
+      const fileContent = await fileToGenerativePart(file);
+      filesParts.push(fileContent);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   for (let i = 0; i < 4; i++) {
     const result = await model.generateContent({
       contents: [
         {
           parts: [
-            ...imageParts,
+            ...filesParts,
             {
               text: prompt,
             },
