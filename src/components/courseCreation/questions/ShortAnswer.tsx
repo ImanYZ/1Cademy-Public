@@ -1,22 +1,27 @@
 import { Box, TextField, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import RubricItems from "./RubricItems";
 
 type ShortAnswerProps = {
   question: any;
-  idx?: number;
-  nodeId?: number;
+  idx: number;
+  nodeId: number;
   sx?: SxProps<Theme>;
   handleQuestion: (question: any, idx: number, nodeId: number) => void;
 };
 
-const ShortAnswer = ({ idx, question, sx }: ShortAnswerProps) => {
+const ShortAnswer = ({ idx, nodeId, question, sx, handleQuestion }: ShortAnswerProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
+  const saveTimeoutRef = useRef<any>(null);
   useEffect(() => {
-    //handleQuestions(idx, )
-    //console.log(questionS, "questionS--questionS");
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      handleQuestion(questionS, idx, nodeId);
+    }, 1000);
   }, [questionS]);
 
   const handleQuestionText = (e: any) => {
@@ -49,7 +54,7 @@ const ShortAnswer = ({ idx, question, sx }: ShortAnswerProps) => {
   };
   const handleRubricPoints = (value: string, idx: number) => {
     const prevRubrics = [...questionS?.rubric_items];
-    prevRubrics[idx].points = parseInt(value);
+    prevRubrics[idx].points = value ? parseInt(value) : 0;
     setQuestionS({ ...questionS, rubric_items: prevRubrics });
   };
 

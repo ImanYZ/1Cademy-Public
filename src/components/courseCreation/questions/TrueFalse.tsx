@@ -2,29 +2,28 @@ import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, IconButton, TextField, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { useState } from "react";
-import { KnowledgeChoice } from "src/knowledgeTypes";
+import React, { useEffect, useRef, useState } from "react";
 
 type TrueFalseProps = {
   question: any;
-  idx?: number;
-  nodeId?: number;
-  choicesNum?: any;
-  choice?: KnowledgeChoice;
-  deleteChoice?: any;
-  switchChoice?: any;
-  changeChoice?: any;
-  changeFeedback?: any;
+  idx: number;
+  nodeId: number;
   sx?: SxProps<Theme>;
   handleQuestion: (question: any, idx: number, nodeId: number) => void;
 };
 
-const TrueFalse = ({ idx, question, sx }: TrueFalseProps) => {
+const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
+  const saveTimeoutRef = useRef<any>(null);
 
-  // useEffect(() => {
-  //   handleQuestions(idx, )
-  // }, [choicesS]);
+  useEffect(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      handleQuestion(questionS, idx, nodeId);
+    }, 1000);
+  }, [questionS]);
 
   const handleCorrect = (value: string) => {
     setQuestionS({ ...questionS, correct_answer: value });
@@ -58,23 +57,28 @@ const TrueFalse = ({ idx, question, sx }: TrueFalseProps) => {
         />
       </Box>
       <Box sx={{ display: "flex", justifyContent: "space-evenly" }}>
-        <IconButton
-          sx={{
-            border: questionS.correct_answer === "True" ? "solid 1px green" : undefined,
-          }}
-          onClick={() => handleCorrect("True")}
-        >
-          <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
-        </IconButton>
-
-        <IconButton
-          sx={{
-            border: questionS.correct_answer === "False" ? "solid 1px red" : undefined,
-          }}
-          onClick={() => handleCorrect("False")}
-        >
-          <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
-        </IconButton>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <IconButton
+            sx={{
+              border: questionS.correct_answer === "True" ? "solid 1px green" : undefined,
+            }}
+            onClick={() => handleCorrect("True")}
+          >
+            <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
+          </IconButton>
+          <Typography fontWeight="bold">True</Typography>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <IconButton
+            sx={{
+              border: questionS.correct_answer === "False" ? "solid 1px red" : undefined,
+            }}
+            onClick={() => handleCorrect("False")}
+          >
+            <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
+          </IconButton>
+          <Typography fontWeight="bold">False</Typography>
+        </Box>
       </Box>
       <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto" }}>
         <TextField

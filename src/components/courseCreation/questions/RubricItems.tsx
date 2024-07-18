@@ -70,15 +70,11 @@ const RubricItems = ({
           })}
         </tbody>
       </table>
-      <CustomButton
-        sx={{ mt: 1 }}
-        variant="contained"
-        type="button"
-        color="secondary"
-        onClick={() => handleAddRubric()}
-      >
-        Add Rubric Item <AddIcon />
-      </CustomButton>
+      <Box mt={1} sx={{ display: "flex", justifyContent: "center" }}>
+        <CustomButton variant="contained" type="button" color="secondary" onClick={() => handleAddRubric()}>
+          Add Rubric Item <AddIcon />
+        </CustomButton>
+      </Box>
     </Box>
   );
 };

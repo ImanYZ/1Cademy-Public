@@ -4,19 +4,13 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { KnowledgeChoice } from "src/knowledgeTypes";
 
 type QuestionChoicesProps = {
   question: any;
-  idx?: number;
-  nodeId?: number;
-  choicesNum?: any;
-  choice?: KnowledgeChoice;
-  deleteChoice?: any;
-  switchChoice?: any;
-  changeChoice?: any;
-  changeFeedback?: any;
+  idx: number;
+  nodeId: number;
   sx?: SxProps<Theme>;
   handleQuestion: (question: any, idx: number, nodeId: number) => void;
 };
@@ -101,11 +95,16 @@ const Choice = ({
   );
 };
 
-const MultipleChoices = ({ idx, question, sx }: QuestionChoicesProps) => {
+const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: QuestionChoicesProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
+  const saveTimeoutRef = useRef<any>(null);
   useEffect(() => {
-    //handleQuestions(idx, )
-    //console.log(questionS, "questionS--questionS");
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      handleQuestion(questionS, idx, nodeId);
+    }, 1000);
   }, [questionS]);
 
   const handleChoiceText = (value: string, idx: number) => {

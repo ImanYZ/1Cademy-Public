@@ -14,6 +14,7 @@ import {
   Button,
   Card,
   CardHeader,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -57,6 +58,7 @@ import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import ImageSlider from "@/components/ImageSlider";
 import LinkedNodes from "@/components/LinkedNodes";
+import { CustomButton } from "@/components/map/Buttons/Buttons";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { NodeHead } from "@/components/NodeHead";
 import NodeItemContributors from "@/components/NodeItemContributors";
@@ -132,6 +134,13 @@ const books = [
     references: ["CORE Econ - The Economy"],
   },
 ];
+
+const questionComponents: any = {
+  "Multiple Choice": MultipleChoices,
+  "True/False": TrueFalse,
+  "Short Answer": ShortAnswer,
+  Essay: Essay,
+};
 const CourseComponent = () => {
   const db = getFirestore();
   const [{ user }] = useAuth();
@@ -1291,11 +1300,18 @@ const CourseComponent = () => {
     [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
   );
 
-  const handleQuestion = (question: any, idx: number, nodeId: number) => {
-    console.error(question);
-    console.error(idx);
-    console.error(nodeId);
-  };
+  const handleQuestion = useCallback(
+    (question: any, idx: number, nodeId: number) => {
+      const updatedCourses = [...courses];
+      if (updatedCourses[selectedCourse]?.questions?.[nodeId]) {
+        updatedCourses[selectedCourse].questions[nodeId][idx] = question;
+        setCourses(updatedCourses);
+        updateCourses(updatedCourses[selectedCourse]);
+      }
+    },
+    [courses, selectedCourse, setCourses]
+  );
+
   if (courses.length <= 0) {
     return (
       <Box
@@ -2253,11 +2269,6 @@ const CourseComponent = () => {
                   />
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
-                      {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
-                      )}
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
                       <NodeItemFull
                         nodeId={nodePublicView?.id}
                         node={nodePublicView}
@@ -2288,67 +2299,38 @@ const CourseComponent = () => {
                               >
                                 Knowledge Checks
                               </TypographyUnderlined>
-                              <LoadingButton
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  retrieveNodeQuestions(nodePublicView?.id);
-                                }}
-                                sx={{
-                                  ml: "10px",
-                                  display: "flex-end",
-                                }}
-                                loading={loadingDescription}
-                              >
-                                <AutoFixHighIcon />
-                              </LoadingButton>
                             </Box>
                           }
                         ></CardHeader>
-                        {questionsLoader && <LinearProgress sx={{ width: "100%" }} />}
-                        {courses[selectedCourse]?.questions &&
-                          courses[selectedCourse]?.questions[nodePublicView?.id]?.map((question: any, idx: number) => {
-                            if (question?.question_type === "Multiple Choice") {
-                              return (
-                                <MultipleChoices
-                                  key={idx}
-                                  idx={idx}
-                                  nodeId={nodePublicView?.id}
-                                  question={question}
-                                  handleQuestion={handleQuestion}
-                                />
-                              );
-                            } else if (question?.question_type === "True/False") {
-                              return (
-                                <TrueFalse
-                                  key={idx}
-                                  idx={idx}
-                                  nodeId={nodePublicView?.id}
-                                  question={question}
-                                  handleQuestion={handleQuestion}
-                                />
-                              );
-                            } else if (question?.question_type === "Short Answer") {
-                              return (
-                                <ShortAnswer
-                                  key={idx}
-                                  idx={idx}
-                                  nodeId={nodePublicView?.id}
-                                  question={question}
-                                  handleQuestion={handleQuestion}
-                                />
-                              );
-                            } else if (question?.question_type === "Essay") {
-                              return (
-                                <Essay
-                                  key={idx}
-                                  idx={idx}
-                                  nodeId={nodePublicView?.id}
-                                  question={question}
-                                  handleQuestion={handleQuestion}
-                                />
-                              );
-                            }
-                          })}
+                        {courses[selectedCourse]?.questions?.[nodePublicView?.id]?.map((question: any, idx: number) => {
+                          const QuestionComponent = questionComponents[question?.question_type];
+                          return QuestionComponent ? (
+                            <QuestionComponent
+                              key={idx}
+                              idx={idx}
+                              nodeId={nodePublicView?.id}
+                              question={question}
+                              handleQuestion={handleQuestion}
+                            />
+                          ) : null;
+                        })}
+                        <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                          <CustomButton
+                            variant="contained"
+                            type="button"
+                            color="secondary"
+                            onClick={() => {
+                              retrieveNodeQuestions(nodePublicView?.id);
+                            }}
+                          >
+                            Generate More Questions
+                            {questionsLoader ? (
+                              <CircularProgress sx={{ ml: 1 }} size={20} />
+                            ) : (
+                              <AutoFixHighIcon sx={{ ml: 1 }} />
+                            )}
+                          </CustomButton>
+                        </Box>
                       </Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
@@ -2379,6 +2361,11 @@ const CourseComponent = () => {
                           institutions={nodePublicView?.institutions || []}
                         />
                       </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                      {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                      )}
                     </Grid>
                     <Grid item xs={12} sm={12}>
                       {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
