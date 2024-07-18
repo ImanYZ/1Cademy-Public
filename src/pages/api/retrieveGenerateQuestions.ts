@@ -226,7 +226,10 @@ Please do not generate similar questions. Fewer questions of higher quality are 
 Your generated questions will be reviewed by a supervisory team. For every helpful question, we will pay you $10 and for every unhelpful one, you'll lose $10.
 `;
     // Check if there is a nodeImage and create a file object if so
-    const files = [node.nodeImage];
+    let files = [];
+    if (node.nodeImage) {
+      files.push(node.nodeImage);
+    }
 
     const response = await askGemini(files, prompt);
     const generatedQs = response.questions;
