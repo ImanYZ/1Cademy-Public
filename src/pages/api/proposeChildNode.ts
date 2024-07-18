@@ -286,10 +286,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await signalNodeToTypesense({
         nodeId: versionNodeId,
         currentTimestamp,
-        versionData: {
-          choices: newVersion.choices,
-          content: newVersion.content,
-        },
       });
     } else {
       await db.runTransaction(async t => {
@@ -521,6 +517,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           voter: userData.uname,
           writeCounts,
           comReputationUpdates,
+          t: null,
+          tWriteOperations: [],
         });
 
         for (const tagId in comReputationUpdates) {

@@ -209,7 +209,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       currentTimestamp,
       newUpdates: {},
       writeCounts,
-      tWriteOperations: null,
+      tWriteOperations: [],
       t: null,
       versionNodeId: "",
       notebookId: "",
@@ -320,6 +320,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       userVersionData,
       nodeType,
       writeCounts,
+      t: null,
+      tWriteOperations: [],
     });
     await commitBatch(batch);
     //  If the proposal is not approved, we do not directly update the node document inside versionCreateUpdate function,
@@ -419,7 +421,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         await signalNodeToTypesense({
           nodeId: versionData.node,
           currentTimestamp,
-          versionData,
         });
       }
     });

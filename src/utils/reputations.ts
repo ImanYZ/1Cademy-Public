@@ -1,7 +1,16 @@
 import { admin, checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
 import { firstWeekMonthDays } from ".";
 import { convertToTGet } from "./";
-import { CollectionReference, Query, DocumentReference } from "firebase-admin/firestore";
+import {
+  CollectionReference,
+  Query,
+  DocumentReference,
+  WriteBatch,
+  Transaction,
+  Timestamp,
+} from "firebase-admin/firestore";
+import { TransactionWrite } from "src/types";
+import { IReputation } from "src/types/IReputationPoint";
 
 export type IComReputationUpdates = {
   [tagId: string]: {
@@ -13,7 +22,17 @@ export type IComReputationUpdates = {
   };
 };
 
-export const initializeNewReputationData: any = ({ tagId, tag, updatedAt, createdAt }: any) => ({
+export const initializeNewReputationData = ({
+  tagId,
+  tag,
+  updatedAt,
+  createdAt,
+}: {
+  tagId: string;
+  tag: string;
+  updatedAt: Timestamp;
+  createdAt: Timestamp;
+}): any => ({
   // for Concept nodes
   cnCorrects: 0,
   cnInst: 0,
@@ -214,7 +233,30 @@ export const updateReputationIncrement = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: any) => {
+}: {
+  uname: string;
+  imageUrl: string;
+  fullname: string;
+  chooseUname: boolean;
+  tagId: string;
+  tag: string;
+  nodeType: string;
+  correctVal: number;
+  wrongVal: number;
+  instVal: number;
+  ltermVal: number;
+  ltermDayVal: number;
+  reputationType: any;
+  firstWeekDay: any;
+  firstMonthDay: any;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  comReputationUpdates: any;
+  writeCounts: number;
+  batch: WriteBatch;
+  t: Transaction | null;
+  tWriteOperations: TransactionWrite[];
+}): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
   // console.log(uname, correctVal, "correctVal")
   let newBatch = batch;
 
@@ -676,7 +718,35 @@ export const updateReputation = async ({
   comReputationUpdates,
   t,
   tWriteOperations,
-}: any) => {
+}: {
+  uname: string;
+  imageUrl: string;
+  fullname: string;
+  chooseUname: boolean;
+  tagIds: string[];
+  tags: string[];
+  nodeType: string;
+  correctVal: number;
+  wrongVal: number;
+  instVal: number;
+  ltermVal: number;
+  ltermDayVal: number;
+  voter: string;
+  comReputationUpdates: any;
+  writeCounts: number;
+  batch: WriteBatch;
+  t: Transaction | null;
+  tWriteOperations: TransactionWrite[];
+}): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
+  console.log("==>keep an eye on this", {
+    nodeType,
+    correctVal,
+    wrongVal,
+    instVal,
+    ltermVal,
+    ltermDayVal,
+    voter,
+  });
   let createdAt = admin.firestore.Timestamp.fromDate(new Date());
   let updatedAt = admin.firestore.Timestamp.fromDate(new Date());
   const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();

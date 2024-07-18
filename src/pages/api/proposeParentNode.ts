@@ -87,6 +87,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   let batch = db.batch();
 
   const userData = req.body.data.user.userData as IUser;
+  const payload = req.body.data as any;
 
   const inststructorDoc = await db.collection("instructors").where("uname", "==", userData.uname).get();
 
@@ -96,10 +97,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { versionNodeId, nodeVideoStartTime, nodeVideoEndTime } = req?.body?.data;
 
-    if (req.body.data.childId) {
+    if (payload.childId) {
       //if we are proposing the first parent of a knowledge graph, we don't have a childId
-      ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.data.childId }));
-      ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: req.body.data.childId }));
+      ({ nodeData, nodeRef } = await getNode({ nodeId: payload.childId }));
+      ({ userNodesData, userNodesRefs } = await getAllUserNodes({ nodeId: payload.childId }));
     }
 
     // adding missing tags/tagIds
@@ -113,7 +114,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const visitedNodeIds: string[] = [];
     await generateTagsOfTagsWithNodes({
       nodeId: "", // newer node don't have node id
-      tagIds: req.body.data.tagIds || [],
+      tagIds: payload.tagIds || [],
       nodeUpdates: tagUpdates,
       nodes: nodesMap,
       visitedNodeIds,
@@ -121,29 +122,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const newVersion: any = {
       awards: 0,
-      children: req.body.data.children,
-      title: req.body.data.title,
-      content: req.body.data.content,
-      nodeImage: req.body.data.nodeImage || "",
-      nodeVideo: req.body.data.nodeVideo || "",
+      children: payload.children,
+      title: payload.title,
+      content: payload.content,
+      nodeImage: payload.nodeImage || "",
+      nodeVideo: payload.nodeVideo || "",
       nodeVideoStartTime: nodeVideoStartTime || "",
       nodeVideoEndTime: nodeVideoEndTime || "",
-      nodeAudio: req.body.data.nodeAudio || "",
+      nodeAudio: payload.nodeAudio || "",
       corrects: 1,
       createdAt: currentTimestamp,
       deleted: false,
-      proposer: req.body.data.user.userData.uname,
-      imageUrl: req.body.data.user.userData.imageUrl,
-      fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-      chooseUname: req.body.data.user.userData.chooseUname,
-      parents: req.body.data.parents,
-      proposal: req.body.data.proposal,
-      referenceIds: req.body.data.referenceIds,
-      references: req.body.data.references,
-      referenceLabels: req.body.data.referenceLabels,
-      summary: req.body.data.summary,
+      proposer: userData.uname,
+      imageUrl: userData.imageUrl,
+      fullname: userData.fName + " " + userData.lName,
+      chooseUname: userData.chooseUname,
+      parents: payload.parents,
+      proposal: payload.proposal,
+      referenceIds: payload.referenceIds,
+      references: payload.references,
+      referenceLabels: payload.referenceLabels,
+      summary: payload.summary,
       newChild: true,
-      subType: req.body.data.subType || "",
+      subType: payload.subType || "",
       tagIds: tagUpdates.tagIds,
       tags: tagUpdates.tags,
       updatedAt: currentTimestamp,
@@ -152,8 +153,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     };
 
     console.log({ newVersion });
-    if (req.body.data.nodeType === "Question") {
-      newVersion.choices = req.body.data.choices;
+    if (payload.nodeType === "Question") {
+      newVersion.choices = payload.choices;
     }
     const { isInstructor, courseExist, instantApprove } = await shouldInstantApprovalForProposal(
       newVersion?.tagIds || [],
@@ -176,25 +177,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         let batch = db.batch();
         [batch, writeCounts] = await updateReputation({
           batch,
-          uname: req.body.data.user.userData.uname,
-          imageUrl: req.body.data.user.userData.imageUrl,
-          fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-          chooseUname: req.body.data.user.userData.chooseUname,
+          uname: userData.uname,
+          imageUrl: userData.imageUrl,
+          fullname: userData.fName + " " + userData.lName,
+          chooseUname: userData.chooseUname,
           tagIds: newVersion.tagIds,
           tags: newVersion.tags,
-          nodeType: req.body.data.parentType,
+          nodeType: payload.parentType,
           correctVal: 1,
           wrongVal: 0,
           instVal: 0,
           ltermVal: 0,
           ltermDayVal: 0,
-          voter: req.body.data.user.userData.uname,
+          voter: userData.uname,
           writeCounts,
           comReputationUpdates,
+          t: null,
+          tWriteOperations: [],
         });
       });
-      newVersion.childType = req.body.data.nodeType;
-      newVersion.node = req.body.data.childtId;
+      newVersion.childType = payload.nodeType;
+      newVersion.node = payload.childtId;
       newVersion.accepted = false;
 
       // Update the parent node by incrementing the number of versions on it.
@@ -208,7 +211,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         batch,
         tagIds: nodeData.tagIds,
         value: 1,
-        voters: [req.body.data.user.userData.uname],
+        voters: [userData.uname],
         writeCounts,
       });
     } else {
@@ -218,21 +221,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         let writeCounts = 0;
         [batch, writeCounts] = await updateReputation({
           batch,
-          uname: req.body.data.user.userData.uname,
-          imageUrl: req.body.data.user.userData.imageUrl,
-          fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-          chooseUname: req.body.data.user.userData.chooseUname,
-          tagIds: req.body.data.tagIds,
-          tags: req.body.data.tags,
-          nodeType: req.body.data.nodeType,
+          uname: userData.uname,
+          imageUrl: userData.imageUrl,
+          fullname: userData.fName + " " + userData.lName,
+          chooseUname: userData.chooseUname,
+          tagIds: payload.tagIds,
+          tags: payload.tags,
+          nodeType: payload.nodeType,
           correctVal: 1,
           wrongVal: 0,
           instVal: 0,
           ltermVal: 0,
           ltermDayVal: 0,
-          voter: req.body.data.user.userData.uname,
+          voter: userData.uname,
           writeCounts,
           comReputationUpdates,
+          t: null,
+          tWriteOperations: [],
         });
         await commitBatch(batch);
       });
@@ -245,31 +250,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       console.log("newVersion.node", newVersion.node);
       newVersion.accepted = true;
       const newNode: any = {
-        admin: req.body.data.user.userData.uname,
-        aImgUrl: req.body.data.user.userData.imageUrl,
-        aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        aChooseUname: req.body.data.user.userData.chooseUname,
+        admin: userData.uname,
+        aImgUrl: userData.imageUrl,
+        aFullname: userData.fName + " " + userData.lName,
+        aChooseUname: userData.chooseUname,
         maxVersionRating: 1,
         changedAt: currentTimestamp,
-        children: req.body.data.children,
+        children: payload.children,
         comments: 0,
-        content: req.body.data.content,
-        nodeImage: req.body.data.nodeImage || "",
-        nodeVideo: req.body.data.nodeVideo || "",
-        nodeAudio: req.body.data.nodeAudio || "",
+        content: payload.content,
+        nodeImage: payload.nodeImage || "",
+        nodeVideo: payload.nodeVideo || "",
+        nodeAudio: payload.nodeAudio || "",
         corrects: 1,
         createdAt: currentTimestamp,
         deleted: false,
-        nodeType: req.body.data.nodeType,
-        subType: req.body.data.subType,
-        parents: req.body.data.parents,
-        referenceIds: req.body.data.referenceIds,
-        references: req.body.data.references,
-        referenceLabels: req.body.data.referenceLabels,
+        nodeType: payload.nodeType,
+        subType: payload.subType,
+        parents: payload.parents,
+        referenceIds: payload.referenceIds,
+        references: payload.references,
+        referenceLabels: payload.referenceLabels,
         studied: 1,
         tagIds: tagUpdates.tagIds,
         tags: tagUpdates.tags,
-        title: req.body.data.title,
+        title: payload.title,
         updatedAt: currentTimestamp,
         versions: 1,
         viewers: 1,
@@ -287,14 +292,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // If a question node gets accepted, it should be added to the practice tool for all
       // users in the communities with the tags that are used on this node.
       // That's why we need to get the list of all members of each of these tags (communities).
-      if (req.body.data.nodeType === "Question") {
-        newNode.choices = req.body.data.choices;
+      if (payload.nodeType === "Question") {
+        newNode.choices = payload.choices;
         [batch, writeCounts] = await createPractice({
           batch,
           unames: [],
-          tagIds: req.body.data.tagIds,
+          tagIds: payload.tagIds,
           nodeId: nodeRef.id,
-          parentId: req.body.data.parents[0].id,
+          parentId: payload.parents[0].id,
           currentTimestamp,
           writeCounts,
         });
@@ -311,26 +316,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         nodeUpdates: newNode,
         nodeTagIds: [],
         nodeTags: [],
-        versionTagIds: req.body.data.tagIds,
-        versionTags: req.body.data.tags,
-        proposer: req.body.data.user.userData.uname,
-        aImgUrl: req.body.data.user.userData.imageUrl,
-        aFullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        aChooseUname: req.body.data.user.userData.chooseUname,
+        versionTagIds: payload.tagIds,
+        versionTags: payload.tags,
+        proposer: userData.uname,
+        aImgUrl: userData.imageUrl,
+        aFullname: userData.fName + " " + userData.lName,
+        aChooseUname: userData.chooseUname,
         currentTimestamp,
         writeCounts,
       });
       console.log("nodeRef", nodeRef.id);
       batch.set(nodeRef, newNode);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      if (req.body.data.childId) {
-        const childNodeRef = db.doc(`/nodes/${req.body.data.childId}`);
+      if (payload.childId) {
+        const childNodeRef = db.doc(`/nodes/${payload.childId}`);
         const ChildNodeChanges = {
           changedAt: currentTimestamp,
           updatedAt: currentTimestamp,
           parents: [
             ...childNodeData.parents,
-            { node: nodeRef.id, title: req.body.data.title, label: "", type: req.body.data.nodeType },
+            { node: nodeRef.id, title: payload.title, label: "", type: payload.nodeType },
           ],
           studied: 0,
         };
@@ -368,11 +373,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         changed: false,
         node: nodeRef.id,
         open: true,
-        user: req.body.data.user.userData.uname,
+        user: userData.uname,
         visible: true,
         wrong: false,
         nodeChanges: {},
-        notebooks: [req.body.data.notebookId],
+        notebooks: [payload.notebookId],
         expands: [true],
       };
       console.log({
@@ -385,11 +390,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         changed: false,
         node: nodeRef.id,
         open: true,
-        user: req.body.data.user.userData.uname,
+        user: userData.uname,
         visible: true,
         wrong: false,
         nodeChanges: {},
-        notebooks: [req.body.data.notebookId],
+        notebooks: [payload.notebookId],
         expands: [true],
       });
       const userNodeRef = db.collection("userNodes").doc();
@@ -403,18 +408,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // create user nodes for new node
       // TODO: move these to queue
       await detach(async () => {
-        if (!req.body.data.notebookId) return;
+        if (!payload.notebookId) return;
 
         let batch = db.batch();
         let writeCounts = 0;
         const nodesUserNodes = await db
           .collection("userNodes")
-          .where("node", "==", req.body.data.parentId)
-          .where("notebooks", "array-contains", req.body.data.notebookId)
+          .where("node", "==", payload.parentId)
+          .where("notebooks", "array-contains", payload.notebookId)
           .get();
         for (const userNode of nodesUserNodes.docs) {
           const userNodeData = userNode.data() as IUserNode;
-          if (userNodeData.user === req.body.data.user.userData.uname || userNodeData.deleted) {
+          if (userNodeData.user === userData.uname || userNodeData.deleted) {
             continue;
           }
           const userNodeRef = db.collection("userNodes").doc();
@@ -462,7 +467,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       createdAt: currentTimestamp,
       updatedAt: currentTimestamp,
       version: versionRef.id,
-      user: req.body.data.user.userData.uname,
+      user: userData.uname,
       wrong: false,
       deleted: false,
     };
@@ -472,15 +477,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const userVersionLogRef = db.collection("userVersionsLog").doc();
     delete newUserVersion.updatedAt;
-    newUserVersion.nodeType = req.body.data.nodeType;
+    newUserVersion.nodeType = payload.nodeType;
     batch.set(userVersionLogRef, newUserVersion);
 
-    if (req.body.data.childId) {
+    if (payload.childId) {
       [batch, writeCounts] = await proposalNotification({
         batch,
-        nodeId: req.body.data.childId,
-        nodeTitle: newVersion.accepted ? req.body.data.title : nodeData.title,
-        uname: req.body.data.user.userData.uname,
+        nodeId: payload.childId,
+        nodeTitle: newVersion.accepted ? payload.title : nodeData.title,
+        uname: userData.uname,
         versionData: newVersion,
         currentTimestamp,
         writeCounts,
@@ -498,14 +503,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       actionRef.create({
         accepted: !!newVersion.accepted,
         type: "ParentNode",
-        imageUrl: req.body.data.user.userData.imageUrl,
+        imageUrl: userData.imageUrl,
         action: versionRef.id,
         createdAt: currentTimestamp,
         doer: newVersion.proposer,
         chooseUname: userData.chooseUname,
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
-        receivers: [req.body.data.user.userData.uname],
+        receivers: [userData.uname],
         email: userData.email,
       } as IActionTrack);
 
@@ -513,14 +518,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       rateActionRef.create({
         accepted: !!newVersion.accepted,
         type: "RateVersion",
-        imageUrl: req.body.data.user.userData.imageUrl,
+        imageUrl: userData.imageUrl,
         action: "Correct-" + versionRef.id,
         createdAt: currentTimestamp,
         doer: newVersion.proposer,
         chooseUname: userData.chooseUname,
         fullname: `${userData.fName} ${userData.lName}`,
         nodeId: newVersion.node,
-        receivers: [req.body.data.user.userData.uname],
+        receivers: [userData.uname],
         email: userData.email,
       } as IActionTrack);
     });
@@ -528,7 +533,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       approved: !!newVersion.accepted,
       isChild: true,
       linksUpdated: true,
-      nodeType: req.body.data.nodeType,
+      nodeType: payload.nodeType,
       proposer: newVersion.proposer,
       tagIds: newVersion.tagIds,
     });
@@ -538,7 +543,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         approved: !!newVersion.accepted,
         isChild: true,
         linksUpdated: true,
-        nodeType: req.body.data.nodeType,
+        nodeType: payload.nodeType,
         proposer: newVersion.proposer,
         tagIds: newVersion.tagIds,
       });
@@ -563,7 +568,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         await signalNodeToTypesense({
           nodeId: newVersion.node,
           currentTimestamp,
-          versionData: newVersion,
         });
       }
     });

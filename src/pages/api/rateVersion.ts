@@ -68,7 +68,7 @@ import { TransactionWrite } from "src/types";
 
 export type IRateVersionPayload = {
   nodeId: string;
-  versionNodeId?: string;
+  versionNodeId: string;
   notebookId?: string;
   versionId: string;
   nodeType: INodeType;
@@ -188,7 +188,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       let { userVersionData, userVersionRef } = await getUserVersion({
         versionId: payload.versionId,
-        nodeType,
         uname,
         t,
       });
@@ -319,6 +318,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // voting on. So, regardless of whether the version is for a new child or improvement,
       // we need to update the votes on the old version.
       await createUpdateUserVersion({
+        batch: db.batch(),
         userVersionRef,
         userVersionData,
         nodeType,
@@ -519,7 +519,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         await signalNodeToTypesense({
           nodeId: versionData.childType ? newUpdates.nodeId : versionData.node,
           currentTimestamp,
-          versionData: versionData.childType ? newUpdates.versionData : versionData,
         });
       }
     });

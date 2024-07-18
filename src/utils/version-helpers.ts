@@ -848,7 +848,12 @@ export const addTagCommunityAndTagsOfTags = async ({
 
           // If we need to create different types of community point documents:
         } else {
-          tagNewData = initializeNewReputationData(tagNodeId, tagTitle, currentTimestamp, currentTimestamp);
+          tagNewData = initializeNewReputationData({
+            tagId: tagNodeId,
+            tag: tagTitle,
+            updatedAt: currentTimestamp,
+            createdAt: currentTimestamp,
+          });
           tagNewData = { ...tagNewData, adminPoints: 1, admin: proposer, aImgUrl, aFullname, aChooseUname };
           delete tagNewData.isAdmin;
         }
@@ -1338,7 +1343,18 @@ export const generateTagsData = async ({
   return [newBatch, writeCounts];
 };
 
-export const getUserVersion = async ({ versionId, nodeType, uname, t = false }: any) => {
+export const getUserVersion = async ({
+  versionId,
+  uname,
+  t = null,
+}: {
+  versionId: string;
+  uname: string;
+  t: Transaction | null;
+}): Promise<{
+  userVersionData: IUserNodeVersion;
+  userVersionRef: DocumentReference<DocumentData>;
+}> => {
   const { userVersionsColl }: any = getTypedCollections();
   const userVersionQuery = userVersionsColl.where("version", "==", versionId).where("user", "==", uname).limit(1);
   const userVersionDoc = t ? await t.get(userVersionQuery) : await userVersionQuery.get();
@@ -1476,8 +1492,17 @@ export const createUpdateUserVersion = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: any) => {
+}: {
+  batch: WriteBatch;
+  userVersionRef: DocumentReference;
+  userVersionData: IUserNodeVersion;
+  nodeType: INodeType;
+  writeCounts: number;
+  t: Transaction | null;
+  tWriteOperations: TWriteOperation[];
+}): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
   let newBatch = batch;
+  console.log("userVersionData createUpdateUserVersion", userVersionData);
   if (t) {
     tWriteOperations.push({
       objRef: userVersionRef,
@@ -1638,14 +1663,9 @@ export const signalNodeVoteToTypesense = async ({
 export const signalNodeToTypesense = async ({
   nodeId,
   currentTimestamp,
-  versionData,
 }: {
   nodeId: string;
   currentTimestamp: Timestamp;
-  versionData: {
-    choices: IQuestionChoice[];
-    content: string;
-  };
 }) => {
   const typesense = getTypesenseClient();
   const nodeData = (await db.collection("nodes").doc(nodeId).get()).data() as INode;
@@ -1670,8 +1690,8 @@ export const signalNodeToTypesense = async ({
     updatedAt: currentTimestamp.toMillis(),
     changedAt: currentTimestamp.toDate().toISOString(),
     changedAtMillis: currentTimestamp.toMillis(),
-    choices: versionData.choices ? versionData.choices : [],
-    content: versionData.content,
+    choices: nodeData.choices ? nodeData.choices : [],
+    content: nodeData.content,
     contribNames: nodeData.contribNames,
     institNames: nodeData.institNames || [],
     contributors: contributors || [],
@@ -1724,7 +1744,7 @@ type ITransferUserVersionsToNewNode = {
   skipUnames: string[];
   batch: WriteBatch;
   writeCounts: number;
-  t?: FirebaseFirestore.Transaction;
+  t: Transaction | null;
   tWriteOperations?: TWriteOperation[];
 };
 
@@ -1739,7 +1759,7 @@ export const transferUserVersionsToNewNode = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: ITransferUserVersionsToNewNode) => {
+}: ITransferUserVersionsToNewNode): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
   let newBatch = batch;
   const { userVersionsColl: oldUserVersionsColl } = getTypedCollections();
   const { userVersionsColl } = getTypedCollections();
