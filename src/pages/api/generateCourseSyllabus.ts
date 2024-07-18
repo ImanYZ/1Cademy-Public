@@ -541,9 +541,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       await Promise.all(categoryPromises);
-
-      await courseRef.update({
-        done: true,
+      await db.runTransaction(async (t: any) => {
+        const courseDoc = await t.get(courseRef);
+        const courseData = courseDoc.data();
+        courseData.done = true;
+        t.update(courseRef, courseData);
       });
 
       if (syllabus) {

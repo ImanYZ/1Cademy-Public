@@ -416,34 +416,40 @@ const CourseComponent = () => {
     }
   };
   const improveCourseStructure = async () => {
-    setLoading(true);
-    const courseTitle = courses[selectedCourse].title;
-    const courseDescription = courses[selectedCourse].description;
-    const targetLearners = courses[selectedCourse].learners;
-    const syllabus = courses[selectedCourse].syllabus;
-    const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
-    const suggestions = courses[selectedCourse].suggestions;
-    let response: any = { suggestions };
-    if (!suggestions) {
-      response = await Post("/improveCourseSyllabus", {
-        courseTitle,
-        courseDescription,
-        targetLearners,
-        syllabus,
-        prerequisiteKnowledge,
-        courseId: courses[selectedCourse].id,
-      });
-    }
+    try {
+      setLoading(true);
+      const courseTitle = courses[selectedCourse].title;
+      const courseDescription = courses[selectedCourse].description;
+      const targetLearners = courses[selectedCourse].learners;
+      const syllabus = courses[selectedCourse].syllabus;
+      const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
+      const suggestions = courses[selectedCourse].suggestions;
+      let response: any = { suggestions };
+      if (!suggestions) {
+        response = await Post("/improveCourseSyllabus", {
+          courseTitle,
+          courseDescription,
+          targetLearners,
+          syllabus,
+          prerequisiteKnowledge,
+          courseId: courses[selectedCourse].id,
+        });
+      }
 
-    setImprovements(response.suggestions);
-    setSidebarOpen(true);
-    if (response.suggestions.length > 0) {
-      setCurrentImprovement(response.suggestions[0]);
-      setSelectedOpenCategory(null);
-      setSelectedTopic(null);
-    }
+      setImprovements(response.suggestions);
+      setSidebarOpen(true);
+      if (response.suggestions.length > 0) {
+        setCurrentImprovement(response.suggestions[0]);
+        setSelectedOpenCategory(null);
+        setSelectedTopic(null);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      await confirmIt("There is a error with the request, please try again.", "Ok", "");
+      console.error(error);
+    }
   };
   const handleAcceptChange = async () => {
     let _courses: any = JSON.parse(JSON.stringify(courses));
@@ -630,6 +636,7 @@ const CourseComponent = () => {
       setLoadingNodes(false);
     } catch (error) {
       setLoadingNodes(false);
+      await confirmIt("There is a error with the request for retrieving nodes, please try again.", "Ok", "");
       console.error(error);
     }
   };
