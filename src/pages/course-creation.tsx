@@ -64,6 +64,7 @@ import { NodeItemFull } from "@/components/NodeItemFull";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import { ReferencesList } from "@/components/ReferencesList";
 import TypographyUnderlined from "@/components/TypographyUnderlined";
+import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
@@ -94,7 +95,7 @@ const glowRed = keyframes`
 `;
 
 interface Topic {
-  topic: string;
+  title: string;
   hours: number;
   difficulty: string;
 }
@@ -133,7 +134,7 @@ const books = [
 ];
 const CourseComponent = () => {
   const db = getFirestore();
-
+  const [{ user }] = useAuth();
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
@@ -190,8 +191,9 @@ const CourseComponent = () => {
   const [questionsLoader, setQuestionsLoader] = useState<any>(false);
 
   useEffect(() => {
+    if (!user?.uname) return;
     const notebooksRef = collection(db, "coursesAI");
-    const q = query(notebooksRef, where("deleted", "==", false));
+    const q = query(notebooksRef, where("deleted", "==", false), where("uname", "==", user.uname));
 
     const killSnapshot = onSnapshot(q, snapshot => {
       const docChanges = snapshot.docChanges();
@@ -227,7 +229,7 @@ const CourseComponent = () => {
     return () => {
       killSnapshot();
     };
-  }, [db]);
+  }, [db, user]);
 
   const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
@@ -247,8 +249,16 @@ const CourseComponent = () => {
   };
 
   const onCreateCourse = async (newCourse: any) => {
+    if (!user) return;
     const courseRef = doc(collection(db, "coursesAI"), newCourse.id);
-    await setDoc(courseRef, { ...newCourse, deleted: false, updateAt: new Date(), createdAt: new Date(), new: false });
+    await setDoc(courseRef, {
+      ...newCourse,
+      deleted: false,
+      updateAt: new Date(),
+      createdAt: new Date(),
+      new: false,
+      uname: user.uname,
+    });
   };
 
   const handleTitleChange = (e: any) => {
@@ -386,20 +396,20 @@ const CourseComponent = () => {
     switch (action) {
       case "add":
         return `**<span style="color: green;">Add a new topic</span>** called **"${
-          new_topic?.topic
+          new_topic?.title
         }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
           new_topic?.difficulty
         }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
       case "modify":
         return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
-          new_topic?.topic
+          new_topic?.title
         }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
           (new_topic?.hours || 0) > 1 ? "s" : ""
         }.`;
       case "divide":
         const dividedTopics = new_topics
           ?.map(
-            nt => `**"${nt.topic}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+            nt => `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
           )
           .join(" and ");
         return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
@@ -412,34 +422,40 @@ const CourseComponent = () => {
     }
   };
   const improveCourseStructure = async () => {
-    setLoading(true);
-    const courseTitle = courses[selectedCourse].title;
-    const courseDescription = courses[selectedCourse].description;
-    const targetLearners = courses[selectedCourse].learners;
-    const syllabus = courses[selectedCourse].syllabus;
-    const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
-    const suggestions = courses[selectedCourse].suggestions;
-    let response: any = { suggestions };
-    if (!suggestions) {
-      response = await Post("/improveCourseSyllabus", {
-        courseTitle,
-        courseDescription,
-        targetLearners,
-        syllabus,
-        prerequisiteKnowledge,
-        courseId: courses[selectedCourse].id,
-      });
-    }
+    try {
+      setLoading(true);
+      const courseTitle = courses[selectedCourse].title;
+      const courseDescription = courses[selectedCourse].description;
+      const targetLearners = courses[selectedCourse].learners;
+      const syllabus = courses[selectedCourse].syllabus;
+      const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
+      const suggestions = courses[selectedCourse].suggestions;
+      let response: any = { suggestions };
+      if (!suggestions) {
+        response = await Post("/improveCourseSyllabus", {
+          courseTitle,
+          courseDescription,
+          targetLearners,
+          syllabus,
+          prerequisiteKnowledge,
+          courseId: courses[selectedCourse].id,
+        });
+      }
 
-    setImprovements(response.suggestions);
-    setSidebarOpen(true);
-    if (response.suggestions.length > 0) {
-      setCurrentImprovement(response.suggestions[0]);
-      setSelectedOpenCategory(null);
-      setSelectedTopic(null);
-    }
+      setImprovements(response.suggestions);
+      setSidebarOpen(true);
+      if (response.suggestions.length > 0) {
+        setCurrentImprovement(response.suggestions[0]);
+        setSelectedOpenCategory(null);
+        setSelectedTopic(null);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      await confirmIt("There is a error with the request, please try again.", "Ok", "");
+      console.error(error);
+    }
   };
   const handleAcceptChange = async () => {
     let _courses: any = JSON.parse(JSON.stringify(courses));
@@ -626,6 +642,7 @@ const CourseComponent = () => {
       setLoadingNodes(false);
     } catch (error) {
       setLoadingNodes(false);
+      await confirmIt("There is a error with the request for retrieving nodes, please try again.", "Ok", "");
       console.error(error);
     }
   };
@@ -641,7 +658,7 @@ const CourseComponent = () => {
   const getNewTopics = (currentImprovement: any, category: string) => {
     let newTopics = [];
     const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
-    if (Object.keys(_currentImprovement).length <= 0 || _currentImprovement.category !== category) {
+    if (Object.keys(_currentImprovement || {}).length <= 0 || _currentImprovement.category !== category) {
       return [];
     }
     if (
@@ -1126,7 +1143,7 @@ const CourseComponent = () => {
       if (selectedTopic) {
         setLoadingImage(true);
         const { imageUrl } = (await Post("/generateCourseImage", {
-          title: selectedTopic.topic,
+          title: selectedTopic.title,
           content: selectedTopic.description,
           courseTitle: courses[selectedCourse].title,
           courseDescription: courses[selectedCourse].description,
@@ -1197,7 +1214,7 @@ const CourseComponent = () => {
       const courseObjectives = courses[selectedCourse].objectives;
       const courseSkills = courses[selectedCourse].skills;
       const syllabus = courses[selectedCourse].syllabus;
-      const topic = selectedTopic.topic;
+      const topic = selectedTopic.title;
 
       const { prompts } = (await Post("/generateMorePromptsForTopic", {
         courseTitle,
@@ -1213,7 +1230,7 @@ const CourseComponent = () => {
       const updatedCourses = [...courses];
       const currentTopic =
         updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex];
-      currentTopic.prompts = prompts;
+      currentTopic.prompts = [...currentTopic.prompts, ...prompts];
 
       setCourses(updatedCourses);
       setSelectedTopic({
@@ -1362,7 +1379,26 @@ const CourseComponent = () => {
           Close
         </LoadingButton>
       )}
-      <Box padding="20px">
+      <Box
+        padding="20px"
+        sx={{
+          background: theme =>
+            theme.palette.mode === "dark"
+              ? theme.palette.common.darkGrayBackground
+              : theme.palette.common.lightGrayBackground,
+          "&::-webkit-scrollbar-track": {
+            background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#888",
+            borderRadius: "10px",
+            border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: "#555",
+          },
+        }}
+      >
         <Box>
           {!courses[selectedCourse]?.new && (
             <TextField
@@ -1672,13 +1708,13 @@ const CourseComponent = () => {
                     if (expanded.includes(category.title)) {
                       setExpanded([]);
                       setSelectedOpenCategory(null);
-                      if (!Object.keys(currentImprovement).length) {
+                      if (!Object.keys(currentImprovement || {}).length) {
                         setSidebarOpen(false);
                       }
                     } else {
                       setExpanded([category.title]);
                       setSelectedTopic(null);
-                      if (!Object.keys(currentImprovement).length) {
+                      if (!Object.keys(currentImprovement || {}).length) {
                         setSelectedOpenCategory({ categoryIndex, ...category });
                         setSidebarOpen(true);
                       }
@@ -1752,15 +1788,18 @@ const CourseComponent = () => {
                         </Box>
                       </Box>
                     )}
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
+                      <LinearProgress sx={{ width: "100%" }} />
+                    )}
                   </Box>
                 </AccordionSummary>
                 {expanded.includes(category.title) && (
                   <AccordionDetails>
-                    {!category.hasOwnProperty("topics") ? (
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done ? (
                       <LinearProgress />
                     ) : (
                       <Grid container spacing={2}>
-                        {[...category.topics, ...getNewTopics(currentImprovement, category.title)].map(
+                        {[...(category.topics || []), ...getNewTopics(currentImprovement, category.title)].map(
                           (tc: any, topicIndex: any) => (
                             <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
                               <Accordion
@@ -1769,13 +1808,13 @@ const CourseComponent = () => {
                                   let newExpanded = [];
                                   if (isExpanded) {
                                     newExpanded = [...expandedTopics, tc.title];
-                                    if (Object.keys(currentImprovement).length <= 0) {
+                                    if (Object.keys(currentImprovement || {}).length <= 0) {
                                       setSidebarOpen(true);
                                       setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                       handlePaperClick();
                                     }
                                   } else {
-                                    if (Object.keys(currentImprovement).length <= 0) {
+                                    if (Object.keys(currentImprovement || {}).length <= 0) {
                                       setSidebarOpen(false);
                                     }
                                     newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
@@ -1983,7 +2022,7 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {(courses[selectedCourse].syllabus || []).length > 0 && (
+          {(courses[selectedCourse].syllabus || []).length > 0 && courses[selectedCourse].done && (
             <Box
               sx={{
                 display: "flex",
@@ -2368,7 +2407,7 @@ const CourseComponent = () => {
                 <Typography variant="h6">
                   {Object.keys(improvements[currentChangeIndex] || {}).length > 0
                     ? "AI-Proposed Improvements"
-                    : selectedTopic?.topic || selectedOpenCategory?.title || ""}
+                    : selectedTopic?.title || selectedOpenCategory?.title || ""}
                 </Typography>
 
                 {(selectedOpenCategory?.title || selectedTopic) && (
@@ -3153,7 +3192,7 @@ const CourseComponent = () => {
 
                         navigateChange(currentChangeIndex - 1);
                       }}
-                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement).length <= 0}
+                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement || {}).length <= 0}
                     >
                       <ArrowBackIosNewIcon />
                     </Button>
@@ -3189,7 +3228,7 @@ const CourseComponent = () => {
                       }}
                       disabled={
                         currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
-                        Object.keys(currentImprovement).length <= 0
+                        Object.keys(currentImprovement || {}).length <= 0
                       }
                     >
                       <ArrowForwardIosIcon />
@@ -3240,92 +3279,3 @@ export default withAuthUser({
   shouldRedirectToLogin: true,
   shouldRedirectToHomeIfAuthenticated: false,
 })(CourseComponent);
-// {
-//   action: "add",
-//   type: "topic",
-//   category: "Therapies and Interventions",
-//   after: "Biological Treatments",
-//   topic: "Integrative and Holistic Approaches",
-//   rationale:
-//     "To introduce students to comprehensive treatment approaches that combine multiple therapeutic modalities.",
-// },
-// {
-//   action: "add",
-//   type: "topic",
-//   category: "Applications of Psychology",
-//   after: "Psychology in the Workplace",
-//   topic: "Forensic Psychology",
-//   rationale: "To cover the application of psychology in legal and criminal justice settings.",
-// },
-{
-  /* {currentImprovement.category === category.title &&
-                          getNewTopics(currentImprovement).length > 0 &&
-                          getNewTopics(currentImprovement).map(tc => (
-                            <Grid key={tc.title} item xs={12}>
-                              <Accordion expanded>
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${categoryIndex}-new-${tc.title}-content`}
-                                  id={`panel${categoryIndex}-new-${tc.title}-header`}
-                                  sx={{
-                                    border: "2px solid green",
-                                    ":hover": {
-                                      border: "1px solid orange",
-                                    },
-                                  }}
-                                >
-                                  <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                    {tc.title}
-                                  </Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  <Paper
-                                    sx={{
-                                      height: "300px",
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      backgroundSize: "cover",
-                                      backgroundPosition: "center",
-                                      borderRadius: "15px",
-                                      position: "relative",
-                                      cursor: "pointer",
-                                      border: "2px solid green",
-                                      ":hover": {
-                                        border: "1px solid orange",
-                                      },
-                                    }}
-                                    elevation={10}
-                                  >
-                                    <Box>
-                                      <Typography variant="h3" sx={{ textAlign: "center", color: "green" }}>
-                                        {tc.title}
-                                      </Typography>
-                                      <Box
-                                        sx={{
-                                          position: "absolute",
-                                          bottom: "0px",
-                                          right: "0px",
-                                          m: 2,
-                                          gap: "5px",
-                                        }}
-                                      >
-                                        <Chip label={tc?.hours + " hours"} color="default" sx={{ mr: "5px" }} />
-                                        <Chip
-                                          label={tc?.difficulty}
-                                          color={
-                                            tc?.difficulty.toLowerCase() === "easy"
-                                              ? "success"
-                                              : tc?.difficulty.toLowerCase() === "medium"
-                                              ? "warning"
-                                              : "error"
-                                          }
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Paper>
-                                </AccordionDetails>
-                              </Accordion>
-                            </Grid>
-                          ))} */
-}

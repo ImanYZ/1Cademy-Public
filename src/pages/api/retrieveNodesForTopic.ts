@@ -127,9 +127,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseId, tags, courseTitle, courseDescription, targetLearners, references, syllabus, topic } = req.body;
 
-    const courseDoc = await db.collection("coursesAI").doc(courseId).get();
-    const courseData: any = courseDoc.data();
-
     const nodes = await retrieveNodesForTopic(
       tags,
       courseTitle,
@@ -139,16 +136,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       syllabus,
       topic
     );
-
-    if (!!courseData?.nodes) {
-      courseData.nodes[topic] = nodes;
-    } else {
-      courseData.nodes = { [topic]: nodes };
-    }
-    console.log("nodes ==>", nodes);
-    await courseDoc.ref.update({
-      nodes: courseData.nodes,
+    await db.runTransaction(async (t: any) => {
+      const courseDoc = await t.get(db.collection("coursesAI").doc(courseId));
+      const courseData = courseDoc.data();
+      if (!!courseData?.nodes) {
+        courseData.nodes[topic] = nodes;
+      } else {
+        courseData.nodes = { [topic]: nodes };
+      }
+      t.update(courseDoc.ref, courseData);
     });
+
+    console.log("nodes ==>", nodes);
+
     return res.status(200).json({});
   } catch (error) {
     console.log(error);

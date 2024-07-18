@@ -9,6 +9,7 @@
 
 const path = require("path");
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
+const fileToGenerativePart = require("../openAI/fileToGenerativePart");
 require("dotenv").config({
   path: path.join(__dirname, "../", ".env.prod"),
 });
@@ -49,30 +50,6 @@ const safetySettings = [
   },
 ];
 
-// Function to convert File to Base64 string and then to the required part structure
-const fileToGenerativePart = async (file: File): Promise<any> => {
-  const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        resolve(reader.result.toString().split(",")[1] || "");
-      } else {
-        reject("Failed to read file");
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
-  const base64Data = await base64EncodedDataPromise;
-  return {
-    inlineData: {
-      mimeType: file.type,
-      data: base64Data,
-    },
-  };
-};
-
 const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } => {
   try {
     return { jsonObject: JSON.parse(jsonString), isJSON: true };
@@ -81,19 +58,21 @@ const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } =
   }
 };
 
-export async function askGemini(files: File[], prompt: string) {
-  files.forEach((file, index) => {
-    console.log(`File ${index} type:`, file.constructor.name);
-  });
+export async function askGemini(files: File[] = [], prompt: string) {
+  let imageParts: any = [];
+  if ((files || []).length > 0) {
+    files.forEach((file, index) => {
+      console.log(`File ${index} type:`, file.constructor.name);
+    });
 
-  const validFiles = files.filter(file => file instanceof File);
-  if (validFiles.length !== files.length) {
-    console.error("Some objects are not File instances:", files);
-    throw new Error("Some provided objects are not File instances");
+    const validFiles = files.filter(file => file instanceof File);
+    if (validFiles.length !== files.length) {
+      console.error("Some objects are not File instances:", files);
+      throw new Error("Some provided objects are not File instances");
+    }
+
+    imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
   }
-
-  const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
-
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   let response = "";
   let isJSONObject: { jsonObject: any; isJSON: boolean } = {

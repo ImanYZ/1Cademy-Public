@@ -4,6 +4,7 @@ import { uploadFileToStorage } from "../STT";
 import { NextApiResponse } from "next";
 import { delay } from "@/lib/utils/utils";
 import { MODEL } from "@/lib/utils/constants";
+import { fileToGenerativePart } from "./fileToGenerativePart";
 
 const OpenAI = require("openai");
 
@@ -2171,28 +2172,7 @@ function isValidJSON(jsonString: string) {
     return false;
   }
 }
-export const fileToGenerativePart = async (file: File): Promise<any> => {
-  const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (reader.result) {
-        resolve(reader.result.toString().split(",")[1] || "");
-      } else {
-        reject("Failed to read file");
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 
-  const base64Data = await base64EncodedDataPromise;
-  return {
-    inlineData: {
-      mimeType: file.type,
-      data: base64Data,
-    },
-  };
-};
 const improverPrompt = `
 Given your previous complex, nested, and truncated JSON response, generate a JSON object with detailed instructions to complete your previous truncated JSON response by implementing the following actions on it:
 
@@ -2548,8 +2528,9 @@ export const completeJsonString = (truncatedJson: string): string => {
   return cleanedJson;
 };
 
-export async function callOpenAIChat(files: File[], userPrompt: string, systemPrompt: string = "") {
-  try {
+export async function callOpenAIChat(files: File[] = [], userPrompt: string, systemPrompt: string = "") {
+  let imageParts = [];
+  if ((files || []).length > 0) {
     files.forEach((file, index) => {
       console.log(`File ${index} type:`, file.constructor.name);
     });
@@ -2559,90 +2540,49 @@ export async function callOpenAIChat(files: File[], userPrompt: string, systemPr
       console.error("Some objects are not File instances:", files);
       throw new Error("Some provided objects are not File instances");
     }
+    console.log("validFiles", validFiles);
+    imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
+  }
 
-    const imageParts = await Promise.all(validFiles.map(fileToGenerativePart));
-
-    let response = "";
-    let finish_reason = "";
-    let isJSONObject: { jsonObject: any; isJSON: boolean } = {
-      jsonObject: {},
-      isJSON: false,
-    };
-    for (let i = 0; i < 4; i++) {
-      let completion: any = {};
-      if (finish_reason === "length") {
-        let improvedJSON: any = {};
-        for (let j = 0; j < 4; j++) {
-          try {
-            completion = await openai.chat.completions.create({
-              model: "gpt-4o",
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    ...imageParts,
-                    {
-                      type: "text",
-                      text: systemPrompt + "\n\n\n" + userPrompt,
-                    },
-                  ],
-                },
-                {
-                  role: "assistant",
-                  content: [
-                    {
-                      type: "text",
-                      text: response,
-                    },
-                  ],
-                },
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: improverPrompt,
-                    },
-                  ],
-                },
-              ],
-              temperature: 0,
-              response_format: { type: "json_object" },
-            });
-
-            console.log("Original JSON:");
-            console.log(response);
-            console.log("RECOMMENDED IMPROVEMENTS:");
-            console.log(completion.choices[0].message.content);
-
-            improvedJSON = applyImprovementInstructions(response, JSON.parse(completion.choices[0].message.content));
-            console.log("IMPROVED JSON:");
-            console.log(improvedJSON);
-            return improvedJSON;
-          } catch (error) {
-            console.error("Error in applyImprovementInstructions:", error);
-          }
-        }
-      } else {
+  let response = "";
+  let finish_reason = "";
+  let isJSONObject: { jsonObject: any; isJSON: boolean } = {
+    jsonObject: {},
+    isJSON: false,
+  };
+  for (let i = 0; i < 4; i++) {
+    let completion: any = {};
+    if (finish_reason === "length") {
+      let improvedJSON: any = {};
+      for (let j = 0; j < 4; j++) {
         completion = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [
-            {
-              role: "system",
-              content: [
-                {
-                  type: "text",
-                  text: systemPrompt,
-                },
-              ],
-            },
             {
               role: "user",
               content: [
                 ...imageParts,
                 {
                   type: "text",
-                  text: userPrompt,
+                  text: systemPrompt + "\n\n\n" + userPrompt,
+                },
+              ],
+            },
+            {
+              role: "assistant",
+              content: [
+                {
+                  type: "text",
+                  text: response,
+                },
+              ],
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: improverPrompt,
                 },
               ],
             },
@@ -2650,38 +2590,72 @@ export async function callOpenAIChat(files: File[], userPrompt: string, systemPr
           temperature: 0,
           response_format: { type: "json_object" },
         });
-        response = completion.choices[0].message.content || "";
-        isJSONObject.isJSON = isValidJSON(response);
-        // console.log("\n\n\nThe completion object is:");
-        // console.log(completion);
-        finish_reason = completion.choices[0].finish_reason;
-        if (isJSONObject.isJSON) {
-          isJSONObject.jsonObject = JSON.parse(response);
-          break;
-        }
-        console.log(
-          `\nFailed to get a complete JSON object. The finish_reason is "${finish_reason}". Retrying for the ${
-            i + 1
-          } time.\n\n\n`
-        );
-        if (finish_reason !== "length") {
-          console.log("Response: ", response);
-        } else {
-          response = completeJsonString(response);
-          i--;
-        }
+
+        console.log("Original JSON:");
+        console.log(response);
+        console.log("RECOMMENDED IMPROVEMENTS:");
+        console.log(completion.choices[0].message.content);
+
+        improvedJSON = applyImprovementInstructions(response, JSON.parse(completion.choices[0].message.content));
+        console.log("IMPROVED JSON:");
+        console.log(improvedJSON);
+        return improvedJSON;
+      }
+    } else {
+      completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: [
+              {
+                type: "text",
+                text: systemPrompt,
+              },
+            ],
+          },
+          {
+            role: "user",
+            content: [
+              ...imageParts,
+              {
+                type: "text",
+                text: userPrompt,
+              },
+            ],
+          },
+        ],
+        temperature: 0,
+        response_format: { type: "json_object" },
+      });
+      response = completion.choices[0].message.content || "";
+      isJSONObject.isJSON = isValidJSON(response);
+      // console.log("\n\n\nThe completion object is:");
+      // console.log(completion);
+      finish_reason = completion.choices[0].finish_reason;
+      if (isJSONObject.isJSON) {
+        isJSONObject.jsonObject = JSON.parse(response);
+        break;
+      }
+      console.log(
+        `\nFailed to get a complete JSON object. The finish_reason is "${finish_reason}". Retrying for the ${
+          i + 1
+        } time.\n\n\n`
+      );
+      if (finish_reason !== "length") {
+        console.log("Response: ", response);
+      } else {
+        response = completeJsonString(response);
+        i--;
       }
     }
-
-    if (!isJSONObject.isJSON) {
-      throw new Error("Failed to get a complete JSON object");
-    }
-
-    return isJSONObject.jsonObject;
-  } catch (error) {
-    console.error("Error in callOpenAIChat:", error);
-    throw error;
   }
+
+  if (!isJSONObject.isJSON) {
+    throw new Error("Failed to get a complete JSON object");
+  }
+
+  return isJSONObject.jsonObject;
 }
 
 export const generateImage = async (prompt: string) => {

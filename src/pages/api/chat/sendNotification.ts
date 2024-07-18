@@ -46,15 +46,18 @@ const triggerNotifications = async (newMessage: any) => {
         updatedAt: new Date(),
       });
     }
+
     console.log(fcmTokensHash);
     if (channelData) {
       const membersInfo = channelData.membersInfo;
       console.log(channelData?.members);
       const _member = channelData.members.filter((m: string) => m !== sender);
       const invalidTokens: any = {};
-      for (let member of _member) {
+      await channelRef.update({
+        visibleFor: channelData?.members,
+      });
+      for (const member of _member) {
         const UID = membersInfo[member].uid;
-
         const newNotification = {
           ...newMessage,
           message: replaceMentions(message),
@@ -106,6 +109,7 @@ const triggerNotifications = async (newMessage: any) => {
         } catch (error) {}
         await notificationRef.set(newNotification);
       }
+
       await removeInvalidTokens(invalidTokens);
     }
 
