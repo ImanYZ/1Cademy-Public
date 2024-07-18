@@ -49,7 +49,10 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
+import Essay from "@/components/courseCreation/questions/Essay";
 import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
+import ShortAnswer from "@/components/courseCreation/questions/ShortAnswer";
+import TrueFalse from "@/components/courseCreation/questions/TrueFalse";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import ImageSlider from "@/components/ImageSlider";
@@ -1244,25 +1247,38 @@ const CourseComponent = () => {
         const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
         setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
         setNodePublicViewLoader(false);
-        setQuestionsLoader(true);
-        const response: any = await Post("/retrieveGenerateQuestions", {
-          courseTitle: courses[selectedCourse].title,
-          courseDescription: courses[selectedCourse].description,
-          targetLearners: courses[selectedCourse].learners,
-          nodeId,
-        });
-        const updatedCourses = [...courses];
-        updatedCourses[selectedCourse]["questions"] = {
-          ...updatedCourses[selectedCourse]["questions"],
-          [nodeId]: response?.questions || [],
-        };
-
-        setCourses(updatedCourses);
-        setQuestionsLoader(false);
       }
     },
     [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
   );
+
+  const retrieveNodeQuestions = useCallback(
+    async (nodeId: string) => {
+      setQuestionsLoader(true);
+      const response: any = await Post("/retrieveGenerateQuestions", {
+        courseTitle: courses[selectedCourse].title,
+        courseDescription: courses[selectedCourse].description,
+        targetLearners: courses[selectedCourse].learners,
+        nodeId,
+      });
+      const updatedCourses = [...courses];
+      const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
+      updatedCourses[selectedCourse]["questions"] = {
+        ...updatedCourses[selectedCourse]["questions"],
+        [nodeId]: [...prevQuestions, ...(response?.questions || [])],
+      };
+
+      setCourses(updatedCourses);
+      setQuestionsLoader(false);
+    },
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+  );
+
+  const handleQuestion = (question: any, idx: number, nodeId: number) => {
+    console.error(question);
+    console.error(idx);
+    console.error(nodeId);
+  };
   if (courses.length <= 0) {
     return (
       <Box
@@ -2214,13 +2230,87 @@ const CourseComponent = () => {
                     </Grid>
 
                     <Grid item xs={12} sm={12}>
-                      {questionsLoader && <LinearProgress sx={{ width: "100%" }} />}
-                      {courses[selectedCourse]?.questions &&
-                        courses[selectedCourse]?.questions[nodePublicView?.id]?.map((question: any, idx: number) => {
-                          if (question?.question_type === "Multiple Choice") {
-                            return <MultipleChoices key={idx} sx={{ mt: 3, p: 2 }} choices={question?.choices} />;
+                      <Card sx={{ mt: 3, p: 2 }}>
+                        <CardHeader
+                          sx={{
+                            backgroundColor: theme =>
+                              theme.palette.mode === "light"
+                                ? theme.palette.common.darkGrayBackground
+                                : theme.palette.common.black,
+                          }}
+                          title={
+                            <Box sx={{ textAlign: "center", color: "inherit" }}>
+                              <TypographyUnderlined
+                                variant="h6"
+                                fontWeight="300"
+                                gutterBottom
+                                align="center"
+                                sx={{ color: theme => theme.palette.common.white }}
+                              >
+                                Knowledge Checks
+                              </TypographyUnderlined>
+                              <LoadingButton
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  retrieveNodeQuestions(nodePublicView?.id);
+                                }}
+                                sx={{
+                                  ml: "10px",
+                                  display: "flex-end",
+                                }}
+                                loading={loadingDescription}
+                              >
+                                <AutoFixHighIcon />
+                              </LoadingButton>
+                            </Box>
                           }
-                        })}
+                        ></CardHeader>
+                        {questionsLoader && <LinearProgress sx={{ width: "100%" }} />}
+                        {courses[selectedCourse]?.questions &&
+                          courses[selectedCourse]?.questions[nodePublicView?.id]?.map((question: any, idx: number) => {
+                            if (question?.question_type === "Multiple Choice") {
+                              return (
+                                <MultipleChoices
+                                  key={idx}
+                                  idx={idx}
+                                  nodeId={nodePublicView?.id}
+                                  question={question}
+                                  handleQuestion={handleQuestion}
+                                />
+                              );
+                            } else if (question?.question_type === "True/False") {
+                              return (
+                                <TrueFalse
+                                  key={idx}
+                                  idx={idx}
+                                  nodeId={nodePublicView?.id}
+                                  question={question}
+                                  handleQuestion={handleQuestion}
+                                />
+                              );
+                            } else if (question?.question_type === "Short Answer") {
+                              return (
+                                <ShortAnswer
+                                  key={idx}
+                                  idx={idx}
+                                  nodeId={nodePublicView?.id}
+                                  question={question}
+                                  handleQuestion={handleQuestion}
+                                />
+                              );
+                            } else if (question?.question_type === "Essay") {
+                              return (
+                                <Essay
+                                  key={idx}
+                                  idx={idx}
+                                  nodeId={nodePublicView?.id}
+                                  question={question}
+                                  handleQuestion={handleQuestion}
+                                />
+                              );
+                            }
+                          })}
+                      </Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
                       <Card sx={{ mt: 3, p: 2 }}>
