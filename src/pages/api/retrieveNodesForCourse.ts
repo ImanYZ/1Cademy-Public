@@ -20,7 +20,7 @@ const jsonNodeStructure =
   // '  "tags": [An array of node titles tagged on this node corresponding to tagIds]\n' +
   "}\n\n";
 
-  let DEFINITION_OF_1CADEMY =
+export let DEFINITION_OF_1CADEMY =
   "1Cademy Definition:\n" +
   "1Cademy is a knowledge graph with the following characteristics:\n" +
   "- Each node represents a unique piece of knowledge.\n" +
