@@ -9,11 +9,10 @@
 
 const path = require("path");
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
-const fileToGenerativePart = require('../openAI/fileToGenerativePart');
+const fileToGenerativePart = require("../openAI/fileToGenerativePart");
 require("dotenv").config({
   path: path.join(__dirname, "../", ".env.prod"),
 });
-
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);

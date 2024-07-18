@@ -11,7 +11,6 @@ export const updateImage = async ({ userData }: any) => {
       const conversationsQuery = await transaction.get(
         db.collection("conversations").where("members", "array-contains", uname)
       );
-      console.log(channelsQuery.docs.length, "channels.DOCS");
 
       channelsQuery.forEach(channelDoc => {
         const channelData = channelDoc.data();
