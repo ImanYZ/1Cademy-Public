@@ -234,9 +234,7 @@ Your generated questions will be reviewed by a supervisory team. For every helpf
 
     const response = await askGemini(files, prompt);
     const generatedQs = response.questions;
-    for (let question of generatedQs) {
-      console.log(question);
-    }
+    return generatedQs;
   }
 };
 
