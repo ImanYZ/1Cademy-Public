@@ -41,6 +41,9 @@ const App = (props: AppPropsWithLayout) => {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js");
+      navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(function (error) {
+        console.error("Service Worker registration failed: ", error);
+      });
       // const firebaseConfig = encodeURIComponent(
       //   JSON.stringify({
       //     apiKey: process.env.NEXT_PUBLIC_API_KEY,

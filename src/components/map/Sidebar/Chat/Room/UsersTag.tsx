@@ -64,7 +64,7 @@ export const UsersTag = ({ user }: UsersTagProps) => {
             <Box className="user-image">
               <OptimizedAvatar2 alt={""} imageUrl={user.imageUrl} size={30} sx={{ border: "none" }} />
             </Box>
-            <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" />
+            {/* <Box sx={{ background: "#12B76A" }} className="UserStatusOnlineIcon" /> */}
           </Box>
           <Box>
             <Box sx={{ display: "flex", width: "300px", alignItems: "center" }}>

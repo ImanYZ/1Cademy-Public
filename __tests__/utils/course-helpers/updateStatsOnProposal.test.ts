@@ -96,14 +96,12 @@ describe("updateStatsOnProposal", () => {
     new MockData([], "credits"),
     new MockData([], "courses"),
     new MockData([], "instructors"),
-    new MockData([], "relationVersions"),
+    new MockData([], "versions"),
     new MockData([], "semesters"),
-    new MockData([], "questionVersions"),
     new MockData([], "semesterStudentSankeys"),
     new MockData([], "semesterStudentStats"),
     new MockData([], "semesterStudentVoteStats"),
     new MockData([], "userVersions"),
-    new MockData([], "userQuestionVersions"),
   ];
 
   const auth = admin.auth();
@@ -496,7 +494,7 @@ describe("updateStatsOnProposal", () => {
         nodeType: "Question",
       }),
     ];
-    await new MockData(_nodeVersions, "questionVersions").populate();
+    await new MockData(_nodeVersions, "versions").populate();
 
     const semester = await db.collection("semesters").doc(semesterId).get();
     const semesterData = semester.data() as ISemester;

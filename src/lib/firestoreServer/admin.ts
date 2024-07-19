@@ -106,5 +106,22 @@ const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
     }
   });
 };
+export const writeTransactionWithT = (tWriteOperations: TWriteOperation[], t: any) => {
+  const _tWriteOperations = tWriteOperations.splice(0, MAX_TRANSACTION_WRITES);
+  for (const operation of _tWriteOperations) {
+    const { objRef, data, operationType } = operation;
+    switch (operationType) {
+      case "update":
+        t.update(objRef, data);
+        break;
+      case "set":
+        t.set(objRef, data);
+        break;
+      case "delete":
+        t.delete(objRef);
+        break;
+    }
+  }
+};
 
 export { admin, db, writeTransaction, type TWriteOperation, checkRestartBatchWriteCounts, app };

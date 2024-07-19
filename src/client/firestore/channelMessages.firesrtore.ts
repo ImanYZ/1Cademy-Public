@@ -2,10 +2,12 @@ import {
   collection,
   doc,
   Firestore,
+  limit,
   // limit,
   onSnapshot,
   orderBy,
   query,
+  startAfter,
   // startAfter,
   Unsubscribe,
 } from "firebase/firestore";
@@ -17,7 +19,7 @@ export type channelMessagesChange = {
   type: SnapshotChangesTypes;
 };
 
-export const getChannelMesasgesSnapshot = (
+export const getChannelMessagesSnapshot = (
   db: Firestore,
   data: {
     lastVisible: any;
@@ -26,7 +28,8 @@ export const getChannelMesasgesSnapshot = (
   },
   callback: (changes: channelMessagesChange[]) => void
 ): Unsubscribe => {
-  const { channelId, roomType /* , lastVisible */ } = data;
+  const { channelId, roomType, lastVisible } = data;
+  const pageSize = 15;
   let channelRef = doc(db, "channelMessages", channelId);
   if (roomType === "direct") {
     channelRef = doc(db, "conversationMessages", channelId);
@@ -36,11 +39,12 @@ export const getChannelMesasgesSnapshot = (
 
   const messageRef = collection(channelRef, "messages");
 
-  let q = query(messageRef, orderBy("createdAt", "desc"));
+  let q = query(messageRef, orderBy("createdAt", "desc"), limit(pageSize));
 
-  // if (lastVisible) {
-  //   q = query(messageRef, orderBy("createdAt", "desc"), startAfter(lastVisible));
-  // }
+  if (lastVisible) {
+    q = query(messageRef, orderBy("createdAt", "desc"), startAfter(lastVisible), limit(pageSize));
+  }
+
   const killSnapshot = onSnapshot(q, snapshot => {
     const docChanges = snapshot.docChanges();
 

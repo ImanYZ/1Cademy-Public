@@ -1,6 +1,8 @@
 import { ArrowForwardIos } from "@mui/icons-material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateIcon from "@mui/icons-material/Create";
 import DoneIcon from "@mui/icons-material/Done";
@@ -8,7 +10,9 @@ import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
 import ImageIcon from "@mui/icons-material/Image";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import MailIcon from "@mui/icons-material/Mail";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RedditIcon from "@mui/icons-material/Reddit";
 import ShareIcon from "@mui/icons-material/Share";
@@ -16,7 +20,9 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import {
+  Badge,
   Button,
+  CircularProgress,
   ClickAwayListener,
   Divider,
   Grid,
@@ -34,20 +40,14 @@ import IconButton from "@mui/material/IconButton";
 import { Box } from "@mui/system";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
-import NextImage from "next/image";
+import { collection, getDocs, getFirestore, limit, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import React, { MutableRefObject, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { ChosenType, OpenLeftSidebar } from "@/pages/notebook";
 
-import ReferenceIcon from "../../../public/reference.svg";
-import ReferenceDarkIcon from "../../../public/reference-dark.svg";
-import ReferenceLightIcon from "../../../public/reference-light.svg";
-import TagIcon from "../../../public/tag.svg";
-import TagDarkIcon from "../../../public/tag-dark.svg";
-import TagLightIcon from "../../../public/tag-light.svg";
 import { User } from "../../knowledgeTypes";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeBookState } from "../../nodeBookTypes";
@@ -92,6 +92,14 @@ type NodeFooterProps = {
   markedWrong: any;
   references: any;
   tags: any;
+  removedTags: string[];
+  addedTags: any;
+  addedReferences: any;
+  removedReferences: any;
+  addedParents: any;
+  removedParents: any;
+  addedChildren: any;
+  removedChildren: any;
   parents: any;
   nodesChildren: any;
   commentsNum: any;
@@ -103,7 +111,7 @@ type NodeFooterProps = {
   simulated?: boolean;
   bookmarked: any;
   bookmarks: any;
-  reloadPermanentGrpah: any;
+  reloadPermanentGraph: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   markStudied: any;
   bookmark: any;
@@ -130,6 +138,11 @@ type NodeFooterProps = {
   onChangeChosenNode: () => void;
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  onlineUsers: any;
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
+  prevImageUrl: string;
+  setPrevImageUrl: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const NodeFooter = ({
@@ -145,8 +158,8 @@ const NodeFooter = ({
   // commentsSelected,
   editable,
   setNodeParts,
-  // title,
-  // content,
+  title,
+  content,
   unaccepted,
   openPart,
   nodeType,
@@ -163,6 +176,14 @@ const NodeFooter = ({
   markedWrong,
   references,
   tags,
+  removedTags,
+  addedTags,
+  addedReferences,
+  removedReferences,
+  addedParents,
+  removedParents,
+  addedChildren,
+  removedChildren,
   parents,
   nodesChildren,
   // commentsNum,
@@ -174,7 +195,7 @@ const NodeFooter = ({
   simulated,
   bookmarked,
   bookmarks,
-  reloadPermanentGrpah,
+  reloadPermanentGraph: reloadPermanentGrpah,
   onNodeShare,
   markStudied,
   bookmark,
@@ -199,6 +220,11 @@ const NodeFooter = ({
   onChangeChosenNode,
   findDescendantNodes,
   findAncestorNodes,
+  onlineUsers,
+  openComments,
+  commentNotifications,
+  prevImageUrl,
+  setPrevImageUrl,
 }: NodeFooterProps) => {
   const router = useRouter();
   const db = getFirestore();
@@ -209,6 +235,7 @@ const NodeFooter = ({
   const [url, setUrl] = useState("");
   const inputEl = useRef<HTMLInputElement>(null);
   const [openMenu, setOpenMenu] = useState(false);
+  const [imageGenerated, setImageGenerated] = useState<boolean>(false);
   // const [openSocialMenu, setOpenSocialMenu] = useState(false);
   const [institutionLogos, setInstitutionLogos] = useState<{
     [institutionName: string]: string;
@@ -411,12 +438,74 @@ const NodeFooter = ({
   }, [identifier, nodeBookDispatch, notebookRef, selectNode]);
 
   const proposeNodeImprovementClick = useCallback(
-    (event: any) => {
-      displayProposals();
+    async (event: any) => {
+      const userVersionsRef = collection(db, "versions");
+      const q = query(
+        userVersionsRef,
+        where("node", "==", identifier),
+        where("accepted", "==", false),
+        where("deleted", "==", false),
+        limit(1)
+      );
+      const versionDocs = await getDocs(q);
+      if (!versionDocs.empty) {
+        displayProposals();
+      }
       proposeNodeImprovement(event, identifier);
     },
     [displayProposals, identifier, proposeNodeImprovement]
   );
+  const getNumberColor = (added: any, removed: any) => {
+    if ((removed || []).length > 0 && (added || []).length > 0) {
+      return "orange";
+    } else if ((added || []).length > 0) {
+      return "green";
+    } else if ((removed || []).length > 0) {
+      return "red";
+    }
+    return "";
+  };
+
+  const checkLinkingNode = useMemo(() => {
+    if (!choosingNode || !choosingNode.type || choosingNode.id === identifier) {
+      return false;
+    }
+
+    if (choosingNode.type === "Child" || choosingNode.type === "Parent") {
+      return !findDescendantNodes(choosingNode.id, identifier) && !findAncestorNodes(choosingNode.id, identifier);
+    }
+
+    if (
+      (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
+      (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [choosingNode, identifier]);
+
+  const generateNodeImage = useCallback(async () => {
+    try {
+      setImageGenerated(true);
+
+      const response: any = await Post("/generateNodeImage", {
+        title,
+        content,
+        nodeId: identifier,
+        prevUrl: prevImageUrl,
+      });
+      setNodeParts(identifier, (thisNode: any) => {
+        thisNode.nodeImage = response?.imageUrl || "";
+        return { ...thisNode };
+      });
+      setPrevImageUrl(response?.filename);
+      setImageGenerated(false);
+    } catch (err) {
+      console.error(err);
+      setImageGenerated(false);
+    }
+  }, [identifier, title, content, prevImageUrl, setNodeParts]);
 
   return (
     <>
@@ -441,7 +530,7 @@ const NodeFooter = ({
                   imageUrl={user.imageUrl || ""}
                   fullname={user.fName + " " + user.lName}
                   chooseUname={user.chooseUname}
-                  online={false}
+                  online={!!onlineUsers[user.uname]}
                   inUserBar={false}
                   inNodeFooter={true}
                   reloadPermanentGraph={reloadPermanentGrpah}
@@ -458,7 +547,7 @@ const NodeFooter = ({
                   imageUrl={aImgUrl}
                   fullname={aFullname}
                   chooseUname={aChooseUname}
-                  online={false}
+                  online={!!onlineUsers[admin]}
                   inUserBar={false}
                   inNodeFooter={true}
                   reloadPermanentGraph={reloadPermanentGrpah}
@@ -473,9 +562,9 @@ const NodeFooter = ({
               sx={{ width: "28px", height: "28px", backgroundColor: "gray", borderRadius: "50%" }}
             />
           )} */}
-          <div
+          <Box
             className={open ? "NodeTypeIconOpen Tooltip" : "NodeTypeIconClosed Tooltip"}
-            style={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
+            sx={{ display: "flex", alignItems: "center", fontSize: "16px" }} // font size refL Map.css ln 71
           >
             {/* <NodeTypeIcon nodeType={nodeType} /> */}
 
@@ -502,36 +591,39 @@ const NodeFooter = ({
               ) : (
                 <NodeTypeIcon id={identifier} nodeType={nodeType} tooltipPlacement={"top"} sx={{ fontSize: "24px" }} />
               ))}
-            <Tooltip
-              title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
-                new Date(changedAt)
-              ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
-                dayjs(new Date(changedAt)).month() + 1
-              }/${dayjs(new Date(changedAt)).year()}`}
-              placement={"top"}
-            >
-              <Box
-                id={`${identifier}-node-footer-timestamp`}
-                component={"span"}
-                sx={{
-                  marginLeft: "10px",
-                  display: editable ? "none" : "block",
-                  lineHeight: "normal",
-                  cursor: "pointer",
-                  ":hover": {
-                    color:
-                      theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange400 : DESIGN_SYSTEM_COLORS.orange500,
-                  },
-                }}
-                onClick={displayProposals}
+            {!locked && (
+              <Tooltip
+                title={`This node was last edited at ${dayjs(new Date(changedAt)).hour()}:${dayjs(
+                  new Date(changedAt)
+                ).minute()}:${dayjs(new Date(changedAt)).second()} on ${dayjs(new Date(changedAt)).day() + 1}/${
+                  dayjs(new Date(changedAt)).month() + 1
+                }/${dayjs(new Date(changedAt)).year()}`}
+                placement={"top"}
               >
-                {dayjs(new Date(changedAt)).fromNow().includes("NaN")
-                  ? "a few minutes ago"
-                  : `${dayjs(new Date(changedAt)).fromNow()}`}
-              </Box>
-            </Tooltip>
+                <Box
+                  id={`${identifier}-node-footer-timestamp`}
+                  component={"span"}
+                  sx={{
+                    fontSize: "13px",
+                    marginLeft: "10px",
+                    display: editable ? "none" : "block",
+                    lineHeight: "normal",
+                    cursor: "pointer",
+                    ":hover": {
+                      color:
+                        theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.orange400 : DESIGN_SYSTEM_COLORS.orange500,
+                    },
+                  }}
+                  onClick={displayProposals}
+                >
+                  {dayjs(new Date(changedAt)).fromNow().includes("NaN")
+                    ? "a few minutes ago"
+                    : `${dayjs(new Date(changedAt)).fromNow()}`}
+                </Box>
+              </Tooltip>
+            )}
 
-            {open && (
+            {!checkLinkingNode && open && !locked && (
               <Box sx={{ display: editable || simulated ? "none" : "flex", alignItems: "center", marginLeft: "10px" }}>
                 <ContainedButton
                   id={proposeButtonId}
@@ -682,6 +774,39 @@ const NodeFooter = ({
                     </Tooltip>
                   </Box>
                 </Box>
+                <ContainedButton
+                  id={proposeButtonId}
+                  title="Open comments"
+                  onClick={() => openComments(identifier, "node")}
+                  tooltipPosition="top"
+                  sx={{
+                    background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                    fontWeight: 400,
+                    color: "inherit",
+                    ":hover": {
+                      borderWidth: "0px",
+                      background: (theme: any) =>
+                        theme.palette.mode === "dark"
+                          ? theme.palette.common.darkBackground2
+                          : theme.palette.common.lightBackground2,
+                    },
+                    padding: "7px 7px",
+                    minWidth: "30px",
+                    height: "30px",
+                  }}
+                  disabled={disableProposeButton}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                    <Badge
+                      badgeContent={
+                        commentNotifications.filter((notification: any) => notification.refId === identifier).length
+                      }
+                      color="error"
+                    >
+                      <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                    </Badge>
+                  </Box>
+                </ContainedButton>
               </Box>
             )}
             {/* <span
@@ -698,7 +823,7 @@ const NodeFooter = ({
               : "a"}{" "}
             "{nodeType}" node.
           </span> */}
-          </div>
+          </Box>
         </Box>
 
         <LinearProgress
@@ -710,11 +835,14 @@ const NodeFooter = ({
           }}
         />
 
-        <Box className="NodeFooter Right" sx={{ display: simulated ? "none" : "flex", alignItems: "center" }}>
+        <Box
+          className="NodeFooter Right"
+          sx={{ display: checkLinkingNode || simulated ? "none" : "flex", alignItems: "center" }}
+        >
           {open ? (
             // REF: Node.css ln 122
             <Box sx={{ display: "flex", alignItems: "center", fontSize: "13px" }}>
-              {!editable && !unaccepted ? (
+              {!locked && !editable && !unaccepted ? (
                 // Accepted nodes
                 <>
                   {/* <MemoizedMetaButton
@@ -748,7 +876,7 @@ const NodeFooter = ({
               ) : (
                 // new Node or unaccepted proposal
                 <>
-                  {nodeType !== "Reference" && editable && (
+                  {!locked && nodeType !== "Reference" && editable && (
                     <Box
                       id={`${identifier}-node-footer-image-video`}
                       sx={{
@@ -758,6 +886,32 @@ const NodeFooter = ({
                         marginRight: "10px",
                       }}
                     >
+                      <ContainedButton
+                        id={`${identifier}-node-footer-image`}
+                        title="Upload an image to better explain this node."
+                        onClick={async () => generateNodeImage()}
+                        tooltipPosition="top"
+                        sx={{
+                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                          color: "inherit",
+                          fontWeight: 400,
+                          height: "28.7px",
+                          ":hover": {
+                            borderWidth: "0px",
+                            background: (theme: any) =>
+                              theme.palette.mode === "dark"
+                                ? theme.palette.common.darkBackground2
+                                : theme.palette.common.lightBackground2,
+                          },
+                        }}
+                        disabled={disabled}
+                      >
+                        {imageGenerated ? (
+                          <CircularProgress size={15} />
+                        ) : (
+                          <AutoFixHighIcon sx={{ fontSize: "16px" }} />
+                        )}
+                      </ContainedButton>
                       <ContainedButton
                         id={`${identifier}-node-footer-image`}
                         title="Upload an image to better explain this node."
@@ -816,7 +970,7 @@ const NodeFooter = ({
                   )}
                 </>
               )}
-              {!editable && !unaccepted && nodeType === "Reference" && !choosingNode ? (
+              {!locked && !editable && !unaccepted && nodeType === "Reference" && !choosingNode ? (
                 <>
                   <Box
                     sx={{
@@ -854,16 +1008,13 @@ const NodeFooter = ({
                     >
                       <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}>
                         <ArrowForwardIcon sx={{ fontSize: "16px" }} />
-                        <NextImage
-                          width={"22px"}
-                          src={
+                        <MenuBookIcon
+                          sx={{ fontSize: "16px" }}
+                          color={
                             openSidebar === "CITATIONS" && notebookRef.current.selectedNode === identifier
-                              ? ReferenceIcon
-                              : theme.palette.mode === "dark"
-                              ? ReferenceLightIcon
-                              : ReferenceDarkIcon
+                              ? "primary"
+                              : "secondary"
                           }
-                          alt="tag icon"
                         />
                       </Box>
                     </ContainedButton>
@@ -877,10 +1028,12 @@ const NodeFooter = ({
                         background: theme => (theme.palette.mode === "dark" ? "#303134" : "#EAECF0"),
                         border: "none",
                         cursor: "pointer",
+                        display: "flex",
+                        gap: "5px",
                       }}
                     >
                       <>
-                        <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
+                        <LocalOfferIcon color="primary" sx={{ fontSize: "14px" }} />
                         <span>{shortenNumber(tags.length, 2, false)}</span>
                       </>
                     </Box>
@@ -915,12 +1068,10 @@ const NodeFooter = ({
                         <Box
                           sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit", height: "23px" }}
                         >
-                          <NextImage
-                            width={"22px"}
-                            src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
-                            alt="tag icon"
-                          />
-                          <span>{shortenNumber(tags.length, 2, false)}</span>
+                          <LocalOfferIcon sx={{ fontSize: "14px" }} />
+                          <span style={{ color: getNumberColor(addedTags, removedTags) }}>
+                            {shortenNumber(tags.length, 2, false)}
+                          </span>
                         </Box>
                       </ContainedButton>
                     </Box>
@@ -928,7 +1079,7 @@ const NodeFooter = ({
                 </>
               ) : (
                 <>
-                  {openPart === "References" ? (
+                  {!locked && openPart === "References" ? (
                     <Box
                       id={tagsCitationsButtonId}
                       onClick={disableTagsCitationsButton ? undefined : selectReferences}
@@ -949,10 +1100,14 @@ const NodeFooter = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            gap: "5px",
                           }}
                         >
-                          <NextImage width={"22px"} src={ReferenceIcon} alt="tag icon" style={{ marginRight: "2px" }} />
-                          <span className="CitationsSpanBeforeTagIcon">
+                          <MenuBookIcon color="primary" sx={{ fontSize: "16px" }} />
+                          <span
+                            style={{ color: getNumberColor(addedReferences, removedReferences) }}
+                            className="CitationsSpanBeforeTagIcon"
+                          >
                             {shortenNumber(references.length, 2, false)}
                           </span>
                         </Box>
@@ -964,92 +1119,104 @@ const NodeFooter = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            gap: "5px",
                           }}
                         >
-                          <NextImage width={"22px"} src={TagIcon} alt="tag icon" />
-                          <span>{shortenNumber(tags.length, 2, false)}</span>
+                          <LocalOfferIcon color="primary" sx={{ fontSize: "14px" }} />
+                          <span
+                            style={{
+                              color: getNumberColor(addedTags, removedTags),
+                            }}
+                          >
+                            {shortenNumber(tags.length, 2, false)}
+                          </span>
                         </Box>
                       </Box>
                     </Box>
                   ) : (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      <ContainedButton
-                        id={tagsCitationsButtonId}
-                        title="View tags and citations used in this node."
-                        onClick={selectReferences}
-                        tooltipPosition="top"
-                        sx={{
-                          background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
-                          color: "inherit",
-                          fontWeight: 400,
-                          height: "28.7px",
-                          ":hover": {
-                            borderWidth: "0px",
-                            background: (theme: any) =>
-                              theme.palette.mode === "dark"
-                                ? theme.palette.common.darkBackground2
-                                : theme.palette.common.lightBackground2,
-                          },
-                        }}
-                        disabled={disableTagsCitationsButton}
-                      >
+                    <>
+                      {!locked && (
                         <Box
                           sx={{
                             display: "flex",
+                            alignItems: "center",
                             gap: "5px",
+                            marginRight: "10px",
                           }}
                         >
-                          <Box
+                          <ContainedButton
+                            id={tagsCitationsButtonId}
+                            title="View tags and citations used in this node."
+                            onClick={selectReferences}
+                            tooltipPosition="top"
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
+                              background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                              color: "inherit",
+                              fontWeight: 400,
+                              height: "28.7px",
+                              ":hover": {
+                                borderWidth: "0px",
+                                background: (theme: any) =>
+                                  theme.palette.mode === "dark"
+                                    ? theme.palette.common.darkBackground2
+                                    : theme.palette.common.lightBackground2,
+                              },
                             }}
+                            disabled={disableTagsCitationsButton}
                           >
-                            <NextImage
-                              width={"22px"}
-                              src={theme.palette.mode === "dark" ? ReferenceLightIcon : ReferenceDarkIcon}
-                              alt="tag icon"
-                            />
-
-                            <span className="CitationsSpanBeforeTagIcon" style={{ marginTop: "3px" }}>
-                              {shortenNumber(references.length, 2, false)}
-                            </span>
-                          </Box>
-                          <Divider
-                            orientation="vertical"
-                            variant="middle"
-                            flexItem
-                            sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
-                          />
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <NextImage
-                              width={"22px"}
-                              src={theme.palette.mode === "dark" ? TagLightIcon : TagDarkIcon}
-                              alt="tag icon"
-                            />
-                            <span style={{ marginTop: "3px" }}>{shortenNumber(tags.length, 2, false)}</span>
-                          </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                gap: "5px",
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  gap: "5px",
+                                }}
+                              >
+                                <MenuBookIcon sx={{ fontSize: "16px" }} />
+                                <span
+                                  style={{
+                                    marginTop: "3px",
+                                    color: getNumberColor(addedReferences, removedReferences),
+                                  }}
+                                  className="CitationsSpanBeforeTagIcon"
+                                >
+                                  {shortenNumber(references.length, 2, false)}
+                                </span>
+                              </Box>
+                              <Divider
+                                orientation="vertical"
+                                variant="middle"
+                                flexItem
+                                sx={{ borderColor: theme => (theme.palette.mode === "dark" ? "#D3D3D3" : "inherit") }}
+                              />
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  gap: "3px",
+                                }}
+                              >
+                                <LocalOfferIcon sx={{ fontSize: "14px" }} />
+                                <span style={{ marginTop: "3px", color: getNumberColor(addedTags, removedTags) }}>
+                                  {shortenNumber(tags.length, 2, false)}
+                                </span>
+                              </Box>
+                            </Box>
+                          </ContainedButton>
                         </Box>
-                      </ContainedButton>
-                    </Box>
+                      )}
+                    </>
                   )}
                 </>
               )}
-              {!editable && !unaccepted && (
+              {!locked && !editable && !unaccepted && (
                 <>
                   {/* <MemoizedMetaButton
                   onClick={bookmark}
@@ -1139,7 +1306,7 @@ const NodeFooter = ({
                 </MemoizedMetaButton> */}
                 </>
               )}
-              {openPart === "LinkingWords" ? (
+              {!locked && openPart === "LinkingWords" ? (
                 <Box
                   id={parentChildrenButtonId}
                   onClick={disableParentChildrenButton ? undefined : selectLinkingWords}
@@ -1151,12 +1318,19 @@ const NodeFooter = ({
                     cursor: disableParentChildrenButton ? "not-allowed" : "pointer",
                   }}
                 >
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <span
+                    className="FooterParentNodesOpen"
+                    style={{ color: getNumberColor(addedParents, removedParents) }}
+                  >
+                    {shortenNumber(parents.length, 2, false)}
+                  </span>
                   <SwapHorizIcon
                     sx={{ fontSize: "20px" }}
                     color={openPart === "LinkingWords" ? "primary" : "inherit"}
                   />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                    {shortenNumber(nodesChildren.length, 2, false)}
+                  </span>
                 </Box>
               ) : (
                 <Box
@@ -1187,9 +1361,16 @@ const NodeFooter = ({
                     // disabled={disableParentChildrenButton}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                      <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                      <span
+                        className="FooterParentNodesOpen"
+                        style={{ color: getNumberColor(addedParents, removedParents) }}
+                      >
+                        {shortenNumber(parents.length, 2, false)}
+                      </span>
                       <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                      <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                      <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                        {shortenNumber(nodesChildren.length, 2, false)}
+                      </span>
                     </Box>
                   </ContainedButton>
                 </Box>
@@ -1756,49 +1937,51 @@ const NodeFooter = ({
                 disabled={disableParentChildrenButton}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
-                  <span className="FooterParentNodesOpen">{shortenNumber(parents.length, 2, false)}</span>
+                  <span
+                    className="FooterParentNodesOpen"
+                    style={{ color: getNumberColor(addedParents, removedParents) }}
+                  >
+                    {shortenNumber(parents.length, 2, false)}
+                  </span>
                   <SwapHorizIcon sx={{ fontSize: "16px" }} color={"inherit"} />
-                  <span>{shortenNumber(nodesChildren.length, 2, false)}</span>
+                  <span style={{ color: getNumberColor(addedChildren, removedChildren) }}>
+                    {shortenNumber(nodesChildren.length, 2, false)}
+                  </span>
                 </Box>
               </ContainedButton>
             </Box>
           )}
         </Box>
-        {choosingNode &&
-          choosingNode?.type &&
-          choosingNode?.id !== identifier &&
-          (choosingNode?.type === "Child" || choosingNode?.type === "Parent"
-            ? !findDescendantNodes(choosingNode?.id, identifier) && !findAncestorNodes(choosingNode?.id, identifier)
-            : true) && (
-            <Button
-              variant="contained"
-              onClick={onChangeChosenNode}
-              sx={{
-                borderRadius: "26px",
-                backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
-                mt: "5px",
-                display:
-                  (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
-                  (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
-                    ? "none"
-                    : "block",
-              }}
-            >
-              {choosingNode?.type === "Reference"
-                ? "Cite It"
-                : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
-                ? "Tag it"
-                : choosingNode?.type === "Child"
-                ? "Link it"
-                : choosingNode?.type === "Parent"
-                ? "Link it"
-                : choosingNode?.type === "Node"
-                ? "Link it"
-                : choosingNode?.type === "Improvement"
-                ? "Choose to improve"
-                : null}
-            </Button>
-          )}
+        {checkLinkingNode && (
+          <Button
+            variant="contained"
+            onClick={onChangeChosenNode}
+            sx={{
+              borderRadius: "26px",
+              backgroundColor: DESIGN_SYSTEM_COLORS.primary800,
+              mt: "5px",
+              display:
+                (choosingNode?.type === "Tag" && choosingNode?.impact !== "node" && !isTag) ||
+                (choosingNode?.type === "Reference" && choosingNode.type !== nodeType)
+                  ? "none"
+                  : "block",
+            }}
+          >
+            {choosingNode?.type === "Reference"
+              ? "Cite It"
+              : choosingNode?.type === "Tag" && (choosingNode?.impact === "node" || isTag)
+              ? "Tag it"
+              : choosingNode?.type === "Child"
+              ? "Link it"
+              : choosingNode?.type === "Parent"
+              ? "Link it"
+              : choosingNode?.type === "Node"
+              ? "Link it"
+              : choosingNode?.type === "Improvement"
+              ? "Choose to improve"
+              : null}
+          </Button>
+        )}
       </Box>
       {openSidebar === "USER_INFO" &&
         notebookRef.current.contributorsNodeId?.showContributors &&

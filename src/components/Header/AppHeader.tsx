@@ -26,10 +26,10 @@ import useThemeChange from "@/hooks/useThemeChange";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { orange900, orangeDark } from "@/pages/home";
 
-import mitLogo from "../../../public/CCI-logo.gif";
 import oneCademyLogo from "../../../public/DarkmodeLogo.png";
+import honorEducationLogoDark from "../../../public/home/about/honor-education-logo-dark.png";
+import honorEducationLogoLight from "../../../public/home/about/honor-education-logo-light.png";
 import oneCademyLogoExtended from "../../../public/logo-extended.png";
-import mitLogoDark from "../../../public/MIT-Logo-Dark.png";
 import { useAuth } from "../../context/AuthContext";
 import { auth, dbExp } from "../../lib/firestoreClient/firestoreClient.config";
 import { Post } from "../../lib/mapApi";
@@ -53,13 +53,16 @@ type AppHeaderProps = {
   sections: HomepageSection[];
   selectedSectionId: string;
   onSwitchSection: (sectionId: string) => void;
-  mitpage?: boolean;
   tutorPage?: boolean;
+  aiCourse?: boolean;
   // preUrl?: string;
 };
 
 const AppHeader = forwardRef(
-  ({ page, sections, selectedSectionId, onSwitchSection, mitpage = false, tutorPage = false }: AppHeaderProps, ref) => {
+  (
+    { page, sections, selectedSectionId, onSwitchSection, tutorPage = false, aiCourse = false }: AppHeaderProps,
+    ref
+  ) => {
     const [openSearch, setOpenSearch] = useState(false);
     const [{ isAuthenticated, user }] = useAuth();
     const [emailExp, setEmailExp] = useState("");
@@ -202,13 +205,14 @@ const AppHeader = forwardRef(
             spacing={{ xs: "2px", sm: "8px", md: "16px" }}
             sx={{
               px: { xs: "16px", sm: "32px" },
-              maxWidth: mitpage ? "100%" : "1280px",
-              margin: "auto",
+              maxWidth: !aiCourse ? "1280px" : "100%",
+              margin: !aiCourse ? "auto" : "",
               height: { xs: `${HEADER_HEIGHT_MOBILE}px`, md: `${HEADER_HEIGHT}px` },
+              position: "relative",
             }}
           >
             <Stack direction={"row"} alignItems="center" spacing={"16px"}>
-              {!mitpage ? (
+              {!aiCourse ? (
                 <Tooltip title="1Cademy's Landing Page">
                   <Avatar
                     src={isMobile ? oneCademyLogoExtended.src : oneCademyLogo.src}
@@ -219,19 +223,18 @@ const AppHeader = forwardRef(
                 </Tooltip>
               ) : (
                 <Avatar
-                  src={theme.palette.mode === "dark" ? mitLogoDark.src : mitLogo.src}
+                  src={theme.palette.mode === "light" ? honorEducationLogoDark.src : honorEducationLogoLight.src}
                   alt="logo"
                   sx={{
                     cursor: "pointer",
                     width: "240px",
                     height: "auto",
+                    mr: "auto",
                     borderRadius: 0,
-                    // mb: "50px",
                   }}
                   onClick={() => {}}
                 />
               )}
-
               <Stack
                 direction={"row"}
                 aria-label="navigation bar"
@@ -275,9 +278,21 @@ const AppHeader = forwardRef(
               </Stack>
             </Stack>
 
-            {/* Navbar Right Options */}
+            {aiCourse && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">AI-Enhanced Course Creation</Typography>
+              </Box>
+            )}
+
             <Stack direction={"row"} justifyContent="flex-end" alignItems="center" spacing={"8px"}>
-              {!mitpage && !tutorPage && (
+              {!tutorPage && (
                 <Box
                   sx={{
                     width: "100%",
@@ -332,7 +347,6 @@ const AppHeader = forwardRef(
                       fontSize: 16,
                       borderRadius: 40,
                       height: "25px",
-                      // width: "60px",
                       textTransform: "capitalize",
                       ":hover": {
                         background: orange900,
@@ -443,7 +457,7 @@ const AppHeader = forwardRef(
                 )}
               </Stack>
 
-              {!mitpage && !tutorPage && (
+              {!tutorPage && (
                 <IconButton
                   onClick={() => setOpenMenu(prev => !prev)}
                   sx={{ display: { xs: "flex", md: "none" }, alignSelf: "center" }}

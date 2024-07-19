@@ -1,17 +1,16 @@
 import { LoadingButton } from "@mui/lab";
-import { Box, Card, CardContent, CardHeader, Container, Link, Stack, TextField } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, Container, Stack, TextField } from "@mui/material";
 import { FirebaseError } from "firebase/app";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { useFormik } from "formik";
-import { NextPage } from "next";
 import Image from "next/image";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
+import { NextPageWithLayout } from "src/knowledgeTypes";
 import * as yup from "yup";
 
-import withAuthUser from "@/components/hoc/withAuthUser";
+import AuthLayout from "@/components/layouts/AuthLayout";
 import { useAuth } from "@/context/AuthContext";
 import { getFirebaseFriendlyError } from "@/lib/utils/firebaseErrors";
 import ROUTES from "@/lib/utils/routes";
@@ -26,7 +25,7 @@ const initialValues = {
   email: "",
 };
 
-const ForgotPasswordPage: NextPage = () => {
+const ForgotPasswordPage: NextPageWithLayout = () => {
   const [, { handleError }] = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -58,7 +57,7 @@ const ForgotPasswordPage: NextPage = () => {
   });
 
   return (
-    <>
+    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
       <Box
         data-testid="library-background-layout"
         sx={{
@@ -99,14 +98,15 @@ const ForgotPasswordPage: NextPage = () => {
                 Reset
               </LoadingButton>
             </Stack>
-            <NextLink href={ROUTES.signIn} passHref>
-              <Link>Sign in</Link>
-            </NextLink>
           </CardContent>
         </Card>
       </Container>
-    </>
+    </Box>
   );
 };
 
-export default withAuthUser({ shouldRedirectToHomeIfAuthenticated: true })(ForgotPasswordPage);
+ForgotPasswordPage.getLayout = (page: ReactNode) => {
+  return <AuthLayout>{page}</AuthLayout>;
+};
+
+export default ForgotPasswordPage;

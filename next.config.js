@@ -27,4 +27,13 @@ module.exports = {
       destination: "/pages/api/myfile.js",
     },
   ],
+  redirects: async () => {
+    return [
+      {
+        source: "/community",
+        destination: "/community/default",
+        permanent: false,
+      },
+    ];
+  },
 };

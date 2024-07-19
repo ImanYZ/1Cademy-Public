@@ -458,7 +458,7 @@ export const getSemestersByIds = async (semesterIds: string[]) => {
     [semesterId: string]: ISemester;
   } = {};
 
-  const semesterIdsChunks = arrayToChunks(Array.from(new Set(semesterIds)), 10);
+  const semesterIdsChunks = arrayToChunks(Array.from(new Set(semesterIds)), 30);
   for (const semesterIds of semesterIdsChunks) {
     const semesters = await db.collection("semesters").where("__name__", "in", semesterIds).get();
     for (const semester of semesters.docs) {
@@ -1369,12 +1369,7 @@ export const shouldInstantApprovalForProposal = async (tagIds: string[], uname: 
 
 //we call this function to check if an instructor is votig on a proposal
 //if yes then we approve the proposal of the node automatically
-export const checkInstantApprovalForProposalVote = async (
-  tagIds: string[],
-  uname: string,
-  verisonType: INodeType,
-  versionId: string
-) => {
+export const checkInstantApprovalForProposalVote = async (tagIds: string[], uname: string, versionId: string) => {
   const semestersByIds = await getSemestersByIds(tagIds);
 
   let isInstructor = false;
@@ -1432,11 +1427,16 @@ export const checkInstantApprovalForProposalVote = async (
 
 //we call this function to check if an instructor is deleting a node
 export const checkInstantDeleteForNode = async (tagIds: string[], uname: string, nodeId: string) => {
+  let isInstructor = false;
+  const instructorDocs = await db.collection("instructors").where("uname", "==", uname).get();
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
   const semestersByIds = await getSemestersByIds(tagIds);
   if (!Object.keys(semestersByIds).length) {
     return {
-      courseExist: false,
-      instantDelete: false,
+      isInstructor,
+      instantDelete: true,
     };
   }
   const userNodes = await db.collection("userNodes").where("node", "==", nodeId).get();
@@ -1447,7 +1447,9 @@ export const checkInstantDeleteForNode = async (tagIds: string[], uname: string,
 
   for (const semesterId in semestersByIds) {
     const semester = semestersByIds[semesterId];
-    semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    if (!semester.instructors.includes(uname)) {
+      semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    }
   }
 
   instructorVotes[uname] = true;
@@ -1463,13 +1465,13 @@ export const checkInstantDeleteForNode = async (tagIds: string[], uname: string,
     const semester = semestersByIds[semesterId];
     if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
       return {
-        courseExist: true,
+        isInstructor,
         instantDelete: false,
       };
     }
   }
   return {
-    courseExist: true,
+    isInstructor,
     instantDelete: true,
   };
 };

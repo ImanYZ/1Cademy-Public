@@ -119,6 +119,11 @@ export const Editor = ({
               sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
               error={error}
               helperText={helperText}
+              InputLabelProps={{
+                style: {
+                  color: "gray",
+                },
+              }}
             />
           ) : (
             <Box>

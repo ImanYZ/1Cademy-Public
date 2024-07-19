@@ -312,6 +312,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       version: versionRef.id,
       user: userData.uname,
       wrong: false,
+      node: id,
     };
     [batch, writeCounts] = await createUpdateUserVersion({
       batch,
@@ -320,34 +321,38 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       nodeType,
       writeCounts,
     });
-
+    await commitBatch(batch);
     //  If the proposal is not approved, we do not directly update the node document inside versionCreateUpdate function,
     //  so we have to set nodeData.versions + 1 here
-    if (!versionData.accepted) {
-      batch.update(nodeRef, {
-        versions: nodeData.versions + 1,
-        updatedAt: currentTimestamp,
-      });
-      [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      [batch, writeCounts] = await addToPendingPropsNums({
+    await detach(async () => {
+      let batch = db.batch();
+      let writeCounts: number = 0;
+      if (!versionData.accepted) {
+        batch.update(nodeRef, {
+          versions: nodeData.versions + 1,
+          updatedAt: currentTimestamp,
+        });
+        [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
+        [batch, writeCounts] = await addToPendingPropsNums({
+          batch,
+          tagIds: nodeData.tagIds,
+          value: 1,
+          voters: [userData.uname],
+          writeCounts,
+        });
+      }
+
+      [batch, writeCounts] = await proposalNotification({
         batch,
-        tagIds: nodeData.tagIds,
-        value: 1,
-        voters: [userData.uname],
+        nodeId: id,
+        nodeTitle: versionData.accepted ? title : nodeData.title,
+        uname: userData.uname,
+        versionData,
+        currentTimestamp,
         writeCounts,
       });
-    }
-
-    [batch, writeCounts] = await proposalNotification({
-      batch,
-      nodeId: id,
-      nodeTitle: versionData.accepted ? title : nodeData.title,
-      uname: userData.uname,
-      versionData,
-      currentTimestamp,
-      writeCounts,
+      await commitBatch(batch);
     });
-    await commitBatch(batch);
 
     // TODO: move these to queue
     // action tracks

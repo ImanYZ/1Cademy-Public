@@ -1,8 +1,8 @@
 import AdapterMomentJs from "@date-io/moment";
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import CodeIcon from "@mui/icons-material/Code";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
@@ -18,7 +18,6 @@ import {
   Button,
   CircularProgress,
   Fab,
-  IconButton,
   Paper,
   Switch,
   TextField,
@@ -35,7 +34,7 @@ import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "s
 
 import { useNodeBook } from "@/context/NodeBookContext";
 import { Post } from "@/lib/mapApi";
-import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { getVideoDataByUrl, momentDateToSeconds } from "@/lib/utils/utils";
 import {
   ChosenType,
@@ -49,7 +48,7 @@ import { useAuth } from "../../context/AuthContext";
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { SearchNodesResponse } from "../../knowledgeTypes";
 import { TNodeBookState } from "../../nodeBookTypes";
-import { NodeType } from "../../types";
+// import { NodeType } from "../../types";
 // import { FullNodeData } from "../../noteBookTypes";
 import { Editor } from "../Editor";
 import MarkdownRender from "../Markdown/MarkdownRender";
@@ -82,6 +81,7 @@ type Parent = {
 
 type NodeProps = {
   identifier: string;
+  node: any;
   nodeBookDispatch: React.Dispatch<DispatchNodeBookActions>;
   nodeUpdates: TNodeUpdates;
   setNodeUpdates: (updates: TNodeUpdates) => void;
@@ -122,6 +122,7 @@ type NodeProps = {
         title?: string;
         label?: string;
       }[];
+  tagIds: string[];
   parents: Parent[];
   nodesChildren:
     | string[]
@@ -130,6 +131,14 @@ type NodeProps = {
         title?: string;
         label?: string;
       }[];
+  removedTags: string[];
+  addedTags: any;
+  addedReferences: any;
+  removedReferences: any;
+  addedParents: any;
+  removedParents: any;
+  addedChildren: any;
+  removedChildren: any;
   choices: KnowledgeChoice[];
   commentsNum: number;
   proposalsNum: number;
@@ -155,7 +164,7 @@ type NodeProps = {
   openAllParent: any;
   onHideNode: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: (event: any, id: string, partType: any, openPart: any, setOpenPart: any, tags: any) => void; //
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -204,7 +213,7 @@ type NodeProps = {
   // expands: boolean[];
   // selectedNotebookId: string;
   open: boolean;
-  nodeHeigth: number;
+  nodeHeight: number;
   hideNode: boolean;
   setAssistantSelectNode: (newValue: boolean) => void;
   assistantSelectNode: boolean;
@@ -216,6 +225,9 @@ type NodeProps = {
   displayParentOptions: boolean;
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  onlineUsers: { [uname: string]: boolean };
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const proposedChildTypesIcons: { [key in ProposedChildTypesIcons]: string } = {
@@ -234,10 +246,11 @@ type Pagination = {
   totalResults: number;
 };
 
-const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
+// const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
 
 const Node = ({
   identifier,
+  node,
   nodeBookDispatch,
   setNodeUpdates,
   notebookRef,
@@ -268,7 +281,16 @@ const Node = ({
   markedWrong,
   references,
   disableVotes,
+  removedTags,
+  addedTags,
+  addedReferences,
+  removedReferences,
+  addedParents,
+  removedParents,
+  addedChildren,
+  removedChildren,
   tags,
+  tagIds,
   parents,
   nodesChildren,
   choices,
@@ -339,7 +361,7 @@ const Node = ({
   openPart,
   setOpenPart,
   hideNode,
-  nodeHeigth,
+  nodeHeight,
   setAssistantSelectNode,
   assistantSelectNode,
   onForceRecalculateGraph,
@@ -350,13 +372,15 @@ const Node = ({
   displayParentOptions,
   findDescendantNodes,
   findAncestorNodes,
+  onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeProps) => {
   const [{ user }] = useAuth();
   const { nodeBookState } = useNodeBook();
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const [showSimilarNodes, setShowSimilarNodes] = useState(true);
   // const [openPart, setOpenPart] = useState<OpenPart>(null);
-  const [isHiding, setIsHiding] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [reason, setReason] = useState<string>("");
@@ -376,6 +400,7 @@ const Node = ({
     totalPage: 0,
     totalResults: 0,
   });
+  const createActionTrack = useCreateActionTrack();
 
   const [openProposalType, setOpenProposalType] = useState<any>(false);
   const [startTimeValue, setStartTimeValue] = React.useState<any>(moment.utc(nodeVideoStartTime * 1000));
@@ -385,6 +410,7 @@ const Node = ({
   const [isLoading, startTransition] = useTransition();
   const [imageHeight, setImageHeight] = useState(100);
   const [proposeLoading, setProposeLoading] = useState<boolean>(false);
+  const [prevImageUrl, setPrevImageUrl] = useState<string>("");
   const imageElementRef = useRef<HTMLImageElement | null>(null);
 
   const childNodeButtonsAnimation = keyframes({
@@ -513,9 +539,9 @@ const Node = ({
     (event: any) => {
       event.preventDefault();
       event.stopPropagation();
-      onHideNode(identifier, setIsHiding);
+      onHideNode(node);
     },
-    [onHideNode, identifier]
+    [node, onHideNode]
   );
 
   const onSetTitle = (newTitle: string) => {
@@ -535,6 +561,31 @@ const Node = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (!user) return;
+    if (!editable) return;
+    const timeoutId = setTimeout(() => {
+      createActionTrack({
+        action: "NodeTitleChanged",
+        nodeId: identifier,
+      });
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [titleCopy]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!editable) return;
+    const timeoutId = setTimeout(() => {
+      createActionTrack({
+        action: "NodeContentChanged",
+        nodeId: identifier,
+      });
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [contentCopy]);
+
   const hideDescendantsHandler = useCallback(() => onHideDescendants(identifier), [onHideDescendants, identifier]);
 
   // const open = useMemo(() => {
@@ -544,7 +595,7 @@ const Node = ({
 
   const toggleNodeHandler = useCallback(
     (event: any) => {
-      toggleNode(event, identifier);
+      toggleNode(event, node, identifier);
     },
     [toggleNode, identifier, open]
   );
@@ -599,8 +650,8 @@ const Node = ({
   );
 
   const wrongNodeHandler = useCallback(
-    (event: any) => wrongNode(event, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked),
-    [wrongNode, identifier, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
+    (event: any) => wrongNode(event, node, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked, tagIds),
+    [wrongNode, node, nodeType, markedWrong, markedCorrect, wrongNum, correctNum, locked]
   );
 
   const uploadNodeImageHandler = useCallback(
@@ -624,7 +675,7 @@ const Node = ({
         setEditingModeNode(false);
 
         if (newParent) {
-          await saveProposedParentNode(identifier, "", reason, () => setAbleToPropose(true));
+          await saveProposedParentNode(identifier, "", reason, tagIds, () => setAbleToPropose(true));
           setProposeLoading(false);
           return;
         }
@@ -638,8 +689,9 @@ const Node = ({
           return;
         }
 
-        await saveProposedImprovement("", reason, () => setAbleToPropose(true));
+        await saveProposedImprovement("", reason, tagIds, () => setAbleToPropose(true));
         setProposeLoading(false);
+        setPrevImageUrl("");
         notebookRef.current.selectedNode = identifier;
         notebookRef.current.selectedNode = identifier;
         nodeBookDispatch({ type: "setSelectedNode", payload: identifier });
@@ -719,44 +771,47 @@ const Node = ({
     [identifier, setNodeParts]
   );
 
-  const onSearch = useCallback(async (page: number, q: string) => {
-    try {
-      setIsFetching(true);
-      if (page < 1) {
-        setSearchResults({
-          data: [],
-          lastPageLoaded: 0,
-          totalPage: 0,
-          totalResults: 0,
+  const onSearch = useCallback(
+    async (page: number, q: string) => {
+      try {
+        setIsFetching(true);
+        if (page < 1) {
+          setSearchResults({
+            data: [],
+            lastPageLoaded: 0,
+            totalPage: 0,
+            totalResults: 0,
+          });
+        }
+        const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
+          q,
+          nodeTypes: [nodeType],
+          tags: [],
+          nodesUpdatedSince: 1000,
+          sortOption: "NOT_SELECTED",
+          sortDirection: "DESCENDING",
+          page,
+          onlyTitle: nodeBookState.searchByTitleOnly,
         });
-      }
-      const data: SearchNodesResponse = await Post<SearchNodesResponse>("/searchNodesInNotebook", {
-        q,
-        nodeTypes: NODE_TYPES_ARRAY,
-        tags: [],
-        nodesUpdatedSince: 1000,
-        sortOption: "NOT_SELECTED",
-        sortDirection: "DESCENDING",
-        page,
-        onlyTitle: nodeBookState.searchByTitleOnly,
-      });
 
-      const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
-      setSearchResults({
-        data: newData,
-        lastPageLoaded: data.page,
-        totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
-        totalResults: data.numResults,
-      });
-      setAbleToPropose(true);
-      if (newData.filter(data => data.title === q).length > 0) {
-        setAbleToPropose(false);
+        const newData = page === 1 ? data.data : [...searchResults.data, ...data.data];
+        setSearchResults({
+          data: newData,
+          lastPageLoaded: data.page,
+          totalPage: Math.ceil((data.numResults || 0) / (data.perPage || 10)),
+          totalResults: data.numResults,
+        });
+        setAbleToPropose(true);
+        if (newData.filter(data => data.title === q).length > 0) {
+          setAbleToPropose(false);
+        }
+        setIsFetching(false);
+      } catch (err) {
+        console.error(err);
       }
-      setIsFetching(false);
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
+    },
+    [nodeType]
+  );
 
   const onBlurNodeTitle = useCallback(
     async (newTitle: string) => {
@@ -851,14 +906,27 @@ const Node = ({
   useEffect(() => {
     setImageLoaded(true);
   }, [nodeImage]);
-
-  if (!user) {
-    return null;
-  }
-
+  const flagLinks = (current: any, added: any, removed: any) => {
+    const addedHash: any = {};
+    const removedHash: any = {};
+    added.forEach((p: { node: string }) => {
+      addedHash[p.node] = true;
+    });
+    removed.forEach((p: { node: string }) => {
+      removedHash[p.node] = true;
+    });
+    for (let element of current) {
+      if (addedHash[element.node]) {
+        element.added = true;
+      } else if (removedHash[element.node]) {
+        element.removed = true;
+      }
+    }
+    return current;
+  };
   if (hideNode && !editable) {
     return (
-      <div
+      <Box
         ref={nodeRef}
         id={identifier}
         onClick={nodeClickHandler}
@@ -867,12 +935,11 @@ const Node = ({
           "Node card" +
           (activeNode ? " active" : "") +
           (changed || !isStudied ? " Changed" : "") +
-          (isHiding ? " IsHiding" : "") +
           (nodeType === "Reference" ? " Choosable" : "")
         }
         style={{
-          height: nodeHeigth,
-          maxHeight: nodeHeigth,
+          height: nodeHeight,
+          maxHeight: nodeHeight,
           left: left ? left : 1000,
           top: top ? top : 1000,
           width,
@@ -931,12 +998,11 @@ const Node = ({
             sx={{ fontSize: `${30}px`, position: "absolute", bottom: "4px", left: "4px" }}
           />
         </Box>
-      </div>
+      </Box>
     );
   }
-
   return (
-    <div
+    <Box
       ref={nodeRef}
       id={identifier}
       onClick={nodeClickHandler}
@@ -947,7 +1013,6 @@ const Node = ({
         "Node card" +
         (activeNode ? " active" : "") +
         (changed || !isStudied ? " Changed" : "") +
-        (isHiding ? " IsHiding" : "") +
         (toBeEligible ? " Choosable" : " ")
       }
       style={{
@@ -963,7 +1028,7 @@ const Node = ({
         <Typography sx={{ position: "absolute", top: "-2px" }}>{identifier}</Typography>
       )}
 
-      <Box sx={{ float: "right" }}>
+      <Box>
         {!editable && !unaccepted && !simulated && (
           <MemoizedNodeHeader
             id={identifier}
@@ -976,7 +1041,7 @@ const Node = ({
           />
         )}
       </Box>
-      <div className="card-content">
+      <Box className="card-content">
         {/* preview edit options */}
         {open && editable && (
           <Box sx={{ display: "flex", justifyContent: "end" }}>
@@ -1027,6 +1092,7 @@ const Node = ({
               editOption={option}
               disabled={disableTitle}
               proposalsSelected={isProposalsSelected}
+              focus={true}
             />
             {editable && (
               <Box sx={{ marginTop: "5px" }}>
@@ -1160,9 +1226,33 @@ const Node = ({
 
               <Box id={`${identifier}-node-content-media`}>
                 {nodeImage && (
-                  <Box sx={{ position: "relative", minHeight: imageHeight }}>
+                  <Box sx={{ position: "relative", minHeight: imageHeight, p: "5px", pb: "15px" }}>
                     {/* TODO: change to Next Image */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
+
+                    {editable && (
+                      <Tooltip title={"Remove Image"} placement="top">
+                        <CloseIcon
+                          className="close-icon"
+                          sx={{
+                            backgroundColor: "grey",
+                            color: "black",
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            ":hover": {
+                              backgroundColor: "black",
+                              color: "white",
+                            },
+                            zIndex: 10,
+                            position: "absolute",
+                            top: "0px",
+                            right: "0px",
+                            padding: "5px",
+                          }}
+                          onClick={removeImageHandler}
+                        />
+                      </Tooltip>
+                    )}
                     <img
                       ref={imageElementRef}
                       src={nodeImage}
@@ -1170,25 +1260,11 @@ const Node = ({
                       className="responsive-img NodeImage"
                       onLoad={onImageLoad}
                       onClick={onImageClick}
+                      style={{
+                        borderRadius: "11px",
+                        cursor: "pointer",
+                      }}
                     />
-
-                    {editable && (
-                      <Tooltip title={"Click to remove the image"}>
-                        <IconButton
-                          onClick={removeImageHandler}
-                          color="primary"
-                          size="small"
-                          sx={{
-                            position: "absolute",
-                            right: "4px",
-                            top: "4px",
-                            background: DESIGN_SYSTEM_COLORS.notebookG500,
-                          }}
-                        >
-                          <DeleteForeverIcon sx={{ fontSize: "16px" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
                     {/* TODO: add loading background */}
                   </Box>
                 )}
@@ -1345,7 +1421,7 @@ const Node = ({
           </Box>
         )}
 
-        {open && (
+        {open && user && (
           <MemoizedNodeFooter
             open={true}
             addVideo={addVideo}
@@ -1378,6 +1454,14 @@ const Node = ({
             markedWrong={markedWrong}
             references={references}
             tags={tags}
+            removedTags={removedTags}
+            addedTags={addedTags}
+            addedReferences={addedReferences}
+            removedReferences={removedReferences}
+            addedParents={addedParents}
+            removedParents={removedParents}
+            addedChildren={addedChildren}
+            removedChildren={removedChildren}
             parents={parents}
             nodesChildren={nodesChildren}
             commentsNum={commentsNum}
@@ -1389,7 +1473,7 @@ const Node = ({
             simulated={simulated}
             bookmarked={bookmarked}
             bookmarks={bookmarks}
-            reloadPermanentGrpah={reloadPermanentGraph}
+            reloadPermanentGraph={reloadPermanentGraph}
             onNodeShare={onNodeShare}
             markStudied={markStudiedHandler}
             bookmark={bookmarkHandler}
@@ -1415,6 +1499,11 @@ const Node = ({
             onChangeChosenNode={onChangeChosenNodeHandler}
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
+            onlineUsers={onlineUsers}
+            openComments={openComments}
+            commentNotifications={commentNotifications}
+            prevImageUrl={prevImageUrl}
+            setPrevImageUrl={setPrevImageUrl}
           />
         )}
 
@@ -1430,8 +1519,8 @@ const Node = ({
             reason={reason}
             references={references}
             tags={tags}
-            parents={parents}
-            nodesChildren={nodesChildren}
+            parents={flagLinks(parents, addedParents, removedParents)}
+            nodesChildren={flagLinks(nodesChildren, addedChildren, removedChildren)}
             chosenNodeChanged={chosenNodeChanged}
             referenceLabelChange={referenceLabelChange}
             deleteLink={deleteLinkHandler}
@@ -1515,8 +1604,8 @@ const Node = ({
           </div>
         )}
 
-        {!open && (
-          <div className="footer">
+        {!open && user && (
+          <Box className="footer">
             <MemoizedNodeFooter
               open={false}
               addVideo={addVideo}
@@ -1549,6 +1638,14 @@ const Node = ({
               markedWrong={markedWrong}
               references={references}
               tags={tags}
+              removedTags={removedTags}
+              addedTags={addedTags}
+              addedReferences={addedReferences}
+              removedReferences={removedReferences}
+              addedParents={addedParents}
+              removedParents={removedParents}
+              addedChildren={addedChildren}
+              removedChildren={removedChildren}
               parents={parents}
               nodesChildren={nodesChildren}
               commentsNum={commentsNum}
@@ -1559,7 +1656,7 @@ const Node = ({
               changedAt={changedAt}
               bookmarked={bookmarked}
               bookmarks={bookmarks}
-              reloadPermanentGrpah={reloadPermanentGraph}
+              reloadPermanentGraph={reloadPermanentGraph}
               onNodeShare={onNodeShare}
               markStudied={markStudiedHandler}
               bookmark={bookmarkHandler}
@@ -1584,10 +1681,15 @@ const Node = ({
               onChangeChosenNode={onChangeChosenNodeHandler}
               findDescendantNodes={findDescendantNodes}
               findAncestorNodes={findAncestorNodes}
+              onlineUsers={onlineUsers}
+              openComments={openComments}
+              commentNotifications={commentNotifications}
+              prevImageUrl={prevImageUrl}
+              setPrevImageUrl={setPrevImageUrl}
             />
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
       {!isNew && nodeType !== "Reference" && editable && user && displayParentOptions && (
         <Box
           id={`${identifier}-new-parent-nodes-buttons`}
@@ -1599,7 +1701,7 @@ const Node = ({
             top: (parseFloat(String(document.getElementById(identifier)?.clientHeight)) - 396) * 0.5 + "px",
             animation: `${childNodeButtonsAnimation} 1s backwards`,
             borderRadius: "25px",
-            right: "590px",
+            right: "596px",
           }}
         >
           {(Object.keys(proposedChildTypesIcons) as ProposedChildTypesIcons[]).map(
@@ -1611,6 +1713,7 @@ const Node = ({
                     disabled={disabled}
                     color="primary"
                     sx={{
+                      mr: "5px",
                       background: "#1F1F1F",
                       ":hover": {
                         background: "#525151",
@@ -1703,7 +1806,7 @@ const Node = ({
           )}
         </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
@@ -1716,10 +1819,13 @@ export const MemoizedNode = React.memo(Node, (prev, next) => {
     prev.isAcceptedProposalSelected === next.isAcceptedProposalSelected &&
     // prev.commentsSelected === next.commentsSelected &&
     prev.unaccepted === next.unaccepted &&
+    prev.simulated === next.simulated &&
     prev.disableVotes === next.disableVotes &&
     prev.openPart === next.openPart &&
     prev.openSidebar === next.openSidebar &&
     prev.hideNode === next.hideNode &&
+    prev.commentNotifications === next.commentNotifications &&
+    prev.onlineUsers === next.onlineUsers &&
     (!next.activeNode || prev.ableToPropose === next.ableToPropose);
   if (
     !basicChanges ||

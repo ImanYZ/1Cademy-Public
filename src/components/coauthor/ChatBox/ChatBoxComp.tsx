@@ -15,8 +15,8 @@ import { User } from "src/knowledgeTypes";
 import { RiveComponentMemoized } from "@/components/home/components/temporals/RiveComponentExtended";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
 
-import { sendMessageToChatGPT } from "../../../services/openai";
 import ImproveItemComp from "../ImproveItemComp";
 import OptimizedAvatar from "../OptimizedAvatar";
 import MessageButtons from "./MessageButtons";

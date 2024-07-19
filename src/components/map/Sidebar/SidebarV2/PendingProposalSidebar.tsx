@@ -1,10 +1,9 @@
-import { MenuItem, Select, Typography } from "@mui/material";
+import { MenuItem, Select, Skeleton, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { getDocs, getFirestore, limit, onSnapshot, query, where } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
+import { getUserProposalsSnapshot } from "src/client/firestore/userProposals.firestore";
 import { UserTheme } from "src/knowledgeTypes";
-
-import { getCollectionsQuery } from "@/lib/utils/getTypedCollections";
 
 import PendingProposalList from "../PendingProposalList";
 import { SidebarWrapper } from "./SidebarWrapper";
@@ -18,6 +17,9 @@ type PendingProposalSidebarProps = {
   tagId: string | undefined;
   sidebarWidth: number;
   innerHeight?: number;
+  pendingProposals: any;
+  openComments: (refId: string, type: string, proposal?: any) => void;
+  commentNotifications: any;
   // innerWidth: number;
 };
 // const NODE_TYPES_ARRAY: NodeType[] = ["Concept", "Code", "Reference", "Relation", "Question", "Idea"];
@@ -27,95 +29,51 @@ const PendingProposalSidebar = ({
   onClose,
   openLinkedNode,
   username,
-  tagId,
+  pendingProposals,
   sidebarWidth,
   innerHeight,
+  openComments,
+  commentNotifications,
 }: // innerWidth,
 PendingProposalSidebarProps) => {
-  const [proposals, setProposals] = useState<any[]>([]);
+  const [userVotesOnProposals, setUserVotesOnProposals] = useState({});
+  // const [loadingProposals, setLoadingProposals] = useState(true);
+
   const [type, setType] = useState<string>("all");
   const db = getFirestore();
 
   useEffect(() => {
-    if (!username) return;
-    if (!tagId) return;
-    const versionsSnapshots: any[] = [];
-    const versions: { [key: string]: any } = {};
+    const onSynchronize = (changes: any) => {
+      setUserVotesOnProposals((prev: any) =>
+        changes.reduce((prev: { [versionId: string]: any }, change: any) => {
+          const docType = change.type;
+          const curData = {
+            ...change.data,
+            createdAt: change.data.createdAt.toDate(),
+            comments: [],
+          } as any & { id: string };
 
-    const { versionsColl, userVersionsColl } = getCollectionsQuery(db);
-
-    const versionsQuery = query(
-      versionsColl,
-      where("accepted", "==", false),
-      where("tagIds", "array-contains", tagId),
-      where("deleted", "==", false)
-    );
-
-    const versionsSnapshot = onSnapshot(versionsQuery, async snapshot => {
-      const docChanges = snapshot.docChanges();
-      if (docChanges.length > 0) {
-        for (let change of docChanges) {
-          const versionId = change.doc.id;
-          const versionData = change.doc.data();
-          if (change.type === "removed") {
-            delete versions[versionId];
+          if (docType === "added" && !prev.hasOwnProperty(curData.version)) {
+            prev[curData.version] = { ...curData, doc: change.doc };
           }
-          if (change.type === "added" || change.type === "modified") {
-            versions[versionId] = {
-              ...versionData,
-              id: versionId,
-              createdAt: versionData.createdAt.toDate(),
-              award: false,
-              correct: false,
-              wrong: false,
-            };
-            delete versions[versionId].deleted;
-            delete versions[versionId].updatedAt;
-
-            const q = query(
-              userVersionsColl,
-              where("version", "==", versionId),
-              where("user", "==", username),
-              limit(1)
-            );
-
-            const userVersionsDocs = await getDocs(q);
-
-            for (let userVersionsDoc of userVersionsDocs.docs) {
-              const userVersion = userVersionsDoc.data();
-              delete userVersion.version;
-              delete userVersion.updatedAt;
-              delete userVersion.createdAt;
-              delete userVersion.user;
-              versions[versionId] = {
-                ...versions[versionId],
-                ...userVersion,
-              };
-            }
+          if (docType === "modified" && prev.hasOwnProperty(curData.version)) {
+            prev[curData.version] = { ...curData, doc: change.doc };
           }
-        }
 
-        const pendingProposals = { ...versions };
-        const proposalsTemp = Object.values(pendingProposals);
-        const orderredProposals = proposalsTemp.sort(
-          (a: any, b: any) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
-        );
-        setProposals(orderredProposals);
-      }
-    });
-    versionsSnapshots.push(versionsSnapshot);
-
-    return () => {
-      for (let vSnapshot of versionsSnapshots) {
-        vSnapshot();
-      }
+          if (docType === "removed" && prev.hasOwnProperty(curData.id)) {
+            delete prev[curData.version];
+          }
+          return prev;
+        }, prev)
+      );
     };
-  }, [db, username, tagId]);
+    const killSnapshot = getUserProposalsSnapshot(db, { nodeId: "", uname: username }, onSynchronize);
+    return () => killSnapshot();
+  }, [db]);
 
   const contentSignalState = useMemo(() => {
     return { updates: true };
-  }, [type, proposals]);
-
+  }, [commentNotifications, type, pendingProposals]);
   return (
     <SidebarWrapper
       id="sidebar-wrapper-pending-list"
@@ -130,14 +88,18 @@ PendingProposalSidebarProps) => {
         boxShadow: "none",
       }}
       SidebarContent={
-        <Box sx={{ p: "10px" }}>
+        <Box>
           <Box
             sx={{
+              position: "sticky",
+              backgroundColor: theme => (theme.palette.mode === "dark" ? "#1B1A1A" : "#F9FAFB"),
+              top: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "right",
-              marginTop: "15px",
               py: "10px",
+              zIndex: "5",
+              mr: "5px",
             }}
           >
             <Typography>Show</Typography>
@@ -180,10 +142,47 @@ PendingProposalSidebarProps) => {
               ))}
             </Select>
           </Box>
-          <PendingProposalList
-            proposals={type === "all" ? proposals : proposals.filter(proposal => proposal.nodeType === type)}
-            openLinkedNode={openLinkedNode}
-          />
+          {false ? (
+            <Box>
+              {Array.from(new Array(7)).map((_, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+
+                    px: 2,
+                  }}
+                >
+                  <Skeleton
+                    variant="rectangular"
+                    width={500}
+                    height={250}
+                    sx={{
+                      bgcolor: "grey.300",
+                      borderRadius: "10px",
+                      mt: "19px",
+                      ml: "5px",
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Box sx={{ p: "10px" }}>
+              <PendingProposalList
+                proposals={
+                  type === "all"
+                    ? pendingProposals
+                    : pendingProposals.filter((proposal: any) => proposal.nodeType === type)
+                }
+                openLinkedNode={openLinkedNode}
+                userVotesOnProposals={userVotesOnProposals}
+                openComments={openComments}
+                commentNotifications={commentNotifications}
+              />
+            </Box>
+          )}
         </Box>
       }
     />
@@ -192,13 +191,13 @@ PendingProposalSidebarProps) => {
 
 type FilterNodeType = { label: string; value: string }[];
 const FILTER_NODE_TYPES: FilterNodeType = [
-  { label: "All", value: "all" },
-  { label: "Concept", value: "Concepts" },
-  { label: "Relation", value: "Relations" },
-  { label: "Question", value: "Questions" },
-  { label: "Idea", value: "Ideas" },
-  { label: "Reference", value: "Codes" },
-  { label: "Code", value: "References" },
+  { value: "all", label: "All" },
+  { value: "Concept", label: "Concepts" },
+  { value: "Relation", label: "Relations" },
+  { value: "Question", label: "Questions" },
+  { value: "Idea", label: "Ideas" },
+  { value: "Reference", label: "Codes" },
+  { value: "Code", label: "References" },
 ];
 
 export const MemoizedPendingProposalSidebar = React.memo(PendingProposalSidebar);

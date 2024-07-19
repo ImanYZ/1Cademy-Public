@@ -1,4 +1,4 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getToken, MessagePayload, onMessage } from "firebase/messaging";
 
 import { db, messaging } from "./firestoreClient.config";
@@ -22,12 +22,23 @@ async function requestNotificationsPermissions(uid: string) {
 // Saves the messaging device token to Cloud Firestore.
 export async function saveMessagingDeviceToken(uid: string) {
   try {
+    if (process.env.NODE_ENV === "development") return;
     const msg = await messaging();
     const fcmToken = await getToken(msg, { vapidKey: VAPID_KEY });
     if (fcmToken) {
       // Save device token to Firestore
       const tokenRef = doc(db, "fcmTokens", uid);
-      await setDoc(tokenRef, { token: fcmToken });
+      const tokenDoc = await getDoc(tokenRef);
+      if (tokenDoc.exists()) {
+        const tokens = tokenDoc.data()?.tokens || [];
+        if (tokens && !tokens.includes(fcmToken)) {
+          tokens.push(fcmToken);
+          await setDoc(tokenRef, { tokens: tokens });
+        }
+      } else {
+        await setDoc(tokenRef, { tokens: [fcmToken] });
+      }
+
       // This will fire when a message is received while the app is in the foreground.
       // When the app is in the background, firebase-messaging-sw.js will receive the message instead.
       onMessage(msg, (message: MessagePayload) => {

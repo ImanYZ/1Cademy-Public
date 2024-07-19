@@ -146,7 +146,7 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
           ...props.sx,
         }}
       >
-        <div>
+        <Box>
           <OptimizedAvatar
             imageUrl={props.imageUrl}
             renderAsAvatar={true}
@@ -160,10 +160,13 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
               filter: "grayscale(1)",
             }}
           />
-          {!props.inNodeFooter && (
-            <div className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}></div>
-          )}
-        </div>
+          <Box
+            className={props.online ? "UserStatusOnlineIcon" : "UserStatusOfflineIcon"}
+            sx={{
+              backgroundColor: !props.online ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe") : "",
+            }}
+          ></Box>
+        </Box>
         {!props.inNodeFooter && (
           <Box className="customUserStatusTotalPoints fromSideBar">
             <DoneIcon className="material-icons DoneIcon gray-text" sx={{ fontSize: "16px" }} />
@@ -200,7 +203,15 @@ const UserStatusIcon = ({ nodeBookDispatch, disabled = false, ...props }: UserSt
             name={props.fullname}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
-          {!props.inNodeFooter && <>{props.online && <Box className={"UserStatusOnlineIcon"}></Box>}</>}
+
+          {props.online && (
+            <Box
+              sx={{
+                fontSize: "1px",
+              }}
+              className="UserStatusOnlineIcon"
+            />
+          )}
         </div>
         {!props.inNodeFooter && (
           // className={"UserStatusTotalPoints" + (props.inUserBar ? " inUserBar" : "")}

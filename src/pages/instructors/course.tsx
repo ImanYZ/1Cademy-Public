@@ -35,11 +35,11 @@ const CourseSetting: InstructorLayoutPage = () => {
   if (!loaded) {
     return (
       <Box
-        className="CenterredLoadingImageContainer"
+        className="CenteredLoadingImageContainer"
         sx={{ background: theme => (theme.palette.mode === "dark" ? "#28282A" : "#F5F5F5") }}
       >
         <Image
-          className="CenterredLoadingImage"
+          className="CenteredLoadingImage"
           loading="lazy"
           src={LoadingImg}
           alt="Loading"

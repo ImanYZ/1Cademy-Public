@@ -1,5 +1,5 @@
 import { Autocomplete, Box, createFilterOptions, TextField } from "@mui/material";
-import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getFirestore, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore";
 import React, { HTMLAttributes, useEffect, useState } from "react";
 import { Institution, Major, User } from "src/knowledgeTypes";
 
@@ -47,13 +47,13 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
   };
 
   const onChangeField = async (user: User, attributeName: string, newValue: any) => {
-    //try {
-    await updateUserField(user.uname, attributeName, newValue);
-    await upadteUserFieldLog(user.uname, attributeName, newValue);
-    dispatch({ type: "setAuthUser", payload: { ...user, [attributeName]: newValue } });
-    // } catch (error) {
-    //   console.error(error);
-    // }
+    try {
+      await updateUserField(user.uname, attributeName, newValue);
+      await upadteUserFieldLog(user.uname, attributeName, newValue);
+      dispatch({ type: "setAuthUser", payload: { ...user, [attributeName]: newValue } });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const getNameFromInstitutionSelected = () => {
@@ -76,7 +76,7 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
     const retrieveInstitutions = async () => {
       const db = getFirestore();
       const institutionsRef = collection(db, "institutions");
-      const q = query(institutionsRef);
+      const q = query(institutionsRef, where("country", "in", ["United States", "United Kingdom"]));
 
       const querySnapshot = await getDocs(q);
       let institutions: Institution[] = [];
@@ -84,9 +84,9 @@ export const UserSettingsProfessionalInfo = ({ user }: UserSettingsProfessionalI
         institutions.push({ id: doc.id, ...doc.data() } as Institution);
       });
 
-      const institutionSorted = institutions
-        .sort((l1, l2) => (l1.name < l2.name ? -1 : 1))
-        .sort((l1, l2) => (l1.country < l2.country ? -1 : 1));
+      const institutionSorted = institutions.sort((l1, l2) =>
+        l1.country === "United States" ? -1 : l2.country === "United States" ? 1 : 0
+      );
       // setAllInstitutions(institutionSorted);
       setInstitutions(institutionSorted);
     };

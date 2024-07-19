@@ -1,3 +1,5 @@
+import { arrayToChunks } from "src/utils";
+
 import {
   KnowledgeNode,
   KnowledgeNodeContributor,
@@ -35,6 +37,20 @@ const retrieveNode = async (nodeId: string): Promise<NodeFireStore | null> => {
     return null;
   }
   return nodeData as NodeFireStore;
+};
+
+const retrieveNodes = async (nodeIds: string[]): Promise<Record<string, NodeFireStore>> => {
+  const chunks = arrayToChunks(nodeIds, 30);
+  const nodesList: Record<string, NodeFireStore> = {};
+
+  for (const nodeIds of chunks) {
+    const { docs: nodes } = await db.collection("nodes").where("__name__", "in", nodeIds).get();
+    for (const node of nodes) {
+      nodesList[node.id] = node.data() as NodeFireStore;
+    }
+  }
+
+  return nodesList;
 };
 
 const convertDateFieldsToString = (
@@ -257,5 +273,99 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     contributors: contributorsNodes,
     institutions: institutionsNodes,
     siblings: siblingsConverted,
+  };
+};
+
+export const getNodeDataForCourse = async (id: string): Promise<KnowledgeNode | null> => {
+  const nodeData = await retrieveNode(id);
+
+  if (!nodeData) {
+    return null;
+  }
+
+  const nodeIds: string[] = (nodeData.children || []).map(link => link.node!).filter(nodeId => nodeId);
+  nodeIds.push(...(nodeData.parents || []).map(link => link.node!).filter(nodeId => nodeId));
+
+  const nodesMap: Record<string, NodeFireStore> = await retrieveNodes(nodeIds);
+
+  // Retrieve the content of all the direct children of the node.
+  const childrenConverted: LinkedKnowledgeNode[] = [];
+  for (let child of nodeData.children || []) {
+    const childData = nodesMap[child.node!];
+    if (!childData) {
+      continue;
+    }
+    childrenConverted.push({
+      node: child.node as string,
+      title: childData.title,
+      nodeSlug: childData.nodeSlug as string,
+      content: childData.content,
+      nodeImage: childData.nodeImage,
+      nodeType: childData.nodeType,
+    });
+  }
+  // Retrieve the content of all the direct parents of the node.
+  const parentsConverted: LinkedKnowledgeNode[] = [];
+  for (let parent of nodeData.parents || []) {
+    const parentData = nodesMap[parent.node!];
+    if (!parentData) {
+      continue;
+    }
+    parentsConverted.push({
+      node: parent.node as string,
+      title: parentData.title,
+      nodeSlug: parentData.nodeSlug as string,
+      content: parentData.content,
+      nodeImage: parentData.nodeImage,
+      nodeType: parentData.nodeType,
+    });
+  }
+
+  // Descendingly sort the contributors array based on the reputation points.
+  const contributorsNodes: KnowledgeNodeContributor[] = Object.entries(nodeData.contributors || {})
+    .sort(([, aObj], [, bObj]) => {
+      return (bObj.reputation || 0) - (aObj.reputation || 0);
+    })
+    .reduce<KnowledgeNodeContributor[]>(
+      (previousValue, currentValue) => [...previousValue, { ...currentValue[1], username: currentValue[0] }],
+      []
+    );
+
+  // Descendingly sort the contributors array based on the reputation points.
+  const institObjs = Object.entries(nodeData.institutions || {}).sort(([, aObj], [, bObj]) => {
+    return (bObj.reputation || 0) - (aObj.reputation || 0);
+  });
+  const institutionsNodes: KnowledgeNodeInstitution[] = [];
+  for (let [name, obj] of institObjs) {
+    const institutionDocs = await db.collection("institutions").where("name", "==", name).get();
+    if (!institutionDocs.docs.length) continue;
+
+    const institutionDoc = institutionDocs.docs[0];
+    const logoURL = institutionDocs.docs.length > 0 ? institutionDoc.data().logoURL : "";
+    institutionsNodes.push({ ...obj, logoURL, name, id: institutionDoc.id });
+  }
+  const {
+    /* eslint-disable */
+    updatedAt,
+    changedAt,
+    createdAt,
+    tags,
+    references,
+    contributors,
+    institutions,
+    children,
+    parents,
+    /* eslint-enable */
+    ...rest
+  } = nodeData;
+  nodeData;
+  return {
+    id,
+    ...rest,
+    ...convertDateFieldsToString(nodeData),
+    children: childrenConverted,
+    parents: parentsConverted,
+    contributors: contributorsNodes,
+    institutions: institutionsNodes,
   };
 };

@@ -1,16 +1,19 @@
 import AddLinkIcon from "@mui/icons-material/AddLink";
 import CloseIcon from "@mui/icons-material/Close";
 import CollectionsIcon from "@mui/icons-material/Collections";
+import DoneIcon from "@mui/icons-material/Done";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import { Button, IconButton, Tooltip } from "@mui/material";
+import { Button, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { getStorage } from "firebase/storage";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { Mention, MentionsInput } from "react-mentions";
 import { IChannelMessage } from "src/chatTypes";
 
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { useCreateActionTrack } from "@/lib/utils/Map.utils";
 import { isValidHttpUrl } from "@/lib/utils/utils";
 
 import { UsersTag } from "./UsersTag";
@@ -36,8 +39,8 @@ type MessageInputProps = {
   sendMessageType?: string;
   setMessages?: any;
   sendMessage: any;
-  sendReplyOnMessage: any;
   parentMessage?: IChannelMessage;
+  setOpenMedia: Dispatch<SetStateAction<string | null>>;
 };
 export const MessageInput = ({
   notebookRef,
@@ -52,13 +55,17 @@ export const MessageInput = ({
   sendMessageType,
   sendMessage,
   parentMessage,
+  setOpenMedia,
 }: MessageInputProps) => {
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputFieldRef = useRef<any>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(editingMessage?.imageUrls || []);
   const [inputValue, setInputValue] = useState<string>("");
   const [important, setImportant] = useState(false);
+  const [isPreview, setIsPreview] = useState<any>(false);
+  const createActionTrack = useCreateActionTrack();
 
   useEffect(() => {
     if (editingMessage) {
@@ -195,13 +202,21 @@ export const MessageInput = ({
 
   const handleKeyPress = useCallback(
     (event: any) => {
-      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && (imageUrls.length > 0 || inputValue.trim())) {
         event.preventDefault();
         handleSendMessage();
       }
     },
     [inputValue]
   );
+
+  useEffect(() => {
+    if (!inputValue) return;
+    const timeoutId = setTimeout(() => {
+      createActionTrack({ action: "MessageTyped" });
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [inputValue]);
 
   const handleTyping = useCallback(
     async (e: any) => {
@@ -233,27 +248,22 @@ export const MessageInput = ({
       }
       const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
       let imageFileName = new Date().toUTCString();
-      uploadImage({ event, path, imageFileName }).then(url => {
-        setImageUrls((prev: string[]) => [...prev, url]);
-        if (!!parentMessage && sendMessageType === "reply") {
-          setReplyOnMessage({ ...parentMessage, notVisible: true });
-        }
-      });
+      uploadImage({ event, path, imageFileName }).then(url => setImageUrls((prev: string[]) => [...prev, url]));
     },
     [setImageUrls]
   );
 
   const handleSendMessage = () => {
-    sendMessage(imageUrls, important, sendMessageType, inputValue);
+    if (!!parentMessage && sendMessageType === "reply") {
+      sendMessage(parentMessage, inputValue, imageUrls, important, {});
+    } else {
+      sendMessage(imageUrls, important, sendMessageType, inputValue);
+    }
     setInputValue("");
     setImageUrls([]);
     setImportant(false);
-  };
-
-  const handleBlur = () => {
-    if (!!parentMessage && sendMessageType === "reply") {
-      setReplyOnMessage({ ...parentMessage, notVisible: true });
-    }
+    setIsPreview(false);
+    inputFieldRef?.current?.blur();
   };
 
   const choosingNewLinkedNode = () => {
@@ -263,8 +273,10 @@ export const MessageInput = ({
     nodeBookDispatch({ type: "setChoosingNode", payload: { id: "", type: "Node" } });
     nodeBookDispatch({ type: "setSelectedNode", payload: "" });
     nodeBookDispatch({ type: "setChosenNode", payload: null });
-    if (!!parentMessage && sendMessageType === "reply") {
+    if (!!parentMessage) {
       setReplyOnMessage({ ...parentMessage, notVisible: true });
+    } else {
+      setReplyOnMessage(null);
     }
   };
 
@@ -280,54 +292,60 @@ export const MessageInput = ({
           theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
       }}
     >
-      <MentionsInput
-        placeholder={placeholder}
-        style={{
-          control: {
-            fontSize: 16,
-            padding: "10px",
-            boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
-            border: "none",
-            overFlow: "hidden",
-          },
-          input: {
-            fontSize: 16,
-            border: "none",
-            outline: "none",
-            width: "100%",
-            color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.orange100 : DESIGN_SYSTEM_COLORS.notebookG900,
-            padding: "8px",
-            overFlow: "auto",
-          },
-          suggestions: {
-            list: {
-              background:
-                theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
-              padding: "2px",
+      {isPreview ? (
+        <MarkdownRender sx={{ p: "10px" }} text={inputValue} />
+      ) : (
+        <MentionsInput
+          className="chat__mention"
+          inputRef={inputFieldRef}
+          placeholder={placeholder}
+          style={{
+            control: {
               fontSize: 16,
-              position: "absolute",
-              top: "-120px",
-              left: "-16px",
-              maxHeight: "150px",
+              padding: "10px",
+              boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)",
+              border: "none",
+              maxHeight: "100px",
+            },
+            input: {
+              fontSize: 16,
+              border: "none",
+              outline: "none",
+              width: "100%",
+              color: theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.baseWhite : DESIGN_SYSTEM_COLORS.baseBlack,
+              padding: "8px",
               overflowY: "auto",
             },
-          },
-        }}
-        value={inputValue}
-        singleLine={false}
-        onChange={handleTyping}
-        onKeyDown={handleKeyPress}
-        onFocus={handleBlur}
-      >
-        <Mention
-          trigger="@"
-          data={channelUsers}
-          displayTransform={(id, display) => {
-            return `@${display}`;
+            suggestions: {
+              list: {
+                background:
+                  theme.toLowerCase() === "dark" ? DESIGN_SYSTEM_COLORS.notebookG700 : DESIGN_SYSTEM_COLORS.gray100,
+                padding: "2px",
+                fontSize: 16,
+                position: "absolute",
+                top: "-170px",
+                left: "-16px",
+                maxHeight: "150px",
+                overflowY: "auto",
+              },
+            },
           }}
-          renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
-        />
-      </MentionsInput>
+          value={inputValue}
+          singleLine={false}
+          onChange={handleTyping}
+          onKeyDown={handleKeyPress}
+        >
+          <Mention
+            trigger="@"
+            data={channelUsers}
+            displayTransform={(id, display) => {
+              return `@${display}`;
+            }}
+            markup="[@__display__](/mention/__id__)"
+            renderSuggestion={(suggestion: any) => <UsersTag user={suggestion} />}
+          />
+        </MentionsInput>
+      )}
       <Box sx={{ display: "flex" }}>
         {imageUrls.map(imageUrl => (
           <Box
@@ -366,6 +384,7 @@ export const MessageInput = ({
               src={imageUrl}
               alt=""
               key={imageUrl}
+              onClick={() => setOpenMedia(imageUrl)}
             />
           </Box>
         ))}
@@ -381,35 +400,70 @@ export const MessageInput = ({
         }}
       >
         <input type="file" ref={fileInputRef} onChange={onUploadImage} hidden />
-        {!editingMessage && (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            {isUploading ? (
-              <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
-            ) : (
-              <Tooltip title={"Upload Image"}>
-                <IconButton onClick={uploadImageClicked}>
-                  <CollectionsIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-            {leading && (
-              <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
-                <IconButton onClick={() => setImportant(prev => !prev)}>
-                  <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            <Tooltip title={"Upload a node from notebook"}>
-              <IconButton onClick={() => choosingNewLinkedNode()}>
-                <AddLinkIcon />
+
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {isUploading ? (
+            <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>{percentageUploaded + "%"}</span>
+          ) : (
+            <Tooltip title={"Upload Image"}>
+              <IconButton onClick={uploadImageClicked}>
+                <CollectionsIcon />
               </IconButton>
             </Tooltip>
+          )}
+
+          {!editingMessage && (
+            <>
+              {leading && (
+                <Tooltip title={important ? "Unmark as Important" : "Mark as Important"}>
+                  <IconButton onClick={() => setImportant(prev => !prev)}>
+                    <PriorityHighIcon sx={{ color: important ? "red" : "" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title={"Share a node from notebook"}>
+                <IconButton onClick={() => choosingNewLinkedNode()}>
+                  <AddLinkIcon />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+          <Box ml={3} sx={{ display: "flex", justifyContent: "end" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                position: "relative",
+                borderRadius: "10px",
+              }}
+            >
+              <Typography
+                onClick={() => setIsPreview(false)}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Edit
+              </Typography>
+              <Switch
+                //disabled={disableSwitchPreview}
+                checked={isPreview}
+                onClick={() => setIsPreview(!isPreview)}
+                size="small"
+              />
+              <Typography
+                onClick={() => setIsPreview(true)}
+                sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+              >
+                Preview
+              </Typography>
+            </Box>
           </Box>
-        )}
+        </Box>
+
         {!editingMessage ? (
           <Button
             variant="contained"
             onClick={handleSendMessage}
+            disabled={!imageUrls.length && !inputValue.trim()}
             sx={{
               minWidth: "0px",
               width: "36px",
@@ -437,34 +491,27 @@ export const MessageInput = ({
           </Button>
         ) : (
           <Box sx={{ ml: "auto" }}>
-            <Button
-              variant="contained"
+            <IconButton
+              color="error"
               onClick={cancel}
               sx={{
-                minWidth: "0px",
-                width: "80px",
-                height: "30px",
-                p: "10px",
+                p: "5px",
                 borderRadius: "8px",
                 mr: "5px",
-                backgroundColor: theme.toLowerCase() === "dark" ? "transparent" : DESIGN_SYSTEM_COLORS.notebookG400,
               }}
             >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
+              <CloseIcon />
+            </IconButton>
+            <IconButton
+              color="success"
               onClick={handleSendMessage}
               sx={{
-                minWidth: "0px",
-                width: "80px",
-                height: "30px",
-                p: "10px",
+                p: "5px",
                 borderRadius: "8px",
               }}
             >
-              Save
-            </Button>
+              <DoneIcon />
+            </IconButton>
           </Box>
         )}
       </Box>

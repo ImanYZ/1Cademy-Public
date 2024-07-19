@@ -6,24 +6,29 @@ import * as moment from "moment";
 
 admin.initializeApp();
 
-import { signalFlashcardChanges } from "./helpers";
+import { signalFlashcardChanges, trackHours } from "./helpers";
 
 const { assignNodeContributorsInstitutionsStats } = require("./assignNodeContributorsInstitutionsStats");
 const { updateInstitutions } = require("./updateInstitutions");
 const { deleteOntologyLock } = require("./actions/deleteOntologyLock");
 const { cleanOpenAiAssistants } = require("./cleanOpenAiAssistants");
+const { createMeeting } = require("./createMeeting");
+const { updateCoursesNums } = require("./updateCoursesNums");
+const { deleteOldProposals } = require("./deleteOldProposals");
 
 import { nodeDeletedUpdates } from "./actions/nodeDeletedUpdates";
 import { updateVersions } from "./actions/updateVersions";
 import { checkNeedsUpdates } from "./helpers/version-helpers";
 import { updatesNodeViewers } from "./actions/updatesNodeViewers";
-import { trigerNotifications } from "./actions/trigerNotifications";
+import { deleteNotifications } from "./actions/deleteNotifications";
 import { addUserToChannel } from "./actions/addUserToChannel";
 import { removeReactionFromCard } from "./actions/removeReactionFromCard";
 
 import { db } from "./admin";
 import { updateSavedCards } from "./actions/updateSavedCards";
 import { sentAlertEmail } from "./actions/sentAlertEmail";
+import { updateImage } from "./actions/updateImage";
+import { signalChangesToUsers } from "./helpers/signalChangesToUsers";
 
 // Since this code will be running in the Cloud Functions environment
 // we call initialize Firestore without any arguments because it
@@ -124,24 +129,32 @@ export const onActionTrackCreated = functions.firestore.document("/actionTracks/
     const twoDaysAgo = new Date(Number(today) - 2 * MILLISECONDS_IN_A_DAY);
 
     const receiversData: any = {};
-
-    for (let receiver of data.receivers) {
-      const receiverDoc = await firestore.collection("users").doc(receiver).get();
-      if (receiverDoc.exists) {
-        const receiverData = receiverDoc.data();
-        receiversData[receiver] = {
-          fullname: receiverData?.fName + " " + receiverData?.lName,
-          chooseUname: receiverData?.chooseUname,
-          imageUrl: receiverData?.imageUrl,
-        };
+    if ((data.receivers || []).length > 0) {
+      for (let receiver of data.receivers) {
+        const receiverDoc = await firestore.collection("users").doc(receiver).get();
+        if (receiverDoc.exists) {
+          const receiverData = receiverDoc.data();
+          receiversData[receiver] = {
+            fullname: receiverData?.fName + " " + receiverData?.lName,
+            chooseUname: receiverData?.chooseUname,
+            imageUrl: receiverData?.imageUrl,
+          };
+        }
       }
+      actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo), receiversData });
     }
-    actionTracksLogRef.add({ ...data, expired: Timestamp.fromDate(twoDaysAgo), receiversData });
-    // create recentUserNodes
-    const recentUserNodesRef = firestore.collection("recentUserNodes");
-    // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
-    const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
-    recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+    if (data.nodeId) {
+      // create recentUserNodes
+      const recentUserNodesRef = firestore.collection("recentUserNodes");
+      // expired is +2 days ago, to remove document in 5 days, because TTL remove in 72h
+      const fiveDaysAgo = new Date(Number(today) + 2 * MILLISECONDS_IN_A_DAY);
+
+      recentUserNodesRef.add({ user: data.doer, nodeId: data.nodeId, expired: Timestamp.fromDate(fiveDaysAgo) });
+    }
+
+    //track hours
+
+    await trackHours(data);
   } catch (error) {
     console.log("error:", error);
   }
@@ -168,13 +181,25 @@ export const onNodeUpdated = functions.firestore.document("/nodes/{id}").onUpdat
 
 export const onNodeUpdatedVersions = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
   try {
-    const newValue = change.after.data();
-    const previousValue = change.before.data();
+    const newNode = change.after.data();
+    const previousNode = change.before.data();
     const nodeId = change.after.id;
-    const needsUpdates = checkNeedsUpdates({ previousValue, newValue });
+    const needsUpdates = checkNeedsUpdates({ previousValue: previousNode, newValue: newNode });
     if (needsUpdates) {
-      updateVersions({ nodeId, nodeData: newValue });
+      updateVersions({ nodeId, nodeData: newNode });
     }
+    console.log("Done Updating Versions");
+  } catch (error) {
+    console.log("error:", error);
+  }
+});
+
+export const signalNodeChanges = functions.firestore.document("/nodes/{id}").onUpdate(async change => {
+  try {
+    const newNode = change.after.data();
+    const previousNode = change.before.data();
+    const nodeId = change.after.id;
+    await signalChangesToUsers(newNode, previousNode, nodeId);
     console.log("Done Updating Versions");
   } catch (error) {
     console.log("error:", error);
@@ -230,33 +255,44 @@ export const onNewOpenNode = functions.firestore.document("/userNodes/{id}").onC
   }
 });
 
-// export const onDirectMessagesNotification = functions.firestore
-//   .document("/conversationMessages/{cid}/messages/{id}")
-//   .onCreate(async change => {
-//     try {
-//       const message = change.data();
-//       trigerNotifications({ message: { messageId: change.id, ...message, chatType: "direct" } });
-//     } catch (error) {
-//       console.log("error onDirectMessagesNotification:", error);
-//     }
-//   });
-
+export const onDirectMessagesNotification = functions.firestore
+  .document("/conversationMessages/{cid}/messages/{id}")
+  .onUpdate(async change => {
+    try {
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "direct" } });
+      }
+    } catch (error) {
+      console.log("error onDirectMessagesNotification:", error);
+    }
+  });
 export const onChannelMessagesNotification = functions.firestore
   .document("/channelMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
+  .onUpdate(async change => {
     try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "channel" } });
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "channel" } });
+      }
     } catch (error) {
       console.log("error onChannelMessagesNotification:", error);
     }
   });
 export const onAnnouncementsMessagesNotification = functions.firestore
   .document("/announcementsMessages/{cid}/messages/{id}")
-  .onCreate(async change => {
+  .onUpdate(async change => {
     try {
-      const message = change.data();
-      trigerNotifications({ message: { messageId: change.id, ...message, chatType: "announcement" } });
+      const updatedData = change.after.data();
+      const previousData = change.before.data();
+      const messageId = change.after.id;
+      if (updatedData.deleted && !previousData.deleted) {
+        deleteNotifications({ message: { messageId, ...updatedData, chatType: "announcement" } });
+      }
     } catch (error) {
       console.log("error onAnnouncementsMessagesNotification:", error);
     }
@@ -268,6 +304,13 @@ export const onUserUpdate = functions.firestore.document("/users/{id}").onUpdate
     const previousData = change.before.data();
     if (userData.tagId !== previousData.tagId) {
       addUserToChannel({ userData });
+    }
+    if (
+      userData?.imageURL !== previousData?.imageURL ||
+      userData.fName !== previousData?.fName ||
+      userData.lName !== previousData?.lName
+    ) {
+      updateImage({ userData });
     }
   } catch (error) {
     console.log("error onUserUpdate:", error);
@@ -329,3 +372,21 @@ exports.cleanOpenAiAssistants = functions
   .pubsub.schedule("every 25 hours")
   .timeZone("America/Detroit")
   .onRun(cleanOpenAiAssistants);
+
+exports.createMeeting = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("0 16 * * 1,5")
+  .timeZone("America/Detroit")
+  .onRun(createMeeting);
+
+exports.updateCoursesNums = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(updateCoursesNums);
+
+exports.deleteOldProposals = functions
+  .runWith({ memory: "1GB", timeoutSeconds: 520 })
+  .pubsub.schedule("every 25 hours")
+  .timeZone("America/Detroit")
+  .onRun(deleteOldProposals);

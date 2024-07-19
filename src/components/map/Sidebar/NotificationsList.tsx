@@ -1,3 +1,4 @@
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
@@ -28,10 +29,31 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { collection, doc, getDocs, getFirestore, increment, limit, query, where, writeBatch } from "firebase/firestore";
-import React, { ChangeEvent, MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  increment,
+  limit,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import React, {
+  ChangeEvent,
+  Dispatch,
+  MouseEvent,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
+import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../../context/AuthContext";
 import { useInView } from "../../../hooks/useObserver";
@@ -73,6 +95,8 @@ type NotificationsListProps = {
   openLinkedNode: any;
   notifications: Notification[];
   checked: boolean;
+  setOpenSidebar: Dispatch<SetStateAction<OpenLeftSidebar>>;
+  setCommentSidebarInfo: any;
 };
 
 const NotificationsList = (props: NotificationsListProps) => {
@@ -155,9 +179,28 @@ const NotificationsList = (props: NotificationsListProps) => {
     setSelectedNotifications([]);
   }, [db, props.checked, props.notifications.length, selectedNotifications, user?.uname]);
 
+  const markAsRead = async (notificationId: string) => {
+    const notificationRef = doc(db, "notifications", notificationId);
+    updateDoc(notificationRef, {
+      checked: true,
+    });
+  };
+
   const openLinkedNodeClick = useCallback(
     (notification: any) => {
-      notification.aType !== "Delete" && props.openLinkedNode(notification.nodeId);
+      const { oType, aType, nodeId, commentSidebarInfo } = notification;
+      if (oType === "Comment") {
+        props.setOpenSidebar("COMMENT");
+        props.setCommentSidebarInfo(commentSidebarInfo);
+        props.openLinkedNode(nodeId);
+      } else if (aType !== "Delete") {
+        props.openLinkedNode(nodeId);
+      }
+      if (!props.checked) {
+        setTimeout(() => {
+          markAsRead(notification.id);
+        }, 1000);
+      }
     },
     [props.openLinkedNode]
   );
@@ -216,6 +259,40 @@ const NotificationsList = (props: NotificationsListProps) => {
     );
     setSelectedNotifications(notificationIds);
   }, [props.notifications]);
+
+  const getNotificationText = (notification: any) => {
+    switch (notification.oType) {
+      case "Proposal":
+        return "Your pending proposal";
+      case "AccProposal":
+        return "Your accepted proposal";
+      case "Node":
+        return YOUR_NODE_TEXT(notification);
+      case "Propo":
+        return "Your node got a proposal for";
+      case "PropoAccept":
+        if (notification.aType === "newChild") {
+          return "Your node got an improvement for a new Child!";
+        } else {
+          return (
+            <>
+              Your node got an improvement for{" "}
+              {notification.aType.map((pType: any, index: number) => (
+                <span key={index}>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</span>
+              ))}
+            </>
+          );
+        }
+      case "Comment":
+        if (notification.aType === "proposal") {
+          return "Your proposal got a comment";
+        } else {
+          return "Your node got a comment";
+        }
+      default:
+        return "";
+    }
+  };
 
   return (
     <Box>
@@ -318,21 +395,7 @@ const NotificationsList = (props: NotificationsListProps) => {
               >
                 <Box flex={1} onClick={() => openLinkedNodeClick(notification)}>
                   <Typography fontSize={"12px"} fontWeight={"500"} mb="10px">
-                    {notification.oType === "Proposal"
-                      ? " Your pending proposal "
-                      : notification.oType === "AccProposal"
-                      ? " Your accepted proposal "
-                      : notification.oType === "Node"
-                      ? YOUR_NODE_TEXT(notification)
-                      : notification.oType === "Propo"
-                      ? " Your node got a proposal for "
-                      : notification.oType === "PropoAccept" &&
-                        " Your node got an improvement for " +
-                          (notification.aType === "newChild"
-                            ? "a new Child!"
-                            : notification.aType.map((pType: any) => {
-                                <p>- {pType.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>;
-                              }))}
+                    {getNotificationText(notification)}
                   </Typography>
 
                   <Stack direction={"row"} alignItems={"center"} spacing={"8px"} mb="10px">
@@ -379,6 +442,50 @@ const NotificationsList = (props: NotificationsListProps) => {
   );
 };
 
+const getIcon = (notification: any) => {
+  switch (true) {
+    case notification.oType === "Propo":
+      return <EditRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />;
+    case notification.oType === "PropoAccept":
+      return <EditRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600 }} fontSize="inherit" />;
+    case notification.aType === "Correct":
+      return <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600 }} fontSize="inherit" />;
+    case notification.aType === "CorrectRM":
+      return (
+        <DoneRoundedIcon
+          sx={{ color: DESIGN_SYSTEM_COLORS.success600, textDecoration: "line-through" }}
+          fontSize="inherit"
+        />
+      );
+    case notification.aType === "Wrong":
+      return <CloseRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} fontSize="inherit" />;
+    case notification.aType === "WrongRM":
+      return (
+        <CloseRoundedIcon
+          sx={{ color: DESIGN_SYSTEM_COLORS.orange700, textDecoration: "line-through" }}
+          fontSize="inherit"
+        />
+      );
+    case notification.aType === "Award":
+      return <EmojiEventsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />;
+    case notification.aType === "AwardRM":
+      return (
+        <EmojiEventsRoundedIcon
+          sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, textDecoration: "line-through" }}
+          fontSize="inherit"
+        />
+      );
+    case notification.aType === "Accepted":
+      return <DoneAllRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />;
+    case notification.aType === "Delete":
+      return <DeleteForeverRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} />;
+    case notification.oType === "Comment":
+      return <ChatBubbleIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />;
+    default:
+      return <></>;
+  }
+};
+
 const NotificationTypeIcon = ({ notification, checked }: { notification: any; checked: boolean }) => {
   if (!notification) return null;
   return (
@@ -400,36 +507,7 @@ const NotificationTypeIcon = ({ notification, checked }: { notification: any; ch
             : DESIGN_SYSTEM_COLORS.notebookG50,
       }}
     >
-      {notification.oType === "Propo" ? (
-        <EditRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />
-      ) : notification.oType === "PropoAccept" ? (
-        <EditRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600 }} fontSize="inherit" />
-      ) : notification.aType === "Correct" ? (
-        <DoneRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.success600 }} fontSize="inherit" />
-      ) : notification.aType === "CorrectRM" ? (
-        <DoneRoundedIcon
-          sx={{ color: DESIGN_SYSTEM_COLORS.success600, textDecoration: "line-through" }}
-          fontSize="inherit"
-        />
-      ) : notification.aType === "Wrong" ? (
-        <CloseRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} fontSize="inherit" />
-      ) : notification.aType === "WrongRM" ? (
-        <CloseRoundedIcon
-          sx={{ color: DESIGN_SYSTEM_COLORS.orange700, textDecoration: "line-through" }}
-          fontSize="inherit"
-        />
-      ) : notification.aType === "Award" ? (
-        <EmojiEventsRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />
-      ) : notification.aType === "AwardRM" ? (
-        <EmojiEventsRoundedIcon
-          sx={{ color: DESIGN_SYSTEM_COLORS.yellow400, textDecoration: "line-through" }}
-          fontSize="inherit"
-        />
-      ) : notification.aType === "Accepted" ? (
-        <DoneAllRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.yellow400 }} fontSize="inherit" />
-      ) : (
-        notification.aType === "Delete" && <DeleteForeverRoundedIcon sx={{ color: DESIGN_SYSTEM_COLORS.orange700 }} />
-      )}
+      {getIcon(notification)}
     </Box>
   );
 };

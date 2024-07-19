@@ -30,7 +30,7 @@ export const getchatNotificationsSnapshot = (
 
     const actionTrackDocuments: channelNotificationChange[] = docChanges.map(change => {
       const document = change.doc.data() as IChannelMessage;
-      return { type: change.type, data: { id: change.doc.id, ...document }, doc: change.doc };
+      return { type: change.type, data: { ...document, id: change.doc.id }, doc: change.doc };
     });
     callback(actionTrackDocuments);
   });

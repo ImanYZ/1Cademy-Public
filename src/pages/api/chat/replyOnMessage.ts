@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { db } from "@/lib/firestoreServer/admin";
 import fbAuth from "src/middlewares/fbAuth";
 import { IChannelMessage } from "src/chatTypes";
-import { DocumentData, DocumentReference, FieldValue } from "firebase-admin/firestore";
 
 type IReactOnMessagePayload = {
   curMessage: IChannelMessage & { id: string };
@@ -14,7 +13,7 @@ const getMessageRef = async (
   messageId: string,
   channelId: string,
   roomType: string
-): Promise<{ mDoc: any; channelDoc: any }> => {
+): Promise<{ mDoc: any; rDoc: any; channelDoc: any }> => {
   let channelRef = db.collection("channelMessages").doc(channelId);
   if (roomType === "direct") {
     channelRef = db.collection("conversationMessages").doc(channelId);
@@ -27,16 +26,17 @@ const getMessageRef = async (
   }
   const channelDoc = await _channelRef.get();
   const mDoc = await channelRef.collection("messages").doc(messageId).get();
-  return { mDoc, channelDoc };
+  const rDoc = await channelRef.collection("messages").doc(messageId).collection("replies").doc().get();
+  return { mDoc, rDoc, channelDoc };
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
-    const { leading } = req.body?.data?.user?.userData?.customClaims;
+    const customClaims = req.body?.data?.user?.userData?.customClaims;
 
     const { reply, curMessage, roomType } = req.body as IReactOnMessagePayload;
 
-    const { channelDoc, mDoc } = await getMessageRef(curMessage.id, curMessage.channelId, roomType);
+    const { channelDoc, mDoc, rDoc } = await getMessageRef(curMessage.id, curMessage.channelId, roomType);
     if (!channelDoc.exists && !mDoc.exists) {
       throw new Error("Channel or message doesn't exist!");
     }
@@ -44,22 +44,27 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (!channelData || !channelData.members.includes(uname)) {
       throw new Error("User is not a member of teh channel!");
     }
+
+    const messageData = mDoc.data();
     reply.sender = uname;
-    if (reply.important && !leading.includes(curMessage.channelId)) {
+    if (reply.important && !customClaims?.leading.includes(curMessage.channelId)) {
       reply.important = false;
     }
-    await mDoc.ref.update({
-      replies: FieldValue.arrayUnion({
-        ...reply,
-        createdAt: new Date(),
-        editedAt: new Date(),
-        read_by: [],
-        pinned: false,
-        replies: [],
-        edited: false,
-        reactions: [],
-      }),
+    await rDoc.ref.create({
+      ...reply,
+      createdAt: new Date(),
+      editedAt: new Date(),
+      read_by: [],
+      pinned: false,
+      replies: [],
+      edited: false,
+      reactions: [],
     });
+
+    await mDoc.ref.update({
+      totalReplies: (messageData?.totalReplies || 0) + 1,
+    });
+
     return res.status(200).send({});
   } catch (error) {
     console.log(error);

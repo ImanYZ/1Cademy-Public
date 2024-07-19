@@ -68,6 +68,7 @@ export type IChannelMessage = {
   deleted: boolean;
   important: boolean;
   notVisible?: boolean;
+  totalReplies?: number;
 };
 
 export type IAnnouncement = {
@@ -90,6 +91,7 @@ export type IChannels = {
   newsUpdatedAt: Timestamp;
   tag: string;
   channelType: "directMessage" | "group";
+  visibleFor: string[];
 };
 
 export type IChatNotification = {
@@ -109,6 +111,7 @@ export type IConversation = {
   membersInfo: MembersInfo;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  visibleFor: string[];
 };
 
 export type IConversationMessage = {

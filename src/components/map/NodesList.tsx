@@ -23,7 +23,7 @@ type NodeListProps = {
   openAllParent: any;
   hideNodeHandler: any;
   hideDescendants: any;
-  toggleNode: (event: any, id: string) => void;
+  toggleNode: (event: any, thisNode: any, id: string) => void;
   openNodePart: any;
   onNodeShare: (nodeId: string, platform: string) => void;
   selectNode: (params: OnSelectNodeInput) => void;
@@ -74,6 +74,10 @@ type NodeListProps = {
   displayParentOptions: boolean;
   findDescendantNodes: (selectedNode: string, searchNode: string) => boolean;
   findAncestorNodes: (selectedNode: string, searchNode: string) => boolean;
+  lockedNodes: { [key: string]: boolean };
+  onlineUsers: { [key: string]: boolean };
+  openComments: (refId: string, type: string) => void;
+  commentNotifications: any;
 };
 
 const NodesList = ({
@@ -141,6 +145,10 @@ const NodesList = ({
   displayParentOptions,
   findDescendantNodes,
   findAncestorNodes,
+  lockedNodes,
+  onlineUsers,
+  openComments,
+  commentNotifications,
 }: NodeListProps) => {
   const { nodeBookState, nodeBookDispatch } = useNodeBook();
 
@@ -148,7 +156,6 @@ const NodesList = ({
     (nodeId: string) => (newOpenPart: OpenPart) => setOpenPart(nodeId, newOpenPart),
     [setOpenPart]
   );
-
   return (
     <>
       {Object.keys(nodes).map(nId => {
@@ -156,6 +163,7 @@ const NodesList = ({
           <MemoizedNode
             key={nId}
             identifier={nId}
+            node={nodes[nId]}
             nodeBookDispatch={nodeBookDispatch}
             nodeUpdates={nodeUpdates}
             setNodeUpdates={setNodeUpdates}
@@ -198,11 +206,22 @@ const NodesList = ({
               removed: (nodes[nId]?.removedReferences || []).includes(nodes[nId].referenceIds[idx]),
             }))}
             tags={nodes[nId].tags.map((cur: string, idx: number) => ({
+              index: idx,
               node: nodes[nId].tagIds[idx],
               title: cur,
               added: (nodes[nId]?.addedTags || []).includes(nodes[nId].tagIds[idx]),
               removed: (nodes[nId]?.removedTags || []).includes(nodes[nId].tagIds[idx]),
+              locked: lockedNodes[nodes[nId].tagIds[idx]],
             }))}
+            removedTags={nodes[nId].removedTags || []}
+            addedTags={nodes[nId].addedTags || []}
+            addedReferences={nodes[nId].addedReferences || []}
+            removedReferences={nodes[nId].removedReferences || []}
+            addedParents={nodes[nId].addedParents || []}
+            removedParents={nodes[nId].removedParents || []}
+            addedChildren={nodes[nId].addedChildren || []}
+            removedChildren={nodes[nId].removedChildren || []}
+            tagIds={nodes[nId].tagIds}
             parents={nodes[nId].parents}
             nodesChildren={nodes[nId].children}
             choices={nodes[nId].choices}
@@ -280,7 +299,7 @@ const NodesList = ({
             // notebooks={nodes[nId].notebooks}
             open={nodes[nId].open}
             hideNode={hideNode}
-            nodeHeigth={nodes[nId].height}
+            nodeHeight={nodes[nId].height}
             setAssistantSelectNode={setAssistantSelectNode}
             assistantSelectNode={assistantSelectNode}
             onForceRecalculateGraph={onForceRecalculateGraph}
@@ -291,6 +310,9 @@ const NodesList = ({
             displayParentOptions={displayParentOptions}
             findDescendantNodes={findDescendantNodes}
             findAncestorNodes={findAncestorNodes}
+            onlineUsers={onlineUsers}
+            openComments={openComments}
+            commentNotifications={commentNotifications}
           />
         );
       })}
@@ -347,6 +369,8 @@ export const MemoizedNodeList = React.memo(NodesList, (prev, next) => {
     prev.ableToPropose === next.ableToPropose &&
     prev.setNodeParts === next.setNodeParts &&
     prev.hideNode === next.hideNode &&
+    prev.commentNotifications.length === next.commentNotifications.length &&
+    prev.onlineUsers === next.onlineUsers &&
     // prev.selectedNotebookId === next.selectedNotebookId &&
     validateTutorialProps()
   );

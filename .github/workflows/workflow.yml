@@ -54,12 +54,12 @@ jobs:
         with:
           compose-file: "./docker-compose.dev.yml"
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: npm install and build
         run: |
-          npm install --legacy-peer-deps
+          NODE_OPTIONS=--openssl-legacy-provider npm install --legacy-peer-deps
           cd cloud-functions
           npm install
           cd ..

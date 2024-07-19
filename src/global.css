@@ -534,21 +534,24 @@
   position: relative;
   white-space: nowrap;
   margin: -10px 0px -4px 0px;
-  height: 10px;
-  width: 10px;
+  height: 11px;
+  width: 11px;
   border-radius: 50%;
-  background-color: #12b76a;
   overflow: hidden;
+}
+
+.UserStatusOnlineIcon {
+  background-color: #12b76a;
+}
+
+.UserStatusOfflineIcon {
+  border: 2.5px solid grey;
+  background-color: #1b1a1a;
 }
 
 .Lightmode .UserStatusOnlineIcon {
   background-color: #12b76a;
 }
-
-.UserStatusOfflineIcon {
-  background-color: #a7a7a7;
-}
-
 .UserStatusTotalPoints,
 .UserStatusTotalAwards {
   color: white;
@@ -714,6 +717,10 @@
   display: none;
 }
 
+.chat__mention__input::-webkit-scrollbar {
+  display: none;
+}
+
 #Sidebar::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 4px;
@@ -763,7 +770,7 @@
   background: rgba(128, 128, 128, 0.13);
 } */
 
-#SidebarBody .CenterredLoadingImage {
+#SidebarBody .CenteredLoadingImage {
   width: 400px;
 }
 
@@ -785,7 +792,7 @@
   margin-bottom: 25px;
 }
 
-.CenterredLoadingImageSidebar {
+.CenteredLoadingImageSidebar {
   display: flex;
   height: 100%;
   width: 100%;
@@ -2132,7 +2139,7 @@ button.MuiTab-textColorInherit:focus {
   margin-bottom: 7px;
 }
 
-#SearchResutlsNumSortContainer {
+#SearchResultsNumSortContainer {
   margin-bottom: 34px;
 }
 
@@ -2914,6 +2921,10 @@ right: 5px; */
   background-color: yellow;
 }
 .reply-box:hover > .message-buttons {
+  display: block;
+}
+
+.direct-channel:hover > .direct-channel-box > .direct-channel-delete {
   display: block;
 }
 

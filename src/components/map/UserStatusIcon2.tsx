@@ -1,6 +1,7 @@
+import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, SxProps, Theme, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import { addDoc, collection, getFirestore, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import { DispatchNodeBookActions } from "src/nodeBookTypes";
@@ -9,7 +10,6 @@ import { OpenLeftSidebar } from "@/pages/notebook";
 
 import { useAuth } from "../../context/AuthContext";
 import usePrevious from "../../hooks/usePrevious";
-import { DESIGN_SYSTEM_COLORS } from "../../lib/theme/colors";
 import shortenNumber from "../../lib/utils/shortenNumber";
 import OptimizedAvatar from "../OptimizedAvatar";
 
@@ -30,6 +30,7 @@ type UserStatusIconProps = {
   sx?: SxProps<Theme>;
   disabled?: boolean;
   smallVersion?: boolean;
+  user?: any;
 };
 
 const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: UserStatusIconProps) => {
@@ -146,17 +147,13 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
             contained={false}
             sx={{ border: "none", width: "38px", height: "38px", position: "static", cursor: "pointer" }}
           />
+
           {props.online && (
             <Box
-              className={"UserStatusOnlineIcon"}
               sx={{
-                width: "14px",
-                height: "14px",
-                position: "absolute",
-                bottom: "0px",
-                right: "0px",
-                border: `solid 2px ${DESIGN_SYSTEM_COLORS.baseWhite}`,
+                fontSize: "1px",
               }}
+              className="UserStatusOnlineIcon"
             />
           )}
         </Box>
@@ -174,6 +171,7 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 whiteSpace: "nowrap",
                 display: "inline-block",
                 fontSize: "13px",
+                width: "95%",
               }}
             >
               {props.fullname}
@@ -191,7 +189,17 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 }}
               >
                 <DoneIcon className=" DoneIcon green-text" sx={{ fontSize: "14px" }} />
-                <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                    fontSize: "14px",
+                    width: "47px",
+                    paddingLeft: "4px",
+                  }}
+                >
                   {shortenNumber(props.totalPositives, 2, false)}
                 </span>
                 {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
@@ -203,13 +211,49 @@ const UserStatusIcon = ({ nodeBookDispatch, smallVersion = true, ...props }: Use
                 }}
               >
                 <CloseIcon className="material-icons red-text" sx={{ fontSize: "14px" }} />
-                <span style={{ fontSize: "14px", paddingLeft: "4px" }}>
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                    fontSize: "14px",
+                    width: "47px",
+                    paddingLeft: "4px",
+                  }}
+                >
                   {shortenNumber(props.totalNegatives, 2, false)}
                 </span>
                 {/* {props.user.tag && <div id="UserProfileButtonDefaultTag">{props.user.tag}</div>} */}
               </Box>
             </Box>
           </Box>
+        )}
+        {!smallVersion && (
+          <IconButton
+            sx={{
+              position: "absolute",
+              right: "0px",
+              top: "20px",
+              ":hover": {
+                background: "transparent",
+                boxShadow: "none!important",
+              },
+            }}
+            size="small"
+            onClick={e => {
+              e.stopPropagation();
+              props.setOpenSideBar("CHAT");
+              setTimeout(() => {
+                const openChatEvent = new CustomEvent("open-chat", {
+                  detail: { user: props.user },
+                });
+                window.dispatchEvent(openChatEvent);
+              }, 500);
+            }}
+          >
+            <ChatBubbleOutlineOutlinedIcon fontSize="small" color="primary" />
+          </IconButton>
         )}
       </Box>
     </Tooltip>

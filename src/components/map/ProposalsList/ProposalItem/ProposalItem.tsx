@@ -1,7 +1,8 @@
 // import "./ProposalItem.css";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DoneRoundedIcon from "@mui/icons-material/DoneRounded";
-import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import { Badge, Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React, { useCallback } from "react";
@@ -13,6 +14,7 @@ import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { proposalSummariesGenerator } from "../../../../lib/utils/proposalSummariesGenerator";
 import shortenNumber from "../../../../lib/utils/shortenNumber";
 import { Editor } from "../../../Editor";
+import { ContainedButton } from "../../ContainedButton";
 
 // import shortenNumber from "../../../../../../utils/shortenNumber";
 // import HyperEditor from "../../../../../Editor/HyperEditor/HyperEditor";
@@ -31,34 +33,48 @@ type ProposalItemProps = {
   openLinkedNode: any;
   proposalSummaries?: any;
   isClickable?: boolean;
+  userVotesOnProposals?: { [key: string]: any };
+  openComments?: (refId: string, type: string, proposal?: any) => void;
+  commentNotifications?: any;
 };
 
-const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
+const ProposalItem = ({
+  isClickable = true,
+  userVotesOnProposals = {},
+  proposal,
+  shouldSelectProposal,
+  showTitle,
+  selectProposal,
+  openLinkedNode,
+  proposalSummaries,
+  openComments,
+  commentNotifications,
+}: ProposalItemProps) => {
   const openLinkedNodeClick = useCallback(
     (proposal: any) => (event: any) => {
-      if (props.shouldSelectProposal) {
-        props.selectProposal(event, proposal, proposal.newNodeId);
+      if (shouldSelectProposal) {
+        selectProposal(event, proposal, proposal.newNodeId);
       } else {
-        props.openLinkedNode(proposal.node);
+        openLinkedNode(proposal.node);
       }
     },
-    [props]
-    // [props.openLinkedNode, props.shouldSelectProposal, props.selectProposal]
+    []
+    // [openLinkedNode, shouldSelectProposal, selectProposal]
   );
 
-  let proposalSummaries;
+  let _proposalSummaries: any;
 
-  if (props.proposalSummaries) {
-    proposalSummaries = props.proposalSummaries;
+  if (proposalSummaries) {
+    _proposalSummaries = proposalSummaries;
   } else {
-    proposalSummaries = proposalSummariesGenerator(props.proposal);
+    _proposalSummaries = proposalSummariesGenerator(proposal);
   }
 
   return (
     <Paper
       elevation={3}
       className="CollapsedProposal collection-item avatar"
-      key={`Proposal${props.proposal.id}`}
+      key={`Proposal${proposal.id}`}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -77,12 +93,12 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
         }),
       }}
     >
-      {/* <h6>{props.proposal.newNodeId}</h6> */}
+      {/* <h6>{proposal.newNodeId}</h6> */}
       <Box>
         <Box>
-          {props.showTitle && (
+          {showTitle && (
             <MarkdownRender
-              text={props.proposal.title}
+              text={proposal.title}
               customClass={"custom-react-markdown"}
               sx={{ fontWeight: 400, letterSpacing: "inherit" }}
             />
@@ -93,8 +109,8 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
               paddingY: "10px",
             }}
           >
-            {proposalSummaries.length > 0
-              ? proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
+            {_proposalSummaries.length > 0
+              ? _proposalSummaries.map((prSummary: string, prSummaryIdx: number) => {
                   return (
                     <Box
                       component="p"
@@ -103,15 +119,13 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                         color: theme =>
                           theme.palette.mode === "light" ? theme.palette.common.black : theme.palette.common.white,
                       }}
-                      key={"Summary" + props.proposal.id + prSummaryIdx}
+                      key={"Summary" + proposal.id + prSummaryIdx}
                     >
                       {prSummary}
                     </Box>
                   );
                 })
-              : props.proposal.summary && (
-                  <Editor label="" readOnly setValue={doNothing} value={props.proposal.summary} />
-                )}
+              : proposal.summary && <Editor label="" readOnly setValue={doNothing} value={proposal.summary} />}
           </Box>
         </Box>
         <Box
@@ -139,7 +153,7 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                 alignItems: "center",
               }}
             >
-              <NodeTypeIcon nodeType={props.proposal.nodeType || ""} fontSize="inherit" />
+              <NodeTypeIcon nodeType={proposal.nodeType || ""} fontSize="inherit" />
             </Box>
             <Box
               sx={{
@@ -148,65 +162,124 @@ const ProposalItem = ({ isClickable = true, ...props }: ProposalItemProps) => {
                 color: theme => (theme.palette.mode === "dark" ? "#A4A4A4" : "#667085"),
               }}
             >
-              {dayjs(props.proposal.createdAt).fromNow()}
+              {dayjs(proposal.createdAt).fromNow()}
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              p: "2px 8px",
-
-              borderRadius: "24px",
-              backgroundColor: theme =>
-                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
-            }}
-          >
-            <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
-              <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                <DoneRoundedIcon
-                  fontSize="small"
-                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
-                />
-                <Typography
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                  }}
-                >
-                  {shortenNumber(props.proposal.corrects, 2, false)}
-                </Typography>
-              </Box>
-            </Tooltip>
-            <Divider
-              orientation="vertical"
-              variant="middle"
-              flexItem
+          <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <Box
               sx={{
-                borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
-              }}
-            />
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                p: "2px 8px",
 
-            <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
-              <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
-                <CloseRoundedIcon
-                  fontSize="small"
-                  sx={{ color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467") }}
-                />
-                <Typography
-                  sx={{
-                    color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
-                  }}
-                >
-                  {shortenNumber(props.proposal.wrongs, 2, false)}
-                </Typography>
-              </Box>
-            </Tooltip>
+                borderRadius: "24px",
+                backgroundColor: theme =>
+                  theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG500 : DESIGN_SYSTEM_COLORS.gray250,
+              }}
+            >
+              <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
+                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                  <DoneRoundedIcon
+                    fontSize="small"
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                      fill:
+                        userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].correct
+                          ? "rgb(0, 211, 105)"
+                          : "",
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                    }}
+                  >
+                    {shortenNumber(proposal.corrects, 2, false)}
+                  </Typography>
+                </Box>
+              </Tooltip>
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{
+                  borderColor: DESIGN_SYSTEM_COLORS.notebookG300,
+                }}
+              />
+
+              <Tooltip title="# of 1Admins who have awarded this proposal." placement="bottom-start">
+                <Box style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "16px" }}>
+                  <CloseRoundedIcon
+                    fontSize="small"
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                      fill:
+                        userVotesOnProposals[proposal.id] && userVotesOnProposals[proposal.id].wrong
+                          ? "rgb(255, 29, 29)"
+                          : "",
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: theme => (theme.palette.mode === "dark" ? "#F9FAFB" : "#475467"),
+                    }}
+                  >
+                    {shortenNumber(proposal.wrongs, 2, false)}
+                  </Typography>
+                </Box>
+              </Tooltip>
+            </Box>
+            {openComments && (
+              <ContainedButton
+                title="Open comments"
+                onClick={() =>
+                  openComments(proposal.id, "version", {
+                    id: proposal.id,
+                    title: proposal.title,
+                    node: proposal.node,
+                    summary: proposal.summary,
+                    _proposalSummaries: _proposalSummaries,
+                    corrects: proposal.corrects,
+                    wrongs: proposal.wrongs,
+                    nodeType: proposal.nodeType,
+                    createdAt: proposal.createdAt,
+                  })
+                }
+                tooltipPosition="top"
+                sx={{
+                  background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
+                  fontWeight: 400,
+                  color: "inherit",
+                  ":hover": {
+                    borderWidth: "0px",
+                    background: (theme: any) =>
+                      theme.palette.mode === "dark"
+                        ? theme.palette.common.darkBackground2
+                        : theme.palette.common.lightBackground2,
+                  },
+                  padding: "7px 7px",
+                  minWidth: "30px",
+                  height: "30px",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: "4px", fill: "inherit" }}>
+                  <Badge
+                    badgeContent={
+                      commentNotifications.filter((notification: any) => notification.refId === proposal.id).length
+                    }
+                    color="error"
+                  >
+                    <ChatBubbleIcon sx={{ fontSize: "16px" }} />
+                  </Badge>
+                </Box>
+              </ContainedButton>
+            )}
           </Box>
           <Button
             sx={{ borderRadius: "20px" }}
             variant="contained"
-            onClick={isClickable ? openLinkedNodeClick(props.proposal) : undefined}
+            onClick={isClickable ? openLinkedNodeClick(proposal) : undefined}
           >
             Compare
           </Button>

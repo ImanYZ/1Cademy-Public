@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -16,10 +16,15 @@ type UserSuggestionProps = {
   db: Firestore;
   onlineUsers: any;
   action: (suggestion: IUser) => void;
+  autoFocus?: boolean;
+  chips?: { id: string; fullName: string }[];
+  handleDeleteChip?: (item: string) => void;
+  error?: boolean;
+  helperText?: string;
 };
 
 const SuggestionList = styled(Paper)(({ theme }) => ({
-  position: "absolute",
+  position: "fixed",
   width: "100%",
   maxHeight: "300px",
   overflowY: "auto",
@@ -27,15 +32,44 @@ const SuggestionList = styled(Paper)(({ theme }) => ({
   zIndex: 1,
 }));
 
-const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
+const StyledTextField: any = styled(TextField)(() => ({
+  "& .MuiInputBase-root": {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "5px",
+    padding: "16px 0px 16px 10px",
+  },
+  "& .MuiInputBase-input": {
+    flex: 1,
+    minWidth: "120px",
+    padding: "0px",
+  },
+}));
+
+const UserSuggestion = ({
+  db,
+  onlineUsers,
+  action,
+  autoFocus,
+  chips = [],
+  handleDeleteChip,
+  error,
+  helperText,
+}: UserSuggestionProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [users, setUsers] = useState<IUser[]>([]);
   const [suggestions, setSuggestions] = useState<IUser[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
-  const fuse = new Fuse(users, {
-    keys: ["fullName"],
-  });
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(!!autoFocus);
   const wrapperRef = useRef<any>(null);
+  const fuse = new Fuse(users, {
+    keys: ["fName", "lName", "fullName"],
+    threshold: 0.3,
+    isCaseSensitive: false,
+    shouldSort: true,
+    findAllMatches: true,
+    useExtendedSearch: true,
+  });
 
   useEffect(() => {
     const getUsers = async () => {
@@ -43,33 +77,47 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
       const usersDocs = await getDocs(usersQuery);
       const _users: any = [];
       usersDocs.docs.forEach((userDoc: any) => {
-        _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName} ${userDoc.data().lName}` });
+        if (userDoc.id !== "one1" && userDoc.id !== "ImanYakhizzar") {
+          _users.push({ ...userDoc.data(), fullName: `${userDoc.data().fName} ${userDoc.data().lName}` });
+        }
       });
       setUsers(_users);
+      setSuggestions(_users.slice(0, 10));
     };
     getUsers();
   }, [db]);
 
   useEffect(() => {
-    if (!inputValue) return;
+    if (!inputValue.trim()) {
+      setSuggestions(users.slice(0, 10));
+      return;
+    }
     const handler = setTimeout(() => {
-      const filteredOptions = (query: string): any => {
+      const filteredOptions = (query: string): IUser[] => {
         if (!query) {
-          return [];
+          return users.slice(0, 10);
         }
+        const lowerCaseQuery = query.toLowerCase();
         return fuse
           .search(query)
           .map(result => result.item)
-          .filter((item: any) => !item.deleted);
+          .filter(
+            user =>
+              user.fName.toLowerCase().startsWith(lowerCaseQuery) ||
+              user.lName.toLowerCase().startsWith(lowerCaseQuery) ||
+              user.uname.toLowerCase().startsWith(lowerCaseQuery) ||
+              (user?.fullName || "").toLowerCase().replace(" ", "").startsWith(lowerCaseQuery.replace(" ", ""))
+          )
+          .slice(0, 20);
       };
-      setSuggestions(filteredOptions(inputValue));
+      setSuggestions(filteredOptions(inputValue.trim()));
       setShowSuggestions(true);
     }, 1000);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [inputValue]);
+  }, [inputValue, users]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
@@ -80,7 +128,7 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
   }, []);
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+    if (wrapperRef.current && !wrapperRef.current.contains(event.target) && !autoFocus) {
       setShowSuggestions(false);
     }
   };
@@ -91,15 +139,33 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
 
   return (
     <Box ref={wrapperRef} style={{ position: "relative", width: "100%" }}>
-      <TextField
+      <StyledTextField
         value={inputValue}
         onChange={handleInputChange}
         placeholder="Search User"
         fullWidth
         variant="outlined"
+        onFocus={() => {
+          setShowSuggestions(true);
+        }}
+        sx={{ position: "sticky", top: 0 }}
+        InputProps={{
+          startAdornment: chips.map((item: any) => (
+            <>
+              <Chip
+                key={item.id}
+                tabIndex={-1}
+                label={item.fullName}
+                onDelete={() => handleDeleteChip && handleDeleteChip(item.id)}
+              />
+            </>
+          )),
+        }}
+        error={error}
+        helperText={error ? helperText : null}
       />
       {showSuggestions && (
-        <SuggestionList>
+        <SuggestionList sx={{ width: "400px" }}>
           <List>
             {suggestions.map((suggestion: IUser, index: number) => (
               <ListItem
@@ -109,11 +175,12 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                   action(suggestion);
                   setShowSuggestions(false);
                 }}
+                sx={{ height: "50px" }}
               >
                 <Box
                   sx={{
-                    width: `40px`,
-                    height: `40px`,
+                    width: `30px`,
+                    height: `30px`,
                     cursor: "pointer",
                     transition: "all 0.2s 0s ease",
                     background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
@@ -121,8 +188,8 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                     "& > .user-image": {
                       borderRadius: "50%",
                       overflow: "hidden",
-                      width: "30px",
-                      height: "30px",
+                      width: "20px",
+                      height: "20px",
                     },
                     "@keyframes slidein": {
                       from: {
@@ -137,17 +204,22 @@ const UserSuggestion = ({ db, onlineUsers, action }: UserSuggestionProps) => {
                   <OptimizedAvatar2
                     alt={suggestion.fullName || ""}
                     imageUrl={suggestion.imageUrl}
-                    size={40}
+                    size={30}
                     sx={{ border: "none" }}
                   />
                   <Box
-                    sx={{ background: onlineUsers.includes(suggestion.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-                    className="UserStatusOnlineIcon"
+                    sx={{
+                      fontSize: "1px",
+                      backgroundColor: !onlineUsers[suggestion.uname]
+                        ? theme => (theme.palette.mode === "dark" ? "#1b1a1a" : "#fefefe")
+                        : "",
+                    }}
+                    className={onlineUsers[suggestion.uname] ? "UserStatusOnlineIcon" : ""}
                   />
                 </Box>
                 <Box>
-                  <Typography sx={{ pl: 2 }}>{suggestion.fullName}</Typography>
-                  <Typography sx={{ pl: 1, color: "grey", fontSize: "15px" }}>@{suggestion.uname}</Typography>
+                  <Typography sx={{ pl: 1.5, fontSize: "14px" }}>{suggestion.fullName}</Typography>
+                  <Typography sx={{ pl: 1, color: "grey", fontSize: "12px" }}>@{suggestion.uname}</Typography>
                 </Box>
               </ListItem>
             ))}

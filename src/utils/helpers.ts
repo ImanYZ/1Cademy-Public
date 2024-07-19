@@ -7,6 +7,13 @@ import { INodeType } from "src/types/INodeType";
 import { splitSentenceIntoChunks } from "../lib/utils/string.utils";
 import { delay } from "../lib/utils/utils";
 import { diffChars } from "diff";
+import { ISemester } from "src/types/ICourse";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firestoreClient/firestoreClient.config";
+import { arrayToChunks } from "./arrayToChunks";
+import { IUserNode } from "src/types/IUserNode";
+import { USER_VERSIONS, getTypedCollections } from "./getTypedCollections";
+import { IUserNodeVersion } from "src/types/IUserNodeVersion";
 
 export const firstWeekMonthDays = (thisDate?: any) => {
   let today = new Date();
@@ -33,22 +40,37 @@ export const detach = async (callback: DetachCallback) => {
   setImmediate(callback);
 };
 
-export const doNeedToDeleteNode = (corrects: number, wrongs: number, locked: boolean = false) => {
-  return corrects < wrongs && !locked;
+export const doNeedToDeleteNode = (
+  corrects: number,
+  wrongs: number,
+  locked: boolean = false,
+  instantDelete: boolean,
+  isInstructor: boolean
+) => {
+  return ((isInstructor && instantDelete) || corrects < wrongs) && !locked;
 };
 
-export const isVersionApproved = ({ corrects, wrongs, nodeData }: any) => {
+export const isVersionApproved = ({
+  corrects,
+  wrongs,
+  nodeData,
+  instantApprove,
+  isInstructor,
+}: {
+  corrects: any;
+  wrongs: any;
+  nodeData: any;
+  instantApprove: boolean;
+  isInstructor: boolean;
+}): boolean => {
   try {
     if (nodeData?.locked) return false; // if node is locked, new versions can't be accepted
     const nodeRating = nodeData.corrects - nodeData.wrongs;
     const versionRating = corrects - wrongs;
-    if (versionRating >= nodeRating / 2) {
-      return nodeData;
-    }
-    return false;
+    return (isInstructor && instantApprove) || versionRating >= nodeRating / 2;
   } catch (err) {
     console.error(err);
-    return err;
+    return false;
   }
 };
 
@@ -156,23 +178,178 @@ export const showDifferences = (oldText: string, proposalText: string): string =
 
 export const childrenParentsDifferences = (current: any[], proposal: any[]): any => {
   // console.log({ current, proposal });
-  const added = proposal.filter((c: any) => !current.find((cp: any) => c.node === cp.node));
-  added.forEach((c: any) => {
-    c.added = true;
-  });
-  const _current = [...current, ...added];
-
-  for (let c of _current) {
-    if (!proposal.find((cp: any) => c.node === cp.node)) {
-      c.removed = true;
-    }
-  }
-
-  return _current;
+  const removed = current.filter((t: any) => !proposal.some(cp => cp.node === t.node));
+  const added = proposal.filter((t: any) => !current.some(cp => cp.node === t.node));
+  return { added, removed };
 };
 
 export const tagsRefDifferences = (current: any, proposal: any): any => {
   const removed = current.filter((t: any) => !proposal.includes(t));
   const added = proposal.filter((t: any) => !current.includes(t));
   return { added, removed };
+};
+export const getSemestersByIds = async (semesterIds: string[]) => {
+  const semestersByIds: {
+    [semesterId: string]: ISemester;
+  } = {};
+
+  const semesterIdsChunks = arrayToChunks(Array.from(new Set(semesterIds)), 30);
+  for (const semesterIds of semesterIdsChunks) {
+    const semesters = await getDocs(query(collection(db, "semesters"), where("__name__", "in", semesterIds)));
+    for (const semester of semesters.docs) {
+      semestersByIds[semester.id] = semester.data() as ISemester;
+    }
+  }
+
+  return semestersByIds;
+};
+
+export const checkInstantDeleteForNode = async (
+  tagIds: string[],
+  uname: string,
+  nodeId: string
+): Promise<{ instantDelete: boolean; isInstructor: boolean; courseExist: boolean }> => {
+  const semestersByIds = await getSemestersByIds(tagIds);
+
+  let isInstructor = false;
+  const instructorDocs = await getDocs(query(collection(db, "instructors"), where("uname", "==", uname)));
+
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
+
+  if (!Object.keys(semestersByIds).length) {
+    return {
+      isInstructor,
+      courseExist: false,
+      instantDelete: true,
+    };
+  }
+  const userNodes = await getDocs(query(collection(db, "userNodes"), where("node", "==", nodeId)));
+
+  const instructorVotes: {
+    [uname: string]: boolean;
+  } = {};
+
+  for (const semesterId in semestersByIds) {
+    const semester = semestersByIds[semesterId];
+    if (!semester.instructors.includes(uname)) {
+      semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+    }
+  }
+
+  instructorVotes[uname] = true;
+
+  for (const userNode of userNodes.docs) {
+    const userNodeData = userNode.data() as IUserNode;
+    if (instructorVotes.hasOwnProperty(userNodeData.user) && userNodeData.wrong) {
+      instructorVotes[userNodeData.user] = true;
+    }
+  }
+
+  for (const semesterId in semestersByIds) {
+    const semester = semestersByIds[semesterId];
+    if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
+      return {
+        isInstructor,
+        courseExist: true,
+        instantDelete: false,
+      };
+    }
+  }
+  return {
+    courseExist: true,
+    instantDelete: true,
+    isInstructor,
+  };
+};
+
+export const checkInstantApprovalForProposalVote = async (nodeId: string, uname: string, versionId: string) => {
+  const nodeDoc = await getDoc(doc(db, "nodes", nodeId));
+  const tagIds = nodeDoc.data()?.tagIds;
+  const semestersByIds = await getSemestersByIds(tagIds);
+
+  let isInstructor = false;
+  const instructorDocs = await getDocs(query(collection(db, "instructors"), where("uname", "==", uname)));
+
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
+
+  if (!Object.keys(semestersByIds).length) {
+    return {
+      isInstructor,
+      courseExist: false,
+      instantApprove: true,
+    };
+  }
+
+  const userVersions = await getDocs(query(collection(db, "userVersions"), where("version", "==", versionId)));
+
+  const instructorVotes: {
+    [uname: string]: boolean;
+  } = {};
+
+  for (const semesterId in semestersByIds) {
+    const semester = semestersByIds[semesterId];
+    semester.instructors.forEach(instructor => (instructorVotes[instructor] = false));
+  }
+
+  instructorVotes[uname] = true;
+
+  for (const userVersion of userVersions.docs) {
+    const userVersionData = userVersion.data() as IUserNodeVersion;
+    if (instructorVotes.hasOwnProperty(userVersionData.user) && userVersionData.correct) {
+      instructorVotes[userVersionData.user] = true;
+    }
+  }
+
+  for (const semesterId in semestersByIds) {
+    const semester = semestersByIds[semesterId];
+    if (!semester.instructors.some(instructor => instructorVotes[instructor])) {
+      return {
+        isInstructor,
+        courseExist: true,
+        instantApprove: false,
+      };
+    }
+  }
+
+  return {
+    isInstructor,
+    courseExist: true,
+    instantApprove: true,
+  };
+};
+
+//we call this function to check if an instructor is creating a new version of a node
+//if yes we approve the version automatically
+export const shouldInstantApprovalForProposal = async ({ tagIds, uname }: any) => {
+  const semestersByIds = await getSemestersByIds(tagIds);
+  let isInstructor = false;
+  const instructorDocs = await getDocs(query(collection(db, "instructors"), where("uname", "==", uname)));
+  if (instructorDocs.docs.length > 0) {
+    isInstructor = true;
+  }
+  if (!Object.keys(semestersByIds).length) {
+    return {
+      isInstructor,
+      courseExist: false,
+      instantApprove: true,
+    };
+  }
+  for (const semester of Object.values(semestersByIds)) {
+    if (!semester.instructors.includes(uname)) {
+      return {
+        isInstructor,
+        courseExist: true,
+        instantApprove: false,
+      };
+    }
+  }
+  return {
+    isInstructor,
+    courseExist: true,
+    instantApprove: true,
+  };
 };

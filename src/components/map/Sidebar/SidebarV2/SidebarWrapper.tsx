@@ -9,8 +9,6 @@ import { Box, SxProps } from "@mui/system";
 import Image, { StaticImageData } from "next/image";
 import { ReactNode, useCallback, useMemo, useRef } from "react";
 
-import OptimizedAvatar2 from "@/components/OptimizedAvatar2";
-
 import GroupAvatar from "../Chat/Common/GroupAvatar";
 
 type SidebarWrapperProps = {
@@ -41,6 +39,9 @@ type SidebarWrapperProps = {
   user?: any;
   openChatInfo?: boolean;
   leading?: boolean;
+  roomType?: string;
+  channelTitle?: string;
+  openDMChannel?: (user2: string) => void;
 };
 /**
  * Only Sidebar content should be scrollable
@@ -69,10 +70,13 @@ export const SidebarWrapper = ({
   // setDisplayTagSearcher,
   openChatInfoPage,
   setNewMemberSection,
-  onlineUsers,
-  user,
+  // onlineUsers,
+  // user,
   openChatInfo,
   leading,
+  roomType,
+  channelTitle,
+  openDMChannel,
 }: SidebarWrapperProps) => {
   const sidebarContentRef = useRef<any>(null);
 
@@ -85,45 +89,6 @@ export const SidebarWrapper = ({
     return <>{SidebarContent}</>;
   }, [contentSignalState]);
 
-  const AvatarUser = ({ members }: any) => {
-    const otherUser = Object.keys(members).filter((u: string) => u !== user?.uname)[0];
-    const userInfo = members[otherUser] || members[user?.uname];
-    return (
-      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-        <Box
-          sx={{
-            width: `30px`,
-            height: `30px`,
-            cursor: "pointer",
-            transition: "all 0.2s 0s ease",
-            background: "linear-gradient(143.7deg, #FDC830 15.15%, #F37335 83.11%);",
-            borderRadius: "50%",
-            "& > .user-image": {
-              borderRadius: "50%",
-              overflow: "hidden",
-              width: "30px",
-              height: "30px",
-            },
-            "@keyframes slidein": {
-              from: {
-                transform: "translateY(0%)",
-              },
-              to: {
-                transform: "translateY(100%)",
-              },
-            },
-          }}
-        >
-          <OptimizedAvatar2 alt={userInfo.fullname} imageUrl={userInfo.imageUrl} size={30} sx={{ border: "none" }} />
-          <Box
-            sx={{ background: onlineUsers.includes(userInfo.uname) ? "#12B76A" : "grey", fontSize: "1px" }}
-            className="UserStatusOnlineIcon"
-          />
-        </Box>
-        <Typography sx={{ pl: 2 }}>{userInfo.fullname}</Typography>
-      </Box>
-    );
-  };
   return (
     <Drawer
       id="sidebarDrawer"
@@ -181,10 +146,24 @@ export const SidebarWrapper = ({
           >
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography> */}
-          {!!selectedChannel && <GroupAvatar membersInfo={selectedChannel?.membersInfo} />}
-          {!!selectedChannel && !selectedChannel.title && <AvatarUser members={selectedChannel.membersInfo} />}
-          {!!selectedChannel && !!selectedChannel.title && !openChatInfo && (
-            <Box sx={{ display: "flex", gap: "5px" }}>
+          {!!selectedChannel && (
+            <GroupAvatar membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
+          )}
+          {!!channelTitle && (
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                maxWidth: "30%",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {channelTitle}
+            </Typography>
+          )}
+          {!!selectedChannel && !!channelTitle && !openChatInfo && (
+            <Box sx={{ display: "flex", gap: "10px" }}>
               <Tooltip title={"More Info"}>
                 <IconButton
                   sx={{
@@ -200,7 +179,7 @@ export const SidebarWrapper = ({
                   <InfoIcon sx={{ color: "inherit" }} />
                 </IconButton>
               </Tooltip>
-              {leading && (
+              {leading && roomType !== "direct" && (
                 <Tooltip title={"Add New Member"}>
                   <IconButton
                     sx={{
@@ -334,20 +313,18 @@ export const SidebarWrapper = ({
             right: "10px",
           }}
         >
-          <Tooltip title="Close the sidebar." placement="left">
-            <IconButton
-              disabled={disabled}
-              onClick={onClose}
-              sx={{
-                ":hover": {
-                  background: theme =>
-                    theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)",
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            disabled={disabled}
+            onClick={onClose}
+            sx={{
+              ":hover": {
+                background: theme => (theme.palette.mode === "light" ? "rgba(240,240,240,0.7)" : "rgba(31,31,31,0.7)"),
+              },
+              zIndex: "5000",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </Box>
       )}
     </Drawer>

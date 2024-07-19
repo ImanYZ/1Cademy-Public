@@ -12,8 +12,9 @@ type IReactOnMessagePayload = {
 const getMessageRef = async (
   messageId: string,
   channelId: string,
-  roomType: string
-): Promise<{ mDoc: any; channelDoc: any }> => {
+  roomType: string,
+  replyId: string
+): Promise<{ mDoc: any; rDoc: any; channelDoc: any }> => {
   let channelRef = db.collection("channelMessages").doc(channelId);
   if (roomType === "direct") {
     channelRef = db.collection("conversationMessages").doc(channelId);
@@ -26,14 +27,20 @@ const getMessageRef = async (
   }
   const channelDoc = await _channelRef.get();
   const mDoc = await channelRef.collection("messages").doc(messageId).get();
-  return { mDoc, channelDoc };
+  const rDoc = await channelRef.collection("messages").doc(messageId).collection("replies").doc(replyId).get();
+  return { mDoc, rDoc, channelDoc };
 };
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const { uname } = req.body?.data?.user?.userData;
     const { reply, curMessage, roomType } = req.body as IReactOnMessagePayload;
 
-    const { channelDoc, mDoc } = await getMessageRef(curMessage.id, curMessage.channelId, roomType);
+    const { channelDoc, mDoc, rDoc } = await getMessageRef(
+      curMessage.id,
+      curMessage.channelId,
+      roomType,
+      reply.id || ""
+    );
     if (!channelDoc.exists && !mDoc.exists) {
       throw new Error("Channel or message doesn't exist!");
     }
@@ -42,10 +49,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       throw new Error("User is not a member of teh channel!");
     }
     const messageData = mDoc.data();
-    const filteredReplies = messageData?.replies?.filter((rply: any) => rply?.id != reply?.id);
-    await mDoc.ref.update({
-      replies: filteredReplies,
+    await rDoc.ref.update({
+      deleted: true,
     });
+
+    await mDoc.ref.update({
+      totalReplies: (messageData?.totalReplies || 0) - 1,
+    });
+
     return res.status(200).send({});
   } catch (error) {
     console.log(error);

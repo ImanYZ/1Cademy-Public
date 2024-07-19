@@ -9,8 +9,7 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 
 import { getArticleSteps } from "@/lib/coauthor";
-
-import { sendMessageToChatGPT } from "../../services/openai";
+import { sendMessageToChatGPT } from "@/lib/utils/utils";
 
 interface Step {
   name: string;

@@ -17,7 +17,7 @@ const NODE_REFERENCE_STEPS_CONFIG: TutorialStepConfig[] = [
         </NodeTypeIconButton>
         <MarkdownRender
           text={
-            "Reference nodes are used as a citation in other nodes. The title of a reference node is the title of the source and its content is the full APA citation of the source. Do no include page numbers, time stamps, or URLs in reference nodes. These should be included when citing a reference node in another node."
+            "Reference nodes are used as a citation in other nodes. The title of a reference node is the title of the source and its content is the full APA citation of the source. Do not include page numbers, time stamps, or URLs in reference nodes. These should be included when citing a reference node in another node."
           }
         />
       </Stack>

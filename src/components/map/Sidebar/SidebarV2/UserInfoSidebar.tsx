@@ -26,6 +26,7 @@ type UserInfoSidebarProps = {
   openLinkedNode: any;
   selectedUser: SelectedUser | null;
   username?: string;
+  onlineUsers: any;
 };
 
 type UserInfoTabs = {
@@ -35,7 +36,15 @@ type UserInfoTabs = {
 
 // const NODE_TYPE_ARRAY: NodeType[] = ["Concept", "Code", "Relation", "Question", "Reference", "News", "Idea"];
 const ELEMENTS_PER_PAGE = 13;
-const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selectedUser }: UserInfoSidebarProps) => {
+const UserInfoSidebar = ({
+  open,
+  onClose,
+  theme,
+  openLinkedNode,
+  username,
+  selectedUser,
+  onlineUsers,
+}: UserInfoSidebarProps) => {
   const [value, setValue] = React.useState(0);
   const [proposals, setProposals] = useState<any[]>([]);
   const [proposalsPerDay, setProposalsPerDay] = useState<any[]>([]);
@@ -82,7 +91,6 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
     );
 
     const versionsData = await getDocs(versionCollectionRef);
-    let versionId;
     const userVersionsRefs: any[] = [];
     versionsData.forEach(versionDoc => {
       const versionData = versionDoc.data();
@@ -107,25 +115,26 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
         userVersionsRefs.push(userVersionCollectionRef);
       }
     });
-    if (userVersionsRefs.length > 0) {
-      await Promise.all(
-        userVersionsRefs.map(async userVersionsRef => {
-          const userVersionsDocs = await getDocs(userVersionsRef);
-          userVersionsDocs.forEach((userVersionsDoc: any) => {
-            const userVersion = userVersionsDoc.data();
-            versionId = userVersion.version;
-            delete userVersion.version;
-            delete userVersion.updatedAt;
-            delete userVersion.createdAt;
-            delete userVersion.user;
-            versions[versionId] = {
-              ...versions[versionId],
-              ...userVersion,
-            };
-          });
-        })
-      );
-    }
+
+    // if (userVersionsRefs.length > 0) {
+    //   await Promise.all(
+    //     userVersionsRefs.map(async userVersionsRef => {
+    //       const userVersionsDocs = await getDocs(userVersionsRef);
+    //       userVersionsDocs.forEach((userVersionsDoc: any) => {
+    //         const userVersion = userVersionsDoc.data();
+    //         versionId = userVersion.version;
+    //         delete userVersion.version;
+    //         delete userVersion.updatedAt;
+    //         delete userVersion.createdAt;
+    //         delete userVersion.user;
+    //         versions[versionId] = {
+    //           ...versions[versionId],
+    //           ...userVersion,
+    //         };
+    //       });
+    //     })
+    //   );
+    // }
 
     const orderredProposals = Object.values(versions).sort(
       (a, b) => Number(new Date(b.createdAt)) - Number(new Date(a.createdAt))
@@ -421,6 +430,7 @@ const UserInfoSidebar = ({ open, onClose, theme, openLinkedNode, username, selec
               uname={selectedUser.username}
               chooseUname={Boolean(selectedUser.chooseUname)}
               points={totalPoints}
+              online={onlineUsers[selectedUser.username]}
             />
             {sUserObj && (
               <>
