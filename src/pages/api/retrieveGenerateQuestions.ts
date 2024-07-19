@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { askGemini } from "./gemini/GeminiAPI";
+import { callOpenAIChat } from "./openAI/helpers";
 import { db } from "@/lib/firestoreServer/admin";
 import { INodeType } from "src/types/INodeType";
 import { INode } from "src/types/INode";
@@ -236,7 +236,7 @@ Your generated question will be reviewed by a supervisory team. For a helpful qu
       files.push(node.nodeImage);
     }
 
-    const response = await askGemini(files, prompt);
+    const response = await callOpenAIChat(files, prompt);
     return response;
   }
 };
