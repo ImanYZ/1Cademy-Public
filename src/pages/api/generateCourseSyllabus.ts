@@ -188,7 +188,7 @@ Your generated syllabus should:
 15. Include an "objectives" field, as an array of strings, for every topic.
 16. Include a "skills" field, as an array of strings, for every topic.
 17. Include a "prerequisiteKnowledge" field, as an array of strings, for every topic.
-18. Include a "prompts" field, as an array of objects, for every topic. Prompts are specific types of questions that encourage social learning.
+18. Include a "prompts" field, as an array of objects, for every topic. Prompts are specific types of questions that encourage social learning. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 
 Prompts can be of two types:
 
