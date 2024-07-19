@@ -1293,7 +1293,7 @@ const CourseComponent = () => {
 
       updatedCourses[selectedCourse]["questions"] = {
         ...updatedCourses[selectedCourse]["questions"],
-        [nodeId]: [...prevQuestions, ...(response?.questions || [])],
+        [nodeId]: [...prevQuestions, response],
       };
 
       setCourses(updatedCourses);
