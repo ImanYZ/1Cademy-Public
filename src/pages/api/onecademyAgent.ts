@@ -1,197 +1,337 @@
+import Cors from "cors";
 import { db } from "@/lib/firestoreServer/admin";
 import { NextApiRequest, NextApiResponse } from "next";
 import fbAuth from "src/middlewares/fbAuth";
 import { sendGPTPrompt, sendGPTPromptJSON } from "src/utils/assistant-helpers";
+import { DEFINITION_OF_1CADEMY } from "./retrieveNodesForCourse";
+import { INode } from "src/types/INode";
+import { askGemini } from "./gemini/GeminiAPI";
+import { callOpenAIChat } from "./openAI/helpers";
+import { delay } from "@/lib/utils/utils";
+import { runMiddleware } from "src/middlewares/cors";
 
-const extractJSON = (text: string, regex = false) => {
-  try {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (end === -1 || start === -1) {
-      return null;
-    }
-    const jsonArrayString = text.slice(start, end + 1);
-    return JSON.parse(jsonArrayString);
-  } catch (error) {
-    return null;
-  }
+let proposalsSchema =
+  "{\n" +
+  '   "improvements" : [An array of improvements to existing nodes based on the above paragraph.]\n' +
+  '   "child_nodes" : [An array of new child nodes based on the above paragraph.]\n' +
+  "}\n" +
+  "Each item in each array should represent an object that proposes an improvement to an existing node OR a new child node.\n" +
+  "If a node about the exact same topic of the above paragraph already exists and you decide to propose an improvement to the existing node, the object (array item) you generate should have the following structure:\n" +
+  "{\n" +
+  '   "old_title": "The current title of the node.",\n' +
+  '   "new_title": "The improved title of the node, if there is any room for improving its title, otherwise it should be the same as the old title.",\n' +
+  '   "content": "The improved content of the node, if there is any room for improving its content, otherwise it would be the same as the old content",\n' +
+  '   "addedParents": [An array of Parent node titles, as strings, that you would like to add as the parents of this node that the node does not currently have.],\n' +
+  '   "addedChildren": [An array of Child node titles, as strings, that you would like to add as the children of this node that the node does not currently have.],\n' +
+  '   "removedParents": [An array of Parent node titles, as strings, that you would like to remove from the array of parents of this node.],\n' +
+  '   "removedChildren": [An array of Child node titles, as strings, that you would like to remove from the array of children of this node.]\n' +
+  '   "reasoning": "Your reasoning for making these improvements to the title, content, parents, and/or children of this node.",\n' +
+  '   "sentences": [An array of sentences from the original paragraph that you used for this proposal.]\n' +
+  "}\n\n" +
+  "If you decide to propose a new child node, the object (array item) you generate should have the following structure:\n" +
+  "{\n" +
+  '   "title": "The title of the child node.",\n' +
+  '   "content": "The content of the child node.",\n' +
+  '   "nodeType": "The type of the child node, either Concept or Relation.",\n' +
+  '   "parents": [An array of Parent node titles, as strings, as the parents (direct prerequisites) of this node. Note that it is required for every child node proposal to have at least one parent.],\n' +
+  '   "children": [An array of Child node titles, as strings, as the children of this node. Usually a new child node does not have any children and this should be an empty array.],\n' +
+  '   "reasoning": "Your reasoning for proposing this new child node with this title, content,  parents, and/or children.",\n' +
+  '   "sentences": [An array of sentences from the original paragraph that you used for this proposal.]\n' +
+  "}\n" +
+  "Note that the proposals should be only based on the last paragraph of the above text. We should not go beyond the knowledge provided by the last paragraph.\n\n";
+
+const searchJSON = async (nodesArray: any[], paragraphs: string[]) => {
+  let prompt =
+    "Task Summary:\n" +
+    "Search through the JSON array of nodes in 1Cademy and find a maximum of ten most related nodes to the provided paragraph.\n" +
+    "For every helpful search result we will pay you $10 and for every irrelevant one, you'll lose $10.\n" +
+    "Return the results in a specified JSON format.\n\n" +
+    DEFINITION_OF_1CADEMY +
+    "{\n" +
+    '"nodes": ' +
+    JSON.stringify(nodesArray, null, 2) +
+    "}\n" +
+    "\nThe following triple-quoted text includes " +
+    getParagraphsLengthString(paragraphs) +
+    " of a passage:\n" +
+    "'''\n" +
+    paragraphs.join("\n\n") +
+    "\n'''\n\n" +
+    "Task Instructions:\n" +
+    "1. **Search**: Identify a maximum of ten nodes in the JSON array that most relate to the " +
+    getParagraphsCountString(paragraphs) +
+    ".\n" +
+    "2. **Ensure Uniqueness**: The titles in the results should be unique.\n" +
+    "3. **Output**: Respond with a JSON object following this schema:\n" +
+    "{\n" +
+    '  "related_nodes": ["Node 1 title", "Node 2 title", "Node 3 title", ...]\n' +
+    "}\n\n" +
+    "Example Output:\n" +
+    "{\n" +
+    '  "related_nodes": ["Economics", "Capitalism"]\n' +
+    "}\n" +
+    "Please take your time to think carefully before responding.";
+
+  // const response = await callOpenAIChat([], prompt);
+  const response = await askGemini([], prompt);
+  console.log("response", response);
+  const searchObj = response.related_nodes;
+  console.log(JSON.stringify(searchObj, null, 2));
+
+  return searchObj;
 };
-const generateProposalsJSON = async (
-  originalPrompt: string,
+const checkAndIncrementError = async (errorCount: number) => {
+  errorCount++;
+  if (errorCount > 4) {
+    console.log("Four or more rejecting evaluations! Exiting loop.");
+    return -1;
+  }
+  console.log("Retrying...");
+  await delay(5000);
+  return errorCount;
+};
+const proposerAgent = async (
+  nodesArray: any[],
   paragraphs: string[],
-  proposalsJSONString: any = {},
+  proposalsJSONString: string = "",
+  proposalsJSON: any = {},
   evalObj: any = {}
-): Promise<any> => {
-  let prompt = originalPrompt + "\n\nThe following triple-quoted text includes three paragraphs of a passage:\n";
-  prompt += "'''\n";
-  prompt += paragraphs.join("\n\n");
-  prompt += "\n'''";
-  prompt += "\n\nWe'd like to focus on the last paragraph.\n\n";
-
-  prompt +=
-    "Carefully respond a JSON object with the following schema to improve/expand the 1Cademy knowledge graph, based on the last paragraph:\n";
-  prompt += "{\n";
-  prompt += '"improvements" : [An array of improvements to existing nodes based on the above paragraph.]';
-  prompt += '"child_nodes" : [An array of new child nodes based on the above paragraph.]';
-  prompt += "}\n";
-  prompt +=
-    "Each item in each array should represent an object that proposes an improvement to an existing node OR a new child node.\n";
-  prompt +=
-    "If a node about the exact same topic of the above paragraph already exists and you decide to propose an improvement to the existing node, the object (array item) you generate should have the following structure:\n";
-  prompt += "{\n";
-  prompt += '"node": "The id of the node you would like to improve.",\n';
-  prompt += '"old_title": "The current title of the node.",\n';
-  prompt +=
-    '"new_title": "The improved title of the node, if there is any room for improving its title, otherwise it should be the same as the old title.",\n';
-  prompt +=
-    '"content": "The improved content of the node, if there is any room for improving its content, otherwise it would be the same as the old content",\n';
-  prompt +=
-    '"addedParents": [An array of objects each with the structure {"node": "Parent node id", "title": "Parent node title"} that you would like to add as the parents of this node that the node does not currently have.],\n';
-  prompt +=
-    '"addedChildren": [An array of objects each with the structure {"node": "Child node id", "title": "Child node title"} that you would like to add as the children of this node that the node does not currently have.],\n';
-  prompt +=
-    '"removedParents": [An array of objects each with the structure {"node": "Parent node id", "title": "Parent node title"} that you would like to remove from the array of parents of this node.],\n';
-  prompt +=
-    '"removedChildren": [An array of objects each with the structure {"node": "Child node id", "title": "Child node title"} that you would like to remove from the array of children of this node.]\n';
-  prompt +=
-    '"reasoning": "Your reasoning for making these improvements to the title, content, parents, and/or children of this node.",\n';
-  prompt += '"sentences": [An array of sentences from the original paragraph that you used for this proposal.]\n';
-  prompt += "}\n\n";
-  prompt +=
-    "If you decide to propose a new child node, the object (array item) you generate should have the following structure:\n";
-  prompt += "{\n";
-  prompt += '"title": "The title of the child node.",\n';
-  prompt += '"content": "The content of the child node.",\n';
-  prompt += '"nodeType": "The type of the child node, either Concept or Relation.",\n';
-  prompt +=
-    '"parents": [An array of objects each with the structure {"node": "Parent node id", "title": "Parent node title"} as the parents (direct prerequisites) of this node.],\n';
-  prompt += '"reasoning": "Your reasoning for proposing this new child node with this title, content, and parents.",\n';
-  prompt += '"sentences": [An array of sentences from the original paragraph that you used for this proposal.]\n';
-  prompt +=
-    "}\n Note that your proposals should be only based on the last paragraph of the above text. Do not go beyond the knowledge provided by the paragraph.";
-  if (evalObj?.evaluation === "Reject" && evalObj?.reasoning) {
-    prompt += "\nYou previously generated the following JSON object:\n";
-    prompt += proposalsJSONString;
+) => {
+  let prompt =
+    DEFINITION_OF_1CADEMY +
+    "{\n" +
+    '"nodes": ' +
+    JSON.stringify(nodesArray, null, 2) +
+    "}\n" +
+    "\n\nThe following triple-quoted text includes " +
+    getParagraphsLengthString(paragraphs) +
+    " of a passage:\n" +
+    "'''\n" +
+    paragraphs.join("\n\n") +
+    "\n'''" +
+    //   "\n\nWe'd like to focus on the " +
+    //   getParagraphsCountString(paragraphs) +
+    //   "." +
+    "\n\nCarefully respond a JSON object with the following schema to improve/expand the 1Cademy knowledge graph, based on the " +
+    getParagraphsCountString(paragraphs) +
+    ":\n" +
+    proposalsSchema;
+  if (
+    evalObj &&
+    ["Reject", "reject"].includes(evalObj.evaluation) &&
+    evalObj?.reasoning &&
+    (proposalsJSON?.improvements?.length > 0 || proposalsJSON?.child_nodes?.length > 0)
+  ) {
     prompt +=
-      "\n\nPlease generate a new JSON object by improving upon your previous JSON object based on the following feedback you received:\n";
-    prompt += evalObj.reasoning;
+      "\nYou previously generated the following proposal:\n" +
+      proposalsJSONString +
+      "\n\nPlease generate a new JSON object by improving upon your previous proposal based on the following feedback:\n" +
+      evalObj.reasoning;
+  }
+  prompt +=
+    "\n\nPlease take your time and carefully respond a well-structured JSON object.\n" +
+    "For every helpful proposal, we will pay you $10 and for every unhelpful one, you'll lose $10.";
+
+  proposalsJSON = await callOpenAIChat([], prompt);
+  // proposalsJSON = await askGemini([], prompt);
+  console.log("proposalsJSON:", proposalsJSON);
+  proposalsJSONString = JSON.stringify(proposalsJSON);
+  return { proposalsJSONString, proposalsJSON };
+};
+
+const generateProposals = async (tags: string[], paragraphs: string[]) => {
+  const nodeDocs = await db
+    .collection("nodes")
+    .where("nodeType", "in", ["Concept", "Relation"])
+    .where("tags", "array-contains-any", tags)
+    .get();
+  const nodesArray = [];
+  for (let nodeDoc of nodeDocs.docs) {
+    const nodeData = nodeDoc.data() as INode;
+    if (!nodeData.deleted && !nodeData.title.includes("References")) {
+      nodesArray.push({
+        title: nodeData.title,
+        content: nodeData.content,
+        nodeType: nodeData.nodeType,
+        children: nodeData.children.map(child => child.title),
+        parents: nodeData.parents.map(parent => parent.title),
+      });
+    }
   }
 
-  const response: string = await sendGPTPromptJSON([
-    {
-      content: prompt,
-      role: "user",
-    },
-  ]);
-  try {
-    const extractedJSON = extractJSON(response);
-    if (!extractedJSON) throw new Error(`JSON not found`);
-    return extractedJSON;
-  } catch (err) {
-    return await generateProposalsJSON(originalPrompt, paragraphs, proposalsJSONString, evalObj);
+  console.log(nodesArray.length + " Nodes retrieved.");
+
+  console.log("paragraphs", paragraphs);
+  let searchResults = await searchJSON(nodesArray, paragraphs);
+  // let rankedResults = await rankSearchJSON(filteredNodes, paragraphs);
+  // console.log("rankedResults:", rankedResults);
+  const nodes = nodesArray.filter(node => searchResults.includes(node.title));
+  let proposalsJSON: any = {};
+  if (nodes.length === 0) {
+    console.log("No related nodes found!");
+  } else {
+    let evalObj: any = {};
+    let proposalsJSONString: string = "";
+    let errorCount = 0;
+    while (!evalObj.hasOwnProperty("evaluation") || !["Accept", "accept"].includes(evalObj.evaluation)) {
+      try {
+        if (!evalObj.hasOwnProperty("evaluation")) {
+          ({ proposalsJSONString, proposalsJSON } = await proposerAgent(nodes, paragraphs));
+        } else if (["Reject", "reject"].includes(evalObj.evaluation) && evalObj?.reasoning) {
+          if (proposalsJSON?.improvements?.length > 0 || proposalsJSON?.child_nodes?.length > 0) {
+            ({ proposalsJSONString, proposalsJSON } = await proposerAgent(
+              nodes,
+              paragraphs,
+              proposalsJSONString,
+              proposalsJSON,
+              evalObj
+            ));
+          } else {
+            console.log("-----------------------------");
+            console.log("No proposals to improve upon!");
+            console.log("-----------------------------");
+            break;
+          }
+        }
+        evalObj = await reviewerAgent(nodes, paragraphs, proposalsJSONString);
+        if (["Accept", "accept"].includes(evalObj.evaluation)) {
+          break;
+        } else {
+          errorCount = await checkAndIncrementError(errorCount);
+          if (errorCount === -1) {
+            break;
+          }
+        }
+      } catch (error) {
+        console.error("Error in generateProposals:", error);
+        errorCount = await checkAndIncrementError(errorCount);
+        if (errorCount === -1) {
+          break;
+        }
+      }
+    }
+  }
+  return proposalsJSON;
+};
+const getParagraphsLengthString = (paragraphs: string[]): string => {
+  const length = paragraphs.length;
+  if (length === 0) {
+    throw new Error("Paragraphs cannot be empty!");
+  } else if (length >= 3) {
+    return `${length} paragraphs`;
+  } else if (length === 2) {
+    return "two paragraphs";
+  } else {
+    return "a paragraph";
   }
 };
 
+const getOrdinalString = (n: number): string => {
+  const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+  return ordinals[n - 1] || `${n}th`;
+};
+const getParagraphsCountString = (paragraphs: string[]): string => {
+  const length = paragraphs.length;
+  if (length === 0) {
+    throw new Error("Paragraphs cannot be empty!");
+  } else {
+    return `${getOrdinalString(length)} paragraph`;
+  }
+};
+
+const reviewerAgent = async (nodesArray: any[], paragraphs: string[], proposalsJSONString: string) => {
+  let prompt =
+    DEFINITION_OF_1CADEMY +
+    "{\n" +
+    '"nodes": ' +
+    JSON.stringify(nodesArray, null, 2) +
+    "}\n" +
+    "\n\nThe following triple-quoted text includes " +
+    getParagraphsLengthString(paragraphs) +
+    " of a passage:\n" +
+    "'''\n" +
+    paragraphs.join("\n\n") +
+    "\n'''" +
+    //   "\n\nWe'd like to focus on the " +
+    //   getParagraphsCountString(paragraphs) +
+    //   "." +
+    "\n\nWe'd like to get high-quality proposals with the following JSON schema to improve/expand the 1Cademy knowledge graph, based on the " +
+    getParagraphsCountString(paragraphs) +
+    ":\n" +
+    proposalsSchema +
+    "One of our collaborators has submitted the following proposal:\n" +
+    proposalsJSONString +
+    "\n" +
+    "Carefully evaluate this proposal and respond only a JSON object with the following structure:\n" +
+    "{\n" +
+    '   "evaluation": The value should be "Accept" if you evaluated our collaborator' +
+    "'s proposal as helpful, or " +
+    '   "Reject" if you evaluated their proposal as not helpful to the 1Cademy knowledge graph,\n' +
+    '   "reasoning": "Your reasoning for why you decided to accept or reject the collaborator' +
+    "'s proposals" +
+    '"\n' +
+    "}\n" +
+    "Please take your time and carefully respond a well-structured JSON object.\n" +
+    "Your generated evaluations will be reviewed by a supervisory team. For every helpful evaluation, we will pay you $10 and for every unhelpful one, you'll lose $10.\n";
+
+  const reviewResponse = await callOpenAIChat([], prompt);
+  // const reviewResponse = await askGemini([], prompt);
+  console.log(JSON.stringify(reviewResponse, null, 2));
+  return reviewResponse;
+};
+const cors = Cors({
+  origin: "*", // Change this to your specific origin or origins
+  methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+  optionsSuccessStatus: 200, // Return status code 200 for preflight requests
+});
+
+const books = [
+  {
+    id: "OpenStax Psychology (2nd ed.) Textbook",
+    tags: ["Psychology", "Psychology @ OpenStax"],
+    references: ["OpenStax Psychology (2nd ed.) Textbook"],
+  },
+  {
+    id: "OpenStax Microbiology Textbook",
+    tags: ["Microbiology @ OpenStax", "Microbiology"],
+    references: ["OpenStax Microbiology Textbook"],
+  },
+  {
+    id: "CORE Econ - The Economy",
+    tags: ["Economy", "Economics"],
+    references: ["CORE Econ - The Economy"],
+  },
+];
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
-    const { paragraphs } = req.body;
-    console.log("paragraphs", paragraphs);
-    const nodeDocs = await db
-      .collection("nodes")
-      .where("nodeType", "in", ["Concept", "Relation"])
-      .where("tags", "array-contains-any", ["Economy", "Economics"])
-      .where("deleted", "==", false)
-      .get();
-    if (nodeDocs.docs.length <= 0) {
-      throw new Error("No nodes in this tag");
-    }
-    const nodesArray = [];
-    const nodesHashMap: { [key: string]: any } = {};
-    for (let nodeDoc of nodeDocs.docs) {
-      const nodeData = nodeDoc.data();
-      if (!nodeData.tags.includes("Cryptoeconomics") && !nodeData.title.includes("References")) {
-        const nodeDetails = {
-          id: nodeDoc.id,
-          title: nodeData.title,
-          content: nodeData.content,
-          nodeType: nodeData.nodeType,
-          children: nodeData.children.map((child: { node: string; title: string }) => ({
-            node: child.node,
-            title: child.title,
-          })),
-          parents: nodeData.parents.map((parent: { node: string; title: string }) => ({
-            node: parent.node,
-            title: parent.title,
-          })),
-        };
-        nodesArray.push(nodeDetails);
-        nodesHashMap[nodeDoc.id] = nodeDetails;
-      }
-    }
-    console.log("nodesArray", nodesArray);
+    await runMiddleware(req, res, cors);
 
-    let originalPrompt = "'''\n";
-    originalPrompt += "1Cademy is a knowledge graph with the following characteristics:\n";
-    originalPrompt += "- Each node represents a unique piece of knowledge.\n";
-    originalPrompt += "- Each node is standalone; that is, it is meaningful without referring to other nodes.\n";
-    originalPrompt += "- Each node is indivisible; dividing it would result in loss of meaning.\n";
-    originalPrompt += "- The source of each link is termed a 'parent' and its destination a 'child.'\n";
-    originalPrompt +=
-      "- Each link between two nodes represents a direct prerequisite relationship, meaning it is impossible to learn a child before learning its parent.\n";
-    originalPrompt += "- If node A is a child of node B, then node B is a parent (prerequisite) of node A.\n";
-    originalPrompt +=
-      "- The prerequisite links are unidirectional, implying that if node A is a parent of node B, node B cannot be a parent of node A.\n";
-    originalPrompt +=
-      "- The graph is acyclic; for instance, if node A is a parent of node B and node B is a parent of node C, node C cannot be a parent of node A.\n";
-    originalPrompt += "- Each node can have one or multiple parents; and zero, one, or multiple children.\n";
-    originalPrompt += "- Each node is of one of these two types:\n";
-    originalPrompt += "   - Concept: defines a granular unit of knowledge.\n";
-    originalPrompt +=
-      "   - Relation: explains the relationships between two or more linked Concept nodes without defining any of them.\n";
-    originalPrompt +=
-      "- The title and content of each node are written in Markdown and mathematical formulas in them are written in MathJax and enclosed in dollar signs.\n";
-    originalPrompt += "'''\n\n";
-
-    originalPrompt +=
-      "We have a JSON array of all the nodes in 1Cademy. In this JSON array, each item represents a node, including its properties:\n";
-    originalPrompt += "- title: the node title\n";
-    originalPrompt += "- content: the node content\n";
-    // prompt +=
-    //   "- nodeImage: the URL of an image added to the node; if the node has no image, it would get an empty string,\n";
-    originalPrompt += "- nodeType: the type of the node, which can be either Concept or Relation.\n";
-    originalPrompt +=
-      '- children: [an array of objects each with the structure {"node": "Child node id", "title": "Child node title"} for each child node under this node],\n';
-    originalPrompt +=
-      '- parents: [an array of objects each with the structure {"node": "Parent node id", "title": "Parent node title"} for each parent node that this node is under],\n';
-    // prompt +=
-    //   "- referenceIds: an array of Reference node ids that this node is citing\n";
-    // prompt +=
-    //   "- referenceLabels: an array of labels (such as page numbers, sections of books or papers, webpage URLs of websites, and time-frames of voice or video files) for Reference nodes that this node is citing corresponding to referenceIds\n";
-    // prompt +=
-    //   "- references: an array of Reference node titles that this node is citing corresponding to referenceIds\n";
-    // prompt += "- tagIds: an array of node ids tagged on this node\n";
-    // prompt +=
-    //   "- tags: an array of node titles tagged on this node corresponding to tagIds\n";
-    originalPrompt += "The JSON array is as follows:\n";
-    originalPrompt += JSON.stringify(nodesArray, null, 2);
-    const response = await generateProposalsJSON(
-      originalPrompt,
-      paragraphs.map((p: { text: string; ids: string[] }) => p.text)
-    );
-    //add the type of the nodes to the children (added ones only) and to the parents (added ones only)
-    response.child_nodes = response.child_nodes.filter((newChild: any) => newChild.parents.length > 0);
-    for (let improvement of response.improvements) {
-      for (let child of improvement.addedChildren || []) {
-        child.type = nodesHashMap[child.node].nodeType;
-      }
-      for (let child of improvement.addedParents || []) {
-        child.type = nodesHashMap[child.node].nodeType;
-      }
-    }
-    console.log(paragraphs.map((p: { text: string; ids: string[] }) => p.text));
-
-    console.log(JSON.stringify(response));
+    const payload = req.body;
+    console.log("==> payload ==>", payload);
+    const paragraphs = payload.paragraphs;
+    const tags = ["Psychology @ OpenStax"];
+    const parags = paragraphs.map((p: { content: string }) => p.content);
+    const response = await generateProposals(tags, parags);
+    console.log("response", response);
+    // const chaptersBook = await db
+    // .collection("chaptersBook")
+    // .where("url", "==", "01-prosperity-inequality-01-ibn-battuta.html")
+    // // .where("chapter", "!=", null)
+    // // .orderBy("chapter")
+    // .get();
+    // for (let chapterBook of chaptersBook.docs) {
+    // const chapterData = chapterBook.data();
+    // if (chapterData.hasOwnProperty("paragraphs")) {
+    // const parags = chapterData.paragraphs.map((p: { text: string }) => p.text);
+    // console.log("response", response);
+    // return res.status(200).json(response);
+    // }
+    // }
+    // const { paragraphs } = req.body;
     return res.status(200).json(response);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 }
-export default fbAuth(handler);
+export default handler;
