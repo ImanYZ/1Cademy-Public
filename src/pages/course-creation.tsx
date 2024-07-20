@@ -1304,16 +1304,19 @@ const CourseComponent = () => {
           theme.palette.mode === "dark"
             ? theme.palette.common.darkGrayBackground
             : theme.palette.common.lightGrayBackground,
+        "&::-webkit-scrollbar": {
+          width: "12px",
+        },
         "&::-webkit-scrollbar-track": {
-          background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+          background: theme => (theme.palette.mode === "dark" ? "#28282a" : "white"),
         },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "#888",
           borderRadius: "10px",
-          border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+          border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid white"),
         },
         "&::-webkit-scrollbar-thumb:hover": {
-          background: "#555",
+          background: "darkred",
         },
       }}
     >
@@ -2193,15 +2196,15 @@ const CourseComponent = () => {
               width: "12px",
             },
             "&::-webkit-scrollbar-track": {
-              background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+              background: theme => (theme.palette.mode === "dark" ? "#28282a" : "white"),
             },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "#888",
               borderRadius: "10px",
-              border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+              border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid white"),
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              background: "#555",
+              background: "darkred",
             },
           }}
           elevation={8}
