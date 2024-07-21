@@ -197,7 +197,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       versionId: versionRef.id,
       versionData,
       newVersion: true,
-      childType: "",
+      childType: undefined,
       voter: userData.uname,
       correct: 1,
       wrong: 0,
@@ -211,7 +211,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       writeCounts,
       tWriteOperations: [],
       t: null,
-      versionNodeId: "",
       notebookId: "",
     });
 
