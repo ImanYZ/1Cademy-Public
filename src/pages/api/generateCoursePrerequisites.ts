@@ -45,11 +45,11 @@ const generateCoursePrerequisites = async (courseTitle: string, targetLearners: 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseTitle, targetLearners, classSessions } = req.body;
-    const courseObjectives = await generateCoursePrerequisites(courseTitle, targetLearners, classSessions).catch(
+    const coursePrerequisites = await generateCoursePrerequisites(courseTitle, targetLearners, classSessions).catch(
       console.error
     );
-    console.log("description ==>", courseObjectives);
-    return res.status(200).json(courseObjectives);
+    console.log("Prerequisites ==>", coursePrerequisites);
+    return res.status(200).json(coursePrerequisites);
   } catch (error) {
     return res.status(500).json({});
   }

@@ -10,8 +10,8 @@ const jsonNodeStructure =
   '  "title": "The node title",\n' +
   '  "content": "The node content",\n' +
   '  "nodeType": "The type of the node, which can be either Concept or Relation.",\n' +
-  '  "children": [An array of objects each with the structure {"title": "Child node title"} for each child node under this node.],\n' +
-  '  "parents": [An array of objects each with the structure {"title": "Parent node title"} for each parent node that this node is under.]\n' +
+  '  "children": [An array of Child node titles, as strings, for each child node under this node.],\n' +
+  '  "parents": [An array of Parent node titles, as strings, for each parent node that this node is under.]\n' +
   // '  "nodeImage": "The URL of an image added to the node; if the node has no image, it would get an empty string",\n' +
   // '  "referenceIds": [An array of Reference node ids that this node is citing]\n' +
   // '  "referenceLabels": [An array of labels (such as page numbers, sections of books or papers, webpage URLs of websites, and time-frames of voice or video files) for Reference nodes that this node is citing corresponding to referenceIds]\n' +
@@ -20,7 +20,7 @@ const jsonNodeStructure =
   // '  "tags": [An array of node titles tagged on this node corresponding to tagIds]\n' +
   "}\n\n";
 
-export const DEFINITION_OF_1CADEMY =
+export let DEFINITION_OF_1CADEMY =
   "1Cademy Definition:\n" +
   "1Cademy is a knowledge graph with the following characteristics:\n" +
   "- Each node represents a unique piece of knowledge.\n" +
@@ -249,6 +249,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       syllabus
     );
     console.log("response", nodes);
+    await db.runTransaction(async (t: any) => {
+      const courseDoc = await t.get(db.collection("coursesAI").doc(courseId));
+      const courseData = courseDoc.data();
+      courseData.nodes = nodes;
+      t.update(courseDoc.ref, courseData);
+    });
+
     await courseDoc.ref.update({
       nodes,
     });

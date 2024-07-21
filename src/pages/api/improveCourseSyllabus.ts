@@ -68,7 +68,7 @@ Each action should be accompanied by:
     - \`objectives\`: An array of strings detailing the objectives.
     - \`skills\`: An array of strings detailing the skills.
     - \`prerequisiteKnowledge\`: An array of strings detailing the prerequisite knowledge.
-    - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions.
+    - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 - For \`modify\` actions:
   - \`category\`: Specifies the category where the topic is located (if applicable).
   - \`old_topic\` or \`old_category\`: Specifies the topic or category to modify.
@@ -77,7 +77,7 @@ Each action should be accompanied by:
     - \`objectives\`: An array of strings detailing the objectives.
     - \`skills\`: An array of strings detailing the skills.
     - \`prerequisiteKnowledge\`: An array of strings detailing the prerequisite knowledge.
-    - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions.
+    - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 - For \`divide\` actions:
   - \`category\`: Specifies the category where the topic is located (if applicable).
   - \`old_topic\` or \`old_category\`: Specifies the topic or category to divide.
@@ -86,7 +86,7 @@ Each action should be accompanied by:
     - \`objectives\`: An array of strings detailing the objectives.
     - \`skills\`: An array of strings detailing the skills.
     - \`prerequisiteKnowledge\`: An array of strings detailing the prerequisite knowledge.
-    - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions.
+    - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 - For \`move\` actions:
   - \`current_category\`: Specifies the current category of the topic (if applicable).
   - \`topic\` or \`category\`: Specifies the topic or category to move.
