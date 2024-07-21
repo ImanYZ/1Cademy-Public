@@ -1496,7 +1496,7 @@ export const createUpdateUserVersion = async ({
   batch: WriteBatch;
   userVersionRef: DocumentReference;
   userVersionData: IUserNodeVersion;
-  nodeType: INodeType;
+  nodeType: INodeType | undefined;
   writeCounts: number;
   t: Transaction | null;
   tWriteOperations: TWriteOperation[];
@@ -1738,8 +1738,6 @@ export const signalNodeToTypesense = async ({
 
 type ITransferUserVersionsToNewNode = {
   versionId: string;
-  versionType: INodeType;
-  childType: INodeType;
   newVersionId: string;
   skipUnames: string[];
   batch: WriteBatch;
@@ -1751,8 +1749,6 @@ type ITransferUserVersionsToNewNode = {
 // helper to transfer user versions (votes) from old node to newely created node on approval
 export const transferUserVersionsToNewNode = async ({
   versionId,
-  versionType,
-  childType,
   newVersionId,
   skipUnames,
   batch,

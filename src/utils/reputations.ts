@@ -738,15 +738,6 @@ export const updateReputation = async ({
   t: Transaction | null;
   tWriteOperations: TransactionWrite[];
 }): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
-  console.log("==>keep an eye on this", {
-    nodeType,
-    correctVal,
-    wrongVal,
-    instVal,
-    ltermVal,
-    ltermDayVal,
-    voter,
-  });
   let createdAt = admin.firestore.Timestamp.fromDate(new Date());
   let updatedAt = admin.firestore.Timestamp.fromDate(new Date());
   const { firstWeekDay, firstMonthDay } = firstWeekMonthDays();

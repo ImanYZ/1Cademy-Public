@@ -23,7 +23,6 @@ import { convertToTGet } from "./convertToTGet";
 import { arrayToChunks } from "./arrayToChunks";
 
 export const versionCreateUpdate = async ({
-  versionNodeId,
   notebookId, // optional string
   batch,
   nodeId,
@@ -53,7 +52,6 @@ export const versionCreateUpdate = async ({
   t,
   tWriteOperations,
 }: {
-  versionNodeId: string;
   notebookId: string; // optional string
   batch: WriteBatch | null;
   nodeId: string;
@@ -66,7 +64,7 @@ export const versionCreateUpdate = async ({
   versionId: string;
   versionData: INodeVersion;
   newVersion: boolean;
-  childType: INodeType | "";
+  childType: INodeType | undefined;
   voter: string;
   correct: number;
   wrong: number;
@@ -111,7 +109,7 @@ export const versionCreateUpdate = async ({
   }: INodeVersion = versionData;
 
   let newBatch = batch;
-  console.log(t, "transactionBitch");
+
   // If the version is deleted, the user should have not been able to vote on it.
   if (!deleted) {
     await detach(async () => {
@@ -142,7 +140,6 @@ export const versionCreateUpdate = async ({
         t: null,
         tWriteOperations,
       });
-      console.log("comReputationUpdates", comReputationUpdates);
       for (const tagId in comReputationUpdates) {
         for (const reputationType of reputationTypes) {
           if (!comReputationUpdates[tagId][reputationType]) continue;
@@ -158,7 +155,6 @@ export const versionCreateUpdate = async ({
               comReputationUpdates[tagId][reputationType].docData
             );
           }
-          console.log(batch, "batch ==>");
           [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
         }
       }
@@ -296,10 +292,9 @@ export const versionCreateUpdate = async ({
             subType,
             changedAt: currentTimestamp,
             versions: nodeData.versions + (newVersion ? 1 : 0),
+            ...(nodeType === "Question" && { choices: versionData.choices }),
           };
-          if (nodeType === "Question") {
-            nodeUpdates.choices = versionData.choices;
-          }
+
           [newBatch, writeCounts] = await generateTagsData({
             batch: newBatch,
             nodeId,
@@ -449,8 +444,8 @@ export const versionCreateUpdate = async ({
           //  just accepted a proposal for a new child node (not an improvement)
         } else {
           let childNodeRef = db.collection("nodes").doc();
-          if (versionNodeId && !(await db.collection("nodes").doc(versionNodeId).get()).exists) {
-            childNodeRef = db.collection("nodes").doc(versionNodeId);
+          if (versionId && !(await db.collection("nodes").doc(versionId).get()).exists) {
+            childNodeRef = db.collection("nodes").doc(versionId);
           }
           let childNode: Partial<INode> = {
             children,
@@ -507,106 +502,6 @@ export const versionCreateUpdate = async ({
 
           // signal search about improvement or new node
           await indexNodeChange(newUpdates.nodeId, title, "NEW");
-
-          // Because it's a child version, the old version that was proposed on the parent node should be
-          // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.
-          const newUserVersionRef = userVersionsColl.doc();
-
-          await detach(async () => {
-            let newBatch = db.batch();
-            let writeCounts: number = 0;
-            const tWriteOperations: TransactionWrite[] = [];
-            console.log("db.runTransaction ===>");
-            const isTestEnvironment = process.env.NODE_ENV === "test";
-
-            await db.runTransaction(async currentT => {
-              const ct: Transaction | null = isTestEnvironment ? t : currentT;
-              let { userVersionData } = await getUserVersion({ versionId, uname: voter, t: ct });
-              // If the userVersion document (of the parent node) does not exist in the database,
-              // i.e., if the user has never had interactions with it, like votes, on the version.
-              if (!userVersionData) {
-                userVersionData = {
-                  award: false,
-                  correct: correct === 1,
-                  createdAt: currentTimestamp,
-                  updatedAt: currentTimestamp,
-                  version: versionRef.id,
-                  user: voter,
-                  wrong: wrong === 1,
-                };
-              } else {
-                //  do not need to set the nodeType, unique collection per each node, unlike userVersionsLog
-                userVersionData = {
-                  award: userVersionData.award,
-                  correct: correct === 1 ? true : correct === 0 ? userVersionData.correct : false,
-                  createdAt: userVersionData.createdAt,
-                  updatedAt: currentTimestamp,
-                  version: versionRef.id,
-                  user: voter,
-                  wrong: wrong === 1 ? true : wrong === 0 ? userVersionData.wrong : false,
-                };
-              }
-              [newBatch, writeCounts] = await createUpdateUserVersion({
-                batch: newBatch,
-                userVersionRef: newUserVersionRef,
-                userVersionData,
-                nodeType: childType,
-                writeCounts,
-                t: ct,
-                tWriteOperations,
-              });
-              [newBatch, writeCounts] = await transferUserVersionsToNewNode({
-                batch: newBatch,
-                writeCounts,
-                childType,
-                newVersionId: versionRef.id,
-                versionId,
-                skipUnames: [voter],
-                t: ct,
-                tWriteOperations,
-                versionType: nodeType,
-              });
-              console.log("tWriteOperations", tWriteOperations);
-              if (ct) {
-                const _tWriteOperations = tWriteOperations.splice(0, MAX_TRANSACTION_WRITES);
-                for (const operation of _tWriteOperations) {
-                  const { objRef, data, operationType } = operation;
-                  switch (operationType) {
-                    case "update":
-                      ct.update(objRef, data);
-                      break;
-                    case "set":
-                      ct.set(objRef, data);
-                      break;
-                    case "delete":
-                      ct.delete(objRef);
-                      break;
-                  }
-                }
-              }
-            });
-
-            const chunkedArray = arrayToChunks(tWriteOperations);
-            for (const chunk of chunkedArray) {
-              await db.runTransaction(async t => {
-                for (const operation of chunk) {
-                  const { objRef, data, operationType } = operation;
-                  switch (operationType) {
-                    case "update":
-                      t.update(objRef, data);
-                      break;
-                    case "set":
-                      t.set(objRef, data);
-                      break;
-                    case "delete":
-                      t.delete(objRef);
-                      break;
-                  }
-                }
-              });
-            }
-            await commitBatch(newBatch);
-          });
 
           // userNode for voter
           const newUserNodeObj: any = {
