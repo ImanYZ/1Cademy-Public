@@ -16,9 +16,14 @@ const storage = new Storage({
   },
 });
 
-const generateImagePrompt = (title: string, content: string) => {
-  const prompt = `Generate an image for:\n"` + title + `":\n` + "'''\n" + content + "\n" + "'''\n" + +"v";
-  ("A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.");
+const generateImagePrompt = (title: string, content: string,
+  imageStyle: string = "") => {
+  const prompt = `Generate an image to help learning the following concept:
+**title:** '''${title}'''
+**content:** '''${content}'''
+The image should be minimalistic and should not include any text.
+${imageStyle ? `The image should be in "${imageStyle}" style.` : ""}
+A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.`;
   return prompt;
 };
 

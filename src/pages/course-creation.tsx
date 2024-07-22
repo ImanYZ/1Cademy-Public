@@ -12,6 +12,9 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Card,
+  CardHeader,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -47,18 +50,21 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import ChipInput from "@/components/ChipInput";
+import Essay from "@/components/courseCreation/questions/Essay";
 import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
+import ShortAnswer from "@/components/courseCreation/questions/ShortAnswer";
+import TrueFalse from "@/components/courseCreation/questions/TrueFalse";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
 import withAuthUser from "@/components/hoc/withAuthUser";
 import ImageSlider from "@/components/ImageSlider";
 import LinkedNodes from "@/components/LinkedNodes";
+import { CustomButton } from "@/components/map/Buttons/Buttons";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import { NodeHead } from "@/components/NodeHead";
 import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
-import { ReferencesList } from "@/components/ReferencesList";
-import { TagsList } from "@/components/TagsList";
+import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
@@ -127,6 +133,13 @@ const books = [
     references: ["CORE Econ - The Economy"],
   },
 ];
+
+const questionComponents: any = {
+  "Multiple Choice": MultipleChoices,
+  "True/False": TrueFalse,
+  "Short Answer": ShortAnswer,
+  Essay: Essay,
+};
 const CourseComponent = () => {
   const db = getFirestore();
   const [{ user }] = useAuth();
@@ -183,6 +196,7 @@ const CourseComponent = () => {
   const [loadingNodes, setLoadingNodes] = useState(false);
   const [nodePublicView, setNodePublicView] = useState<any>(null);
   const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
+  const [questionsLoader, setQuestionsLoader] = useState<any>(false);
 
   useEffect(() => {
     if (!user?.uname) return;
@@ -1260,8 +1274,45 @@ const CourseComponent = () => {
         setNodePublicViewLoader(false);
       }
     },
-    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode]
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
   );
+
+  const retrieveNodeQuestions = useCallback(
+    async (nodeId: string) => {
+      setQuestionsLoader(true);
+      const updatedCourses = [...courses];
+      const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
+      const response: any = await Post("/retrieveGenerateQuestions", {
+        courseTitle: courses[selectedCourse].title,
+        courseDescription: courses[selectedCourse].description,
+        targetLearners: courses[selectedCourse].learners,
+        nodeId,
+        previousQuestions: prevQuestions,
+      });
+
+      updatedCourses[selectedCourse]["questions"] = {
+        ...updatedCourses[selectedCourse]["questions"],
+        [nodeId]: [...prevQuestions, response],
+      };
+
+      setCourses(updatedCourses);
+      setQuestionsLoader(false);
+    },
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+  );
+
+  const handleQuestion = useCallback(
+    (question: any, idx: number, nodeId: number) => {
+      const updatedCourses = [...courses];
+      if (updatedCourses[selectedCourse]?.questions?.[nodeId]) {
+        updatedCourses[selectedCourse].questions[nodeId][idx] = question;
+        setCourses(updatedCourses);
+        updateCourses(updatedCourses[selectedCourse]);
+      }
+    },
+    [courses, selectedCourse, setCourses]
+  );
+
   if (courses.length <= 0) {
     return (
       <Box
@@ -1841,22 +1892,10 @@ const CourseComponent = () => {
                                     >
                                       {tc?.title || ""}
                                     </Typography>
-                                    <LoadingButton
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        retrieveNodesForTopic(tc);
-                                      }}
-                                      sx={{
-                                        display: "flex-end",
-                                      }}
-                                      loading={loadingDescription}
-                                    >
-                                      <AutoFixHighIcon />
-                                    </LoadingButton>
                                   </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                  {loadingNodes && <LinearProgress />}
+                                  {/* {loadingNodes && <LinearProgress />} */}
                                   <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
                                     {((courses[selectedCourse].nodes || {})[tc.title] || []).map((n: any) => (
                                       <Box key={n.node} sx={{ mb: "10px" }}>
@@ -1874,6 +1913,16 @@ const CourseComponent = () => {
                                               theme.palette.mode === "dark" ? "#1f1f1f" : "white",
                                             border: expandedNode === n.node ? `2px solid orange` : "",
                                             p: "0px !important",
+                                          }}
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (expandedNode === n.node) {
+                                              setExpandedNode(null);
+                                            } else {
+                                              setSidebarOpen(true);
+                                              setExpandedNode(n.node);
+                                              retrieveNodeData(n.node);
+                                            }
                                           }}
                                         >
                                           <CloseIcon
@@ -1904,15 +1953,6 @@ const CourseComponent = () => {
                                           >
                                             <Box sx={{ flexDirection: "column", width: "100%" }}>
                                               <Box
-                                                onClick={e => {
-                                                  e.stopPropagation();
-                                                  if (expandedNode === n.node) {
-                                                    setExpandedNode(null);
-                                                  } else {
-                                                    setExpandedNode(n.node);
-                                                    retrieveNodeData(n.node);
-                                                  }
-                                                }}
                                                 sx={{
                                                   display: "flex",
                                                   alignItems: "center",
@@ -1975,6 +2015,23 @@ const CourseComponent = () => {
                                       </Box>
                                     ))}
                                   </Masonry>
+                                  <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <CustomButton
+                                      variant="contained"
+                                      type="button"
+                                      color="secondary"
+                                      onClick={() => {
+                                        retrieveNodesForTopic(tc);
+                                      }}
+                                    >
+                                      Retrieve More Nodes
+                                      {loadingNodes ? (
+                                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                                      ) : (
+                                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                                      )}
+                                    </CustomButton>
+                                  </Box>
                                 </AccordionDetails>
                               </Accordion>
                             </Grid>
@@ -2206,6 +2263,9 @@ const CourseComponent = () => {
           }}
           elevation={8}
         >
+          <IconButton sx={{ position: "absolute", top: "5px", right: "5px" }} onClick={handleSidebarClose}>
+            <CloseIcon />
+          </IconButton>
           {expandedNode ? (
             <>
               {nodePublicViewLoader && <LinearProgress sx={{ width: "100%" }} />}
@@ -2219,32 +2279,100 @@ const CourseComponent = () => {
                   />
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
-                      {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
-                      )}
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      <NodeItemFull
-                        nodeId={nodePublicView?.id}
-                        node={nodePublicView}
-                        contributors={
-                          <NodeItemContributors
-                            contributors={nodePublicView?.contributors || []}
-                            institutions={nodePublicView?.institutions || []}
-                          />
-                        }
-                        references={<ReferencesList references={nodePublicView?.references || []} sx={{ mt: 3 }} />}
-                        tags={<TagsList tags={nodePublicView?.tags || []} sx={{ mt: 3 }} />}
-                      />
+                      <NodeItemFull nodeId={nodePublicView?.id} node={nodePublicView} />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
                     </Grid>
 
                     <Grid item xs={12} sm={12}>
-                      <MultipleChoices sx={{ mt: 3, p: 1 }} choices={[]} />
+                      <Card sx={{ mt: 3, p: 2 }}>
+                        <CardHeader
+                          sx={{
+                            backgroundColor: theme =>
+                              theme.palette.mode === "light"
+                                ? theme.palette.common.darkGrayBackground
+                                : theme.palette.common.black,
+                          }}
+                          title={
+                            <Box sx={{ textAlign: "center", color: "inherit" }}>
+                              <TypographyUnderlined
+                                variant="h6"
+                                fontWeight="300"
+                                gutterBottom
+                                align="center"
+                                sx={{ color: theme => theme.palette.common.white }}
+                              >
+                                Knowledge Checks
+                              </TypographyUnderlined>
+                            </Box>
+                          }
+                        ></CardHeader>
+                        {courses[selectedCourse]?.questions?.[nodePublicView?.id]?.map((question: any, idx: number) => {
+                          const QuestionComponent = questionComponents[question?.question_type];
+                          return QuestionComponent ? (
+                            <QuestionComponent
+                              key={idx}
+                              idx={idx}
+                              nodeId={nodePublicView?.id}
+                              question={question}
+                              handleQuestion={handleQuestion}
+                            />
+                          ) : null;
+                        })}
+                        <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                          <CustomButton
+                            variant="contained"
+                            type="button"
+                            color="secondary"
+                            onClick={() => {
+                              retrieveNodeQuestions(nodePublicView?.id);
+                            }}
+                          >
+                            Generate More Questions
+                            {questionsLoader ? (
+                              <CircularProgress sx={{ ml: 1 }} size={20} />
+                            ) : (
+                              <AutoFixHighIcon sx={{ ml: 1 }} />
+                            )}
+                          </CustomButton>
+                        </Box>
+                      </Card>
                     </Grid>
-
+                    <Grid item xs={12} sm={12}>
+                      <Card sx={{ mt: 3, p: 2 }}>
+                        <CardHeader
+                          sx={{
+                            backgroundColor: theme =>
+                              theme.palette.mode === "light"
+                                ? theme.palette.common.darkGrayBackground
+                                : theme.palette.common.black,
+                          }}
+                          title={
+                            <Box sx={{ textAlign: "center", color: "inherit" }}>
+                              <TypographyUnderlined
+                                variant="h6"
+                                fontWeight="300"
+                                gutterBottom
+                                align="center"
+                                sx={{ color: theme => theme.palette.common.white }}
+                              >
+                                Contributors
+                              </TypographyUnderlined>
+                            </Box>
+                          }
+                        ></CardHeader>
+                        <NodeItemContributors
+                          contributors={nodePublicView?.contributors || []}
+                          institutions={nodePublicView?.institutions || []}
+                        />
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                      {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                      )}
+                    </Grid>
                     <Grid item xs={12} sm={12}>
                       {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
                         <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
@@ -2264,7 +2392,7 @@ const CourseComponent = () => {
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-between",
+                  gap: "10px",
                   alignItems: "center",
                   borderBottom: "1px solid lightgrey",
                 }}
@@ -2292,9 +2420,6 @@ const CourseComponent = () => {
                     Delete
                   </Button>
                 )}
-                <IconButton onClick={handleSidebarClose}>
-                  <CloseIcon />
-                </IconButton>
               </Box>
               {selectedOpenCategory && (
                 <Box sx={{ gap: "8px" }}>

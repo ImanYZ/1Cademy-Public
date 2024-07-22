@@ -63,14 +63,14 @@ export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references
   return (
     <Card data-testid="node-item-full">
       <CardHeader
-        sx={{ px: { xs: 5, md: 5 }, pt: { xs: 4, md: 10 }, pb: 8 }}
+        sx={{ px: { xs: 5, md: 5 }, pt: { xs: 5, md: 5 }, pb: 8 }}
         title={<MarkdownRender sx={{ fontSize: "30px" }} text={node.title || ""} />}
       ></CardHeader>
       <CardContent
         sx={{
           p: { xs: 5, md: 5 },
           "&:last-child": {
-            paddingBottom: { xs: 4, md: 10 },
+            paddingBottom: { xs: 5, md: 5 },
           },
         }}
       >
@@ -173,7 +173,7 @@ export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references
             </Box>
           </Box>
         </Box>
-        <Divider sx={{ my: 8 }} />
+        {(contributors || references || tags) && <Divider sx={{ my: 8 }} />}
         <Box>{contributors}</Box>
         <Box>{references}</Box>
         <Box>{tags}</Box>

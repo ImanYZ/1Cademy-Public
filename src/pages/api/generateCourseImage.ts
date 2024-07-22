@@ -19,19 +19,15 @@ const storage = new Storage({
 const generateImagePrompt = (
   title: string,
   content: string,
-  courseTitle: string
-  // courseDescription: string,
-  // targetLearners: any,
-  // sessions: number,
-  // prerequisiteKnowledge: any,
-  // objectives: any,
-  // syllabus: any
+  courseTitle: string,
+  imageStyle: string = ""
 ) => {
   const prompt = `Generate an image to help students in the course ${courseTitle} learn the following topic:
-  **title:** ${title}
-  **content:** ${content}
-  The image should be minimalistic and should not include any text.
-  A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.`;
+**title:** '''${title}'''
+**content:** '''${content}'''
+The image should be minimalistic and should not include any text.
+${imageStyle ? `The image should be in "${imageStyle}" style.` : ""}
+A team will evaluate the image that you generate. If they identify it as helpful, they'll pay you $1,000. If they find it unhelpful, you'll lose $1,000.`;
   return prompt;
 };
 

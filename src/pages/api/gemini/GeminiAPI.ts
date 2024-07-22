@@ -73,28 +73,36 @@ export async function askGemini(files: string[], prompt: string) {
   }
 
   for (let i = 0; i < 4; i++) {
-    const result = await model.generateContent({
-      contents: [
-        {
-          parts: [
-            ...filesParts,
-            {
-              text: prompt,
-            },
-          ],
-          role: "user",
-        },
-      ],
-      generationConfig,
-      safetySettings,
-    });
-    response = result.response.text();
-    isJSONObject = isValidJSON(response);
-    if (isJSONObject.isJSON) {
-      break;
+    try {
+      const result = await model.generateContent({
+        contents: [
+          {
+            parts: [
+              ...filesParts,
+              {
+                text: prompt,
+              },
+            ],
+            role: "user",
+          },
+        ],
+        generationConfig,
+        safetySettings,
+      });
+      response = result.response.text();
+      isJSONObject = isValidJSON(response);
+      if (isJSONObject.isJSON) {
+        break;
+      }
+      console.log(
+        "Failed to get a complete JSON object. Retrying for the ",
+        i + 1,
+        " time."
+      );
+      console.log("Response: ", response);
+    } catch (error) {
+      console.error("Error in generating content: ", error);
     }
-    console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
-    console.log("Response: ", response);
   }
 
   if (!isJSONObject.isJSON) {
