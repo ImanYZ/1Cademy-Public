@@ -64,7 +64,6 @@ import { NodeHead } from "@/components/NodeHead";
 import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
-import { ReferencesList } from "@/components/ReferencesList";
 import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
@@ -1893,22 +1892,10 @@ const CourseComponent = () => {
                                     >
                                       {tc?.title || ""}
                                     </Typography>
-                                    <LoadingButton
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        retrieveNodesForTopic(tc);
-                                      }}
-                                      sx={{
-                                        display: "flex-end",
-                                      }}
-                                      loading={loadingDescription}
-                                    >
-                                      <AutoFixHighIcon />
-                                    </LoadingButton>
                                   </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                  {loadingNodes && <LinearProgress />}
+                                  {/* {loadingNodes && <LinearProgress />} */}
                                   <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
                                     {((courses[selectedCourse].nodes || {})[tc.title] || []).map((n: any) => (
                                       <Box key={n.node} sx={{ mb: "10px" }}>
@@ -1926,6 +1913,16 @@ const CourseComponent = () => {
                                               theme.palette.mode === "dark" ? "#1f1f1f" : "white",
                                             border: expandedNode === n.node ? `2px solid orange` : "",
                                             p: "0px !important",
+                                          }}
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (expandedNode === n.node) {
+                                              setExpandedNode(null);
+                                            } else {
+                                              setSidebarOpen(true);
+                                              setExpandedNode(n.node);
+                                              retrieveNodeData(n.node);
+                                            }
                                           }}
                                         >
                                           <CloseIcon
@@ -1956,15 +1953,6 @@ const CourseComponent = () => {
                                           >
                                             <Box sx={{ flexDirection: "column", width: "100%" }}>
                                               <Box
-                                                onClick={e => {
-                                                  e.stopPropagation();
-                                                  if (expandedNode === n.node) {
-                                                    setExpandedNode(null);
-                                                  } else {
-                                                    setExpandedNode(n.node);
-                                                    retrieveNodeData(n.node);
-                                                  }
-                                                }}
                                                 sx={{
                                                   display: "flex",
                                                   alignItems: "center",
@@ -2027,6 +2015,23 @@ const CourseComponent = () => {
                                       </Box>
                                     ))}
                                   </Masonry>
+                                  <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <CustomButton
+                                      variant="contained"
+                                      type="button"
+                                      color="secondary"
+                                      onClick={() => {
+                                        retrieveNodesForTopic(tc);
+                                      }}
+                                    >
+                                      Retrieve More Nodes
+                                      {loadingNodes ? (
+                                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                                      ) : (
+                                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                                      )}
+                                    </CustomButton>
+                                  </Box>
                                 </AccordionDetails>
                               </Accordion>
                             </Grid>
@@ -2258,6 +2263,9 @@ const CourseComponent = () => {
           }}
           elevation={8}
         >
+          <IconButton sx={{ position: "absolute", top: "5px", right: "5px" }} onClick={handleSidebarClose}>
+            <CloseIcon />
+          </IconButton>
           {expandedNode ? (
             <>
               {nodePublicViewLoader && <LinearProgress sx={{ width: "100%" }} />}
@@ -2271,11 +2279,7 @@ const CourseComponent = () => {
                   />
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
-                      <NodeItemFull
-                        nodeId={nodePublicView?.id}
-                        node={nodePublicView}
-                        references={<ReferencesList references={nodePublicView?.references || []} sx={{ mt: 3 }} />}
-                      />
+                      <NodeItemFull nodeId={nodePublicView?.id} node={nodePublicView} />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
@@ -2388,7 +2392,7 @@ const CourseComponent = () => {
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-between",
+                  gap: "10px",
                   alignItems: "center",
                   borderBottom: "1px solid lightgrey",
                 }}
@@ -2416,9 +2420,6 @@ const CourseComponent = () => {
                     Delete
                   </Button>
                 )}
-                <IconButton onClick={handleSidebarClose}>
-                  <CloseIcon />
-                </IconButton>
               </Box>
               {selectedOpenCategory && (
                 <Box sx={{ gap: "8px" }}>

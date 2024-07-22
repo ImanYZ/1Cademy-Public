@@ -1,9 +1,12 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Divider, IconButton, Switch, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { Editor } from "@/components/Editor";
+
+type EditorOptions = "EDIT" | "PREVIEW";
 type TrueFalseProps = {
   question: any;
   idx: number;
@@ -14,6 +17,7 @@ type TrueFalseProps = {
 
 const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
+  const [option, setOption] = useState<EditorOptions>("EDIT");
   const saveTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
@@ -29,31 +33,60 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
     setQuestionS({ ...questionS, correct_answer: value });
   };
 
-  const handleQuestionText = (e: any) => {
-    setQuestionS({ ...questionS, question_text: e.target.value });
+  const handleQuestionText = (value: string) => {
+    setQuestionS({ ...questionS, question_text: value });
   };
 
   const handleFeedbackText = (value: string) => {
     setQuestionS({ ...questionS, feedback: value });
   };
+
+  const onChangeOption = useCallback(
+    (newOption: boolean) => {
+      setOption(newOption ? "PREVIEW" : "EDIT");
+    },
+    [setOption]
+  );
   return (
     <Box sx={{ ...sx }}>
       <Box mt={2} mb={2}>
-        <Typography mb={4} variant="h3" fontWeight={"bold"}>
-          True-False Question {(idx || 0) + 1}:
-        </Typography>
-        <TextField
-          multiline
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography mb={4} variant="h3" fontWeight={"bold"}>
+            True-False Question {(idx || 0) + 1}:
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              top: "-5px",
+              borderRadius: "10px",
+            }}
+          >
+            <Typography
+              onClick={() => setOption("PREVIEW")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
+              Preview
+            </Typography>
+            <Switch checked={option === "EDIT"} onClick={() => onChangeOption(option === "EDIT")} size="small" />
+            <Typography
+              onClick={() => setOption("EDIT")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
+              Edit
+            </Typography>
+          </Box>
+        </Box>
+
+        <Editor
           label="Question Stem"
-          variant="outlined"
-          fullWidth
           value={questionS?.question_text}
-          onChange={handleQuestionText}
-          InputLabelProps={{
-            style: {
-              color: "gray",
-            },
-          }}
+          setValue={handleQuestionText}
+          readOnly={option === "PREVIEW"}
+          sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+          showEditPreviewSection={false}
+          editOption={option}
         />
       </Box>
       <Box sx={{ display: "flex", justifyContent: "space-evenly" }}>
@@ -80,24 +113,19 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
           <Typography fontWeight="bold">False</Typography>
         </Box>
       </Box>
-      <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto" }}>
-        <TextField
+      <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", mt: 2 }}>
+        <Editor
           label="Replace this with the choice-specific feedback."
-          fullWidth
-          value={questionS.feedback}
-          onChange={e => handleFeedbackText(e.target.value)}
-          margin="normal"
-          variant="outlined"
-          sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-          InputLabelProps={{
-            style: {
-              color: "gray",
-            },
-          }}
+          value={questionS?.feedback}
+          setValue={handleFeedbackText}
+          readOnly={option === "PREVIEW"}
+          sxPreview={{ fontSize: "20px", fontWeight: 300 }}
+          showEditPreviewSection={false}
+          editOption={option}
         />
       </Box>
 
-      <Box sx={{ mt: 2, pb: 2, borderTop: "solid 2px gray" }} />
+      <Divider sx={{ borderColor: "gray", my: 3 }} />
     </Box>
   );
 };

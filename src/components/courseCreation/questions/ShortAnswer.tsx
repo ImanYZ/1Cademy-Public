@@ -1,9 +1,12 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Divider, Switch, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import { Editor } from "@/components/Editor";
 
 import RubricItems from "./RubricItems";
 
+type EditorOptions = "EDIT" | "PREVIEW";
 type ShortAnswerProps = {
   question: any;
   idx: number;
@@ -14,6 +17,7 @@ type ShortAnswerProps = {
 
 const ShortAnswer = ({ idx, nodeId, question, sx, handleQuestion }: ShortAnswerProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
+  const [option, setOption] = useState<EditorOptions>("EDIT");
   const saveTimeoutRef = useRef<any>(null);
   useEffect(() => {
     if (saveTimeoutRef.current) {
@@ -24,8 +28,8 @@ const ShortAnswer = ({ idx, nodeId, question, sx, handleQuestion }: ShortAnswerP
     }, 1000);
   }, [questionS]);
 
-  const handleQuestionText = (e: any) => {
-    setQuestionS({ ...questionS, question_text: e.target.value });
+  const handleQuestionText = (value: string) => {
+    setQuestionS({ ...questionS, question_text: value });
   };
 
   const handleAddRubric = () => {
@@ -58,24 +62,53 @@ const ShortAnswer = ({ idx, nodeId, question, sx, handleQuestion }: ShortAnswerP
     setQuestionS({ ...questionS, rubric_items: prevRubrics });
   };
 
+  const onChangeOption = useCallback(
+    (newOption: boolean) => {
+      setOption(newOption ? "PREVIEW" : "EDIT");
+    },
+    [setOption]
+  );
+
   return (
     <Box sx={{ ...sx }}>
       <Box mt={2} mb={2}>
-        <Typography mb={4} variant="h3" fontWeight={"bold"}>
-          Short-Answer Question {(idx || 0) + 1}:
-        </Typography>
-        <TextField
-          multiline
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography mb={4} variant="h3" fontWeight={"bold"}>
+            Short-Answer Question {(idx || 0) + 1}:
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              top: "-5px",
+              borderRadius: "10px",
+            }}
+          >
+            <Typography
+              onClick={() => setOption("PREVIEW")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
+              Preview
+            </Typography>
+            <Switch checked={option === "EDIT"} onClick={() => onChangeOption(option === "EDIT")} size="small" />
+            <Typography
+              onClick={() => setOption("EDIT")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
+              Edit
+            </Typography>
+          </Box>
+        </Box>
+
+        <Editor
           label="Question Stem"
-          variant="outlined"
-          fullWidth
           value={questionS?.question_text}
-          onChange={handleQuestionText}
-          InputLabelProps={{
-            style: {
-              color: "gray",
-            },
-          }}
+          setValue={handleQuestionText}
+          readOnly={option === "PREVIEW"}
+          sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+          showEditPreviewSection={false}
+          editOption={option}
         />
       </Box>
       <RubricItems
@@ -85,9 +118,10 @@ const ShortAnswer = ({ idx, nodeId, question, sx, handleQuestion }: ShortAnswerP
         handleDeleteRubric={handleDeleteRubric}
         handleRubricItem={handleRubricItem}
         handleRubricPoints={handleRubricPoints}
+        option={option}
       />
-      {/* <Divider variant="fullWidth" orientation="horizontal" /> */}
-      <Box sx={{ mt: 2, pb: 2, borderTop: "solid 2px gray" }} />
+
+      <Divider sx={{ borderColor: "gray", my: 3 }} />
     </Box>
   );
 };
