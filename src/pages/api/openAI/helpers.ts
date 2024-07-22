@@ -2165,9 +2165,7 @@ export const chaptersMapCoreEcon = [
   },
 ];
 
-const isValidJSON = (
-  jsonString: string
-): { jsonObject: any; isJSON: boolean } => {
+const isValidJSON = (jsonString: string): { jsonObject: any; isJSON: boolean } => {
   try {
     return { jsonObject: JSON.parse(jsonString), isJSON: true };
   } catch (error) {

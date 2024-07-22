@@ -16,12 +16,7 @@ const storage = new Storage({
   },
 });
 
-const generateImagePrompt = (
-  title: string,
-  content: string,
-  courseTitle: string,
-  imageStyle: string = ""
-) => {
+const generateImagePrompt = (title: string, content: string, courseTitle: string, imageStyle: string = "") => {
   const prompt = `Generate an image to help students in the course ${courseTitle} learn the following topic:
 **title:** '''${title}'''
 **content:** '''${content}'''

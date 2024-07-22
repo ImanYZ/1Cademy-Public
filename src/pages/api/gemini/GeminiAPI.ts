@@ -94,11 +94,7 @@ export async function askGemini(files: string[], prompt: string) {
       if (isJSONObject.isJSON) {
         break;
       }
-      console.log(
-        "Failed to get a complete JSON object. Retrying for the ",
-        i + 1,
-        " time."
-      );
+      console.log("Failed to get a complete JSON object. Retrying for the ", i + 1, " time.");
       console.log("Response: ", response);
     } catch (error) {
       console.error("Error in generating content: ", error);
