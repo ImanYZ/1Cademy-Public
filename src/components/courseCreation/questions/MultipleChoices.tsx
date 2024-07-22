@@ -2,11 +2,14 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Divider, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { KnowledgeChoice } from "src/knowledgeTypes";
 
+import { Editor } from "@/components/Editor";
+
+type EditorOptions = "EDIT" | "PREVIEW";
 type QuestionChoicesProps = {
   question: any;
   idx: number;
@@ -23,6 +26,7 @@ type ChoiceProps = {
   handleCorrect: (value: boolean, idx: number) => void;
   handleFeedbackText: (value: string, idx: number) => void;
   deleteChoice: (idx: number) => void;
+  option: EditorOptions;
 };
 
 const Choice = ({
@@ -33,6 +37,7 @@ const Choice = ({
   handleCorrect,
   handleFeedbackText,
   deleteChoice,
+  option,
 }: ChoiceProps) => {
   return (
     <Box>
@@ -50,21 +55,16 @@ const Choice = ({
             )}
           </Box>
           {/* TODO: Keep the state of readonly after render */}
-          <TextField
+          <Editor
             label="Replace this with the choice."
-            fullWidth
-            value={choice.choice}
-            onChange={e => handleChoiceText(e.target.value, idx)}
-            margin="normal"
-            variant="outlined"
-            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            InputLabelProps={{
-              style: {
-                color: "gray",
-              },
-            }}
+            value={choice?.choice}
+            setValue={value => handleChoiceText(value, idx)}
+            readOnly={option === "PREVIEW"}
+            sxPreview={{ fontSize: "15px", fontWeight: 300 }}
+            showEditPreviewSection={false}
+            editOption={option}
           />
-          {choices.length > 1 && (
+          {option === "EDIT" && choices.length > 1 && (
             <Box>
               <Tooltip title={"Delete this choice from this question."}>
                 <IconButton onClick={() => deleteChoice(idx)}>
@@ -74,22 +74,17 @@ const Choice = ({
             </Box>
           )}
         </Box>
-        <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto" }}>
-          <TextField
+        <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", my: 3 }}>
+          <Editor
             label="Replace this with the choice-specific feedback."
-            fullWidth
-            value={choice.feedback}
-            onChange={e => handleFeedbackText(e.target.value, idx)}
-            margin="normal"
-            variant="outlined"
-            sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-            InputLabelProps={{
-              style: {
-                color: "gray",
-              },
-            }}
+            value={choice?.feedback}
+            setValue={value => handleFeedbackText(value, idx)}
+            readOnly={false}
+            showEditPreviewSection={false}
+            editOption={option}
           />
         </Box>
+        {option === "PREVIEW" && <Divider sx={{ borderColor: "gray" }} />}
       </li>
     </Box>
   );
@@ -97,6 +92,7 @@ const Choice = ({
 
 const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: QuestionChoicesProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
+  const [option, setOption] = useState<EditorOptions>("EDIT");
   const saveTimeoutRef = useRef<any>(null);
   useEffect(() => {
     if (saveTimeoutRef.current) {
@@ -149,24 +145,53 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
     setQuestionS({ ...questionS, question_text: e.target.value });
   };
 
+  const onChangeOption = useCallback(
+    (newOption: boolean) => {
+      setOption(newOption ? "PREVIEW" : "EDIT");
+    },
+    [setOption]
+  );
+
   return (
     <Box sx={{ ...sx }}>
       <Box mt={2} mb={2}>
-        <Typography mb={4} variant="h3" fontWeight={"bold"}>
-          Multiple-Choice Question {(idx || 0) + 1}:
-        </Typography>
-        <TextField
-          multiline
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Typography mb={4} variant="h3" fontWeight={"bold"}>
+            Multiple-Choice Question {(idx || 0) + 1}:
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+              top: "-5px",
+              borderRadius: "10px",
+            }}
+          >
+            <Typography
+              onClick={() => setOption("PREVIEW")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
+              Preview
+            </Typography>
+            <Switch checked={option === "EDIT"} onClick={() => onChangeOption(option === "EDIT")} size="small" />
+            <Typography
+              onClick={() => setOption("EDIT")}
+              sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+            >
+              Edit
+            </Typography>
+          </Box>
+        </Box>
+
+        <Editor
           label="Question Stem"
-          variant="outlined"
-          fullWidth
           value={questionS?.question_text}
-          onChange={handleQuestionText}
-          InputLabelProps={{
-            style: {
-              color: "gray",
-            },
-          }}
+          setValue={handleQuestionText}
+          readOnly={option === "PREVIEW"}
+          sxPreview={{ fontSize: "25px", fontWeight: 300 }}
+          showEditPreviewSection={false}
+          editOption={option}
         />
       </Box>
       {questionS?.choices.map((choice: KnowledgeChoice, idx: number) => {
@@ -180,6 +205,7 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
             handleCorrect={handleCorrect}
             handleFeedbackText={handleFeedbackText}
             deleteChoice={deleteChoice}
+            option={option}
           />
         );
       })}
@@ -189,8 +215,7 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
           <span>Add Choice</span>
         </Button>
       </Box> */}
-      {/* <Divider variant="fullWidth" orientation="horizontal" /> */}
-      <Box sx={{ mt: 2, pb: 2, borderTop: "solid 2px gray" }} />
+      <Divider sx={{ borderColor: "gray", my: 3 }} />
     </Box>
   );
 };

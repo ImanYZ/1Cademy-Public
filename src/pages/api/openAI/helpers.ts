@@ -2164,14 +2164,16 @@ export const chaptersMapCoreEcon = [
     ],
   },
 ];
-function isValidJSON(jsonString: string) {
+
+const isValidJSON = (
+  jsonString: string
+): { jsonObject: any; isJSON: boolean } => {
   try {
-    JSON.parse(jsonString);
-    return true;
+    return { jsonObject: JSON.parse(jsonString), isJSON: true };
   } catch (error) {
-    return false;
+    return { jsonObject: {}, isJSON: false };
   }
-}
+};
 
 const improverPrompt = `
 Given your previous complex, nested, and truncated JSON response, generate a JSON object with detailed instructions to complete your previous truncated JSON response by implementing the following actions on it:
@@ -2629,12 +2631,11 @@ export async function callOpenAIChat(files: string[], userPrompt: string, system
           response_format: { type: "json_object" },
         });
         response = completion.choices[0].message.content || "";
-        isJSONObject.isJSON = isValidJSON(response);
+        isJSONObject = isValidJSON(response);
         // console.log("\n\n\nThe completion object is:");
         // console.log(completion);
         finish_reason = completion.choices[0].finish_reason;
         if (isJSONObject.isJSON) {
-          isJSONObject.jsonObject = JSON.parse(response);
           break;
         }
         if (finish_reason !== "length") {

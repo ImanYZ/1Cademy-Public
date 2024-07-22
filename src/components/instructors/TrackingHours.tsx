@@ -664,7 +664,26 @@ const TrackingHours = () => {
     };
 
     return (
-      <TableContainer component={Paper} sx={{ overflow: "auto", height: "100vh", width: "auto", pb: "156px" }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          overflow: "auto",
+          height: "100vh",
+          width: "auto",
+          pb: "156px",
+          "&::-webkit-scrollbar-track": {
+            background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#888",
+            borderRadius: "10px",
+            border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: "#555",
+          },
+        }}
+      >
         <Table>
           <TableHead
             sx={{
@@ -888,7 +907,7 @@ const TrackingHours = () => {
                     )}
                     PopperProps={{
                       sx: {
-                        zIndex: "9999",
+                        zIndex: "999999999",
                       },
                     }}
                   />
@@ -914,7 +933,7 @@ const TrackingHours = () => {
                     )}
                     PopperProps={{
                       sx: {
-                        zIndex: "9999",
+                        zIndex: "999999999",
                       },
                     }}
                   />

@@ -21,6 +21,7 @@ type EditorProps = {
   disabled?: boolean;
   proposalsSelected?: boolean;
   added?: boolean;
+  sx?: SxProps<Theme>;
 };
 
 export const Editor = ({
@@ -37,6 +38,7 @@ export const Editor = ({
   editOption = "EDIT",
   showEditPreviewSection = true,
   disabled = false,
+  sx,
 }: EditorProps) => {
   // const [value, setValue] = React.useState<string>('');
   // const [canEdit, setCanEdit] = useState(true);
@@ -116,7 +118,7 @@ export const Editor = ({
               onChange={e => setValue(e.target.value)}
               onBlur={onBlurCallback ? e => onBlurCallback(e.target.value) : undefined}
               onFocus={moveToEnd}
-              sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px" }}
+              sx={{ p: "0px", m: "0px", fontWeight: 400, lineHeight: "24px", ...sx }}
               error={error}
               helperText={helperText}
               InputLabelProps={{
