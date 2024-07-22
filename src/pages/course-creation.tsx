@@ -1826,9 +1826,6 @@ const CourseComponent = () => {
                                       ? `${glowGreen} 1.5s ease-in-out infinite`
                                       : "",
                                     // border: `1px solid ${getTopicColor(category, tc)}`,
-                                    ":hover": {
-                                      border: "1px solid orange",
-                                    },
                                   }}
                                 >
                                   {" "}
