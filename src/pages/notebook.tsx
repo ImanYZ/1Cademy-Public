@@ -4252,6 +4252,7 @@ const Notebook = ({}: NotebookProps) => {
           notebookRef.current.selectionType = null;
           return;
         }
+        await openNodeHandler(proposal.node);
         devLog("ON_SELECT_PROPOSAL", { proposal, newNodeId });
         if (!user?.uname) return;
         event.preventDefault();
