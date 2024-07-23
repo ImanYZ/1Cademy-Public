@@ -56,4 +56,6 @@ export type INode = {
   children: INodeLink[];
   maxVersionRating: number;
   node?: string;
+  updatedStr?: string;
+  createdStr?: string;
 };
