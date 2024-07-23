@@ -64,6 +64,7 @@ import { CustomButton } from "@/components/map/Buttons/Buttons";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
+import { NodeItemFullEditor, ProposalFormValues } from "@/components/NodeItemFullEditor";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
 import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
@@ -97,27 +98,27 @@ const glowRed = keyframes`
   }
 `;
 
-interface Topic {
-  title: string;
-  hours: number;
-  difficulty: string;
-}
+// interface  {
+//   title: string;
+//   hours: number;
+//   difficulty: string;
+// }
 
-interface Suggestion {
-  action: string;
-  type: string;
-  category?: string | null;
-  after?: string;
-  new_topic?: Topic;
-  old_topic?: string;
-  new_topics?: Topic[];
-  current_category?: string;
-  topic?: string;
-  current_after?: string;
-  new_category?: string;
-  new_after?: string;
-  rationale: string;
-}
+// interface Suggestion {
+//   action: string;
+//   type: string;
+//   category?: string | null;
+//   after?: string;
+//   new_topic?: Topic;
+//   old_topic?: string;
+//   new_topics?: Topic[];
+//   current_category?: string;
+//   topic?: string;
+//   current_after?: string;
+//   new_category?: string;
+//   new_after?: string;
+//   rationale: string;
+// }
 const books = [
   {
     id: "OpenStax Psychology (2nd ed.) Textbook",
@@ -155,6 +156,7 @@ const CourseComponent = () => {
   const [dragOverTopicPointer, setDragOverTopicPointer] = useState<any>(null);
   // const containerTopicRef = useRef<any>(null);
 
+  const [editMode, setEditMode] = useState(false);
   const [loadingPrompt, setLoadingPrompt] = useState(false);
   const [glowCategoryGreenIndex, setGlowCategoryGreenIndex] = useState(-1);
   const [glowCategoryRedIndex, setGlowCategoryRedIndex] = useState(-1);
@@ -391,7 +393,7 @@ const CourseComponent = () => {
     setDifficulty("");
   };
 
-  const generateSuggestionMessage = (suggestion: Suggestion): string => {
+  const generateSuggestionMessage = (suggestion: any): string => {
     const {
       action,
       category,
@@ -405,33 +407,63 @@ const CourseComponent = () => {
       new_after,
     } = suggestion;
 
-    switch (action) {
-      case "add":
-        return `**<span style="color: green;">Add a new topic</span>** called **"${
-          new_topic?.title
-        }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
-          new_topic?.difficulty
-        }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
-      case "modify":
-        return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
-          new_topic?.title
-        }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
-          (new_topic?.hours || 0) > 1 ? "s" : ""
-        }.`;
-      case "divide":
-        const dividedTopics = new_topics
-          ?.map(
-            nt => `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
-          )
-          .join(" and ");
-        return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
-      case "move":
-        return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
-      case "delete":
-        return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
-      default:
-        return "Invalid action.";
+    if (suggestion.type === "topic") {
+      switch (action) {
+        case "add":
+          return `**<span style="color: green;">Add a new topic</span>** called **"${
+            new_topic?.title
+          }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
+            new_topic?.difficulty
+          }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+        case "modify":
+          return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
+            new_topic?.title
+          }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${
+            new_topic?.hours
+          } hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+        case "divide":
+          const dividedTopics = new_topics
+            ?.map(
+              (nt: any) =>
+                `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+            )
+            .join(" and ");
+          return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
+        case "move":
+          return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+        case "delete":
+          return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
+        default:
+          return "Invalid action.";
+      }
+    } else if (suggestion.type === "category") {
+      const { new_category, after } = suggestion;
+      switch (action) {
+        case "add":
+          return `**<span style="color: green;">Add a new Category</span>** called **"${new_category?.title}"** after the category **"${after}"**.`;
+        case "modify":
+          return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
+            new_topic?.title
+          }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${
+            new_topic?.hours
+          } hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+        case "divide":
+          const dividedTopics = new_topics
+            ?.map(
+              (nt: any) =>
+                `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+            )
+            .join(" and ");
+          return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
+        case "move":
+          return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+        case "delete":
+          return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
+        default:
+          return "Invalid action.";
+      }
     }
+    return "Invalid action.";
   };
   const improveCourseStructure = async () => {
     try {
@@ -1275,7 +1307,7 @@ const CourseComponent = () => {
 
   const retrieveNodeData = useCallback(
     async (node: INode, topicTitle: string, idx: number) => {
-      if (node) {
+      if (node && selectedTopic) {
         let keywords = "";
         for (let tag of node.tags || []) {
           keywords += escapeBreaksQuotes(tag) + ", ";
@@ -1317,24 +1349,30 @@ const CourseComponent = () => {
 
   const retrieveNodeQuestions = useCallback(
     async (nodeId: string) => {
-      setQuestionsLoader(true);
-      const updatedCourses = [...courses];
-      const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
-      const response: any = await Post("/retrieveGenerateQuestions", {
-        courseTitle: courses[selectedCourse].title,
-        courseDescription: courses[selectedCourse].description,
-        targetLearners: courses[selectedCourse].learners,
-        nodeId,
-        previousQuestions: prevQuestions,
-      });
+      try {
+        setQuestionsLoader(true);
+        const updatedCourses = [...courses];
+        const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
+        const response: any = await Post("/retrieveGenerateQuestions", {
+          courseTitle: courses[selectedCourse].title,
+          courseDescription: courses[selectedCourse].description,
+          targetLearners: courses[selectedCourse].learners,
+          nodeId,
+          previousQuestions: prevQuestions,
+        });
 
-      updatedCourses[selectedCourse]["questions"] = {
-        ...updatedCourses[selectedCourse]["questions"],
-        [nodeId]: [...prevQuestions, response],
-      };
+        updatedCourses[selectedCourse]["questions"] = {
+          ...updatedCourses[selectedCourse]["questions"],
+          [nodeId]: [...prevQuestions, response],
+        };
 
-      setCourses(updatedCourses);
-      setQuestionsLoader(false);
+        setCourses(updatedCourses);
+        setQuestionsLoader(false);
+      } catch (error) {
+        setQuestionsLoader(false);
+        await confirmIt("There is a error with the request for retrieving questions, please try again.", "Ok", "");
+        console.error(error);
+      }
     },
     [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
   );
@@ -1350,7 +1388,28 @@ const CourseComponent = () => {
     },
     [courses, selectedCourse, setCourses]
   );
+  const saveChanges = async (values: ProposalFormValues) => {
+    try {
+      setNodePublicViewLoader(true);
 
+      const course = courses[selectedCourse];
+
+      const nodes = { ...course.nodes };
+      const nodeIdx = nodes[selectedTopic?.title].findIndex((n: { node: string }) => n.node === nodePublicView.node);
+      let nodeData = nodes[nodeIdx];
+      nodeData = {
+        ...nodeData,
+        ...values,
+      };
+      course.nodes[selectedTopic?.title][nodeIdx] = nodeData;
+      setNodePublicView(course.nodes[selectedTopic?.title][nodeIdx]);
+      updateCourses(course);
+      setNodePublicViewLoader(false);
+      setEditMode(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   if (courses.length <= 0) {
     return (
       <Box
@@ -2050,23 +2109,25 @@ const CourseComponent = () => {
                                       )
                                     )}
                                   </Masonry>
-                                  <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-                                    <CustomButton
-                                      variant="contained"
-                                      type="button"
-                                      color="secondary"
-                                      onClick={() => {
-                                        retrieveNodesForTopic(tc.title);
-                                      }}
-                                    >
-                                      {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
-                                      {loadingNodes.includes(tc.title) ? (
-                                        <CircularProgress sx={{ ml: 1 }} size={20} />
-                                      ) : (
-                                        <AutoFixHighIcon sx={{ ml: 1 }} />
-                                      )}
-                                    </CustomButton>
-                                  </Box>
+                                  {Object.keys(currentImprovement || {}).length <= 0 && (
+                                    <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                      <CustomButton
+                                        variant="contained"
+                                        type="button"
+                                        color="secondary"
+                                        onClick={() => {
+                                          retrieveNodesForTopic(tc.title);
+                                        }}
+                                      >
+                                        {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
+                                        {loadingNodes.includes(tc.title) ? (
+                                          <CircularProgress sx={{ ml: 1 }} size={20} />
+                                        ) : (
+                                          <AutoFixHighIcon sx={{ ml: 1 }} />
+                                        )}
+                                      </CustomButton>
+                                    </Box>
+                                  )}
                                 </AccordionDetails>
                               </Accordion>
                             </Grid>
@@ -2307,123 +2368,155 @@ const CourseComponent = () => {
             <Box>
               {nodePublicView && (
                 <Box data-testid="node-item-container" sx={{ p: { xs: 1 } }}>
-                  <Grid container spacing={3}>
+                  {editMode && (
+                    <NodeItemFullEditor
+                      node={nodePublicView}
+                      image={
+                        nodePublicView.nodeImage ? (
+                          <Box
+                            sx={{
+                              display: "block",
+                              width: "100%",
+                              cursor: "pointer",
+                              mt: 3,
+                            }}
+                          >
+                            {/* TODO: Change to next Image */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={nodePublicView.nodeImage}
+                              alt={"Preview Image"}
+                              width="100%"
+                              height="100%"
+                              loading="lazy"
+                            />
+                          </Box>
+                        ) : null
+                      }
+                      tags={null}
+                      references={null}
+                      onSubmit={saveChanges}
+                      onCancel={() => {
+                        setEditMode(false);
+                      }}
+                      publicView={false}
+                    />
+                  )}
+                  {!editMode && (
                     <Grid item xs={12} sm={12}>
                       <NodeItemFull
                         nodeId={nodePublicView?.node}
                         node={nodePublicView}
-                        setEditMode={() => {}}
+                        setEditMode={setEditMode}
                         deleteNode={() => handleRemoveNode(selectedTopic.title, expandedNode?.node || "")}
                       />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
                     </Grid>
+                  )}
 
-                    <Grid item xs={12} sm={12}>
-                      <Card sx={{ mt: 3, p: 2 }}>
-                        <CardHeader
-                          sx={{
-                            backgroundColor: theme =>
-                              theme.palette.mode === "light"
-                                ? theme.palette.common.darkGrayBackground
-                                : theme.palette.common.black,
+                  <Grid item xs={12} sm={12}>
+                    <Card sx={{ mt: 3, p: 2 }}>
+                      <CardHeader
+                        sx={{
+                          backgroundColor: theme =>
+                            theme.palette.mode === "light"
+                              ? theme.palette.common.darkGrayBackground
+                              : theme.palette.common.black,
+                        }}
+                        title={
+                          <Box sx={{ textAlign: "center", color: "inherit" }}>
+                            <TypographyUnderlined
+                              variant="h6"
+                              fontWeight="300"
+                              gutterBottom
+                              align="center"
+                              sx={{ color: theme => theme.palette.common.white }}
+                            >
+                              Knowledge Checks
+                            </TypographyUnderlined>
+                          </Box>
+                        }
+                      ></CardHeader>
+                      {courses[selectedCourse]?.questions?.[nodePublicView?.node]?.map((question: any, idx: number) => {
+                        const QuestionComponent = questionComponents[question?.question_type];
+                        return QuestionComponent ? (
+                          <QuestionComponent
+                            key={idx}
+                            idx={idx}
+                            nodeId={nodePublicView?.id}
+                            question={question}
+                            handleQuestion={handleQuestion}
+                          />
+                        ) : null;
+                      })}
+                      <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                        <CustomButton
+                          variant="contained"
+                          type="button"
+                          color="secondary"
+                          onClick={() => {
+                            retrieveNodeQuestions(nodePublicView.node);
                           }}
-                          title={
-                            <Box sx={{ textAlign: "center", color: "inherit" }}>
-                              <TypographyUnderlined
-                                variant="h6"
-                                fontWeight="300"
-                                gutterBottom
-                                align="center"
-                                sx={{ color: theme => theme.palette.common.white }}
-                              >
-                                Knowledge Checks
-                              </TypographyUnderlined>
-                            </Box>
-                          }
-                        ></CardHeader>
-                        {courses[selectedCourse]?.questions?.[nodePublicView?.node]?.map(
-                          (question: any, idx: number) => {
-                            const QuestionComponent = questionComponents[question?.question_type];
-                            return QuestionComponent ? (
-                              <QuestionComponent
-                                key={idx}
-                                idx={idx}
-                                nodeId={nodePublicView?.id}
-                                question={question}
-                                handleQuestion={handleQuestion}
-                              />
-                            ) : null;
-                          }
-                        )}
-                        <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-                          <CustomButton
-                            variant="contained"
-                            type="button"
-                            color="secondary"
-                            onClick={() => {
-                              retrieveNodeQuestions(nodePublicView.node);
-                            }}
-                          >
-                            Generate More Questions
-                            {questionsLoader ? (
-                              <CircularProgress sx={{ ml: 1 }} size={20} />
-                            ) : (
-                              <AutoFixHighIcon sx={{ ml: 1 }} />
-                            )}
-                          </CustomButton>
-                        </Box>
-                      </Card>
-                    </Grid>
-                    {nodePublicViewLoader ? (
-                      <Box sx={{ my: 2, width: "100%", display: "flex", justifyContent: "center" }}>
-                        <CircularProgress size={40} />
+                        >
+                          Generate More Questions
+                          {questionsLoader ? (
+                            <CircularProgress sx={{ ml: 1 }} size={20} />
+                          ) : (
+                            <AutoFixHighIcon sx={{ ml: 1 }} />
+                          )}
+                        </CustomButton>
                       </Box>
-                    ) : (
-                      <>
-                        <Grid item xs={12} sm={12}>
-                          <Card sx={{ mt: 3, p: 2 }}>
-                            <CardHeader
-                              sx={{
-                                backgroundColor: theme =>
-                                  theme.palette.mode === "light"
-                                    ? theme.palette.common.darkGrayBackground
-                                    : theme.palette.common.black,
-                              }}
-                              title={
-                                <Box sx={{ textAlign: "center", color: "inherit" }}>
-                                  <TypographyUnderlined
-                                    variant="h6"
-                                    fontWeight="300"
-                                    gutterBottom
-                                    align="center"
-                                    sx={{ color: theme => theme.palette.common.white }}
-                                  >
-                                    Contributors
-                                  </TypographyUnderlined>
-                                </Box>
-                              }
-                            ></CardHeader>
-                            <NodeItemContributors
-                              contributors={nodePublicView?.contributors || []}
-                              institutions={nodePublicView?.institutions || []}
-                            />
-                          </Card>
-                        </Grid>
-                        <Grid item xs={12} sm={12}>
-                          {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                            <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
-                          )}
-                        </Grid>
-                        <Grid item xs={12} sm={12}>
-                          {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
-                            <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
-                          )}
-                        </Grid>
-                      </>
-                    )}
+                    </Card>
                   </Grid>
+                  {nodePublicViewLoader ? (
+                    <Box sx={{ my: 2, width: "100%", display: "flex", justifyContent: "center" }}>
+                      <CircularProgress size={40} />
+                    </Box>
+                  ) : (
+                    <>
+                      <Grid item xs={12} sm={12}>
+                        <Card sx={{ mt: 3, p: 2 }}>
+                          <CardHeader
+                            sx={{
+                              backgroundColor: theme =>
+                                theme.palette.mode === "light"
+                                  ? theme.palette.common.darkGrayBackground
+                                  : theme.palette.common.black,
+                            }}
+                            title={
+                              <Box sx={{ textAlign: "center", color: "inherit" }}>
+                                <TypographyUnderlined
+                                  variant="h6"
+                                  fontWeight="300"
+                                  gutterBottom
+                                  align="center"
+                                  sx={{ color: theme => theme.palette.common.white }}
+                                >
+                                  Contributors
+                                </TypographyUnderlined>
+                              </Box>
+                            }
+                          ></CardHeader>
+                          <NodeItemContributors
+                            contributors={nodePublicView?.contributors || []}
+                            institutions={nodePublicView?.institutions || []}
+                          />
+                        </Card>
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                          <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                        )}
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
+                          <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
+                        )}
+                      </Grid>
+                    </>
+                  )}
                 </Box>
               )}
             </Box>
