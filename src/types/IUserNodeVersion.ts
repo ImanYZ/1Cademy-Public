@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 import { INodeType } from "./INodeType";
 
 export type IUserNodeVersion = {
@@ -10,6 +12,6 @@ export type IUserNodeVersion = {
   opened?: boolean;
   nodeType?: INodeType;
   deleted?: boolean;
-  createdAt: Date;
-  updatedAt?: Date;
+  createdAt: Date | Timestamp;
+  updatedAt?: Date | Timestamp;
 };

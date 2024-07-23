@@ -39,7 +39,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     let batch = db.batch();
     let writeCounts = 0;
 
-    const { semesterId } = req.query;
+    const { semesterId } = req.query as { semesterId: string };
     const payload = req.body as InstructorSemesterSignUpPayload;
 
     const semesterRef = db.collection("semesters").doc(String(semesterId));

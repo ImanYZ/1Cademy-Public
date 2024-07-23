@@ -3,7 +3,7 @@ import { Timestamp } from "firebase-admin/firestore";
 export type IPractice = {
   documentId?: string;
   lastPresented: Date | null;
-  createdAt: Date;
+  createdAt: Date | Timestamp;
   node: string;
   user: string;
   eFactor: number;
@@ -11,7 +11,7 @@ export type IPractice = {
   nextDate: Date | Timestamp;
   lastCompleted: Date | null;
   q: number;
-  updatedAt: Date;
+  updatedAt: Date | Timestamp;
   iInterval: number;
   start_practice?: Date | Timestamp;
   end_practice?: Date | Timestamp;

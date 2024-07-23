@@ -286,7 +286,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       await signalNodeToTypesense({
         nodeId: versionNodeId,
         currentTimestamp,
-        versionData: newVersion,
+      });
+    } else {
+      await db.runTransaction(async t => {
+        let parentNodeRef = db.collection("nodes").doc(parentId);
+        const parentNodeDoc = await t.get(parentNodeRef);
+        const parentNodeData: any = parentNodeDoc.data();
+        // Update the parent node by incrementing the number of versions on it.
+        t.update(parentNodeRef, {
+          versions: parentNodeData.versions + 1,
+        });
       });
     }
     // transaction for creating a new version document to make sure we are not creating duplicates
@@ -333,18 +342,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       newUserVersion.nodeType = nodeType; // Update nodeType field
       t.set(userVersionLogRef, newUserVersion);
     });
-
-    if (!accepted) {
-      await db.runTransaction(async t => {
-        let parentNodeRef = db.collection("nodes").doc(parentId);
-        const parentNodeDoc = await t.get(parentNodeRef);
-        const parentNodeData: any = parentNodeDoc.data();
-        // Update the parent node by incrementing the number of versions on it.
-        t.update(parentNodeRef, {
-          versions: parentNodeData.versions + 1,
-        });
-      });
-    }
 
     //TO:DO detached action that need to be done in queue
     await detach(async () => {
@@ -435,20 +432,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
       /*  */
-      if (accepted) {
+      if (accepted && nodeType === "Question") {
         // If a question node gets accepted, it should be added to the practice tool for all
         // users in the communities with the tags that are used on this node.
         // That's why we need to get the list of all members of each of these tags (communities).
-        if (nodeType === "Question") {
-          [batch, writeCounts] = await createPractice({
-            batch,
-            tagIds: tagIds,
-            nodeId: parentNodeRef.id,
-            parentId: parents[0].id,
-            currentTimestamp,
-            writeCounts,
-          });
-        }
+
+        [batch, writeCounts] = await createPractice({
+          batch,
+          unames: [],
+          tagIds: tagIds,
+          nodeId: parentNodeRef.id,
+          parentId: parents[0].id,
+          currentTimestamp,
+          writeCounts,
+        });
       }
       /*  */
       // A child node is being created. So, based on the tags on the node, we should make
@@ -520,6 +517,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           voter: userData.uname,
           writeCounts,
           comReputationUpdates,
+          t: null,
+          tWriteOperations: [],
         });
 
         for (const tagId in comReputationUpdates) {

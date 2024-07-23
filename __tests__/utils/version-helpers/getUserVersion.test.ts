@@ -17,8 +17,8 @@ describe("getUserVersion", () => {
 
     let { userVersionData, userVersionRef } = await getUserVersion({
       versionId: "bkZvkniwziO1Ue7K9gtX",
-      nodeType: "Concept",
       uname: "A_wei",
+      t: null,
     });
     expect(userVersionRef.parent.id).toEqual("userVersions");
     expect(userVersionData).toMatchObject({ user: "A_wei" });
