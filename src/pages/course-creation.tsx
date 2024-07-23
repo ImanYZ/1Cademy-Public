@@ -19,6 +19,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
   Grid,
   IconButton,
@@ -2049,7 +2050,7 @@ const CourseComponent = () => {
                                                   sx={{
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    m: "15px",
+                                                    m: "15px 15px 0px 15px",
                                                   }}
                                                 >
                                                   <Box
@@ -2081,7 +2082,7 @@ const CourseComponent = () => {
                                             </AccordionSummary>
 
                                             <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                              <Box sx={{ p: "17px", pt: 0 }}>
+                                              <Box sx={{ p: "15px", pt: 0 }}>
                                                 <Box
                                                   sx={{
                                                     transition: "border 0.3s",
@@ -2098,7 +2099,7 @@ const CourseComponent = () => {
                                                 </Box>
                                                 {/* <FlashcardVideo flashcard={concept} /> */}
                                                 {(n?.nodeImage || []).length > 0 && (
-                                                  <Box>
+                                                  <Box sx={{ mt: "15px" }}>
                                                     <ImageSlider images={[n?.nodeImage]} />
                                                   </Box>
                                                 )}
@@ -2532,7 +2533,6 @@ const CourseComponent = () => {
                   display: "flex",
                   gap: "10px",
                   alignItems: "center",
-                  borderBottom: "1px solid lightgrey",
                 }}
               >
                 <Typography variant="h6">
@@ -2559,9 +2559,14 @@ const CourseComponent = () => {
                   </Button>
                 )}
               </Box>
+              <Divider
+                sx={{
+                  borderColor: "lightgrey",
+                  my: "15px",
+                }}
+              />
               {selectedOpenCategory && (
-                <Box sx={{ gap: "8px" }}>
-                  {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                   <TextField
                     label="Category Title"
                     multiline
@@ -2581,9 +2586,16 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "430px" }}
+                    sx={{
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                      width: "100%",
+                      mt: "10px",
+                      mb: "0px",
+                    }}
                     InputLabelProps={{
-                      style: { color: "grey" },
+                      sx: {
+                        color: "grey",
+                      },
                     }}
                   />
                   <TextField
@@ -2609,15 +2621,20 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "430px" }}
+                    sx={{
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                      width: "100%",
+                      mt: "10px",
+                      mb: "0px",
+                    }}
                     InputLabelProps={{
                       style: { color: "grey" },
                     }}
                   />
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px", mb: "15px" }}>
-                    <Typography sx={{ fontSize: "19px", mt: "14px" }}>Category Image:</Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Typography sx={{ fontSize: "19px" }}>Category Image:</Typography>
                     {loadingImage ? (
-                      <LinearProgress sx={{ width: "40px", mt: "15px" }} />
+                      <LinearProgress sx={{ width: "40px" }} />
                     ) : (
                       <AutoFixHighIcon
                         sx={{
@@ -2625,24 +2642,23 @@ const CourseComponent = () => {
                           // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
                           color: "orange",
                           borderRadius: "50%",
-
                           ":hover": {
                             backgroundColor: "black",
-
                             display: "block",
                           },
-
                           zIndex: 10,
-                          mt: "9px",
                           padding: "5px",
                           cursor: "pointer",
-                          fontSize: "35px",
+                          fontSize: "30px",
+                          height: "100%",
                         }}
                         onClick={generateImageForCategory}
                       />
                     )}
                   </Box>
-                  <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Objectives:</Typography>
+                  {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
+
+                  <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
                   <ChipInput
                     tags={selectedOpenCategory?.objectives || []}
                     selectedTags={() => {}}
@@ -2692,7 +2708,7 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
               /> */}
-                  <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Prerequisite knowledge:</Typography>
+                  <Typography sx={{ fontWeight: "bold" }}>Prerequisite knowledge:</Typography>
                   <ChipInput
                     tags={selectedOpenCategory?.prerequisiteKnowledge || []}
                     selectedTags={() => {}}
@@ -2892,8 +2908,7 @@ const CourseComponent = () => {
                 </Box>
               )}
               {selectedTopic && (
-                <Box>
-                  {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                   <TextField
                     label="Topic Description"
                     multiline
@@ -2922,18 +2937,23 @@ const CourseComponent = () => {
                     margin="normal"
                     variant="outlined"
                     minRows={4}
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                    sx={{
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                      mt: "10px",
+                      mb: "0px",
+                    }}
                     InputLabelProps={{
                       style: {
                         color: "gray",
                       },
                     }}
                   />
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px", mb: "15px" }}>
-                    <Typography sx={{ fontSize: "19px", mt: "14px" }}>Topic Image:</Typography>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    <Typography sx={{ fontSize: "19px" }}>Topic Image:</Typography>
 
                     {loadingImage ? (
-                      <LinearProgress sx={{ width: "40px", mt: "15px" }} />
+                      <LinearProgress sx={{ width: "40px" }} />
                     ) : (
                       <AutoFixHighIcon
                         sx={{
@@ -2949,16 +2969,17 @@ const CourseComponent = () => {
                           },
 
                           zIndex: 10,
-                          mt: "9px",
+
                           padding: "5px",
                           cursor: "pointer",
-                          fontSize: "34px",
+                          fontSize: "30px",
                         }}
                         onClick={generateImageForTopic}
                       />
                     )}
                   </Box>
-                  <FormControl fullWidth margin="normal">
+                  {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+                  <FormControl fullWidth margin="normal" sx={{ mt: "8px" }}>
                     <InputLabel id="difficulty-label">Difficulty</InputLabel>
                     <Select
                       labelId="difficulty-label"
@@ -3029,9 +3050,10 @@ const CourseComponent = () => {
                     margin="normal"
                     variant="outlined"
                     type="number"
+                    sx={{ mt: "8px", mb: "0px" }}
                     inputProps={{ min: 0 }}
                   />
-                  <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Objectives:</Typography>
+                  <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
                   <ChipInput
                     tags={selectedTopic.objectives}
                     selectedTags={() => {}}
@@ -3063,7 +3085,7 @@ const CourseComponent = () => {
                     readOnly={false}
                     placeholder="Type a new skill and click enter ↵ to add it..."
                   />
-                  <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prerequisite Knowledge:</Typography>
+                  <Typography sx={{ fontWeight: "bold" }}>Prerequisite Knowledge:</Typography>
                   <ChipInput
                     tags={selectedTopic.prerequisiteKnowledge}
                     selectedTags={() => {}}
@@ -3095,21 +3117,36 @@ const CourseComponent = () => {
                     readOnly={false}
                     placeholder="Type a new skill and click enter ↵ to add it..."
                   />
-                  <Box sx={{ display: "flex" }}>
-                    <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-                    <LoadingButton
-                      onClick={generateMorePromptsForTopic}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingPrompt}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
+                  <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
+                    <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
+
+                    {loadingPrompt ? (
+                      <LinearProgress sx={{ width: "40px" }} />
+                    ) : (
+                      <AutoFixHighIcon
+                        sx={{
+                          // backgroundColor: "grey",
+                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                          color: "orange",
+                          borderRadius: "50%",
+
+                          ":hover": {
+                            backgroundColor: "black",
+
+                            display: "block",
+                          },
+                          zIndex: 10,
+                          padding: "5px",
+                          cursor: "pointer",
+                          fontSize: "30px",
+                        }}
+                        onClick={generateMorePromptsForTopic}
+                      />
+                    )}
                   </Box>
                   {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                     <Box key={index}>
-                      <Box sx={{ marginTop: 4 }}>
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <Typography gutterBottom>Prompt {index + 1}:</Typography>
                           <Button
