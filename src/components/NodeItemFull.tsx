@@ -40,6 +40,7 @@ type Props = {
   tags?: ReactNode;
   editable?: boolean;
   setEditMode: (value: boolean) => void;
+  deleteNode?: any;
 };
 
 type FocusedNodeProps = {
@@ -60,6 +61,7 @@ export const NodeItemFull: FC<Props> = ({
   tags,
   editable = true,
   setEditMode,
+  deleteNode,
 }) => {
   const [imageFullScreen, setImageFullScreen] = useState(false);
   const [showShareButtons, setShowShareButtons] = useState(false);
@@ -162,24 +164,27 @@ export const NodeItemFull: FC<Props> = ({
             </Box>
 
             <Box sx={{ display: "flex" }}>
-              <Button
-                onClick={() => setShowShareButtons(!showShareButtons)}
-                sx={{
-                  minWidth: "20px",
-                  justifyContent: "start",
-                  color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
-                }}
-              >
-                <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} />
+              {!deleteNode && (
+                <Button
+                  onClick={() => setShowShareButtons(!showShareButtons)}
+                  sx={{
+                    minWidth: "20px",
+                    justifyContent: "start",
+                    color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
+                  }}
+                >
+                  <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} />
 
-                {!showShareButtons && <Typography py="2px">Share</Typography>}
-              </Button>
+                  {!showShareButtons && <Typography py="2px">Share</Typography>}
+                </Button>
+              )}
               {showShareButtons && <ShareButtons url={getNodePageWithDomain(String(node.title), nodeId)} />}
               {editable && (
                 <IconButton onClick={editPublicNode}>
                   <EditIcon />
                 </IconButton>
               )}
+              {deleteNode && <Button onClick={deleteNode}>Delete</Button>}
             </Box>
           </Box>
         </Box>

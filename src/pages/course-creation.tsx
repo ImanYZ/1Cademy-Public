@@ -133,11 +133,6 @@ const books = [
     tags: ["Economy", "Economics"],
     references: ["CORE Econ - The Economy"],
   },
-  {
-    id: "Data Science",
-    tags: ["Data Science"],
-    references: ["Data science and prediction"],
-  },
 ];
 
 const questionComponents: any = {
@@ -2293,35 +2288,16 @@ const CourseComponent = () => {
           </Box>
           {expandedNode ? (
             <Box>
-              <DeleteForeverIcon
-                className="close-icon"
-                sx={{
-                  // backgroundColor: "grey",
-                  // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                  color: "red",
-                  borderRadius: "50%",
-
-                  ":hover": {
-                    backgroundColor: "black",
-
-                    display: "block",
-                  },
-
-                  zIndex: 10,
-                  position: "absolute",
-                  top: "55px",
-                  left: "15px",
-                  padding: "5px",
-                  cursor: "pointer",
-                  fontSize: "35px",
-                }}
-                onClick={() => handleRemoveNode(selectedTopic.title, expandedNode?.node || "")}
-              />
               {nodePublicView && (
                 <Box data-testid="node-item-container" sx={{ p: { xs: 1 } }}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
-                      <NodeItemFull nodeId={nodePublicView?.node} node={nodePublicView} setEditMode={() => {}} />
+                      <NodeItemFull
+                        nodeId={nodePublicView?.node}
+                        node={nodePublicView}
+                        setEditMode={() => {}}
+                        deleteNode={() => handleRemoveNode(selectedTopic.title, expandedNode?.node || "")}
+                      />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
@@ -2475,35 +2451,6 @@ const CourseComponent = () => {
               </Box>
               {selectedOpenCategory && (
                 <Box sx={{ gap: "8px" }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                    <Typography sx={{ fontSize: "19px", mt: "14px" }}>Category Image:</Typography>
-                    {loadingImage ? (
-                      <LinearProgress sx={{ width: "40px", mt: "15px" }} />
-                    ) : (
-                      <AutoFixHighIcon
-                        sx={{
-                          // backgroundColor: "grey",
-                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                          color: "orange",
-                          borderRadius: "50%",
-
-                          ":hover": {
-                            backgroundColor: "black",
-
-                            display: "block",
-                          },
-
-                          zIndex: 10,
-                          mt: "9px",
-                          padding: "5px",
-                          cursor: "pointer",
-                          fontSize: "35px",
-                        }}
-                        onClick={generateImageForCategory}
-                      />
-                    )}
-                  </Box>
-
                   {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
                   <TextField
                     label="Category Title"
@@ -2524,7 +2471,7 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "430px" }}
                     InputLabelProps={{
                       style: { color: "grey" },
                     }}
@@ -2552,11 +2499,39 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "430px" }}
                     InputLabelProps={{
                       style: { color: "grey" },
                     }}
                   />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px", mb: "15px" }}>
+                    <Typography sx={{ fontSize: "19px", mt: "14px" }}>Category Image:</Typography>
+                    {loadingImage ? (
+                      <LinearProgress sx={{ width: "40px", mt: "15px" }} />
+                    ) : (
+                      <AutoFixHighIcon
+                        sx={{
+                          // backgroundColor: "grey",
+                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                          color: "orange",
+                          borderRadius: "50%",
+
+                          ":hover": {
+                            backgroundColor: "black",
+
+                            display: "block",
+                          },
+
+                          zIndex: 10,
+                          mt: "9px",
+                          padding: "5px",
+                          cursor: "pointer",
+                          fontSize: "35px",
+                        }}
+                        onClick={generateImageForCategory}
+                      />
+                    )}
+                  </Box>
                   <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Objectives:</Typography>
                   <ChipInput
                     tags={selectedOpenCategory?.objectives || []}
@@ -2808,36 +2783,6 @@ const CourseComponent = () => {
               )}
               {selectedTopic && (
                 <Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                    <Typography sx={{ fontSize: "19px", mt: "14px" }}>Topic Image:</Typography>
-
-                    {loadingImage ? (
-                      <LinearProgress sx={{ width: "40px", mt: "15px" }} />
-                    ) : (
-                      <AutoFixHighIcon
-                        sx={{
-                          // backgroundColor: "grey",
-                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                          color: "orange",
-                          borderRadius: "50%",
-
-                          ":hover": {
-                            backgroundColor: "black",
-
-                            display: "block",
-                          },
-
-                          zIndex: 10,
-                          mt: "9px",
-                          padding: "5px",
-                          cursor: "pointer",
-                          fontSize: "34px",
-                        }}
-                        onClick={generateImageForTopic}
-                      />
-                    )}
-                  </Box>
-
                   {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
                   <TextField
                     label="Topic Description"
@@ -2874,7 +2819,36 @@ const CourseComponent = () => {
                       },
                     }}
                   />
-                  <FormControl fullWidth margin="normal" sx={{ width: "500px" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px", mb: "15px" }}>
+                    <Typography sx={{ fontSize: "19px", mt: "14px" }}>Topic Image:</Typography>
+
+                    {loadingImage ? (
+                      <LinearProgress sx={{ width: "40px", mt: "15px" }} />
+                    ) : (
+                      <AutoFixHighIcon
+                        sx={{
+                          // backgroundColor: "grey",
+                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                          color: "orange",
+                          borderRadius: "50%",
+
+                          ":hover": {
+                            backgroundColor: "black",
+
+                            display: "block",
+                          },
+
+                          zIndex: 10,
+                          mt: "9px",
+                          padding: "5px",
+                          cursor: "pointer",
+                          fontSize: "34px",
+                        }}
+                        onClick={generateImageForTopic}
+                      />
+                    )}
+                  </Box>
+                  <FormControl fullWidth margin="normal">
                     <InputLabel id="difficulty-label">Difficulty</InputLabel>
                     <Select
                       labelId="difficulty-label"
@@ -2944,7 +2918,6 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ width: "500px" }}
                     type="number"
                     inputProps={{ min: 0 }}
                   />
