@@ -20,6 +20,7 @@ import { getAllNodeParamsForStaticProps, getNodeData } from "@/lib/firestoreServ
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
 import { escapeBreaksQuotes } from "@/lib/utils/utils";
+import PublicProposal from "@/pages/proposal/PublicProposal";
 
 import SearcherPupUp from "../../../components/SearcherPupUp";
 import { KnowledgeNode } from "../../../knowledgeTypes";
@@ -39,6 +40,7 @@ interface Params extends ParsedUrlQuery {
 
 export const getStaticProps: GetStaticProps<Props, Params> = async ({ params }) => {
   const nodeData = await getNodeData(params?.id || "");
+
   if (!nodeData) {
     return {
       redirect: {
@@ -82,6 +84,7 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
   const router = useRouter();
   const [openSearch, setOpenSearch] = useState(false);
   const isMobile = useMediaQuery("(max-width:600px)");
+  const [editNode, setEditNode] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -104,6 +107,10 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
   }
 
   const { parents, contributors, references, institutions, tags, children, siblings } = node || {};
+
+  if (editNode) {
+    return <PublicProposal nodeId={node?.id} setEditNode={setEditNode} nodeData={node} />;
+  }
   return (
     <PagesNavbar
       title={`1Cademy - ${node.title}`}
@@ -113,7 +120,7 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
     >
       <Box data-testid="node-item-container" sx={{ p: { xs: 3, md: 10 } }}>
         <NodeHead node={node} keywords={keywords} createdStr={createdStr} updatedStr={updatedStr} />
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={3}>
             {parents && parents?.length > 0 && <LinkedNodes data={parents || []} header="Learn Before" />}
           </Grid>
@@ -125,7 +132,8 @@ const NodePage: NextPage<Props> = ({ node, keywords, createdStr, updatedStr }) =
                 <NodeItemContributors contributors={contributors || []} institutions={institutions || []} />
               }
               references={<ReferencesList references={references || []} sx={{ mt: 3 }} />}
-              tags={<TagsList tags={tags || []} sx={{ mt: 3 }} />}
+              tags={<TagsList tags={tags || []} sx={{ mt: 2 }} />}
+              setEditMode={setEditNode}
             />
             {siblings && siblings.length > 0 && (
               <LinkedNodes sx={{ mt: 3 }} data={siblings} header="Related"></LinkedNodes>

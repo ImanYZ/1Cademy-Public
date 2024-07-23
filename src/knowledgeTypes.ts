@@ -153,6 +153,7 @@ export type KnowledgeNode = Omit<
   children?: LinkedKnowledgeNode[];
   parents?: LinkedKnowledgeNode[];
   siblings?: LinkedKnowledgeNode[];
+  node?: string;
 };
 
 export type SimpleNode = {
@@ -368,7 +369,7 @@ export type ProposalInput = {
   tags?: string[] | { node: string; title?: string; label?: string }[];
   title: string;
   node: string;
-  summary: string;
+  proposal: string;
   choices?: KnowledgeChoice[];
   nodeType: string;
 };

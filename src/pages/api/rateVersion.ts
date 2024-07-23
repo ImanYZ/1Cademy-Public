@@ -210,7 +210,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       award = nodeData.admin === uname && versionData.proposer !== uname && payload.award ? 1 : 0;
-
+      if (versionData.proposer === null) {
+        versionData.proposer = uname;
+      }
       if (correct === 1) {
         actionName = "Correct";
       } else if (correct === -1) {

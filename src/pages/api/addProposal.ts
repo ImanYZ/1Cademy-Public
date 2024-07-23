@@ -9,7 +9,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const data = req.body.data as ProposalInput;
     const nodeType = req.body.nodeType as NodeType;
-
+    console.log(data, "<===data ==>");
     let proposalNameCollection = "versions";
 
     if (!proposalNameCollection) {
