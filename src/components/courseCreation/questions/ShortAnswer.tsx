@@ -73,15 +73,20 @@ const ShortAnswer = ({ idx, nodeId, question, sx, handleQuestion }: ShortAnswerP
     <Box sx={{ ...sx }}>
       <Box mt={2} mb={2}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography mb={4} variant="h3" fontWeight={"bold"}>
-            Short-Answer Question {(idx || 0) + 1}:
-          </Typography>
+          <Box sx={{ display: "flex", gap: "5px" }}>
+            <Typography mb={4} variant="h3" fontWeight={"bold"}>
+              Question {(idx || 0) + 1}
+            </Typography>
+            <Typography mb={4} variant="h3">
+              (Short-Answer):
+            </Typography>
+          </Box>
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               position: "relative",
-              top: "-5px",
+              top: "-8px",
               borderRadius: "10px",
             }}
           >
