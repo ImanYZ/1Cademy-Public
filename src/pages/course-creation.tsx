@@ -44,10 +44,12 @@ import {
   onSnapshot,
   query,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { INode } from "src/types/INode";
 
 import ChipInput from "@/components/ChipInput";
 import Essay from "@/components/courseCreation/questions/Essay";
@@ -771,6 +773,7 @@ const CourseComponent = () => {
       });
       return _prev;
     });
+    setSidebarOpen(false);
     setTimeout(() => {
       setSelectedCourse(courses.length);
     }, 900);
@@ -1258,23 +1261,55 @@ const CourseComponent = () => {
   };
 
   const retrieveNodeData = useCallback(
-    async (nodeId: string) => {
-      setNodePublicViewLoader(true);
-      const nodeData = await getNodeDataForCourse(nodeId);
-
-      if (nodeData) {
+    async (node: INode) => {
+      if (node) {
         let keywords = "";
-        for (let tag of nodeData.tags || []) {
-          keywords += escapeBreaksQuotes(tag.title) + ", ";
+        for (let tag of node.tags || []) {
+          keywords += escapeBreaksQuotes(tag) + ", ";
         }
 
-        const updatedStr = nodeData.changedAt ? dayjs(new Date(nodeData.changedAt)).format("YYYY-MM-DD") : "";
-        const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
-        setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
-        setNodePublicViewLoader(false);
+        const updatedStr =
+          node.changedAt && node.changedAt instanceof Timestamp
+            ? dayjs(new Date(node.changedAt.toDate())).format("YYYY-MM-DD")
+            : "";
+        const createdStr =
+          node.createdAt && node.createdAt instanceof Timestamp
+            ? dayjs(new Date(node.createdAt.toDate())).format("YYYY-MM-DD")
+            : "";
+
+        const course = courses[selectedCourse];
+        const nodeIdx = course.nodes[selectedTopic?.title].findIndex((n: any) => n.node === node.node);
+        const nodeData = course.nodes[selectedTopic?.title]?.[nodeIdx];
+        setNodePublicView(node);
+        if (!nodeData?.updatedStr) {
+          setNodePublicViewLoader(true);
+          const nodeResponse = await getNodeDataForCourse(node?.node || "");
+          const updatedData = {
+            ...nodeData,
+            createdStr,
+            updatedStr,
+            keywords,
+            children: nodeResponse.children,
+            parents: nodeResponse.parents,
+            contributors: nodeResponse.contributors,
+            institutions: nodeResponse.institutions,
+          };
+          course.nodes[selectedTopic?.title][nodeIdx] = updatedData;
+          setNodePublicView(updatedData);
+          updateCourses(course);
+          setNodePublicViewLoader(false);
+        }
       }
     },
-    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+    [
+      setNodePublicViewLoader,
+      setNodePublicView,
+      setNodePublicViewLoader,
+      expandedNode,
+      courses,
+      selectedCourse,
+      selectedTopic,
+    ]
   );
 
   const retrieveNodeQuestions = useCallback(
@@ -1796,16 +1831,18 @@ const CourseComponent = () => {
                         >
                           {category.title}
                         </Typography>
-                        <Box sx={{ ml: "14px" }}>
-                          <Button
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleOpenDialog(categoryIndex);
-                            }}
-                          >
-                            Add topic
-                          </Button>
-                        </Box>
+                        {expanded.includes(category.title) && (
+                          <Box sx={{ ml: "14px" }}>
+                            <Button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleOpenDialog(categoryIndex);
+                              }}
+                            >
+                              Add topic
+                            </Button>
+                          </Box>
+                        )}
                       </Box>
                     )}
                     {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
@@ -1916,6 +1953,7 @@ const CourseComponent = () => {
                                               theme.palette.mode === "dark" ? "#1f1f1f" : "white",
                                             border: expandedNode === n.node ? `2px solid orange` : "",
                                             p: "0px !important",
+                                            cursor: "pointer",
                                           }}
                                           onClick={e => {
                                             e.stopPropagation();
@@ -1924,7 +1962,7 @@ const CourseComponent = () => {
                                             } else {
                                               setSidebarOpen(true);
                                               setExpandedNode(n.node);
-                                              retrieveNodeData(n.node);
+                                              retrieveNodeData(n);
                                             }
                                           }}
                                         >
@@ -1938,7 +1976,7 @@ const CourseComponent = () => {
                                                 backgroundColor: "black",
                                                 color: "red",
                                               },
-                                              cursor: "pointer",
+
                                               zIndex: 10,
                                               position: "absolute",
                                               top: "0px",
@@ -2008,7 +2046,7 @@ const CourseComponent = () => {
                                               </Box>
                                               {/* <FlashcardVideo flashcard={concept} /> */}
                                               {(n?.nodeImage || []).length > 0 && (
-                                                <Box sx={{ px: "55px" }}>
+                                                <Box>
                                                   <ImageSlider images={[n?.nodeImage]} />
                                                 </Box>
                                               )}
@@ -2271,8 +2309,7 @@ const CourseComponent = () => {
           </IconButton>
           {expandedNode ? (
             <>
-              {nodePublicViewLoader && <LinearProgress sx={{ width: "100%" }} />}
-              {!nodePublicViewLoader && nodePublicView && (
+              {nodePublicView && (
                 <Box data-testid="node-item-container" sx={{ p: { xs: 1 } }}>
                   <NodeHead
                     node={expandedNode}
@@ -2311,25 +2348,27 @@ const CourseComponent = () => {
                             </Box>
                           }
                         ></CardHeader>
-                        {courses[selectedCourse]?.questions?.[nodePublicView?.id]?.map((question: any, idx: number) => {
-                          const QuestionComponent = questionComponents[question?.question_type];
-                          return QuestionComponent ? (
-                            <QuestionComponent
-                              key={idx}
-                              idx={idx}
-                              nodeId={nodePublicView?.id}
-                              question={question}
-                              handleQuestion={handleQuestion}
-                            />
-                          ) : null;
-                        })}
+                        {courses[selectedCourse]?.questions?.[nodePublicView?.node]?.map(
+                          (question: any, idx: number) => {
+                            const QuestionComponent = questionComponents[question?.question_type];
+                            return QuestionComponent ? (
+                              <QuestionComponent
+                                key={idx}
+                                idx={idx}
+                                nodeId={nodePublicView?.id}
+                                question={question}
+                                handleQuestion={handleQuestion}
+                              />
+                            ) : null;
+                          }
+                        )}
                         <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
                           <CustomButton
                             variant="contained"
                             type="button"
                             color="secondary"
                             onClick={() => {
-                              retrieveNodeQuestions(nodePublicView?.id);
+                              retrieveNodeQuestions(nodePublicView.node);
                             }}
                           >
                             Generate More Questions
@@ -2342,45 +2381,53 @@ const CourseComponent = () => {
                         </Box>
                       </Card>
                     </Grid>
-                    <Grid item xs={12} sm={12}>
-                      <Card sx={{ mt: 3, p: 2 }}>
-                        <CardHeader
-                          sx={{
-                            backgroundColor: theme =>
-                              theme.palette.mode === "light"
-                                ? theme.palette.common.darkGrayBackground
-                                : theme.palette.common.black,
-                          }}
-                          title={
-                            <Box sx={{ textAlign: "center", color: "inherit" }}>
-                              <TypographyUnderlined
-                                variant="h6"
-                                fontWeight="300"
-                                gutterBottom
-                                align="center"
-                                sx={{ color: theme => theme.palette.common.white }}
-                              >
-                                Contributors
-                              </TypographyUnderlined>
-                            </Box>
-                          }
-                        ></CardHeader>
-                        <NodeItemContributors
-                          contributors={nodePublicView?.contributors || []}
-                          institutions={nodePublicView?.institutions || []}
-                        />
-                      </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
-                      )}
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
-                      )}
-                    </Grid>
+                    {nodePublicViewLoader ? (
+                      <Box sx={{ my: 2, width: "100%", display: "flex", justifyContent: "center" }}>
+                        <CircularProgress size={40} />
+                      </Box>
+                    ) : (
+                      <>
+                        <Grid item xs={12} sm={12}>
+                          <Card sx={{ mt: 3, p: 2 }}>
+                            <CardHeader
+                              sx={{
+                                backgroundColor: theme =>
+                                  theme.palette.mode === "light"
+                                    ? theme.palette.common.darkGrayBackground
+                                    : theme.palette.common.black,
+                              }}
+                              title={
+                                <Box sx={{ textAlign: "center", color: "inherit" }}>
+                                  <TypographyUnderlined
+                                    variant="h6"
+                                    fontWeight="300"
+                                    gutterBottom
+                                    align="center"
+                                    sx={{ color: theme => theme.palette.common.white }}
+                                  >
+                                    Contributors
+                                  </TypographyUnderlined>
+                                </Box>
+                              }
+                            ></CardHeader>
+                            <NodeItemContributors
+                              contributors={nodePublicView?.contributors || []}
+                              institutions={nodePublicView?.institutions || []}
+                            />
+                          </Card>
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                          {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                            <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                          )}
+                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                          {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
+                            <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
+                          )}
+                        </Grid>
+                      </>
+                    )}
                   </Grid>
                 </Box>
               )}

@@ -54,7 +54,6 @@ const RubricItems = ({
                     label="Question Stem"
                     value={rubric?.item}
                     setValue={value => handleRubricItem(value, index)}
-                    sxPreview={{ fontSize: "20px", fontWeight: 300 }}
                     showEditPreviewSection={false}
                     editOption={option}
                     readOnly={option === "PREVIEW"}
@@ -75,10 +74,11 @@ const RubricItems = ({
                     value={option === "PREVIEW" ? rubric?.points.toString() : rubric?.points}
                     setValue={value => handleRubricPoints(value, index)}
                     readOnly={option === "PREVIEW"}
-                    sxPreview={{ fontSize: "20px", fontWeight: 300, textAlign: "center" }}
+                    sxPreview={{ textAlign: "center", overflow: "hidden" }}
                     showEditPreviewSection={false}
                     editOption={option}
                     sx={{ width: "50px" }}
+                    multiline={false}
                   />
                 </td>
                 {option === "EDIT" && (
