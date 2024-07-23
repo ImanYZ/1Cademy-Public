@@ -133,11 +133,6 @@ const books = [
     tags: ["Economy", "Economics"],
     references: ["CORE Econ - The Economy"],
   },
-  {
-    id: "Data Science",
-    tags: ["Data Science"],
-    references: ["Data science and prediction"],
-  },
 ];
 
 const questionComponents: any = {
@@ -2293,35 +2288,16 @@ const CourseComponent = () => {
           </Box>
           {expandedNode ? (
             <Box>
-              <DeleteForeverIcon
-                className="close-icon"
-                sx={{
-                  // backgroundColor: "grey",
-                  // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                  color: "red",
-                  borderRadius: "50%",
-
-                  ":hover": {
-                    backgroundColor: "black",
-
-                    display: "block",
-                  },
-
-                  zIndex: 10,
-                  position: "absolute",
-                  top: "55px",
-                  left: "15px",
-                  padding: "5px",
-                  cursor: "pointer",
-                  fontSize: "35px",
-                }}
-                onClick={() => handleRemoveNode(selectedTopic.title, expandedNode?.node || "")}
-              />
               {nodePublicView && (
                 <Box data-testid="node-item-container" sx={{ p: { xs: 1 } }}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
-                      <NodeItemFull nodeId={nodePublicView?.id} node={nodePublicView} setEditMode={() => {}} />
+                      <NodeItemFull
+                        nodeId={nodePublicView?.id}
+                        node={nodePublicView}
+                        setEditMode={() => {}}
+                        deleteNode={() => handleRemoveNode(selectedTopic.title, expandedNode?.node || "")}
+                      />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
