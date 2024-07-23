@@ -39,6 +39,7 @@ type Props = {
   references?: ReactNode;
   tags?: ReactNode;
   editable?: boolean;
+  setEditMode: (value: boolean) => void;
 };
 
 type FocusedNodeProps = {
@@ -51,15 +52,24 @@ type FocusedNodeProps = {
   editable?: boolean;
 };
 
-export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references, tags, editable = true }) => {
-  const router = useRouter();
+export const NodeItemFull: FC<Props> = ({
+  nodeId,
+  node,
+  contributors,
+  references,
+  tags,
+  editable = true,
+  setEditMode,
+}) => {
   const [imageFullScreen, setImageFullScreen] = useState(false);
   const [showShareButtons, setShowShareButtons] = useState(false);
   const handleClickImageFullScreen = () => {
     setImageFullScreen(true);
   };
   const [paddingTop, setPaddingTop] = useState("0");
-
+  const editPublicNode = () => {
+    setEditMode(true);
+  };
   return (
     <Card data-testid="node-item-full">
       <CardHeader
@@ -166,7 +176,7 @@ export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references
               </Button>
               {showShareButtons && <ShareButtons url={getNodePageWithDomain(String(node.title), nodeId)} />}
               {editable && (
-                <IconButton onClick={() => router.push({ pathname: `${ROUTES.proposal}/${node.id}` })}>
+                <IconButton onClick={editPublicNode}>
                   <EditIcon />
                 </IconButton>
               )}

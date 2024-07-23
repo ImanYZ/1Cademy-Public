@@ -59,7 +59,7 @@ const searchJSONForTopic = async (
   return searchObj;
 };
 
-const retrieveNodesForTopic = async (
+export const retrieveNodesForTopic = async (
   tags: string[],
   courseTitle: string,
   courseDescription: string,
