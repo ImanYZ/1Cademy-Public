@@ -1273,7 +1273,7 @@ const CourseComponent = () => {
   };
 
   const retrieveNodeData = useCallback(
-    async (node: INode) => {
+    async (node: INode, topicTitle: string, idx: number) => {
       if (node) {
         let keywords = "";
         for (let tag of node.tags || []) {
@@ -1290,14 +1290,12 @@ const CourseComponent = () => {
             : "";
 
         const course = courses[selectedCourse];
-        const nodeIdx = course.nodes[selectedTopic?.title].findIndex((n: any) => n.node === node.node);
-        const nodeData = course.nodes[selectedTopic?.title]?.[nodeIdx];
         setNodePublicView(node);
-        if (!nodeData?.updatedStr) {
+        if (!node?.updatedStr) {
           setNodePublicViewLoader(true);
           const nodeResponse = await getNodeDataForCourse(node?.node || "");
           const updatedData = {
-            ...nodeData,
+            ...node,
             createdStr,
             updatedStr,
             keywords,
@@ -1306,14 +1304,14 @@ const CourseComponent = () => {
             contributors: nodeResponse.contributors,
             institutions: nodeResponse.institutions,
           };
-          course.nodes[selectedTopic?.title][nodeIdx] = updatedData;
+          course.nodes[topicTitle][idx] = updatedData;
           setNodePublicView(updatedData);
           updateCourses(course);
           setNodePublicViewLoader(false);
         }
       }
     },
-    [courses, selectedCourse, selectedTopic?.title, updateCourses]
+    [courses, selectedCourse, updateCourses]
   );
 
   const retrieveNodeQuestions = useCallback(
@@ -1937,106 +1935,108 @@ const CourseComponent = () => {
                                 <AccordionDetails>
                                   {/* {loadingNodes && <LinearProgress />} */}
                                   <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                    {((courses[selectedCourse].nodes || {})[tc.title] || []).map((n: any) => (
-                                      <Box key={n.node} sx={{ mb: "10px" }}>
-                                        <Accordion
-                                          id={n.node}
-                                          expanded={true}
-                                          sx={{
-                                            borderRadius: "13px!important",
-
-                                            overflow: "hidden",
-                                            listStyle: "none",
-                                            transition: "box-shadow 0.3s",
-
-                                            backgroundColor: theme =>
-                                              theme.palette.mode === "dark" ? "#1f1f1f" : "white",
-                                            border:
-                                              expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
-                                            p: "0px !important",
-                                            cursor: "pointer",
-                                          }}
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            if (expandedNode === n.node) {
-                                              setExpandedNode(null);
-                                            } else {
-                                              setSidebarOpen(true);
-                                              setExpandedNode(n);
-                                              retrieveNodeData(n);
-                                              setSelectedTopic(tc);
-                                            }
-                                          }}
-                                        >
-                                          <AccordionSummary
+                                    {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
+                                      (n: any, idx: number) => (
+                                        <Box key={n.node} sx={{ mb: "10px" }}>
+                                          <Accordion
+                                            id={n.node}
+                                            expanded={true}
                                             sx={{
+                                              borderRadius: "13px!important",
+
+                                              overflow: "hidden",
+                                              listStyle: "none",
+                                              transition: "box-shadow 0.3s",
+
+                                              backgroundColor: theme =>
+                                                theme.palette.mode === "dark" ? "#1f1f1f" : "white",
+                                              border:
+                                                expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
                                               p: "0px !important",
-                                              marginBlock: "-13px !important",
+                                              cursor: "pointer",
+                                            }}
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              if (expandedNode === n.node) {
+                                                setExpandedNode(null);
+                                              } else {
+                                                setSidebarOpen(true);
+                                                setExpandedNode(n);
+                                                retrieveNodeData(n, tc.title, idx);
+                                                setSelectedTopic(tc);
+                                              }
                                             }}
                                           >
-                                            <Box sx={{ flexDirection: "column", width: "100%" }}>
-                                              <Box
-                                                sx={{
-                                                  display: "flex",
-                                                  alignItems: "center",
-                                                  m: "15px",
-                                                }}
-                                              >
+                                            <AccordionSummary
+                                              sx={{
+                                                p: "0px !important",
+                                                marginBlock: "-13px !important",
+                                              }}
+                                            >
+                                              <Box sx={{ flexDirection: "column", width: "100%" }}>
                                                 <Box
                                                   sx={{
-                                                    pr: "25px",
-                                                    // pb: '15px',
                                                     display: "flex",
-                                                    gap: "15px",
+                                                    alignItems: "center",
+                                                    m: "15px",
                                                   }}
                                                 >
-                                                  <NodeTypeIcon
-                                                    id={n.title}
-                                                    nodeType={n.nodeType}
-                                                    tooltipPlacement={"top"}
-                                                    fontSize={"medium"}
-                                                    // disabled={disabled}
-                                                  />
-                                                  <MarkdownRender
-                                                    text={n?.title}
+                                                  <Box
                                                     sx={{
-                                                      fontSize: "20px",
+                                                      pr: "25px",
+                                                      // pb: '15px',
+                                                      display: "flex",
+                                                      gap: "15px",
+                                                    }}
+                                                  >
+                                                    <NodeTypeIcon
+                                                      id={n.title}
+                                                      nodeType={n.nodeType}
+                                                      tooltipPlacement={"top"}
+                                                      fontSize={"medium"}
+                                                      // disabled={disabled}
+                                                    />
+                                                    <MarkdownRender
+                                                      text={n?.title}
+                                                      sx={{
+                                                        fontSize: "20px",
+                                                        fontWeight: 400,
+                                                        letterSpacing: "inherit",
+                                                      }}
+                                                    />
+                                                  </Box>
+                                                </Box>
+                                              </Box>
+                                            </AccordionSummary>
+
+                                            <AccordionDetails /* sx={{ p: "0px !important" }} */>
+                                              <Box sx={{ p: "17px", pt: 0 }}>
+                                                <Box
+                                                  sx={{
+                                                    transition: "border 0.3s",
+                                                  }}
+                                                >
+                                                  <MarkdownRender
+                                                    text={n.content}
+                                                    sx={{
+                                                      fontSize: "16px",
                                                       fontWeight: 400,
                                                       letterSpacing: "inherit",
                                                     }}
                                                   />
                                                 </Box>
+                                                {/* <FlashcardVideo flashcard={concept} /> */}
+                                                {(n?.nodeImage || []).length > 0 && (
+                                                  <Box>
+                                                    <ImageSlider images={[n?.nodeImage]} />
+                                                  </Box>
+                                                )}
                                               </Box>
-                                            </Box>
-                                          </AccordionSummary>
-
-                                          <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                            <Box sx={{ p: "17px", pt: 0 }}>
-                                              <Box
-                                                sx={{
-                                                  transition: "border 0.3s",
-                                                }}
-                                              >
-                                                <MarkdownRender
-                                                  text={n.content}
-                                                  sx={{
-                                                    fontSize: "16px",
-                                                    fontWeight: 400,
-                                                    letterSpacing: "inherit",
-                                                  }}
-                                                />
-                                              </Box>
-                                              {/* <FlashcardVideo flashcard={concept} /> */}
-                                              {(n?.nodeImage || []).length > 0 && (
-                                                <Box>
-                                                  <ImageSlider images={[n?.nodeImage]} />
-                                                </Box>
-                                              )}
-                                            </Box>
-                                          </AccordionDetails>
-                                        </Accordion>
-                                      </Box>
-                                    ))}
+                                            </AccordionDetails>
+                                          </Accordion>
+                                        </Box>
+                                      )
+                                    )}
                                   </Masonry>
                                   <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
                                     <CustomButton
@@ -2321,7 +2321,7 @@ const CourseComponent = () => {
                 <Box data-testid="node-item-container" sx={{ p: { xs: 1 } }}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={12}>
-                      <NodeItemFull nodeId={nodePublicView?.id} node={nodePublicView} setEditMode={() => {}} />
+                      <NodeItemFull nodeId={nodePublicView?.node} node={nodePublicView} setEditMode={() => {}} />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
