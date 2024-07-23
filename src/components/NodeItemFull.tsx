@@ -75,7 +75,7 @@ export const NodeItemFull: FC<Props> = ({
   return (
     <Card data-testid="node-item-full">
       <CardHeader
-        sx={{ px: { xs: 5, md: 5 }, py: { xs: 2, md: 2 } }}
+        sx={{ px: { xs: 5, md: 5 }, py: { xs: 2, md: 2 }, mt: 3 }}
         title={<MarkdownRender sx={{ fontSize: "30px" }} text={node.title || ""} />}
       ></CardHeader>
       <CardContent
