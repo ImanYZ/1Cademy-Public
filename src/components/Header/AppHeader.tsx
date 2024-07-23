@@ -18,7 +18,6 @@ import Tooltip from "@mui/material/Tooltip";
 import { Stack } from "@mui/system";
 import { getAuth } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { forwardRef, useEffect, useState } from "react";
 
@@ -38,6 +37,7 @@ import { capitalizeString } from "../../lib/utils/string.utils";
 import AppHeaderSearchBar from "../AppHeaderSearchBar2";
 import AssistantForm from "../assistant/AssistantRegister";
 import { HomepageSection } from "../home/SectionsItems";
+import OptimizedAvatar2 from "../OptimizedAvatar2";
 import SearcherPupUp from "../SearcherPupUp";
 import { ActiveLink } from "./ActiveLink";
 import { MenuHeader } from "./MenuHeader";
@@ -372,7 +372,7 @@ const AppHeader = forwardRef(
                         aria-label={`${user.fName}'s Account`}
                         aria-expanded={isProfileMenuOpen ? "true" : undefined}
                       >
-                        <Image
+                        {/* <Image
                           src={user.imageUrl || ""}
                           alt={user.fName}
                           width="26px"
@@ -382,6 +382,13 @@ const AppHeader = forwardRef(
                           style={{
                             borderRadius: "30px",
                           }}
+                        /> */}
+
+                        <OptimizedAvatar2
+                          alt={user.fName || ""}
+                          imageUrl={user.imageUrl || ""}
+                          size={26}
+                          sx={{ border: "none" }}
                         />
                       </Box>
                     </IconButton>
