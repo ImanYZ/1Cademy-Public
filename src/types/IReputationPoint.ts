@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase-admin/firestore";
+
 export type IReputation = {
   documentId?: string;
 
@@ -53,8 +55,8 @@ export type IReputation = {
   positives: number;
   totalPoints: number;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
 };
 
 export type IMonthlyReputation = IReputation & {

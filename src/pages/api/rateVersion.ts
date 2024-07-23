@@ -7,7 +7,11 @@ import { IUser } from "src/types/IUser";
 import { IUserNode } from "src/types/IUserNode";
 import { checkInstantApprovalForProposalVote, updateStatsOnVersionVote } from "src/utils/course-helpers";
 import { detach, isVersionApproved } from "src/utils/helpers";
-import { signalNodeToTypesense, updateNodeContributions } from "src/utils/version-helpers";
+import {
+  signalNodeToTypesense,
+  transferUserVersionsToNewNode,
+  updateNodeContributions,
+} from "src/utils/version-helpers";
 
 import {
   admin,
@@ -22,11 +26,14 @@ import {
   arrayToChunks,
   createUpdateUserVersion,
   getNode,
+  getTypedCollections,
   getUserVersion,
   getVersion,
   setOrIncrementNotificationNums,
   versionCreateUpdate,
 } from "../../utils";
+import { TransactionWrite } from "src/types";
+import { GetTypedCollectionsReturn } from "src/utils/getTypedCollections";
 
 /*
   This function gets invoked when the user clicks on the 
@@ -67,7 +74,7 @@ import {
 
 export type IRateVersionPayload = {
   nodeId: string;
-  versionNodeId?: string;
+  versionNodeId: string;
   notebookId?: string;
   versionId: string;
   nodeType: INodeType;
@@ -118,10 +125,11 @@ export type IRateVersionPayload = {
 // - aType values according voting action
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { uname } = req.body?.data?.user?.userData;
+    const userData = req.body?.data?.user?.userData;
+    const { uname } = userData;
     const payload = req.body as IRateVersionPayload;
 
-    const tWriteOperations: { objRef: any; data: any; operationType: string }[] = [];
+    const tWriteOperations: TransactionWrite[] = [];
 
     let writeCounts = 0;
     let nodeData: INode,
@@ -132,11 +140,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       correct: number,
       wrong: number,
       award;
-    let accepted: boolean, isApproved: boolean;
+    let isApproved: boolean = false;
+    let previouslyAccepted: boolean = false;
+
     const currentTimestamp = admin.firestore.Timestamp.fromDate(new Date());
     let actionName: string = "";
 
     let newUpdates: any = {};
+    let childType: INodeType | undefined = undefined;
 
     await db.runTransaction(async t => {
       const addedParents = [];
@@ -144,9 +155,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const removedParents = [];
       const removedChildren = [];
 
-      ({ nodeData, nodeRef } = await getNode({ nodeId: req.body.nodeId, t }));
+      ({ nodeData, nodeRef } = await getNode({ nodeId: payload.nodeId, t }));
       ({ versionData, versionRef, nodeType } = await getVersion({
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         nodeData,
         t,
       }));
@@ -155,8 +166,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         versionData.nodeImage = "";
       }
 
-      const previouslyAccepted = versionData.accepted;
-      let childType: INodeType | "" = !!versionData.childType ? versionData.childType : "";
+      previouslyAccepted = versionData.accepted;
+      childType = !!versionData.childType ? versionData.childType : undefined;
 
       for (let parent of versionData.parents) {
         if (nodeData.parents.findIndex((p: any) => p.node === parent.node) === -1) {
@@ -185,13 +196,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
 
       let { userVersionData, userVersionRef } = await getUserVersion({
-        versionId: req.body.versionId,
-        nodeType,
+        versionId: payload.versionId,
         uname,
         t,
       });
 
-      if (req.body.correct) {
+      if (payload.correct) {
         correct = userVersionData?.correct ? -1 : 1;
         wrong = !userVersionData?.correct && userVersionData?.wrong ? -1 : 0;
       } else {
@@ -199,8 +209,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         wrong = userVersionData?.wrong ? -1 : 1;
       }
 
-      award = nodeData.admin === uname && versionData.proposer !== uname && req.body.award ? 1 : 0;
-
+      award = nodeData.admin === uname && versionData.proposer !== uname && payload.award ? 1 : 0;
+      if (versionData.proposer === null) {
+        versionData.proposer = uname;
+      }
       if (correct === 1) {
         actionName = "Correct";
       } else if (correct === -1) {
@@ -215,8 +227,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         actionName = "AwardRM";
       }
 
-      // it version was previously approved
-      accepted = versionData.accepted;
       // if its going to approve now
 
       const {
@@ -224,7 +234,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         instantApprove,
         isInstructor,
       }: { courseExist: boolean; instantApprove: boolean; isInstructor: boolean } =
-        await checkInstantApprovalForProposalVote(nodeData?.tagIds || [], uname, req.body.versionId);
+        await checkInstantApprovalForProposalVote(nodeData?.tagIds || [], uname, payload.versionId);
 
       isApproved = isVersionApproved({
         corrects: versionData.corrects + correct,
@@ -236,16 +246,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       //  if user already has an interaction with the version
       await versionCreateUpdate({
-        versionNodeId: req.body.versionNodeId,
         notebookId: payload.notebookId ? payload.notebookId : "",
-        nodeId: req.body.nodeId,
+        nodeId: payload.nodeId,
         nodeData,
         nodeRef,
         nodeType: nodeType,
         instantApprove: isApproved,
         courseExist,
         isInstructor,
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         versionData,
         newVersion: false,
         childType,
@@ -266,7 +275,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // let choices: any[] = [];
-      // if ((!childType && req.body.nodeType === "Question") || childType === "Question") {
+      // if ((!childType && payload.nodeType === "Question") || childType === "Question") {
       //   choices = versionData.choices;
       // }
       const versionUpdates: any = {
@@ -285,7 +294,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           correct: correct === 1,
           createdAt: currentTimestamp,
           updatedAt: currentTimestamp,
-          version: req.body.versionId,
+          version: payload.versionId,
           user: uname,
           wrong: wrong === 1,
         };
@@ -317,6 +326,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // voting on. So, regardless of whether the version is for a new child or improvement,
       // we need to update the votes on the old version.
       await createUpdateUserVersion({
+        batch: db.batch(),
         userVersionRef,
         userVersionData,
         nodeType,
@@ -328,10 +338,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       let notificationData = {
         proposer: versionData.proposer,
         uname,
-        imageUrl: req.body.data.user.userData.imageUrl,
-        fullname: req.body.data.user.userData.fName + " " + req.body.data.user.userData.lName,
-        chooseUname: req.body.data.user.userData.chooseUname,
-        nodeId: req.body.nodeId,
+        imageUrl: userData.imageUrl,
+        fullname: userData.fName + " " + userData.lName,
+        chooseUname: userData.chooseUname,
+        nodeId: payload.nodeId,
         title: versionData.accepted ? versionData.title : nodeData.title,
         // Origin type
         oType: "Proposal",
@@ -352,7 +362,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         // This was a pending proposal for a child/improvement that just got accepted. So, we need to decrement the number of pending proposals for all the members of this community.
         await addToPendingPropsNumsExcludingVoters({
           nodeType: !!childType ? childType : nodeType,
-          versionId: req.body.versionId,
+          versionId: payload.versionId,
           tagIds: versionData.tagIds,
           value: -1,
           writeCounts,
@@ -416,17 +426,81 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    if (childType !== undefined && isApproved) {
+      // Because it's a child version, the old version that was proposed on the parent node should be
+      // removed. So, we should create a new version and a new userVersion document that use the data of the previous one.
+      await detach(async () => {
+        let newBatch = db.batch();
+        let writeCounts: number = 0;
+        const versionId = payload.versionId;
+        const voter = userData.uname;
+
+        const { versionsColl, userVersionsColl }: Partial<GetTypedCollectionsReturn> = getTypedCollections();
+        const newUserVersionRef = userVersionsColl.doc();
+
+        // TO:DO :this may go wrong if the newly created node child got a new proposal
+        const versionsDocs = await versionsColl.where("node", "==", versionId).get();
+        const versionsDoc = versionsDocs.docs[0];
+
+        let { userVersionData } = await getUserVersion({ versionId, uname: voter, t: null });
+        // If the userVersion document (of the parent node) does not exist in the database,
+        // i.e., if the user has never had interactions with it, like votes, on the version.
+        if (!userVersionData) {
+          userVersionData = {
+            award: false,
+            correct: correct === 1,
+            createdAt: currentTimestamp,
+            updatedAt: currentTimestamp,
+            version: versionsDoc.id,
+            user: voter,
+            wrong: wrong === 1,
+          };
+        } else {
+          //  do not need to set the nodeType, unique collection per each node, unlike userVersionsLog
+          userVersionData = {
+            award: userVersionData.award,
+            correct: correct === 1 ? true : correct === 0 ? userVersionData.correct : false,
+            createdAt: userVersionData.createdAt,
+            updatedAt: currentTimestamp,
+            version: versionsDoc.id,
+            user: voter,
+            wrong: wrong === 1 ? true : wrong === 0 ? userVersionData.wrong : false,
+          };
+        }
+        [newBatch, writeCounts] = await createUpdateUserVersion({
+          batch: newBatch,
+          userVersionRef: newUserVersionRef,
+          userVersionData,
+          nodeType: childType,
+          writeCounts,
+          t: null,
+          tWriteOperations: [],
+        });
+        [newBatch, writeCounts] = await transferUserVersionsToNewNode({
+          batch: newBatch,
+          writeCounts,
+          newVersionId: versionsDoc.id,
+          versionId,
+          skipUnames: [voter],
+          t: null,
+          tWriteOperations: [],
+        });
+
+        await commitBatch(newBatch);
+      });
+    }
+
     // TODO: move these to queue
     // action tracks
     await detach(async () => {
       const user = await db.collection("users").doc(uname).get();
       const userData = user.data() as IUser;
-      const isAccepted = !!(accepted || isApproved);
+      const isAccepted = !!(previouslyAccepted || isApproved);
       const actionRef = db.collection("actionTracks").doc();
       actionRef.create({
         accepted: isAccepted,
         type: "RateVersion",
-        action: actionName + "-" + req.body.versionId,
+        action: actionName + "-" + payload.versionId,
         imageUrl: userData.imageUrl,
         createdAt: currentTimestamp,
         doer: userData.uname,
@@ -442,7 +516,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     await detach(async () => {
       if (!payload.notebookId) return;
 
-      const justApproved = accepted === false && isApproved;
+      const justApproved = !previouslyAccepted && isApproved;
       if (!justApproved) return;
 
       let batch = db.batch();
@@ -485,15 +559,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // TODO: move these to queue
     await detach(async () => {
       await updateStatsOnVersionVote({
-        approved: accepted,
-        justApproved: accepted === false && isApproved,
+        approved: previouslyAccepted,
+        justApproved: !previouslyAccepted && isApproved,
         isChild: !!versionData.childType,
         nodeId: versionData.node,
         nodeType: (versionData.childType || nodeType) as INodeType,
         parentType: versionData.childType ? (nodeType as INodeType) : undefined,
         proposer: versionData.proposer,
         tagIds: versionData.tagIds,
-        versionId: req.body.versionId,
+        versionId: payload.versionId,
         voter: uname,
         voterCorrect: correct,
         voterWrong: wrong,
@@ -503,21 +577,20 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // we need update contributors, contribNames, institNames, institutions
     // TODO: move these to queue
     await detach(async () => {
-      let contribution: number = req.body.correct ? correct : wrong;
-      if (!accepted && isApproved) {
+      let contribution: number = payload.correct ? correct : wrong;
+      if (!previouslyAccepted && isApproved) {
         contribution = versionData.corrects + correct - (versionData.wrongs + wrong);
       }
       await updateNodeContributions({
         nodeId: versionData.node,
         uname: versionData.proposer,
-        accepted: accepted || isApproved,
+        accepted: previouslyAccepted || isApproved,
         contribution,
       });
-      if (accepted || isApproved) {
+      if (previouslyAccepted || isApproved) {
         await signalNodeToTypesense({
           nodeId: versionData.childType ? newUpdates.nodeId : versionData.node,
           currentTimestamp,
-          versionData: versionData.childType ? newUpdates.versionData : versionData,
         });
       }
     });

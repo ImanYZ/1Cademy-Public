@@ -28,7 +28,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log("userDoc.docs.length", userDoc.docs.length);
     if (userDoc.docs.length > 0) {
       const userData = userDoc.docs[0].data();
-      console.log(userData);
       const customToken = await getAuth().createCustomToken(userData.userId);
       return res.status(200).json({
         customToken,

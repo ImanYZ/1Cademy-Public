@@ -21,7 +21,7 @@ export const TagsList = ({ tags, sx }: TagsListProps) => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: "15px", mt: "20px" }}>
           Tags
         </Typography>
-        <LocalOfferIcon sx={{ fontSize: "1.5rem", ml: "10px", color: "#ff8a33" }} />
+        <LocalOfferIcon sx={{ fontSize: "1.3rem", ml: "10px", color: "#ff8a33" }} />
       </Box>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
         {tags.map((node, idx) => (

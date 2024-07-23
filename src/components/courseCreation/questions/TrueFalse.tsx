@@ -119,7 +119,6 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
           value={questionS?.feedback}
           setValue={handleFeedbackText}
           readOnly={option === "PREVIEW"}
-          sxPreview={{ fontSize: "20px", fontWeight: 300 }}
           showEditPreviewSection={false}
           editOption={option}
         />

@@ -38,7 +38,6 @@ export {
   schoolPointTypes,
   generateTagsData,
   generateTagsOfTags,
-  versionCreateUpdate,
   proposalNotification,
   addToPendingPropsNums,
   createUpdateUserVersion,
@@ -50,3 +49,5 @@ export {
   getCumulativeProposerVersionRatingsOnNode,
   deleteTagFromNodeTagCommunityAndTagsOfTags,
 } from "./version-helpers";
+
+export { versionCreateUpdate } from "./versionCreateUpdate";
