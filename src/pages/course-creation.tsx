@@ -70,6 +70,7 @@ import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 import { delay, escapeBreaksQuotes } from "@/lib/utils/utils";
 
@@ -150,6 +151,8 @@ const CourseComponent = () => {
 
   const dragTopicItem = useRef<any>(null);
   const dragOverTopicItem = useRef<any>(null);
+  const [dragOverItemPointer, setDragOverItemPointer] = useState<any>(null);
+  const [dragOverTopicPointer, setDragOverTopicPointer] = useState<any>(null);
   // const containerTopicRef = useRef<any>(null);
 
   const [loadingPrompt, setLoadingPrompt] = useState(false);
@@ -1021,6 +1024,8 @@ const CourseComponent = () => {
     setCourses(_courses);
     updateCourses(_courses[selectedCourse]);
     setTimeout(() => {
+      setDragOverItemPointer(null);
+      setDragOverTopicPointer(null);
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
@@ -1040,11 +1045,12 @@ const CourseComponent = () => {
       _courses[selectedCourse].syllabus[dragOverItem.current].topics.push(fromTopic);
       setGlowCategoryGreenIndex(dragOverItem.current);
     }
-
     setCourses(_courses);
     updateCourses(_courses[selectedCourse]);
     setTimeout(() => {
       setIsChanged([]);
+      setDragOverItemPointer(null);
+      setDragOverTopicPointer(null);
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
@@ -1777,6 +1783,10 @@ const CourseComponent = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    borderLeft:
+                      dragOverItemPointer === categoryIndex
+                        ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                        : undefined,
                     animation:
                       categoryIndex === glowCategoryGreenIndex
                         ? `${glowGreen} 1.5s ease-in-out infinite`
@@ -1790,6 +1800,7 @@ const CourseComponent = () => {
                   }}
                   onDragEnter={() => {
                     dragOverItem.current = categoryIndex;
+                    setDragOverItemPointer(categoryIndex);
                     //dragOverTopicItem.current = categoryIndex;
                   }}
                   onDragOver={handleDragOver}
@@ -1877,19 +1888,6 @@ const CourseComponent = () => {
                                   setExpandedTopics(newExpanded);
                                   setExpandedNode(null);
                                 }}
-                                draggable
-                                onDragStart={() => {
-                                  dragItem.current = categoryIndex;
-                                  dragTopicItem.current = topicIndex;
-                                }}
-                                onDragEnter={() => {
-                                  dragOverTopicItem.current = topicIndex;
-                                  dragOverItem.current = categoryIndex;
-                                }}
-                                onDragOver={() => {
-                                  // console.log("onDragOver");
-                                }}
-                                onDragEnd={handleSortingForItems}
                                 sx={{
                                   backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
                                   borderRadius: "25px",
@@ -1904,6 +1902,10 @@ const CourseComponent = () => {
                                     alignItems: "center",
                                     justifyContent: "space-between",
                                     borderRadius: "25px",
+                                    borderLeft:
+                                      dragOverTopicPointer === topicIndex
+                                        ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                                        : undefined,
                                     animation: isRemoved.includes(tc.title)
                                       ? `${glowRed} 1.5s ease-in-out infinite`
                                       : isChanged.includes(tc.title)
@@ -1911,6 +1913,21 @@ const CourseComponent = () => {
                                       : "",
                                     // border: `1px solid ${getTopicColor(category, tc)}`,
                                   }}
+                                  draggable
+                                  onDragStart={() => {
+                                    dragItem.current = categoryIndex;
+                                    dragTopicItem.current = topicIndex;
+                                  }}
+                                  onDragEnter={() => {
+                                    dragOverTopicItem.current = topicIndex;
+                                    dragOverItem.current = categoryIndex;
+                                    setDragOverTopicPointer(topicIndex);
+                                    setDragOverItemPointer(categoryIndex);
+                                  }}
+                                  onDragOver={() => {
+                                    // console.log("onDragOver");
+                                  }}
+                                  onDragEnd={handleSortingForItems}
                                 >
                                   {" "}
                                   <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
