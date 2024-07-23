@@ -17,6 +17,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -25,7 +26,7 @@ import { grey } from "@mui/material/colors";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FieldArray, Formik, FormikErrors, FormikHelpers } from "formik";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useState } from "react";
 
 // import { NodeType } from "src/types";
 import { NODE_TYPE_OPTIONS } from "@/lib/utils/constants";
@@ -52,9 +53,19 @@ type Props = {
   tags: ReactNode;
   onSubmit: (formValues: ProposalFormValues) => Promise<void>;
   onCancel: () => void;
+  publicView?: boolean;
 };
 
-export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, onSubmit, onCancel }) => {
+export const NodeItemFullEditor: FC<Props> = ({
+  node,
+  image,
+  references,
+  tags,
+  onSubmit,
+  onCancel,
+  publicView = true,
+}) => {
+  const [option, setOption] = useState("EDIT");
   const initialValues: ProposalFormValues = {
     title: node.title || "",
     content: node.content || "",
@@ -110,14 +121,16 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
   ) => {
     return questions.map((cur, idx) => (idx === index ? { ...cur, correct: !cur.correct } : { ...cur }));
   };
+  const onChangeOption = () => {
+    setOption(prev => (prev === "EDIT" ? "PREVIEW" : "EDIT"));
+  };
 
   return (
     <Card data-testid="node-item-full">
       <CardContent
         sx={{
-          p: { xs: 5, md: 10 },
           "&:last-child": {
-            paddingBottom: { xs: 4, md: 10 },
+            paddingBottom: { xs: 2, md: 4 },
           },
         }}
       >
@@ -131,7 +144,11 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                   label="Provide reasons for your changes"
                   variant="outlined"
                   margin="normal"
-                  placeholder="To expedite your proposal review, please explain why you propose this new version"
+                  placeholder={
+                    publicView
+                      ? "To expedite your proposal review, please explain why you propose this new version"
+                      : "Type the reasons for this changes..."
+                  }
                   value={values.reasons}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -139,27 +156,51 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                   rows={2}
                   multiline
                   fullWidth
+                  InputLabelProps={{
+                    style: { color: "grey" },
+                  }}
                 />
-
                 <Box sx={{ my: "8px" }}>
-                  <Typography textAlign="right">
-                    <Link>Log in</Link> to show your name in the contributors’ list and earn points for your helpful
-                    proposals
-                  </Typography>
+                  {publicView && (
+                    <Typography textAlign="right">
+                      <Link>Log in</Link> to show your name in the contributors’ list and earn points for your helpful
+                      proposals
+                    </Typography>
+                  )}
                   <Box sx={{ pt: "20px", display: "flex", justifyContent: "end", gap: "10px" }}>
                     <Button onClick={onCancel} type="button" color="secondary">
                       Cancel
                     </Button>
                     <LoadingButton type="submit" color="primary" variant="contained" loading={isSubmitting}>
-                      Propose changes
+                      {publicView ? "Propose changes" : "Save Changes"}
                     </LoadingButton>
                   </Box>
                 </Box>
-
                 <Divider sx={{ my: "8px" }} />
-
                 <MarkdownHelper />
-
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                    borderRadius: "10px",
+                    mt: "16px",
+                  }}
+                >
+                  <Typography
+                    onClick={() => setOption("PREVIEW")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Preview
+                  </Typography>
+                  <Switch checked={option === "EDIT"} onClick={onChangeOption} size="small" />
+                  <Typography
+                    onClick={() => setOption("EDIT")}
+                    sx={{ cursor: "pointer", fontSize: "14px", fontWeight: 490, color: "inherit" }}
+                  >
+                    Edit
+                  </Typography>
+                </Box>
                 <FormControl sx={{ width: "200px" }} margin="normal">
                   <InputLabel id="nodeTypeLabel">Node Type</InputLabel>
                   <Select
@@ -176,6 +217,11 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                         value === "Question" ? [{ choice: "", feedback: "", correct: false }] : []
                       );
                     }}
+                    MenuProps={{
+                      sx: {
+                        zIndex: "9999",
+                      },
+                    }}
                   >
                     {NODE_TYPE_OPTIONS.map((cur, idx) => (
                       <MenuItem value={cur} key={idx}>
@@ -187,7 +233,6 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                     ))}
                   </Select>
                 </FormControl>
-
                 {values.nodeType === "Question" && (
                   <Box>
                     <>
@@ -294,54 +339,55 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                     </>
                   </Box>
                 )}
-
-                <TextField
-                  id="title"
-                  name="title"
-                  label="Change the title"
-                  variant="outlined"
-                  margin="normal"
-                  value={values.title}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={Boolean(errors.title) && Boolean(touched.title)}
-                  fullWidth
-                />
-
-                <TextField
-                  id="content"
-                  name="content"
-                  label="Change the content"
-                  variant="outlined"
-                  margin="normal"
-                  value={values.content}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={Boolean(errors.content) && Boolean(touched.content)}
-                  fullWidth
-                  multiline
-                  rows={4}
-                />
-
-                <Box>
-                  <Typography component="h2" sx={{ fontSize: "30px", mb: "32px", mt: "10px" }}>
-                    <MarkdownRender text={values.title} />
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    component="div"
-                    sx={{
-                      color: theme => theme.palette.common.black,
-                      lineHeight: 2,
-                      fontSize: "1.2rem",
-                    }}
-                  >
-                    <MarkdownRender text={values.content} />
-                  </Typography>
-                </Box>
-
-                {image}
+                {option === "EDIT" && (
+                  <Box>
+                    <TextField
+                      id="title"
+                      name="title"
+                      label="Change the title"
+                      variant="outlined"
+                      margin="normal"
+                      value={values.title}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={Boolean(errors.title) && Boolean(touched.title)}
+                      fullWidth
+                    />
+                    <TextField
+                      id="content"
+                      name="content"
+                      label="Change the content"
+                      variant="outlined"
+                      margin="normal"
+                      value={values.content}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={Boolean(errors.content) && Boolean(touched.content)}
+                      fullWidth
+                      multiline
+                    />
+                  </Box>
+                )}
+                {option === "PREVIEW" && (
+                  <Box>
+                    <Typography component="h2" sx={{ fontSize: "30px", mb: "32px", mt: "10px" }}>
+                      <MarkdownRender text={values.title} />
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      component="div"
+                      sx={{
+                        color: theme => theme.palette.common.black,
+                        lineHeight: 2,
+                        fontSize: "1.2rem",
+                      }}
+                    >
+                      <MarkdownRender text={values.content} />
+                    </Typography>
+                    {image}
+                  </Box>
+                )}
 
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <NodeTypeIcon nodeType={node.nodeType} />
@@ -353,8 +399,7 @@ export const NodeItemFullEditor: FC<Props> = ({ node, image, references, tags, o
                     </Tooltip>
                   )}
                 </Box>
-
-                <Divider sx={{ my: "32px" }} />
+                {publicView && <Divider sx={{ my: "32px" }} />}
                 <Box>{tags}</Box>
                 <Box>{references}</Box>
               </form>
