@@ -1,21 +1,14 @@
-import { Box, Divider, Switch, Typography } from "@mui/material";
-import { SxProps, Theme } from "@mui/system";
+import { Box, Switch, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { QuestionProps } from "src/types";
 
 import { Editor } from "@/components/Editor";
 
 import RubricItems from "./RubricItems";
 
 type EditorOptions = "EDIT" | "PREVIEW";
-type EssayProps = {
-  question: any;
-  idx: number;
-  nodeId: number;
-  sx?: SxProps<Theme>;
-  handleQuestion: (question: any, idx: number, nodeId: number) => void;
-};
 
-const Essay = ({ idx, nodeId, question, sx, handleQuestion }: EssayProps) => {
+const Essay = ({ idx, nodeId, question, sx, handleQuestion }: QuestionProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const saveTimeoutRef = useRef<any>(null);
@@ -72,7 +65,7 @@ const Essay = ({ idx, nodeId, question, sx, handleQuestion }: EssayProps) => {
 
   return (
     <Box sx={{ ...sx }}>
-      <Box mt={2} mb={2}>
+      <Box>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
             <Typography mb={4} variant="h3" fontWeight={"bold"}>
@@ -126,7 +119,6 @@ const Essay = ({ idx, nodeId, question, sx, handleQuestion }: EssayProps) => {
         handleRubricPoints={handleRubricPoints}
         option={option}
       />
-      <Divider sx={{ borderColor: "gray", my: 3 }} />
     </Box>
   );
 };
