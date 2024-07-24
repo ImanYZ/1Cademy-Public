@@ -9,7 +9,7 @@ export const buildProposal = ({
   referenceIds,
   referenceLabels,
   references,
-  summary,
+  proposal,
   tagIds,
   tags,
   title,
@@ -17,7 +17,6 @@ export const buildProposal = ({
 }: ProposalInput) => {
   return {
     accepted: false,
-    addedInstitContris: false,
     awards: 0,
     children, // FORM
     choices, // FORM
@@ -27,17 +26,17 @@ export const buildProposal = ({
     corrects: 0,
     createdAt: new Date(),
     deleted: false,
-    fullname: "UNKNOWN UNKNOWN",
-    imageUrl: "UNKNOWN",
+    fullname: null,
+    imageUrl: null,
     institutions: [],
-    newChild: true, // IF THEY PROPOSE A NEW NODE, true; IF THEY PROPOSE AN IMPROVEMENT TO AN EXISTING NODE, false.
-    node, // FORM: THE ID OF THE NODE WHERE THEY PROPOSE THIS CHILD?IMPROVEMENT
+    newChild: false, // IF THEY PROPOSE A NEW NODE, true; IF THEY PROPOSE AN IMPROVEMENT TO AN EXISTING NODE, false.
+    node, // FORM: THE ID OF THE NODE WHERE THEY PROPOSE THIS IMPROVEMENT
     nodeImage: "", // UNAUTHENTICATED USER CANT UPLOAD IMAGES
     parents, // FORM
     referenceIds, // FORM
     referenceLabels, // FORM
     references, // FORM
-    summary, // FORM: REASONING FOR WHY THEY PROPOSE THIS CHANGE.
+    proposal, // FORM: REASONING FOR WHY THEY PROPOSE THIS CHANGE.
     tagIds, // FORM
     tags, // FORM
     title, // FORM

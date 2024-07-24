@@ -1,47 +1,34 @@
 import { ThemeProvider } from "@mui/material";
-import {
-  Backdrop,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  Grid,
-  Link,
-  Skeleton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { useRouter } from "next/router";
+import { Backdrop, Box, CircularProgress, Grid, Link, Skeleton, Tooltip, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "react-query";
+import { useMutation } from "react-query";
 
 import { FullReferencesAutocomplete } from "@/components/FullReferencesAutocomplete";
 import FullScreenImage from "@/components/FullScreenImage";
 import { FullTagAutocomplete } from "@/components/FullTagAutocomplete";
 import { LinkedNodeEditor } from "@/components/LinkedNodeEditor";
 import { NodeItemFullEditor, ProposalFormValues } from "@/components/NodeItemFullEditor";
-import {
-  buildReferences,
-  buildTags,
-  getNodePageUrl,
-  mapLinkedKnowledgeNodeToLinkedNodeObject,
-} from "@/lib/utils/utils";
+import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { buildReferences, buildTags, mapLinkedKnowledgeNodeToLinkedNodeObject } from "@/lib/utils/utils";
 
 import { LinkedKnowledgeNode, ProposalInput } from "../../knowledgeTypes";
-import { addProposal, getNodeData } from "../../lib/knowledgeApi";
+import { addProposal } from "../../lib/knowledgeApi";
 import { brandingLightTheme } from "../../lib/theme/brandingTheme";
 import { PagesNavbar } from "../search";
 
-const NodeProposal = () => {
-  const router = useRouter();
+const PublicProposal = ({
+  nodeId,
+  setEditNode,
+  nodeData,
+}: {
+  nodeId: string;
+  setEditNode: (value: boolean) => void;
+  nodeData: any;
+}) => {
   const { enqueueSnackbar } = useSnackbar();
   const [imageFullScreen, setImageFullScreen] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const nodeId = router.query.id as string;
-  const { data, isLoading } = useQuery(["nodeData", nodeId], () => getNodeData(nodeId), { enabled: Boolean(nodeId) });
+  const { confirmIt, ConfirmDialog } = useConfirmDialog();
 
   const handleClickImageFullScreen = () => {
     setImageFullScreen(true);
@@ -52,21 +39,22 @@ const NodeProposal = () => {
   const [nodeReferencesSelected, setNodeReferencesSelected] = useState<LinkedKnowledgeNode[]>([]);
 
   const { isLoading: isSavingProposal, mutateAsync } = useMutation(addProposal, { mutationKey: "addProposal" });
+  const isLoading = false;
 
   useEffect(() => {
-    if (data?.parents) {
-      setNodeParentsSelected(data.parents);
+    if (nodeData?.parents) {
+      setNodeParentsSelected(nodeData.parents);
     }
-    if (data?.children) {
-      setNodeChildrenSelected(data.children);
+    if (nodeData?.children) {
+      setNodeChildrenSelected(nodeData.children);
     }
-    if (data?.tags) {
-      setNodeTagsSelected(data.tags);
+    if (nodeData?.tags) {
+      setNodeTagsSelected(nodeData.tags);
     }
-    if (data?.references) {
-      setNodeReferencesSelected(data.references);
+    if (nodeData?.references) {
+      setNodeReferencesSelected(nodeData.references);
     }
-  }, [data]);
+  }, [nodeData]);
 
   const onSubmit = async (formValues: ProposalFormValues) => {
     const data: ProposalInput = {
@@ -74,7 +62,7 @@ const NodeProposal = () => {
       content: formValues.content,
       node: nodeId,
       parents: mapLinkedKnowledgeNodeToLinkedNodeObject(nodeParentsSelected),
-      summary: formValues.reasons,
+      proposal: formValues.reasons,
       ...buildReferences(nodeReferencesSelected),
       ...buildTags(nodeTagsSelected),
       title: formValues.title,
@@ -82,7 +70,7 @@ const NodeProposal = () => {
       nodeType: formValues.nodeType,
     };
     await mutateAsync({ data, nodeType: formValues.nodeType });
-    router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) });
+    setEditNode(false);
     enqueueSnackbar(
       <Box sx={{ maxWidth: "428px" }}>
         <Typography fontWeight={700}>'We have received your proposal!'</Typography>
@@ -105,6 +93,12 @@ const NodeProposal = () => {
         anchorOrigin: { horizontal: "left", vertical: "bottom" },
       }
     );
+  };
+
+  const cancelChanges = async () => {
+    if (await confirmIt("Are you sure you want to discard the changes?", "Cancel Changes", "Keep Changes")) {
+      setEditNode(false);
+    }
   };
 
   const getLinkedNodesFallback = () => (
@@ -140,7 +134,7 @@ const NodeProposal = () => {
             <Grid item xs={12} sm={12} md={3}>
               {isLoading
                 ? getLinkedNodesFallback()
-                : data?.parents && (
+                : nodeData?.parents && (
                     <LinkedNodeEditor
                       header="Learn Before"
                       nodesSelected={nodeParentsSelected}
@@ -151,11 +145,11 @@ const NodeProposal = () => {
             <Grid item xs={12} sm={12} md={6}>
               {isLoading ? (
                 getNodeItemFullEditorFallback()
-              ) : data ? (
+              ) : nodeData ? (
                 <NodeItemFullEditor
-                  node={data}
+                  node={nodeData}
                   image={
-                    data.nodeImage ? (
+                    nodeData.nodeImage ? (
                       <Tooltip title="Click to view image in full-screen!">
                         <Box
                           onClick={handleClickImageFullScreen}
@@ -168,7 +162,13 @@ const NodeProposal = () => {
                         >
                           {/* TODO: Change to next Image */}
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={data.nodeImage} alt={"Preview Image"} width="100%" height="100%" loading="lazy" />
+                          <img
+                            src={nodeData.nodeImage}
+                            alt={"Preview Image"}
+                            width="100%"
+                            height="100%"
+                            loading="lazy"
+                          />
                         </Box>
                       </Tooltip>
                     ) : null
@@ -181,14 +181,14 @@ const NodeProposal = () => {
                     />
                   }
                   onSubmit={onSubmit}
-                  onCancel={() => setShowConfirmation(true)}
+                  onCancel={cancelChanges}
                 />
               ) : null}
             </Grid>
             <Grid item xs={12} sm={12} md={3}>
               {isLoading
                 ? getLinkedNodesFallback()
-                : data?.children && (
+                : nodeData?.children && (
                     <LinkedNodeEditor
                       header="Learn After"
                       nodesSelected={nodeChildrenSelected}
@@ -197,10 +197,10 @@ const NodeProposal = () => {
                   )}
             </Grid>
           </Grid>
-          {data?.nodeImage && (
+          {nodeData?.nodeImage && (
             <FullScreenImage
-              alt={data.title || ""}
-              src={data.nodeImage}
+              alt={nodeData.title || ""}
+              src={nodeData.nodeImage}
               open={imageFullScreen}
               onClose={() => setImageFullScreen(false)}
             />
@@ -209,23 +209,11 @@ const NodeProposal = () => {
           <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={isSavingProposal}>
             <CircularProgress color="inherit" />
           </Backdrop>
-
-          <Dialog open={showConfirmation} onClose={() => setShowConfirmation(false)} sx={{ width: "444px", m: "auto" }}>
-            <DialogTitle id="alert-dialog-title">{"Are you sure you want to discard the changes?"}</DialogTitle>
-
-            <DialogActions>
-              <Button variant="contained" onClick={() => setShowConfirmation(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => router.push({ pathname: getNodePageUrl(data?.title || "", nodeId) })} autoFocus>
-                Yes, I'm sure
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Box>
       </PagesNavbar>
+      {ConfirmDialog}
     </ThemeProvider>
   );
 };
 
-export default NodeProposal;
+export default PublicProposal;

@@ -133,33 +133,6 @@ OR
 }
 OR
 {
-  "question_type": "Matching",
-  "question_text": "Match each organelle with its function.",
-  "pairs": [
-    {
-      "term": "Mitochondria",
-      "definition": "Produces energy for the cell",
-      "feedback": "The mitochondria generate most of the cell's supply of ATP, used as a source of chemical energy."
-    },
-    {
-      "term": "Ribosome",
-      "definition": "Synthesizes proteins",
-      "feedback": "Ribosomes are responsible for protein synthesis in the cell."
-    },
-    {
-      "term": "Chloroplast",
-      "definition": "Conducts photosynthesis",
-      "feedback": "Chloroplasts capture light energy to produce sugars during photosynthesis."
-    },
-    {
-      "term": "Golgi apparatus",
-      "definition": "Modifies and packages proteins",
-      "feedback": "The Golgi apparatus processes and packages proteins and lipids for secretion or delivery to other organelles."
-    }
-  ]
-}
-OR
-{
   "question_type": "Fill in the Blank",
   "question_text": "The powerhouse of the cell is the ____. ",
   "correct_answer": "mitochondria",
@@ -243,17 +216,31 @@ Your generated question will be reviewed by a supervisory team. For a helpful qu
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, courseDescription, targetLearners, nodeId, previousQuestions } = req.body;
+    const { courseId, courseTitle, courseDescription, targetLearners, nodeId, previousQuestions } = req.body;
 
-    const question = await retrieveGenerateQuestions(
+    const newQuestion = await retrieveGenerateQuestions(
       courseTitle,
       courseDescription,
       targetLearners,
       nodeId,
       previousQuestions
     );
-    return res.status(200).json(question);
+    const courseRef = db.collection("coursesAI").doc(courseId);
+    await db.runTransaction(async (t: any) => {
+      const courseDoc = await t.get(courseRef);
+      const courseData = courseDoc.data();
+
+      if (courseData.questions) {
+        courseData.questions[nodeId] = [...previousQuestions, newQuestion];
+      } else {
+        courseData.questions = { [nodeId]: [newQuestion] };
+      }
+      t.update(courseRef, courseData);
+    });
+
+    return res.status(200).json({});
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: error });
   }
 }

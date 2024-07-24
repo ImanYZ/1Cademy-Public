@@ -4,7 +4,7 @@ import { NodeType } from "../types";
 
 type GetTypedCollectionsParam = { nodeType: NodeType };
 
-type GetTypedCollectionsReturn = {
+export type GetTypedCollectionsReturn = {
   versionsColl: CollectionReference;
   userVersionsColl: CollectionReference;
   versionsCommentsColl: CollectionReference;

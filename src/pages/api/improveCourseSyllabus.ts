@@ -41,7 +41,7 @@ Your suggestions should:
 6. Consider the sequence of topics to ensure a logical progression of learning.
 7. Consider the number of class sessions available and the level of detail appropriate for the target learners.
 8. Provide clear rationales for each suggested change to the syllabus.
-9. If the syllabus includes categories, ensure that categories are well-structured and sequenced, and topics are appropriately grouped and organized.
+9. Ensure that categories are well-structured and sequenced, and topics are appropriately grouped and organized.
 10. Ensure that the hours allocated to each topic are appropriate for the level of detail and complexity required.
 11. Ensure that the difficulty level of each topic is suitable for the target learners.
 12. Ensure that the syllabus is engaging, challenging, and achievable for the target learners.
@@ -97,490 +97,7 @@ Each action should be accompanied by:
   - \`category\`: Specifies the category where the topic is located (if applicable).
   - \`topic\` or \`category\`: Specifies the topic or category to delete.
 
-### Example Input 1:
-
-\`\`\`json
-{
-  "Course Title": "Introduction to Data Science",
-  "Course Description": "This course introduces the fundamental concepts and techniques of data science, including data manipulation, visualization, statistical analysis, and machine learning. It is designed for beginners with no prior experience in data science.",
-  "Target Learners": "Undergraduate students majoring in computer science or related fields, with a basic understanding of programming.",
-  "Number of Hour-long Class Sessions": 13,
-  "Prerequisite Knowledge": [
-    "Basic programming skills in Python",
-    "Familiarity with data structures and algorithms",
-    "Basic understanding of statistics"
-  ],
-  "Objectives": [
-    "Understand the fundamental concepts of data science",
-    "Gain practical experience with data manipulation and visualization",
-    "Learn the basics of statistical analysis and machine learning"
-  ],
-  "Skills": [
-    "Data Cleaning",
-    "Data Visualization",
-    "Statistical Analysis",
-    "Machine Learning"
-  ],
-  "Current Syllabus": [
-    {
-      "topic": "Introduction to Data Science",
-      "hours": 1,
-      "difficulty": "Easy",
-      "description": "Overview of data science, its importance, and applications.",
-      "objectives": [
-        "Understand the scope and importance of data science",
-        "Identify key applications of data science"
-      ],
-      "skills": ["Understanding Data Science"],
-      "prerequisiteKnowledge": [],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which application of data science do you find most fascinating?",
-          "choices": ["Healthcare", "Finance", "Marketing", "Other"],
-          "purpose": "Encourage students to discuss different applications and their potential impacts."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "How can data science be applied in your field of study?",
-          "purpose": "Encourage students to explore and share specific applications of data science in their areas of interest."
-        }
-      ]
-    },
-    {
-      "topic": "Data Manipulation with Pandas",
-      "hours": 2,
-      "difficulty": "Medium",
-      "description": "Techniques for manipulating data using the Pandas library.",
-      "objectives": [
-        "Load and inspect datasets using Pandas",
-        "Perform data cleaning and transformation"
-      ],
-      "skills": ["Data Manipulation"],
-      "prerequisiteKnowledge": ["Basic programming skills in Python"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which data manipulation operation do you find most challenging?",
-          "choices": ["Filtering data", "Sorting data", "Merging data", "Other"],
-          "purpose": "Identify and discuss common challenges in data manipulation with Pandas."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Describe a scenario where you had to clean and transform data. What challenges did you face?",
-          "purpose": "Encourage students to share their experiences and strategies for data cleaning."
-        }
-      ]
-    },
-    {
-      "topic": "Data Visualization with Matplotlib",
-      "hours": 2,
-      "difficulty": "Medium",
-      "description": "Creating visual representations of data using Matplotlib.",
-      "objectives": [
-        "Create basic plots using Matplotlib",
-        "Customize plots to improve readability and presentation"
-      ],
-      "skills": ["Data Visualization"],
-      "prerequisiteKnowledge": ["Basic programming skills in Python"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which type of plot do you find most useful for data analysis?",
-          "choices": ["Line plot", "Bar chart", "Scatter plot", "Other"],
-          "purpose": "Encourage discussion on the use cases of different plot types."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Share an example where data visualization helped you understand a complex dataset.",
-          "purpose": "Encourage students to discuss the benefits of data visualization in data analysis."
-        }
-      ]
-    },
-    {
-      "topic": "Descriptive Statistics",
-      "hours": 1,
-      "difficulty": "Easy",
-      "description": "Basic concepts of descriptive statistics.",
-      "objectives": [
-        "Calculate measures of central tendency and dispersion",
-        "Interpret statistical summaries"
-      ],
-      "skills": ["Descriptive Statistics"],
-      "prerequisiteKnowledge": ["Basic understanding of statistics"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which measure of central tendency do you find most useful?",
-          "choices": ["Mean", "Median", "Mode", "Other"],
-          "purpose": "Encourage discussion on the applications of different measures of central tendency."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "How would you explain the importance of standard deviation to someone without a statistics background?",
-          "purpose": "Encourage students to simplify and communicate statistical concepts."
-        }
-      ]
-    },
-    {
-      "topic": "Inferential Statistics",
-      "hours": 2,
-      "difficulty": "Medium",
-      "description": "Introduction to inferential statistics.",
-      "objectives": [
-        "Understand sampling distributions",
-        "Perform hypothesis testing"
-      ],
-      "skills": ["Inferential Statistics"],
-      "prerequisiteKnowledge": ["Basic understanding of statistics"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which aspect of inferential statistics do you find most challenging?",
-          "choices": ["Sampling distributions", "Hypothesis testing", "Confidence intervals", "Other"],
-          "purpose": "Identify and discuss common challenges in understanding inferential statistics."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Describe a scenario where you would use hypothesis testing. What steps would you follow?",
-          "purpose": "Encourage students to apply inferential statistics in real-world scenarios."
-        }
-      ]
-    },
-    {
-      "topic": "Introduction to Machine Learning",
-      "hours": 1,
-      "difficulty": "Medium",
-      "description": "Basic concepts and techniques of machine learning.",
-      "objectives": [
-        "Understand key machine learning concepts",
-        "Identify different types of machine learning algorithms"
-      ],
-      "skills": ["Machine Learning"],
-      "prerequisiteKnowledge": ["Basic programming skills in Python"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which machine learning algorithm are you most interested in learning about?",
-          "choices": ["Decision Trees", "Neural Networks", "Support Vector Machines", "Other"],
-          "purpose": "Gauge student interest in different machine learning algorithms."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Explain a real-world problem that could be solved using machine learning.",
-          "purpose": "Encourage students to think about practical applications of machine learning."
-        }
-      ]
-    },
-    {
-      "topic": "Linear Regression",
-      "hours": 1,
-      "difficulty": "Medium",
-      "description": "Introduction to linear regression models.",
-      "objectives": [
-        "Understand the principles of linear regression",
-        "Implement a linear regression model"
-      ],
-      "skills": ["Linear Regression"],
-      "prerequisiteKnowledge": ["Basic understanding of statistics", "Introduction to Machine Learning"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "What aspect of linear regression do you find most challenging?",
-          "choices": ["Assumptions", "Model fitting", "Interpretation of results", "Other"],
-          "purpose": "Identify and discuss common challenges in understanding linear regression."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Describe a scenario where linear regression could be used to make predictions.",
-          "purpose": "Encourage students to apply linear regression to real-world problems."
-        }
-      ]
-    },
-    {
-      "topic": "Classification Algorithms",
-      "hours": 1,
-      "difficulty": "Medium",
-      "description": "Overview of classification algorithms.",
-      "objectives": [
-        "Understand different classification techniques",
-        "Implement basic classification models"
-      ],
-      "skills": ["Classification Algorithms"],
-      "prerequisiteKnowledge": ["Basic programming skills in Python", "Introduction to Machine Learning"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which classification algorithm do you find most interesting?",
-          "choices": ["K-Nearest Neighbors", "Support Vector Machines", "Naive Bayes", "Other"],
-          "purpose": "Gauge student interest in different classification algorithms."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Explain a scenario where a classification algorithm could be used to solve a problem.",
-          "purpose": "Encourage students to think about practical applications of classification algorithms."
-        }
-      ]
-    },
-    {
-      "topic": "Clustering Algorithms",
-      "hours": 1,
-      "difficulty": "Medium",
-      "description": "Introduction to clustering algorithms.",
-      "objectives": [
-        "Understand different clustering techniques",
-        "Implement basic clustering models"
-      ],
-      "skills": ["Clustering Algorithms"],
-      "prerequisiteKnowledge": ["Basic programming skills in Python", "Introduction to Machine Learning"],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which clustering algorithm do you find most useful?",
-          "choices": ["K-Means", "Hierarchical Clustering", "DBSCAN", "Other"],
-          "purpose": "Gauge student interest in different clustering algorithms."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "Describe a scenario where clustering could be used to group data.",
-          "purpose": "Encourage students to think about practical applications of clustering algorithms."
-        }
-      ]
-    },
-    {
-      "topic": "Conclusion and Future Directions",
-      "hours": 1,
-      "difficulty": "Easy",
-      "description": "Summary of course content and future directions in data science.",
-      "objectives": [
-        "Summarize key takeaways from the course",
-        "Identify potential future developments in data science"
-      ],
-      "skills": ["Understanding Future Directions"],
-      "prerequisiteKnowledge": [],
-      "prompts": [
-        {
-          "type": "Poll",
-          "text": "Which topic from the course do you want to explore further?",
-          "choices": ["Data Cleaning", "Data Visualization", "Machine Learning", "Other"],
-          "purpose": "Identify topics of interest for future learning."
-        },
-        {
-          "type": "Open-Ended",
-          "text": "What do you see as the future of data science in your field?",
-          "purpose": "Encourage students to think about and discuss the future impact of data science."
-        }
-      ]
-    }
-  ]
-}
-\`\`\`
-
-### Example Output 1:
-
-\`\`\`json
-{
-  "suggestions":
-  [
-    {
-      "action": "add",
-      "type": "topic",
-      "category": null,
-      "after": "Introduction to Data Science",
-      "new_topic": {
-        "topic": "Data Cleaning and Preprocessing",
-        "hours": 1,
-        "difficulty": "Medium",
-        "description": "Methods for cleaning and preprocessing data to ensure quality.",
-        "objectives": [
-          "Understand the importance of data cleaning",
-          "Implement basic data cleaning techniques"
-        ],
-        "skills": ["Data Cleaning", "Data Preprocessing"],
-        "prerequisiteKnowledge": ["Basic programming skills in Python"],
-        "prompts": [
-          {
-            "type": "Poll",
-            "text": "Which data cleaning technique do you find most useful?",
-            "choices": ["Removing duplicates", "Handling missing values", "Correcting errors", "Other"],
-            "purpose": "Encourage discussion on the effectiveness of different data cleaning techniques."
-          },
-          {
-            "type": "Open-Ended",
-            "text": "Describe a scenario where data cleaning significantly improved the quality of your analysis.",
-            "purpose": "Encourage students to share their experiences and the impact of data cleaning."
-          }
-        ]
-      },
-      "rationale": "This is a crucial step in the data science workflow that beginners need to understand before diving into data manipulation and analysis."
-    },
-    {
-      "action": "divide",
-      "type": "topic",
-      "category": null,
-      "old_topic": "Data Manipulation with Pandas",
-      "new_topics": [
-        {
-          "topic": "Introduction to Pandas",
-          "hours": 1,
-          "difficulty": "Medium",
-          "description": "Basic data manipulation techniques using Pandas.",
-          "objectives": [
-            "Load and inspect datasets using Pandas",
-            "Perform basic data manipulation tasks"
-          ],
-          "skills": ["Basic Data Manipulation"],
-          "prerequisiteKnowledge": ["Basic programming skills in Python"],
-          "prompts": [
-            {
-              "type": "Poll",
-              "text": "Which basic data manipulation task do you find most challenging?",
-              "choices": ["Filtering data", "Sorting data", "Merging data", "Other"],
-              "purpose": "Identify and discuss common challenges in basic data manipulation with Pandas."
-            },
-            {
-              "type": "Open-Ended",
-              "text": "Describe a scenario where you used Pandas to perform a basic data manipulation task.",
-              "purpose": "Encourage students to share their experiences with basic data manipulation tasks."
-            }
-          ]
-        },
-        {
-          "topic": "Advanced Data Manipulation with Pandas",
-          "hours": 1,
-          "difficulty": "Medium",
-          "description": "Advanced techniques for data manipulation using Pandas.",
-          "objectives": [
-            "Perform complex data manipulation tasks using Pandas",
-            "Optimize data processing with Pandas"
-          ],
-          "skills": ["Advanced Data Manipulation"],
-          "prerequisiteKnowledge": ["Basic programming skills in Python", "Introduction to Pandas"],
-          "prompts": [
-            {
-              "type": "Poll",
-              "text": "Which advanced data manipulation technique do you find most useful?",
-              "choices": ["Pivot tables", "Group by operations", "Time series analysis", "Other"],
-              "purpose": "Encourage discussion on the effectiveness of different advanced data manipulation techniques."
-            },
-            {
-              "type": "Open-Ended",
-              "text": "Describe a scenario where advanced data manipulation significantly improved your analysis.",
-              "purpose": "Encourage students to share their experiences with advanced data manipulation techniques."
-            }
-          ]
-        }
-      ],
-      "rationale": "To ensure each topic is focused and manageable for beginners."
-    },
-    {
-      "action": "delete",
-      "type": "topic",
-      "category": null,
-      "topic": "Conclusion and Future Directions",
-      "rationale": "This topic is too vague and can be integrated into the final sessions of each module."
-    },
-    {
-      "action": "modify",
-      "type": "topic",
-      "category": null,
-      "old_topic": "Descriptive Statistics",
-      "new_topic": {
-        "topic": "Descriptive Statistics - Standardization of Length and Depth",
-        "hours": 1,
-        "difficulty": "Easy",
-        "description": "Standardizing the approach to understanding descriptive statistics.",
-        "objectives": [
-          "Calculate and interpret measures of central tendency and dispersion",
-          "Summarize data using descriptive statistics"
-        ],
-        "skills": ["Descriptive Statistics"],
-        "prerequisiteKnowledge": ["Basic understanding of statistics"],
-        "prompts": [
-          {
-            "type": "Poll",
-            "text": "Which descriptive statistic do you find most useful?",
-            "choices": ["Mean", "Median", "Standard deviation", "Other"],
-            "purpose": "Encourage discussion on the usefulness of different descriptive statistics."
-          },
-          {
-            "type": "Open-Ended",
-            "text": "Describe a scenario where descriptive statistics helped you understand your data better.",
-            "purpose": "Encourage students to share their experiences with descriptive statistics."
-          }
-        ]
-      },
-      "rationale": "Standardize the length and depth of 'Descriptive Statistics' to ensure it is consistent."
-    },
-    {
-      "action": "modify",
-      "type": "topic",
-      "category": null,
-      "old_topic": "Inferential Statistics",
-      "new_topic": {
-        "topic": "Inferential Statistics - Standardization of Length and Depth",
-        "hours": 2,
-        "difficulty": "Medium",
-        "description": "Standardizing the approach to understanding inferential statistics.",
-        "objectives": [
-          "Perform hypothesis testing",
-          "Interpret results from inferential statistical analyses"
-        ],
-        "skills": ["Inferential Statistics"],
-        "prerequisiteKnowledge": ["Basic understanding of statistics"],
-        "prompts": [
-          {
-            "type": "Poll",
-            "text": "Which inferential statistic do you find most challenging?",
-            "choices": ["T-test", "ANOVA", "Regression analysis", "Other"],
-            "purpose": "Identify and discuss common challenges in understanding inferential statistics."
-          },
-          {
-            "type": "Open-Ended",
-            "text": "Describe a scenario where inferential statistics could be used to make decisions.",
-            "purpose": "Encourage students to think about and apply inferential statistics in real-world scenarios."
-          }
-        ]
-      },
-      "rationale": "Standardize the length and depth of 'Inferential Statistics' to ensure it is consistent."
-    },
-    {
-      "action": "add",
-      "type": "topic",
-      "category": null,
-      "after": "Introduction to Machine Learning",
-      "new_topic": {
-        "topic": "Practical Project: Implementing a Simple Machine Learning Model",
-        "hours": 1,
-        "difficulty": "Medium",
-        "description": "Hands-on project to implement a basic machine learning model.",
-        "objectives": [
-          "Apply machine learning concepts in a practical project",
-          "Implement and evaluate a simple machine learning model"
-        ],
-        "skills": ["Implementing Machine Learning Models"],
-        "prerequisiteKnowledge": ["Introduction to Machine Learning"],
-        "prompts": [
-          {
-            "type": "Poll",
-            "text": "Which part of the machine learning project do you find most challenging?",
-            "choices": ["Data preprocessing", "Model selection", "Evaluation metrics", "Other"],
-            "purpose": "Identify and discuss common challenges in implementing a machine learning project."
-          },
-          {
-            "type": "Open-Ended",
-            "text": "Describe your experience with implementing a machine learning model. What challenges did you face?",
-            "purpose": "Encourage students to share their experiences with implementing machine learning models."
-          }
-        ]
-      },
-      "rationale": "Add practical assignments or projects for each major section to ensure students can apply what they've learned in real-world scenarios."
-    }
-  ]
-}
-\`\`\`
-
-### Example Input 2:
+### Example Input:
 
 \`\`\`json
 {
@@ -654,7 +171,7 @@ Each action should be accompanied by:
       ],
       "topics": [
         {
-          "topic": "Advanced HTML and CSS",
+          "title": "Advanced HTML and CSS",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Advanced techniques in HTML and CSS for modern web design.",
@@ -687,7 +204,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "JavaScript ES6 and Beyond",
+          "title": "JavaScript ES6 and Beyond",
           "hours": 2,
           "difficulty": "Medium",
           "description": "In-depth coverage of ES6 features and modern JavaScript.",
@@ -720,7 +237,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Introduction to React",
+          "title": "Introduction to React",
           "hours": 3,
           "difficulty": "Medium",
           "description": "Fundamentals of React for building dynamic user interfaces.",
@@ -753,7 +270,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "State Management in React",
+          "title": "State Management in React",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Managing state in React applications using various techniques.",
@@ -820,7 +337,7 @@ Each action should be accompanied by:
       ],
       "topics": [
         {
-          "topic": "Node.js and Express.js",
+          "title": "Node.js and Express.js",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Building server-side applications using Node.js and Express.js.",
@@ -853,7 +370,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "RESTful API Design",
+          "title": "RESTful API Design",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Designing RESTful APIs for web applications.",
@@ -886,7 +403,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Database Integration with MongoDB",
+          "title": "Database Integration with MongoDB",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Integrating MongoDB with web applications for data storage.",
@@ -919,7 +436,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Authentication and Authorization",
+          "title": "Authentication and Authorization",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Implementing secure authentication and authorization mechanisms.",
@@ -985,7 +502,7 @@ Each action should be accompanied by:
       ],
       "topics": [
         {
-          "topic": "Common Security Threats",
+          "title": "Common Security Threats",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Identifying and mitigating common web security threats.",
@@ -1018,7 +535,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Secure Coding Practices",
+          "title": "Secure Coding Practices",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Best practices for writing secure code.",
@@ -1051,7 +568,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Web Application Firewalls",
+          "title": "Web Application Firewalls",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Using web application firewalls to protect web applications.",
@@ -1089,7 +606,7 @@ Each action should be accompanied by:
 }
 \`\`\`
 
-### Example Output 2:
+### Example Output:
 
 \`\`\`json
 {
@@ -1100,7 +617,7 @@ Each action should be accompanied by:
       "type": "category",
       "after": "Web Security",
       "new_category": {
-        "category": "DevOps and Deployment",
+        "title": "DevOps and Deployment",
         "description": "In-depth exploration of DevOps practices and deployment techniques.",
         "objectives": [
           "Implement CI/CD pipelines",
@@ -1131,7 +648,7 @@ Each action should be accompanied by:
         ],
         "topics": [
           {
-            "topic": "Continuous Integration and Continuous Deployment (CI/CD)",
+            "title": "Continuous Integration and Continuous Deployment (CI/CD)",
             "hours": 2,
             "difficulty": "Medium",
             "description": "Practices and tools for continuous integration and deployment.",
@@ -1164,7 +681,7 @@ Each action should be accompanied by:
             ]
           },
           {
-            "topic": "Containerization with Docker",
+            "title": "Containerization with Docker",
             "hours": 2,
             "difficulty": "Medium",
             "description": "Using Docker for containerization and deployment.",
@@ -1197,7 +714,7 @@ Each action should be accompanied by:
             ]
           },
           {
-            "topic": "Deployment on Cloud Platforms",
+            "title": "Deployment on Cloud Platforms",
             "hours": 2,
             "difficulty": "Medium",
             "description": "Deploying web applications on cloud platforms.",
@@ -1240,7 +757,7 @@ Each action should be accompanied by:
       "old_topic": "State Management in React",
       "new_topics": [
         {
-          "topic": "State Management with Redux",
+          "title": "State Management with Redux",
           "hours": 1,
           "difficulty": "Medium",
           "description": "Managing state in React applications using Redux.",
@@ -1271,7 +788,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "State Management with Context API",
+          "title": "State Management with Context API",
           "hours": 1,
           "difficulty": "Medium",
           "description": "Managing state in React applications using the Context API.",
@@ -1308,14 +825,14 @@ Each action should be accompanied by:
       "action": "delete",
       "type": "topic",
       "category": "Web Security",
-      "topic": "Common Security Threats",
+      "title": "Common Security Threats",
       "rationale": "This topic can be integrated into 'Secure Coding Practices' to streamline the content and avoid redundancy."
     },
     {
       "action": "move",
       "type": "topic",
       "current_category": "Backend Development",
-      "topic": "RESTful API Design",
+      "title": "RESTful API Design",
       "current_after": "Node.js and Express.js",
       "new_category": "Frontend Development",
       "new_after": "JavaScript ES6 and Beyond",
@@ -1327,7 +844,7 @@ Each action should be accompanied by:
       "category": "Backend Development",
       "after": "Database Integration with MongoDB",
       "new_topic": {
-        "topic": "GraphQL API Design",
+        "title": "GraphQL API Design",
         "hours": 2,
         "difficulty": "Medium",
         "description": "Designing APIs using GraphQL for more flexible data queries.",
@@ -1410,6 +927,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // console.log("suggestions ==>", suggestions);
     return res.status(200).json({ suggestions });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({});
   }
 }

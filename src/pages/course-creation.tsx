@@ -5,6 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { LoadingButton, Masonry } from "@mui/lab";
 import {
   Accordion,
@@ -19,6 +20,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
   Grid,
   IconButton,
@@ -32,7 +34,6 @@ import {
   Select,
   Slide,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
@@ -44,10 +45,14 @@ import {
   onSnapshot,
   query,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { KnowledgeNode } from "src/knowledgeTypes";
+import { QuestionProps } from "src/types";
+import { INode } from "src/types/INode";
 
 import ChipInput from "@/components/ChipInput";
 import Essay from "@/components/courseCreation/questions/Essay";
@@ -60,16 +65,16 @@ import ImageSlider from "@/components/ImageSlider";
 import LinkedNodes from "@/components/LinkedNodes";
 import { CustomButton } from "@/components/map/Buttons/Buttons";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
-import { NodeHead } from "@/components/NodeHead";
 import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
+import { NodeItemFullEditor, ProposalFormValues } from "@/components/NodeItemFullEditor";
 import NodeTypeIcon from "@/components/NodeTypeIcon";
-import { ReferencesList } from "@/components/ReferencesList";
 import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
 import { delay, escapeBreaksQuotes } from "@/lib/utils/utils";
 
@@ -96,27 +101,27 @@ const glowRed = keyframes`
   }
 `;
 
-interface Topic {
-  title: string;
-  hours: number;
-  difficulty: string;
-}
+// interface  {
+//   title: string;
+//   hours: number;
+//   difficulty: string;
+// }
 
-interface Suggestion {
-  action: string;
-  type: string;
-  category?: string | null;
-  after?: string;
-  new_topic?: Topic;
-  old_topic?: string;
-  new_topics?: Topic[];
-  current_category?: string;
-  topic?: string;
-  current_after?: string;
-  new_category?: string;
-  new_after?: string;
-  rationale: string;
-}
+// interface Suggestion {
+//   action: string;
+//   type: string;
+//   category?: string | null;
+//   after?: string;
+//   new_topic?: Topic;
+//   old_topic?: string;
+//   new_topics?: Topic[];
+//   current_category?: string;
+//   topic?: string;
+//   current_after?: string;
+//   new_category?: string;
+//   new_after?: string;
+//   rationale: string;
+// }
 const books = [
   {
     id: "OpenStax Psychology (2nd ed.) Textbook",
@@ -135,7 +140,11 @@ const books = [
   },
 ];
 
-const questionComponents: any = {
+type QuestionComponentsType = {
+  [key: string]: React.ComponentType<QuestionProps>;
+};
+
+const questionComponents: QuestionComponentsType = {
   "Multiple Choice": MultipleChoices,
   "True/False": TrueFalse,
   "Short Answer": ShortAnswer,
@@ -150,8 +159,11 @@ const CourseComponent = () => {
 
   const dragTopicItem = useRef<any>(null);
   const dragOverTopicItem = useRef<any>(null);
+  const [dragOverItemPointer, setDragOverItemPointer] = useState<any>(null);
+  const [dragOverTopicPointer, setDragOverTopicPointer] = useState<any>(null);
   // const containerTopicRef = useRef<any>(null);
 
+  const [editMode, setEditMode] = useState(false);
   const [loadingPrompt, setLoadingPrompt] = useState(false);
   const [glowCategoryGreenIndex, setGlowCategoryGreenIndex] = useState(-1);
   const [glowCategoryRedIndex, setGlowCategoryRedIndex] = useState(-1);
@@ -186,7 +198,7 @@ const CourseComponent = () => {
   const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState<string[]>([]);
   const [editTopic, setEditTopic] = useState<any>(null);
-  const [expandedNode, setExpandedNode] = useState(null);
+  const [expandedNode, setExpandedNode] = useState<KnowledgeNode | null>(null);
   const [isChanged, setIsChanged] = useState<string[]>([]);
   const [isRemoved, setIsRemoved] = useState<string[]>([]);
   const [creatingCourseStep, setCreatingCourseStep] = useState<number>(0);
@@ -194,7 +206,7 @@ const CourseComponent = () => {
   const [newCategoryTitle, setNewCategoryTitle] = useState<string>("");
   const [expandedTopics, setExpandedTopics] = useState<any>([]);
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
-  const [loadingNodes, setLoadingNodes] = useState(false);
+  const [loadingNodes, setLoadingNodes] = useState<string[]>([]);
   const [nodePublicView, setNodePublicView] = useState<any>(null);
   const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
   const [questionsLoader, setQuestionsLoader] = useState<any>(false);
@@ -242,7 +254,7 @@ const CourseComponent = () => {
 
   const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
-
+    delete course.suggestions;
     const courseRef = doc(db, "coursesAI", course.id);
     const updateData: any = { ...course, updateAt: new Date() };
 
@@ -388,7 +400,7 @@ const CourseComponent = () => {
     setDifficulty("");
   };
 
-  const generateSuggestionMessage = (suggestion: Suggestion): string => {
+  const generateSuggestionMessage = (suggestion: any): string => {
     const {
       action,
       category,
@@ -398,37 +410,68 @@ const CourseComponent = () => {
       new_topics,
       current_category,
       topic,
+      title,
       new_category,
       new_after,
     } = suggestion;
 
-    switch (action) {
-      case "add":
-        return `**<span style="color: green;">Add a new topic</span>** called **"${
-          new_topic?.title
-        }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
-          new_topic?.difficulty
-        }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
-      case "modify":
-        return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
-          new_topic?.title
-        }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${new_topic?.hours} hour${
-          (new_topic?.hours || 0) > 1 ? "s" : ""
-        }.`;
-      case "divide":
-        const dividedTopics = new_topics
-          ?.map(
-            nt => `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
-          )
-          .join(" and ");
-        return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
-      case "move":
-        return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
-      case "delete":
-        return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
-      default:
-        return "Invalid action.";
+    if (suggestion.type === "topic") {
+      switch (action) {
+        case "add":
+          return `**<span style="color: green;">Add a new topic</span>** called **"${
+            new_topic?.title
+          }"** after the topic **"${after}"** under the category **"${category}"** with difficulty level **"${
+            new_topic?.difficulty
+          }"** that we estimate would take **${new_topic?.hours}** hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+        case "modify":
+          return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
+            new_topic?.title
+          }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${
+            new_topic?.hours
+          } hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+        case "divide":
+          const dividedTopics = new_topics
+            ?.map(
+              (nt: any) =>
+                `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+            )
+            .join(" and ");
+          return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
+        case "move":
+          return `**<span style="color: orange;">Move the topic</span>** **"${title}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+        case "delete":
+          return `**<span style="color: red;">Delete the topic</span>** **"${title}"** under the category **"${category}"**.`;
+        default:
+          return "Invalid action.";
+      }
+    } else if (suggestion.type === "category") {
+      const { new_category, after } = suggestion;
+      switch (action) {
+        case "add":
+          return `**<span style="color: green;">Add a new Category</span>** called **"${new_category?.title}"** after the category **"${after}"**.`;
+        case "modify":
+          return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
+            new_topic?.title
+          }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${
+            new_topic?.hours
+          } hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+        case "divide":
+          const dividedTopics = new_topics
+            ?.map(
+              (nt: any) =>
+                `**"${nt.title}"** (${nt.hours} hour${(nt?.hours || 0) > 1 ? "s" : ""}, ${nt.difficulty} difficulty)`
+            )
+            .join(" and ");
+          return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
+        case "move":
+          return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+        case "delete":
+          return `**<span style="color: red;">Delete the category</span>** **"${topic}"** under the category **"${category}"**.`;
+        default:
+          return "Invalid action.";
+      }
     }
+    return "Invalid action.";
   };
   const improveCourseStructure = async () => {
     try {
@@ -477,17 +520,17 @@ const CourseComponent = () => {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const afterTopicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.after);
+          const afterTopicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.after);
           topics.splice(afterTopicIdx + 1, 0, currentImprovement.new_topic);
         }
-        modifiedTopics.push(currentImprovement.new_topic.topic);
+        modifiedTopics.push(currentImprovement.new_topic.title);
       }
 
       if (currentImprovement.action === "modify") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.old_topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.old_topic);
           if (topicIdx !== -1) {
             topics[topicIdx] = currentImprovement.new_topic;
           }
@@ -496,10 +539,10 @@ const CourseComponent = () => {
       }
 
       if (currentImprovement.action === "divide") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.old_topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.old_topic);
           if (topicIdx !== -1) {
             topics.splice(topicIdx, 1, ...currentImprovement.new_topics);
           }
@@ -509,15 +552,15 @@ const CourseComponent = () => {
       }
 
       if (currentImprovement.action === "delete") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.topic);
           if (topicIdx !== -1) {
             topics.splice(topicIdx, 1);
           }
         }
-        removedTopics.push(currentImprovement.topic);
+        removedTopics.push(currentImprovement.title);
       }
 
       if (currentImprovement.action === "move") {
@@ -526,53 +569,50 @@ const CourseComponent = () => {
         );
         if (currentCategoryIdx !== -1) {
           let topics = syllabus[currentCategoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.topic);
           if (topicIdx !== -1) {
             const [movedTopic] = topics.splice(topicIdx, 1);
-            const newCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_category);
+            const newCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.new_category);
             if (newCategoryIdx !== -1) {
               let newTopics = syllabus[newCategoryIdx].topics;
 
-              const newAfterTopicIdx = newTopics.findIndex((tp: any) => tp.topic === currentImprovement.new_after);
+              const newAfterTopicIdx = newTopics.findIndex((tp: any) => tp.title === currentImprovement.new_after);
               newTopics.splice(newAfterTopicIdx + 1, 0, movedTopic);
             }
           }
         }
-        modifiedTopics.push(currentImprovement.topic);
+        modifiedTopics.push(currentImprovement.title);
       }
     }
 
     if (currentImprovement.type === "category") {
       if (currentImprovement.action === "add") {
-        const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.after);
-        syllabus.splice(afterCategoryIdx + 1, 0, {
-          category: currentImprovement.new_category,
-          topics: currentImprovement.topics,
-        });
+        const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.after);
+        syllabus.splice(afterCategoryIdx + 1, 0, currentImprovement.new_category);
       }
 
-      if (currentImprovement.action === "modify") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.old_category);
-        if (categoryIdx !== -1) {
-          syllabus[categoryIdx].category = currentImprovement.new_category.category;
-        }
-      }
+      // if (currentImprovement.action === "modify") {
+      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.old_category);
+      //   if (categoryIdx !== -1) {
+      //     syllabus[categoryIdx].category = currentImprovement.new_category.category;
+      //   }
+      // }
 
-      if (currentImprovement.action === "delete") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
-        if (categoryIdx !== -1) {
-          syllabus.splice(categoryIdx, 1);
-        }
-      }
+      // if (currentImprovement.action === "delete") {
+      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+      //   if (categoryIdx !== -1) {
+      //     syllabus.splice(categoryIdx, 1);
+      //   }
+      // }
 
-      if (currentImprovement.action === "move") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
-        if (categoryIdx !== -1) {
-          const [movedCategory] = syllabus.splice(categoryIdx, 1);
-          const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_after);
-          syllabus.splice(newAfterCategoryIdx + 1, 0, movedCategory);
-        }
-      }
+      // if (currentImprovement.action === "move") {
+      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+      //   if (categoryIdx !== -1) {
+      //     const [movedCategory] = syllabus.splice(categoryIdx, 1);
+      //     const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_after);
+      //     syllabus.splice(newAfterCategoryIdx + 1, 0, movedCategory);
+      //   }
+      // }
     }
 
     _courses[selectedCourse].syllabus = syllabus;
@@ -582,6 +622,7 @@ const CourseComponent = () => {
     setIsChanged(modifiedTopics);
     setTimeout(() => {
       setCourses(_courses);
+      setDisplayCourses(_courses);
     }, 1000);
     setCurrentImprovement({});
 
@@ -598,11 +639,16 @@ const CourseComponent = () => {
   };
 
   const navigateChange = (index: any) => {
-    if (improvements[index]) {
+    let newIndex = index;
+    if (index >= improvements.length && improvements.length > 0) {
+      newIndex = 0;
+    }
+
+    if (newIndex !== -1) {
       TriggerSlideAnimation();
       setTimeout(() => {
-        setCurrentChangeIndex(index);
-        setCurrentImprovement(improvements[index]);
+        setCurrentChangeIndex(newIndex);
+        setCurrentImprovement(improvements[newIndex]);
       }, 1000);
     } else {
       setSidebarOpen(false);
@@ -620,9 +666,9 @@ const CourseComponent = () => {
   };
 
   /*  */
-  const handlePaperClick = async () => {
+  const retrieveNodesForTopic = async (topic: string) => {
     try {
-      if (Object.keys(currentImprovement || {}).length > 0 || loadingNodes) {
+      if (Object.keys(currentImprovement || {}).length > 0 || loadingNodes.includes(topic)) {
         return;
       }
 
@@ -635,11 +681,11 @@ const CourseComponent = () => {
       const syllabus = courses[selectedCourse].syllabus;
       const tags = courses[selectedCourse].tags;
       const references = courses[selectedCourse].references;
-      if (Object.keys(courses[selectedCourse].nodes || {}).length > 0) {
-        return;
-      }
-      setLoadingNodes(true);
-      await Post("/retrieveNodesForCourse", {
+
+      setLoadingNodes((prev: string[]) => {
+        return [...prev, topic];
+      });
+      await Post("/retrieveNodesForTopic", {
         courseId: courses[selectedCourse].id,
         tags,
         courseTitle,
@@ -647,10 +693,15 @@ const CourseComponent = () => {
         targetLearners,
         references,
         syllabus,
+        topic,
       });
-      setLoadingNodes(false);
+      setLoadingNodes((prev: string[]) => {
+        return [...prev.filter(t => t !== topic)];
+      });
     } catch (error) {
-      setLoadingNodes(false);
+      setLoadingNodes((prev: string[]) => {
+        return [...prev.filter(t => t !== topic)];
+      });
       await confirmIt("There is a error with the request for retrieving nodes, please try again.", "Ok", "");
       console.error(error);
     }
@@ -664,25 +715,7 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
   };
-  const getNewTopics = (currentImprovement: any, category: string) => {
-    let newTopics = [];
-    const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
-    if (Object.keys(_currentImprovement || {}).length <= 0 || _currentImprovement.category !== category) {
-      return [];
-    }
-    if (
-      _currentImprovement.new_topic &&
-      (_currentImprovement.action === "add" || _currentImprovement.action === "divide")
-    ) {
-      newTopics.push(_currentImprovement.new_topic);
-    }
-    if ((_currentImprovement.new_topics || []).length > 0) {
-      newTopics = [...newTopics, ..._currentImprovement.new_topics];
-    }
-    newTopics = [...newTopics].slice();
-    newTopics.forEach(t => (t.color = "add"));
-    return newTopics;
-  };
+
   const scrollToCategory = (category: string) => {
     const categoryElement = document.getElementById(category);
     if (categoryElement) {
@@ -694,31 +727,67 @@ const CourseComponent = () => {
       setExpanded([currentImprovement.category]);
       scrollToCategory(currentImprovement.category);
     }
-    if (currentImprovement.action === "move" && currentImprovement.type === "topic") {
-      const NEW_COURSES: any = JSON.parse(JSON.stringify(courses));
-      const _selectedCourse = NEW_COURSES[selectedCourse];
-      const syllabus: any = _selectedCourse.syllabus;
+    const NEW_COURSES: any = JSON.parse(JSON.stringify(courses));
+    const _selectedCourse = NEW_COURSES[selectedCourse];
+    if (!_selectedCourse) return;
+    const syllabus: any = _selectedCourse.syllabus;
+    if (currentImprovement.type === "topic") {
+      if (currentImprovement.action === "move") {
+        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.current_category);
+        const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
+          (s: any) => s.title === currentImprovement.title
+        );
+        const oldTopic = syllabus[oldCategoryIndex].topics[oldTopicIndex];
+        syllabus[oldCategoryIndex].color = "change";
 
-      const oldCategoryIndex = syllabus.findIndex((s: any) => s.category === currentImprovement.current_category);
-      const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-        (s: any) => s.topic === currentImprovement.topic
-      );
-      const oldTopic = syllabus[oldCategoryIndex].topics[oldTopicIndex];
+        const newCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.new_category);
+        if (newCategoryIndex === -1) {
+          return;
+        }
+        syllabus[newCategoryIndex].color = "change";
+        const afterIndex = syllabus[newCategoryIndex].topics.findIndex(
+          (s: any) => s.title === currentImprovement.new_after
+        );
 
-      const categoryIndex = syllabus.findIndex((s: any) => s.category === currentImprovement.new_category);
-      if (categoryIndex === -1) {
-        return;
+        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex((s: any) => s.title === oldTopic.title);
+        if (alreadyExist === -1) {
+          oldTopic.color = "delete";
+          oldTopic.action = "move";
+          syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
+        }
+        setExpanded([currentImprovement.current_category, currentImprovement.new_category]);
+        scrollToCategory(currentImprovement.current_category);
+      } else if (currentImprovement.action === "delete") {
+        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
+          (s: any) => s.title === currentImprovement.title
+        );
+
+        syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
+        setExpanded([currentImprovement.category]);
+        scrollToCategory(currentImprovement.category);
+      } else if (currentImprovement.action === "divide") {
+        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(
+          (t: any) => t.title === currentImprovement.old_topic
+        );
+        syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
+        currentImprovement.new_topics.forEach((t: any) => (t.color = "add"));
+        syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...currentImprovement.new_topics];
+      } else if (currentImprovement.action === "add") {
+        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const afterIndex = syllabus[categoryIndex].topics.findIndex((t: any) => t.title === currentImprovement.after);
+
+        const newTopic = currentImprovement.new_topic;
+        newTopic.color = "add";
+        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
       }
-
-      const afterIndex = syllabus[categoryIndex].topics.findIndex((s: any) => s.topic === currentImprovement.new_after);
-      const alreadyExist = syllabus[categoryIndex].topics.findIndex((s: any) => s.topic === oldTopic.topic);
-      if (alreadyExist === -1) {
-        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic });
-      }
-      setExpanded([currentImprovement.current_category, currentImprovement.new_category]);
-      setDisplayCourses(NEW_COURSES);
-      scrollToCategory(currentImprovement.current_category);
     }
+    if (currentImprovement.action === "add" && currentImprovement.type === "category") {
+      const addAfterIdx = syllabus.findIndex((c: any) => c.title === currentImprovement.after);
+      syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovement.new_category, color: "add" });
+    }
+    setDisplayCourses(NEW_COURSES);
   }, [currentImprovement]);
 
   const getCourses = () => {
@@ -729,28 +798,17 @@ const CourseComponent = () => {
     }
   };
 
-  const getTopicColor = (category: any, tc: any) => {
-    const color =
-      tc.color === "add"
-        ? "green"
-        : currentImprovement.old_topic === tc
-        ? "red"
-        : selectedTopic === tc.title
-        ? "orange"
-        : currentImprovement.action === "move" &&
-          currentImprovement.type === "topic" &&
-          currentImprovement.topic === tc.title &&
-          currentImprovement.new_category === category.title
-        ? "green"
-        : (currentImprovement.action === "move" ||
-            currentImprovement.action === "delete" ||
-            currentImprovement.action === "divide") &&
-          currentImprovement.type === "topic" &&
-          (currentImprovement.topic === tc.title || currentImprovement.old_topic === tc.title) &&
-          (currentImprovement.current_category === category.title || !currentImprovement.current_category)
-        ? "red"
-        : "";
-    return color;
+  const getColor = (action: "delete" | "add" | "change") => {
+    switch (action) {
+      case "delete":
+        return "red";
+      case "add":
+        return "green";
+      case "change":
+        return "orange";
+      default:
+        return "";
+    }
   };
 
   const createCourse = async () => {
@@ -772,9 +830,10 @@ const CourseComponent = () => {
       });
       return _prev;
     });
+    setSidebarOpen(false);
     setTimeout(() => {
       setSelectedCourse(courses.length);
-    }, 900);
+    }, 1000);
     setCreatingCourseStep(0);
   };
 
@@ -905,29 +964,6 @@ const CourseComponent = () => {
 
     setLoadingCourseStructure(false);
   };
-  const retrieveNodesForTopic = async (topic: any) => {
-    try {
-      setLoadingNodes(true);
-      const courseTitle = courses[selectedCourse].title;
-      const targetLearners = courses[selectedCourse].learners;
-      const courseDescription = courses[selectedCourse].description;
-      const syllabus = courses[selectedCourse].syllabus;
-      const tags = courses[selectedCourse].tags;
-      const references = courses[selectedCourse].references;
-
-      await Post("/retrieveNodesForTopic", {
-        courseId: courses[selectedCourse].id,
-        tags,
-        courseTitle,
-        courseDescription,
-        targetLearners,
-        references,
-        syllabus,
-        topic: topic.title,
-      });
-      setLoadingNodes(false);
-    } catch (error) {}
-  };
 
   const deleteCategory = async (c: any) => {
     if (
@@ -1038,6 +1074,8 @@ const CourseComponent = () => {
     setCourses(_courses);
     updateCourses(_courses[selectedCourse]);
     setTimeout(() => {
+      setDragOverItemPointer(null);
+      setDragOverTopicPointer(null);
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
@@ -1057,11 +1095,12 @@ const CourseComponent = () => {
       _courses[selectedCourse].syllabus[dragOverItem.current].topics.push(fromTopic);
       setGlowCategoryGreenIndex(dragOverItem.current);
     }
-
     setCourses(_courses);
     updateCourses(_courses[selectedCourse]);
     setTimeout(() => {
       setIsChanged([]);
+      setDragOverItemPointer(null);
+      setDragOverTopicPointer(null);
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
@@ -1140,11 +1179,37 @@ const CourseComponent = () => {
 
     return false;
   };
-  const handleRemoveNode = (topic: string, node: string) => {
-    const course = courses[selectedCourse];
-    const newNodes = course.nodes[topic].filter((n: any) => n.node !== node);
-    course.nodes[topic] = newNodes;
-    updateCourses(course);
+  const handleRemoveNode = async (topic: string, node: string) => {
+    if (
+      await confirmIt(
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: "10px",
+          }}
+        >
+          <DeleteForeverIcon />
+          <Typography sx={{ fontWeight: "bold" }}>Do you want to delete this node under the topic?</Typography>
+        </Box>,
+        "Delete Node",
+        "Keep Node"
+      )
+    ) {
+      const course = courses[selectedCourse];
+      if (!course.nodes[topic]) {
+        return;
+      }
+      const newNodes = course.nodes[topic].filter((n: any) => n.node !== node);
+      course.nodes[topic] = newNodes;
+      updateCourses(course);
+      setSidebarOpen(false);
+      setNodePublicView(null);
+      setExpandedNode(null);
+    }
   };
 
   const generateImageForTopic = async () => {
@@ -1259,45 +1324,68 @@ const CourseComponent = () => {
   };
 
   const retrieveNodeData = useCallback(
-    async (nodeId: string) => {
-      setNodePublicViewLoader(true);
-      const nodeData = await getNodeDataForCourse(nodeId);
-
-      if (nodeData) {
+    async (node: INode, topicTitle: string, idx: number) => {
+      if (node && selectedTopic) {
         let keywords = "";
-        for (let tag of nodeData.tags || []) {
-          keywords += escapeBreaksQuotes(tag.title) + ", ";
+        for (let tag of node.tags || []) {
+          keywords += escapeBreaksQuotes(tag) + ", ";
         }
 
-        const updatedStr = nodeData.changedAt ? dayjs(new Date(nodeData.changedAt)).format("YYYY-MM-DD") : "";
-        const createdStr = nodeData.createdAt ? dayjs(new Date(nodeData.createdAt)).format("YYYY-MM-DD") : "";
-        setNodePublicView({ ...nodeData, keywords, updatedStr, createdStr });
-        setNodePublicViewLoader(false);
+        const updatedStr =
+          node.changedAt && node.changedAt instanceof Timestamp
+            ? dayjs(new Date(node.changedAt.toDate())).format("YYYY-MM-DD")
+            : "";
+        const createdStr =
+          node.createdAt && node.createdAt instanceof Timestamp
+            ? dayjs(new Date(node.createdAt.toDate())).format("YYYY-MM-DD")
+            : "";
+
+        const course = courses[selectedCourse];
+        setNodePublicView(node);
+        if (!node?.updatedStr) {
+          setNodePublicViewLoader(true);
+          const nodeResponse = await getNodeDataForCourse(node?.node || "");
+          const updatedData = {
+            ...node,
+            createdStr,
+            updatedStr,
+            keywords,
+            children: nodeResponse.children,
+            parents: nodeResponse.parents,
+            contributors: nodeResponse.contributors,
+            institutions: nodeResponse.institutions,
+          };
+          course.nodes[topicTitle][idx] = updatedData;
+          setNodePublicView(updatedData);
+          updateCourses(course);
+          setNodePublicViewLoader(false);
+        }
       }
     },
-    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+    [courses, selectedCourse, updateCourses]
   );
 
   const retrieveNodeQuestions = useCallback(
     async (nodeId: string) => {
-      setQuestionsLoader(true);
-      const updatedCourses = [...courses];
-      const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
-      const response: any = await Post("/retrieveGenerateQuestions", {
-        courseTitle: courses[selectedCourse].title,
-        courseDescription: courses[selectedCourse].description,
-        targetLearners: courses[selectedCourse].learners,
-        nodeId,
-        previousQuestions: prevQuestions,
-      });
-
-      updatedCourses[selectedCourse]["questions"] = {
-        ...updatedCourses[selectedCourse]["questions"],
-        [nodeId]: [...prevQuestions, response],
-      };
-
-      setCourses(updatedCourses);
-      setQuestionsLoader(false);
+      try {
+        setQuestionsLoader(true);
+        const updatedCourses = [...courses];
+        const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
+        const courseId = courses[selectedCourse].id;
+        await Post("/retrieveGenerateQuestions", {
+          courseId,
+          courseTitle: courses[selectedCourse].title,
+          courseDescription: courses[selectedCourse].description,
+          targetLearners: courses[selectedCourse].learners,
+          nodeId,
+          previousQuestions: prevQuestions,
+        });
+        setQuestionsLoader(false);
+      } catch (error) {
+        setQuestionsLoader(false);
+        await confirmIt("There is a error with the request for retrieving questions, please try again.", "Ok", "");
+        console.error(error);
+      }
     },
     [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
   );
@@ -1313,7 +1401,28 @@ const CourseComponent = () => {
     },
     [courses, selectedCourse, setCourses]
   );
+  const saveChanges = async (values: ProposalFormValues) => {
+    try {
+      setNodePublicViewLoader(true);
 
+      const course = courses[selectedCourse];
+
+      const nodes = { ...course.nodes };
+      const nodeIdx = nodes[selectedTopic?.title].findIndex((n: { node: string }) => n.node === nodePublicView.node);
+      let nodeData = nodes[nodeIdx];
+      nodeData = {
+        ...nodeData,
+        ...values,
+      };
+      course.nodes[selectedTopic?.title][nodeIdx] = nodeData;
+      setNodePublicView(course.nodes[selectedTopic?.title][nodeIdx]);
+      updateCourses(course);
+      setNodePublicViewLoader(false);
+      setEditMode(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   if (courses.length <= 0) {
     return (
       <Box
@@ -1356,16 +1465,19 @@ const CourseComponent = () => {
           theme.palette.mode === "dark"
             ? theme.palette.common.darkGrayBackground
             : theme.palette.common.lightGrayBackground,
+        "&::-webkit-scrollbar": {
+          width: "12px",
+        },
         "&::-webkit-scrollbar-track": {
-          background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+          background: theme => (theme.palette.mode === "dark" ? "#28282a" : "white"),
         },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "#888",
           borderRadius: "10px",
-          border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+          border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid white"),
         },
         "&::-webkit-scrollbar-thumb:hover": {
-          background: "#555",
+          background: DESIGN_SYSTEM_COLORS.orange400,
         },
       }}
     >
@@ -1691,7 +1803,7 @@ const CourseComponent = () => {
               </Box>
             ))} */}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 7) &&
+          {creatingCourseStep >= 7 &&
             (loadingCourseStructure ? (
               <LinearProgress />
             ) : (
@@ -1743,12 +1855,17 @@ const CourseComponent = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    borderLeft:
+                      dragOverItemPointer === categoryIndex
+                        ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                        : undefined,
                     animation:
                       categoryIndex === glowCategoryGreenIndex
                         ? `${glowGreen} 1.5s ease-in-out infinite`
                         : categoryIndex === glowCategoryRedIndex
                         ? `${glowRed} 1.5s ease-in-out infinite`
                         : "",
+                    color: getColor(category.color),
                   }}
                   draggable
                   onDragStart={() => {
@@ -1756,6 +1873,7 @@ const CourseComponent = () => {
                   }}
                   onDragEnter={() => {
                     dragOverItem.current = categoryIndex;
+                    setDragOverItemPointer(categoryIndex);
                     //dragOverTopicItem.current = categoryIndex;
                   }}
                   onDragOver={handleDragOver}
@@ -1781,29 +1899,23 @@ const CourseComponent = () => {
                         <Typography
                           variant="h4"
                           sx={{
-                            color:
-                              currentImprovement.type === "topic" && currentImprovement.category === category.title
-                                ? "orange"
-                                : currentImprovement.type === "topic" &&
-                                  currentImprovement.current_category === category.title
-                                ? "red"
-                                : currentImprovement.new_category === category.title
-                                ? "green"
-                                : "",
+                            color: getColor(category.color),
                           }}
                         >
                           {category.title}
                         </Typography>
-                        <Box sx={{ ml: "14px" }}>
-                          <Button
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleOpenDialog(categoryIndex);
-                            }}
-                          >
-                            Add topic
-                          </Button>
-                        </Box>
+                        {expanded.includes(category.title) && Object.keys(currentImprovement).length <= 0 && (
+                          <Box sx={{ ml: "14px" }}>
+                            <Button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleOpenDialog(categoryIndex);
+                              }}
+                            >
+                              Add topic
+                            </Button>
+                          </Box>
+                        )}
                       </Box>
                     )}
                     {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
@@ -1817,30 +1929,53 @@ const CourseComponent = () => {
                       <LinearProgress />
                     ) : (
                       <Grid container spacing={2}>
-                        {[...(category.topics || []), ...getNewTopics(currentImprovement, category.title)].map(
-                          (tc: any, topicIndex: any) => (
-                            <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
-                              <Accordion
-                                expanded={expandedTopics.includes(tc.title)}
-                                onChange={(e, isExpanded) => {
-                                  let newExpanded = [];
-                                  if (isExpanded) {
-                                    newExpanded = [...expandedTopics, tc.title];
-                                    if (Object.keys(currentImprovement || {}).length <= 0) {
-                                      setSidebarOpen(true);
-                                      setSelectedTopic({ categoryIndex, topicIndex, ...tc });
-                                      handlePaperClick();
-                                    }
-                                  } else {
-                                    if (Object.keys(currentImprovement || {}).length <= 0) {
-                                      setSidebarOpen(false);
-                                    }
-                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
+                        {[...(category.topics || [])].map((tc: any, topicIndex: any) => (
+                          <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
+                            <Accordion
+                              expanded={expandedTopics.includes(tc.title)}
+                              onChange={(e, isExpanded) => {
+                                let newExpanded = [];
+                                if (isExpanded) {
+                                  newExpanded = [...expandedTopics, tc.title];
+                                  if (Object.keys(currentImprovement || {}).length <= 0) {
+                                    setSidebarOpen(true);
+                                    setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                   }
+                                } else {
+                                  if (Object.keys(currentImprovement || {}).length <= 0) {
+                                    setSidebarOpen(false);
+                                  }
+                                  newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
+                                }
 
-                                  setSelectedOpenCategory(null);
-                                  setExpandedTopics(newExpanded);
-                                  setExpandedNode(null);
+                                setSelectedOpenCategory(null);
+                                setExpandedTopics(newExpanded);
+                                setExpandedNode(null);
+                              }}
+                              sx={{
+                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                borderRadius: "25px",
+                              }}
+                            >
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
+                                id={`panel${categoryIndex}-${topicIndex}-header`}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  borderRadius: "25px",
+                                  borderLeft:
+                                    dragOverTopicPointer === topicIndex
+                                      ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                                      : undefined,
+                                  animation: isRemoved.includes(tc.title)
+                                    ? `${glowRed} 1.5s ease-in-out infinite`
+                                    : isChanged.includes(tc.title)
+                                    ? `${glowGreen} 1.5s ease-in-out infinite`
+                                    : "",
+                                  // border: `1px solid ${getTopicColor(category, tc)}`,
                                 }}
                                 draggable
                                 onDragStart={() => {
@@ -1850,67 +1985,35 @@ const CourseComponent = () => {
                                 onDragEnter={() => {
                                   dragOverTopicItem.current = topicIndex;
                                   dragOverItem.current = categoryIndex;
+                                  setDragOverTopicPointer(topicIndex);
+                                  setDragOverItemPointer(categoryIndex);
                                 }}
                                 onDragOver={() => {
                                   // console.log("onDragOver");
                                 }}
                                 onDragEnd={handleSortingForItems}
-                                sx={{
-                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
-                                  borderRadius: "25px",
-                                }}
                               >
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
-                                  id={`panel${categoryIndex}-${topicIndex}-header`}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    borderRadius: "25px",
-                                    animation: isRemoved.includes(tc.title)
-                                      ? `${glowRed} 1.5s ease-in-out infinite`
-                                      : isChanged.includes(tc.title)
-                                      ? `${glowGreen} 1.5s ease-in-out infinite`
-                                      : "",
-                                    // border: `1px solid ${getTopicColor(category, tc)}`,
-                                    ":hover": {
-                                      border: "1px solid orange",
-                                    },
-                                  }}
-                                >
-                                  {" "}
-                                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                    <DragIndicatorIcon />
-                                    <Typography
-                                      variant="h6"
-                                      sx={{
-                                        textAlign: "center",
-                                        color: getTopicColor(category, tc),
-                                        fontWeight: 300,
-                                      }}
-                                    >
-                                      {tc?.title || ""}
-                                    </Typography>
-                                    <LoadingButton
-                                      onClick={e => {
-                                        e.stopPropagation();
-                                        retrieveNodesForTopic(tc);
-                                      }}
-                                      sx={{
-                                        display: "flex-end",
-                                      }}
-                                      loading={loadingDescription}
-                                    >
-                                      <AutoFixHighIcon />
-                                    </LoadingButton>
-                                  </Box>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  {loadingNodes && <LinearProgress />}
-                                  <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                    {((courses[selectedCourse].nodes || {})[tc.title] || []).map((n: any) => (
+                                {" "}
+                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                  <DragIndicatorIcon sx={{ color: getColor(tc.color) }} />
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      textAlign: "center",
+                                      color: getColor(tc.color),
+                                      fontWeight: 300,
+                                    }}
+                                  >
+                                    {tc?.title || ""}
+                                  </Typography>
+                                  {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
+                                </Box>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                {/* {loadingNodes && <LinearProgress />} */}
+                                <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                  {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
+                                    (n: any, idx: number) => (
                                       <Box key={n.node} sx={{ mb: "10px" }}>
                                         <Accordion
                                           id={n.node}
@@ -1924,30 +2027,23 @@ const CourseComponent = () => {
 
                                             backgroundColor: theme =>
                                               theme.palette.mode === "dark" ? "#1f1f1f" : "white",
-                                            border: expandedNode === n.node ? `2px solid orange` : "",
+                                            border:
+                                              expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
                                             p: "0px !important",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (expandedNode === n.node) {
+                                              setExpandedNode(null);
+                                            } else {
+                                              setSidebarOpen(true);
+                                              setExpandedNode(n);
+                                              retrieveNodeData(n, tc.title, idx);
+                                              setSelectedTopic(tc);
+                                            }
                                           }}
                                         >
-                                          <CloseIcon
-                                            className="close-icon"
-                                            sx={{
-                                              // backgroundColor: "grey",
-                                              color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                                              borderRadius: "50%",
-                                              ":hover": {
-                                                backgroundColor: "black",
-                                                color: "red",
-                                              },
-                                              cursor: "pointer",
-                                              zIndex: 10,
-                                              position: "absolute",
-                                              top: "0px",
-                                              right: "0px",
-                                              padding: "5px",
-                                              fontSize: "35px",
-                                            }}
-                                            onClick={() => handleRemoveNode(tc.title, n.node)}
-                                          />
                                           <AccordionSummary
                                             sx={{
                                               p: "0px !important",
@@ -1956,19 +2052,10 @@ const CourseComponent = () => {
                                           >
                                             <Box sx={{ flexDirection: "column", width: "100%" }}>
                                               <Box
-                                                onClick={e => {
-                                                  e.stopPropagation();
-                                                  if (expandedNode === n.node) {
-                                                    setExpandedNode(null);
-                                                  } else {
-                                                    setExpandedNode(n.node);
-                                                    retrieveNodeData(n.node);
-                                                  }
-                                                }}
                                                 sx={{
                                                   display: "flex",
                                                   alignItems: "center",
-                                                  m: "15px",
+                                                  m: "15px 15px 0px 15px",
                                                 }}
                                               >
                                                 <Box
@@ -2000,7 +2087,7 @@ const CourseComponent = () => {
                                           </AccordionSummary>
 
                                           <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                            <Box sx={{ p: "17px", pt: 0 }}>
+                                            <Box sx={{ p: "15px", pt: 0 }}>
                                               <Box
                                                 sx={{
                                                   transition: "border 0.3s",
@@ -2017,7 +2104,7 @@ const CourseComponent = () => {
                                               </Box>
                                               {/* <FlashcardVideo flashcard={concept} /> */}
                                               {(n?.nodeImage || []).length > 0 && (
-                                                <Box sx={{ px: "55px" }}>
+                                                <Box sx={{ mt: "15px" }}>
                                                   <ImageSlider images={[n?.nodeImage]} />
                                                 </Box>
                                               )}
@@ -2025,13 +2112,33 @@ const CourseComponent = () => {
                                           </AccordionDetails>
                                         </Accordion>
                                       </Box>
-                                    ))}
-                                  </Masonry>
-                                </AccordionDetails>
-                              </Accordion>
-                            </Grid>
-                          )
-                        )}
+                                    )
+                                  )}
+                                </Masonry>
+                                {Object.keys(currentImprovement || {}).length <= 0 && (
+                                  <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <CustomButton
+                                      variant="contained"
+                                      type="button"
+                                      color="secondary"
+                                      onClick={() => {
+                                        retrieveNodesForTopic(tc.title);
+                                      }}
+                                    >
+                                      {loadingNodes.includes(tc.title) ? "Retrieving Concept Cards"
+                                          : "Retrieve More Concept Cards"}
+                                      {loadingNodes.includes(tc.title) ? (
+                                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                                      ) : (
+                                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                                      )}
+                                    </CustomButton>
+                                  </Box>
+                                )}
+                              </AccordionDetails>
+                            </Accordion>
+                          </Grid>
+                        ))}
                       </Grid>
                     )}
                   </AccordionDetails>
@@ -2245,66 +2352,101 @@ const CourseComponent = () => {
               width: "12px",
             },
             "&::-webkit-scrollbar-track": {
-              background: theme => (theme.palette.mode === "dark" ? "#28282a" : "#f1f1f1"),
+              background: theme => (theme.palette.mode === "dark" ? "#28282a" : "white"),
             },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "#888",
               borderRadius: "10px",
-              border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid #f1f1f1"),
+              border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid white"),
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              background: "#555",
+              background: DESIGN_SYSTEM_COLORS.orange400,
             },
           }}
           elevation={8}
         >
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <IconButton onClick={handleSidebarClose}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
           {expandedNode ? (
-            <>
-              {nodePublicViewLoader && <LinearProgress sx={{ width: "100%" }} />}
-              {!nodePublicViewLoader && nodePublicView && (
+            <Box>
+              {nodePublicView && (
                 <Box data-testid="node-item-container" sx={{ p: { xs: 1 } }}>
-                  <NodeHead
-                    node={expandedNode}
-                    keywords={nodePublicView?.keywords}
-                    createdStr={nodePublicView?.createdStr}
-                    updatedStr={nodePublicView?.updatedStr}
-                  />
-                  <Grid container spacing={3}>
+                  {editMode && (
+                    <NodeItemFullEditor
+                      node={nodePublicView}
+                      image={
+                        nodePublicView.nodeImage ? (
+                          <Box
+                            sx={{
+                              display: "block",
+                              width: "100%",
+                              cursor: "pointer",
+                              mt: 3,
+                            }}
+                          >
+                            {/* TODO: Change to next Image */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={nodePublicView.nodeImage}
+                              alt={"Preview Image"}
+                              width="100%"
+                              height="100%"
+                              loading="lazy"
+                            />
+                          </Box>
+                        ) : null
+                      }
+                      tags={null}
+                      references={null}
+                      onSubmit={saveChanges}
+                      onCancel={() => {
+                        setEditMode(false);
+                      }}
+                      publicView={false}
+                    />
+                  )}
+                  {!editMode && (
                     <Grid item xs={12} sm={12}>
                       <NodeItemFull
-                        nodeId={nodePublicView?.id}
+                        nodeId={nodePublicView?.node}
                         node={nodePublicView}
-                        references={<ReferencesList references={nodePublicView?.references || []} sx={{ mt: 3 }} />}
+                        setEditMode={setEditMode}
+                        deleteNode={() => handleRemoveNode(selectedTopic.title, expandedNode?.node || "")}
                       />
                       {nodePublicView?.siblings && nodePublicView?.siblings.length > 0 && (
                         <LinkedNodes sx={{ mt: 3 }} data={nodePublicView?.siblings} header="Related"></LinkedNodes>
                       )}
                     </Grid>
+                  )}
 
-                    <Grid item xs={12} sm={12}>
-                      <Card sx={{ mt: 3, p: 2 }}>
-                        <CardHeader
-                          sx={{
-                            backgroundColor: theme =>
-                              theme.palette.mode === "light"
-                                ? theme.palette.common.darkGrayBackground
-                                : theme.palette.common.black,
-                          }}
-                          title={
-                            <Box sx={{ textAlign: "center", color: "inherit" }}>
-                              <TypographyUnderlined
-                                variant="h6"
-                                fontWeight="300"
-                                gutterBottom
-                                align="center"
-                                sx={{ color: theme => theme.palette.common.white }}
-                              >
-                                Knowledge Checks
-                              </TypographyUnderlined>
-                            </Box>
-                          }
-                        ></CardHeader>
-                        {courses[selectedCourse]?.questions?.[nodePublicView?.id]?.map((question: any, idx: number) => {
+                  <Grid item xs={12} sm={12}>
+                    <Card sx={{ mt: 3, p: 2 }}>
+                      <CardHeader
+                        sx={{
+                          backgroundColor: theme =>
+                            theme.palette.mode === "light"
+                              ? theme.palette.common.darkGrayBackground
+                              : theme.palette.common.black,
+                        }}
+                        title={
+                          <Box sx={{ textAlign: "center", color: "inherit" }}>
+                            <TypographyUnderlined
+                              variant="h6"
+                              fontWeight="300"
+                              gutterBottom
+                              align="center"
+                              sx={{ color: theme => theme.palette.common.white }}
+                            >
+                              Knowledge Checks
+                            </TypographyUnderlined>
+                          </Box>
+                        }
+                      ></CardHeader>
+                      {(courses[selectedCourse]?.questions?.[nodePublicView?.node] || []).map(
+                        (question: any, idx: number) => {
                           const QuestionComponent = questionComponents[question?.question_type];
                           return QuestionComponent ? (
                             <QuestionComponent
@@ -2313,71 +2455,84 @@ const CourseComponent = () => {
                               nodeId={nodePublicView?.id}
                               question={question}
                               handleQuestion={handleQuestion}
+                              sx={{
+                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "white"),
+                                mt: 2,
+                                p: "8px",
+                              }}
                             />
                           ) : null;
-                        })}
-                        <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-                          <CustomButton
-                            variant="contained"
-                            type="button"
-                            color="secondary"
-                            onClick={() => {
-                              retrieveNodeQuestions(nodePublicView?.id);
-                            }}
-                          >
-                            Generate More Questions
-                            {questionsLoader ? (
-                              <CircularProgress sx={{ ml: 1 }} size={20} />
-                            ) : (
-                              <AutoFixHighIcon sx={{ ml: 1 }} />
-                            )}
-                          </CustomButton>
-                        </Box>
-                      </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      <Card sx={{ mt: 3, p: 2 }}>
-                        <CardHeader
-                          sx={{
-                            backgroundColor: theme =>
-                              theme.palette.mode === "light"
-                                ? theme.palette.common.darkGrayBackground
-                                : theme.palette.common.black,
+                        }
+                      )}
+                      <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                        <CustomButton
+                          variant="contained"
+                          type="button"
+                          color="secondary"
+                          onClick={() => {
+                            retrieveNodeQuestions(nodePublicView.node);
                           }}
-                          title={
-                            <Box sx={{ textAlign: "center", color: "inherit" }}>
-                              <TypographyUnderlined
-                                variant="h6"
-                                fontWeight="300"
-                                gutterBottom
-                                align="center"
-                                sx={{ color: theme => theme.palette.common.white }}
-                              >
-                                Contributors
-                              </TypographyUnderlined>
-                            </Box>
-                          }
-                        ></CardHeader>
-                        <NodeItemContributors
-                          contributors={nodePublicView?.contributors || []}
-                          institutions={nodePublicView?.institutions || []}
-                        />
-                      </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
-                      )}
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                      {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
-                        <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
-                      )}
-                    </Grid>
+                        >
+                          Generate Question
+                          {questionsLoader ? (
+                            <CircularProgress sx={{ ml: 1 }} size={20} />
+                          ) : (
+                            <AutoFixHighIcon sx={{ ml: 1 }} />
+                          )}
+                        </CustomButton>
+                      </Box>
+                    </Card>
                   </Grid>
+                  {nodePublicViewLoader ? (
+                    <Box sx={{ my: 2, width: "100%", display: "flex", justifyContent: "center" }}>
+                      <CircularProgress size={40} />
+                    </Box>
+                  ) : (
+                    <>
+                      <Grid item xs={12} sm={12}>
+                        <Card sx={{ mt: 3, p: 2 }}>
+                          <CardHeader
+                            sx={{
+                              backgroundColor: theme =>
+                                theme.palette.mode === "light"
+                                  ? theme.palette.common.darkGrayBackground
+                                  : theme.palette.common.black,
+                            }}
+                            title={
+                              <Box sx={{ textAlign: "center", color: "inherit" }}>
+                                <TypographyUnderlined
+                                  variant="h6"
+                                  fontWeight="300"
+                                  gutterBottom
+                                  align="center"
+                                  sx={{ color: theme => theme.palette.common.white }}
+                                >
+                                  Contributors
+                                </TypographyUnderlined>
+                              </Box>
+                            }
+                          ></CardHeader>
+                          <NodeItemContributors
+                            contributors={nodePublicView?.contributors || []}
+                            institutions={nodePublicView?.institutions || []}
+                          />
+                        </Card>
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                          <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                        )}
+                      </Grid>
+                      <Grid item xs={12} sm={12}>
+                        {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
+                          <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
+                        )}
+                      </Grid>
+                    </>
+                  )}
                 </Box>
               )}
-            </>
+            </Box>
           ) : (
             <Box
               sx={{
@@ -2388,9 +2543,8 @@ const CourseComponent = () => {
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-between",
+                  gap: "10px",
                   alignItems: "center",
-                  borderBottom: "1px solid lightgrey",
                 }}
               >
                 <Typography variant="h6">
@@ -2416,29 +2570,15 @@ const CourseComponent = () => {
                     Delete
                   </Button>
                 )}
-                <IconButton onClick={handleSidebarClose}>
-                  <CloseIcon />
-                </IconButton>
               </Box>
+              <Divider
+                sx={{
+                  borderColor: "lightgrey",
+                  my: "15px",
+                }}
+              />
               {selectedOpenCategory && (
-                <Box sx={{ gap: "8px" }}>
-                  <Tooltip
-                    title=""
-                    sx={{
-                      zIndex: "99990",
-                    }}
-                  >
-                    <LoadingButton
-                      onClick={generateImageForCategory}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingImage}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  </Tooltip>
-                  {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                   <TextField
                     label="Category Title"
                     multiline
@@ -2458,9 +2598,16 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                    sx={{
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                      width: "100%",
+                      mt: "10px",
+                      mb: "0px",
+                    }}
                     InputLabelProps={{
-                      style: { color: "grey" },
+                      sx: {
+                        color: "grey",
+                      },
                     }}
                   />
                   <TextField
@@ -2486,12 +2633,44 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"), width: "500px" }}
+                    sx={{
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                      width: "100%",
+                      mt: "10px",
+                      mb: "0px",
+                    }}
                     InputLabelProps={{
                       style: { color: "grey" },
                     }}
                   />
-                  <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Objectives:</Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Typography sx={{ fontSize: "19px" }}>Category Image:</Typography>
+                    {loadingImage ? (
+                      <LinearProgress sx={{ width: "40px" }} />
+                    ) : (
+                      <AutoFixHighIcon
+                        sx={{
+                          // backgroundColor: "grey",
+                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                          color: "orange",
+                          borderRadius: "50%",
+                          ":hover": {
+                            backgroundColor: "black",
+                            display: "block",
+                          },
+                          zIndex: 10,
+                          padding: "5px",
+                          cursor: "pointer",
+                          fontSize: "30px",
+                          height: "100%",
+                        }}
+                        onClick={generateImageForCategory}
+                      />
+                    )}
+                  </Box>
+                  {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
+
+                  <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
                   <ChipInput
                     tags={selectedOpenCategory?.objectives || []}
                     selectedTags={() => {}}
@@ -2541,7 +2720,7 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
               /> */}
-                  <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Prerequisite knowledge:</Typography>
+                  <Typography sx={{ fontWeight: "bold" }}>Prerequisite knowledge:</Typography>
                   <ChipInput
                     tags={selectedOpenCategory?.prerequisiteKnowledge || []}
                     selectedTags={() => {}}
@@ -2741,25 +2920,7 @@ const CourseComponent = () => {
                 </Box>
               )}
               {selectedTopic && (
-                <Box>
-                  <Tooltip
-                    title=""
-                    sx={{
-                      zIndex: "99990",
-                    }}
-                  >
-                    <LoadingButton
-                      onClick={generateImageForTopic}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingImage}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  </Tooltip>
-
-                  {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                   <TextField
                     label="Topic Description"
                     multiline
@@ -2788,14 +2949,49 @@ const CourseComponent = () => {
                     margin="normal"
                     variant="outlined"
                     minRows={4}
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+                    sx={{
+                      backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                      mt: "10px",
+                      mb: "0px",
+                    }}
                     InputLabelProps={{
                       style: {
                         color: "gray",
                       },
                     }}
                   />
-                  <FormControl fullWidth margin="normal" sx={{ width: "500px" }}>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    <Typography sx={{ fontSize: "19px" }}>Topic Image:</Typography>
+
+                    {loadingImage ? (
+                      <LinearProgress sx={{ width: "40px" }} />
+                    ) : (
+                      <AutoFixHighIcon
+                        sx={{
+                          // backgroundColor: "grey",
+                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                          color: "orange",
+                          borderRadius: "50%",
+
+                          ":hover": {
+                            backgroundColor: "black",
+
+                            display: "block",
+                          },
+
+                          zIndex: 10,
+
+                          padding: "5px",
+                          cursor: "pointer",
+                          fontSize: "30px",
+                        }}
+                        onClick={generateImageForTopic}
+                      />
+                    )}
+                  </Box>
+                  {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+                  <FormControl fullWidth margin="normal" sx={{ mt: "8px" }}>
                     <InputLabel id="difficulty-label">Difficulty</InputLabel>
                     <Select
                       labelId="difficulty-label"
@@ -2865,11 +3061,11 @@ const CourseComponent = () => {
                     }}
                     margin="normal"
                     variant="outlined"
-                    sx={{ width: "500px" }}
                     type="number"
+                    sx={{ mt: "8px", mb: "0px" }}
                     inputProps={{ min: 0 }}
                   />
-                  <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Objectives:</Typography>
+                  <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
                   <ChipInput
                     tags={selectedTopic.objectives}
                     selectedTags={() => {}}
@@ -2901,7 +3097,7 @@ const CourseComponent = () => {
                     readOnly={false}
                     placeholder="Type a new skill and click enter ↵ to add it..."
                   />
-                  <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prerequisite Knowledge:</Typography>
+                  <Typography sx={{ fontWeight: "bold" }}>Prerequisite Knowledge:</Typography>
                   <ChipInput
                     tags={selectedTopic.prerequisiteKnowledge}
                     selectedTags={() => {}}
@@ -2933,21 +3129,10 @@ const CourseComponent = () => {
                     readOnly={false}
                     placeholder="Type a new skill and click enter ↵ to add it..."
                   />
-                  <Box sx={{ display: "flex" }}>
-                    <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-                    <LoadingButton
-                      onClick={generateMorePromptsForTopic}
-                      sx={{
-                        display: "flex-end",
-                      }}
-                      loading={loadingPrompt}
-                    >
-                      <AutoFixHighIcon />
-                    </LoadingButton>
-                  </Box>
+                  <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
                   {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                     <Box key={index}>
-                      <Box sx={{ marginTop: 4 }}>
+                      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <Typography gutterBottom>Prompt {index + 1}:</Typography>
                           <Button
@@ -3099,36 +3284,57 @@ const CourseComponent = () => {
                       </Box>
                     </Box>
                   ))}
-                  <Button
-                    onClick={() => {
-                      const updatedCourses = [...courses];
-                      const currentTopic =
-                        updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ];
-                      if (!currentTopic.prompts) {
-                        currentTopic.prompts = [];
-                      }
-                      currentTopic.prompts.push({
-                        type: "Poll",
-                        text: "",
-                        purpose: "",
-                      });
+                  <Box sx={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: "10px" }}>
+                    <CustomButton
+                      variant="contained"
+                      type="button"
+                      color="secondary"
+                      onClick={() => {
+                        const updatedCourses = [...courses];
+                        const currentTopic =
+                          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ];
+                        if (!currentTopic.prompts) {
+                          currentTopic.prompts = [];
+                        }
+                        currentTopic.prompts.push({
+                          type: "Poll",
+                          text: "",
+                          purpose: "",
+                        });
 
-                      setCourses(updatedCourses);
-                      setSelectedTopic({
-                        categoryIndex: selectedTopic.categoryIndex,
-                        topicIndex: selectedTopic.topicIndex,
-                        ...currentTopic,
-                      });
-                      updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
-                      });
-                    }}
-                  >
-                    Add prompt
-                  </Button>
+                        setCourses(updatedCourses);
+                        setSelectedTopic({
+                          categoryIndex: selectedTopic.categoryIndex,
+                          topicIndex: selectedTopic.topicIndex,
+                          ...currentTopic,
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      sx={{ width: "210px" }}
+                    >
+                      Add prompt
+                    </CustomButton>
+
+                    <CustomButton
+                      variant="contained"
+                      type="button"
+                      color="secondary"
+                      onClick={generateMorePromptsForTopic}
+                      disabled={loadingPrompt}
+                    >
+                      {loadingPrompt ? "Auto-generating Prompts" : "Auto-generate Prompts"}
+                      {loadingPrompt ? (
+                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                      ) : (
+                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                      )}
+                    </CustomButton>
+                  </Box>
                 </Box>
               )}
 

@@ -40,6 +40,7 @@ const LinkedNodeItem: FC<Props> = ({
 }) => {
   return (
     <HtmlTooltip
+      sx={{ zIndex: 9999 }}
       title={
         <Box>
           <Typography variant="body2" component="div">
@@ -58,7 +59,12 @@ const LinkedNodeItem: FC<Props> = ({
     >
       <ListItem
         disablePadding
-        sx={{ display: "flex" }}
+        sx={{
+          display: "flex",
+          "& .MuiListItemIcon-root": {
+            minWidth: "100%",
+          },
+        }}
         secondaryAction={
           <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", ...secondaryActionSx }}>
             {secondaryActions}

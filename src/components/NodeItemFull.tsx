@@ -39,6 +39,8 @@ type Props = {
   references?: ReactNode;
   tags?: ReactNode;
   editable?: boolean;
+  setEditMode: (value: boolean) => void;
+  deleteNode?: any;
 };
 
 type FocusedNodeProps = {
@@ -51,26 +53,36 @@ type FocusedNodeProps = {
   editable?: boolean;
 };
 
-export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references, tags, editable = true }) => {
-  const router = useRouter();
+export const NodeItemFull: FC<Props> = ({
+  nodeId,
+  node,
+  contributors,
+  references,
+  tags,
+  editable = true,
+  setEditMode,
+  deleteNode,
+}) => {
   const [imageFullScreen, setImageFullScreen] = useState(false);
   const [showShareButtons, setShowShareButtons] = useState(false);
   const handleClickImageFullScreen = () => {
     setImageFullScreen(true);
   };
   const [paddingTop, setPaddingTop] = useState("0");
-
+  const editPublicNode = () => {
+    setEditMode(true);
+  };
   return (
     <Card data-testid="node-item-full">
       <CardHeader
-        sx={{ px: { xs: 5, md: 5 }, pt: { xs: 4, md: 10 }, pb: 8 }}
+        sx={{ px: { xs: 5, md: 5 }, py: { xs: 2, md: 2 }, mt: 3 }}
         title={<MarkdownRender sx={{ fontSize: "30px" }} text={node.title || ""} />}
       ></CardHeader>
       <CardContent
         sx={{
           p: { xs: 5, md: 5 },
           "&:last-child": {
-            paddingBottom: { xs: 4, md: 10 },
+            paddingBottom: { xs: 5, md: 5 },
           },
         }}
       >
@@ -127,7 +139,7 @@ export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references
             flexDirection: { xs: "column", sm: "row" },
             flexWrap: "wrap",
             justifyContent: "space-between",
-            mt: 5,
+            mt: 3,
           }}
         >
           <Box
@@ -152,28 +164,31 @@ export const NodeItemFull: FC<Props> = ({ nodeId, node, contributors, references
             </Box>
 
             <Box sx={{ display: "flex" }}>
-              <Button
-                onClick={() => setShowShareButtons(!showShareButtons)}
-                sx={{
-                  minWidth: "20px",
-                  justifyContent: "start",
-                  color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
-                }}
-              >
-                <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} />
+              {!deleteNode && (
+                <Button
+                  onClick={() => setShowShareButtons(!showShareButtons)}
+                  sx={{
+                    minWidth: "20px",
+                    justifyContent: "start",
+                    color: theme => (showShareButtons ? theme.palette.common.orange : theme.palette.grey[600]),
+                  }}
+                >
+                  <ReplyIcon sx={{ ml: "10px", transform: "scale(-1,1)" }} />
 
-                {!showShareButtons && <Typography py="2px">Share</Typography>}
-              </Button>
+                  {!showShareButtons && <Typography py="2px">Share</Typography>}
+                </Button>
+              )}
               {showShareButtons && <ShareButtons url={getNodePageWithDomain(String(node.title), nodeId)} />}
               {editable && (
-                <IconButton onClick={() => router.push({ pathname: `${ROUTES.proposal}/${node.id}` })}>
+                <IconButton onClick={editPublicNode}>
                   <EditIcon />
                 </IconButton>
               )}
+              {deleteNode && <Button onClick={deleteNode}>Delete</Button>}
             </Box>
           </Box>
         </Box>
-        <Divider sx={{ my: 8 }} />
+        {(contributors || references || tags) && <Divider sx={{ my: 8 }} />}
         <Box>{contributors}</Box>
         <Box>{references}</Box>
         <Box>{tags}</Box>

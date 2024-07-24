@@ -6,6 +6,7 @@ import { callOpenAIChat } from "./openAI/helpers";
 import { detach } from "src/utils/helpers";
 import { db } from "@/lib/firestoreServer/admin";
 import { retrieveNodesForCourse } from "./retrieveNodesForCourse";
+import { retrieveNodesForTopic } from "./retrieveNodesForTopic";
 
 const generateCourseSyllabus = async (
   courseTitle: string,
@@ -514,7 +515,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     await detach(async () => {
-      let syllabus = null;
+      let syllabus: any = null;
       const categoryPromises = categories.map(async (category: { title: string; topics: string[] }) => {
         const topics = await generateCourseCategory(
           courseTitle,
@@ -549,21 +550,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
 
       if (syllabus) {
-        const nodes = await retrieveNodesForCourse(
-          tags,
-          courseTitle,
-          courseDescription,
-          targetLearners,
-          references,
-          syllabus
-        );
-        await db.runTransaction(async (t: any) => {
-          const courseDoc = await t.get(courseRef);
-          const courseData = courseDoc.data();
-          courseData.nodes = nodes;
-
-          t.update(courseRef, courseData);
+        const nodTopicsPromises = syllabus.map(async (category: any) => {
+          for (let topic of category.topics) {
+            const nodes = await retrieveNodesForTopic(
+              tags,
+              courseTitle,
+              courseDescription,
+              targetLearners,
+              references,
+              syllabus,
+              topic.title
+            );
+            await db.runTransaction(async (t: any) => {
+              const courseDoc = await t.get(courseRef);
+              const courseData = courseDoc.data();
+              if (courseData.nodes) {
+                courseData.nodes[topic.title] = nodes;
+              } else {
+                courseData.nodes = { [topic.title]: nodes };
+              }
+              t.update(courseRef, courseData);
+            });
+          }
         });
+        await Promise.all(nodTopicsPromises);
       }
     });
 
