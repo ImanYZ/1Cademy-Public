@@ -249,7 +249,7 @@ const CourseComponent = () => {
 
   const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
-
+    delete course.suggestions;
     const courseRef = doc(db, "coursesAI", course.id);
     const updateData: any = { ...course, updateAt: new Date() };
 
