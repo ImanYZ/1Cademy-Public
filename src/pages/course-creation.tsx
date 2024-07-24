@@ -51,6 +51,7 @@ import {
 } from "firebase/firestore";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { KnowledgeNode } from "src/knowledgeTypes";
+import { QuestionProps } from "src/types";
 import { INode } from "src/types/INode";
 
 import ChipInput from "@/components/ChipInput";
@@ -139,7 +140,11 @@ const books = [
   },
 ];
 
-const questionComponents: any = {
+type QuestionComponentsType = {
+  [key: string]: React.ComponentType<QuestionProps>;
+};
+
+const questionComponents: QuestionComponentsType = {
   "Multiple Choice": MultipleChoices,
   "True/False": TrueFalse,
   "Short Answer": ShortAnswer,
@@ -2449,6 +2454,11 @@ const CourseComponent = () => {
                               nodeId={nodePublicView?.id}
                               question={question}
                               handleQuestion={handleQuestion}
+                              sx={{
+                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "white"),
+                                mt: 2,
+                                p: "8px",
+                              }}
                             />
                           ) : null;
                         }

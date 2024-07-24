@@ -1,21 +1,14 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, Divider, IconButton, Switch, Typography } from "@mui/material";
-import { SxProps, Theme } from "@mui/system";
+import { Box, IconButton, Switch, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { QuestionProps } from "src/types";
 
 import { Editor } from "@/components/Editor";
 
 type EditorOptions = "EDIT" | "PREVIEW";
-type TrueFalseProps = {
-  question: any;
-  idx: number;
-  nodeId: number;
-  sx?: SxProps<Theme>;
-  handleQuestion: (question: any, idx: number, nodeId: number) => void;
-};
 
-const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps) => {
+const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: QuestionProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const saveTimeoutRef = useRef<any>(null);
@@ -49,7 +42,7 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
   );
   return (
     <Box sx={{ ...sx }}>
-      <Box mt={2} mb={2}>
+      <Box>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
             <Typography mb={4} variant="h3" fontWeight={"bold"}>
@@ -94,7 +87,7 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
           editOption={option}
         />
       </Box>
-      <Box sx={{ display: "flex", justifyContent: "space-evenly" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-evenly", mt: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
           <IconButton
             sx={{
@@ -118,7 +111,7 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
           <Typography fontWeight="bold">False</Typography>
         </Box>
       </Box>
-      <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", mt: 2 }}>
+      <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", mt: 3 }}>
         <Editor
           label="Replace this with the choice-specific feedback."
           value={questionS?.feedback}
@@ -128,8 +121,6 @@ const TrueFalse = ({ idx, question, nodeId, sx, handleQuestion }: TrueFalseProps
           editOption={option}
         />
       </Box>
-
-      <Divider sx={{ borderColor: "gray", my: 3 }} />
     </Box>
   );
 };

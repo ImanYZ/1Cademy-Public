@@ -1,3 +1,4 @@
+import { SxProps, Theme } from "@mui/system";
 import { Timestamp } from "firebase/firestore";
 import { DocumentReference } from "firebase-admin/firestore";
 
@@ -95,3 +96,11 @@ export type TryRubricResponse = {
 export type LivelinessBarType = "relativeInteractions" | "relativeReputations" | "interaction" | "reputation";
 
 export type TransactionWrite = { objRef: DocumentReference; data: any; operationType: "update" | "set" | "delete" };
+
+export type QuestionProps = {
+  question: any;
+  idx: number;
+  nodeId: number;
+  sx?: SxProps<Theme>;
+  handleQuestion: (question: any, idx: number, nodeId: number) => void;
+};
