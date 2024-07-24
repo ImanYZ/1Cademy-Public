@@ -133,33 +133,6 @@ OR
 }
 OR
 {
-  "question_type": "Matching",
-  "question_text": "Match each organelle with its function.",
-  "pairs": [
-    {
-      "term": "Mitochondria",
-      "definition": "Produces energy for the cell",
-      "feedback": "The mitochondria generate most of the cell's supply of ATP, used as a source of chemical energy."
-    },
-    {
-      "term": "Ribosome",
-      "definition": "Synthesizes proteins",
-      "feedback": "Ribosomes are responsible for protein synthesis in the cell."
-    },
-    {
-      "term": "Chloroplast",
-      "definition": "Conducts photosynthesis",
-      "feedback": "Chloroplasts capture light energy to produce sugars during photosynthesis."
-    },
-    {
-      "term": "Golgi apparatus",
-      "definition": "Modifies and packages proteins",
-      "feedback": "The Golgi apparatus processes and packages proteins and lipids for secretion or delivery to other organelles."
-    }
-  ]
-}
-OR
-{
   "question_type": "Fill in the Blank",
   "question_text": "The powerhouse of the cell is the ____. ",
   "correct_answer": "mitochondria",
