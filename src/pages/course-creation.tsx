@@ -5,6 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { LoadingButton, Masonry } from "@mui/lab";
 import {
   Accordion,
@@ -403,6 +404,7 @@ const CourseComponent = () => {
       new_topics,
       current_category,
       topic,
+      title,
       new_category,
       new_after,
     } = suggestion;
@@ -430,9 +432,9 @@ const CourseComponent = () => {
             .join(" and ");
           return `**<span style="color: orange;">Divide the topic</span>** **"${old_topic}"** under the category **"${category}"** into ${dividedTopics}.`;
         case "move":
-          return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
+          return `**<span style="color: orange;">Move the topic</span>** **"${title}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
         case "delete":
-          return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
+          return `**<span style="color: red;">Delete the topic</span>** **"${title}"** under the category **"${category}"**.`;
         default:
           return "Invalid action.";
       }
@@ -458,7 +460,7 @@ const CourseComponent = () => {
         case "move":
           return `**<span style="color: orange;">Move the topic</span>** **"${topic}"** from the category **"${current_category}"** to the category **"${new_category}"** after the topic **"${new_after}"**.`;
         case "delete":
-          return `**<span style="color: red;">Delete the topic</span>** **"${topic}"** under the category **"${category}"**.`;
+          return `**<span style="color: red;">Delete the category</span>** **"${topic}"** under the category **"${category}"**.`;
         default:
           return "Invalid action.";
       }
@@ -512,17 +514,17 @@ const CourseComponent = () => {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const afterTopicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.after);
+          const afterTopicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.after);
           topics.splice(afterTopicIdx + 1, 0, currentImprovement.new_topic);
         }
-        modifiedTopics.push(currentImprovement.new_topic.topic);
+        modifiedTopics.push(currentImprovement.new_topic.title);
       }
 
       if (currentImprovement.action === "modify") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.old_topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.old_topic);
           if (topicIdx !== -1) {
             topics[topicIdx] = currentImprovement.new_topic;
           }
@@ -531,10 +533,10 @@ const CourseComponent = () => {
       }
 
       if (currentImprovement.action === "divide") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.old_topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.old_topic);
           if (topicIdx !== -1) {
             topics.splice(topicIdx, 1, ...currentImprovement.new_topics);
           }
@@ -544,15 +546,15 @@ const CourseComponent = () => {
       }
 
       if (currentImprovement.action === "delete") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
         if (categoryIdx !== -1) {
           let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.topic);
           if (topicIdx !== -1) {
             topics.splice(topicIdx, 1);
           }
         }
-        removedTopics.push(currentImprovement.topic);
+        removedTopics.push(currentImprovement.title);
       }
 
       if (currentImprovement.action === "move") {
@@ -561,53 +563,50 @@ const CourseComponent = () => {
         );
         if (currentCategoryIdx !== -1) {
           let topics = syllabus[currentCategoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.topic === currentImprovement.topic);
+          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.topic);
           if (topicIdx !== -1) {
             const [movedTopic] = topics.splice(topicIdx, 1);
-            const newCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_category);
+            const newCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.new_category);
             if (newCategoryIdx !== -1) {
               let newTopics = syllabus[newCategoryIdx].topics;
 
-              const newAfterTopicIdx = newTopics.findIndex((tp: any) => tp.topic === currentImprovement.new_after);
+              const newAfterTopicIdx = newTopics.findIndex((tp: any) => tp.title === currentImprovement.new_after);
               newTopics.splice(newAfterTopicIdx + 1, 0, movedTopic);
             }
           }
         }
-        modifiedTopics.push(currentImprovement.topic);
+        modifiedTopics.push(currentImprovement.title);
       }
     }
 
     if (currentImprovement.type === "category") {
       if (currentImprovement.action === "add") {
-        const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.after);
-        syllabus.splice(afterCategoryIdx + 1, 0, {
-          category: currentImprovement.new_category,
-          topics: currentImprovement.topics,
-        });
+        const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.after);
+        syllabus.splice(afterCategoryIdx + 1, 0, currentImprovement.new_category);
       }
 
-      if (currentImprovement.action === "modify") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.old_category);
-        if (categoryIdx !== -1) {
-          syllabus[categoryIdx].category = currentImprovement.new_category.category;
-        }
-      }
+      // if (currentImprovement.action === "modify") {
+      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.old_category);
+      //   if (categoryIdx !== -1) {
+      //     syllabus[categoryIdx].category = currentImprovement.new_category.category;
+      //   }
+      // }
 
-      if (currentImprovement.action === "delete") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
-        if (categoryIdx !== -1) {
-          syllabus.splice(categoryIdx, 1);
-        }
-      }
+      // if (currentImprovement.action === "delete") {
+      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+      //   if (categoryIdx !== -1) {
+      //     syllabus.splice(categoryIdx, 1);
+      //   }
+      // }
 
-      if (currentImprovement.action === "move") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
-        if (categoryIdx !== -1) {
-          const [movedCategory] = syllabus.splice(categoryIdx, 1);
-          const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_after);
-          syllabus.splice(newAfterCategoryIdx + 1, 0, movedCategory);
-        }
-      }
+      // if (currentImprovement.action === "move") {
+      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
+      //   if (categoryIdx !== -1) {
+      //     const [movedCategory] = syllabus.splice(categoryIdx, 1);
+      //     const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_after);
+      //     syllabus.splice(newAfterCategoryIdx + 1, 0, movedCategory);
+      //   }
+      // }
     }
 
     _courses[selectedCourse].syllabus = syllabus;
@@ -617,6 +616,7 @@ const CourseComponent = () => {
     setIsChanged(modifiedTopics);
     setTimeout(() => {
       setCourses(_courses);
+      setDisplayCourses(_courses);
     }, 1000);
     setCurrentImprovement({});
 
@@ -704,25 +704,7 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
   };
-  const getNewTopics = (currentImprovement: any, category: string) => {
-    let newTopics = [];
-    const _currentImprovement = JSON.parse(JSON.stringify(currentImprovement));
-    if (Object.keys(_currentImprovement || {}).length <= 0 || _currentImprovement.category !== category) {
-      return [];
-    }
-    if (
-      _currentImprovement.new_topic &&
-      (_currentImprovement.action === "add" || _currentImprovement.action === "divide")
-    ) {
-      newTopics.push(_currentImprovement.new_topic);
-    }
-    if ((_currentImprovement.new_topics || []).length > 0) {
-      newTopics = [...newTopics, ..._currentImprovement.new_topics];
-    }
-    newTopics = [...newTopics].slice();
-    newTopics.forEach(t => (t.color = "add"));
-    return newTopics;
-  };
+
   const scrollToCategory = (category: string) => {
     const categoryElement = document.getElementById(category);
     if (categoryElement) {
@@ -734,31 +716,67 @@ const CourseComponent = () => {
       setExpanded([currentImprovement.category]);
       scrollToCategory(currentImprovement.category);
     }
-    if (currentImprovement.action === "move" && currentImprovement.type === "topic") {
-      const NEW_COURSES: any = JSON.parse(JSON.stringify(courses));
-      const _selectedCourse = NEW_COURSES[selectedCourse];
-      const syllabus: any = _selectedCourse.syllabus;
+    const NEW_COURSES: any = JSON.parse(JSON.stringify(courses));
+    const _selectedCourse = NEW_COURSES[selectedCourse];
+    if (!_selectedCourse) return;
+    const syllabus: any = _selectedCourse.syllabus;
+    if (currentImprovement.type === "topic") {
+      if (currentImprovement.action === "move") {
+        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.current_category);
+        const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
+          (s: any) => s.title === currentImprovement.title
+        );
+        const oldTopic = syllabus[oldCategoryIndex].topics[oldTopicIndex];
+        syllabus[oldCategoryIndex].color = "change";
 
-      const oldCategoryIndex = syllabus.findIndex((s: any) => s.category === currentImprovement.current_category);
-      const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-        (s: any) => s.topic === currentImprovement.topic
-      );
-      const oldTopic = syllabus[oldCategoryIndex].topics[oldTopicIndex];
+        const newCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.new_category);
+        if (newCategoryIndex === -1) {
+          return;
+        }
+        syllabus[newCategoryIndex].color = "change";
+        const afterIndex = syllabus[newCategoryIndex].topics.findIndex(
+          (s: any) => s.title === currentImprovement.new_after
+        );
 
-      const categoryIndex = syllabus.findIndex((s: any) => s.category === currentImprovement.new_category);
-      if (categoryIndex === -1) {
-        return;
+        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex((s: any) => s.title === oldTopic.title);
+        if (alreadyExist === -1) {
+          oldTopic.color = "delete";
+          oldTopic.action = "move";
+          syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
+        }
+        setExpanded([currentImprovement.current_category, currentImprovement.new_category]);
+        scrollToCategory(currentImprovement.current_category);
+      } else if (currentImprovement.action === "delete") {
+        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
+          (s: any) => s.title === currentImprovement.title
+        );
+
+        syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
+        setExpanded([currentImprovement.category]);
+        scrollToCategory(currentImprovement.category);
+      } else if (currentImprovement.action === "divide") {
+        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(
+          (t: any) => t.title === currentImprovement.old_topic
+        );
+        syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
+        currentImprovement.new_topics.forEach((t: any) => (t.color = "add"));
+        syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...currentImprovement.new_topics];
+      } else if (currentImprovement.action === "add") {
+        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const afterIndex = syllabus[categoryIndex].topics.findIndex((t: any) => t.title === currentImprovement.after);
+
+        const newTopic = currentImprovement.new_topic;
+        newTopic.color = "add";
+        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
       }
-
-      const afterIndex = syllabus[categoryIndex].topics.findIndex((s: any) => s.topic === currentImprovement.new_after);
-      const alreadyExist = syllabus[categoryIndex].topics.findIndex((s: any) => s.topic === oldTopic.topic);
-      if (alreadyExist === -1) {
-        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic });
-      }
-      setExpanded([currentImprovement.current_category, currentImprovement.new_category]);
-      setDisplayCourses(NEW_COURSES);
-      scrollToCategory(currentImprovement.current_category);
     }
+    if (currentImprovement.action === "add" && currentImprovement.type === "category") {
+      const addAfterIdx = syllabus.findIndex((c: any) => c.title === currentImprovement.after);
+      syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovement.new_category, color: "add" });
+    }
+    setDisplayCourses(NEW_COURSES);
   }, [currentImprovement]);
 
   const getCourses = () => {
@@ -769,28 +787,17 @@ const CourseComponent = () => {
     }
   };
 
-  const getTopicColor = (category: any, tc: any) => {
-    const color =
-      tc.color === "add"
-        ? "green"
-        : currentImprovement.old_topic === tc
-        ? "red"
-        : selectedTopic === tc.title
-        ? "orange"
-        : currentImprovement.action === "move" &&
-          currentImprovement.type === "topic" &&
-          currentImprovement.topic === tc.title &&
-          currentImprovement.new_category === category.title
-        ? "green"
-        : (currentImprovement.action === "move" ||
-            currentImprovement.action === "delete" ||
-            currentImprovement.action === "divide") &&
-          currentImprovement.type === "topic" &&
-          (currentImprovement.topic === tc.title || currentImprovement.old_topic === tc.title) &&
-          (currentImprovement.current_category === category.title || !currentImprovement.current_category)
-        ? "red"
-        : "";
-    return color;
+  const getColor = (action: "delete" | "add" | "change") => {
+    switch (action) {
+      case "delete":
+        return "red";
+      case "add":
+        return "green";
+      case "change":
+        return "orange";
+      default:
+        return "";
+    }
   };
 
   const createCourse = async () => {
@@ -1852,6 +1859,7 @@ const CourseComponent = () => {
                         : categoryIndex === glowCategoryRedIndex
                         ? `${glowRed} 1.5s ease-in-out infinite`
                         : "",
+                    color: getColor(category.color),
                   }}
                   draggable
                   onDragStart={() => {
@@ -1885,20 +1893,12 @@ const CourseComponent = () => {
                         <Typography
                           variant="h4"
                           sx={{
-                            color:
-                              currentImprovement.type === "topic" && currentImprovement.category === category.title
-                                ? "orange"
-                                : currentImprovement.type === "topic" &&
-                                  currentImprovement.current_category === category.title
-                                ? "red"
-                                : currentImprovement.new_category === category.title
-                                ? "green"
-                                : "",
+                            color: getColor(category.color),
                           }}
                         >
                           {category.title}
                         </Typography>
-                        {expanded.includes(category.title) && (
+                        {expanded.includes(category.title) && Object.keys(currentImprovement).length <= 0 && (
                           <Box sx={{ ml: "14px" }}>
                             <Button
                               onClick={e => {
@@ -1923,216 +1923,215 @@ const CourseComponent = () => {
                       <LinearProgress />
                     ) : (
                       <Grid container spacing={2}>
-                        {[...(category.topics || []), ...getNewTopics(currentImprovement, category.title)].map(
-                          (tc: any, topicIndex: any) => (
-                            <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
-                              <Accordion
-                                expanded={expandedTopics.includes(tc.title)}
-                                onChange={(e, isExpanded) => {
-                                  let newExpanded = [];
-                                  if (isExpanded) {
-                                    newExpanded = [...expandedTopics, tc.title];
-                                    if (Object.keys(currentImprovement || {}).length <= 0) {
-                                      setSidebarOpen(true);
-                                      setSelectedTopic({ categoryIndex, topicIndex, ...tc });
-                                    }
-                                  } else {
-                                    if (Object.keys(currentImprovement || {}).length <= 0) {
-                                      setSidebarOpen(false);
-                                    }
-                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
+                        {[...(category.topics || [])].map((tc: any, topicIndex: any) => (
+                          <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
+                            <Accordion
+                              expanded={expandedTopics.includes(tc.title)}
+                              onChange={(e, isExpanded) => {
+                                let newExpanded = [];
+                                if (isExpanded) {
+                                  newExpanded = [...expandedTopics, tc.title];
+                                  if (Object.keys(currentImprovement || {}).length <= 0) {
+                                    setSidebarOpen(true);
+                                    setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                   }
+                                } else {
+                                  if (Object.keys(currentImprovement || {}).length <= 0) {
+                                    setSidebarOpen(false);
+                                  }
+                                  newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
+                                }
 
-                                  setSelectedOpenCategory(null);
-                                  setExpandedTopics(newExpanded);
-                                  setExpandedNode(null);
-                                }}
+                                setSelectedOpenCategory(null);
+                                setExpandedTopics(newExpanded);
+                                setExpandedNode(null);
+                              }}
+                              sx={{
+                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                borderRadius: "25px",
+                              }}
+                            >
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
+                                id={`panel${categoryIndex}-${topicIndex}-header`}
                                 sx={{
-                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
                                   borderRadius: "25px",
+                                  borderLeft:
+                                    dragOverTopicPointer === topicIndex
+                                      ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                                      : undefined,
+                                  animation: isRemoved.includes(tc.title)
+                                    ? `${glowRed} 1.5s ease-in-out infinite`
+                                    : isChanged.includes(tc.title)
+                                    ? `${glowGreen} 1.5s ease-in-out infinite`
+                                    : "",
+                                  // border: `1px solid ${getTopicColor(category, tc)}`,
                                 }}
+                                draggable
+                                onDragStart={() => {
+                                  dragItem.current = categoryIndex;
+                                  dragTopicItem.current = topicIndex;
+                                }}
+                                onDragEnter={() => {
+                                  dragOverTopicItem.current = topicIndex;
+                                  dragOverItem.current = categoryIndex;
+                                  setDragOverTopicPointer(topicIndex);
+                                  setDragOverItemPointer(categoryIndex);
+                                }}
+                                onDragOver={() => {
+                                  // console.log("onDragOver");
+                                }}
+                                onDragEnd={handleSortingForItems}
                               >
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
-                                  id={`panel${categoryIndex}-${topicIndex}-header`}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    borderRadius: "25px",
-                                    borderLeft:
-                                      dragOverTopicPointer === topicIndex
-                                        ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
-                                        : undefined,
-                                    animation: isRemoved.includes(tc.title)
-                                      ? `${glowRed} 1.5s ease-in-out infinite`
-                                      : isChanged.includes(tc.title)
-                                      ? `${glowGreen} 1.5s ease-in-out infinite`
-                                      : "",
-                                    // border: `1px solid ${getTopicColor(category, tc)}`,
-                                  }}
-                                  draggable
-                                  onDragStart={() => {
-                                    dragItem.current = categoryIndex;
-                                    dragTopicItem.current = topicIndex;
-                                  }}
-                                  onDragEnter={() => {
-                                    dragOverTopicItem.current = topicIndex;
-                                    dragOverItem.current = categoryIndex;
-                                    setDragOverTopicPointer(topicIndex);
-                                    setDragOverItemPointer(categoryIndex);
-                                  }}
-                                  onDragOver={() => {
-                                    // console.log("onDragOver");
-                                  }}
-                                  onDragEnd={handleSortingForItems}
-                                >
-                                  {" "}
-                                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                    <DragIndicatorIcon />
-                                    <Typography
-                                      variant="h6"
-                                      sx={{
-                                        textAlign: "center",
-                                        color: getTopicColor(category, tc),
-                                        fontWeight: 300,
-                                      }}
-                                    >
-                                      {tc?.title || ""}
-                                    </Typography>
-                                  </Box>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  {/* {loadingNodes && <LinearProgress />} */}
-                                  <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                    {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
-                                      (n: any, idx: number) => (
-                                        <Box key={n.node} sx={{ mb: "10px" }}>
-                                          <Accordion
-                                            id={n.node}
-                                            expanded={true}
+                                {" "}
+                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                  <DragIndicatorIcon sx={{ color: getColor(tc.color) }} />
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      textAlign: "center",
+                                      color: getColor(tc.color),
+                                      fontWeight: 300,
+                                    }}
+                                  >
+                                    {tc?.title || ""}
+                                  </Typography>
+                                  {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
+                                </Box>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                {/* {loadingNodes && <LinearProgress />} */}
+                                <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                  {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
+                                    (n: any, idx: number) => (
+                                      <Box key={n.node} sx={{ mb: "10px" }}>
+                                        <Accordion
+                                          id={n.node}
+                                          expanded={true}
+                                          sx={{
+                                            borderRadius: "13px!important",
+
+                                            overflow: "hidden",
+                                            listStyle: "none",
+                                            transition: "box-shadow 0.3s",
+
+                                            backgroundColor: theme =>
+                                              theme.palette.mode === "dark" ? "#1f1f1f" : "white",
+                                            border:
+                                              expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
+                                            p: "0px !important",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (expandedNode === n.node) {
+                                              setExpandedNode(null);
+                                            } else {
+                                              setSidebarOpen(true);
+                                              setExpandedNode(n);
+                                              retrieveNodeData(n, tc.title, idx);
+                                              setSelectedTopic(tc);
+                                            }
+                                          }}
+                                        >
+                                          <AccordionSummary
                                             sx={{
-                                              borderRadius: "13px!important",
-
-                                              overflow: "hidden",
-                                              listStyle: "none",
-                                              transition: "box-shadow 0.3s",
-
-                                              backgroundColor: theme =>
-                                                theme.palette.mode === "dark" ? "#1f1f1f" : "white",
-                                              border:
-                                                expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
                                               p: "0px !important",
-                                              cursor: "pointer",
-                                            }}
-                                            onClick={e => {
-                                              e.stopPropagation();
-                                              if (expandedNode === n.node) {
-                                                setExpandedNode(null);
-                                              } else {
-                                                setSidebarOpen(true);
-                                                setExpandedNode(n);
-                                                retrieveNodeData(n, tc.title, idx);
-                                                setSelectedTopic(tc);
-                                              }
+                                              marginBlock: "-13px !important",
                                             }}
                                           >
-                                            <AccordionSummary
-                                              sx={{
-                                                p: "0px !important",
-                                                marginBlock: "-13px !important",
-                                              }}
-                                            >
-                                              <Box sx={{ flexDirection: "column", width: "100%" }}>
+                                            <Box sx={{ flexDirection: "column", width: "100%" }}>
+                                              <Box
+                                                sx={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  m: "15px",
+                                                }}
+                                              >
                                                 <Box
                                                   sx={{
+                                                    pr: "25px",
+                                                    // pb: '15px',
                                                     display: "flex",
-                                                    alignItems: "center",
-                                                    m: "15px",
+                                                    gap: "15px",
                                                   }}
                                                 >
-                                                  <Box
-                                                    sx={{
-                                                      pr: "25px",
-                                                      // pb: '15px',
-                                                      display: "flex",
-                                                      gap: "15px",
-                                                    }}
-                                                  >
-                                                    <NodeTypeIcon
-                                                      id={n.title}
-                                                      nodeType={n.nodeType}
-                                                      tooltipPlacement={"top"}
-                                                      fontSize={"medium"}
-                                                      // disabled={disabled}
-                                                    />
-                                                    <MarkdownRender
-                                                      text={n?.title}
-                                                      sx={{
-                                                        fontSize: "20px",
-                                                        fontWeight: 400,
-                                                        letterSpacing: "inherit",
-                                                      }}
-                                                    />
-                                                  </Box>
-                                                </Box>
-                                              </Box>
-                                            </AccordionSummary>
-
-                                            <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                              <Box sx={{ p: "17px", pt: 0 }}>
-                                                <Box
-                                                  sx={{
-                                                    transition: "border 0.3s",
-                                                  }}
-                                                >
+                                                  <NodeTypeIcon
+                                                    id={n.title}
+                                                    nodeType={n.nodeType}
+                                                    tooltipPlacement={"top"}
+                                                    fontSize={"medium"}
+                                                    // disabled={disabled}
+                                                  />
                                                   <MarkdownRender
-                                                    text={n.content}
+                                                    text={n?.title}
                                                     sx={{
-                                                      fontSize: "16px",
+                                                      fontSize: "20px",
                                                       fontWeight: 400,
                                                       letterSpacing: "inherit",
                                                     }}
                                                   />
                                                 </Box>
-                                                {/* <FlashcardVideo flashcard={concept} /> */}
-                                                {(n?.nodeImage || []).length > 0 && (
-                                                  <Box>
-                                                    <ImageSlider images={[n?.nodeImage]} />
-                                                  </Box>
-                                                )}
                                               </Box>
-                                            </AccordionDetails>
-                                          </Accordion>
-                                        </Box>
-                                      )
-                                    )}
-                                  </Masonry>
-                                  {Object.keys(currentImprovement || {}).length <= 0 && (
-                                    <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-                                      <CustomButton
-                                        variant="contained"
-                                        type="button"
-                                        color="secondary"
-                                        onClick={() => {
-                                          retrieveNodesForTopic(tc.title);
-                                        }}
-                                      >
-                                        {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
-                                        {loadingNodes.includes(tc.title) ? (
-                                          <CircularProgress sx={{ ml: 1 }} size={20} />
-                                        ) : (
-                                          <AutoFixHighIcon sx={{ ml: 1 }} />
-                                        )}
-                                      </CustomButton>
-                                    </Box>
+                                            </Box>
+                                          </AccordionSummary>
+
+                                          <AccordionDetails /* sx={{ p: "0px !important" }} */>
+                                            <Box sx={{ p: "17px", pt: 0 }}>
+                                              <Box
+                                                sx={{
+                                                  transition: "border 0.3s",
+                                                }}
+                                              >
+                                                <MarkdownRender
+                                                  text={n.content}
+                                                  sx={{
+                                                    fontSize: "16px",
+                                                    fontWeight: 400,
+                                                    letterSpacing: "inherit",
+                                                  }}
+                                                />
+                                              </Box>
+                                              {/* <FlashcardVideo flashcard={concept} /> */}
+                                              {(n?.nodeImage || []).length > 0 && (
+                                                <Box>
+                                                  <ImageSlider images={[n?.nodeImage]} />
+                                                </Box>
+                                              )}
+                                            </Box>
+                                          </AccordionDetails>
+                                        </Accordion>
+                                      </Box>
+                                    )
                                   )}
-                                </AccordionDetails>
-                              </Accordion>
-                            </Grid>
-                          )
-                        )}
+                                </Masonry>
+                                {Object.keys(currentImprovement || {}).length <= 0 && (
+                                  <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <CustomButton
+                                      variant="contained"
+                                      type="button"
+                                      color="secondary"
+                                      onClick={() => {
+                                        retrieveNodesForTopic(tc.title);
+                                      }}
+                                    >
+                                      {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
+                                      {loadingNodes.includes(tc.title) ? (
+                                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                                      ) : (
+                                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                                      )}
+                                    </CustomButton>
+                                  </Box>
+                                )}
+                              </AccordionDetails>
+                            </Accordion>
+                          </Grid>
+                        ))}
                       </Grid>
                     )}
                   </AccordionDetails>
