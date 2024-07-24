@@ -3,20 +3,13 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, Divider, IconButton, Switch, Tooltip, Typography } from "@mui/material";
-import { SxProps, Theme } from "@mui/system";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { KnowledgeChoice } from "src/knowledgeTypes";
+import { QuestionProps } from "src/types";
 
 import { Editor } from "@/components/Editor";
 
 type EditorOptions = "EDIT" | "PREVIEW";
-type QuestionChoicesProps = {
-  question: any;
-  idx: number;
-  nodeId: number;
-  sx?: SxProps<Theme>;
-  handleQuestion: (question: any, idx: number, nodeId: number) => void;
-};
 
 type ChoiceProps = {
   idx: number;
@@ -41,7 +34,7 @@ const Choice = ({
 }: ChoiceProps) => {
   return (
     <Box>
-      <li className="QuestionChoices">
+      <li className="QuestionChoices" style={{ marginTop: "15px" }}>
         <Box style={{ display: "flex", alignItems: "center" }}>
           <Box>
             {choice?.correct ? (
@@ -74,7 +67,7 @@ const Choice = ({
             </Box>
           )}
         </Box>
-        <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", my: 3 }}>
+        <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", mt: 3 }}>
           <Editor
             label="Replace this with the choice-specific feedback."
             value={choice?.feedback}
@@ -90,7 +83,7 @@ const Choice = ({
   );
 };
 
-const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: QuestionChoicesProps) => {
+const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: QuestionProps) => {
   const [questionS, setQuestionS] = useState<any>(question);
   const [option, setOption] = useState<EditorOptions>("EDIT");
   const saveTimeoutRef = useRef<any>(null);
@@ -154,7 +147,7 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
 
   return (
     <Box sx={{ ...sx }}>
-      <Box mt={2} mb={2}>
+      <Box>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
             <Typography mb={4} variant="h3" fontWeight={"bold"}>
@@ -220,7 +213,6 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
           <span>Add Choice</span>
         </Button>
       </Box> */}
-      <Divider sx={{ borderColor: "gray", my: 3 }} />
     </Box>
   );
 };
