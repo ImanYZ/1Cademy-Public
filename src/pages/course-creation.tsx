@@ -3131,33 +3131,7 @@ const CourseComponent = () => {
                     readOnly={false}
                     placeholder="Type a new skill and click enter ↵ to add it..."
                   />
-                  <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
-                    <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
-
-                    {loadingPrompt ? (
-                      <LinearProgress sx={{ width: "40px" }} />
-                    ) : (
-                      <AutoFixHighIcon
-                        sx={{
-                          // backgroundColor: "grey",
-                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                          color: "orange",
-                          borderRadius: "50%",
-
-                          ":hover": {
-                            backgroundColor: "black",
-
-                            display: "block",
-                          },
-                          zIndex: 10,
-                          padding: "5px",
-                          cursor: "pointer",
-                          fontSize: "30px",
-                        }}
-                        onClick={generateMorePromptsForTopic}
-                      />
-                    )}
-                  </Box>
+                  <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
                   {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                     <Box key={index}>
                       <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
@@ -3312,36 +3286,57 @@ const CourseComponent = () => {
                       </Box>
                     </Box>
                   ))}
-                  <Button
-                    onClick={() => {
-                      const updatedCourses = [...courses];
-                      const currentTopic =
-                        updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ];
-                      if (!currentTopic.prompts) {
-                        currentTopic.prompts = [];
-                      }
-                      currentTopic.prompts.push({
-                        type: "Poll",
-                        text: "",
-                        purpose: "",
-                      });
+                  <Box sx={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: "10px" }}>
+                    <CustomButton
+                      variant="contained"
+                      type="button"
+                      color="secondary"
+                      onClick={() => {
+                        const updatedCourses = [...courses];
+                        const currentTopic =
+                          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ];
+                        if (!currentTopic.prompts) {
+                          currentTopic.prompts = [];
+                        }
+                        currentTopic.prompts.push({
+                          type: "Poll",
+                          text: "",
+                          purpose: "",
+                        });
 
-                      setCourses(updatedCourses);
-                      setSelectedTopic({
-                        categoryIndex: selectedTopic.categoryIndex,
-                        topicIndex: selectedTopic.topicIndex,
-                        ...currentTopic,
-                      });
-                      updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
-                      });
-                    }}
-                  >
-                    Add prompt
-                  </Button>
+                        setCourses(updatedCourses);
+                        setSelectedTopic({
+                          categoryIndex: selectedTopic.categoryIndex,
+                          topicIndex: selectedTopic.topicIndex,
+                          ...currentTopic,
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourse].id,
+                          syllabus: updatedCourses[selectedCourse].syllabus,
+                        });
+                      }}
+                      sx={{ width: "210px" }}
+                    >
+                      Add prompt
+                    </CustomButton>
+
+                    <CustomButton
+                      variant="contained"
+                      type="button"
+                      color="secondary"
+                      onClick={generateMorePromptsForTopic}
+                      disabled={loadingPrompt}
+                    >
+                      {loadingPrompt ? "Auto-generating Prompts" : "Auto-generate Prompts"}
+                      {loadingPrompt ? (
+                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                      ) : (
+                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                      )}
+                    </CustomButton>
+                  </Box>
                 </Box>
               )}
 
