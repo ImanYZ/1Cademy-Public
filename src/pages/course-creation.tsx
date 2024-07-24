@@ -828,7 +828,7 @@ const CourseComponent = () => {
     setSidebarOpen(false);
     setTimeout(() => {
       setSelectedCourse(courses.length);
-    }, 900);
+    }, 1000);
     setCreatingCourseStep(0);
   };
 
@@ -1798,7 +1798,7 @@ const CourseComponent = () => {
               </Box>
             ))} */}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 7) &&
+          {creatingCourseStep >= 7 &&
             (loadingCourseStructure ? (
               <LinearProgress />
             ) : (
@@ -1822,324 +1822,323 @@ const CourseComponent = () => {
             ))}
 
           <Box ref={containerRef} marginTop="20px">
-            {!courses[selectedCourse].new &&
-              (getCourses()[selectedCourse].syllabus || []).map((category: any, categoryIndex: any) => (
-                <Accordion id={category.title} key={category.title} expanded={expanded.includes(category.title)}>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls={`panel${categoryIndex}-content`}
-                    id={`panel${categoryIndex}-header`}
-                    onClick={e => {
-                      e.stopPropagation();
-                      if (expanded.includes(category.title)) {
-                        setExpanded([]);
-                        setSelectedOpenCategory(null);
-                        if (!Object.keys(currentImprovement || {}).length) {
-                          setSidebarOpen(false);
-                        }
-                      } else {
-                        setExpanded([category.title]);
-                        setSelectedTopic(null);
-                        if (!Object.keys(currentImprovement || {}).length) {
-                          setSelectedOpenCategory({ categoryIndex, ...category });
-                          setSidebarOpen(true);
-                        }
+            {(getCourses()[selectedCourse].syllabus || []).map((category: any, categoryIndex: any) => (
+              <Accordion id={category.title} key={category.title} expanded={expanded.includes(category.title)}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`panel${categoryIndex}-content`}
+                  id={`panel${categoryIndex}-header`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    if (expanded.includes(category.title)) {
+                      setExpanded([]);
+                      setSelectedOpenCategory(null);
+                      if (!Object.keys(currentImprovement || {}).length) {
+                        setSidebarOpen(false);
                       }
-                      setExpandedNode(null);
-                    }}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      borderLeft:
-                        dragOverItemPointer === categoryIndex
-                          ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
-                          : undefined,
-                      animation:
-                        categoryIndex === glowCategoryGreenIndex
-                          ? `${glowGreen} 1.5s ease-in-out infinite`
-                          : categoryIndex === glowCategoryRedIndex
-                          ? `${glowRed} 1.5s ease-in-out infinite`
-                          : "",
-                      color: getColor(category.color),
-                    }}
-                    draggable
-                    onDragStart={() => {
-                      dragItem.current = categoryIndex;
-                    }}
-                    onDragEnter={() => {
-                      dragOverItem.current = categoryIndex;
-                      setDragOverItemPointer(categoryIndex);
-                      //dragOverTopicItem.current = categoryIndex;
-                    }}
-                    onDragOver={handleDragOver}
-                    onDragEnd={handleSorting}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                      <DragIndicatorIcon />
-                      {currentImprovement.type === "category" &&
-                      currentImprovement.action === "modify" &&
-                      currentImprovement.old_category === category.title ? (
-                        <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
-                          <Box sx={{ display: "flex", gap: "5px" }}>
-                            <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
-                              {category.title}
-                            </Typography>
-                            <Typography variant="h6" sx={{ color: "green" }}>
-                              {currentImprovement.new_category.title}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      ) : (
-                        <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              color: getColor(category.color),
-                            }}
-                          >
+                    } else {
+                      setExpanded([category.title]);
+                      setSelectedTopic(null);
+                      if (!Object.keys(currentImprovement || {}).length) {
+                        setSelectedOpenCategory({ categoryIndex, ...category });
+                        setSidebarOpen(true);
+                      }
+                    }
+                    setExpandedNode(null);
+                  }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderLeft:
+                      dragOverItemPointer === categoryIndex
+                        ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                        : undefined,
+                    animation:
+                      categoryIndex === glowCategoryGreenIndex
+                        ? `${glowGreen} 1.5s ease-in-out infinite`
+                        : categoryIndex === glowCategoryRedIndex
+                        ? `${glowRed} 1.5s ease-in-out infinite`
+                        : "",
+                    color: getColor(category.color),
+                  }}
+                  draggable
+                  onDragStart={() => {
+                    dragItem.current = categoryIndex;
+                  }}
+                  onDragEnter={() => {
+                    dragOverItem.current = categoryIndex;
+                    setDragOverItemPointer(categoryIndex);
+                    //dragOverTopicItem.current = categoryIndex;
+                  }}
+                  onDragOver={handleDragOver}
+                  onDragEnd={handleSorting}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                    <DragIndicatorIcon />
+                    {currentImprovement.type === "category" &&
+                    currentImprovement.action === "modify" &&
+                    currentImprovement.old_category === category.title ? (
+                      <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
+                        <Box sx={{ display: "flex", gap: "5px" }}>
+                          <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
                             {category.title}
                           </Typography>
-                          {expanded.includes(category.title) && Object.keys(currentImprovement).length <= 0 && (
-                            <Box sx={{ ml: "14px" }}>
-                              <Button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleOpenDialog(categoryIndex);
-                                }}
-                              >
-                                Add topic
-                              </Button>
-                            </Box>
-                          )}
+                          <Typography variant="h6" sx={{ color: "green" }}>
+                            {currentImprovement.new_category.title}
+                          </Typography>
                         </Box>
-                      )}
-                      {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
-                        <LinearProgress sx={{ width: "100%" }} />
-                      )}
-                    </Box>
-                  </AccordionSummary>
-                  {expanded.includes(category.title) && (
-                    <AccordionDetails>
-                      {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done ? (
-                        <LinearProgress />
-                      ) : (
-                        <Grid container spacing={2}>
-                          {[...(category.topics || [])].map((tc: any, topicIndex: any) => (
-                            <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
-                              <Accordion
-                                expanded={expandedTopics.includes(tc.title)}
-                                onChange={(e, isExpanded) => {
-                                  let newExpanded = [];
-                                  if (isExpanded) {
-                                    newExpanded = [...expandedTopics, tc.title];
-                                    if (Object.keys(currentImprovement || {}).length <= 0) {
-                                      setSidebarOpen(true);
-                                      setSelectedTopic({ categoryIndex, topicIndex, ...tc });
-                                    }
-                                  } else {
-                                    if (Object.keys(currentImprovement || {}).length <= 0) {
-                                      setSidebarOpen(false);
-                                    }
-                                    newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            color: getColor(category.color),
+                          }}
+                        >
+                          {category.title}
+                        </Typography>
+                        {expanded.includes(category.title) && Object.keys(currentImprovement).length <= 0 && (
+                          <Box sx={{ ml: "14px" }}>
+                            <Button
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleOpenDialog(categoryIndex);
+                              }}
+                            >
+                              Add topic
+                            </Button>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
+                      <LinearProgress sx={{ width: "100%" }} />
+                    )}
+                  </Box>
+                </AccordionSummary>
+                {expanded.includes(category.title) && (
+                  <AccordionDetails>
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done ? (
+                      <LinearProgress />
+                    ) : (
+                      <Grid container spacing={2}>
+                        {[...(category.topics || [])].map((tc: any, topicIndex: any) => (
+                          <Grid item xs={12} key={topicIndex} sx={{ borderRadius: "25px" }}>
+                            <Accordion
+                              expanded={expandedTopics.includes(tc.title)}
+                              onChange={(e, isExpanded) => {
+                                let newExpanded = [];
+                                if (isExpanded) {
+                                  newExpanded = [...expandedTopics, tc.title];
+                                  if (Object.keys(currentImprovement || {}).length <= 0) {
+                                    setSidebarOpen(true);
+                                    setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                   }
+                                } else {
+                                  if (Object.keys(currentImprovement || {}).length <= 0) {
+                                    setSidebarOpen(false);
+                                  }
+                                  newExpanded = expandedTopics.filter((topic: string) => topic !== tc.title);
+                                }
 
-                                  setSelectedOpenCategory(null);
-                                  setExpandedTopics(newExpanded);
-                                  setExpandedNode(null);
-                                }}
+                                setSelectedOpenCategory(null);
+                                setExpandedTopics(newExpanded);
+                                setExpandedNode(null);
+                              }}
+                              sx={{
+                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                borderRadius: "25px",
+                              }}
+                            >
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
+                                id={`panel${categoryIndex}-${topicIndex}-header`}
                                 sx={{
-                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#161515" : "white"),
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
                                   borderRadius: "25px",
+                                  borderLeft:
+                                    dragOverTopicPointer === topicIndex
+                                      ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
+                                      : undefined,
+                                  animation: isRemoved.includes(tc.title)
+                                    ? `${glowRed} 1.5s ease-in-out infinite`
+                                    : isChanged.includes(tc.title)
+                                    ? `${glowGreen} 1.5s ease-in-out infinite`
+                                    : "",
+                                  // border: `1px solid ${getTopicColor(category, tc)}`,
                                 }}
+                                draggable
+                                onDragStart={() => {
+                                  dragItem.current = categoryIndex;
+                                  dragTopicItem.current = topicIndex;
+                                }}
+                                onDragEnter={() => {
+                                  dragOverTopicItem.current = topicIndex;
+                                  dragOverItem.current = categoryIndex;
+                                  setDragOverTopicPointer(topicIndex);
+                                  setDragOverItemPointer(categoryIndex);
+                                }}
+                                onDragOver={() => {
+                                  // console.log("onDragOver");
+                                }}
+                                onDragEnd={handleSortingForItems}
                               >
-                                <AccordionSummary
-                                  expandIcon={<ExpandMoreIcon />}
-                                  aria-controls={`panel${categoryIndex}-${topicIndex}-content`}
-                                  id={`panel${categoryIndex}-${topicIndex}-header`}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    borderRadius: "25px",
-                                    borderLeft:
-                                      dragOverTopicPointer === topicIndex
-                                        ? `solid 4px ${DESIGN_SYSTEM_COLORS.success400}`
-                                        : undefined,
-                                    animation: isRemoved.includes(tc.title)
-                                      ? `${glowRed} 1.5s ease-in-out infinite`
-                                      : isChanged.includes(tc.title)
-                                      ? `${glowGreen} 1.5s ease-in-out infinite`
-                                      : "",
-                                    // border: `1px solid ${getTopicColor(category, tc)}`,
-                                  }}
-                                  draggable
-                                  onDragStart={() => {
-                                    dragItem.current = categoryIndex;
-                                    dragTopicItem.current = topicIndex;
-                                  }}
-                                  onDragEnter={() => {
-                                    dragOverTopicItem.current = topicIndex;
-                                    dragOverItem.current = categoryIndex;
-                                    setDragOverTopicPointer(topicIndex);
-                                    setDragOverItemPointer(categoryIndex);
-                                  }}
-                                  onDragOver={() => {
-                                    // console.log("onDragOver");
-                                  }}
-                                  onDragEnd={handleSortingForItems}
-                                >
-                                  {" "}
-                                  <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                    <DragIndicatorIcon sx={{ color: getColor(tc.color) }} />
-                                    <Typography
-                                      variant="h6"
-                                      sx={{
-                                        textAlign: "center",
-                                        color: getColor(tc.color),
-                                        fontWeight: 300,
-                                      }}
-                                    >
-                                      {tc?.title || ""}
-                                    </Typography>
-                                    {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
-                                  </Box>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                  {/* {loadingNodes && <LinearProgress />} */}
-                                  <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                    {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
-                                      (n: any, idx: number) => (
-                                        <Box key={n.node} sx={{ mb: "10px" }}>
-                                          <Accordion
-                                            id={n.node}
-                                            expanded={true}
+                                {" "}
+                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                  <DragIndicatorIcon sx={{ color: getColor(tc.color) }} />
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      textAlign: "center",
+                                      color: getColor(tc.color),
+                                      fontWeight: 300,
+                                    }}
+                                  >
+                                    {tc?.title || ""}
+                                  </Typography>
+                                  {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
+                                </Box>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                {/* {loadingNodes && <LinearProgress />} */}
+                                <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
+                                  {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
+                                    (n: any, idx: number) => (
+                                      <Box key={n.node} sx={{ mb: "10px" }}>
+                                        <Accordion
+                                          id={n.node}
+                                          expanded={true}
+                                          sx={{
+                                            borderRadius: "13px!important",
+
+                                            overflow: "hidden",
+                                            listStyle: "none",
+                                            transition: "box-shadow 0.3s",
+
+                                            backgroundColor: theme =>
+                                              theme.palette.mode === "dark" ? "#1f1f1f" : "white",
+                                            border:
+                                              expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
+                                            p: "0px !important",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            if (expandedNode === n.node) {
+                                              setExpandedNode(null);
+                                            } else {
+                                              setSidebarOpen(true);
+                                              setExpandedNode(n);
+                                              retrieveNodeData(n, tc.title, idx);
+                                              setSelectedTopic(tc);
+                                            }
+                                          }}
+                                        >
+                                          <AccordionSummary
                                             sx={{
-                                              borderRadius: "13px!important",
-
-                                              overflow: "hidden",
-                                              listStyle: "none",
-                                              transition: "box-shadow 0.3s",
-
-                                              backgroundColor: theme =>
-                                                theme.palette.mode === "dark" ? "#1f1f1f" : "white",
-                                              border:
-                                                expandedNode && expandedNode.node === n.node ? `2px solid orange` : "",
                                               p: "0px !important",
-                                              cursor: "pointer",
-                                            }}
-                                            onClick={e => {
-                                              e.stopPropagation();
-                                              if (expandedNode === n.node) {
-                                                setExpandedNode(null);
-                                              } else {
-                                                setSidebarOpen(true);
-                                                setExpandedNode(n);
-                                                retrieveNodeData(n, tc.title, idx);
-                                                setSelectedTopic(tc);
-                                              }
+                                              marginBlock: "-13px !important",
                                             }}
                                           >
-                                            <AccordionSummary
-                                              sx={{
-                                                p: "0px !important",
-                                                marginBlock: "-13px !important",
-                                              }}
-                                            >
-                                              <Box sx={{ flexDirection: "column", width: "100%" }}>
+                                            <Box sx={{ flexDirection: "column", width: "100%" }}>
+                                              <Box
+                                                sx={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  m: "15px 15px 0px 15px",
+                                                }}
+                                              >
                                                 <Box
                                                   sx={{
+                                                    pr: "25px",
+                                                    // pb: '15px',
                                                     display: "flex",
-                                                    alignItems: "center",
-                                                    m: "15px 15px 0px 15px",
+                                                    gap: "15px",
                                                   }}
                                                 >
-                                                  <Box
-                                                    sx={{
-                                                      pr: "25px",
-                                                      // pb: '15px',
-                                                      display: "flex",
-                                                      gap: "15px",
-                                                    }}
-                                                  >
-                                                    <NodeTypeIcon
-                                                      id={n.title}
-                                                      nodeType={n.nodeType}
-                                                      tooltipPlacement={"top"}
-                                                      fontSize={"medium"}
-                                                      // disabled={disabled}
-                                                    />
-                                                    <MarkdownRender
-                                                      text={n?.title}
-                                                      sx={{
-                                                        fontSize: "20px",
-                                                        fontWeight: 400,
-                                                        letterSpacing: "inherit",
-                                                      }}
-                                                    />
-                                                  </Box>
-                                                </Box>
-                                              </Box>
-                                            </AccordionSummary>
-
-                                            <AccordionDetails /* sx={{ p: "0px !important" }} */>
-                                              <Box sx={{ p: "15px", pt: 0 }}>
-                                                <Box
-                                                  sx={{
-                                                    transition: "border 0.3s",
-                                                  }}
-                                                >
+                                                  <NodeTypeIcon
+                                                    id={n.title}
+                                                    nodeType={n.nodeType}
+                                                    tooltipPlacement={"top"}
+                                                    fontSize={"medium"}
+                                                    // disabled={disabled}
+                                                  />
                                                   <MarkdownRender
-                                                    text={n.content}
+                                                    text={n?.title}
                                                     sx={{
-                                                      fontSize: "16px",
+                                                      fontSize: "20px",
                                                       fontWeight: 400,
                                                       letterSpacing: "inherit",
                                                     }}
                                                   />
                                                 </Box>
-                                                {/* <FlashcardVideo flashcard={concept} /> */}
-                                                {(n?.nodeImage || []).length > 0 && (
-                                                  <Box sx={{ mt: "15px" }}>
-                                                    <ImageSlider images={[n?.nodeImage]} />
-                                                  </Box>
-                                                )}
                                               </Box>
-                                            </AccordionDetails>
-                                          </Accordion>
-                                        </Box>
-                                      )
-                                    )}
-                                  </Masonry>
-                                  {Object.keys(currentImprovement || {}).length <= 0 && (
-                                    <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-                                      <CustomButton
-                                        variant="contained"
-                                        type="button"
-                                        color="secondary"
-                                        onClick={() => {
-                                          retrieveNodesForTopic(tc.title);
-                                        }}
-                                      >
-                                        {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
-                                        {loadingNodes.includes(tc.title) ? (
-                                          <CircularProgress sx={{ ml: 1 }} size={20} />
-                                        ) : (
-                                          <AutoFixHighIcon sx={{ ml: 1 }} />
-                                        )}
-                                      </CustomButton>
-                                    </Box>
+                                            </Box>
+                                          </AccordionSummary>
+
+                                          <AccordionDetails /* sx={{ p: "0px !important" }} */>
+                                            <Box sx={{ p: "15px", pt: 0 }}>
+                                              <Box
+                                                sx={{
+                                                  transition: "border 0.3s",
+                                                }}
+                                              >
+                                                <MarkdownRender
+                                                  text={n.content}
+                                                  sx={{
+                                                    fontSize: "16px",
+                                                    fontWeight: 400,
+                                                    letterSpacing: "inherit",
+                                                  }}
+                                                />
+                                              </Box>
+                                              {/* <FlashcardVideo flashcard={concept} /> */}
+                                              {(n?.nodeImage || []).length > 0 && (
+                                                <Box sx={{ mt: "15px" }}>
+                                                  <ImageSlider images={[n?.nodeImage]} />
+                                                </Box>
+                                              )}
+                                            </Box>
+                                          </AccordionDetails>
+                                        </Accordion>
+                                      </Box>
+                                    )
                                   )}
-                                </AccordionDetails>
-                              </Accordion>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      )}
-                    </AccordionDetails>
-                  )}
-                </Accordion>
-              ))}
+                                </Masonry>
+                                {Object.keys(currentImprovement || {}).length <= 0 && (
+                                  <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                    <CustomButton
+                                      variant="contained"
+                                      type="button"
+                                      color="secondary"
+                                      onClick={() => {
+                                        retrieveNodesForTopic(tc.title);
+                                      }}
+                                    >
+                                      {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
+                                      {loadingNodes.includes(tc.title) ? (
+                                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                                      ) : (
+                                        <AutoFixHighIcon sx={{ ml: 1 }} />
+                                      )}
+                                    </CustomButton>
+                                  </Box>
+                                )}
+                              </AccordionDetails>
+                            </Accordion>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    )}
+                  </AccordionDetails>
+                )}
+              </Accordion>
+            ))}
           </Box>
 
           {(courses[selectedCourse].syllabus || []).length > 0 && courses[selectedCourse].done && (
