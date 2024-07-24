@@ -1477,7 +1477,7 @@ const CourseComponent = () => {
           border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid white"),
         },
         "&::-webkit-scrollbar-thumb:hover": {
-          background: "darkred",
+          background: DESIGN_SYSTEM_COLORS.orange400,
         },
       }}
     >
@@ -2126,7 +2126,9 @@ const CourseComponent = () => {
                                           retrieveNodesForTopic(tc.title);
                                         }}
                                       >
-                                        {loadingNodes.includes(tc.title) ? "Retrieving Nodes" : "Retrieve More Nodes"}
+                                        {loadingNodes.includes(tc.title)
+                                          ? "Retrieving Concept Cards"
+                                          : "Retrieve More Concept Cards"}
                                         {loadingNodes.includes(tc.title) ? (
                                           <CircularProgress sx={{ ml: 1 }} size={20} />
                                         ) : (
@@ -2360,7 +2362,7 @@ const CourseComponent = () => {
               border: theme => (theme.palette.mode === "dark" ? "3px solid #28282a" : "3px solid white"),
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              background: "darkred",
+              background: DESIGN_SYSTEM_COLORS.orange400,
             },
           }}
           elevation={8}
