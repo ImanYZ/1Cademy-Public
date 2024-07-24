@@ -243,17 +243,31 @@ Your generated question will be reviewed by a supervisory team. For a helpful qu
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseTitle, courseDescription, targetLearners, nodeId, previousQuestions } = req.body;
+    const { courseId, courseTitle, courseDescription, targetLearners, nodeId, previousQuestions } = req.body;
 
-    const question = await retrieveGenerateQuestions(
+    const newQuestion = await retrieveGenerateQuestions(
       courseTitle,
       courseDescription,
       targetLearners,
       nodeId,
       previousQuestions
     );
-    return res.status(200).json(question);
+    const courseRef = db.collection("coursesAI").doc(courseId);
+    await db.runTransaction(async (t: any) => {
+      const courseDoc = await t.get(courseRef);
+      const courseData = courseDoc.data();
+
+      if (courseData.questions) {
+        courseData.questions[nodeId] = [...previousQuestions, newQuestion];
+      } else {
+        courseData.questions = { [nodeId]: [newQuestion] };
+      }
+      t.update(courseRef, courseData);
+    });
+
+    return res.status(200).json({});
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: error });
   }
 }
