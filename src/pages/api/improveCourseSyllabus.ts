@@ -171,7 +171,7 @@ Each action should be accompanied by:
       ],
       "topics": [
         {
-          "topic": "Advanced HTML and CSS",
+          "title": "Advanced HTML and CSS",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Advanced techniques in HTML and CSS for modern web design.",
@@ -204,7 +204,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "JavaScript ES6 and Beyond",
+          "title": "JavaScript ES6 and Beyond",
           "hours": 2,
           "difficulty": "Medium",
           "description": "In-depth coverage of ES6 features and modern JavaScript.",
@@ -237,7 +237,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Introduction to React",
+          "title": "Introduction to React",
           "hours": 3,
           "difficulty": "Medium",
           "description": "Fundamentals of React for building dynamic user interfaces.",
@@ -270,7 +270,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "State Management in React",
+          "title": "State Management in React",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Managing state in React applications using various techniques.",
@@ -337,7 +337,7 @@ Each action should be accompanied by:
       ],
       "topics": [
         {
-          "topic": "Node.js and Express.js",
+          "title": "Node.js and Express.js",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Building server-side applications using Node.js and Express.js.",
@@ -370,7 +370,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "RESTful API Design",
+          "title": "RESTful API Design",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Designing RESTful APIs for web applications.",
@@ -403,7 +403,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Database Integration with MongoDB",
+          "title": "Database Integration with MongoDB",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Integrating MongoDB with web applications for data storage.",
@@ -436,7 +436,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Authentication and Authorization",
+          "title": "Authentication and Authorization",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Implementing secure authentication and authorization mechanisms.",
@@ -502,7 +502,7 @@ Each action should be accompanied by:
       ],
       "topics": [
         {
-          "topic": "Common Security Threats",
+          "title": "Common Security Threats",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Identifying and mitigating common web security threats.",
@@ -535,7 +535,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Secure Coding Practices",
+          "title": "Secure Coding Practices",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Best practices for writing secure code.",
@@ -568,7 +568,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "Web Application Firewalls",
+          "title": "Web Application Firewalls",
           "hours": 2,
           "difficulty": "Medium",
           "description": "Using web application firewalls to protect web applications.",
@@ -648,7 +648,7 @@ Each action should be accompanied by:
         ],
         "topics": [
           {
-            "topic": "Continuous Integration and Continuous Deployment (CI/CD)",
+            "title": "Continuous Integration and Continuous Deployment (CI/CD)",
             "hours": 2,
             "difficulty": "Medium",
             "description": "Practices and tools for continuous integration and deployment.",
@@ -681,7 +681,7 @@ Each action should be accompanied by:
             ]
           },
           {
-            "topic": "Containerization with Docker",
+            "title": "Containerization with Docker",
             "hours": 2,
             "difficulty": "Medium",
             "description": "Using Docker for containerization and deployment.",
@@ -714,7 +714,7 @@ Each action should be accompanied by:
             ]
           },
           {
-            "topic": "Deployment on Cloud Platforms",
+            "title": "Deployment on Cloud Platforms",
             "hours": 2,
             "difficulty": "Medium",
             "description": "Deploying web applications on cloud platforms.",
@@ -757,7 +757,7 @@ Each action should be accompanied by:
       "old_topic": "State Management in React",
       "new_topics": [
         {
-          "topic": "State Management with Redux",
+          "title": "State Management with Redux",
           "hours": 1,
           "difficulty": "Medium",
           "description": "Managing state in React applications using Redux.",
@@ -788,7 +788,7 @@ Each action should be accompanied by:
           ]
         },
         {
-          "topic": "State Management with Context API",
+          "title": "State Management with Context API",
           "hours": 1,
           "difficulty": "Medium",
           "description": "Managing state in React applications using the Context API.",
@@ -825,14 +825,14 @@ Each action should be accompanied by:
       "action": "delete",
       "type": "topic",
       "category": "Web Security",
-      "topic": "Common Security Threats",
+      "title": "Common Security Threats",
       "rationale": "This topic can be integrated into 'Secure Coding Practices' to streamline the content and avoid redundancy."
     },
     {
       "action": "move",
       "type": "topic",
       "current_category": "Backend Development",
-      "topic": "RESTful API Design",
+      "title": "RESTful API Design",
       "current_after": "Node.js and Express.js",
       "new_category": "Frontend Development",
       "new_after": "JavaScript ES6 and Beyond",
@@ -844,7 +844,7 @@ Each action should be accompanied by:
       "category": "Backend Development",
       "after": "Database Integration with MongoDB",
       "new_topic": {
-        "topic": "GraphQL API Design",
+        "title": "GraphQL API Design",
         "hours": 2,
         "difficulty": "Medium",
         "description": "Designing APIs using GraphQL for more flexible data queries.",
