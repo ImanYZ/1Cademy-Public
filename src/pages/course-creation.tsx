@@ -1,3 +1,5 @@
+import AddIcon from "@mui/icons-material/Add";
+import AltRouteIcon from "@mui/icons-material/AltRoute";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
@@ -254,7 +256,7 @@ const CourseComponent = () => {
 
   const updateCourses = async (course: any, deleteNodes = false, deleteImprovements = false) => {
     if (!course.id || course.new) return;
-    delete course.suggestions;
+
     const courseRef = doc(db, "coursesAI", course.id);
     const updateData: any = { ...course, updateAt: new Date() };
 
@@ -535,20 +537,25 @@ const CourseComponent = () => {
             topics[topicIdx] = currentImprovement.new_topic;
           }
         }
-        modifiedTopics.push(currentImprovement.new_topic.topic);
+        modifiedTopics.push(currentImprovement.new_topic.title);
       }
 
       if (currentImprovement.action === "divide") {
-        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
-        if (categoryIdx !== -1) {
-          let topics = syllabus[categoryIdx].topics;
-          const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.old_topic);
-          if (topicIdx !== -1) {
-            topics.splice(topicIdx, 1, ...currentImprovement.new_topics);
-          }
-        }
-        modifiedTopics.push(...currentImprovement.new_topics.map((t: { topic: string }) => t.topic));
+        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(
+          (t: any) => t.title === currentImprovement.old_topic
+        );
+        syllabus[categoryIndex].color = "modify";
+        syllabus[categoryIndex].topics.splice(oldTopicIdx, 1);
+        const new_topics_copy = currentImprovement.new_topics.slice();
+        new_topics_copy.forEach((element: any) => {
+          delete element.color;
+          delete element.action;
+        });
+        syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
+
         removedTopics.push(currentImprovement.old_topic);
+        modifiedTopics.push(...currentImprovement.new_topics.map((t: { title: string }) => t.title));
       }
 
       if (currentImprovement.action === "delete") {
@@ -618,7 +625,9 @@ const CourseComponent = () => {
     _courses[selectedCourse].syllabus = syllabus;
 
     setIsRemoved(removedTopics);
-    await delay(1000);
+    if (removedTopics.length > 0) {
+      await delay(1000);
+    }
     setIsChanged(modifiedTopics);
     setTimeout(() => {
       setCourses(_courses);
@@ -626,8 +635,8 @@ const CourseComponent = () => {
     }, 1000);
     setCurrentImprovement({});
 
-    updateCourses(_courses[selectedCourse], false, true);
     setTimeout(() => {
+      updateCourses(_courses[selectedCourse], false, true);
       setImprovements((prev: any) => {
         prev.splice(currentChangeIndex, 1);
         return prev;
@@ -772,6 +781,7 @@ const CourseComponent = () => {
           (t: any) => t.title === currentImprovement.old_topic
         );
         syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
+        syllabus[categoryIndex].topics[oldTopicIdx].action = "divide";
         const new_topics_copy = currentImprovement.new_topics.slice();
         new_topics_copy.forEach((t: any) => (t.color = "add"));
         syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
@@ -1423,6 +1433,7 @@ const CourseComponent = () => {
       console.error(error);
     }
   };
+
   if (courses.length <= 0) {
     return (
       <Box
@@ -2007,6 +2018,8 @@ const CourseComponent = () => {
                                     {tc?.title || ""}
                                   </Typography>
                                   {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
+                                  {tc.action === "divide" && <AltRouteIcon sx={{ color: getColor(tc.color) }} />}
+                                  {tc.color === "add" && <AddIcon sx={{ color: getColor(tc.color) }} />}
                                 </Box>
                               </AccordionSummary>
                               <AccordionDetails>
@@ -2125,8 +2138,9 @@ const CourseComponent = () => {
                                         retrieveNodesForTopic(tc.title);
                                       }}
                                     >
-                                      {loadingNodes.includes(tc.title) ? "Retrieving Concept Cards"
-                                          : "Retrieve More Concept Cards"}
+                                      {loadingNodes.includes(tc.title)
+                                        ? "Retrieving Concept Cards"
+                                        : "Retrieve More Concept Cards"}
                                       {loadingNodes.includes(tc.title) ? (
                                         <CircularProgress sx={{ ml: 1 }} size={20} />
                                       ) : (
