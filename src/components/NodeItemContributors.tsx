@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+import { SxProps, Theme } from "@mui/system";
 import { FC } from "react";
 
 import ROUTES from "@/lib/utils/routes";
@@ -11,9 +12,10 @@ import LeaderboardChip from "./LeaderboardChip";
 type Props = {
   contributors: KnowledgeNodeContributor[];
   institutions: KnowledgeNodeInstitution[];
+  sx?: SxProps<Theme>;
 };
 
-const NodeItemContributors: FC<Props> = ({ contributors, institutions }) => {
+const NodeItemContributors: FC<Props> = ({ contributors, institutions, sx }) => {
   const renderContributors = () => {
     return contributors.map((el, idx) => (
       <Grid item key={idx}>
@@ -50,7 +52,7 @@ const NodeItemContributors: FC<Props> = ({ contributors, institutions }) => {
   }
 
   return (
-    <Box>
+    <Box sx={{ ...sx }}>
       <Typography variant="body2" color="text.secondary" sx={{ mb: "15px" }}>
         Contributors are:
       </Typography>
