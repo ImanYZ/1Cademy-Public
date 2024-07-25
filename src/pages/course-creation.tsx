@@ -2558,7 +2558,7 @@ const CourseComponent = () => {
                                 type="button"
                                 color="secondary"
                                 onClick={() => {
-                                  retrievePrerequisites(nodePublicView.node, nodePublicView?.topic, "parent");
+                                  retrievePrerequisites(nodePublicView.node, nodePublicView?.topic, "parents");
                                 }}
                                 disabled={prerequisitesLoader === "parents"}
                               >

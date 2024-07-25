@@ -3,6 +3,8 @@ import fbAuth from "src/middlewares/fbAuth";
 import { db } from "@/lib/firestoreServer/admin";
 import { INode } from "src/types/INode";
 
+type RetrieveNodePrerequesitesProps = { courseId: string; nodeId: string; topic: string; type: "parents" | "children" };
+
 const compareNodes = async (courseNodes: any, nodes: any): Promise<any[]> => {
   const nonMatchingObjects: any[] = [];
   const courseNodeTitles = new Set(courseNodes.map((node: any) => node.title));
@@ -49,7 +51,7 @@ const findPrerequisitesNodes = async (courseNodes: any[], nodes: any[] = [], typ
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { courseId, nodeId, topic, type } = req.body;
+    const { courseId, nodeId, topic, type }: RetrieveNodePrerequesitesProps = req.body;
     const courseRef = db.collection("coursesAI").doc(courseId);
     const courseDoc = await courseRef.get();
 
@@ -79,8 +81,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const courseDoc = await t.get(courseRef);
         const courseData = courseDoc.data() as FirebaseFirestore.DocumentData;
         const nodeIdx = courseData.nodes[topic].findIndex((node: any) => node.node === nodeId);
-        courseData.nodes[topic][nodeIdx][type] = [...courseData.nodes[topic][nodeIdx][type], ...prerequisitesNodes];
-        t.update(courseRef, courseData);
+        if (courseData.nodes?.[topic]?.[nodeIdx]?.[type]) {
+          courseData.nodes[topic][nodeIdx][type] = [...courseData.nodes[topic][nodeIdx][type], ...prerequisitesNodes];
+          t.update(courseRef, courseData);
+        }
       });
     }
     return res.status(200).json({ nodes: prerequisitesNodes });
