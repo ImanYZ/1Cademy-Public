@@ -2,12 +2,13 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, Divider, IconButton, Switch, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { KnowledgeChoice } from "src/knowledgeTypes";
 import { QuestionProps } from "src/types";
 
 import { Editor } from "@/components/Editor";
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 type EditorOptions = "EDIT" | "PREVIEW";
 
@@ -34,51 +35,48 @@ const Choice = ({
 }: ChoiceProps) => {
   return (
     <Box>
-      <li className="QuestionChoices" style={{ marginTop: "15px" }}>
-        <Box style={{ display: "flex", alignItems: "center" }}>
-          <Box>
-            {choice?.correct ? (
-              <IconButton onClick={() => handleCorrect(false, idx)}>
-                <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
-              </IconButton>
-            ) : (
-              <IconButton onClick={() => handleCorrect(true, idx)}>
-                <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
-              </IconButton>
-            )}
-          </Box>
-          {/* TODO: Keep the state of readonly after render */}
-          <Editor
-            label="Replace this with the choice."
-            value={choice?.choice}
-            setValue={value => handleChoiceText(value, idx)}
-            readOnly={option === "PREVIEW"}
-            sxPreview={{ fontSize: "15px", fontWeight: 300 }}
-            showEditPreviewSection={false}
-            editOption={option}
-          />
-          {option === "EDIT" && choices.length > 1 && (
-            <Box>
-              <Tooltip title={"Delete this choice from this question."}>
-                <IconButton onClick={() => deleteChoice(idx)}>
-                  <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
-                </IconButton>
-              </Tooltip>
-            </Box>
+      <Box style={{ display: "flex", alignItems: "center" }}>
+        <Box>
+          {choice?.correct ? (
+            <IconButton onClick={() => handleCorrect(false, idx)}>
+              <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
+            </IconButton>
+          ) : (
+            <IconButton onClick={() => handleCorrect(true, idx)}>
+              <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
+            </IconButton>
           )}
         </Box>
-        <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", mt: 3 }}>
-          <Editor
-            label="Replace this with the choice-specific feedback."
-            value={choice?.feedback}
-            setValue={value => handleFeedbackText(value, idx)}
-            readOnly={false}
-            showEditPreviewSection={false}
-            editOption={option}
-          />
-        </Box>
-        {option === "PREVIEW" && <Divider sx={{ borderColor: "gray" }} />}
-      </li>
+        {/* TODO: Keep the state of readonly after render */}
+        <Editor
+          label="Replace this with the choice."
+          value={choice?.choice}
+          setValue={value => handleChoiceText(value, idx)}
+          readOnly={option === "PREVIEW"}
+          sxPreview={{ fontSize: "15px", fontWeight: 300 }}
+          showEditPreviewSection={false}
+          editOption={option}
+        />
+        {option === "EDIT" && choices.length > 1 && (
+          <Box>
+            <Tooltip title={"Delete this choice from this question."}>
+              <IconButton onClick={() => deleteChoice(idx)}>
+                <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
+      </Box>
+      <Box className="collapsible-body" sx={{ display: "block", width: "90%", mx: "auto", mt: 3 }}>
+        <Editor
+          label="Replace this with the choice-specific feedback."
+          value={choice?.feedback}
+          setValue={value => handleFeedbackText(value, idx)}
+          readOnly={false}
+          showEditPreviewSection={false}
+          editOption={option}
+        />
+      </Box>
     </Box>
   );
 };
@@ -194,17 +192,26 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
       </Box>
       {questionS?.choices.map((choice: KnowledgeChoice, idx: number) => {
         return (
-          <Choice
+          <Box
             key={idx}
-            idx={idx}
-            choices={questionS?.choices}
-            choice={choice}
-            handleChoiceText={handleChoiceText}
-            handleCorrect={handleCorrect}
-            handleFeedbackText={handleFeedbackText}
-            deleteChoice={deleteChoice}
-            option={option}
-          />
+            sx={{
+              background: theme =>
+                theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+              p: 3,
+              mt: 2,
+            }}
+          >
+            <Choice
+              idx={idx}
+              choices={questionS?.choices}
+              choice={choice}
+              handleChoiceText={handleChoiceText}
+              handleCorrect={handleCorrect}
+              handleFeedbackText={handleFeedbackText}
+              deleteChoice={deleteChoice}
+              option={option}
+            />
+          </Box>
         );
       })}
       {/* <Box sx={{ alignSelf: "flex-end" }}>
