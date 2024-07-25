@@ -208,8 +208,14 @@ const CourseComponent = () => {
   const { confirmIt, ConfirmDialog } = useConfirmDialog();
   const [loadingNodes, setLoadingNodes] = useState<string[]>([]);
   const [nodePublicView, setNodePublicView] = useState<any>(null);
-  const [nodePublicViewLoader, setNodePublicViewLoader] = useState<any>(false);
-  const [questionsLoader, setQuestionsLoader] = useState<any>(false);
+  const [nodePublicViewLoader, setNodePublicViewLoader] = useState<boolean>(false);
+  const [questionsLoader, setQuestionsLoader] = useState<boolean>(false);
+  const [prerequisitesLoader, setPrerequisitesLoader] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (nodePublicView) {
+    }
+  }, [nodePublicView]);
 
   useEffect(() => {
     if (!user?.uname) return;
@@ -1341,7 +1347,7 @@ const CourseComponent = () => {
             : "";
 
         const course = courses[selectedCourse];
-        setNodePublicView(node);
+        setNodePublicView({ ...node, topic: topicTitle });
         if (!node?.updatedStr) {
           setNodePublicViewLoader(true);
           const nodeResponse = await getNodeDataForCourse(node?.node || "");
@@ -1356,7 +1362,7 @@ const CourseComponent = () => {
             institutions: nodeResponse.institutions,
           };
           course.nodes[topicTitle][idx] = updatedData;
-          setNodePublicView(updatedData);
+          setNodePublicView({ ...updatedData, topic: topicTitle });
           updateCourses(course);
           setNodePublicViewLoader(false);
         }
@@ -1383,6 +1389,29 @@ const CourseComponent = () => {
         setQuestionsLoader(false);
       } catch (error) {
         setQuestionsLoader(false);
+        await confirmIt("There is a error with the request for retrieving questions, please try again.", "Ok", "");
+        console.error(error);
+      }
+    },
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+  );
+
+  const retrievePrerequisites = useCallback(
+    async (nodeId: string, topic: string, type: "parents" | "children") => {
+      try {
+        setPrerequisitesLoader(type);
+        const courseId = courses[selectedCourse].id;
+        const result: any = await Post("/retrieveNodePrerequesites", {
+          nodeId,
+          type,
+          topic,
+          courseId,
+        });
+        setNodePublicView({ ...nodePublicView, [type]: [...nodePublicView[type], ...(result?.nodes || [])] });
+
+        setPrerequisitesLoader(null);
+      } catch (error) {
+        setPrerequisitesLoader(null);
         await confirmIt("There is a error with the request for retrieving questions, please try again.", "Ok", "");
         console.error(error);
       }
@@ -2125,8 +2154,9 @@ const CourseComponent = () => {
                                         retrieveNodesForTopic(tc.title);
                                       }}
                                     >
-                                      {loadingNodes.includes(tc.title) ? "Retrieving Concept Cards"
-                                          : "Retrieve More Concept Cards"}
+                                      {loadingNodes.includes(tc.title)
+                                        ? "Retrieving Concept Cards"
+                                        : "Retrieve More Concept Cards"}
                                       {loadingNodes.includes(tc.title) ? (
                                         <CircularProgress sx={{ ml: 1 }} size={20} />
                                       ) : (
@@ -2520,12 +2550,52 @@ const CourseComponent = () => {
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
-                          <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                          <>
+                            <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                              <CustomButton
+                                variant="contained"
+                                type="button"
+                                color="secondary"
+                                onClick={() => {
+                                  retrievePrerequisites(nodePublicView.node, nodePublicView?.topic, "parents");
+                                }}
+                                disabled={prerequisitesLoader === "parents"}
+                              >
+                                Auto-generate parents
+                                {prerequisitesLoader === "parents" ? (
+                                  <CircularProgress sx={{ ml: 1 }} size={20} />
+                                ) : (
+                                  <AutoFixHighIcon sx={{ ml: 1 }} />
+                                )}
+                              </CustomButton>
+                            </Box>
+                          </>
                         )}
                       </Grid>
                       <Grid item xs={12} sm={12}>
                         {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
-                          <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
+                          <>
+                            <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
+                            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                              <CustomButton
+                                variant="contained"
+                                type="button"
+                                color="secondary"
+                                onClick={() => {
+                                  retrievePrerequisites(nodePublicView.node, nodePublicView?.topic, "children");
+                                }}
+                                disabled={prerequisitesLoader === "children"}
+                              >
+                                Auto-generate children
+                                {prerequisitesLoader === "children" ? (
+                                  <CircularProgress sx={{ ml: 1 }} size={20} />
+                                ) : (
+                                  <AutoFixHighIcon sx={{ ml: 1 }} />
+                                )}
+                              </CustomButton>
+                            </Box>
+                          </>
                         )}
                       </Grid>
                     </>
@@ -3132,7 +3202,18 @@ const CourseComponent = () => {
                   <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
                   {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                     <Box key={index}>
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "15px",
+                          background: theme =>
+                            theme.palette.mode === "dark"
+                              ? DESIGN_SYSTEM_COLORS.notebookG600
+                              : DESIGN_SYSTEM_COLORS.gray100,
+                          p: 2,
+                        }}
+                      >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
                           <Typography gutterBottom>Prompt {index + 1}:</Typography>
                           <Button
