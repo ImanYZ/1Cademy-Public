@@ -772,15 +772,15 @@ const CourseComponent = () => {
           (t: any) => t.title === currentImprovement.old_topic
         );
         syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
-        currentImprovement.new_topics.forEach((t: any) => (t.color = "add"));
-        syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...currentImprovement.new_topics];
+        const new_topics_copy = currentImprovement.new_topics.slice();
+        new_topics_copy.forEach((t: any) => (t.color = "add"));
+        syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
       } else if (currentImprovement.action === "add") {
         const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
         const afterIndex = syllabus[categoryIndex].topics.findIndex((t: any) => t.title === currentImprovement.after);
 
         const newTopic = currentImprovement.new_topic;
-        newTopic.color = "add";
-        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
+        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, { ...newTopic, color: "add" });
       }
     }
     if (currentImprovement.action === "add" && currentImprovement.type === "category") {
