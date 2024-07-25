@@ -81,10 +81,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const courseDoc = await t.get(courseRef);
         const courseData = courseDoc.data() as FirebaseFirestore.DocumentData;
         const nodeIdx = courseData.nodes[topic].findIndex((node: any) => node.node === nodeId);
-        if (courseData.nodes?.[topic]?.[nodeIdx]?.[type]) {
-          courseData.nodes[topic][nodeIdx][type] = [...courseData.nodes[topic][nodeIdx][type], ...prerequisitesNodes];
-          t.update(courseRef, courseData);
+        if (!courseData.nodes?.[topic]?.[nodeIdx]?.[type]) {
+          courseData.nodes[topic][nodeIdx][type] = [];
         }
+        courseData.nodes[topic][nodeIdx][type] = [...courseData.nodes[topic][nodeIdx][type], ...prerequisitesNodes];
+        t.update(courseRef, courseData);
       });
     }
     return res.status(200).json({ nodes: prerequisitesNodes });

@@ -1397,7 +1397,7 @@ const CourseComponent = () => {
   );
 
   const retrievePrerequisites = useCallback(
-    async (nodeId: string, topic: string, type: string) => {
+    async (nodeId: string, topic: string, type: "parents" | "children") => {
       try {
         setPrerequisitesLoader(type);
         const courseId = courses[selectedCourse].id;
