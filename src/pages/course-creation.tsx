@@ -144,11 +144,21 @@ type QuestionComponentsType = {
   [key: string]: React.ComponentType<QuestionProps>;
 };
 
+type DifficultyType = {
+  [key: string]: { label: string; color: string };
+};
+
 const questionComponents: QuestionComponentsType = {
   "Multiple Choice": MultipleChoices,
   "True/False": TrueFalse,
   "Short Answer": ShortAnswer,
   Essay: Essay,
+};
+
+const difficulties: DifficultyType = {
+  easy: { label: "Easy", color: DESIGN_SYSTEM_COLORS.success400 },
+  medium: { label: "Medium", color: DESIGN_SYSTEM_COLORS.yellow500 },
+  hard: { label: "Hard", color: DESIGN_SYSTEM_COLORS.notebookRed2 },
 };
 const CourseComponent = () => {
   const db = getFirestore();
@@ -2023,19 +2033,42 @@ const CourseComponent = () => {
                                 onDragEnd={handleSortingForItems}
                               >
                                 {" "}
-                                <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                  <DragIndicatorIcon sx={{ color: getColor(tc.color) }} />
-                                  <Typography
-                                    variant="h6"
-                                    sx={{
-                                      textAlign: "center",
-                                      color: getColor(tc.color),
-                                      fontWeight: 300,
-                                    }}
-                                  >
-                                    {tc?.title || ""}
-                                  </Typography>
-                                  {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    width: "100%",
+                                  }}
+                                >
+                                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                                    <DragIndicatorIcon sx={{ color: getColor(tc.color) }} />
+                                    <Typography
+                                      variant="h6"
+                                      sx={{
+                                        textAlign: "center",
+                                        color: getColor(tc.color),
+                                        fontWeight: 300,
+                                      }}
+                                    >
+                                      {tc?.title || ""}
+                                    </Typography>
+                                    {tc.action === "move" && <SwapHorizIcon sx={{ color: getColor(tc.color) }} />}
+                                  </Box>
+                                  <Box sx={{ display: "flex", gap: "15px", mr: 2 }}>
+                                    <Typography>
+                                      Hours:{" "}
+                                      <Typography display={"inline"} color={DESIGN_SYSTEM_COLORS.orange300}>
+                                        {tc?.hours || 0}
+                                      </Typography>
+                                    </Typography>
+                                    <Typography>
+                                      Difficulty:{" "}
+                                      <Typography display={"inline"} color={difficulties[tc?.difficulty || ""]?.color}>
+                                        {difficulties[tc?.difficulty || ""]?.label}
+                                      </Typography>
+                                    </Typography>
+                                  </Box>
                                 </Box>
                               </AccordionSummary>
                               <AccordionDetails>
@@ -2323,13 +2356,13 @@ const CourseComponent = () => {
                     },
                   }}
                 >
-                  <MenuItem value="easy" sx={{ color: "#AAFF00" }}>
+                  <MenuItem value="easy" sx={{ color: difficulties["easy"].color }}>
                     Easy
                   </MenuItem>
-                  <MenuItem value="medium" sx={{ color: "#ffc071" }}>
+                  <MenuItem value="medium" sx={{ color: difficulties["medium"].color }}>
                     Medium
                   </MenuItem>
-                  <MenuItem value="hard" sx={{ color: "red" }}>
+                  <MenuItem value="hard" sx={{ color: difficulties["hard"].color }}>
                     Hard
                   </MenuItem>
                 </Select>
@@ -2488,7 +2521,7 @@ const CourseComponent = () => {
                               sx={{
                                 backgroundColor: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "white"),
                                 mt: 2,
-                                p: "8px",
+                                p: "12px",
                               }}
                             />
                           ) : null;
@@ -2513,6 +2546,32 @@ const CourseComponent = () => {
                       </Box>
                     </Card>
                   </Grid>
+
+                  {/* <Grid item xs={12} sm={12}>
+                    <Card sx={{ mt: 3, p: 2 }}>
+                      <CardHeader
+                        sx={{
+                          backgroundColor: theme =>
+                            theme.palette.mode === "light"
+                              ? theme.palette.common.darkGrayBackground
+                              : theme.palette.common.black,
+                        }}
+                        title={
+                          <Box sx={{ textAlign: "center", color: "inherit" }}>
+                            <TypographyUnderlined
+                              variant="h6"
+                              fontWeight="300"
+                              gutterBottom
+                              align="center"
+                              sx={{ color: theme => theme.palette.common.white }}
+                            >
+                              Topics
+                            </TypographyUnderlined>
+                          </Box>
+                        }
+                      ></CardHeader>
+                    </Card>
+                  </Grid> */}
                   {nodePublicViewLoader ? (
                     <Box sx={{ my: 2, width: "100%", display: "flex", justifyContent: "center" }}>
                       <CircularProgress size={40} />
@@ -2545,6 +2604,7 @@ const CourseComponent = () => {
                           <NodeItemContributors
                             contributors={nodePublicView?.contributors || []}
                             institutions={nodePublicView?.institutions || []}
+                            sx={{ my: 4 }}
                           />
                         </Card>
                       </Grid>
@@ -3094,13 +3154,13 @@ const CourseComponent = () => {
                       }}
                       sx={{ color: difficulty === "easy" ? "#AAFF00" : difficulty === "medium" ? "#ffc071" : "red" }}
                     >
-                      <MenuItem value="easy" sx={{ color: "#AAFF00" }}>
+                      <MenuItem value="easy" sx={{ color: difficulties["easy"].color }}>
                         Easy
                       </MenuItem>
-                      <MenuItem value="medium" sx={{ color: "#ffc071" }}>
+                      <MenuItem value="medium" sx={{ color: difficulties["medium"].color }}>
                         Medium
                       </MenuItem>
-                      <MenuItem value="hard" sx={{ color: "red" }}>
+                      <MenuItem value="hard" sx={{ color: difficulties["hard"].color }}>
                         Hard
                       </MenuItem>
                     </Select>
