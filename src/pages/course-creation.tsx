@@ -602,8 +602,8 @@ const CourseComponent = () => {
   };
   const handleAcceptChange = async () => {
     if (currentImprovement === null) return;
-    let coursesCopy: any = Object.assign({}, courses);
-    let syllabus: any = coursesCopy[selectedCourseIdx].syllabus;
+    let coursesCopy: Course[] = Object.assign({}, courses);
+    let syllabus = coursesCopy[selectedCourseIdx].syllabus;
     setDisplayCourses(null);
     const modifiedTopics: string[] = [];
     const removedTopics: string[] = [];
@@ -661,9 +661,7 @@ const CourseComponent = () => {
       }
 
       if (currentImprovement.action === "move") {
-        const currentCategoryIdx = syllabus.findIndex(
-          (cat: any) => cat.category === currentImprovement.current_category
-        );
+        const currentCategoryIdx = syllabus.findIndex(cat => cat.title === currentImprovement.current_category);
         if (currentCategoryIdx !== -1) {
           let topics = syllabus[currentCategoryIdx].topics;
           const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.topic);
@@ -683,7 +681,7 @@ const CourseComponent = () => {
     }
 
     if (currentImprovement.type === "category") {
-      if (currentImprovement.action === "add") {
+      if (currentImprovement.action === "add" && typeof currentImprovement.new_category === "object") {
         const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.after);
         syllabus.splice(afterCategoryIdx + 1, 0, currentImprovement.new_category);
       }
@@ -823,41 +821,46 @@ const CourseComponent = () => {
   };
   useEffect(() => {
     if (currentImprovement === null) return;
-    // TO:DO
-    // if (currentImprovement.type === "topic") {
-    // setExpanded([currentImprovement.category]);
-    // scrollToCategory(currentImprovement.category);
-    // }
 
-    const coursesCopy: Course[] = Object.assign({}, courses);
-    const currentImprovementCopy: Improvement = Object.assign({}, currentImprovement);
-    const selectedCourse = coursesCopy[selectedCourseIdx];
+    if (currentImprovement.type === "topic") {
+      setExpanded([currentImprovement.category]);
+      scrollToCategory(currentImprovement.category);
+    }
+
+    const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
+
+    const currentImprovementCopy: Improvement = { ...currentImprovement };
+    const selectedCourse = { ...coursesCopy[selectedCourseIdx] };
+
     if (!selectedCourse) return;
-    const syllabus = selectedCourse.syllabus;
+
+    const syllabus = [...selectedCourse.syllabus];
+    selectedCourse.syllabus = syllabus;
+
     if (currentImprovementCopy.type === "topic") {
       if (currentImprovementCopy.action === "move") {
-        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovementCopy.current_category);
+        const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.current_category);
         const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-          (s: any) => s.title === currentImprovementCopy.title
+          s => s.title === currentImprovementCopy.title
         );
-        const oldTopic = syllabus[oldCategoryIndex].topics[oldTopicIndex];
+        const oldTopic = { ...syllabus[oldCategoryIndex].topics[oldTopicIndex] };
         syllabus[oldCategoryIndex].color = "change";
 
-        const newCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovementCopy.new_category);
-        if (newCategoryIndex === -1) {
-          return;
-        }
+        const newCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.new_category);
+        if (newCategoryIndex === -1) return;
+
         syllabus[newCategoryIndex].color = "change";
         const afterIndex = syllabus[newCategoryIndex].topics.findIndex(
           topic => topic.title === currentImprovementCopy.new_after
         );
+        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex(s => s.title === oldTopic.title);
 
-        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex((s: any) => s.title === oldTopic.title);
         if (alreadyExist === -1) {
           oldTopic.color = "delete";
           oldTopic.action = "move";
           syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
         }
+
         const expand = [currentImprovementCopy.current_category];
         if (typeof currentImprovementCopy.new_category === "string") {
           expand.push(currentImprovementCopy.new_category);
@@ -865,44 +868,42 @@ const CourseComponent = () => {
         setExpanded(expand);
         scrollToCategory(currentImprovementCopy.current_category);
       } else if (currentImprovementCopy.action === "delete") {
-        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovementCopy.category);
+        const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-          (s: any) => s.title === currentImprovementCopy.title
+          s => s.title === currentImprovementCopy.title
         );
 
         syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
         setExpanded([currentImprovementCopy.category]);
         scrollToCategory(currentImprovementCopy.category);
       } else if (currentImprovementCopy.action === "divide") {
-        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovementCopy.category);
-        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(
-          (t: any) => t.title === currentImprovementCopy.old_topic
-        );
+        const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
+        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.old_topic);
         syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
         syllabus[categoryIndex].topics[oldTopicIdx].action = "divide";
-        const new_topics_copy = currentImprovementCopy.new_topics.slice();
-        new_topics_copy.forEach((t: any) => (t.color = "add"));
+        const new_topics_copy = currentImprovementCopy.new_topics.map(t => ({ ...t, color: "add" }));
         syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
       } else if (currentImprovementCopy.action === "add") {
-        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovementCopy.category);
-        const afterIndex = syllabus[categoryIndex].topics.findIndex(
-          (t: any) => t.title === currentImprovementCopy.after
-        );
+        const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
+        const afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
 
-        const newTopic = currentImprovementCopy.new_topic;
-        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, { ...newTopic, color: "add" });
+        const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
+        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
       }
     }
+
     if (
       currentImprovementCopy.action === "add" &&
       currentImprovementCopy.type === "category" &&
       typeof currentImprovementCopy.new_category === "object"
     ) {
-      const addAfterIdx = syllabus.findIndex((c: any) => c.title === currentImprovementCopy.after);
+      const addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
       syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovementCopy.new_category, color: "add" });
     }
+
+    coursesCopy[selectedCourseIdx].syllabus = syllabus;
     setDisplayCourses(coursesCopy);
-  }, [currentImprovement]);
+  }, [courses, currentImprovement, selectedCourseIdx]);
 
   const getCourses = () => {
     if (displayCourses !== null) {
