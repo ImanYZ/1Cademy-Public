@@ -488,7 +488,7 @@ const CourseComponent = () => {
     handleCloseDialog();
     setNewTopic("");
     setHours(0);
-    setDifficulty("");
+    setDifficulty("medium");
   };
 
   const generateSuggestionMessage = (suggestion: any): string => {
@@ -2178,8 +2178,11 @@ const CourseComponent = () => {
                                     </Typography>
                                     <Typography>
                                       Difficulty:{" "}
-                                      <Typography display={"inline"} color={difficulties[tc?.difficulty || ""]?.color}>
-                                        {difficulties[tc?.difficulty || ""]?.label}
+                                      <Typography
+                                        display={"inline"}
+                                        color={difficulties[tc?.difficulty?.toLowerCase() || "medium"]?.color}
+                                      >
+                                        {difficulties[tc?.difficulty?.toLowerCase() || "medium"]?.label}
                                       </Typography>
                                     </Typography>
                                   </Box>
