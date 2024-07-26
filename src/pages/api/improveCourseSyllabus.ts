@@ -140,7 +140,7 @@ Each action should be accompanied by:
   ],
   "Current Syllabus": [
     {
-      "category": "Frontend Development",
+      "title": "Frontend Development",
       "description": "In-depth exploration of advanced frontend development techniques and frameworks.",
       "objectives": [
         "Master advanced HTML and CSS",
