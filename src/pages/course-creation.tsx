@@ -103,6 +103,79 @@ const glowRed = keyframes`
   }
 `;
 
+type Prompt = {
+  type: "Poll" | "Open-Ended";
+  text: string;
+  choices?: string[];
+  purpose: string;
+};
+interface Topic {
+  title: string;
+  hours: number;
+  difficulty: "easy" | "medium" | "hard";
+  description: string;
+  objectives: string[];
+  skills: string[];
+  prerequisiteKnowledge: string[];
+  prompts: Prompt[];
+  imageUrl: string;
+  color?: string;
+  action?: string;
+}
+
+interface Improvement {
+  type: "topic" | "category";
+  action: "add" | "divide" | "move" | "modify" | "delete";
+  after: string;
+  category: string;
+  old_topic: string;
+  new_topics: Topic[];
+  new_topic: Topic;
+  title: string;
+  current_category: string;
+  topic: string;
+  new_after: string;
+  old_category: string;
+  new_category: Category | string;
+  rationale: string;
+}
+
+interface Category {
+  title: string;
+  description: string;
+  objectives: string[];
+  skills: string[];
+  prerequisiteKnowledge: string[];
+  prompts: Prompt[];
+  topics: Topic[];
+  imageUrl: string;
+  color?: string;
+  action?: string;
+}
+
+interface Course {
+  id: string;
+  suggestions: any;
+  courseObjectives: string[];
+  courseSkills: string[];
+  createdAt: Timestamp;
+  deleted: boolean;
+  description: string;
+  done: boolean;
+  hours: number;
+  questions: any;
+  learners: string;
+  new: boolean;
+  nodes: any;
+  prerequisiteKnowledge: string;
+  references: string[];
+  syllabus: Category[];
+  tags: string[];
+  title: string;
+  uname: string;
+  updatedAt: Timestamp;
+}
+
 // interface  {
 //   title: string;
 //   hours: number;
@@ -186,10 +259,10 @@ const CourseComponent = () => {
   // const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingCourseStructure, setLoadingCourseStructure] = useState(false);
   const [slideIn, setSlideIn] = useState(true);
-  const [courses, setCourses] = useState<any>([]);
-  const [displayCourses, setDisplayCourses] = useState(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [displayCourses, setDisplayCourses] = useState<Course[] | null>(null);
 
-  const [selectedCourse, setSelectedCourse] = useState<any>(0);
+  const [selectedCourseIdx, setSelectedCourseIdx] = useState<number>(0);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   // const [dialogOpenImp, setDialogOpenImp] = useState<boolean>(false);
   const [selectedOpenCategory, setSelectedOpenCategory] = useState<any>(null);
@@ -202,12 +275,12 @@ const CourseComponent = () => {
   const [loadingImage, setLoadingImage] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [improvements, setImprovements] = useState<any>([]);
+  const [improvements, setImprovements] = useState<Improvement[]>([]);
+  const [currentImprovement, setCurrentImprovement] = useState<Improvement | null>(null);
   const [currentChangeIndex, setCurrentChangeIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [currentImprovement, setCurrentImprovement] = useState<any>({});
   const [expanded, setExpanded] = useState<string[]>([]);
   const [editTopic, setEditTopic] = useState<any>(null);
   const [expandedNode, setExpandedNode] = useState<KnowledgeNode | null>(null);
@@ -302,52 +375,52 @@ const CourseComponent = () => {
 
   const handleTitleChange = (e: any) => {
     const updatedCourses = [...courses];
-    updatedCourses[selectedCourse] = {
-      ...updatedCourses[selectedCourse],
+    updatedCourses[selectedCourseIdx] = {
+      ...updatedCourses[selectedCourseIdx],
       title: e.target.value,
     };
     setCourses(updatedCourses);
-    updateCourses(updatedCourses[selectedCourse]);
+    updateCourses(updatedCourses[selectedCourseIdx]);
   };
   const handleHoursChange = (e: any) => {
     const updatedCourses: any = [...courses];
-    updatedCourses[selectedCourse] = {
-      ...updatedCourses[selectedCourse],
+    updatedCourses[selectedCourseIdx] = {
+      ...updatedCourses[selectedCourseIdx],
       hours: Number(e.target.value),
     };
     setCourses(updatedCourses);
-    updateCourses(updatedCourses[selectedCourse]);
+    updateCourses(updatedCourses[selectedCourseIdx]);
   };
 
   const handleDescriptionChange = (e: any) => {
     const updatedCourses = [...courses];
-    updatedCourses[selectedCourse] = {
-      ...updatedCourses[selectedCourse],
+    updatedCourses[selectedCourseIdx] = {
+      ...updatedCourses[selectedCourseIdx],
       description: e.target.value,
     };
     setCourses(updatedCourses);
     // setTimeout(() => {
-    updateCourses(updatedCourses[selectedCourse]);
+    updateCourses(updatedCourses[selectedCourseIdx]);
     // }, 1000);
   };
   const handlePrerequisiteChange = (e: any) => {
     const updatedCourses = [...courses];
-    updatedCourses[selectedCourse] = {
-      ...updatedCourses[selectedCourse],
+    updatedCourses[selectedCourseIdx] = {
+      ...updatedCourses[selectedCourseIdx],
       prerequisiteKnowledge: e.target.value,
     };
     setCourses(updatedCourses);
-    updateCourses(updatedCourses[selectedCourse]);
+    updateCourses(updatedCourses[selectedCourseIdx]);
   };
 
   const handleLearnersChange = (e: any) => {
     const updatedCourses = [...courses];
-    updatedCourses[selectedCourse] = {
-      ...updatedCourses[selectedCourse],
+    updatedCourses[selectedCourseIdx] = {
+      ...updatedCourses[selectedCourseIdx],
       learners: e.target.value,
     };
     setCourses(updatedCourses);
-    updateCourses(updatedCourses[selectedCourse]);
+    updateCourses(updatedCourses[selectedCourseIdx]);
   };
   const handleRemoveTopic = async (selectedOpenCategory: any) => {
     const confirmation = await confirmIt(
@@ -369,12 +442,12 @@ const CourseComponent = () => {
     );
     if (confirmation) {
       const updatedCourses = [...courses];
-      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex].topics.splice(
+      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex].topics.splice(
         selectedOpenCategory.topicIndex,
         1
       );
       setCourses(updatedCourses);
-      updateCourses(updatedCourses[selectedCourse]);
+      updateCourses(updatedCourses[selectedCourseIdx]);
       setSidebarOpen(false);
     }
   };
@@ -390,7 +463,7 @@ const CourseComponent = () => {
 
   const handleSaveTopic = () => {
     const updatedCourses = [...courses];
-    const topics: any = updatedCourses[selectedCourse].syllabus[selectedCategory].topics;
+    const topics: any = updatedCourses[selectedCourseIdx].syllabus[selectedCategory].topics;
     if (editTopic) {
       const topicIndex = topics.findIndex((t: any) => t.topic === editTopic.topic);
 
@@ -411,7 +484,7 @@ const CourseComponent = () => {
     }
 
     setCourses(updatedCourses);
-    updateCourses(updatedCourses[selectedCourse]);
+    updateCourses(updatedCourses[selectedCourseIdx]);
     handleCloseDialog();
     setNewTopic("");
     setHours(0);
@@ -494,12 +567,12 @@ const CourseComponent = () => {
   const improveCourseStructure = async () => {
     try {
       setLoading(true);
-      const courseTitle = courses[selectedCourse].title;
-      const courseDescription = courses[selectedCourse].description;
-      const targetLearners = courses[selectedCourse].learners;
-      const syllabus = courses[selectedCourse].syllabus;
-      const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
-      const suggestions = courses[selectedCourse].suggestions;
+      const courseTitle = courses[selectedCourseIdx].title;
+      const courseDescription = courses[selectedCourseIdx].description;
+      const targetLearners = courses[selectedCourseIdx].learners;
+      const syllabus = courses[selectedCourseIdx].syllabus;
+      const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
+      const suggestions = courses[selectedCourseIdx].suggestions;
       let response: any = { suggestions };
       if (!suggestions) {
         response = await Post("/improveCourseSyllabus", {
@@ -508,7 +581,7 @@ const CourseComponent = () => {
           targetLearners,
           syllabus,
           prerequisiteKnowledge,
-          courseId: courses[selectedCourse].id,
+          courseId: courses[selectedCourseIdx].id,
         });
       }
 
@@ -528,8 +601,9 @@ const CourseComponent = () => {
     }
   };
   const handleAcceptChange = async () => {
-    let _courses: any = JSON.parse(JSON.stringify(courses));
-    let syllabus: any = _courses[selectedCourse].syllabus;
+    if (currentImprovement === null) return;
+    let coursesCopy: Course[] = Object.assign({}, courses);
+    let syllabus = coursesCopy[selectedCourseIdx].syllabus;
     setDisplayCourses(null);
     const modifiedTopics: string[] = [];
     const removedTopics: string[] = [];
@@ -587,9 +661,7 @@ const CourseComponent = () => {
       }
 
       if (currentImprovement.action === "move") {
-        const currentCategoryIdx = syllabus.findIndex(
-          (cat: any) => cat.category === currentImprovement.current_category
-        );
+        const currentCategoryIdx = syllabus.findIndex(cat => cat.title === currentImprovement.current_category);
         if (currentCategoryIdx !== -1) {
           let topics = syllabus[currentCategoryIdx].topics;
           const topicIdx = topics.findIndex((tp: any) => tp.title === currentImprovement.topic);
@@ -609,7 +681,7 @@ const CourseComponent = () => {
     }
 
     if (currentImprovement.type === "category") {
-      if (currentImprovement.action === "add") {
+      if (currentImprovement.action === "add" && typeof currentImprovement.new_category === "object") {
         const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.after);
         syllabus.splice(afterCategoryIdx + 1, 0, currentImprovement.new_category);
       }
@@ -638,7 +710,7 @@ const CourseComponent = () => {
       // }
     }
 
-    _courses[selectedCourse].syllabus = syllabus;
+    coursesCopy[selectedCourseIdx].syllabus = syllabus;
 
     setIsRemoved(removedTopics);
     if (removedTopics.length > 0) {
@@ -646,13 +718,13 @@ const CourseComponent = () => {
     }
     setIsChanged(modifiedTopics);
     setTimeout(() => {
-      setCourses(_courses);
-      setDisplayCourses(_courses);
+      setCourses(coursesCopy);
+      setDisplayCourses(coursesCopy);
     }, 1000);
-    setCurrentImprovement({});
+    setCurrentImprovement(null);
 
     setTimeout(() => {
-      updateCourses(_courses[selectedCourse], false, true);
+      updateCourses(coursesCopy[selectedCourseIdx], false, true);
       setImprovements((prev: any) => {
         prev.splice(currentChangeIndex, 1);
         return prev;
@@ -677,7 +749,7 @@ const CourseComponent = () => {
       }, 1000);
     } else {
       setSidebarOpen(false);
-      setCurrentImprovement({});
+      setCurrentImprovement(null);
     }
   };
   const handleRejectChange = () => {
@@ -698,20 +770,20 @@ const CourseComponent = () => {
       }
 
       setImprovements([]);
-      setCurrentImprovement({});
+      setCurrentImprovement(null);
 
-      const courseTitle = courses[selectedCourse].title;
-      const courseDescription = courses[selectedCourse].description;
-      const targetLearners = courses[selectedCourse].learners;
-      const syllabus = courses[selectedCourse].syllabus;
-      const tags = courses[selectedCourse].tags;
-      const references = courses[selectedCourse].references;
+      const courseTitle = courses[selectedCourseIdx].title;
+      const courseDescription = courses[selectedCourseIdx].description;
+      const targetLearners = courses[selectedCourseIdx].learners;
+      const syllabus = courses[selectedCourseIdx].syllabus;
+      const tags = courses[selectedCourseIdx].tags;
+      const references = courses[selectedCourseIdx].references;
 
       setLoadingNodes((prev: string[]) => {
         return [...prev, topic];
       });
       await Post("/retrieveNodesForTopic", {
-        courseId: courses[selectedCourse].id,
+        courseId: courses[selectedCourseIdx].id,
         tags,
         courseTitle,
         courseDescription,
@@ -735,7 +807,7 @@ const CourseComponent = () => {
   const handleSidebarClose = () => {
     setSidebarOpen(false);
     setSelectedTopic(null);
-    setCurrentImprovement({});
+    setCurrentImprovement(null);
     setIsChanged([]);
     setIsRemoved([]);
     setImprovements([]);
@@ -748,73 +820,90 @@ const CourseComponent = () => {
     }
   };
   useEffect(() => {
+    if (currentImprovement === null) return;
+
     if (currentImprovement.type === "topic") {
       setExpanded([currentImprovement.category]);
       scrollToCategory(currentImprovement.category);
     }
-    const NEW_COURSES: any = JSON.parse(JSON.stringify(courses));
-    const _selectedCourse = NEW_COURSES[selectedCourse];
-    if (!_selectedCourse) return;
-    const syllabus: any = _selectedCourse.syllabus;
-    if (currentImprovement.type === "topic") {
-      if (currentImprovement.action === "move") {
-        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.current_category);
+
+    const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
+
+    const currentImprovementCopy: Improvement = { ...currentImprovement };
+    const selectedCourse = { ...coursesCopy[selectedCourseIdx] };
+
+    if (!selectedCourse) return;
+
+    const syllabus = [...selectedCourse.syllabus];
+    selectedCourse.syllabus = syllabus;
+
+    if (currentImprovementCopy.type === "topic") {
+      if (currentImprovementCopy.action === "move") {
+        const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.current_category);
         const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-          (s: any) => s.title === currentImprovement.title
+          s => s.title === currentImprovementCopy.title
         );
-        const oldTopic = syllabus[oldCategoryIndex].topics[oldTopicIndex];
+        const oldTopic = { ...syllabus[oldCategoryIndex].topics[oldTopicIndex] };
         syllabus[oldCategoryIndex].color = "change";
 
-        const newCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.new_category);
-        if (newCategoryIndex === -1) {
-          return;
-        }
+        const newCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.new_category);
+        if (newCategoryIndex === -1) return;
+
         syllabus[newCategoryIndex].color = "change";
         const afterIndex = syllabus[newCategoryIndex].topics.findIndex(
-          (s: any) => s.title === currentImprovement.new_after
+          topic => topic.title === currentImprovementCopy.new_after
         );
+        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex(s => s.title === oldTopic.title);
 
-        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex((s: any) => s.title === oldTopic.title);
         if (alreadyExist === -1) {
           oldTopic.color = "delete";
           oldTopic.action = "move";
           syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
         }
-        setExpanded([currentImprovement.current_category, currentImprovement.new_category]);
-        scrollToCategory(currentImprovement.current_category);
-      } else if (currentImprovement.action === "delete") {
-        const oldCategoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
+
+        const expand = [currentImprovementCopy.current_category];
+        if (typeof currentImprovementCopy.new_category === "string") {
+          expand.push(currentImprovementCopy.new_category);
+        }
+        setExpanded(expand);
+        scrollToCategory(currentImprovementCopy.current_category);
+      } else if (currentImprovementCopy.action === "delete") {
+        const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-          (s: any) => s.title === currentImprovement.title
+          s => s.title === currentImprovementCopy.title
         );
 
         syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
-        setExpanded([currentImprovement.category]);
-        scrollToCategory(currentImprovement.category);
-      } else if (currentImprovement.action === "divide") {
-        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
-        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(
-          (t: any) => t.title === currentImprovement.old_topic
-        );
+        setExpanded([currentImprovementCopy.category]);
+        scrollToCategory(currentImprovementCopy.category);
+      } else if (currentImprovementCopy.action === "divide") {
+        const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
+        const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.old_topic);
         syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
         syllabus[categoryIndex].topics[oldTopicIdx].action = "divide";
-        const new_topics_copy = currentImprovement.new_topics.slice();
-        new_topics_copy.forEach((t: any) => (t.color = "add"));
+        const new_topics_copy = currentImprovementCopy.new_topics.map(t => ({ ...t, color: "add" }));
         syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
-      } else if (currentImprovement.action === "add") {
-        const categoryIndex = syllabus.findIndex((s: any) => s.title === currentImprovement.category);
-        const afterIndex = syllabus[categoryIndex].topics.findIndex((t: any) => t.title === currentImprovement.after);
+      } else if (currentImprovementCopy.action === "add") {
+        const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
+        const afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
 
-        const newTopic = currentImprovement.new_topic;
-        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, { ...newTopic, color: "add" });
+        const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
+        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
       }
     }
-    if (currentImprovement.action === "add" && currentImprovement.type === "category") {
-      const addAfterIdx = syllabus.findIndex((c: any) => c.title === currentImprovement.after);
-      syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovement.new_category, color: "add" });
+
+    if (
+      currentImprovementCopy.action === "add" &&
+      currentImprovementCopy.type === "category" &&
+      typeof currentImprovementCopy.new_category === "object"
+    ) {
+      const addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
+      syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovementCopy.new_category, color: "add" });
     }
-    setDisplayCourses(NEW_COURSES);
-  }, [currentImprovement]);
+
+    coursesCopy[selectedCourseIdx].syllabus = syllabus;
+    setDisplayCourses(coursesCopy);
+  }, [courses, currentImprovement, selectedCourseIdx]);
 
   const getCourses = () => {
     if (displayCourses !== null) {
@@ -857,22 +946,26 @@ const CourseComponent = () => {
       return _prev;
     });
     setSidebarOpen(false);
+    setCurrentImprovement(null);
+    setNodePublicView(null);
+    setSelectedTopic(null);
+    setSelectedOpenCategory(null);
     setTimeout(() => {
-      setSelectedCourse(courses.length);
+      setSelectedCourseIdx(courses.length);
     }, 1000);
     setCreatingCourseStep(0);
   };
 
   const deleteCourse = async () => {
     if (
-      courses[selectedCourse].id &&
+      courses[selectedCourseIdx].id &&
       (await confirmIt(`Do you want to delete this course?`, "Delete Course", "Keep Course"))
     ) {
-      const courseRef = doc(db, "coursesAI", courses[selectedCourse].id);
+      const courseRef = doc(db, "coursesAI", courses[selectedCourseIdx].id);
       updateDoc(courseRef, { deleted: true });
-      setSelectedCourse(0);
+      setSelectedCourseIdx(0);
       setSidebarOpen(false);
-      setCurrentImprovement({});
+      setCurrentImprovement(null);
     }
   };
   const cancelCreatingCourse = () => {
@@ -880,19 +973,19 @@ const CourseComponent = () => {
       prev = prev.filter((p: any) => !p.new);
       return prev;
     });
-    setSelectedCourse(0);
+    setSelectedCourseIdx(0);
   };
 
   const generatePrerequisiteKnowledge = async () => {
     setLoadingPrerequisiteKnowledge(true);
-    const courseTitle = courses[selectedCourse].title;
-    const targetLearners = courses[selectedCourse].learners;
-    const hours = courses[selectedCourse].hours;
+    const courseTitle = courses[selectedCourseIdx].title;
+    const targetLearners = courses[selectedCourseIdx].learners;
+    const hours = courses[selectedCourseIdx].hours;
     const response = await Post("/generateCoursePrerequisites", { courseTitle, targetLearners, hours });
     setCourses((prev: any) => {
-      prev[selectedCourse].prerequisiteKnowledge = response;
-      if (!prev[selectedCourse].new) {
-        updateCourses(prev[selectedCourse]);
+      prev[selectedCourseIdx].prerequisiteKnowledge = response;
+      if (!prev[selectedCourseIdx].new) {
+        updateCourses(prev[selectedCourseIdx]);
       }
       return prev;
     });
@@ -900,14 +993,14 @@ const CourseComponent = () => {
   };
   const generateDescription = async () => {
     setLoadingDescription(true);
-    const courseTitle = courses[selectedCourse].title;
-    const targetLearners = courses[selectedCourse].learners;
-    const hours = courses[selectedCourse].hours;
+    const courseTitle = courses[selectedCourseIdx].title;
+    const targetLearners = courses[selectedCourseIdx].learners;
+    const hours = courses[selectedCourseIdx].hours;
     const response = await Post("/generateCourseDescription", { courseTitle, targetLearners, hours });
     setCourses((prev: any) => {
-      prev[selectedCourse].description = response;
-      if (!prev[selectedCourse].new) {
-        updateCourses(prev[selectedCourse]);
+      prev[selectedCourseIdx].description = response;
+      if (!prev[selectedCourseIdx].new) {
+        updateCourses(prev[selectedCourseIdx]);
       }
       return prev;
     });
@@ -915,14 +1008,14 @@ const CourseComponent = () => {
   };
   const generateObjectives = async () => {
     setLoadingObjectives(true);
-    const courseTitle = courses[selectedCourse].title;
-    const targetLearners = courses[selectedCourse].learners;
-    const courseDescription = courses[selectedCourse].description;
-    const hours = courses[selectedCourse].hours;
+    const courseTitle = courses[selectedCourseIdx].title;
+    const targetLearners = courses[selectedCourseIdx].learners;
+    const courseDescription = courses[selectedCourseIdx].description;
+    const hours = courses[selectedCourseIdx].hours;
     const response = await Post("/generateCourseObjectives", { courseTitle, targetLearners, courseDescription, hours });
     setCourses((prev: any) => {
-      prev[selectedCourse].courseObjectives = response;
-      updateCourses(prev[selectedCourse]);
+      prev[selectedCourseIdx].courseObjectives = response;
+      updateCourses(prev[selectedCourseIdx]);
       return prev;
     });
 
@@ -930,11 +1023,11 @@ const CourseComponent = () => {
   };
   const generateSkills = async () => {
     // setLoadingSkills(true);
-    const courseTitle = courses[selectedCourse].title;
-    const targetLearners = courses[selectedCourse].learners;
-    const courseObjectives = courses[selectedCourse].courseObjectives;
-    const courseDescription = courses[selectedCourse].description;
-    const hours = courses[selectedCourse].hours;
+    const courseTitle = courses[selectedCourseIdx].title;
+    const targetLearners = courses[selectedCourseIdx].learners;
+    const courseObjectives = courses[selectedCourseIdx].courseObjectives;
+    const courseDescription = courses[selectedCourseIdx].description;
+    const hours = courses[selectedCourseIdx].hours;
 
     const response = await Post("/generateCourseSkills", {
       courseTitle,
@@ -944,11 +1037,11 @@ const CourseComponent = () => {
       hours,
     });
     setCourses((prev: any) => {
-      prev[selectedCourse].courseSkills = response;
-      if (prev[selectedCourse].new) {
-        onCreateCourse(prev[selectedCourse]);
+      prev[selectedCourseIdx].courseSkills = response;
+      if (prev[selectedCourseIdx].new) {
+        onCreateCourse(prev[selectedCourseIdx]);
       } else {
-        updateCourses(prev[selectedCourse]);
+        updateCourses(prev[selectedCourseIdx]);
       }
       return prev;
     });
@@ -958,19 +1051,19 @@ const CourseComponent = () => {
     setLoadingCourseStructure(true);
     await generateSkills();
 
-    const courseTitle = courses[selectedCourse].title;
-    const targetLearners = courses[selectedCourse].learners;
-    const courseObjectives = courses[selectedCourse].courseObjectives;
-    const courseDescription = courses[selectedCourse].description;
-    const courseSkills = courses[selectedCourse].courseSkills;
-    const hours = courses[selectedCourse].hours;
-    const prerequisiteKnowledge = courses[selectedCourse].prerequisiteKnowledge;
+    const courseTitle = courses[selectedCourseIdx].title;
+    const targetLearners = courses[selectedCourseIdx].learners;
+    const courseObjectives = courses[selectedCourseIdx].courseObjectives;
+    const courseDescription = courses[selectedCourseIdx].description;
+    const courseSkills = courses[selectedCourseIdx].courseSkills;
+    const hours = courses[selectedCourseIdx].hours;
+    const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
 
-    const tags = courses[selectedCourse].tags;
-    const references = courses[selectedCourse].references;
+    const tags = courses[selectedCourseIdx].tags;
+    const references = courses[selectedCourseIdx].references;
 
     const response: any = await Post("/generateCourseSyllabus", {
-      courseId: courses[selectedCourse].id,
+      courseId: courses[selectedCourseIdx].id,
       courseTitle,
       targetLearners,
       courseObjectives,
@@ -1012,32 +1105,38 @@ const CourseComponent = () => {
       )
     ) {
       const _courses = [...courses];
-      const course = _courses[selectedCourse];
+      const course = _courses[selectedCourseIdx];
       const categoryIdx = course.syllabus.findIndex((s: any) => s.category === c.category);
       setGlowCategoryRedIndex(categoryIdx);
       setTimeout(() => {
         course.syllabus = course.syllabus.filter((s: any) => s.category !== c.category);
         setGlowCategoryRedIndex(-1);
         setCourses(_courses);
-        updateCourses(_courses[selectedCourse]);
+        updateCourses(_courses[selectedCourseIdx]);
       }, 900);
     }
   };
 
   const handleEditCategory = () => {
     const _courses = [...courses];
-    const course = _courses[selectedCourse];
+    const course = _courses[selectedCourseIdx];
     let glowIdx = -1;
     if (editCategory === "new") {
       course.syllabus.unshift({
-        category: newCategoryTitle,
+        title: newCategoryTitle,
+        description: "",
+        objectives: [],
+        skills: [],
+        prerequisiteKnowledge: [],
+        prompts: [],
         topics: [],
+        imageUrl: "",
       });
       glowIdx = 0;
     } else {
       const categoryIdx: any = course.syllabus.findIndex((s: any) => s.category === editCategory.category);
       if (categoryIdx !== -1) {
-        course.syllabus[categoryIdx].category = newCategoryTitle;
+        course.syllabus[categoryIdx].title = newCategoryTitle;
         glowIdx = categoryIdx;
       }
     }
@@ -1047,7 +1146,7 @@ const CourseComponent = () => {
     }, 1000);
 
     setCourses(_courses);
-    updateCourses(_courses[selectedCourse]);
+    updateCourses(_courses[selectedCourseIdx]);
     setEditCategory(null);
     setNewCategoryTitle("");
   };
@@ -1060,9 +1159,9 @@ const CourseComponent = () => {
   // };
   const setNewCourseObjectives = (newTags: string[]) => {
     const _courses: any = [...courses];
-    _courses[selectedCourse].courseObjectives = newTags;
+    _courses[selectedCourseIdx].courseObjectives = newTags;
     setCourses(_courses);
-    updateCourses(_courses[selectedCourse]);
+    updateCourses(_courses[selectedCourseIdx]);
   };
 
   const handleDragOver = (e: any) => {
@@ -1093,12 +1192,12 @@ const CourseComponent = () => {
   };
   const handleSorting = () => {
     const _courses = [...courses];
-    const dragItemContent = _courses[selectedCourse].syllabus[dragItem.current];
+    const dragItemContent = _courses[selectedCourseIdx].syllabus[dragItem.current];
     setGlowCategoryGreenIndex(dragOverItem.current);
-    _courses[selectedCourse].syllabus.splice(dragItem.current, 1);
-    _courses[selectedCourse].syllabus.splice(dragOverItem.current, 0, dragItemContent);
+    _courses[selectedCourseIdx].syllabus.splice(dragItem.current, 1);
+    _courses[selectedCourseIdx].syllabus.splice(dragOverItem.current, 0, dragItemContent);
     setCourses(_courses);
-    updateCourses(_courses[selectedCourse]);
+    updateCourses(_courses[selectedCourseIdx]);
     setTimeout(() => {
       setDragOverItemPointer(null);
       setDragOverTopicPointer(null);
@@ -1108,21 +1207,21 @@ const CourseComponent = () => {
 
   const handleSortingForItems = () => {
     const _courses = [...courses];
-    const fromTopic = _courses[selectedCourse].syllabus[dragItem.current].topics[dragTopicItem.current];
+    const fromTopic = _courses[selectedCourseIdx].syllabus[dragItem.current].topics[dragTopicItem.current];
     if (dragItem.current === dragOverItem.current) {
-      const toTopic = _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current];
-      _courses[selectedCourse].syllabus[dragItem.current].topics[dragTopicItem.current] = toTopic;
-      _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current] = fromTopic;
+      const toTopic = _courses[selectedCourseIdx].syllabus[dragItem.current].topics[dragOverTopicItem.current];
+      _courses[selectedCourseIdx].syllabus[dragItem.current].topics[dragTopicItem.current] = toTopic;
+      _courses[selectedCourseIdx].syllabus[dragItem.current].topics[dragOverTopicItem.current] = fromTopic;
       const modifiedTopic =
-        _courses[selectedCourse].syllabus[dragItem.current].topics[dragOverTopicItem.current]?.title;
+        _courses[selectedCourseIdx].syllabus[dragItem.current].topics[dragOverTopicItem.current]?.title;
       setIsChanged([...isChanged, modifiedTopic]);
     } else {
-      _courses[selectedCourse].syllabus[dragItem.current].topics.splice(dragTopicItem.current, 1);
-      _courses[selectedCourse].syllabus[dragOverItem.current].topics.push(fromTopic);
+      _courses[selectedCourseIdx].syllabus[dragItem.current].topics.splice(dragTopicItem.current, 1);
+      _courses[selectedCourseIdx].syllabus[dragOverItem.current].topics.push(fromTopic);
       setGlowCategoryGreenIndex(dragOverItem.current);
     }
     setCourses(_courses);
-    updateCourses(_courses[selectedCourse]);
+    updateCourses(_courses[selectedCourseIdx]);
     setTimeout(() => {
       setIsChanged([]);
       setDragOverItemPointer(null);
@@ -1225,7 +1324,7 @@ const CourseComponent = () => {
         "Keep Node"
       )
     ) {
-      const course = courses[selectedCourse];
+      const course = courses[selectedCourseIdx];
       if (!course.nodes[topic]) {
         return;
       }
@@ -1245,28 +1344,28 @@ const CourseComponent = () => {
         const { imageUrl } = (await Post("/generateCourseImage", {
           title: selectedTopic.title,
           content: selectedTopic.description,
-          courseTitle: courses[selectedCourse].title,
-          courseDescription: courses[selectedCourse].description,
-          targetLearners: courses[selectedCourse].learners,
-          syllabus: courses[selectedCourse].syllabus,
+          courseTitle: courses[selectedCourseIdx].title,
+          courseDescription: courses[selectedCourseIdx].description,
+          targetLearners: courses[selectedCourseIdx].learners,
+          syllabus: courses[selectedCourseIdx].syllabus,
           prerequisiteKnowledge: selectedTopic.prerequisiteKnowledge,
-          sessions: courses[selectedCourse].hours,
+          sessions: courses[selectedCourseIdx].hours,
           objectives: selectedTopic.objectives,
         })) as { imageUrl: string };
 
         if (imageUrl) {
           const updatedCourses = [...courses];
-          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex] = {
-            ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+          updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex] = {
+            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
             imageUrl: imageUrl,
           };
           setSelectedTopic({
             categoryIndex: selectedTopic.categoryIndex,
             topicIndex: selectedTopic.topicIndex,
-            ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
           });
           setCourses(updatedCourses);
-          updateCourses(updatedCourses[selectedCourse]);
+          updateCourses(updatedCourses[selectedCourseIdx]);
         }
         setLoadingImage(false);
       }
@@ -1281,39 +1380,39 @@ const CourseComponent = () => {
       const { imageUrl } = (await Post("/generateCourseImage", {
         title: selectedOpenCategory.title,
         content: selectedOpenCategory.description,
-        courseTitle: courses[selectedCourse].title,
-        courseDescription: courses[selectedCourse].description,
-        targetLearners: courses[selectedCourse].learners,
-        syllabus: courses[selectedCourse].syllabus,
+        courseTitle: courses[selectedCourseIdx].title,
+        courseDescription: courses[selectedCourseIdx].description,
+        targetLearners: courses[selectedCourseIdx].learners,
+        syllabus: courses[selectedCourseIdx].syllabus,
         prerequisiteKnowledge: selectedOpenCategory.prerequisiteKnowledge,
-        sessions: courses[selectedCourse].hours,
+        sessions: courses[selectedCourseIdx].hours,
         objectives: selectedOpenCategory.objectives,
       })) as { imageUrl: string };
       const updatedCourses = [...courses];
-      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
-        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
         imageUrl: imageUrl,
       };
       setSelectedOpenCategory({
         categoryIndex: selectedOpenCategory.categoryIndex,
-        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
       });
       setCourses(updatedCourses);
-      updateCourses(updatedCourses[selectedCourse]);
+      updateCourses(updatedCourses[selectedCourseIdx]);
       setLoadingImage(false);
     }
   };
   const generateMorePromptsForTopic = async () => {
     try {
       setLoadingPrompt(true);
-      const courseTitle = courses[selectedCourse].title;
-      const targetLearners = courses[selectedCourse].targetLearners;
+      const courseTitle = courses[selectedCourseIdx].title;
+      const targetLearners = courses[selectedCourseIdx].learners;
       const hours = selectedTopic.hours;
       const prerequisiteKnowledge = selectedTopic.prerequisiteKnowledge;
-      const courseDescription = courses[selectedCourse].description;
-      const courseObjectives = courses[selectedCourse].objectives;
-      const courseSkills = courses[selectedCourse].skills;
-      const syllabus = courses[selectedCourse].syllabus;
+      const courseDescription = courses[selectedCourseIdx].description;
+      const courseObjectives = courses[selectedCourseIdx].courseObjectives;
+      const courseSkills = courses[selectedCourseIdx].courseSkills;
+      const syllabus = courses[selectedCourseIdx].syllabus;
       const topic = selectedTopic.title;
 
       const { prompts } = (await Post("/generateMorePromptsForTopic", {
@@ -1329,7 +1428,7 @@ const CourseComponent = () => {
       })) as { prompts: any };
       const updatedCourses = [...courses];
       const currentTopic =
-        updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex];
+        updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex];
       currentTopic.prompts = [...currentTopic.prompts, ...prompts];
 
       setCourses(updatedCourses);
@@ -1339,8 +1438,8 @@ const CourseComponent = () => {
         ...currentTopic,
       });
       updateCourses({
-        id: updatedCourses[selectedCourse].id,
-        syllabus: updatedCourses[selectedCourse].syllabus,
+        id: updatedCourses[selectedCourseIdx].id,
+        syllabus: updatedCourses[selectedCourseIdx].syllabus,
       });
       setLoadingPrompt(false);
     } catch (error) {
@@ -1366,7 +1465,7 @@ const CourseComponent = () => {
             ? dayjs(new Date(node.createdAt.toDate())).format("YYYY-MM-DD")
             : "";
 
-        const course = courses[selectedCourse];
+        const course = courses[selectedCourseIdx];
         setNodePublicView({ ...node, topic: topicTitle });
         if (!node?.updatedStr) {
           setNodePublicViewLoader(true);
@@ -1388,7 +1487,7 @@ const CourseComponent = () => {
         }
       }
     },
-    [courses, selectedCourse, updateCourses]
+    [courses, selectedCourseIdx, updateCourses]
   );
 
   const retrieveNodeQuestions = useCallback(
@@ -1396,13 +1495,13 @@ const CourseComponent = () => {
       try {
         setQuestionsLoader(true);
         const updatedCourses = [...courses];
-        const prevQuestions = updatedCourses[selectedCourse]?.questions?.[nodeId] ?? [];
-        const courseId = courses[selectedCourse].id;
+        const prevQuestions = updatedCourses[selectedCourseIdx]?.questions?.[nodeId] ?? [];
+        const courseId = courses[selectedCourseIdx].id;
         await Post("/retrieveGenerateQuestions", {
           courseId,
-          courseTitle: courses[selectedCourse].title,
-          courseDescription: courses[selectedCourse].description,
-          targetLearners: courses[selectedCourse].learners,
+          courseTitle: courses[selectedCourseIdx].title,
+          courseDescription: courses[selectedCourseIdx].description,
+          targetLearners: courses[selectedCourseIdx].learners,
           nodeId,
           previousQuestions: prevQuestions,
         });
@@ -1413,14 +1512,14 @@ const CourseComponent = () => {
         console.error(error);
       }
     },
-    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourseIdx]
   );
 
   const retrievePrerequisites = useCallback(
     async (nodeId: string, topic: string, type: "parents" | "children") => {
       try {
         setPrerequisitesLoader(type);
-        const courseId = courses[selectedCourse].id;
+        const courseId = courses[selectedCourseIdx].id;
         const result: any = await Post("/retrieveNodePrerequesites", {
           nodeId,
           type,
@@ -1436,25 +1535,25 @@ const CourseComponent = () => {
         console.error(error);
       }
     },
-    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourse]
+    [setNodePublicViewLoader, setNodePublicView, setNodePublicViewLoader, expandedNode, courses, selectedCourseIdx]
   );
 
   const handleQuestion = useCallback(
     (question: any, idx: number, nodeId: number) => {
       const updatedCourses = [...courses];
-      if (updatedCourses[selectedCourse]?.questions?.[nodeId]) {
-        updatedCourses[selectedCourse].questions[nodeId][idx] = question;
+      if (updatedCourses[selectedCourseIdx]?.questions?.[nodeId]) {
+        updatedCourses[selectedCourseIdx].questions[nodeId][idx] = question;
         setCourses(updatedCourses);
-        updateCourses(updatedCourses[selectedCourse]);
+        updateCourses(updatedCourses[selectedCourseIdx]);
       }
     },
-    [courses, selectedCourse, setCourses]
+    [courses, selectedCourseIdx, setCourses]
   );
   const saveChanges = async (values: ProposalFormValues) => {
     try {
       setNodePublicViewLoader(true);
 
-      const course = courses[selectedCourse];
+      const course = courses[selectedCourseIdx];
 
       const nodes = { ...course.nodes };
       const nodeIdx = nodes[selectedTopic?.title].findIndex((n: { node: string }) => n.node === nodePublicView.node);
@@ -1539,7 +1638,7 @@ const CourseComponent = () => {
         onSwitchSection={() => {}}
         aiCourse={true}
       />
-      {courses[selectedCourse].new && creatingCourseStep <= 6 && (
+      {courses[selectedCourseIdx].new && creatingCourseStep <= 6 && (
         <LoadingButton
           variant="contained"
           color="error"
@@ -1580,13 +1679,13 @@ const CourseComponent = () => {
         }}
       >
         <Box>
-          {!courses[selectedCourse]?.new && (
+          {!courses[selectedCourseIdx]?.new && (
             <TextField
-              value={courses[selectedCourse].title}
+              value={courses[selectedCourseIdx].title}
               onChange={event => {
                 const courseIdx = courses.findIndex((course: any) => course.title === event.target.value);
                 if (courseIdx !== -1) {
-                  setSelectedCourse(courseIdx);
+                  setSelectedCourseIdx(courseIdx);
                   setImprovements([]);
                   setSidebarOpen(false);
                 }
@@ -1613,7 +1712,7 @@ const CourseComponent = () => {
               ))}
             </TextField>
           )}
-          {!courses[selectedCourse].new && (
+          {!courses[selectedCourseIdx].new && (
             <LoadingButton
               variant="contained"
               color="error"
@@ -1625,7 +1724,7 @@ const CourseComponent = () => {
             </LoadingButton>
           )}
 
-          {!courses[selectedCourse].new && (
+          {!courses[selectedCourseIdx].new && (
             <LoadingButton
               variant="contained"
               color="success"
@@ -1638,11 +1737,11 @@ const CourseComponent = () => {
           )}
 
           <Box sx={{ display: "flex", gap: "15px" }}>
-            {(!courses[selectedCourse].new || creatingCourseStep >= 0) && (
+            {(!courses[selectedCourseIdx].new || creatingCourseStep >= 0) && (
               <TextField
                 label="Course Title"
                 multiline
-                value={courses[selectedCourse].title}
+                value={courses[selectedCourseIdx].title}
                 onChange={handleTitleChange}
                 margin="normal"
                 variant="outlined"
@@ -1652,11 +1751,11 @@ const CourseComponent = () => {
                 }}
               />
             )}
-            {(!courses[selectedCourse].new || creatingCourseStep >= 1) && (
+            {(!courses[selectedCourseIdx].new || creatingCourseStep >= 1) && (
               <TextField
                 label="Number of Hour-long Class Sessions"
                 fullWidth
-                value={courses[selectedCourse].hours || ""}
+                value={courses[selectedCourseIdx].hours || ""}
                 onChange={handleHoursChange}
                 margin="normal"
                 variant="outlined"
@@ -1668,22 +1767,22 @@ const CourseComponent = () => {
                 }}
               />
             )}
-            {(!courses[selectedCourse].new || creatingCourseStep >= 2) && (
+            {(!courses[selectedCourseIdx].new || creatingCourseStep >= 2) && (
               <TextField
-                value={courses[selectedCourse]?.references[0] || ""}
+                value={courses[selectedCourseIdx]?.references[0] || ""}
                 select
                 label="Select Book"
                 sx={{ mt: "15px", minWidth: "200px" }}
                 onChange={event => {
                   const updatedCourses: any = [...courses];
                   const bookIdx = books.findIndex(b => b.id === event.target.value);
-                  updatedCourses[selectedCourse] = {
-                    ...updatedCourses[selectedCourse],
+                  updatedCourses[selectedCourseIdx] = {
+                    ...updatedCourses[selectedCourseIdx],
                     tags: books[bookIdx].tags,
                     references: books[bookIdx].references,
                   };
                   setCourses(updatedCourses);
-                  updateCourses(updatedCourses[selectedCourse]);
+                  updateCourses(updatedCourses[selectedCourseIdx]);
                 }}
               >
                 <MenuItem
@@ -1706,12 +1805,12 @@ const CourseComponent = () => {
             )}
           </Box>
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 3) && (
+          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 3) && (
             <TextField
               label="Target Learners"
               multiline
               fullWidth
-              value={courses[selectedCourse].learners}
+              value={courses[selectedCourseIdx].learners}
               onChange={handleLearnersChange}
               margin="normal"
               variant="outlined"
@@ -1722,7 +1821,7 @@ const CourseComponent = () => {
               }}
             />
           )}
-          {(!courses[selectedCourse].new || creatingCourseStep >= 4) &&
+          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 4) &&
             (loadingPrerequisiteKnowledge ? (
               <LinearProgress />
             ) : (
@@ -1730,7 +1829,7 @@ const CourseComponent = () => {
                 label="Prerequisite Knowledge"
                 multiline
                 fullWidth
-                value={courses[selectedCourse].prerequisiteKnowledge}
+                value={courses[selectedCourseIdx].prerequisiteKnowledge}
                 onChange={handlePrerequisiteChange}
                 margin="normal"
                 variant="outlined"
@@ -1756,7 +1855,7 @@ const CourseComponent = () => {
                 }}
               />
             ))}
-          {(!courses[selectedCourse].new || creatingCourseStep >= 5) &&
+          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 5) &&
             (loadingDescription ? (
               <LinearProgress />
             ) : (
@@ -1764,7 +1863,7 @@ const CourseComponent = () => {
                 label="Course Description"
                 multiline
                 fullWidth
-                value={courses[selectedCourse].description}
+                value={courses[selectedCourseIdx].description}
                 onChange={handleDescriptionChange}
                 margin="normal"
                 variant="outlined"
@@ -1793,7 +1892,7 @@ const CourseComponent = () => {
               />
             ))}
 
-          {(!courses[selectedCourse].new || creatingCourseStep >= 6) &&
+          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 6) &&
             (loadingObjectives ? (
               <LinearProgress />
             ) : (
@@ -1813,7 +1912,7 @@ const CourseComponent = () => {
                   </InputAdornment>
                 </Box>
                 <ChipInput
-                  tags={courses[selectedCourse].courseObjectives || []}
+                  tags={courses[selectedCourseIdx].courseObjectives || []}
                   selectedTags={() => {}}
                   setTags={setNewCourseObjectives}
                   fullWidth
@@ -1877,7 +1976,7 @@ const CourseComponent = () => {
             ))}
 
           <Box ref={containerRef} marginTop="20px">
-            {(getCourses()[selectedCourse].syllabus || []).map((category: any, categoryIndex: any) => (
+            {(getCourses()[selectedCourseIdx].syllabus || []).map((category: any, categoryIndex: any) => (
               <Accordion id={category.title} key={category.title} expanded={expanded.includes(category.title)}>
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
@@ -1931,7 +2030,9 @@ const CourseComponent = () => {
                 >
                   <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <DragIndicatorIcon />
-                    {currentImprovement.type === "category" &&
+                    {currentImprovement !== null &&
+                    typeof currentImprovement.new_category === "object" &&
+                    currentImprovement.type === "category" &&
                     currentImprovement.action === "modify" &&
                     currentImprovement.old_category === category.title ? (
                       <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
@@ -1954,7 +2055,7 @@ const CourseComponent = () => {
                         >
                           {category.title}
                         </Typography>
-                        {expanded.includes(category.title) && Object.keys(currentImprovement).length <= 0 && (
+                        {expanded.includes(category.title) && currentImprovement !== null && (
                           <Box sx={{ ml: "14px" }}>
                             <Button
                               onClick={e => {
@@ -1968,14 +2069,14 @@ const CourseComponent = () => {
                         )}
                       </Box>
                     )}
-                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done && (
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourseIdx].done && (
                       <LinearProgress sx={{ width: "100%" }} />
                     )}
                   </Box>
                 </AccordionSummary>
                 {expanded.includes(category.title) && (
                   <AccordionDetails>
-                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourse].done ? (
+                    {!category.hasOwnProperty("topics") && !getCourses()[selectedCourseIdx].done ? (
                       <LinearProgress />
                     ) : (
                       <Grid container spacing={2}>
@@ -2087,7 +2188,7 @@ const CourseComponent = () => {
                               <AccordionDetails>
                                 {/* {loadingNodes && <LinearProgress />} */}
                                 <Masonry columns={{ xs: 1, md: 2, lg: 3 }} spacing={2}>
-                                  {((courses[selectedCourse].nodes || {})[tc.title] || []).map(
+                                  {((courses[selectedCourseIdx].nodes || {})[tc.title] || []).map(
                                     (n: any, idx: number) => (
                                       <Box key={n.node} sx={{ mb: "10px" }}>
                                         <Accordion
@@ -2223,7 +2324,7 @@ const CourseComponent = () => {
             ))}
           </Box>
 
-          {(courses[selectedCourse].syllabus || []).length > 0 && courses[selectedCourse].done && (
+          {(courses[selectedCourseIdx].syllabus || []).length > 0 && courses[selectedCourseIdx].done && (
             <Box
               sx={{
                 display: "flex",
@@ -2245,7 +2346,7 @@ const CourseComponent = () => {
               </LoadingButton>
             </Box>
           )}
-          {courses[selectedCourse].new && creatingCourseStep <= 6 && (
+          {courses[selectedCourseIdx].new && creatingCourseStep <= 6 && (
             <Box
               sx={{
                 display: "flex",
@@ -2267,7 +2368,7 @@ const CourseComponent = () => {
                   sx={{ color: "white", zIndex: 9, fontSize: "15px" }}
                   onClick={nextStep}
                   loading={loading}
-                  disabled={nextButtonDisabled(courses[selectedCourse])}
+                  disabled={nextButtonDisabled(courses[selectedCourseIdx])}
                 >
                   Continue
                 </LoadingButton>
@@ -2521,7 +2622,7 @@ const CourseComponent = () => {
                           </Box>
                         }
                       ></CardHeader>
-                      {(courses[selectedCourse]?.questions?.[nodePublicView?.node] || []).map(
+                      {(courses[selectedCourseIdx]?.questions?.[nodePublicView?.node] || []).map(
                         (question: any, idx: number) => {
                           const QuestionComponent = questionComponents[question?.question_type];
                           return QuestionComponent ? (
@@ -2728,16 +2829,16 @@ const CourseComponent = () => {
                     value={selectedOpenCategory.title}
                     onChange={e => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                         title: e.target.value,
                       };
                       setSelectedOpenCategory({
                         categoryIndex: selectedOpenCategory.categoryIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                       });
                       setCourses(updatedCourses);
-                      updateCourses(updatedCourses[selectedCourse]);
+                      updateCourses(updatedCourses[selectedCourseIdx]);
                     }}
                     margin="normal"
                     variant="outlined"
@@ -2759,19 +2860,19 @@ const CourseComponent = () => {
                     value={selectedOpenCategory?.description || ""}
                     onChange={e => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                         description: e.target.value,
                       };
                       setSelectedOpenCategory({
                         categoryIndex: selectedOpenCategory.categoryIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                       });
                       setCourses(updatedCourses);
 
                       updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
+                        id: updatedCourses[selectedCourseIdx].id,
+                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
                       });
                     }}
                     margin="normal"
@@ -2819,18 +2920,18 @@ const CourseComponent = () => {
                     selectedTags={() => {}}
                     setTags={(newTags: string[]) => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                         objectives: newTags,
                       };
                       setSelectedOpenCategory({
                         categoryIndex: selectedOpenCategory.categoryIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                       });
                       setCourses(updatedCourses);
                       updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
+                        id: updatedCourses[selectedCourseIdx].id,
+                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
                       });
                     }}
                     fullWidth
@@ -2869,18 +2970,18 @@ const CourseComponent = () => {
                     selectedTags={() => {}}
                     setTags={(newTags: string[]) => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                         prerequisiteKnowledge: newTags,
                       };
                       setCourses(updatedCourses);
                       setSelectedOpenCategory({
                         categoryIndex: selectedOpenCategory.categoryIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                       });
                       updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
+                        id: updatedCourses[selectedCourseIdx].id,
+                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
                       });
                     }}
                     fullWidth
@@ -3071,10 +3172,10 @@ const CourseComponent = () => {
                     value={selectedTopic.description}
                     onChange={e => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                         selectedTopic.topicIndex
                       ] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                         description: e.target.value,
@@ -3082,12 +3183,12 @@ const CourseComponent = () => {
                       setSelectedTopic({
                         categoryIndex: selectedTopic.categoryIndex,
                         topicIndex: selectedTopic.topicIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                       });
                       setCourses(updatedCourses);
-                      updateCourses(updatedCourses[selectedCourse]);
+                      updateCourses(updatedCourses[selectedCourseIdx]);
                     }}
                     margin="normal"
                     variant="outlined"
@@ -3141,10 +3242,10 @@ const CourseComponent = () => {
                       value={selectedTopic.difficulty.toLowerCase()}
                       onChange={e => {
                         const updatedCourses = [...courses];
-                        updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ] = {
-                          ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                             selectedTopic.topicIndex
                           ],
                           difficulty: e.target.value,
@@ -3152,12 +3253,12 @@ const CourseComponent = () => {
                         setSelectedTopic({
                           categoryIndex: selectedTopic.categoryIndex,
                           topicIndex: selectedTopic.topicIndex,
-                          ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                             selectedTopic.topicIndex
                           ],
                         });
                         setCourses(updatedCourses);
-                        updateCourses(updatedCourses[selectedCourse]);
+                        updateCourses(updatedCourses[selectedCourseIdx]);
                       }}
                       label="Difficulty"
                       MenuProps={{
@@ -3184,23 +3285,23 @@ const CourseComponent = () => {
                     value={selectedTopic.hours || ""}
                     onChange={e => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                         selectedTopic.topicIndex
                       ] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
-                        hours: e.target.value,
+                        hours: Number(e.target.value),
                       };
                       setSelectedTopic({
                         categoryIndex: selectedTopic.categoryIndex,
                         topicIndex: selectedTopic.topicIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                       });
                       setCourses(updatedCourses);
-                      updateCourses(updatedCourses[selectedCourse]);
+                      updateCourses(updatedCourses[selectedCourseIdx]);
                     }}
                     margin="normal"
                     variant="outlined"
@@ -3214,10 +3315,10 @@ const CourseComponent = () => {
                     selectedTags={() => {}}
                     setTags={(newTags: string[]) => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                         selectedTopic.topicIndex
                       ] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                         objectives: newTags,
@@ -3226,13 +3327,13 @@ const CourseComponent = () => {
                       setSelectedTopic({
                         categoryIndex: selectedTopic.categoryIndex,
                         topicIndex: selectedTopic.topicIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                       });
                       updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
+                        id: updatedCourses[selectedCourseIdx].id,
+                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
                       });
                     }}
                     fullWidth
@@ -3246,10 +3347,10 @@ const CourseComponent = () => {
                     selectedTags={() => {}}
                     setTags={(newTags: string[]) => {
                       const updatedCourses = [...courses];
-                      updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                         selectedTopic.topicIndex
                       ] = {
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                         prerequisiteKnowledge: newTags,
@@ -3258,13 +3359,13 @@ const CourseComponent = () => {
                       setSelectedTopic({
                         categoryIndex: selectedTopic.categoryIndex,
                         topicIndex: selectedTopic.topicIndex,
-                        ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                           selectedTopic.topicIndex
                         ],
                       });
                       updateCourses({
-                        id: updatedCourses[selectedCourse].id,
-                        syllabus: updatedCourses[selectedCourse].syllabus,
+                        id: updatedCourses[selectedCourseIdx].id,
+                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
                       });
                     }}
                     fullWidth
@@ -3293,7 +3394,7 @@ const CourseComponent = () => {
                             onClick={() => {
                               const updatedCourses = [...courses];
                               const currentTopic =
-                                updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                                   selectedTopic.topicIndex
                                 ];
                               currentTopic.prompts.splice(index, 1);
@@ -3305,8 +3406,8 @@ const CourseComponent = () => {
                                 ...currentTopic,
                               });
                               updateCourses({
-                                id: updatedCourses[selectedCourse].id,
-                                syllabus: updatedCourses[selectedCourse].syllabus,
+                                id: updatedCourses[selectedCourseIdx].id,
+                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
                               });
                             }}
                             sx={{ pb: "5px" }}
@@ -3320,7 +3421,7 @@ const CourseComponent = () => {
                           onChange={e => {
                             const updatedCourses = [...courses];
                             const currentTopic =
-                              updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                              updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                                 selectedTopic.topicIndex
                               ];
                             currentTopic.prompts[index].type = e.target.value;
@@ -3334,8 +3435,8 @@ const CourseComponent = () => {
                               ...currentTopic,
                             });
                             updateCourses({
-                              id: updatedCourses[selectedCourse].id,
-                              syllabus: updatedCourses[selectedCourse].syllabus,
+                              id: updatedCourses[selectedCourseIdx].id,
+                              syllabus: updatedCourses[selectedCourseIdx].syllabus,
                             });
                           }}
                           label="type"
@@ -3357,7 +3458,7 @@ const CourseComponent = () => {
                           onChange={e => {
                             const updatedCourses = [...courses];
                             const currentTopic =
-                              updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                              updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                                 selectedTopic.topicIndex
                               ];
                             currentTopic.prompts[index].text = e.target.value;
@@ -3369,8 +3470,8 @@ const CourseComponent = () => {
                               ...currentTopic,
                             });
                             updateCourses({
-                              id: updatedCourses[selectedCourse].id,
-                              syllabus: updatedCourses[selectedCourse].syllabus,
+                              id: updatedCourses[selectedCourseIdx].id,
+                              syllabus: updatedCourses[selectedCourseIdx].syllabus,
                             });
                           }}
                           sx={{ mb: 2 }}
@@ -3385,7 +3486,7 @@ const CourseComponent = () => {
                           onChange={e => {
                             const updatedCourses = [...courses];
                             const currentTopic =
-                              updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                              updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                                 selectedTopic.topicIndex
                               ];
                             currentTopic.prompts[index].purpose = e.target.value;
@@ -3397,8 +3498,8 @@ const CourseComponent = () => {
                               ...currentTopic,
                             });
                             updateCourses({
-                              id: updatedCourses[selectedCourse].id,
-                              syllabus: updatedCourses[selectedCourse].syllabus,
+                              id: updatedCourses[selectedCourseIdx].id,
+                              syllabus: updatedCourses[selectedCourseIdx].syllabus,
                             });
                           }}
                           sx={{ mb: 2 }}
@@ -3413,7 +3514,7 @@ const CourseComponent = () => {
                             setTags={(newTags: string[]) => {
                               const updatedCourses = [...courses];
                               const currentTopic =
-                                updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                                   selectedTopic.topicIndex
                                 ];
                               currentTopic.prompts[index].choices = newTags;
@@ -3425,8 +3526,8 @@ const CourseComponent = () => {
                                 ...currentTopic,
                               });
                               updateCourses({
-                                id: updatedCourses[selectedCourse].id,
-                                syllabus: updatedCourses[selectedCourse].syllabus,
+                                id: updatedCourses[selectedCourseIdx].id,
+                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
                               });
                             }}
                             fullWidth
@@ -3446,7 +3547,7 @@ const CourseComponent = () => {
                       onClick={() => {
                         const updatedCourses = [...courses];
                         const currentTopic =
-                          updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
+                          updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                             selectedTopic.topicIndex
                           ];
                         if (!currentTopic.prompts) {
@@ -3465,8 +3566,8 @@ const CourseComponent = () => {
                           ...currentTopic,
                         });
                         updateCourses({
-                          id: updatedCourses[selectedCourse].id,
-                          syllabus: updatedCourses[selectedCourse].syllabus,
+                          id: updatedCourses[selectedCourseIdx].id,
+                          syllabus: updatedCourses[selectedCourseIdx].syllabus,
                         });
                       }}
                       sx={{ width: "210px" }}
@@ -3541,7 +3642,7 @@ const CourseComponent = () => {
 
                         navigateChange(currentChangeIndex - 1);
                       }}
-                      disabled={currentChangeIndex === 0 || Object.keys(currentImprovement || {}).length <= 0}
+                      disabled={currentChangeIndex === 0 || currentImprovement === null}
                     >
                       <ArrowBackIosNewIcon />
                     </Button>
@@ -3561,7 +3662,7 @@ const CourseComponent = () => {
                           </Box>
                         )}
                         <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
-                        <Typography> {improvements[currentChangeIndex]?.rationale}</Typography>
+                        <Typography> {improvements[currentChangeIndex].rationale}</Typography>
                         <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
                           {currentChangeIndex + 1}/{improvements.length}
                         </Typography>
@@ -3576,7 +3677,7 @@ const CourseComponent = () => {
                         navigateChange(currentChangeIndex + 1);
                       }}
                       disabled={
-                        currentChangeIndex === improvements[currentChangeIndex].length - 1 ||
+                        currentChangeIndex === improvements.length - 1 ||
                         Object.keys(currentImprovement || {}).length <= 0
                       }
                     >
@@ -3590,7 +3691,7 @@ const CourseComponent = () => {
                       onClick={handleRejectChange}
                       color="error"
                       variant="contained"
-                      disabled={Object.keys(currentImprovement).length <= 0}
+                      disabled={!!currentImprovement}
                     >
                       Delete Proposal
                     </Button>
@@ -3600,7 +3701,7 @@ const CourseComponent = () => {
                       color="success"
                       autoFocus
                       variant="contained"
-                      disabled={Object.keys(currentImprovement).length <= 0}
+                      disabled={!!currentImprovement}
                       sx={{ ml: "auto", mr: "11px" }}
                     >
                       Implement Proposal
