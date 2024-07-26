@@ -857,6 +857,10 @@ const CourseComponent = () => {
       return _prev;
     });
     setSidebarOpen(false);
+    setCurrentImprovement({});
+    setNodePublicView(null);
+    setSelectedTopic(null);
+    setSelectedOpenCategory(null);
     setTimeout(() => {
       setSelectedCourse(courses.length);
     }, 1000);
