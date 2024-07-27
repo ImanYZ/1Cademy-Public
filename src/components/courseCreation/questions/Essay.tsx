@@ -52,7 +52,7 @@ const Essay = ({ idx, nodeId, question, sx, handleQuestion }: QuestionProps) => 
 
   const handleRubricPoints = (value: string, idx: number) => {
     const prevRubrics = [...questionS?.rubric_items];
-    prevRubrics[idx].points = value ? parseInt(value) : 0;
+    prevRubrics[idx].points = value;
     setQuestionS({ ...questionS, rubric_items: prevRubrics });
   };
 
