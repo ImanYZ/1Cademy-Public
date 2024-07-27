@@ -26,7 +26,7 @@ const RubricItems = ({
 }: RubricFormProps) => {
   return (
     <Box>
-      <table>
+      <table style={{ borderSpacing: "5px 15px" }}>
         <thead>
           <th>
             <Typography>Rubric item</Typography>
@@ -39,14 +39,14 @@ const RubricItems = ({
         <tbody>
           {rubrics.map((rubric: any, index: number) => {
             return (
-              <tr key={index} style={{ marginBottom: "15px" }}>
+              <tr key={index}>
                 <td
                   style={{
                     width: "100%",
                     ...(option === "PREVIEW" && {
                       border: "solid 1px #606163",
                       borderRadius: "5px",
-                      padding: "3px",
+                      padding: "10px",
                     }),
                   }}
                 >
@@ -65,7 +65,7 @@ const RubricItems = ({
                     ...(option === "PREVIEW" && {
                       border: "solid 1px #606163",
                       borderRadius: "5px",
-                      padding: "3px",
+                      padding: "10px",
                     }),
                   }}
                 >
