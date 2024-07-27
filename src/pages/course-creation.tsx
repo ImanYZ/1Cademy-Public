@@ -1449,6 +1449,7 @@ const CourseComponent = () => {
 
   const retrieveNodeData = useCallback(
     async (node: INode, topicTitle: string, idx: number) => {
+      const nodeId = node.node || "";
       if (node && selectedTopic) {
         let keywords = "";
         for (let tag of node.tags || []) {
@@ -1466,9 +1467,13 @@ const CourseComponent = () => {
 
         const course = courses[selectedCourseIdx];
         setNodePublicView({ ...node, topic: topicTitle });
+        if (!courses[selectedCourseIdx]?.questions[nodeId]?.length) {
+          retrieveNodeQuestions(nodeId);
+        }
+
         if (!node?.updatedStr) {
           setNodePublicViewLoader(true);
-          const nodeResponse = await getNodeDataForCourse(node?.node || "");
+          const nodeResponse = await getNodeDataForCourse(nodeId);
           const updatedData = {
             ...node,
             createdStr,
@@ -2631,7 +2636,7 @@ const CourseComponent = () => {
                             <QuestionComponent
                               key={idx}
                               idx={idx}
-                              nodeId={nodePublicView?.id}
+                              nodeId={nodePublicView?.node}
                               question={question}
                               handleQuestion={handleQuestion}
                               sx={{
@@ -3508,35 +3513,38 @@ const CourseComponent = () => {
                           multiline
                           minRows={2}
                         />
-                        <Typography gutterBottom>Choices:</Typography>
-                        {prompt.type === "Poll" && (
-                          <ChipInput
-                            tags={prompt.choices}
-                            selectedTags={() => {}}
-                            setTags={(newTags: string[]) => {
-                              const updatedCourses = [...courses];
-                              const currentTopic =
-                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                  selectedTopic.topicIndex
-                                ];
-                              currentTopic.prompts[index].choices = newTags;
 
-                              setCourses(updatedCourses);
-                              setSelectedTopic({
-                                categoryIndex: selectedTopic.categoryIndex,
-                                topicIndex: selectedTopic.topicIndex,
-                                ...currentTopic,
-                              });
-                              updateCourses({
-                                id: updatedCourses[selectedCourseIdx].id,
-                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                              });
-                            }}
-                            fullWidth
-                            variant="outlined"
-                            readOnly={false}
-                            placeholder="Type a new choice and click enter ↵ to add it..."
-                          />
+                        {prompt.type === "Poll" && (
+                          <>
+                            <Typography gutterBottom>Choices:</Typography>
+                            <ChipInput
+                              tags={prompt.choices}
+                              selectedTags={() => {}}
+                              setTags={(newTags: string[]) => {
+                                const updatedCourses = [...courses];
+                                const currentTopic =
+                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                    selectedTopic.topicIndex
+                                  ];
+                                currentTopic.prompts[index].choices = newTags;
+
+                                setCourses(updatedCourses);
+                                setSelectedTopic({
+                                  categoryIndex: selectedTopic.categoryIndex,
+                                  topicIndex: selectedTopic.topicIndex,
+                                  ...currentTopic,
+                                });
+                                updateCourses({
+                                  id: updatedCourses[selectedCourseIdx].id,
+                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                });
+                              }}
+                              fullWidth
+                              variant="outlined"
+                              readOnly={false}
+                              placeholder="Type a new choice and click enter ↵ to add it..."
+                            />
+                          </>
                         )}
                       </Box>
                     </Box>

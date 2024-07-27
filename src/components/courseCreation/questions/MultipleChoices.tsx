@@ -197,7 +197,7 @@ const MultipleChoices = ({ idx, nodeId, question, sx, handleQuestion }: Question
             sx={{
               background: theme =>
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
-              p: 3,
+              py: 2,
               mt: 2,
             }}
           >

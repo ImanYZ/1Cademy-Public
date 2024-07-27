@@ -20,6 +20,7 @@ const retrieveGenerateQuestions = async (
     for (let child of node.children) {
       if (child.type === "Question") {
         const childDoc = await db.collection("nodes").doc(child.node).get();
+        if (!childDoc.exists) continue;
         const childData = childDoc.data() as INode;
         console.log("Question found:", child.title + "\n" + childData.content);
         questions.push({
