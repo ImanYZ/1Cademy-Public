@@ -323,7 +323,7 @@ export const allCommunities = [
         ],
       },
     ],
-    YouTube: "tLYj1Ts8_F0",
+    YouTube: "fylApZlhqoQ",
 
     description: (
       <>
@@ -331,7 +331,7 @@ export const allCommunities = [
         known as large language models, are a powerful type of artificial intelligence trained to comprehend massive
         repositories of texts & designed to mimic sophisticated human language patterns. We encourage interns to delve
         into research that applies LLMs in educational settings through interactive learning, personalized tutoring,
-        automated grading, etc
+        automated grading, etc.
         <br />
         <br />
         After learning how to navigate the 1Cademy platform, researchers should break down complex research articles,
@@ -351,9 +351,7 @@ export const allCommunities = [
     requirements: `In addition to the 1Cademy general application process, we require our interns to submit both their most current resume and unofficial transcripts, with GPA included on those transcripts. We require our interns to have a minimum of a 3.5 GPA to apply for this position. All majors are welcome to apply. A personal or academic interest in disability is highly preferred, and answer our quiz questions to evaluate their domain knowledge.`,
     hasTest: true,
     qualifications: [
-      `A strong academic background in topics related to computer science, education, linguistics,`,
-      `psychology, statistics, or mathematics.`,
-      `Fluency in writing and reading in English.`,
+      `An academic background in topics related to STEM. Majors in education, business, humanities, and social sciences, are also encouraged to apply.`,
     ],
     responsibilities: [
       `Read and summarize textbook chapters and scientific journal articles.`,
