@@ -297,6 +297,7 @@ const CourseComponent = () => {
   const [questionsLoader, setQuestionsLoader] = useState<boolean>(false);
   const [prerequisitesLoader, setPrerequisitesLoader] = useState<string | null>(null);
 
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
   useEffect(() => {
     if (nodePublicView) {
     }
@@ -504,6 +505,7 @@ const CourseComponent = () => {
       title,
       new_category,
       new_after,
+      old_category,
     } = suggestion;
 
     if (suggestion.type === "topic") {
@@ -541,11 +543,7 @@ const CourseComponent = () => {
         case "add":
           return `**<span style="color: green;">Add a new Category</span>** called **"${new_category?.title}"** after the category **"${after}"**.`;
         case "modify":
-          return `**<span style="color: orange;">Modify the topic</span>** **"${old_topic}"** under the category **"${category}"** to **"${
-            new_topic?.title
-          }"** with difficulty level **"${new_topic?.difficulty}"** that we estimate would take ${
-            new_topic?.hours
-          } hour${(new_topic?.hours || 0) > 1 ? "s" : ""}.`;
+          return `**<span style="color: orange;">Modify the category</span>** **"${old_category}"** to **"${new_category?.title}"**`;
         case "divide":
           const dividedTopics = new_topics
             ?.map(
@@ -566,6 +564,7 @@ const CourseComponent = () => {
   };
   const improveCourseStructure = async () => {
     try {
+      setExpanded([]);
       setLoading(true);
       const courseTitle = courses[selectedCourseIdx].title;
       const courseDescription = courses[selectedCourseIdx].description;
@@ -584,7 +583,6 @@ const CourseComponent = () => {
           courseId: courses[selectedCourseIdx].id,
         });
       }
-
       setImprovements(response.suggestions);
       setSidebarOpen(true);
       if (response.suggestions.length > 0) {
@@ -686,28 +684,28 @@ const CourseComponent = () => {
         syllabus.splice(afterCategoryIdx + 1, 0, currentImprovement.new_category);
       }
 
-      // if (currentImprovement.action === "modify") {
-      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.old_category);
-      //   if (categoryIdx !== -1) {
-      //     syllabus[categoryIdx].category = currentImprovement.new_category.category;
-      //   }
-      // }
+      if (currentImprovement.action === "modify" && typeof currentImprovement.new_category === "object") {
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.old_category);
+        if (categoryIdx !== -1) {
+          syllabus[categoryIdx] = currentImprovement.new_category;
+        }
+      }
 
-      // if (currentImprovement.action === "delete") {
-      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
-      //   if (categoryIdx !== -1) {
-      //     syllabus.splice(categoryIdx, 1);
-      //   }
-      // }
+      if (currentImprovement.action === "delete") {
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
+        if (categoryIdx !== -1) {
+          syllabus.splice(categoryIdx, 1);
+        }
+      }
 
-      // if (currentImprovement.action === "move") {
-      //   const categoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.category);
-      //   if (categoryIdx !== -1) {
-      //     const [movedCategory] = syllabus.splice(categoryIdx, 1);
-      //     const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.category === currentImprovement.new_after);
-      //     syllabus.splice(newAfterCategoryIdx + 1, 0, movedCategory);
-      //   }
-      // }
+      if (currentImprovement.action === "move") {
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
+        if (categoryIdx !== -1) {
+          const [movedCategory] = syllabus.splice(categoryIdx, 1);
+          const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.new_after);
+          syllabus.splice(newAfterCategoryIdx + 1, 0, movedCategory);
+        }
+      }
     }
 
     coursesCopy[selectedCourseIdx].syllabus = syllabus;
@@ -742,7 +740,7 @@ const CourseComponent = () => {
     }
 
     if (newIndex !== -1) {
-      TriggerSlideAnimation();
+      triggerSlideAnimation();
       setTimeout(() => {
         setCurrentChangeIndex(newIndex);
         setCurrentImprovement(improvements[newIndex]);
@@ -811,6 +809,7 @@ const CourseComponent = () => {
     setIsChanged([]);
     setIsRemoved([]);
     setImprovements([]);
+    setDisplayCourses(null);
   };
 
   const scrollToCategory = (category: string) => {
@@ -825,6 +824,8 @@ const CourseComponent = () => {
     if (currentImprovement.type === "topic") {
       setExpanded([currentImprovement.category]);
       scrollToCategory(currentImprovement.category);
+    } else {
+      setExpanded([]);
     }
 
     const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
@@ -1229,11 +1230,12 @@ const CourseComponent = () => {
       setGlowCategoryGreenIndex(-1);
     }, 700);
   };
-  const TriggerSlideAnimation = () => {
+  const triggerSlideAnimation = () => {
     setSlideIn(false);
     const timeoutId = setTimeout(() => {
+      setSlideDirection(prev => (prev === "right" ? "left" : "right"));
       setSlideIn(true);
-    }, 500);
+    }, 1100);
 
     return () => clearTimeout(timeoutId);
   };
@@ -1998,10 +2000,8 @@ const CourseComponent = () => {
                     } else {
                       setExpanded([category.title]);
                       setSelectedTopic(null);
-                      if (!Object.keys(currentImprovement || {}).length) {
-                        setSelectedOpenCategory({ categoryIndex, ...category });
-                        setSidebarOpen(true);
-                      }
+                      setSelectedOpenCategory({ categoryIndex, ...category });
+                      setSidebarOpen(true);
                     }
                     setExpandedNode(null);
                   }}
@@ -2093,10 +2093,9 @@ const CourseComponent = () => {
                                 let newExpanded = [];
                                 if (isExpanded) {
                                   newExpanded = [...expandedTopics, tc.title];
-                                  if (Object.keys(currentImprovement || {}).length <= 0) {
-                                    setSidebarOpen(true);
-                                    setSelectedTopic({ categoryIndex, topicIndex, ...tc });
-                                  }
+
+                                  setSidebarOpen(true);
+                                  setSelectedTopic({ categoryIndex, topicIndex, ...tc });
                                 } else {
                                   if (Object.keys(currentImprovement || {}).length <= 0) {
                                     setSidebarOpen(false);
@@ -2555,6 +2554,97 @@ const CourseComponent = () => {
               <CloseIcon />
             </IconButton>
           </Box>
+          <Typography variant="h6">
+            {Object.keys(improvements[currentChangeIndex] || {}).length > 0 ? "AI-Proposed Improvements" : ""}
+          </Typography>
+          {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+            <Box>
+              <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    minWidth: "32px",
+                    p: 0,
+                    m: 0,
+                    backgroundColor: "#1973d3",
+                    ":hover": { backgroundColor: "#084694" },
+                  }}
+                  onClick={() => {
+                    setSlideDirection("right");
+                    setDisplayCourses(null);
+                    navigateChange(currentChangeIndex - 1);
+                  }}
+                  disabled={currentChangeIndex === 0 || currentImprovement === null}
+                >
+                  <ArrowBackIosNewIcon />
+                </Button>
+
+                <Slide
+                  direction={slideDirection}
+                  timeout={900}
+                  in={slideIn}
+                  easing={{ enter: "ease-in-out", exit: "ease-in-out" }}
+                >
+                  <Paper sx={{ p: "15px", m: "17px" }}>
+                    {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                      <Box sx={{ mb: "15px" }}>
+                        <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
+                        <MarkdownRender
+                          text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
+                          sx={{
+                            fontSize: "16px",
+                            fontWeight: 400,
+                            letterSpacing: "inherit",
+                          }}
+                        />
+                      </Box>
+                    )}
+                    <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
+                    <Typography> {improvements[currentChangeIndex].rationale}</Typography>
+                    <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
+                      {currentChangeIndex + 1}/{improvements.length}
+                    </Typography>
+                  </Paper>
+                </Slide>
+                <Button
+                  variant="contained"
+                  sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
+                  onClick={() => {
+                    setSlideDirection("left");
+                    setDisplayCourses(null);
+                    navigateChange(currentChangeIndex + 1);
+                  }}
+                  disabled={
+                    currentChangeIndex === improvements.length - 1 || Object.keys(currentImprovement || {}).length <= 0
+                  }
+                >
+                  <ArrowForwardIosIcon />
+                </Button>
+              </Box>
+              <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
+                <Button
+                  sx={{ ml: "9px" }}
+                  onClick={handleRejectChange}
+                  color="error"
+                  variant="contained"
+                  disabled={!!currentImprovement}
+                >
+                  Delete Proposal
+                </Button>
+                <Button
+                  onClick={handleAcceptChange}
+                  color="success"
+                  autoFocus
+                  variant="contained"
+                  disabled={!!currentImprovement}
+                  sx={{ ml: "auto", mr: "11px" }}
+                >
+                  Implement Proposal
+                </Button>
+              </Box>
+            </Box>
+          )}
+
           {expandedNode ? (
             <Box>
               {nodePublicView && (
@@ -2790,6 +2880,7 @@ const CourseComponent = () => {
               sx={{
                 display: "flex",
                 flexDirection: "column",
+                mt: "15px",
               }}
             >
               <Box
@@ -2799,13 +2890,9 @@ const CourseComponent = () => {
                   alignItems: "center",
                 }}
               >
-                <Typography variant="h6">
-                  {Object.keys(improvements[currentChangeIndex] || {}).length > 0
-                    ? "AI-Proposed Improvements"
-                    : selectedTopic?.title || selectedOpenCategory?.title || ""}
-                </Typography>
+                <Typography variant="h6">{selectedTopic?.title || selectedOpenCategory?.title || ""}</Typography>
 
-                {(selectedOpenCategory?.title || selectedTopic) && (
+                {(selectedOpenCategory?.title || selectedTopic) && !currentImprovement && (
                   <Button
                     onClick={() => {
                       if (selectedOpenCategory?.title) {
@@ -3636,90 +3723,7 @@ const CourseComponent = () => {
               />
             </Box>
           )} */}
-              {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                <Box>
-                  <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        minWidth: "32px",
-                        p: 0,
-                        m: 0,
-                        backgroundColor: "#1973d3",
-                        ":hover": { backgroundColor: "#084694" },
-                      }}
-                      onClick={() => {
-                        setDisplayCourses(null);
 
-                        navigateChange(currentChangeIndex - 1);
-                      }}
-                      disabled={currentChangeIndex === 0 || currentImprovement === null}
-                    >
-                      <ArrowBackIosNewIcon />
-                    </Button>
-                    <Slide direction="left" timeout={800} in={slideIn}>
-                      <Paper sx={{ p: "15px", m: "17px" }}>
-                        {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-                          <Box sx={{ mb: "15px" }}>
-                            <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
-                            <MarkdownRender
-                              text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
-                              sx={{
-                                fontSize: "16px",
-                                fontWeight: 400,
-                                letterSpacing: "inherit",
-                              }}
-                            />
-                          </Box>
-                        )}
-                        <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
-                        <Typography> {improvements[currentChangeIndex].rationale}</Typography>
-                        <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
-                          {currentChangeIndex + 1}/{improvements.length}
-                        </Typography>
-                      </Paper>
-                    </Slide>
-                    <Button
-                      variant="contained"
-                      sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
-                      onClick={() => {
-                        TriggerSlideAnimation();
-                        setDisplayCourses(null);
-                        navigateChange(currentChangeIndex + 1);
-                      }}
-                      disabled={
-                        currentChangeIndex === improvements.length - 1 ||
-                        Object.keys(currentImprovement || {}).length <= 0
-                      }
-                    >
-                      <ArrowForwardIosIcon />
-                    </Button>
-                  </Box>
-
-                  <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
-                    <Button
-                      sx={{ ml: "9px" }}
-                      onClick={handleRejectChange}
-                      color="error"
-                      variant="contained"
-                      disabled={!!currentImprovement}
-                    >
-                      Delete Proposal
-                    </Button>
-
-                    <Button
-                      onClick={handleAcceptChange}
-                      color="success"
-                      autoFocus
-                      variant="contained"
-                      disabled={!!currentImprovement}
-                      sx={{ ml: "auto", mr: "11px" }}
-                    >
-                      Implement Proposal
-                    </Button>
-                  </Box>
-                </Box>
-              )}
               {/* {currentImprovement?.new_topic &&
             Object.keys(currentImprovement.new_topic).map((key: string) => (
               <Box key={key}>
