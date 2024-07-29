@@ -2,9 +2,11 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
-import { IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 // import "./QuestionChoices.css"
 import React, { startTransition, useCallback, useEffect, useState } from "react";
+
+import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 
 import { KnowledgeChoice } from "../../knowledgeTypes";
 import { Editor } from "../Editor";
@@ -101,9 +103,17 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
 
   if (props.editable) {
     return (
-      <li className="QuestionChoices">
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div>
+      <Box
+        sx={{
+          mb: 2,
+          p: 3,
+          pt: 4,
+          background: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+        }}
+      >
+        <Box style={{ display: "flex", alignItems: "center" }}>
+          <Box>
             {props.choice.correct ? (
               <IconButton onClick={switchChoiceHandler}>
                 <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
@@ -113,7 +123,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
                 <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
               </IconButton>
             )}
-          </div>
+          </Box>
           {/* TODO: Keep the state of readonly after render */}
           <Editor
             label="Replace this with the choice."
@@ -125,16 +135,16 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             // onBlurCallback={changeChoiceHandler}
           />
           {props.choicesNum > 1 && (
-            <div>
+            <Box>
               <Tooltip title={"Delete this choice from this question."}>
                 <IconButton onClick={deleteChoiceHandler}>
                   <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
                 </IconButton>
               </Tooltip>
-            </div>
+            </Box>
           )}
-        </div>
-        <div className="collapsible-body" style={{ display: "block" }}>
+        </Box>
+        <Box sx={{ display: "block", mt: 4 }}>
           {/* TODO: Keep the state of readonly after render */}
           <Editor
             label="Replace this with the choice-specific feedback."
@@ -145,25 +155,32 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             editOption={props.option}
             // onBlurCallback={changeFeedbackHandler}
           />
-        </div>
-      </li>
+        </Box>
+      </Box>
     );
   } else {
     return (
-      <li className="QuestionChoices">
-        <div
+      <Box
+        sx={{
+          mb: 2,
+          px: 2,
+          background: theme =>
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+        }}
+      >
+        <Box
           className="collapsible-header"
           onClick={choiceClick}
           style={{ display: "flex", cursor: "pointer", alignItems: "center" }}
         >
           {choicesOpen[props.idx] ? (
             props.choice.correct ? (
-              <DoneIcon className="green-text" sx={{ marginRight: "8px" }} />
+              <DoneIcon className="green-text" sx={{ mr: "8px" }} />
             ) : (
-              <CloseIcon className="red-text" sx={{ marginRight: "8px" }} />
+              <CloseIcon className="red-text" sx={{ mr: "8px" }} />
             )
           ) : (
-            <CheckBoxOutlineBlankIcon sx={{ marginRight: "8px" }} />
+            <CheckBoxOutlineBlankIcon sx={{ mr: "8px" }} />
           )}
           <Editor
             label="Replace this with the choice."
@@ -173,12 +190,9 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             showEditPreviewSection={false}
             editOption={props.option}
           />
-        </div>
+        </Box>
         {choicesOpen[props.idx] && (
-          <div
-            className="collapsible-body"
-            style={{ display: "block", borderBottom: "solid 1px #fff", paddingLeft: "32px" }}
-          >
+          <Box className="collapsible-body" sx={{ display: "block", pl: "32px" }}>
             <Editor
               label="Replace this with the choice-specific feedback."
               readOnly={true}
@@ -187,9 +201,9 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
               showEditPreviewSection={false}
               editOption={props.option}
             />
-          </div>
+          </Box>
         )}
-      </li>
+      </Box>
     );
   }
 };
