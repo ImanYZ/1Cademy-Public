@@ -109,7 +109,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           p: 3,
           pt: 4,
           background: theme =>
-            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray250,
         }}
       >
         <Box style={{ display: "flex", alignItems: "center" }}>
@@ -165,7 +165,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           mb: 2,
           px: 2,
           background: theme =>
-            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
+            theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray250,
         }}
       >
         <Box
