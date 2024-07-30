@@ -29,6 +29,7 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import moment from "moment";
+import Image from "next/image";
 import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { DispatchNodeBookActions, FullNodeData, OpenPart, TNodeUpdates } from "src/nodeBookTypes";
 
@@ -1253,7 +1254,20 @@ const Node = ({
                         />
                       </Tooltip>
                     )}
-                    <img
+                    <Image
+                      className="CenteredLoadingImage"
+                      src={nodeImage}
+                      alt="Node image"
+                      width={595}
+                      height={400}
+                      onLoad={onImageLoad}
+                      onClick={onImageClick}
+                      style={{
+                        borderRadius: "11px",
+                        cursor: "pointer",
+                      }}
+                    />
+                    {/* <img
                       ref={imageElementRef}
                       src={nodeImage}
                       alt="Node image"
@@ -1264,7 +1278,7 @@ const Node = ({
                         borderRadius: "11px",
                         cursor: "pointer",
                       }}
-                    />
+                    /> */}
                     {/* TODO: add loading background */}
                   </Box>
                 )}
@@ -1292,15 +1306,16 @@ const Node = ({
                       })}
                     </ul>
                     {editable && (
-                      <Box sx={{ alignSelf: "flex-end" }}>
+                      <Box sx={{ alignSelf: "flex-end", pb: "14px" }}>
                         <MemoizedMetaButton
                           onClick={addChoiceHandler}
-                          tooltip="Click to add a new choice to this question."
+                          round={true}
+                          style={{ borderRadius: "25px" /* , "background-color": "#303134" */ }}
                         >
-                          <>
+                          <Box sx={{ alignItems: "center", display: "flex", gap: "2px" }}>
                             <AddIcon className="green-text" sx={{ fontSize: "16px" }} />
-                            <span>Add Choice</span>
-                          </>
+                            <Box>Add Choice</Box>
+                          </Box>
                         </MemoizedMetaButton>
                       </Box>
                     )}

@@ -888,8 +888,8 @@ const NodeFooter = ({
                     >
                       <ContainedButton
                         id={`${identifier}-node-footer-image`}
-                        title="Upload an image to better explain this node."
-                        onClick={async () => generateNodeImage()}
+                        title="Generate an image using AI."
+                        onClick={generateNodeImage}
                         tooltipPosition="top"
                         sx={{
                           background: (theme: any) => (theme.palette.mode === "dark" ? "#404040" : "#EAECF0"),
