@@ -238,20 +238,6 @@ export const versionCreateUpdate = async ({
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
         }
-        // TODO: move these to queue
-        await detach(async () => {
-          let batch = db.batch();
-          let writeCounts = 0;
-          await retrieveAndsignalAllUserNodesChanges({
-            batch,
-            linkedId: nodeId,
-            nodeChanges: nodeUpdates,
-            major: false,
-            currentTimestamp,
-            writeCounts,
-          });
-          await commitBatch(batch);
-        });
         //  the version we are dealing with is just accepted (nodeDataDoc is not null)
         //  this was a pending proposal that was just accepted
       } else {
@@ -326,6 +312,7 @@ export const versionCreateUpdate = async ({
           }
           if (nodeData.title !== title || nodeType !== nodeData.nodeType) {
             await detach(async () => {
+              console.log("<=::::::=> CHANGE TITLE <=::::::=>");
               let batch = db.batch();
               let writeCounts = 0;
               [batch, writeCounts] = await changeNodeTitle({
@@ -336,10 +323,11 @@ export const versionCreateUpdate = async ({
                 nodeType,
                 currentTimestamp,
                 writeCounts,
-                t,
-                tWriteOperations,
+                t: null,
+                tWriteOperations: [],
               });
               await commitBatch(batch);
+              console.log("<=::::::=> DONE CHANGE TITLE <=::::::=>");
             });
           }
 

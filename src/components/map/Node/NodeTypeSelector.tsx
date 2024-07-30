@@ -43,6 +43,7 @@ const NodeTypeSelector = ({
             height: "0.7em",
             position: "relative",
           },
+          borderRadius: "23px",
         }}
         MenuProps={{
           sx: {

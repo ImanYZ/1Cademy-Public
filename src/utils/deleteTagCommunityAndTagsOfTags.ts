@@ -1,5 +1,7 @@
 import { checkRestartBatchWriteCounts, db } from "../lib/firestoreServer/admin";
 import { tagsAndCommPoints } from ".";
+import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore";
+import { ITag } from "src/types/ITag";
 
 // A tag should be deleted. So, in addition to deleting the document from the tags collection,
 // we need to also delete its corresponding comPoints documents and tags of tags.
@@ -8,7 +10,15 @@ export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCoun
   // Delete the corresponding tag document from the tags collection.
   await tagsAndCommPoints({
     nodeId,
-    callBack: async ({ tagRef, tagDoc, tagData }: any) => {
+    callBack: async ({
+      tagRef,
+      tagDoc,
+      tagData,
+    }: {
+      tagRef: DocumentReference;
+      tagDoc: DocumentSnapshot;
+      tagData: ITag;
+    }) => {
       if (tagDoc && !tagData.deleted) {
         if (t) {
           tWriteOperations.push({
@@ -22,6 +32,7 @@ export const deleteTagCommunityAndTagsOfTags = async ({ batch, nodeId, writeCoun
         }
       }
     },
+    t: null,
   });
 
   // Delete the corresponding tag of tags documents from the tags collection.
