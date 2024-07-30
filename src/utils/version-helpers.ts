@@ -3,7 +3,6 @@ import {
   checkRestartBatchWriteCounts,
   commitBatch,
   db,
-  runBatchedTransaction,
   TWriteOperation,
   writeTransactionWithT,
 } from "../lib/firestoreServer/admin";
