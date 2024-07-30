@@ -1,6 +1,6 @@
 // import "./MetaButton.css";
 
-import { Box, Tooltip, TooltipProps } from "@mui/material";
+import { Box, Button, Tooltip, TooltipProps } from "@mui/material";
 import React, { useCallback } from "react";
 
 // import { useRecoilValue } from "recoil";
@@ -22,17 +22,27 @@ type MetaButtonProps = {
   disabled?: boolean;
   onDoubleClick?: any;
   round?: boolean;
-  style?: any;
+  style?: { [key: string]: any };
   id?: string;
 };
 
-const MetaButton = (props: MetaButtonProps) => {
+const MetaButton = ({
+  children,
+  tooltipPosition,
+  tooltip,
+  onClick,
+  disabled,
+  onDoubleClick,
+  round,
+  style,
+  id,
+}: MetaButtonProps) => {
   // const isSubmitting = useRecoilValue(isSubmittingState);
 
   /* This custom hook prevents user from double clicking onClick within 0.3s */
   const [handleClick, handleDoubleClick] = useClickPreventionOnDoubleClick(
-    "onClick" in props && props.onClick ? props.onClick : doNothing,
-    "onDoubleClick" in props && props.onDoubleClick ? props.onDoubleClick : doNothing
+    onClick ? onClick : doNothing,
+    onDoubleClick ? onDoubleClick : doNothing
   );
 
   const metaButtonClick = useCallback(
@@ -47,52 +57,52 @@ const MetaButton = (props: MetaButtonProps) => {
     [handleClick]
   );
 
-  if ("onClick" in props && props.onClick) {
+  if (onClick) {
     return (
-      <Tooltip title={props.tooltip || ""} placement={props.tooltipPosition} disableInteractive>
+      <Tooltip title={tooltip || ""} placement={tooltipPosition} disableInteractive>
         <span>
-          <button
-            id={props.id}
+          <Button
+            id={id}
             className={
               // (isSubmitting
               //   ? "disabled MetaButton waves-effect waves-light grey-text hoverable" :
-              `MetaButton Clickable waves-effect waves-light grey-text hoverable ${props.disabled && "disabled"} ` +
-              ("round" in props && props.round ? " Round" : "") +
+              `MetaButton Clickable waves-effect waves-light grey-text hoverable ${disabled && "disabled"} ` +
+              (round ? " Round" : "") +
               // )
-              ("tooltip" in props && props.tooltip ? " Tooltip" : "")
+              (tooltip ? " Tooltip" : "")
             }
-            disabled={props.disabled}
+            disabled={disabled}
             // style={{ disabled: isSubmitting }}
             // disabled={isSubmitting}
             onClick={metaButtonClick}
             onDoubleClick={handleDoubleClick}
-            style={props?.style}
+            style={style}
           >
-            {props.children}
-            {/* {"tooltip" in props && props.tooltip && (
+            {children}
+            {/* {"tooltip" in props && tooltip && (
           <span
-            className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}
+            className={"TooltipText " + (tooltipPosition ? tooltipPosition : "Bottom")}
             onClick={preventEventPropagation}
           >
-            {props.tooltip}
+            {tooltip}
           </span>
         )} */}
-          </button>
+          </Button>
         </span>
       </Tooltip>
     );
   } else {
     return (
-      <Tooltip title={props.tooltip ?? ""} placement={props.tooltipPosition || "bottom"}>
-        <Box id={props.id} className="MetaButton">
-          {props.children}
+      <Tooltip title={tooltip ?? ""} placement={tooltipPosition || "bottom"}>
+        <Box id={id} className="MetaButton">
+          {children}
         </Box>
       </Tooltip>
-      // <span className={"MetaButton" + ("tooltip" in props && props.tooltip ? " Tooltip" : "")}>
-      //   {props.children}
-      //   {"tooltip" in props && props.tooltip && (
-      //     <span className={"TooltipText " + (props.tooltipPosition ? props.tooltipPosition : "Bottom")}>
-      //       {props.tooltip}
+      // <span className={"MetaButton" + ("tooltip" in props && tooltip ? " Tooltip" : "")}>
+      //   {children}
+      //   {"tooltip" in props && tooltip && (
+      //     <span className={"TooltipText " + (tooltipPosition ? tooltipPosition : "Bottom")}>
+      //       {tooltip}
       //     </span>
       //   )}
       // </span>
