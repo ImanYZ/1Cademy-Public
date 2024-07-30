@@ -310,7 +310,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       /*
       if the proposal is a child node proposal, as soon as it gets accepted
-      we need to delete the proposal from the original colleciton and create
+      we need to delete the proposal from the original collection and create
       a copy of it under the version collection of the child type.
       we should do the same thing for the user version.
     */

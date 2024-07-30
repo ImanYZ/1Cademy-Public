@@ -10,7 +10,7 @@ import moment from "moment";
 import { INodeLink } from "src/types/INodeLink";
 import { INodeVersion } from "src/types/INodeVersion";
 import { detach } from "src/utils/helpers";
-import { retrieveAndsignalAllUserNodesChanges } from "src/utils";
+import { retrieveAndSignalAllUserNodesChanges } from "src/utils";
 import { deleteNode } from "src/utils/instructor";
 
 export type InstructorSemesterSettingPayload = {
@@ -132,7 +132,7 @@ const createVersion = async (
       let writeCounts = 0;
       // In both cases of accepting an improvement proposal and a child proposal,
       // we need to signal all the users that it's changed.
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+      [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
         batch,
         linkedId: nodeRef.id,
         nodeChanges,

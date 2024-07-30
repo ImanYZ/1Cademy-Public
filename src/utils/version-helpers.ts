@@ -16,7 +16,7 @@ import {
   getTypedCollections,
   initializeNewReputationData,
   isVersionApproved,
-  retrieveAndsignalAllUserNodesChanges,
+  retrieveAndSignalAllUserNodesChanges,
   tagsAndCommPoints,
   updateReputation,
 } from ".";
@@ -562,25 +562,26 @@ export const changeNodeTitle = async ({
 
   await db.runTransaction(async t => {
     const tWriteOperations: TWriteOperation[] = [];
-    for (let parent of nodeData.parents) {
-      console.log(parent.node, "update");
 
+    for (let parent of nodeData.parents) {
       const linkedRef = db.collection("nodes").doc(parent.node);
       const linkedDoc = await convertToTGet(linkedRef, t);
-      if (!linkedDoc.exist()) continue;
-      const linkedData: any = linkedDoc.data();
-      const newChildren = linkedData.children.filter((child: any) => child.node !== nodeId);
-      newChildren.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
-      linkedDataChanges = {
-        children: newChildren,
-        updatedAt: currentTimestamp,
-      };
 
-      tWriteOperations.push({
-        objRef: linkedRef,
-        data: linkedDataChanges,
-        operationType: "update",
-      });
+      const linkedData: INode | undefined = linkedDoc.data();
+      if (linkedData) {
+        const newChildren = linkedData.children.filter((child: any) => child.node !== nodeId);
+        newChildren.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
+        linkedDataChanges = {
+          children: newChildren,
+          updatedAt: currentTimestamp,
+        };
+
+        tWriteOperations.push({
+          objRef: linkedRef,
+          data: linkedDataChanges,
+          operationType: "update",
+        });
+      }
     }
     //make the documents writes
     for (let operation of tWriteOperations) {
@@ -589,18 +590,20 @@ export const changeNodeTitle = async ({
   });
 
   await db.runTransaction(async t => {
+    console.log("==> newTitle ===>", newTitle, nodeData.children);
     for (let child of nodeData.children) {
       console.log("child.node", child.node);
       const linkedRef = db.collection("nodes").doc(child.node);
       const linkDoc = await t.get(linkedRef);
-      if (linkDoc.exists) {
-        const linkedData = linkDoc.data() as INode;
+      const linkedData = linkDoc.data() as INode;
+      if (linkedData) {
         const newParents = linkedData.parents.filter((parent: INodeLink) => parent.node !== nodeId);
         newParents.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
         linkedDataChanges = {
           parents: newParents,
           updatedAt: currentTimestamp,
         };
+        // 40442675-c84b-4f50-8549-e847957bae84
         tWriteOperations.push({
           objRef: linkedRef,
           data: linkedDataChanges,
@@ -625,7 +628,7 @@ export const changeNodeTitle = async ({
     t
   );
   isATag = taggedNodesDocs.docs.length > 0;
-  console.log("==> taggedNodesDocs.docs ===>", taggedNodesDocs.docs.length);
+
   for (let taggedNodeDoc of taggedNodesDocs.docs) {
     console.log("update", taggedNodeDoc.id);
     const linkedData = taggedNodeDoc.data() as INode;
