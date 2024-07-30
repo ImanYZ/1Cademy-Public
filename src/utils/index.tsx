@@ -16,7 +16,7 @@ export { updateUserImageEverywhere } from "./updateUserImageEverywhere";
 export { updateUserImageInCollection } from "./updateUserImageInCollection";
 export { deleteTagCommunityAndTagsOfTags } from "./deleteTagCommunityAndTagsOfTags";
 export { fetchGoogleMapsGeolocationWrapper } from "./fetchGoogleMapsGeolocationWrapper";
-export { retrieveAndsignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
+export { retrieveAndSignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
 export { updateReputation, initializeNewReputationData } from "./reputations";
 
 export { convertToTGet } from "./convertToTGet";
