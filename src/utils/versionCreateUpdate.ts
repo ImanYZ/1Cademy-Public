@@ -16,7 +16,7 @@ import {
   indexNodeChange,
   transferUserVersionsToNewNode,
 } from "./version-helpers";
-import { retrieveAndsignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
+import { retrieveAndSignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
 import { getNode } from "./getNode";
 import { GetTypedCollectionsReturn, getTypedCollections } from "./getTypedCollections";
 import { convertToTGet } from "./convertToTGet";
@@ -238,6 +238,19 @@ export const versionCreateUpdate = async ({
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
         }
+        await detach(async () => {
+          let batch = db.batch();
+          let writeCounts = 0;
+          await retrieveAndSignalAllUserNodesChanges({
+            batch,
+            linkedId: nodeId,
+            nodeChanges: nodeUpdates,
+            major: false,
+            currentTimestamp,
+            writeCounts,
+          });
+          await commitBatch(batch);
+        });
         //  the version we are dealing with is just accepted (nodeDataDoc is not null)
         //  this was a pending proposal that was just accepted
       } else {
@@ -418,7 +431,7 @@ export const versionCreateUpdate = async ({
             }
 
             for (const { nodeId, nodeChanges } of updatedNodeIds) {
-              [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+              [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
                 batch,
                 linkedId: nodeId,
                 nodeChanges: nodeChanges,
@@ -680,7 +693,7 @@ export const versionCreateUpdate = async ({
           let writeCounts = 0;
           // In both cases of accepting an improvement proposal and a child proposal,
           // we need to signal all the users that it's changed.
-          await retrieveAndsignalAllUserNodesChanges({
+          await retrieveAndSignalAllUserNodesChanges({
             batch,
             linkedId: nodeId,
             nodeChanges: nodeUpdates,

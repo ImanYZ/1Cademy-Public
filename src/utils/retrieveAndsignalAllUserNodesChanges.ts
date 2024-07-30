@@ -1,6 +1,6 @@
 import { getAllUserNodes, signalAllUserNodesChanges } from ".";
 
-export const retrieveAndsignalAllUserNodesChanges = async ({
+export const retrieveAndSignalAllUserNodesChanges = async ({
   batch,
   linkedId,
   nodeChanges,

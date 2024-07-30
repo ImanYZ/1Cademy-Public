@@ -427,6 +427,7 @@ describe("POST /api/rateVersion", () => {
           deleted: true,
           createdAt: new Date(),
           updatedAt: new Date(),
+          nodesNum: 0,
         } as ITag,
       ];
 
@@ -551,13 +552,19 @@ describe("POST /api/rateVersion", () => {
       });
 
       // TODO: not checking reference type node and isTag=true
-      it("if node title has been changed, change it every where title can be present (tags, nodes.children[x].title, nodes.parents[x].title, community docs and reputation docs)", async () => {
-        const parentNode = await db.collection("nodes").doc(String(nodes[0].documentId)).get();
-        const parentNodeData = parentNode.data() as INode;
-        const childNode = await db.collection("nodes").doc(String(nodes[2].documentId)).get();
-        const childNodeData = childNode.data() as INode;
-        expect(parentNodeData.children[0].title).toEqual(nodeVersions[1].title);
-        expect(childNodeData.parents[0].title).toEqual(nodeVersions[1].title);
+      it(`${nodes[0].documentId}if node title has been changed, change it every where title can be present (tags, nodes.children[x].title, nodes.parents[x].title, community docs and reputation docs)`, async () => {
+        const node = (await db.collection("nodes").doc(String(nodes[1].documentId)).get()).data() as INode;
+
+        const newTitle = nodeVersions[1].title;
+        for (let parent of node.parents) {
+          const parentNode = (await db.collection("nodes").doc(String(parent.node)).get()).data() as INode;
+          expect(parentNode.children[0].title).toEqual(newTitle);
+        }
+
+        for (let child of node.children) {
+          const childNode = (await db.collection("nodes").doc(String(child.node)).get()).data() as INode;
+          expect(childNode.parents[0].title).toEqual(newTitle);
+        }
       });
 
       it("contribution should be updated", async () => {
@@ -772,6 +779,7 @@ describe("POST /api/rateVersion", () => {
           deleted: true,
           createdAt: new Date(),
           updatedAt: new Date(),
+          nodesNum: 0,
         } as ITag,
       ];
 

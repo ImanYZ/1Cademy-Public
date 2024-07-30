@@ -4,7 +4,7 @@ import {
   getTypedCollections,
   NODE_TYPES,
   reputationTypes,
-  retrieveAndsignalAllUserNodesChanges,
+  retrieveAndSignalAllUserNodesChanges,
   schoolPointTypes,
 } from ".";
 
@@ -192,7 +192,7 @@ export const replaceUsername = async ({ userDoc, newUsername }: any) => {
       };
       batch.update(nodeRef, nodeChanges);
       [batch, writeCounts] = await checkRestartBatchWriteCounts(batch, writeCounts);
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+      [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
         batch,
         linkedId: nodeDoc.id,
         nodeChanges,

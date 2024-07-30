@@ -4,7 +4,7 @@ import { INode } from "src/types/INode";
 import { INodeLink } from "src/types/INodeLink";
 import { getAllUserNodes } from "./getAllUserNodes";
 import { detach } from "./helpers";
-import { retrieveAndsignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
+import { retrieveAndSignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
 import { signalAllUserNodesChanges } from "./signalAllUserNodesChanges";
 
 export const searchAvailableUnameByEmail = async (email: string) => {
@@ -64,7 +64,7 @@ export const deleteNode = async ({
     await detach(async () => {
       let batch = db.batch();
       let writeCounts = 0;
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+      [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
         batch,
         linkedId: parentRef.id,
         nodeChanges,
@@ -97,7 +97,7 @@ export const deleteNode = async ({
     await detach(async () => {
       let batch = db.batch();
       let writeCounts = 0;
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+      [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
         batch,
         linkedId: childRef.id,
         nodeChanges,
@@ -159,7 +159,7 @@ export const deleteNode = async ({
     await detach(async () => {
       let batch = db.batch();
       let writeCounts = 0;
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+      [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
         batch,
         onlyVisible: true,
         linkedId: taggedNodeDoc.id,
