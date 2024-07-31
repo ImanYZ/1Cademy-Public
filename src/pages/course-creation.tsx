@@ -740,11 +740,9 @@ const CourseComponent = () => {
     }
 
     if (newIndex !== -1) {
+      setCurrentChangeIndex(newIndex);
+      setCurrentImprovement(improvements[newIndex]);
       triggerSlideAnimation();
-      setTimeout(() => {
-        setCurrentChangeIndex(newIndex);
-        setCurrentImprovement(improvements[newIndex]);
-      }, 1000);
     } else {
       setSidebarOpen(false);
       setCurrentImprovement(null);
@@ -810,6 +808,7 @@ const CourseComponent = () => {
     setIsRemoved([]);
     setImprovements([]);
     setDisplayCourses(null);
+    setCurrentChangeIndex(0);
   };
 
   const scrollToCategory = (category: string) => {
@@ -861,7 +860,8 @@ const CourseComponent = () => {
           oldTopic.action = "move";
           syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
         }
-
+        syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
+        syllabus[oldCategoryIndex].topics[oldTopicIndex].action = "move";
         const expand = [currentImprovementCopy.current_category];
         if (typeof currentImprovementCopy.new_category === "string") {
           expand.push(currentImprovementCopy.new_category);
@@ -955,6 +955,7 @@ const CourseComponent = () => {
       setSelectedCourseIdx(courses.length);
     }, 1000);
     setCreatingCourseStep(0);
+    setCurrentChangeIndex(0);
   };
 
   const deleteCourse = async () => {
@@ -1578,7 +1579,6 @@ const CourseComponent = () => {
       console.error(error);
     }
   };
-
   if (courses.length <= 0) {
     return (
       <Box
@@ -2060,7 +2060,7 @@ const CourseComponent = () => {
                         >
                           {category.title}
                         </Typography>
-                        {expanded.includes(category.title) && currentImprovement !== null && (
+                        {expanded.includes(category.title) && currentImprovement === null && (
                           <Box sx={{ ml: "14px" }}>
                             <Button
                               onClick={e => {
@@ -2559,18 +2559,19 @@ const CourseComponent = () => {
           </Typography>
           {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
             <Box>
-              <Box sx={{ display: "flex", my: "15px", mx: "5px" }}>
+              <Box sx={{ display: "flex", my: "15px" /* , mx: "5px" */ }}>
                 <Button
                   variant="contained"
                   sx={{
                     minWidth: "32px",
                     p: 0,
                     m: 0,
+                    ml: "-14px",
                     backgroundColor: "#1973d3",
                     ":hover": { backgroundColor: "#084694" },
                   }}
                   onClick={() => {
-                    setSlideDirection("right");
+                    setSlideDirection("left");
                     setDisplayCourses(null);
                     navigateChange(currentChangeIndex - 1);
                   }}
@@ -2581,16 +2582,17 @@ const CourseComponent = () => {
 
                 <Slide
                   direction={slideDirection}
-                  timeout={900}
+                  timeout={1000}
                   in={slideIn}
                   easing={{ enter: "ease-in-out", exit: "ease-in-out" }}
+                  style={{ zIndex: "-12px" }}
                 >
                   <Paper sx={{ p: "15px", m: "17px" }}>
-                    {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                    {Object.keys(currentImprovement || {}).length > 0 && (
                       <Box sx={{ mb: "15px" }}>
                         <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
                         <MarkdownRender
-                          text={generateSuggestionMessage(improvements[currentChangeIndex] || {})}
+                          text={generateSuggestionMessage(currentImprovement || {})}
                           sx={{
                             fontSize: "16px",
                             fontWeight: 400,
@@ -2600,7 +2602,7 @@ const CourseComponent = () => {
                       </Box>
                     )}
                     <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
-                    <Typography> {improvements[currentChangeIndex].rationale}</Typography>
+                    <Typography> {(currentImprovement || {}).rationale}</Typography>
                     <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
                       {currentChangeIndex + 1}/{improvements.length}
                     </Typography>
@@ -2608,9 +2610,9 @@ const CourseComponent = () => {
                 </Slide>
                 <Button
                   variant="contained"
-                  sx={{ minWidth: "32px", p: 0, m: 0, mr: "5px" }}
+                  sx={{ minWidth: "32px", p: 0, m: 0, mr: "-14px" }}
                   onClick={() => {
-                    setSlideDirection("left");
+                    setSlideDirection("right");
                     setDisplayCourses(null);
                     navigateChange(currentChangeIndex + 1);
                   }}
@@ -2627,7 +2629,7 @@ const CourseComponent = () => {
                   onClick={handleRejectChange}
                   color="error"
                   variant="contained"
-                  disabled={!!currentImprovement}
+                  disabled={!currentImprovement}
                 >
                   Delete Proposal
                 </Button>
@@ -2636,7 +2638,7 @@ const CourseComponent = () => {
                   color="success"
                   autoFocus
                   variant="contained"
-                  disabled={!!currentImprovement}
+                  disabled={!currentImprovement}
                   sx={{ ml: "auto", mr: "11px" }}
                 >
                   Implement Proposal
