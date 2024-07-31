@@ -305,7 +305,7 @@ Each action should be accompanied by:
       ]
     },
     {
-      "category": "Backend Development",
+      "title": "Backend Development",
       "description": "Comprehensive coverage of backend development techniques, including server-side programming and database integration.",
       "objectives": [
         "Master server-side development with Node.js and Express.js",
@@ -471,7 +471,7 @@ Each action should be accompanied by:
       ]
     },
     {
-      "category": "Web Security",
+      "title": "Web Security",
       "description": "Focused exploration of web security principles and practices.",
       "objectives": [
         "Identify and mitigate common web security threats",
