@@ -591,6 +591,7 @@ export const changeNodeTitle = async ({
 
   await db.runTransaction(async t => {
     console.log("==> newTitle ===>", newTitle, nodeData.children);
+    const tWriteOperations: TWriteOperation[] = [];
     for (let child of nodeData.children) {
       console.log("child.node", child.node);
       const linkedRef = db.collection("nodes").doc(child.node);
