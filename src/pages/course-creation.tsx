@@ -32,11 +32,14 @@ import {
   LinearProgress,
   // LinearProgress,
   MenuItem,
+  OutlinedInput,
   Paper,
   Select,
   Slide,
   TextField,
+  Theme,
   Typography,
+  useTheme,
 } from "@mui/material";
 import dayjs from "dayjs";
 import {
@@ -235,7 +238,19 @@ const difficulties: DifficultyType = {
   medium: { label: "Medium", color: DESIGN_SYSTEM_COLORS.yellow500 },
   hard: { label: "Hard", color: DESIGN_SYSTEM_COLORS.notebookRed2 },
 };
+
+function getStyles(name: string, personName: string[], theme: Theme) {
+  return {
+    fontWeight:
+      personName.indexOf(name) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
+  };
+}
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+
 const CourseComponent = () => {
+  const theme = useTheme();
   const db = getFirestore();
   const [{ user }] = useAuth();
   const dragItem = useRef<any>(null);
@@ -1787,40 +1802,48 @@ const CourseComponent = () => {
               />
             )}
             {(!courses[selectedCourseIdx].new || creatingCourseStep >= 2) && (
-              <TextField
-                value={courses[selectedCourseIdx]?.references[0] || ""}
-                select
-                label="Select Book"
-                sx={{ mt: "15px", minWidth: "200px" }}
-                onChange={event => {
-                  const updatedCourses: any = [...courses];
-                  const bookIdx = books.findIndex(b => b.id === event.target.value);
-                  updatedCourses[selectedCourseIdx] = {
-                    ...updatedCourses[selectedCourseIdx],
-                    tags: books[bookIdx].tags,
-                    references: books[bookIdx].references,
-                  };
-                  setCourses(updatedCourses);
-                  updateCourses(updatedCourses[selectedCourseIdx]);
-                }}
-              >
-                <MenuItem
-                  value=""
-                  disabled
-                  sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
+              <FormControl sx={{ m: 1, width: 300, mt: "15px" }}>
+                <InputLabel>Books</InputLabel>
+                <Select
+                  multiple
+                  value={courses[selectedCourseIdx]?.references}
+                  onChange={event => {
+                    const tags: string[] = [];
+
+                    books
+                      .filter((book: { id: string; tags: string[]; references: string[] }) =>
+                        event.target.value.includes(book.id)
+                      )
+                      .map(book => {
+                        tags.push(...book.tags);
+                      });
+                    const updatedCourses: Course[] = [...courses];
+
+                    updatedCourses[selectedCourseIdx] = {
+                      ...updatedCourses[selectedCourseIdx],
+                      tags: tags,
+                      references: event.target.value as string[],
+                    };
+                    setCourses(updatedCourses);
+                    updateCourses(updatedCourses[selectedCourseIdx]);
+                  }}
+                  input={<OutlinedInput label="Name" />}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                        width: 250,
+                      },
+                    },
+                  }}
                 >
-                  Select Book
-                </MenuItem>
-                {books.map((book: any) => (
-                  <MenuItem
-                    key={book.id}
-                    value={book.id}
-                    sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-                  >
-                    {book.id}
-                  </MenuItem>
-                ))}
-              </TextField>
+                  {books.map(book => (
+                    <MenuItem key={book.id} value={book.id} style={getStyles(book.id, [], theme)}>
+                      {book.id}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             )}
           </Box>
 
