@@ -834,13 +834,7 @@ const CourseComponent = () => {
   };
   useEffect(() => {
     if (currentImprovement === null) return;
-    if (currentImprovement.type === "topic") {
-      setExpanded([currentImprovement.category]);
-      scrollToCategory(currentImprovement.category);
-    } else {
-      setExpanded([]);
-    }
-
+    let expandCategories = [];
     const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
 
     const currentImprovementCopy: Improvement = { ...currentImprovement };
@@ -876,12 +870,11 @@ const CourseComponent = () => {
         }
         syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
         syllabus[oldCategoryIndex].topics[oldTopicIndex].action = "move";
-        const expand = [currentImprovementCopy.current_category];
+        expandCategories.push(currentImprovementCopy.current_category);
+
         if (typeof currentImprovementCopy.new_category === "string") {
-          expand.push(currentImprovementCopy.new_category);
+          expandCategories.push(currentImprovementCopy.new_category);
         }
-        setExpanded(expand);
-        scrollToCategory(currentImprovementCopy.current_category);
       } else if (currentImprovementCopy.action === "delete") {
         const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
@@ -889,7 +882,7 @@ const CourseComponent = () => {
         );
 
         syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
-        setExpanded([currentImprovementCopy.category]);
+        expandCategories.push(currentImprovementCopy.category);
         scrollToCategory(currentImprovementCopy.category);
       } else if (currentImprovementCopy.action === "divide") {
         const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
@@ -898,12 +891,14 @@ const CourseComponent = () => {
         syllabus[categoryIndex].topics[oldTopicIdx].action = "divide";
         const new_topics_copy = currentImprovementCopy.new_topics.map(t => ({ ...t, color: "add" }));
         syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
+        expandCategories.push(currentImprovementCopy.category);
       } else if (currentImprovementCopy.action === "add") {
         const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         const afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
 
         const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
         syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
+        expandCategories.push(currentImprovementCopy.category);
       } else if (currentImprovementCopy.action === "modify") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
         if (categoryIdx !== -1) {
@@ -917,18 +912,47 @@ const CourseComponent = () => {
             };
           }
         }
+        expandCategories.push(currentImprovementCopy.category);
       }
     }
 
-    if (
-      currentImprovementCopy.action === "add" &&
-      currentImprovementCopy.type === "category" &&
-      typeof currentImprovementCopy.new_category === "object"
-    ) {
-      const addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
-      syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovementCopy.new_category, color: "add" });
-    }
+    if (currentImprovementCopy.type === "category") {
+      if (currentImprovementCopy.action === "add" && typeof currentImprovementCopy.new_category === "object") {
+        const addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
+        syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovementCopy.new_category, color: "add" });
+        expandCategories.push(currentImprovementCopy.new_category.title);
+      }
+      if (currentImprovement.action === "modify" && typeof currentImprovement.new_category === "object") {
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.old_category);
+        if (categoryIdx !== -1) {
+          syllabus[categoryIdx] = currentImprovement.new_category;
+        }
+        expandCategories.push(currentImprovement.old_category);
+      }
 
+      if (currentImprovement.action === "delete") {
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
+        if (categoryIdx !== -1) {
+          syllabus[categoryIdx].color = "delete";
+        }
+      }
+
+      if (currentImprovement.action === "move") {
+        const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
+        if (categoryIdx !== -1) {
+          const movedCategory = syllabus[categoryIdx];
+          syllabus[categoryIdx].color = "delete";
+          syllabus[categoryIdx].action = "move";
+
+          const newAfterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.new_after);
+          syllabus.splice(newAfterCategoryIdx + 1, 0, { ...movedCategory, color: "add", action: "move" });
+        }
+      }
+    }
+    if (expandCategories.length > 0) {
+      scrollToCategory(expandCategories[0]);
+    }
+    setExpanded(expandCategories || []);
     coursesCopy[selectedCourseIdx].syllabus = syllabus;
     setDisplayCourses(coursesCopy);
   }, [courses, currentImprovement, selectedCourseIdx]);
@@ -3443,7 +3467,9 @@ const CourseComponent = () => {
                     {currentImprovement !== null ? (
                       <Box sx={{ display: "flex", gap: "5px" }}>
                         <Typography>Difficulty:</Typography>
-                        <Typography sx={{ color: difficulties[selectedTopic.difficulty.toLowerCase()].color }}>
+                        <Typography
+                          sx={{ color: difficulties[selectedTopic.difficulty.toLowerCase()]?.color || "orange" }}
+                        >
                           {selectedTopic.difficulty.toLowerCase()}
                         </Typography>
                       </Box>
