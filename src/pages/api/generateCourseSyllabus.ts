@@ -12,12 +12,13 @@ const generateCourseSyllabus = async (
   courseTitle: string,
   targetLearners: string,
   classSessions: number,
+  sessionHours: number,
   prerequisiteKnowledge: string,
   courseDescription: string,
   courseObjectives: string[],
   courseSkills: string[]
 ) => {
-  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of hour-long class sessions, objectives, and skills, your task is to generate a JSON object with an array of categories, where each category includes a title and an array of topic titles. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, and skills, your task is to generate a JSON object with an array of categories, where each category includes a title and an array of topic titles. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated categories and topics will be reviewed by a supervisory team. For every helpful category or topic, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
 **Input:**
@@ -25,10 +26,11 @@ Your generated categories and topics will be reviewed by a supervisory team. For
 1. **Course Title:** [Course Title goes here]
 2. **Course Description:** [Course Description goes here]
 3. **Target Learners:** [Target Learners Description goes here]
-4. **Number of Hour-long Class Sessions:** [Number of Class Sessions goes here]
-5. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
-6. **Objectives:** [Course Objectives go here]
-7. **Skills:** [Skills Gained from the Course go here]
+4. **Number of Class Sessions:** [Number of Class Sessions goes here]
+5. **Number of Hours Per Class Session:** [Number of Hours per Class Session goes here]
+6. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
+7. **Objectives:** [Course Objectives go here]
+8. **Skills:** [Skills Gained from the Course go here]
 
 **Output:**
 
@@ -43,7 +45,8 @@ Generate a JSON object with an array of categories. Each category should include
   "Course Title": "Advanced Web Development",
   "Course Description": "This course covers advanced topics in web development, including modern JavaScript frameworks, server-side programming, database integration, and web security. It is intended for students with a basic understanding of web development.",
   "Target Learners": "Graduate students in computer science or related fields, with prior experience in basic web development.",
-  "Number of Hour-long Class Sessions": 16,
+  "Number of Class Sessions": 16,
+  "Number of Hours Per Class Session": 2,
   "Prerequisite Knowledge": [
     "HTML and CSS fundamentals",
     "JavaScript programming basics",
@@ -127,7 +130,8 @@ Generate a JSON object with an array of categories. Each category should include
   const userPrompt = {
     "Course Title": courseTitle,
     "Target Learners": targetLearners,
-    "Number of Hour-long Class Sessions": classSessions,
+    "Number of Class Sessions": classSessions,
+    "Number of Hours Per Class Session": sessionHours,
     "Current Description": courseDescription,
     "Prerequisite Knowledge": prerequisiteKnowledge,
     "Course Objectives": courseObjectives,
@@ -144,6 +148,7 @@ const generateCourseCategory = async (
   courseTitle: string,
   targetLearners: string,
   classSessions: number,
+  sessionHours: number,
   prerequisiteKnowledge: string,
   courseDescription: string,
   courseObjectives: string[],
@@ -151,7 +156,7 @@ const generateCourseCategory = async (
   categories: { title: string; topics: string[] }[],
   category: { title: string; topics: string[] }
 ) => {
-  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of hour-long class sessions, objectives, skills, and the entire array of categories and their topic titles, along with the title of a specific category, your task is to generate a detailed syllabus for that specific category. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, skills, and the entire array of categories and their topic titles, along with the title of a specific category, your task is to generate a detailed syllabus for that specific category. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated categories and topics will be reviewed by a supervisory team. For every helpful category or topic, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
 **Input:**
@@ -159,12 +164,13 @@ Your generated categories and topics will be reviewed by a supervisory team. For
 1. **Course Title:** [Course Title goes here]
 2. **Course Description:** [Course Description goes here]
 3. **Target Learners:** [Target Learners Description goes here]
-4. **Number of Hour-long Class Sessions:** [Number of Class Sessions goes here]
-5. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
-6. **Objectives:** [Course Objectives go here]
-7. **Skills:** [Skills Gained from the Course go here]
-8. **Categories:** [Array of categories and their topic titles goes here]
-9. **Category Title:** [Title of the category to generate detailed data for]
+4. **Number of Class Sessions:** [Number of Class Sessions goes here]
+5. **Number of Hours Per Class Session:** [Number of Hours per Class Session goes here]
+6. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
+7. **Objectives:** [Course Objectives go here]
+8. **Skills:** [Skills Gained from the Course go here]
+9. **Categories:** [Array of categories and their topic titles goes here]
+10. **Category Title:** [Title of the category to generate detailed data for]
 
 **Output:**
 
@@ -177,7 +183,7 @@ Your generated syllabus should:
 3. Align topics with the course objectives and the needs of the target learners.
 4. Ensure comprehensive coverage of the subject matter.
 5. Sequence topics logically to ensure a progression of learning.
-6. Consider the number of class sessions available and the level of detail appropriate for the target learners.
+6. Consider the number of class sessions, number of hours per class session, and the level of detail appropriate for the target learners.
 7. Ensure that the hours allocated to each topic are appropriate for the level of detail and complexity required.
 8. Ensure that the difficulty level of each topic is suitable for the target learners.
 9. Ensure that the syllabus is engaging, challenging, and achievable for the target learners.
@@ -203,7 +209,8 @@ Prompts can be of two types:
   "Course Title": "Advanced Web Development",
   "Course Description": "This course covers advanced topics in web development, including modern JavaScript frameworks, server-side programming, database integration, and web security. It is intended for students with a basic understanding of web development.",
   "Target Learners": "Graduate students in computer science or related fields, with prior experience in basic web development.",
-  "Number of Hour-long Class Sessions": 16,
+  "Number of Class Sessions": 16,
+  "Number of Hours Per Class Session": 2,
   "Prerequisite Knowledge": [
     "HTML and CSS fundamentals",
     "JavaScript programming basics",
@@ -453,13 +460,14 @@ Prompts can be of two types:
   const userPrompt = {
     "Course Title": courseTitle,
     "Target Learners": targetLearners,
-    "Number of Hour-long Class Sessions": classSessions,
+    "Number of Class Sessions": classSessions,
+    "Number of Hours Per Class Session": sessionHours,
     "Current Description": courseDescription,
     "Prerequisite Knowledge": prerequisiteKnowledge,
     "Course Objectives": courseObjectives,
     "Course Skills": courseSkills,
     Categories: categories,
-    Category: category.title,
+    Category: category,
   };
 
   const response = await callOpenAIChat(
@@ -477,6 +485,7 @@ Prompts can be of two types:
   console.log(JSON.stringify(catOjb, null, 2));
   return catOjb;
 };
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
@@ -488,6 +497,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       courseObjectives,
       courseSkills,
       hours,
+      classSessions,
       tags,
       references,
     } = req.body;
@@ -496,6 +506,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       courseTitle,
       targetLearners,
       hours,
+      classSessions,
       prerequisiteKnowledge,
       courseDescription,
       courseObjectives,
@@ -520,6 +531,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const topics = await generateCourseCategory(
           courseTitle,
           targetLearners,
+          classSessions,
           hours,
           prerequisiteKnowledge,
           courseDescription,
