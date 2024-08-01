@@ -3560,6 +3560,7 @@ const CourseComponent = () => {
                               ? DESIGN_SYSTEM_COLORS.notebookG600
                               : DESIGN_SYSTEM_COLORS.gray100,
                           p: 2,
+                          borderRadius: "18px",
                         }}
                       >
                         <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -3585,7 +3586,8 @@ const CourseComponent = () => {
                                   syllabus: updatedCourses[selectedCourseIdx].syllabus,
                                 });
                               }}
-                              sx={{ pb: "5px" }}
+                              sx={{ pb: "5px", ml: "auto", height: "27px" }}
+                              variant="contained"
                             >
                               Delete
                             </Button>
@@ -3659,6 +3661,39 @@ const CourseComponent = () => {
                             minRows={2}
                           />
                         )}
+
+                        {prompt.type === "Poll" && (
+                          <>
+                            <Typography gutterBottom>Choices:</Typography>
+                            <ChipInput
+                              tags={prompt.choices}
+                              selectedTags={() => {}}
+                              setTags={(newTags: string[]) => {
+                                const updatedCourses = [...courses];
+                                const currentTopic =
+                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                    selectedTopic.topicIndex
+                                  ];
+                                currentTopic.prompts[index].choices = newTags;
+
+                                setCourses(updatedCourses);
+                                setSelectedTopic({
+                                  categoryIndex: selectedTopic.categoryIndex,
+                                  topicIndex: selectedTopic.topicIndex,
+                                  ...currentTopic,
+                                });
+                                updateCourses({
+                                  id: updatedCourses[selectedCourseIdx].id,
+                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                });
+                              }}
+                              fullWidth
+                              variant="outlined"
+                              readOnly={currentImprovement !== null}
+                              placeholder="Type a new choice and click enter ↵ to add it..."
+                            />
+                          </>
+                        )}
                         {currentImprovement !== null ? (
                           <Typography>{prompt.purpose}</Typography>
                         ) : (
@@ -3690,39 +3725,6 @@ const CourseComponent = () => {
                             multiline
                             minRows={2}
                           />
-                        )}
-
-                        {prompt.type === "Poll" && (
-                          <>
-                            <Typography gutterBottom>Choices:</Typography>
-                            <ChipInput
-                              tags={prompt.choices}
-                              selectedTags={() => {}}
-                              setTags={(newTags: string[]) => {
-                                const updatedCourses = [...courses];
-                                const currentTopic =
-                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                    selectedTopic.topicIndex
-                                  ];
-                                currentTopic.prompts[index].choices = newTags;
-
-                                setCourses(updatedCourses);
-                                setSelectedTopic({
-                                  categoryIndex: selectedTopic.categoryIndex,
-                                  topicIndex: selectedTopic.topicIndex,
-                                  ...currentTopic,
-                                });
-                                updateCourses({
-                                  id: updatedCourses[selectedCourseIdx].id,
-                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                                });
-                              }}
-                              fullWidth
-                              variant="outlined"
-                              readOnly={false}
-                              placeholder="Type a new choice and click enter ↵ to add it..."
-                            />
-                          </>
                         )}
                       </Box>
                     </Box>
