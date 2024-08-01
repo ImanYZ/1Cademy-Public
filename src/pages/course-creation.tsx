@@ -2590,98 +2590,102 @@ const CourseComponent = () => {
               <CloseIcon />
             </IconButton>
           </Box>
-          <Typography variant="h6">
-            {Object.keys(improvements[currentChangeIndex] || {}).length > 0 ? "AI-Proposed Improvements" : ""}
-          </Typography>
-          {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
-            <Box>
-              <Box sx={{ display: "flex", my: "15px" /* , mx: "5px" */ }}>
-                <Button
-                  variant="contained"
-                  sx={{
-                    minWidth: "32px",
-                    p: 0,
-                    m: 0,
-                    ml: "-14px",
-                    backgroundColor: "#1973d3",
-                    ":hover": { backgroundColor: "#084694" },
-                    zIndex: 99999,
-                  }}
-                  onClick={() => {
-                    setSlideDirection("left");
-                    setDisplayCourses(null);
-                    navigateChange(currentChangeIndex - 1);
-                  }}
-                  disabled={currentImprovement === null}
-                >
-                  <ArrowBackIosNewIcon />
-                </Button>
+          {currentImprovement && (
+            <Paper sx={{ mx: "-10px", p: "6px" }}>
+              <Typography variant="h6">
+                {Object.keys(improvements[currentChangeIndex] || {}).length > 0 ? "AI-Proposed Improvements" : ""}
+              </Typography>
+              {Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
+                <Box>
+                  <Box sx={{ display: "flex", my: "15px" /* , mx: "5px" */ }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        minWidth: "32px",
+                        p: 0,
+                        m: 0,
+                        // ml: "-14px",
+                        backgroundColor: "#1973d3",
+                        ":hover": { backgroundColor: "#084694" },
+                        zIndex: 99999,
+                      }}
+                      onClick={() => {
+                        setSlideDirection("left");
+                        setDisplayCourses(null);
+                        navigateChange(currentChangeIndex - 1);
+                      }}
+                      disabled={currentImprovement === null}
+                    >
+                      <ArrowBackIosNewIcon />
+                    </Button>
 
-                {currentImprovement !== null && (
-                  <Slide
-                    direction={slideDirection}
-                    timeout={1000}
-                    in={slideIn}
-                    easing={{ enter: "ease-in-out", exit: "ease-in-out" }}
-                    style={{ zIndex: "-12px" }}
-                  >
-                    <Paper sx={{ p: "15px", m: "17px" }}>
-                      {Object.keys(currentImprovement || {}).length > 0 && (
-                        <Box sx={{ mb: "15px" }}>
-                          <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
-                          <MarkdownRender
-                            text={generateSuggestionMessage(currentImprovement || {})}
-                            sx={{
-                              fontSize: "16px",
-                              fontWeight: 400,
-                              letterSpacing: "inherit",
-                            }}
-                          />
-                        </Box>
-                      )}
-                      <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
-                      <Typography> {(currentImprovement || {}).rationale}</Typography>
-                      <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
-                        {currentChangeIndex + 1}/{improvements.length}
-                      </Typography>
-                    </Paper>
-                  </Slide>
-                )}
-                <Button
-                  variant="contained"
-                  sx={{ minWidth: "32px", p: 0, m: 0, mr: "-14px" }}
-                  onClick={() => {
-                    setSlideDirection("right");
-                    setDisplayCourses(null);
-                    navigateChange(currentChangeIndex + 1);
-                  }}
-                  disabled={currentImprovement === null}
-                >
-                  <ArrowForwardIosIcon />
-                </Button>
-              </Box>
-              <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
-                <Button
-                  sx={{ ml: "9px" }}
-                  onClick={handleRejectChange}
-                  color="error"
-                  variant="contained"
-                  disabled={!currentImprovement}
-                >
-                  Delete Proposal
-                </Button>
-                <Button
-                  onClick={handleAcceptChange}
-                  color="success"
-                  autoFocus
-                  variant="contained"
-                  disabled={!currentImprovement}
-                  sx={{ ml: "auto", mr: "11px" }}
-                >
-                  Implement Proposal
-                </Button>
-              </Box>
-            </Box>
+                    {currentImprovement !== null && (
+                      <Slide
+                        direction={slideDirection}
+                        timeout={1000}
+                        in={slideIn}
+                        easing={{ enter: "ease-in-out", exit: "ease-in-out" }}
+                        style={{ zIndex: "-12px" }}
+                      >
+                        <Paper sx={{ p: "15px", m: "17px" }}>
+                          {Object.keys(currentImprovement || {}).length > 0 && (
+                            <Box sx={{ mb: "15px" }}>
+                              <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Proposal:</strong>{" "}
+                              <MarkdownRender
+                                text={generateSuggestionMessage(currentImprovement || {})}
+                                sx={{
+                                  fontSize: "16px",
+                                  fontWeight: 400,
+                                  letterSpacing: "inherit",
+                                }}
+                              />
+                            </Box>
+                          )}
+                          <strong style={{ fontWeight: "bold", marginRight: "5px" }}> Rationale:</strong>{" "}
+                          <Typography> {(currentImprovement || {}).rationale}</Typography>
+                          <Typography sx={{ mr: "15px", mt: "5px", ml: "5px", fontWeight: "bold" }}>
+                            {currentChangeIndex + 1}/{improvements.length}
+                          </Typography>
+                        </Paper>
+                      </Slide>
+                    )}
+                    <Button
+                      variant="contained"
+                      sx={{ minWidth: "32px", p: 0, m: 0 /* , mr: "-14px" */ }}
+                      onClick={() => {
+                        setSlideDirection("right");
+                        setDisplayCourses(null);
+                        navigateChange(currentChangeIndex + 1);
+                      }}
+                      disabled={currentImprovement === null}
+                    >
+                      <ArrowForwardIosIcon />
+                    </Button>
+                  </Box>
+                  <Box sx={{ display: "flex", gap: "20px", alignItems: "center" }}>
+                    <Button
+                      sx={{ ml: "9px" }}
+                      onClick={handleRejectChange}
+                      color="error"
+                      variant="contained"
+                      disabled={!currentImprovement}
+                    >
+                      Delete Proposal
+                    </Button>
+                    <Button
+                      onClick={handleAcceptChange}
+                      color="success"
+                      autoFocus
+                      variant="contained"
+                      disabled={!currentImprovement}
+                      sx={{ ml: "auto", mr: "11px" }}
+                    >
+                      Implement Proposal
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </Paper>
           )}
 
           {expandedNode ? (
@@ -2930,166 +2934,171 @@ const CourseComponent = () => {
                 mt: "15px",
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: "10px",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="h6">{selectedTopic?.title || selectedOpenCategory?.title || ""}</Typography>
+              {currentImprovement === null && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="h6">{selectedTopic?.title || selectedOpenCategory?.title || ""}</Typography>
 
-                {(selectedOpenCategory?.title || selectedTopic) && !currentImprovement && (
-                  <Button
-                    onClick={() => {
-                      if (selectedOpenCategory?.title) {
-                        deleteCategory(selectedOpenCategory);
-                      } else if (selectedTopic) {
-                        handleRemoveTopic(selectedTopic);
-                      }
-                    }}
-                    sx={{
-                      m: 1,
-                    }}
-                    variant="contained"
-                  >
-                    Delete
-                  </Button>
-                )}
-              </Box>
-              <Divider
-                sx={{
-                  borderColor: "lightgrey",
-                  my: "15px",
-                }}
-              />
-              {selectedOpenCategory && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                  {currentImprovement !== null ? (
-                    <Typography>{selectedOpenCategory.title}</Typography>
-                  ) : (
-                    <TextField
-                      label="Category Title"
-                      multiline
-                      value={selectedOpenCategory.title}
-                      onChange={e => {
-                        const updatedCourses = [...courses];
-                        updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
-                          ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                          title: e.target.value,
-                        };
-                        setSelectedOpenCategory({
-                          categoryIndex: selectedOpenCategory.categoryIndex,
-                          ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                        });
-                        setCourses(updatedCourses);
-                        updateCourses(updatedCourses[selectedCourseIdx]);
+                  {(selectedOpenCategory?.title || selectedTopic) && (
+                    <Button
+                      onClick={() => {
+                        if (selectedOpenCategory?.title) {
+                          deleteCategory(selectedOpenCategory);
+                        } else if (selectedTopic) {
+                          handleRemoveTopic(selectedTopic);
+                        }
                       }}
-                      margin="normal"
-                      variant="outlined"
                       sx={{
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
-                        width: "100%",
-                        mt: "10px",
-                        mb: "0px",
+                        m: 1,
                       }}
-                      InputLabelProps={{
-                        sx: {
-                          color: "grey",
-                        },
-                      }}
-                    />
+                      variant="contained"
+                    >
+                      Delete
+                    </Button>
                   )}
-                  {currentImprovement !== null ? (
-                    <Typography>{selectedOpenCategory?.description}</Typography>
-                  ) : (
-                    <TextField
-                      label="Description"
-                      multiline
-                      value={selectedOpenCategory?.description || ""}
-                      onChange={e => {
+                </Box>
+              )}
+              {currentImprovement === null && (
+                <Divider
+                  sx={{
+                    borderColor: "lightgrey",
+                    my: "15px",
+                  }}
+                />
+              )}
+              <Paper sx={{ mx: "-10px", p: "6px", display: selectedTopic || selectedOpenCategory ? "block" : "none" }}>
+                {selectedOpenCategory && (
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: "15px", p: "10px" }}>
+                    {currentImprovement !== null ? (
+                      <Typography variant="h3">{selectedOpenCategory.title}</Typography>
+                    ) : (
+                      <TextField
+                        label="Category Title"
+                        multiline
+                        value={selectedOpenCategory.title}
+                        onChange={e => {
+                          const updatedCourses = [...courses];
+                          updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+                            title: e.target.value,
+                          };
+                          setSelectedOpenCategory({
+                            categoryIndex: selectedOpenCategory.categoryIndex,
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+                          });
+                          setCourses(updatedCourses);
+                          updateCourses(updatedCourses[selectedCourseIdx]);
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        sx={{
+                          backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                          width: "100%",
+                          mt: "10px",
+                          mb: "0px",
+                        }}
+                        InputLabelProps={{
+                          sx: {
+                            color: "grey",
+                          },
+                        }}
+                      />
+                    )}
+                    {currentImprovement !== null ? (
+                      <Typography>{selectedOpenCategory?.description}</Typography>
+                    ) : (
+                      <TextField
+                        label="Description"
+                        multiline
+                        value={selectedOpenCategory?.description || ""}
+                        onChange={e => {
+                          const updatedCourses = [...courses];
+                          updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+                            description: e.target.value,
+                          };
+                          setSelectedOpenCategory({
+                            categoryIndex: selectedOpenCategory.categoryIndex,
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+                          });
+                          setCourses(updatedCourses);
+
+                          updateCourses({
+                            id: updatedCourses[selectedCourseIdx].id,
+                            syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                          });
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        sx={{
+                          backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                          width: "100%",
+                          mt: "10px",
+                          mb: "0px",
+                        }}
+                        InputLabelProps={{
+                          style: { color: "grey" },
+                        }}
+                      />
+                    )}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <Typography sx={{ fontSize: "19px" }}>Category Image:</Typography>
+                      {loadingImage ? (
+                        <LinearProgress sx={{ width: "40px" }} />
+                      ) : (
+                        <AutoFixHighIcon
+                          sx={{
+                            // backgroundColor: "grey",
+                            // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                            color: "orange",
+                            borderRadius: "50%",
+                            ":hover": {
+                              backgroundColor: "black",
+                              display: "block",
+                            },
+                            zIndex: 10,
+                            padding: "5px",
+                            cursor: "pointer",
+                            fontSize: "30px",
+                            height: "100%",
+                          }}
+                          onClick={generateImageForCategory}
+                        />
+                      )}
+                    </Box>
+                    {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
+
+                    <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
+                    <ChipInput
+                      tags={selectedOpenCategory?.objectives || []}
+                      selectedTags={() => {}}
+                      setTags={(newTags: string[]) => {
                         const updatedCourses = [...courses];
                         updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
                           ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                          description: e.target.value,
+                          objectives: newTags,
                         };
                         setSelectedOpenCategory({
                           categoryIndex: selectedOpenCategory.categoryIndex,
                           ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
                         });
                         setCourses(updatedCourses);
-
                         updateCourses({
                           id: updatedCourses[selectedCourseIdx].id,
                           syllabus: updatedCourses[selectedCourseIdx].syllabus,
                         });
                       }}
-                      margin="normal"
+                      fullWidth
                       variant="outlined"
-                      sx={{
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
-                        width: "100%",
-                        mt: "10px",
-                        mb: "0px",
-                      }}
-                      InputLabelProps={{
-                        style: { color: "grey" },
-                      }}
+                      readOnly={currentImprovement !== null}
+                      placeholder="Type a new skill and click enter ↵ to add it..."
                     />
-                  )}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <Typography sx={{ fontSize: "19px" }}>Category Image:</Typography>
-                    {loadingImage ? (
-                      <LinearProgress sx={{ width: "40px" }} />
-                    ) : (
-                      <AutoFixHighIcon
-                        sx={{
-                          // backgroundColor: "grey",
-                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                          color: "orange",
-                          borderRadius: "50%",
-                          ":hover": {
-                            backgroundColor: "black",
-                            display: "block",
-                          },
-                          zIndex: 10,
-                          padding: "5px",
-                          cursor: "pointer",
-                          fontSize: "30px",
-                          height: "100%",
-                        }}
-                        onClick={generateImageForCategory}
-                      />
-                    )}
-                  </Box>
-                  {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
-
-                  <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
-                  <ChipInput
-                    tags={selectedOpenCategory?.objectives || []}
-                    selectedTags={() => {}}
-                    setTags={(newTags: string[]) => {
-                      const updatedCourses = [...courses];
-                      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                        objectives: newTags,
-                      };
-                      setSelectedOpenCategory({
-                        categoryIndex: selectedOpenCategory.categoryIndex,
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                      });
-                      setCourses(updatedCourses);
-                      updateCourses({
-                        id: updatedCourses[selectedCourseIdx].id,
-                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                      });
-                    }}
-                    fullWidth
-                    variant="outlined"
-                    readOnly={currentImprovement !== null}
-                    placeholder="Type a new skill and click enter ↵ to add it..."
-                  />
-                  {/* <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Skills:</Typography>
+                    {/* <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Skills:</Typography>
               <ChipInput
                 tags={selectedOpenCategory?.skills || []}
                 selectedTags={() => {}}
@@ -3114,32 +3123,32 @@ const CourseComponent = () => {
                 readOnly={false}
                 placeholder="Type a new skill and click enter ↵ to add it..."
               /> */}
-                  <Typography sx={{ fontWeight: "bold" }}>Prerequisite knowledge:</Typography>
-                  <ChipInput
-                    tags={selectedOpenCategory?.prerequisiteKnowledge || []}
-                    selectedTags={() => {}}
-                    setTags={(newTags: string[]) => {
-                      const updatedCourses = [...courses];
-                      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                        prerequisiteKnowledge: newTags,
-                      };
-                      setCourses(updatedCourses);
-                      setSelectedOpenCategory({
-                        categoryIndex: selectedOpenCategory.categoryIndex,
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-                      });
-                      updateCourses({
-                        id: updatedCourses[selectedCourseIdx].id,
-                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                      });
-                    }}
-                    fullWidth
-                    variant="outlined"
-                    readOnly={currentImprovement !== null}
-                    placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
-                  />
-                  {/* <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
+                    <Typography sx={{ fontWeight: "bold" }}>Prerequisite knowledge:</Typography>
+                    <ChipInput
+                      tags={selectedOpenCategory?.prerequisiteKnowledge || []}
+                      selectedTags={() => {}}
+                      setTags={(newTags: string[]) => {
+                        const updatedCourses = [...courses];
+                        updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+                          prerequisiteKnowledge: newTags,
+                        };
+                        setCourses(updatedCourses);
+                        setSelectedOpenCategory({
+                          categoryIndex: selectedOpenCategory.categoryIndex,
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourseIdx].id,
+                          syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                        });
+                      }}
+                      fullWidth
+                      variant="outlined"
+                      readOnly={currentImprovement !== null}
+                      placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
+                    />
+                    {/* <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
               {(selectedOpenCategory?.prompts || []).map((prompt: any, index: number) => (
                 <Box key={index}>
                   <Box sx={{ marginTop: 4 }}>
@@ -3286,7 +3295,7 @@ const CourseComponent = () => {
                   </Box>
                 </Box>
               ))} */}
-                  {/* <Button
+                    {/* <Button
                 onClick={() => {
                   const updatedCourses = [...courses];
                   const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
@@ -3311,478 +3320,520 @@ const CourseComponent = () => {
               >
                 Add prompt
               </Button> */}
-                </Box>
-              )}
-              {selectedTopic && (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                  {currentImprovement !== null ? (
-                    <Typography>{selectedTopic.description}</Typography>
-                  ) : (
-                    <TextField
-                      label="Topic Description"
-                      multiline
-                      fullWidth
-                      value={selectedTopic.description}
-                      onChange={e => {
-                        const updatedCourses = [...courses];
-                        updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ] = {
-                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                            selectedTopic.topicIndex
-                          ],
-                          description: e.target.value,
-                        };
-                        setSelectedTopic({
-                          categoryIndex: selectedTopic.categoryIndex,
-                          topicIndex: selectedTopic.topicIndex,
-                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                            selectedTopic.topicIndex
-                          ],
-                        });
-                        setCourses(updatedCourses);
-                        updateCourses(updatedCourses[selectedCourseIdx]);
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      minRows={4}
-                      sx={{
-                        backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
-                        mt: "10px",
-                        mb: "0px",
-                      }}
-                      InputLabelProps={{
-                        style: {
-                          color: "gray",
-                        },
-                      }}
-                    />
-                  )}
-
-                  <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                    <Typography sx={{ fontSize: "19px" }}>Topic Image:</Typography>
-
-                    {loadingImage ? (
-                      <LinearProgress sx={{ width: "40px" }} />
-                    ) : (
-                      <AutoFixHighIcon
-                        sx={{
-                          // backgroundColor: "grey",
-                          // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                          color: "orange",
-                          borderRadius: "50%",
-
-                          ":hover": {
-                            backgroundColor: "black",
-
-                            display: "block",
-                          },
-
-                          zIndex: 10,
-
-                          padding: "5px",
-                          cursor: "pointer",
-                          fontSize: "30px",
-                        }}
-                        onClick={generateImageForTopic}
-                      />
-                    )}
                   </Box>
-                  {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
-                  {currentImprovement !== null ? (
-                    <Box sx={{ display: "flex", gap: "5px" }}>
-                      <Typography>Difficulty:</Typography>
-                      <Typography sx={{ color: difficulties[selectedTopic.difficulty.toLowerCase()].color }}>
-                        {selectedTopic.difficulty.toLowerCase()}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Box>
-                      <FormControl fullWidth margin="normal" sx={{ mt: "8px" }}>
-                        <InputLabel id="difficulty-label">Difficulty</InputLabel>
-                        <Select
-                          labelId="difficulty-label"
-                          value={selectedTopic.difficulty.toLowerCase()}
-                          onChange={e => {
-                            const updatedCourses = [...courses];
-                            updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                              selectedTopic.topicIndex
-                            ] = {
-                              ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                selectedTopic.topicIndex
-                              ],
-                              difficulty: e.target.value,
-                            };
-                            setSelectedTopic({
-                              categoryIndex: selectedTopic.categoryIndex,
-                              topicIndex: selectedTopic.topicIndex,
-                              ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                selectedTopic.topicIndex
-                              ],
-                            });
-                            setCourses(updatedCourses);
-                            updateCourses(updatedCourses[selectedCourseIdx]);
-                          }}
-                          label="Difficulty"
-                          MenuProps={{
-                            sx: {
-                              zIndex: "9999",
-                            },
-                          }}
-                          sx={{
-                            color: difficulty === "easy" ? "#AAFF00" : difficulty === "medium" ? "#ffc071" : "red",
-                          }}
-                        >
-                          <MenuItem value="easy" sx={{ color: difficulties["easy"].color }}>
-                            Easy
-                          </MenuItem>
-                          <MenuItem value="medium" sx={{ color: difficulties["medium"].color }}>
-                            Medium
-                          </MenuItem>
-                          <MenuItem value="hard" sx={{ color: difficulties["hard"].color }}>
-                            Hard
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
-                  )}
-                  {currentImprovement !== null ? (
-                    <Box sx={{ display: "flex", gap: "5px" }}>
-                      <Typography>Hours:</Typography>
-                      <Typography>{selectedTopic.hours}</Typography>
-                    </Box>
-                  ) : (
-                    <TextField
-                      label="Hours"
-                      fullWidth
-                      value={selectedTopic.hours || ""}
-                      onChange={e => {
-                        const updatedCourses = [...courses];
-                        updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ] = {
-                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                            selectedTopic.topicIndex
-                          ],
-                          hours: Number(e.target.value),
-                        };
-                        setSelectedTopic({
-                          categoryIndex: selectedTopic.categoryIndex,
-                          topicIndex: selectedTopic.topicIndex,
-                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                            selectedTopic.topicIndex
-                          ],
-                        });
-                        setCourses(updatedCourses);
-                        updateCourses(updatedCourses[selectedCourseIdx]);
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      type="number"
-                      sx={{ mt: "8px", mb: "0px" }}
-                      inputProps={{ min: 0 }}
-                    />
-                  )}
-                  <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
-                  <ChipInput
-                    tags={selectedTopic.objectives}
-                    selectedTags={() => {}}
-                    setTags={(newTags: string[]) => {
-                      const updatedCourses = [...courses];
-                      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                        selectedTopic.topicIndex
-                      ] = {
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ],
-                        objectives: newTags,
-                      };
-                      setCourses(updatedCourses);
-                      setSelectedTopic({
-                        categoryIndex: selectedTopic.categoryIndex,
-                        topicIndex: selectedTopic.topicIndex,
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ],
-                      });
-                      updateCourses({
-                        id: updatedCourses[selectedCourseIdx].id,
-                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                      });
-                    }}
-                    fullWidth
-                    variant="outlined"
-                    readOnly={currentImprovement !== null}
-                    placeholder="Type a new skill and click enter ↵ to add it..."
-                  />
-                  <Typography sx={{ fontWeight: "bold" }}>Prerequisite Knowledge:</Typography>
-                  <ChipInput
-                    tags={selectedTopic.prerequisiteKnowledge}
-                    selectedTags={() => {}}
-                    setTags={(newTags: string[]) => {
-                      const updatedCourses = [...courses];
-                      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                        selectedTopic.topicIndex
-                      ] = {
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ],
-                        prerequisiteKnowledge: newTags,
-                      };
-                      setCourses(updatedCourses);
-                      setSelectedTopic({
-                        categoryIndex: selectedTopic.categoryIndex,
-                        topicIndex: selectedTopic.topicIndex,
-                        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                          selectedTopic.topicIndex
-                        ],
-                      });
-                      updateCourses({
-                        id: updatedCourses[selectedCourseIdx].id,
-                        syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                      });
-                    }}
-                    fullWidth
-                    variant="outlined"
-                    readOnly={currentImprovement !== null}
-                    placeholder="Type a new skill and click enter ↵ to add it..."
-                  />
-                  <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
-                  {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
-                    <Box key={index}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "15px",
-                          background: theme =>
-                            theme.palette.mode === "dark"
-                              ? DESIGN_SYSTEM_COLORS.notebookG600
-                              : DESIGN_SYSTEM_COLORS.gray100,
-                          p: 2,
-                          borderRadius: "18px",
-                        }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <Typography gutterBottom>Prompt {index + 1}:</Typography>
-                          {currentImprovement === null && (
-                            <Button
-                              onClick={() => {
-                                const updatedCourses = [...courses];
-                                const currentTopic =
-                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                    selectedTopic.topicIndex
-                                  ];
-                                currentTopic.prompts.splice(index, 1);
-
-                                setCourses(updatedCourses);
-                                setSelectedTopic({
-                                  categoryIndex: selectedTopic.categoryIndex,
-                                  topicIndex: selectedTopic.topicIndex,
-                                  ...currentTopic,
-                                });
-                                updateCourses({
-                                  id: updatedCourses[selectedCourseIdx].id,
-                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                                });
-                              }}
-                              sx={{ pb: "5px", ml: "auto", height: "27px" }}
-                              variant="contained"
-                            >
-                              Delete
-                            </Button>
-                          )}
-                        </Box>
-                        <Select
-                          labelId="type-label"
-                          value={prompt.type}
-                          onChange={e => {
-                            if (currentImprovement !== null) return;
-                            const updatedCourses = [...courses];
-                            const currentTopic =
-                              updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                selectedTopic.topicIndex
-                              ];
-                            currentTopic.prompts[index].type = e.target.value;
-                            if (e.target.value !== "Poll") {
-                              delete currentTopic.prompts[index].choices;
-                            }
-                            setCourses(updatedCourses);
-                            setSelectedTopic({
-                              categoryIndex: selectedTopic.categoryIndex,
-                              topicIndex: selectedTopic.topicIndex,
-                              ...currentTopic,
-                            });
-                            updateCourses({
-                              id: updatedCourses[selectedCourseIdx].id,
-                              syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                            });
-                          }}
-                          label="type"
-                          MenuProps={{
-                            sx: {
-                              zIndex: "9999",
-                            },
-                          }}
-                          sx={{ mb: 2 }}
-                        >
-                          <MenuItem value="Poll">Poll</MenuItem>
-                          <MenuItem value="Open-Ended">Open-Ended</MenuItem>
-                        </Select>
-                        {currentImprovement !== null ? (
-                          <Typography>{prompt.text}</Typography>
-                        ) : (
-                          <TextField
-                            fullWidth
-                            label="Text Prompt"
-                            variant="outlined"
-                            value={prompt.text}
-                            onChange={e => {
-                              const updatedCourses = [...courses];
-                              const currentTopic =
-                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                  selectedTopic.topicIndex
-                                ];
-                              currentTopic.prompts[index].text = e.target.value;
-
-                              setCourses(updatedCourses);
-                              setSelectedTopic({
-                                categoryIndex: selectedTopic.categoryIndex,
-                                topicIndex: selectedTopic.topicIndex,
-                                ...currentTopic,
-                              });
-                              updateCourses({
-                                id: updatedCourses[selectedCourseIdx].id,
-                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                              });
-                            }}
-                            sx={{ mb: 2 }}
-                            multiline
-                            minRows={2}
-                          />
-                        )}
-
-                        {prompt.type === "Poll" && (
-                          <>
-                            <Typography gutterBottom>Choices:</Typography>
-                            <ChipInput
-                              tags={prompt.choices}
-                              selectedTags={() => {}}
-                              setTags={(newTags: string[]) => {
-                                const updatedCourses = [...courses];
-                                const currentTopic =
-                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                    selectedTopic.topicIndex
-                                  ];
-                                currentTopic.prompts[index].choices = newTags;
-
-                                setCourses(updatedCourses);
-                                setSelectedTopic({
-                                  categoryIndex: selectedTopic.categoryIndex,
-                                  topicIndex: selectedTopic.topicIndex,
-                                  ...currentTopic,
-                                });
-                                updateCourses({
-                                  id: updatedCourses[selectedCourseIdx].id,
-                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                                });
-                              }}
-                              fullWidth
-                              variant="outlined"
-                              readOnly={currentImprovement !== null}
-                              placeholder="Type a new choice and click enter ↵ to add it..."
-                            />
-                          </>
-                        )}
-                        {currentImprovement !== null ? (
-                          <Typography>{prompt.purpose}</Typography>
-                        ) : (
-                          <TextField
-                            fullWidth
-                            label="Purpose"
-                            variant="outlined"
-                            value={prompt.purpose}
-                            onChange={e => {
-                              const updatedCourses = [...courses];
-                              const currentTopic =
-                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                  selectedTopic.topicIndex
-                                ];
-                              currentTopic.prompts[index].purpose = e.target.value;
-
-                              setCourses(updatedCourses);
-                              setSelectedTopic({
-                                categoryIndex: selectedTopic.categoryIndex,
-                                topicIndex: selectedTopic.topicIndex,
-                                ...currentTopic,
-                              });
-                              updateCourses({
-                                id: updatedCourses[selectedCourseIdx].id,
-                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                              });
-                            }}
-                            sx={{ mb: 2 }}
-                            multiline
-                            minRows={2}
-                          />
-                        )}
-                      </Box>
-                    </Box>
-                  ))}
-                  <Box sx={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: "10px" }}>
-                    <CustomButton
-                      variant="contained"
-                      type="button"
-                      color="secondary"
-                      onClick={() => {
-                        const updatedCourses = [...courses];
-                        const currentTopic =
+                )}
+                {selectedTopic && (
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                    {currentImprovement !== null ? (
+                      <Typography variant="h3">{selectedTopic.title}</Typography>
+                    ) : (
+                      <TextField
+                        label="Topic Title"
+                        multiline
+                        value={selectedTopic.title}
+                        onChange={e => {
+                          const updatedCourses = [...courses];
                           updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
                             selectedTopic.topicIndex
-                          ];
-                        if (!currentTopic.prompts) {
-                          currentTopic.prompts = [];
-                        }
-                        currentTopic.prompts.push({
-                          type: "Poll",
-                          text: "",
-                          purpose: "",
-                        });
+                          ] = {
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ],
+                            title: e.target.value,
+                          };
+                          setSelectedTopic({
+                            categoryIndex: selectedTopic.categoryIndex,
+                            topicIndex: selectedTopic.topicIndex,
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ],
+                          });
+                          setCourses(updatedCourses);
+                          updateCourses(updatedCourses[selectedCourseIdx]);
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        sx={{
+                          backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                          width: "100%",
+                          mt: "10px",
+                          mb: "0px",
+                        }}
+                        InputLabelProps={{
+                          sx: {
+                            color: "grey",
+                          },
+                        }}
+                      />
+                    )}
+                    {currentImprovement !== null ? (
+                      <Typography>{selectedTopic.description}</Typography>
+                    ) : (
+                      <TextField
+                        label="Topic Description"
+                        multiline
+                        fullWidth
+                        value={selectedTopic.description}
+                        onChange={e => {
+                          const updatedCourses = [...courses];
+                          updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ] = {
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ],
+                            description: e.target.value,
+                          };
+                          setSelectedTopic({
+                            categoryIndex: selectedTopic.categoryIndex,
+                            topicIndex: selectedTopic.topicIndex,
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ],
+                          });
+                          setCourses(updatedCourses);
+                          updateCourses(updatedCourses[selectedCourseIdx]);
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        minRows={4}
+                        sx={{
+                          backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white"),
+                          mt: "10px",
+                          mb: "0px",
+                        }}
+                        InputLabelProps={{
+                          style: {
+                            color: "gray",
+                          },
+                        }}
+                      />
+                    )}
 
+                    <Box sx={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <Typography sx={{ fontSize: "19px" }}>Topic Image:</Typography>
+
+                      {loadingImage ? (
+                        <LinearProgress sx={{ width: "40px" }} />
+                      ) : (
+                        <AutoFixHighIcon
+                          sx={{
+                            // backgroundColor: "grey",
+                            // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                            color: "orange",
+                            borderRadius: "50%",
+
+                            ":hover": {
+                              backgroundColor: "black",
+
+                              display: "block",
+                            },
+
+                            zIndex: 10,
+
+                            padding: "5px",
+                            cursor: "pointer",
+                            fontSize: "30px",
+                          }}
+                          onClick={generateImageForTopic}
+                        />
+                      )}
+                    </Box>
+                    {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+                    {currentImprovement !== null ? (
+                      <Box sx={{ display: "flex", gap: "5px" }}>
+                        <Typography>Difficulty:</Typography>
+                        <Typography sx={{ color: difficulties[selectedTopic.difficulty.toLowerCase()].color }}>
+                          {selectedTopic.difficulty.toLowerCase()}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box>
+                        <FormControl fullWidth margin="normal" sx={{ mt: "8px" }}>
+                          <InputLabel id="difficulty-label">Difficulty</InputLabel>
+                          <Select
+                            labelId="difficulty-label"
+                            value={selectedTopic.difficulty.toLowerCase()}
+                            onChange={e => {
+                              const updatedCourses = [...courses];
+                              updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                selectedTopic.topicIndex
+                              ] = {
+                                ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                  selectedTopic.topicIndex
+                                ],
+                                difficulty: e.target.value,
+                              };
+                              setSelectedTopic({
+                                categoryIndex: selectedTopic.categoryIndex,
+                                topicIndex: selectedTopic.topicIndex,
+                                ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                  selectedTopic.topicIndex
+                                ],
+                              });
+                              setCourses(updatedCourses);
+                              updateCourses(updatedCourses[selectedCourseIdx]);
+                            }}
+                            label="Difficulty"
+                            MenuProps={{
+                              sx: {
+                                zIndex: "9999",
+                              },
+                            }}
+                            sx={{
+                              color: difficulty === "easy" ? "#AAFF00" : difficulty === "medium" ? "#ffc071" : "red",
+                            }}
+                          >
+                            <MenuItem value="easy" sx={{ color: difficulties["easy"].color }}>
+                              Easy
+                            </MenuItem>
+                            <MenuItem value="medium" sx={{ color: difficulties["medium"].color }}>
+                              Medium
+                            </MenuItem>
+                            <MenuItem value="hard" sx={{ color: difficulties["hard"].color }}>
+                              Hard
+                            </MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    )}
+                    {currentImprovement !== null ? (
+                      <Box sx={{ display: "flex", gap: "5px" }}>
+                        <Typography>Hours:</Typography>
+                        <Typography>{selectedTopic.hours}</Typography>
+                      </Box>
+                    ) : (
+                      <TextField
+                        label="Hours"
+                        fullWidth
+                        value={selectedTopic.hours || ""}
+                        onChange={e => {
+                          const updatedCourses = [...courses];
+                          updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ] = {
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ],
+                            hours: Number(e.target.value),
+                          };
+                          setSelectedTopic({
+                            categoryIndex: selectedTopic.categoryIndex,
+                            topicIndex: selectedTopic.topicIndex,
+                            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ],
+                          });
+                          setCourses(updatedCourses);
+                          updateCourses(updatedCourses[selectedCourseIdx]);
+                        }}
+                        margin="normal"
+                        variant="outlined"
+                        type="number"
+                        sx={{ mt: "8px", mb: "0px" }}
+                        inputProps={{ min: 0 }}
+                      />
+                    )}
+                    <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
+                    <ChipInput
+                      tags={selectedTopic.objectives}
+                      selectedTags={() => {}}
+                      setTags={(newTags: string[]) => {
+                        const updatedCourses = [...courses];
+                        updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                          selectedTopic.topicIndex
+                        ] = {
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ],
+                          objectives: newTags,
+                        };
                         setCourses(updatedCourses);
                         setSelectedTopic({
                           categoryIndex: selectedTopic.categoryIndex,
                           topicIndex: selectedTopic.topicIndex,
-                          ...currentTopic,
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ],
                         });
                         updateCourses({
                           id: updatedCourses[selectedCourseIdx].id,
                           syllabus: updatedCourses[selectedCourseIdx].syllabus,
                         });
                       }}
-                      sx={{ width: "210px" }}
-                    >
-                      Add prompt
-                    </CustomButton>
+                      fullWidth
+                      variant="outlined"
+                      readOnly={currentImprovement !== null}
+                      placeholder="Type a new skill and click enter ↵ to add it..."
+                    />
+                    <Typography sx={{ fontWeight: "bold" }}>Prerequisite Knowledge:</Typography>
+                    <ChipInput
+                      tags={selectedTopic.prerequisiteKnowledge}
+                      selectedTags={() => {}}
+                      setTags={(newTags: string[]) => {
+                        const updatedCourses = [...courses];
+                        updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                          selectedTopic.topicIndex
+                        ] = {
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ],
+                          prerequisiteKnowledge: newTags,
+                        };
+                        setCourses(updatedCourses);
+                        setSelectedTopic({
+                          categoryIndex: selectedTopic.categoryIndex,
+                          topicIndex: selectedTopic.topicIndex,
+                          ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                            selectedTopic.topicIndex
+                          ],
+                        });
+                        updateCourses({
+                          id: updatedCourses[selectedCourseIdx].id,
+                          syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                        });
+                      }}
+                      fullWidth
+                      variant="outlined"
+                      readOnly={currentImprovement !== null}
+                      placeholder="Type a new skill and click enter ↵ to add it..."
+                    />
+                    <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
+                    {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
+                      <Box key={index}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "15px",
+                            background: theme =>
+                              theme.palette.mode === "dark"
+                                ? DESIGN_SYSTEM_COLORS.notebookG600
+                                : DESIGN_SYSTEM_COLORS.gray100,
+                            p: 2,
+                            borderRadius: "18px",
+                          }}
+                        >
+                          <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Typography gutterBottom>Prompt {index + 1}:</Typography>
+                            {currentImprovement === null && (
+                              <Button
+                                onClick={() => {
+                                  const updatedCourses = [...courses];
+                                  const currentTopic =
+                                    updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                      selectedTopic.topicIndex
+                                    ];
+                                  currentTopic.prompts.splice(index, 1);
 
-                    <CustomButton
-                      variant="contained"
-                      type="button"
-                      color="secondary"
-                      onClick={generateMorePromptsForTopic}
-                      disabled={loadingPrompt}
-                    >
-                      {loadingPrompt ? "Auto-generating Prompts" : "Auto-generate Prompts"}
-                      {loadingPrompt ? (
-                        <CircularProgress sx={{ ml: 1 }} size={20} />
-                      ) : (
-                        <AutoFixHighIcon sx={{ ml: 1 }} />
-                      )}
-                    </CustomButton>
+                                  setCourses(updatedCourses);
+                                  setSelectedTopic({
+                                    categoryIndex: selectedTopic.categoryIndex,
+                                    topicIndex: selectedTopic.topicIndex,
+                                    ...currentTopic,
+                                  });
+                                  updateCourses({
+                                    id: updatedCourses[selectedCourseIdx].id,
+                                    syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                  });
+                                }}
+                                sx={{ pb: "5px", ml: "auto", height: "27px" }}
+                                variant="contained"
+                              >
+                                Delete
+                              </Button>
+                            )}
+                          </Box>
+                          <Select
+                            labelId="type-label"
+                            value={prompt.type}
+                            onChange={e => {
+                              if (currentImprovement !== null) return;
+                              const updatedCourses = [...courses];
+                              const currentTopic =
+                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                  selectedTopic.topicIndex
+                                ];
+                              currentTopic.prompts[index].type = e.target.value;
+                              if (e.target.value !== "Poll") {
+                                delete currentTopic.prompts[index].choices;
+                              }
+                              setCourses(updatedCourses);
+                              setSelectedTopic({
+                                categoryIndex: selectedTopic.categoryIndex,
+                                topicIndex: selectedTopic.topicIndex,
+                                ...currentTopic,
+                              });
+                              updateCourses({
+                                id: updatedCourses[selectedCourseIdx].id,
+                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                              });
+                            }}
+                            label="type"
+                            MenuProps={{
+                              sx: {
+                                zIndex: "9999",
+                              },
+                            }}
+                            sx={{ mb: 2 }}
+                          >
+                            <MenuItem value="Poll">Poll</MenuItem>
+                            <MenuItem value="Open-Ended">Open-Ended</MenuItem>
+                          </Select>
+                          {currentImprovement !== null ? (
+                            <Typography>{prompt.text}</Typography>
+                          ) : (
+                            <TextField
+                              fullWidth
+                              label="Text Prompt"
+                              variant="outlined"
+                              value={prompt.text}
+                              onChange={e => {
+                                const updatedCourses = [...courses];
+                                const currentTopic =
+                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                    selectedTopic.topicIndex
+                                  ];
+                                currentTopic.prompts[index].text = e.target.value;
+
+                                setCourses(updatedCourses);
+                                setSelectedTopic({
+                                  categoryIndex: selectedTopic.categoryIndex,
+                                  topicIndex: selectedTopic.topicIndex,
+                                  ...currentTopic,
+                                });
+                                updateCourses({
+                                  id: updatedCourses[selectedCourseIdx].id,
+                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                });
+                              }}
+                              sx={{ mb: 2 }}
+                              multiline
+                              minRows={2}
+                            />
+                          )}
+
+                          {prompt.type === "Poll" && (
+                            <>
+                              <Typography gutterBottom>Choices:</Typography>
+                              <ChipInput
+                                tags={prompt.choices}
+                                selectedTags={() => {}}
+                                setTags={(newTags: string[]) => {
+                                  const updatedCourses = [...courses];
+                                  const currentTopic =
+                                    updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                      selectedTopic.topicIndex
+                                    ];
+                                  currentTopic.prompts[index].choices = newTags;
+
+                                  setCourses(updatedCourses);
+                                  setSelectedTopic({
+                                    categoryIndex: selectedTopic.categoryIndex,
+                                    topicIndex: selectedTopic.topicIndex,
+                                    ...currentTopic,
+                                  });
+                                  updateCourses({
+                                    id: updatedCourses[selectedCourseIdx].id,
+                                    syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                  });
+                                }}
+                                fullWidth
+                                variant="outlined"
+                                readOnly={currentImprovement !== null}
+                                placeholder="Type a new choice and click enter ↵ to add it..."
+                              />
+                            </>
+                          )}
+                          {currentImprovement !== null ? (
+                            <Typography>{prompt.purpose}</Typography>
+                          ) : (
+                            <TextField
+                              fullWidth
+                              label="Purpose"
+                              variant="outlined"
+                              value={prompt.purpose}
+                              onChange={e => {
+                                const updatedCourses = [...courses];
+                                const currentTopic =
+                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                    selectedTopic.topicIndex
+                                  ];
+                                currentTopic.prompts[index].purpose = e.target.value;
+
+                                setCourses(updatedCourses);
+                                setSelectedTopic({
+                                  categoryIndex: selectedTopic.categoryIndex,
+                                  topicIndex: selectedTopic.topicIndex,
+                                  ...currentTopic,
+                                });
+                                updateCourses({
+                                  id: updatedCourses[selectedCourseIdx].id,
+                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                });
+                              }}
+                              sx={{ mb: 2 }}
+                              multiline
+                              minRows={2}
+                            />
+                          )}
+                        </Box>
+                      </Box>
+                    ))}
+                    <Box sx={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: "10px" }}>
+                      <CustomButton
+                        variant="contained"
+                        type="button"
+                        color="secondary"
+                        onClick={() => {
+                          const updatedCourses = [...courses];
+                          const currentTopic =
+                            updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                              selectedTopic.topicIndex
+                            ];
+                          if (!currentTopic.prompts) {
+                            currentTopic.prompts = [];
+                          }
+                          currentTopic.prompts.push({
+                            type: "Poll",
+                            text: "",
+                            purpose: "",
+                          });
+
+                          setCourses(updatedCourses);
+                          setSelectedTopic({
+                            categoryIndex: selectedTopic.categoryIndex,
+                            topicIndex: selectedTopic.topicIndex,
+                            ...currentTopic,
+                          });
+                          updateCourses({
+                            id: updatedCourses[selectedCourseIdx].id,
+                            syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                          });
+                        }}
+                        sx={{ width: "210px" }}
+                      >
+                        Add prompt
+                      </CustomButton>
+
+                      <CustomButton
+                        variant="contained"
+                        type="button"
+                        color="secondary"
+                        onClick={generateMorePromptsForTopic}
+                        disabled={loadingPrompt}
+                      >
+                        {loadingPrompt ? "Auto-generating Prompts" : "Auto-generate Prompts"}
+                        {loadingPrompt ? (
+                          <CircularProgress sx={{ ml: 1 }} size={20} />
+                        ) : (
+                          <AutoFixHighIcon sx={{ ml: 1 }} />
+                        )}
+                      </CustomButton>
+                    </Box>
                   </Box>
-                </Box>
-              )}
-
+                )}
+              </Paper>
               {/* {selectedTopic && (
             <Box sx={{ mx: "15px" }}>
               <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
