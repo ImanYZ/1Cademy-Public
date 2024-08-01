@@ -4,6 +4,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -60,8 +61,12 @@ import { QuestionProps } from "src/types";
 import { INode } from "src/types/INode";
 
 import ChipInput from "@/components/ChipInput";
+import CaseStudy from "@/components/courseCreation/questions/CaseStudy";
 import Essay from "@/components/courseCreation/questions/Essay";
+import FillInTheBlank from "@/components/courseCreation/questions/FillInTheBlank";
+import Matching from "@/components/courseCreation/questions/Matching";
 import MultipleChoices from "@/components/courseCreation/questions/MultipleChoices";
+import SequenceOrder from "@/components/courseCreation/questions/SequenceOrder";
 import ShortAnswer from "@/components/courseCreation/questions/ShortAnswer";
 import TrueFalse from "@/components/courseCreation/questions/TrueFalse";
 import AppHeaderMemoized from "@/components/Header/AppHeader";
@@ -227,10 +232,14 @@ type DifficultyType = {
 };
 
 const questionComponents: QuestionComponentsType = {
+  Essay,
+  Matching,
   "Multiple Choice": MultipleChoices,
   "True/False": TrueFalse,
   "Short Answer": ShortAnswer,
-  Essay: Essay,
+  "Sequence Ordering": SequenceOrder,
+  "Fill in the Blank": FillInTheBlank,
+  "Case Study": CaseStudy,
 };
 
 const difficulties: DifficultyType = {
@@ -2370,7 +2379,11 @@ const CourseComponent = () => {
                                     >
                                       {loadingNodes.includes(tc.title)
                                         ? "Retrieving Concept Cards"
-                                        : "Retrieve More Concept Cards"}
+                                        : `Retrieve ${
+                                            ((courses[selectedCourseIdx].nodes || {})[tc.title] || []).length > 0
+                                              ? "More"
+                                              : ""
+                                          } Concept Cards`}
                                       {loadingNodes.includes(tc.title) ? (
                                         <CircularProgress sx={{ ml: 1 }} size={20} />
                                       ) : (
@@ -2791,18 +2804,43 @@ const CourseComponent = () => {
                         (question: any, idx: number) => {
                           const QuestionComponent = questionComponents[question?.question_type];
                           return QuestionComponent ? (
-                            <QuestionComponent
-                              key={idx}
-                              idx={idx}
-                              nodeId={nodePublicView?.node}
-                              question={question}
-                              handleQuestion={handleQuestion}
-                              sx={{
-                                backgroundColor: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "white"),
-                                mt: 2,
-                                p: "12px",
-                              }}
-                            />
+                            <Box sx={{ position: "relative" }}>
+                              <QuestionComponent
+                                key={idx}
+                                idx={idx}
+                                nodeId={nodePublicView?.node}
+                                question={question}
+                                handleQuestion={handleQuestion}
+                                sx={{
+                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "white"),
+                                  mt: 2,
+                                  p: "12px",
+                                  pb: "65px",
+                                }}
+                              />
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  bottom: "-5px",
+                                  left: "50%",
+                                  transform: "translate(-50%, -50%)",
+                                }}
+                              >
+                                <CustomButton
+                                  variant="outlined"
+                                  type="button"
+                                  color="error"
+                                  onClick={() => {
+                                    const updatedCourses: any = [...courses];
+                                    updatedCourses[selectedCourseIdx]?.questions?.[nodePublicView?.node].splice(idx, 1);
+                                    setCourses(updatedCourses);
+                                  }}
+                                >
+                                  Delete Question
+                                  <DeleteIcon sx={{ ml: 1 }} />
+                                </CustomButton>
+                              </Box>
+                            </Box>
                           ) : null;
                         }
                       )}
@@ -3848,8 +3886,23 @@ const CourseComponent = () => {
                         color="secondary"
                         onClick={generateMorePromptsForTopic}
                         disabled={loadingPrompt}
+                        sx={{ maxWidth: "45%", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
                       >
-                        {loadingPrompt ? "Auto-generating Prompts" : "Auto-generate Prompts"}
+                        <Typography
+                          className="toolbarDescription"
+                          sx={{
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+                            maxWidth: "90%",
+                            whiteSpace: "nowrap",
+                            fontWeight: "500",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {" "}
+                          {loadingPrompt ? "Auto-generating Prompts" : "Auto-generate Prompts"}
+                        </Typography>
+
                         {loadingPrompt ? (
                           <CircularProgress sx={{ ml: 1 }} size={20} />
                         ) : (
