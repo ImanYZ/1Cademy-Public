@@ -1,7 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Button, Grid, Switch, Typography } from "@mui/material";
-import { blue, blueGrey,green, indigo, orange, purple } from "@mui/material/colors";
+import { blue, blueGrey, green, indigo, orange, purple } from "@mui/material/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { QuestionProps } from "src/types";
 
@@ -93,6 +93,26 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
         setSelectedItemARef(null);
       }
     }
+  };
+  const highlightWords = (text: string) => {
+    const words = text.split(/(correct|Correct|incorrect|Incorrect)/);
+    return words.map((word, index) => {
+      if (word.toLowerCase() === "correct") {
+        return (
+          <span key={index} style={{ color: DESIGN_SYSTEM_COLORS.success600 }}>
+            {word}
+          </span>
+        );
+      } else if (word.toLowerCase() === "incorrect") {
+        return (
+          <span key={index} style={{ color: DESIGN_SYSTEM_COLORS.notebookRed2 }}>
+            {word}
+          </span>
+        );
+      } else {
+        return <span key={index}>{word}</span>;
+      }
+    });
   };
 
   return (
@@ -235,7 +255,6 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
                       color: "white",
                       width: "48%",
                       fontWeight: "bold",
-                      textAlign: "center",
                     }}
                   >
                     {selectedItemsA[selectedItemsB[itemB].ref || ""].term}
@@ -250,7 +269,6 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
                       color: "white",
                       width: "48%",
                       fontWeight: "bold",
-                      textAlign: "center",
                     }}
                   >
                     {selectedItemsA[itemB].definition}
@@ -258,12 +276,12 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
                 </Box>
 
                 {selectedItemsB[itemB]?.term === selectedItemsB[itemB].ref ? (
-                  <Typography textAlign={"center"} variant="subtitle1" color={DESIGN_SYSTEM_COLORS.success600}>
-                    {selectedItemsA[selectedItemsB[itemB].ref || ""].feedback.correct}
+                  <Typography variant="subtitle1">
+                    {highlightWords(selectedItemsA[selectedItemsB[itemB].ref || ""].feedback.correct)}
                   </Typography>
                 ) : (
-                  <Typography textAlign={"center"} variant="subtitle1" color={DESIGN_SYSTEM_COLORS.notebookRed2}>
-                    {selectedItemsB[itemB].feedback.incorrect[selectedItemsB[itemB].ref || ""]}
+                  <Typography variant="subtitle1">
+                    {highlightWords(selectedItemsB[itemB].feedback.incorrect[selectedItemsB[itemB].ref || ""])}
                   </Typography>
                 )}
               </Box>
