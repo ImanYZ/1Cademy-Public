@@ -70,7 +70,7 @@ import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
 import { NodeItemFullEditor, ProposalFormValues } from "@/components/NodeItemFullEditor";
-import NodeTypeIcon from "@/components/NodeTypeIcon";
+// import NodeTypeIcon from "@/components/NodeTypeIcon";
 import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
@@ -2256,18 +2256,19 @@ const CourseComponent = () => {
                                                 <Box
                                                   sx={{
                                                     pr: "25px",
+                                                    pl: "11px",
                                                     // pb: '15px',
                                                     display: "flex",
                                                     gap: "15px",
                                                   }}
                                                 >
-                                                  <NodeTypeIcon
+                                                  {/* <NodeTypeIcon
                                                     id={n.title}
                                                     nodeType={n.nodeType}
                                                     tooltipPlacement={"top"}
                                                     fontSize={"medium"}
                                                     // disabled={disabled}
-                                                  />
+                                                  /> */}
                                                   <MarkdownRender
                                                     text={n?.title}
                                                     sx={{
@@ -2838,7 +2839,11 @@ const CourseComponent = () => {
                       <Grid item xs={12} sm={12}>
                         {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
                           <>
-                            <LinkedNodes data={nodePublicView?.parents || []} header="What to Learn Before" />
+                            <LinkedNodes
+                              data={nodePublicView?.parents || []}
+                              header="What to Learn Before"
+                              showIcon={false}
+                            />
                             <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                               <CustomButton
                                 variant="contained"
@@ -2863,7 +2868,11 @@ const CourseComponent = () => {
                       <Grid item xs={12} sm={12}>
                         {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
                           <>
-                            <LinkedNodes data={nodePublicView?.children || []} header="What to Learn After" />
+                            <LinkedNodes
+                              data={nodePublicView?.children || []}
+                              header="What to Learn After"
+                              showIcon={false}
+                            />
                             <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                               <CustomButton
                                 variant="contained"
