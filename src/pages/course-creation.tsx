@@ -171,6 +171,7 @@ interface Course {
   description: string;
   done: boolean;
   hours: number;
+  classSessions: number;
   questions: any;
   learners: string;
   new: boolean;
@@ -257,6 +258,51 @@ function getStyles(name: string, personName: string[], theme: Theme) {
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
+
+// const compareTopics = (oldTopic: Topic, newTopic: Topic) => {
+//   let differences: any = {};
+
+//   // Compare each attribute
+//   if (oldTopic.difficulty !== newTopic.difficulty) {
+//     differences.difficulty = { old: oldTopic.difficulty, new: newTopic.difficulty };
+//   }
+
+//   if (oldTopic.hours !== newTopic.hours) {
+//     differences.hours = { old: oldTopic.hours, new: newTopic.hours };
+//   }
+
+//   if (JSON.stringify(oldTopic.prerequisiteKnowledge) !== JSON.stringify(newTopic.prerequisiteKnowledge)) {
+//     differences.prerequisiteKnowledge = {
+//       old: oldTopic.prerequisiteKnowledge,
+//       new: newTopic.prerequisiteKnowledge,
+//     };
+//   }
+
+//   if (JSON.stringify(oldTopic.prompts) !== JSON.stringify(newTopic.prompts)) {
+//     differences.prompts = { old: oldTopic.prompts, new: newTopic.prompts };
+//   }
+
+//   if (JSON.stringify(oldTopic.objectives) !== JSON.stringify(newTopic.objectives)) {
+//     differences.objectives = { old: oldTopic.objectives, new: newTopic.objectives };
+//   }
+
+//   if (JSON.stringify(oldTopic.skills) !== JSON.stringify(newTopic.skills)) {
+//     differences.skills = { old: oldTopic.skills, new: newTopic.skills };
+//   }
+
+//   if (oldTopic.title !== newTopic.title) {
+//     differences.title = { old: oldTopic.title, new: newTopic.title };
+//   }
+
+//   if (oldTopic.description !== newTopic.description) {
+//     differences.description = {
+//       old: oldTopic.description,
+//       new: newTopic.description,
+//     };
+//   }
+
+//   return differences;
+// };
 
 const CourseComponent = () => {
   const theme = useTheme();
@@ -403,6 +449,15 @@ const CourseComponent = () => {
     updatedCourses[selectedCourseIdx] = {
       ...updatedCourses[selectedCourseIdx],
       title: e.target.value,
+    };
+    setCourses(updatedCourses);
+    updateCourses(updatedCourses[selectedCourseIdx]);
+  };
+  const handleClassSessionsChange = (e: any) => {
+    const updatedCourses: any = [...courses];
+    updatedCourses[selectedCourseIdx] = {
+      ...updatedCourses[selectedCourseIdx],
+      classSessions: Number(e.target.value),
     };
     setCourses(updatedCourses);
     updateCourses(updatedCourses[selectedCourseIdx]);
@@ -596,6 +651,8 @@ const CourseComponent = () => {
       const syllabus = courses[selectedCourseIdx].syllabus;
       const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
       const suggestions = courses[selectedCourseIdx].suggestions;
+      const classSessions = courses[selectedCourseIdx].classSessions;
+      const sessionHours = courses[selectedCourseIdx].hours;
       let response: any = { suggestions };
       if (!suggestions) {
         response = await Post("/improveCourseSyllabus", {
@@ -603,6 +660,8 @@ const CourseComponent = () => {
           courseDescription,
           targetLearners,
           syllabus,
+          classSessions,
+          sessionHours,
           prerequisiteKnowledge,
           courseId: courses[selectedCourseIdx].id,
         });
@@ -1042,8 +1101,14 @@ const CourseComponent = () => {
     setLoadingPrerequisiteKnowledge(true);
     const courseTitle = courses[selectedCourseIdx].title;
     const targetLearners = courses[selectedCourseIdx].learners;
-    const hours = courses[selectedCourseIdx].hours;
-    const response = await Post("/generateCoursePrerequisites", { courseTitle, targetLearners, hours });
+    const classSessions = courses[selectedCourseIdx].classSessions;
+    const sessionHours = courses[selectedCourseIdx].hours;
+    const response = await Post("/generateCoursePrerequisites", {
+      courseTitle,
+      targetLearners,
+      classSessions,
+      sessionHours,
+    });
     setCourses((prev: any) => {
       prev[selectedCourseIdx].prerequisiteKnowledge = response;
       if (!prev[selectedCourseIdx].new) {
@@ -1057,8 +1122,16 @@ const CourseComponent = () => {
     setLoadingDescription(true);
     const courseTitle = courses[selectedCourseIdx].title;
     const targetLearners = courses[selectedCourseIdx].learners;
-    const hours = courses[selectedCourseIdx].hours;
-    const response = await Post("/generateCourseDescription", { courseTitle, targetLearners, hours });
+    const sessionHours = courses[selectedCourseIdx].hours;
+    const classSessions = courses[selectedCourseIdx].classSessions;
+    const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
+    const response = await Post("/generateCourseDescription", {
+      courseTitle,
+      targetLearners,
+      sessionHours,
+      classSessions,
+      prerequisiteKnowledge,
+    });
     setCourses((prev: any) => {
       prev[selectedCourseIdx].description = response;
       if (!prev[selectedCourseIdx].new) {
@@ -1073,8 +1146,18 @@ const CourseComponent = () => {
     const courseTitle = courses[selectedCourseIdx].title;
     const targetLearners = courses[selectedCourseIdx].learners;
     const courseDescription = courses[selectedCourseIdx].description;
-    const hours = courses[selectedCourseIdx].hours;
-    const response = await Post("/generateCourseObjectives", { courseTitle, targetLearners, courseDescription, hours });
+    const classSessions = courses[selectedCourseIdx].classSessions;
+    const sessionHours = courses[selectedCourseIdx].hours;
+    const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
+
+    const response = await Post("/generateCourseObjectives", {
+      courseTitle,
+      targetLearners,
+      courseDescription,
+      prerequisiteKnowledge,
+      classSessions,
+      sessionHours,
+    });
     setCourses((prev: any) => {
       prev[selectedCourseIdx].courseObjectives = response;
       updateCourses(prev[selectedCourseIdx]);
@@ -1089,14 +1172,17 @@ const CourseComponent = () => {
     const targetLearners = courses[selectedCourseIdx].learners;
     const courseObjectives = courses[selectedCourseIdx].courseObjectives;
     const courseDescription = courses[selectedCourseIdx].description;
-    const hours = courses[selectedCourseIdx].hours;
-
+    const classSessions = courses[selectedCourseIdx].classSessions;
+    const sessionHours = courses[selectedCourseIdx].hours;
+    const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
     const response = await Post("/generateCourseSkills", {
       courseTitle,
       targetLearners,
       courseDescription,
       courseObjectives,
-      hours,
+      classSessions,
+      sessionHours,
+      prerequisiteKnowledge,
     });
     setCourses((prev: any) => {
       prev[selectedCourseIdx].courseSkills = response;
@@ -1120,7 +1206,7 @@ const CourseComponent = () => {
     const courseSkills = courses[selectedCourseIdx].courseSkills;
     const hours = courses[selectedCourseIdx].hours;
     const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
-
+    const classSessions = courses[selectedCourseIdx].classSessions;
     const tags = courses[selectedCourseIdx].tags;
     const references = courses[selectedCourseIdx].references;
 
@@ -1133,6 +1219,7 @@ const CourseComponent = () => {
       courseDescription,
       courseSkills,
       hours,
+      classSessions,
       tags,
       references,
     });
@@ -1470,7 +1557,8 @@ const CourseComponent = () => {
       setLoadingPrompt(true);
       const courseTitle = courses[selectedCourseIdx].title;
       const targetLearners = courses[selectedCourseIdx].learners;
-      const hours = selectedTopic.hours;
+      const classSessions = selectedTopic.classSessions;
+      const sessionHours = selectedTopic.hours;
       const prerequisiteKnowledge = selectedTopic.prerequisiteKnowledge;
       const courseDescription = courses[selectedCourseIdx].description;
       const courseObjectives = courses[selectedCourseIdx].courseObjectives;
@@ -1481,7 +1569,8 @@ const CourseComponent = () => {
       const { prompts } = (await Post("/generateMorePromptsForTopic", {
         courseTitle,
         targetLearners,
-        hours,
+        classSessions,
+        sessionHours,
         prerequisiteKnowledge,
         courseDescription,
         courseObjectives,
@@ -1820,7 +1909,23 @@ const CourseComponent = () => {
             )}
             {(!courses[selectedCourseIdx].new || creatingCourseStep >= 1) && (
               <TextField
-                label="Number of Hour-long Class Sessions"
+                label="Number of Class Sessions"
+                fullWidth
+                value={courses[selectedCourseIdx].classSessions || ""}
+                onChange={handleClassSessionsChange}
+                margin="normal"
+                variant="outlined"
+                sx={{ width: "500px" }}
+                type="number"
+                inputProps={{ min: 0 }}
+                InputLabelProps={{
+                  style: { color: "grey" },
+                }}
+              />
+            )}
+            {(!courses[selectedCourseIdx].new || creatingCourseStep >= 1) && (
+              <TextField
+                label="Each Taking"
                 fullWidth
                 value={courses[selectedCourseIdx].hours || ""}
                 onChange={handleHoursChange}
@@ -1834,52 +1939,51 @@ const CourseComponent = () => {
                 }}
               />
             )}
-            {(!courses[selectedCourseIdx].new || creatingCourseStep >= 2) && (
-              <FormControl sx={{ m: 1, width: 300, mt: "15px" }}>
-                <InputLabel>Books</InputLabel>
-                <Select
-                  multiple
-                  value={courses[selectedCourseIdx]?.references}
-                  onChange={event => {
-                    const tags: string[] = [];
-
-                    books
-                      .filter((book: { id: string; tags: string[]; references: string[] }) =>
-                        event.target.value.includes(book.id)
-                      )
-                      .map(book => {
-                        tags.push(...book.tags);
-                      });
-                    const updatedCourses: Course[] = [...courses];
-
-                    updatedCourses[selectedCourseIdx] = {
-                      ...updatedCourses[selectedCourseIdx],
-                      tags: tags,
-                      references: event.target.value as string[],
-                    };
-                    setCourses(updatedCourses);
-                    updateCourses(updatedCourses[selectedCourseIdx]);
-                  }}
-                  input={<OutlinedInput label="Name" />}
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-                        width: 250,
-                      },
-                    },
-                  }}
-                >
-                  {books.map(book => (
-                    <MenuItem key={book.id} value={book.id} style={getStyles(book.id, [], theme)}>
-                      {book.id}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
           </Box>
+          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 2) && (
+            <FormControl sx={{ m: 1, width: "100%", mt: "15px" }}>
+              <InputLabel>Books</InputLabel>
+              <Select
+                multiple
+                value={courses[selectedCourseIdx]?.references}
+                onChange={event => {
+                  const tags: string[] = [];
 
+                  books
+                    .filter((book: { id: string; tags: string[]; references: string[] }) =>
+                      event.target.value.includes(book.id)
+                    )
+                    .map(book => {
+                      tags.push(...book.tags);
+                    });
+                  const updatedCourses: Course[] = [...courses];
+
+                  updatedCourses[selectedCourseIdx] = {
+                    ...updatedCourses[selectedCourseIdx],
+                    tags: tags,
+                    references: event.target.value as string[],
+                  };
+                  setCourses(updatedCourses);
+                  updateCourses(updatedCourses[selectedCourseIdx]);
+                }}
+                input={<OutlinedInput label="Name" />}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                      width: 250,
+                    },
+                  },
+                }}
+              >
+                {books.map(book => (
+                  <MenuItem key={book.id} value={book.id} style={getStyles(book.id, [], theme)}>
+                    {book.id}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
           {(!courses[selectedCourseIdx].new || creatingCourseStep >= 3) && (
             <TextField
               label="Target Learners"
@@ -3749,7 +3853,7 @@ const CourseComponent = () => {
                           ) : (
                             <TextField
                               fullWidth
-                              label="Text Prompt"
+                              label="Prompt"
                               variant="outlined"
                               value={prompt.text}
                               onChange={e => {
