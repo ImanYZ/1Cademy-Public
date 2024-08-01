@@ -1,6 +1,15 @@
-export const convertToTGet = (query: any, t: any) => {
+import {
+  DocumentData,
+  DocumentReference,
+  DocumentSnapshot,
+  Query,
+  QuerySnapshot,
+  Transaction,
+} from "firebase-admin/firestore";
+
+export const convertToTGet = (q: Query | DocumentReference, t: Transaction | null): Promise<any> => {
   if (t) {
-    return t.get(query);
+    return t.get(q as DocumentReference);
   }
-  return query.get();
+  return q.get();
 };

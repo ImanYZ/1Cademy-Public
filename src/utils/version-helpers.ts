@@ -16,7 +16,7 @@ import {
   getTypedCollections,
   initializeNewReputationData,
   isVersionApproved,
-  retrieveAndsignalAllUserNodesChanges,
+  retrieveAndSignalAllUserNodesChanges,
   tagsAndCommPoints,
   updateReputation,
 } from ".";
@@ -29,9 +29,11 @@ import { IUser } from "src/types/IUser";
 import { IInstitution } from "src/types/IInstitution";
 import { getTypesenseClient, typesenseDocumentExists } from "@/lib/typesense/typesense.config";
 import {
+  CollectionReference,
   DocumentData,
   DocumentReference,
   DocumentSnapshot,
+  Query,
   Timestamp,
   Transaction,
   WriteBatch,
@@ -46,6 +48,7 @@ import { IPractice } from "src/types/IPractice";
 import { getCourseIdsFromTagIds, getSemesterIdsFromTagIds } from "./course-helpers";
 import { ISemester } from "src/types/ICourse";
 import { INodeLink } from "src/types/INodeLink";
+import { ITag } from "src/types/ITag";
 
 export const comPointTypes = [
   "comPoints",
@@ -448,10 +451,14 @@ export const createPractice = async ({
   return [newBatch, writeCounts];
 };
 
-export const getTagRefData = async (nodeId: string, t = false) => {
-  let tagRef: any = db.collection("tags").where("node", "==", nodeId);
-  const tagDoc = await convertToTGet(tagRef, t);
+export const getTagRefData = async (
+  nodeId: string,
+  t = null
+): Promise<{ tagRef: DocumentReference; tagData: ITag }> => {
+  let tagQuery: Query = db.collection("tags").where("node", "==", nodeId);
+  const tagDoc = await convertToTGet(tagQuery, t);
   let tagData = null;
+  let tagRef = null;
   if (tagDoc.docs.length > 0) {
     tagRef = db.collection("tags").doc(tagDoc.docs[0].id);
     tagData = tagDoc.docs[0].data();
@@ -499,7 +506,15 @@ export const changeTagTitleInCollection = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: any) => {
+}: {
+  batch: WriteBatch;
+  collectionName: string;
+  nodeId: string;
+  newTitle: string;
+  writeCounts: number;
+  t: Transaction | null;
+  tWriteOperations: TWriteOperation[];
+}): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
   let newBatch = batch;
   const linkedRefs = db.collection(collectionName).where("tagId", "==", nodeId);
   const linkedDocs = await convertToTGet(linkedRefs, t);
@@ -531,122 +546,122 @@ export const changeNodeTitle = async ({
   writeCounts,
   t,
   tWriteOperations,
-}: any) => {
+}: {
+  batch: WriteBatch;
+  nodeData: INode;
+  nodeId: string;
+  newTitle: string;
+  nodeType: INodeType;
+  currentTimestamp: Timestamp;
+  writeCounts: number;
+  t: Transaction | null;
+  tWriteOperations: TWriteOperation[];
+}): Promise<[newBatch: WriteBatch, writeCounts: number]> => {
   let newBatch = batch;
   let linkedDataChanges = {};
-  for (let parent of nodeData.parents) {
-    const linkedRef = db.collection("nodes").doc(parent.node);
-    const linkedDoc = await convertToTGet(linkedRef, t);
-    const linkedData: any = linkedDoc.data();
-    const newChildren = linkedData.children.filter((child: any) => child.node !== nodeId);
-    newChildren.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
-    linkedDataChanges = {
-      children: newChildren,
-      updatedAt: currentTimestamp,
-    };
-    if (t) {
-      tWriteOperations.push({
-        objRef: linkedRef,
-        data: linkedDataChanges,
-        operationType: "update",
-      });
-    } else {
-      newBatch.update(linkedRef, linkedDataChanges);
-      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-    }
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-        batch,
-        linkedId: parent.node,
-        nodeChanges: linkedDataChanges,
-        major: false,
-        currentTimestamp,
-        writeCounts,
-      });
-      await commitBatch(batch);
-    });
-  }
-  for (let child of nodeData.children) {
-    const linkedRef = db.collection("nodes").doc(child.node);
-    const linkedDoc = await convertToTGet(linkedRef, t);
-    const linkedData: any = linkedDoc.data();
-    const newParents = linkedData.parents.filter((parent: any) => parent.node !== nodeId);
-    newParents.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
-    linkedDataChanges = {
-      parents: newParents,
-      updatedAt: currentTimestamp,
-    };
 
-    if (t) {
-      tWriteOperations.push({
-        objRef: linkedRef,
-        data: linkedDataChanges,
-        operationType: "update",
-      });
-    } else {
-      newBatch.update(linkedRef, linkedDataChanges);
-      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-    }
-    await detach(async () => {
-      let batch = db.batch();
-      let writeCounts = 0;
-      [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
-        batch,
-        linkedId: child.node,
-        nodeChanges: linkedDataChanges,
-        major: false,
-        currentTimestamp,
-        writeCounts,
-      });
-      await commitBatch(batch);
-    });
-  }
-  if (nodeData.isTag) {
-    const taggedNodesDocs = await convertToTGet(db.collection("nodes").where("tagIds", "array-contains", nodeId), t);
-    for (let taggedNodeDoc of taggedNodesDocs.docs) {
-      const linkedRef = db.collection("nodes").doc(taggedNodeDoc.id);
-      const linkedData = taggedNodeDoc.data();
-      const tagIdx = linkedData.tagIds.indexOf(nodeId);
-      linkedData.tags[tagIdx] = newTitle;
-      linkedDataChanges = {
-        tags: linkedData.tags,
-        updatedAt: currentTimestamp,
-      };
+  await db.runTransaction(async t => {
+    const tWriteOperations: TWriteOperation[] = [];
 
-      if (t) {
+    for (let parent of nodeData.parents) {
+      const linkedRef = db.collection("nodes").doc(parent.node);
+      const linkedDoc = await convertToTGet(linkedRef, t);
+
+      const linkedData: INode | undefined = linkedDoc.data();
+      if (linkedData) {
+        const newChildren = linkedData.children.filter((child: any) => child.node !== nodeId);
+        newChildren.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
+        linkedDataChanges = {
+          children: newChildren,
+          updatedAt: currentTimestamp,
+        };
+
         tWriteOperations.push({
           objRef: linkedRef,
           data: linkedDataChanges,
           operationType: "update",
         });
-      } else {
-        newBatch.update(linkedRef, linkedDataChanges);
-        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
       }
-
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts = 0;
-        await retrieveAndsignalAllUserNodesChanges({
-          batch,
-          linkedId: taggedNodeDoc.id,
-          nodeChanges: linkedDataChanges,
-          major: false,
-          currentTimestamp,
-          writeCounts,
-        });
-        await commitBatch(batch);
-      });
     }
+    //make the documents writes
+    for (let operation of tWriteOperations) {
+      t.update(operation.objRef, linkedDataChanges);
+    }
+  });
 
+  await db.runTransaction(async t => {
+    console.log("==> newTitle ===>", newTitle, nodeData.children);
+    const tWriteOperations: TWriteOperation[] = [];
+    for (let child of nodeData.children) {
+      console.log("child.node", child.node);
+      const linkedRef = db.collection("nodes").doc(child.node);
+      const linkDoc = await t.get(linkedRef);
+      const linkedData = linkDoc.data() as INode;
+      if (linkedData) {
+        const newParents = linkedData.parents.filter((parent: INodeLink) => parent.node !== nodeId);
+        newParents.push({ title: newTitle, node: nodeId, label: "", type: nodeType });
+        linkedDataChanges = {
+          parents: newParents,
+          updatedAt: currentTimestamp,
+        };
+        // 40442675-c84b-4f50-8549-e847957bae84
+        tWriteOperations.push({
+          objRef: linkedRef,
+          data: linkedDataChanges,
+          operationType: "update",
+        });
+      }
+    }
+    //make the documents writes
+    for (let operation of tWriteOperations) {
+      t.update(operation.objRef, linkedDataChanges);
+    }
+  });
+  let isATag = false;
+  // update the title of the tag in the nodes Documents
+
+  const taggedNodesDocs = await convertToTGet(
+    db
+      .collection("nodes")
+      .where("tagIds", "array-contains", nodeId)
+      .where("deleted", "==", false)
+      .select("tags", "tagIds"),
+    t
+  );
+  isATag = taggedNodesDocs.docs.length > 0;
+
+  for (let taggedNodeDoc of taggedNodesDocs.docs) {
+    console.log("update", taggedNodeDoc.id);
+    const linkedData = taggedNodeDoc.data() as INode;
+    const tagIdx = linkedData.tagIds.indexOf(nodeId);
+    linkedData.tags[tagIdx] = newTitle;
+    linkedDataChanges = {
+      tags: linkedData.tags,
+      updatedAt: currentTimestamp,
+    };
+    newBatch.update(taggedNodeDoc.ref, linkedDataChanges);
+    [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
+  }
+
+  console.log("done updating tags");
+  if (isATag) {
     await tagsAndCommPoints({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       nodeId,
-      callBack: async ({ collectionName, tagRef, tagDoc }: any) => {
+      callBack: async ({
+        collectionName,
+        tagRef,
+        tagDoc,
+      }: {
+        collectionName: string;
+        tagRef: DocumentReference;
+        tagDoc: DocumentSnapshot;
+      }) => {
         if (tagDoc) {
-          const tagUpdates: any = {
+          const tagUpdates: {
+            updatedAt: Timestamp;
+            title?: string;
+            tag?: string;
+          } = {
             updatedAt: currentTimestamp,
           };
           if (collectionName === "tags") {
@@ -690,37 +705,33 @@ export const changeNodeTitle = async ({
       });
     }
 
-    const { versionsColl }: any = getTypedCollections();
-    const versionsQuery = versionsColl.where("tagIds", "array-contains", nodeId);
+    // update the title of the tag in the versions Documents
+    console.log("updating versions");
+
+    const { versionsColl }: { versionsColl: CollectionReference } = getTypedCollections();
+    const versionsQuery = versionsColl.where("tagIds", "array-contains", nodeId).select("tags", "tagIds");
     const versionsDocs = await convertToTGet(versionsQuery, t);
     for (let versionDoc of versionsDocs.docs) {
-      const linkedRef = versionsColl.doc(versionDoc.id);
-      const linkedData = versionDoc.data();
+      console.log("version", versionDoc.id);
+      const linkedData = versionDoc.data() as INodeVersion;
       const tagIdx = linkedData.tagIds.indexOf(nodeId);
       linkedData.tags[tagIdx] = newTitle;
       linkedDataChanges = {
         tags: linkedData.tags,
         updatedAt: currentTimestamp,
       };
-      if (t) {
-        tWriteOperations.push({
-          objRef: linkedRef,
-          data: linkedDataChanges,
-          operationType: "update",
-        });
-      } else {
-        newBatch.update(linkedRef, linkedDataChanges);
-        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-      }
+      newBatch.update(versionDoc.ref, linkedDataChanges);
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
   }
+  console.log("updating references");
   if (nodeData.nodeType === "Reference") {
     const citingNodesDocs = await convertToTGet(
       db.collection("nodes").where("referenceIds", "array-contains", nodeId),
       t
     );
+    console.log("citingNodesDocs.docs ===>", citingNodesDocs.docs.length);
     for (let citingNodeDoc of citingNodesDocs.docs) {
-      const linkedRef = db.collection("nodes").doc(citingNodeDoc.id);
       const linkedData = citingNodeDoc.data();
       const theRefIdx = linkedData.referenceIds.indexOf(nodeId);
       linkedData.references[theRefIdx] = newTitle;
@@ -728,29 +739,8 @@ export const changeNodeTitle = async ({
         references: linkedData.references,
         updatedAt: currentTimestamp,
       };
-      if (t) {
-        tWriteOperations.push({
-          objRef: linkedRef,
-          data: linkedDataChanges,
-          operationType: "update",
-        });
-      } else {
-        newBatch.update(linkedRef, linkedDataChanges);
-        [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-      }
-      await detach(async () => {
-        let batch = db.batch();
-        let writeCounts = 0;
-        await retrieveAndsignalAllUserNodesChanges({
-          batch,
-          linkedId: citingNodeDoc.id,
-          nodeChanges: linkedDataChanges,
-          major: false,
-          currentTimestamp,
-          writeCounts,
-        });
-        await commitBatch(batch);
-      });
+      newBatch.update(citingNodeDoc.ref, linkedDataChanges);
+      [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
     }
   }
   const notificationsDocs = await convertToTGet(db.collection("notifications").where("nodeId", "==", nodeId), t);
@@ -761,7 +751,7 @@ export const changeNodeTitle = async ({
       tWriteOperations.push({
         objRef: notificationRef,
         data: notificationUpdates,
-        operationType: "updates",
+        operationType: "update",
       });
     } else {
       newBatch.update(notificationRef, notificationUpdates);
@@ -800,7 +790,17 @@ export const addTagCommunityAndTagsOfTags = async ({
   await tagsAndCommPoints({
     nodeId: tagNodeId,
 
-    callBack: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
+    callBack: async ({
+      collectionName,
+      tagRef,
+      tagDoc,
+      tagData,
+    }: {
+      collectionName: string;
+      tagRef: DocumentReference;
+      tagDoc: DocumentSnapshot;
+      tagData: ITag;
+    }) => {
       let tagNewData;
       // If the tag or comPoints document already exists in the corresponding collection:
       if (tagDoc) {
@@ -869,6 +869,7 @@ export const addTagCommunityAndTagsOfTags = async ({
         [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
       }
     },
+    t: null,
   });
   return [newBatch, writeCounts];
 };

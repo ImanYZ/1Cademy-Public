@@ -2,7 +2,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DoneIcon from "@mui/icons-material/Done";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Switch, Typography } from "@mui/material";
 // import "./QuestionChoices.css"
 import React, { startTransition, useCallback, useEffect, useState } from "react";
 
@@ -33,32 +33,45 @@ type QuestionChoicesProps = {
   // nodeChanged: any;
 };
 
-const QuestionChoices = (props: QuestionChoicesProps) => {
+const QuestionChoices = ({
+  identifier,
+  nodeRef,
+  editable,
+  choices,
+  idx,
+  choicesNum,
+  choice,
+  deleteChoice,
+  switchChoice,
+  changeChoice,
+  changeFeedback,
+  option,
+}: QuestionChoicesProps) => {
   const [choicesOpen, setChoicesOpen] = useState<boolean[]>([]);
-  const [choiceCopy, setChoiceCopy] = useState(props.choice.choice);
-  const [feedbackCopy, setFeedbackCopy] = useState(props.choice.feedback);
+  const [choiceCopy, setChoiceCopy] = useState(choice.choice);
+  const [feedbackCopy, setFeedbackCopy] = useState(choice.feedback);
 
   // update choices
   useEffect(() => {
     startTransition(() => {
-      setChoiceCopy(props.choice.choice);
-      setFeedbackCopy(props.choice.feedback);
+      setChoiceCopy(choice.choice);
+      setFeedbackCopy(choice.feedback);
     });
-  }, [props.choice]);
+  }, [choice]);
 
   useEffect(() => {
     const choices: boolean[] = [];
-    for (let i = 0; i < props.choices.length; i++) {
+    for (let i = 0; i < choices.length; i++) {
       choices[i] = false;
     }
     setChoicesOpen(choices);
-  }, [props.choices.length]);
+  }, [choices.length]);
 
   const onSetChoiseCopy = (newChoise: string) => {
     setChoiceCopy(newChoise);
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      props.changeChoice(props.nodeRef, props.identifier, newChoise, props.idx);
+      changeChoice(nodeRef, identifier, newChoise, idx);
     });
   };
 
@@ -66,64 +79,76 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
     setFeedbackCopy(newFeedback);
     startTransition(() => {
       // value => setNodeParts(identifier, thisNode => ({ ...thisNode, title: value }))
-      props.changeFeedback(props.nodeRef, props.identifier, newFeedback, props.idx);
+      changeFeedback(nodeRef, identifier, newFeedback, idx);
     });
   };
 
   const choiceClick = useCallback(() => {
     const choices = [...choicesOpen];
-    choices[props.idx] = !choices[props.idx];
+    choices[idx] = !choices[idx];
     setChoicesOpen(choices);
     // setTimeout(() => {
-    //   props.nodeChanged();
+    //   nodeChanged();
     // }, 400);
-  }, [props.idx, choicesOpen /*, props.nodeChanged*/]);
+  }, [idx, choicesOpen /*, nodeChanged*/]);
 
   const deleteChoiceHandler = useCallback(
-    () => props.deleteChoice(props.nodeRef, props.identifier, props.idx),
-    [props]
+    () => deleteChoice(nodeRef, identifier, idx),
+    [deleteChoice, identifier, idx, nodeRef]
   );
 
-  const switchChoiceHandler = useCallback(() => props.switchChoice(props.identifier, props.idx), [props]);
+  const switchChoiceHandler = useCallback(() => switchChoice(identifier, idx), [identifier, idx, switchChoice]);
 
   // const changeChoiceHandler = useCallback(
 
   //   (value: any) => {
   //     startTransition(() => {
-  //       props.changeChoice(props.nodeRef, props.identifier, value, props.idx);
+  //       changeChoice(nodeRef, identifier, value, idx);
   //     });
   //   },
   //   [props]
   // );
 
   // const changeFeedbackHandler = useCallback(
-  //   (value: any) => props.changeFeedback(props.nodeRef, props.identifier, value, props.idx),
+  //   (value: any) => changeFeedback(nodeRef, identifier, value, idx),
   //   [props]
   // );
+  const getLetter = (index: number): string => {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  if (props.editable) {
+    if (index < 26) {
+      return letters[index];
+    } else {
+      const firstIndex = Math.floor(index / 26) - 1;
+      const secondIndex = index % 26;
+      return `${letters[firstIndex]}.${letters[secondIndex]}`;
+    }
+  };
+
+  if (editable) {
     return (
       <Box
         sx={{
           mb: 2,
           p: 3,
-          pt: 4,
+          pt: 0,
+          borderRadius: "17px",
           background: theme =>
             theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray250,
         }}
       >
+        <Box sx={{ display: "flex", alignItems: "center", mb: "7px" }}>
+          <Typography> {`${getLetter(idx)})-`}</Typography>
+          <Typography sx={{ color: "red", ml: "10px" }}>Wrong</Typography>
+
+          {choice.correct ? (
+            <Switch checked={true} onClick={switchChoiceHandler} color="success" />
+          ) : (
+            <Switch checked={false} defaultChecked onClick={switchChoiceHandler} />
+          )}
+          <Typography sx={{ color: "green" }}>Correct</Typography>
+        </Box>
         <Box style={{ display: "flex", alignItems: "center" }}>
-          <Box>
-            {props.choice.correct ? (
-              <IconButton onClick={switchChoiceHandler}>
-                <DoneIcon className="green-text" sx={{ fontSize: "28px" }} />
-              </IconButton>
-            ) : (
-              <IconButton onClick={switchChoiceHandler}>
-                <CloseIcon className="red-text" sx={{ fontSize: "28px" }} />
-              </IconButton>
-            )}
-          </Box>
           {/* TODO: Keep the state of readonly after render */}
           <Editor
             label="Replace this with the choice."
@@ -131,16 +156,14 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             value={choiceCopy}
             setValue={onSetChoiseCopy}
             showEditPreviewSection={false}
-            editOption={props.option}
+            editOption={option}
             // onBlurCallback={changeChoiceHandler}
           />
-          {props.choicesNum > 1 && (
-            <Box>
-              <Tooltip title={"Delete this choice from this question."}>
-                <IconButton onClick={deleteChoiceHandler}>
-                  <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
-                </IconButton>
-              </Tooltip>
+          {choicesNum > 1 && (
+            <Box sx={{ ml: "7px" }}>
+              <IconButton onClick={deleteChoiceHandler}>
+                <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
+              </IconButton>
             </Box>
           )}
         </Box>
@@ -152,7 +175,7 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
             setValue={onSetFeedbackCopy}
             value={feedbackCopy}
             showEditPreviewSection={false}
-            editOption={props.option}
+            editOption={option}
             // onBlurCallback={changeFeedbackHandler}
           />
         </Box>
@@ -173,8 +196,8 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           onClick={choiceClick}
           style={{ display: "flex", cursor: "pointer", alignItems: "center" }}
         >
-          {choicesOpen[props.idx] ? (
-            props.choice.correct ? (
+          {choicesOpen[idx] ? (
+            choice.correct ? (
               <DoneIcon className="green-text" sx={{ mr: "8px" }} />
             ) : (
               <CloseIcon className="red-text" sx={{ mr: "8px" }} />
@@ -185,21 +208,21 @@ const QuestionChoices = (props: QuestionChoicesProps) => {
           <Editor
             label="Replace this with the choice."
             readOnly={true}
-            value={props.choice.choice}
+            value={choice.choice}
             setValue={doNothing}
             showEditPreviewSection={false}
-            editOption={props.option}
+            editOption={option}
           />
         </Box>
-        {choicesOpen[props.idx] && (
+        {choicesOpen[idx] && (
           <Box className="collapsible-body" sx={{ display: "block", pl: "32px" }}>
             <Editor
               label="Replace this with the choice-specific feedback."
               readOnly={true}
-              value={props.choice.feedback}
+              value={choice.feedback}
               setValue={doNothing}
               showEditPreviewSection={false}
-              editOption={props.option}
+              editOption={option}
             />
           </Box>
         )}

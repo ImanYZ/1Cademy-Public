@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { checkRestartBatchWriteCounts, db } from "../../lib/firestoreServer/admin";
 import { getTypedCollections, reputationTypes, tagsAndCommPoints } from "../../utils";
+import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore";
+import { ITag } from "src/types/ITag";
 
 const changeTagTitleInAllDocs = async ({ batch, collName, allDocs, nodeId, newTitle, writeCounts }: any) => {
   let newBatch = batch;
@@ -130,7 +132,17 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         console.log("Done with tagging nodes.");
         await tagsAndCommPoints({
           nodeId,
-          callBack: async ({ collectionName, tagRef, tagDoc, tagData }: any) => {
+          callBack: async ({
+            collectionName,
+            tagRef,
+            tagDoc,
+            tagData,
+          }: {
+            collectionName: string;
+            tagRef: DocumentReference;
+            tagDoc: DocumentSnapshot;
+            tagData: ITag;
+          }) => {
             if (tagDoc) {
               if (
                 (collectionName === "tags" && tagData.title !== newTitle) ||
@@ -146,6 +158,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             }
             console.log("Done with tags and communities: " + collectionName);
           },
+          t: null,
         });
 
         [batch, writeCounts] = await changeTagTitleInAllDocs({

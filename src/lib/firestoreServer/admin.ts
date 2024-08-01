@@ -85,8 +85,8 @@ interface TWriteOperation {
 const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
   const chunked = arrayToChunks(tWriteOperations);
 
-  await db.runTransaction(async t => {
-    for (let chunk of chunked) {
+  for (let chunk of chunked) {
+    await db.runTransaction(async t => {
       for (let op of chunk) {
         const { operationType, objRef, data } = op;
         switch (operationType) {
@@ -103,8 +103,8 @@ const writeTransaction = async (tWriteOperations: TWriteOperation[]) => {
             break;
         }
       }
-    }
-  });
+    });
+  }
 };
 export const writeTransactionWithT = (tWriteOperations: TWriteOperation[], t: any) => {
   const _tWriteOperations = tWriteOperations.splice(0, MAX_TRANSACTION_WRITES);

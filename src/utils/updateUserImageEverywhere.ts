@@ -3,7 +3,7 @@ import {
   comPointTypes,
   getTypedCollections,
   NODE_TYPES,
-  retrieveAndsignalAllUserNodesChanges,
+  retrieveAndSignalAllUserNodesChanges,
   schoolPointTypes,
   updateUserImageInCollection,
 } from ".";
@@ -204,7 +204,7 @@ export const updateUserImageEverywhere = async ({
     };
     newBatch.update(nodeRef, nodeChanges);
     [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
-    [newBatch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+    [newBatch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
       batch: newBatch,
       linkedId: nodeDoc.id,
       nodeChanges,

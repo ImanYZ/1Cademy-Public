@@ -16,7 +16,7 @@ import {
   indexNodeChange,
   transferUserVersionsToNewNode,
 } from "./version-helpers";
-import { retrieveAndsignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
+import { retrieveAndSignalAllUserNodesChanges } from "./retrieveAndsignalAllUserNodesChanges";
 import { getNode } from "./getNode";
 import { GetTypedCollectionsReturn, getTypedCollections } from "./getTypedCollections";
 import { convertToTGet } from "./convertToTGet";
@@ -238,11 +238,10 @@ export const versionCreateUpdate = async ({
             [newBatch, writeCounts] = await checkRestartBatchWriteCounts(newBatch, writeCounts);
           }
         }
-        // TODO: move these to queue
         await detach(async () => {
           let batch = db.batch();
           let writeCounts = 0;
-          await retrieveAndsignalAllUserNodesChanges({
+          await retrieveAndSignalAllUserNodesChanges({
             batch,
             linkedId: nodeId,
             nodeChanges: nodeUpdates,
@@ -326,6 +325,7 @@ export const versionCreateUpdate = async ({
           }
           if (nodeData.title !== title || nodeType !== nodeData.nodeType) {
             await detach(async () => {
+              console.log("<=::::::=> CHANGE TITLE <=::::::=>");
               let batch = db.batch();
               let writeCounts = 0;
               [batch, writeCounts] = await changeNodeTitle({
@@ -336,10 +336,11 @@ export const versionCreateUpdate = async ({
                 nodeType,
                 currentTimestamp,
                 writeCounts,
-                t,
-                tWriteOperations,
+                t: null,
+                tWriteOperations: [],
               });
               await commitBatch(batch);
+              console.log("<=::::::=> DONE CHANGE TITLE <=::::::=>");
             });
           }
 
@@ -430,7 +431,7 @@ export const versionCreateUpdate = async ({
             }
 
             for (const { nodeId, nodeChanges } of updatedNodeIds) {
-              [batch, writeCounts] = await retrieveAndsignalAllUserNodesChanges({
+              [batch, writeCounts] = await retrieveAndSignalAllUserNodesChanges({
                 batch,
                 linkedId: nodeId,
                 nodeChanges: nodeChanges,
@@ -692,7 +693,7 @@ export const versionCreateUpdate = async ({
           let writeCounts = 0;
           // In both cases of accepting an improvement proposal and a child proposal,
           // we need to signal all the users that it's changed.
-          await retrieveAndsignalAllUserNodesChanges({
+          await retrieveAndSignalAllUserNodesChanges({
             batch,
             linkedId: nodeId,
             nodeChanges: nodeUpdates,

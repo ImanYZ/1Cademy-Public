@@ -1404,7 +1404,10 @@ export const useCreateActionTrack = () => {
       }
 
       const currentMinute = new Date().getMinutes();
-      if (currentMinute === lastRecordedMinute && data?.action === "navigateWhenNotScrolling") {
+      if (
+        currentMinute === lastRecordedMinute &&
+        (data?.action === "navigateWhenNotScrolling" || data?.action === "detectTriggerTutorial")
+      ) {
         return;
       }
       setLastRecordedMinute(currentMinute);
