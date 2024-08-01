@@ -3595,7 +3595,7 @@ const CourseComponent = () => {
                           <MenuItem value="Poll">Poll</MenuItem>
                           <MenuItem value="Open-Ended">Open-Ended</MenuItem>
                         </Select>
-                        {currentImprovement === null ? (
+                        {currentImprovement !== null ? (
                           <Typography>{prompt.text}</Typography>
                         ) : (
                           <TextField
@@ -3627,7 +3627,7 @@ const CourseComponent = () => {
                             minRows={2}
                           />
                         )}
-                        {currentImprovement === null ? (
+                        {currentImprovement !== null ? (
                           <Typography>{prompt.purpose}</Typography>
                         ) : (
                           <TextField
