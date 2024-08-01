@@ -179,10 +179,17 @@ const SequenceOrder = ({ idx, nodeId, question, sx, handleQuestion }: QuestionPr
                       editOption={option}
                     />
                   )}
-                  <CustomButton variant="outlined" type="button" color="error" onClick={() => handleDeleteItem(index)}>
-                    Delete Item
-                    <DeleteIcon sx={{ ml: 1 }} />
-                  </CustomButton>
+                  {option === "EDIT" && (
+                    <CustomButton
+                      variant="outlined"
+                      type="button"
+                      color="error"
+                      onClick={() => handleDeleteItem(index)}
+                    >
+                      Delete Item
+                      <DeleteIcon sx={{ ml: 1 }} />
+                    </CustomButton>
+                  )}
                 </Box>
               </Box>
             );
