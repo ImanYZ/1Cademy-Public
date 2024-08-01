@@ -26,7 +26,7 @@ const RubricItems = ({
 }: RubricFormProps) => {
   return (
     <Box>
-      <table style={{ borderSpacing: option === "EDIT" ? "5px 15px" : "0px 15px" }}>
+      <table style={{ borderSpacing: option === "EDIT" ? "5px 15px" : "0px 0px" }}>
         <thead>
           <th>
             <Typography>Rubric item</Typography>
@@ -60,7 +60,6 @@ const RubricItems = ({
                 </td>
                 <td
                   style={{
-                    verticalAlign: "top",
                     ...(option === "PREVIEW" && {
                       borderBottom: "solid 1px #606163",
                       padding: "10px",
@@ -80,7 +79,7 @@ const RubricItems = ({
                   />
                 </td>
                 {option === "EDIT" && (
-                  <td style={{ verticalAlign: "top" }}>
+                  <td>
                     <Tooltip title="Remove Rubric Item">
                       <IconButton type="button" onClick={() => handleDeleteRubric(index)}>
                         <DeleteIcon />
