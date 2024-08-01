@@ -26,7 +26,7 @@ const RubricItems = ({
 }: RubricFormProps) => {
   return (
     <Box>
-      <table style={{ borderSpacing: "5px 15px" }}>
+      <table style={{ borderSpacing: option === "EDIT" ? "5px 15px" : "0px 15px" }}>
         <thead>
           <th>
             <Typography>Rubric item</Typography>
@@ -44,8 +44,7 @@ const RubricItems = ({
                   style={{
                     width: "100%",
                     ...(option === "PREVIEW" && {
-                      border: "solid 1px #606163",
-                      borderRadius: "5px",
+                      borderBottom: "solid 1px #606163",
                       padding: "10px",
                     }),
                   }}
@@ -63,8 +62,7 @@ const RubricItems = ({
                   style={{
                     verticalAlign: "top",
                     ...(option === "PREVIEW" && {
-                      border: "solid 1px #606163",
-                      borderRadius: "5px",
+                      borderBottom: "solid 1px #606163",
                       padding: "10px",
                     }),
                   }}

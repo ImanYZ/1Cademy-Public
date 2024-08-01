@@ -134,9 +134,64 @@ OR
 }
 OR
 {
+  "question_type": "Matching",
+  "question_text": "Match each organelle with its function.",
+  "pairs": [
+    {
+      "term": "Mitochondria",
+      "definition": "Produces energy for the cell",
+      "feedback": {
+        "correct": "The mitochondria generate most of the cell's supply of ATP, used as a source of chemical energy.",
+        "incorrect": {
+          "Ribosome": "Incorrect. Ribosomes synthesize proteins, not produce energy.",
+          "Chloroplast": "Incorrect. Chloroplasts conduct photosynthesis, not produce energy.",
+          "Golgi apparatus": "Incorrect. The Golgi apparatus modifies and packages proteins, not produce energy."
+        }
+      }
+    },
+    {
+      "term": "Ribosome",
+      "definition": "Synthesizes proteins",
+      "feedback": {
+        "correct": "Ribosomes are responsible for protein synthesis in the cell.",
+        "incorrect": {
+          "Mitochondria": "Incorrect. Mitochondria produce energy for the cell, not synthesize proteins.",
+          "Chloroplast": "Incorrect. Chloroplasts conduct photosynthesis, not synthesize proteins.",
+          "Golgi apparatus": "Incorrect. The Golgi apparatus modifies and packages proteins, but does not synthesize them."
+        }
+      }
+    },
+    {
+      "term": "Chloroplast",
+      "definition": "Conducts photosynthesis",
+      "feedback": {
+        "correct": "Chloroplasts capture light energy to produce sugars during photosynthesis.",
+        "incorrect": {
+          "Mitochondria": "Incorrect. Mitochondria produce energy for the cell, not conduct photosynthesis.",
+          "Ribosome": "Incorrect. Ribosomes synthesize proteins, not conduct photosynthesis.",
+          "Golgi apparatus": "Incorrect. The Golgi apparatus modifies and packages proteins, not conduct photosynthesis."
+        }
+      }
+    },
+    {
+      "term": "Golgi apparatus",
+      "definition": "Modifies and packages proteins",
+      "feedback": {
+        "correct": "The Golgi apparatus processes and packages proteins and lipids for secretion or delivery to other organelles.",
+        "incorrect": {
+          "Mitochondria": "Incorrect. Mitochondria produce energy for the cell, not modify and package proteins.",
+          "Ribosome": "Incorrect. Ribosomes synthesize proteins, but do not modify and package them.",
+          "Chloroplast": "Incorrect. Chloroplasts conduct photosynthesis, not modify and package proteins."
+        }
+      }
+    }
+  ]
+}
+OR
+{
   "question_type": "Fill in the Blank",
   "question_text": "The powerhouse of the cell is the ____. ",
-  "correct_answer": "mitochondria",
+  "possible_correct_answers": ["mitochondria", "mitochondrion"],
   "feedback": "The mitochondria are known as the powerhouse of the cell because they generate most of the cell's supply of ATP, used as a source of chemical energy."
 }
 OR
