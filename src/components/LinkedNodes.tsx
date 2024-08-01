@@ -18,9 +18,10 @@ type LinkedNodesProps = {
   data: LinkedKnowledgeNode[];
   header: string;
   sx?: SxProps<Theme>;
+  showIcon?: boolean;
 };
 
-const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
+const LinkedNodes = ({ data, header, sx, showIcon = true }: LinkedNodesProps) => {
   const renderLinkedNodes = () => {
     return data.map((el, idx, src) => (
       <React.Fragment key={idx}>
@@ -34,7 +35,9 @@ const LinkedNodes = ({ data, header, sx }: LinkedNodesProps) => {
           sx={{ p: "20px" }}
           secondaryActions={
             <ListItemIcon>
-              <NodeTypeIcon tooltipPlacement="bottom" nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
+              {showIcon && (
+                <NodeTypeIcon tooltipPlacement="bottom" nodeType={el.nodeType} sx={{ marginLeft: "auto" }} />
+              )}
             </ListItemIcon>
           }
         />
