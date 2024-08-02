@@ -19,9 +19,18 @@ type LinkedNodesProps = {
   header: string;
   sx?: SxProps<Theme>;
   showIcon?: boolean;
+  readonly?: boolean;
+  openInNewTab?: boolean;
 };
 
-const LinkedNodes = ({ data, header, sx, showIcon = true }: LinkedNodesProps) => {
+const LinkedNodes = ({
+  data,
+  header,
+  sx,
+  showIcon = true,
+  openInNewTab = false,
+  readonly = false,
+}: LinkedNodesProps) => {
   const renderLinkedNodes = () => {
     return data.map((el, idx, src) => (
       <React.Fragment key={idx}>
@@ -33,7 +42,7 @@ const LinkedNodes = ({ data, header, sx, showIcon = true }: LinkedNodesProps) =>
           nodeContent={el.content}
           label={el.label || ""}
           sx={{ p: "20px" }}
-          openInNewTab={true}
+          openInNewTab={openInNewTab}
           secondaryActions={
             <ListItemIcon>
               {showIcon && (
@@ -41,6 +50,7 @@ const LinkedNodes = ({ data, header, sx, showIcon = true }: LinkedNodesProps) =>
               )}
             </ListItemIcon>
           }
+          readonly={readonly}
         />
         {idx < src.length - 1 && <Divider component="li" />}
       </React.Fragment>

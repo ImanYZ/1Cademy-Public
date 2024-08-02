@@ -26,6 +26,7 @@ type Props = {
   secondaryActions?: ReactNode;
   secondaryActionSx?: SxProps<Theme>;
   openInNewTab?: Boolean;
+  readonly?: boolean;
 };
 const LinkedNodeItem: FC<Props> = ({
   nodeImageUrl,
@@ -37,6 +38,7 @@ const LinkedNodeItem: FC<Props> = ({
   secondaryActions = null,
   secondaryActionSx,
   openInNewTab = false,
+  readonly = false,
 }) => {
   return (
     <HtmlTooltip
@@ -90,11 +92,28 @@ const LinkedNodeItem: FC<Props> = ({
         }
       >
         {!openInNewTab && (
-          <LinkNext passHref href={linkSrc}>
-            <ListItemButton component="a" sx={{ ...sx, p: "16px" }}>
-              <ListItemText primary={<MarkdownRender text={title || ""} />} disableTypography={true} />
-            </ListItemButton>
-          </LinkNext>
+          <>
+            {readonly ? (
+              <ListItemText
+                sx={{
+                  ...sx,
+                  p: "16px",
+                  ":hover": {
+                    background: theme =>
+                      theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.04)",
+                  },
+                }}
+                primary={<MarkdownRender text={title || ""} />}
+                disableTypography={true}
+              />
+            ) : (
+              <LinkNext passHref href={linkSrc}>
+                <ListItemButton component="a" sx={{ ...sx, p: "16px" }}>
+                  <ListItemText primary={<MarkdownRender text={title || ""} />} disableTypography={true} />
+                </ListItemButton>
+              </LinkNext>
+            )}
+          </>
         )}
         {openInNewTab && (
           <ListItemButton component="a" href={linkSrc} rel="noreferrer" target="_blank" sx={{ ...sx, p: "16px" }}>
