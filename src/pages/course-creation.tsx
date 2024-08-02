@@ -822,7 +822,9 @@ const CourseComponent = () => {
     }
     if (newIndex !== -1) {
       setCurrentChangeIndex(newIndex);
-      setCurrentImprovement(improvements[newIndex]);
+      setTimeout(() => {
+        setCurrentImprovement(improvements[newIndex]);
+      }, 900);
     } else {
       setSidebarOpen(false);
       setCurrentImprovement(null);
