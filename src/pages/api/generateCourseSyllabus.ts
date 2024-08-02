@@ -564,25 +564,29 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (syllabus) {
         const nodTopicsPromises = syllabus.map(async (category: any) => {
           for (let topic of category.topics) {
-            const nodes = await retrieveNodesForTopic(
-              tags,
-              courseTitle,
-              courseDescription,
-              targetLearners,
-              references,
-              syllabus,
-              topic.title
-            );
-            await db.runTransaction(async (t: any) => {
-              const courseDoc = await t.get(courseRef);
-              const courseData = courseDoc.data();
-              if (courseData.nodes) {
-                courseData.nodes[topic.title] = nodes;
-              } else {
-                courseData.nodes = { [topic.title]: nodes };
-              }
-              t.update(courseRef, courseData);
-            });
+            try {
+              const nodes = await retrieveNodesForTopic(
+                tags,
+                courseTitle,
+                courseDescription,
+                targetLearners,
+                references,
+                syllabus,
+                topic.title
+              );
+              await db.runTransaction(async (t: any) => {
+                const courseDoc = await t.get(courseRef);
+                const courseData = courseDoc.data();
+                if (courseData.nodes) {
+                  courseData.nodes[topic.title] = nodes;
+                } else {
+                  courseData.nodes = { [topic.title]: nodes };
+                }
+                t.update(courseRef, courseData);
+              });
+            } catch (error) {
+              console.log(error);
+            }
           }
         });
         await Promise.all(nodTopicsPromises);
