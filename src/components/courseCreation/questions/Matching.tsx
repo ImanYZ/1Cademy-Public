@@ -1,6 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, Grid, Switch, Typography } from "@mui/material";
+import { Box, Button, Grid, IconButton, Switch, Typography } from "@mui/material";
 import { blue, blueGrey, green, indigo, orange, purple } from "@mui/material/colors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { QuestionProps } from "src/types";
@@ -59,12 +59,12 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
     if (type === "itemA") {
       if (selectedItemsA[value?.term]) {
         const newSelectedAItems = { ...selectedItemsA };
-        delete newSelectedAItems[value?.term];
+        delete newSelectedAItems?.[value?.term];
         setSelectedItemsA(newSelectedAItems);
         const newSelectedBItems = { ...selectedItemsB };
         const resultKey = Object.keys(newSelectedBItems).find(key => newSelectedBItems[key].ref === value.term);
         if (resultKey !== undefined) {
-          delete newSelectedBItems[resultKey];
+          delete newSelectedBItems?.[resultKey];
           setSelectedItemsB(newSelectedBItems);
           const findIndexOfItem = Object.keys(selectedItemsA)?.indexOf(value.term);
           selectedColors.splice(findIndexOfItem, 1);
@@ -79,12 +79,12 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
       }
     } else if (type === "itemB") {
       if (selectedItemsB[value.term]) {
-        delete selectedItemsB[value?.term];
+        delete selectedItemsB?.[value?.term];
         setSelectedItemsB({ ...selectedItemsB });
 
         const newSelectedAItems = { ...selectedItemsA };
         const findIndexOfItem = Object.keys(newSelectedAItems)?.indexOf(value?.ref || "");
-        delete newSelectedAItems[value?.ref || ""];
+        delete newSelectedAItems?.[value?.ref || ""];
         setSelectedItemsA(newSelectedAItems);
         selectedColors.splice(findIndexOfItem, 1);
         setSelectedColors([...selectedColors]);
@@ -290,16 +290,19 @@ const MatchingColumns = ({ pairs }: MatchingColumnsProps) => {
         </Grid>
       )}
 
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => (resultView ? setResultView(false) : setResultView(true))}
-          sx={{ mt: 4 }}
-        >
-          {resultView ? "Back" : "Submit"}
-        </Button>
-      </Box>
+      {Object.keys(selectedItemsA).length > 0 &&
+        Object.keys(selectedItemsA).length === Object.keys(selectedItemsB).length && (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => (resultView ? setResultView(false) : setResultView(true))}
+              sx={{ mt: 4 }}
+            >
+              {resultView ? "Back" : "Submit"}
+            </Button>
+          </Box>
+        )}
     </Box>
   );
 };
@@ -322,7 +325,7 @@ const MatchingEdit = ({
             sx={{
               display: "flex",
               mb: 3,
-              p: 2,
+              p: 3,
               background: theme =>
                 theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
               ...(option === "PREVIEW" && {
@@ -355,7 +358,13 @@ const MatchingEdit = ({
                 showEditPreviewSection={false}
                 editOption={option}
               />
-              <Typography my={2}>Incorrect Feedbacks:</Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography my={2}>Incorrect Feedbacks:</Typography>
+
+                <IconButton onClick={() => handleDeleteItem(index)}>
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
               {Object.keys(pair?.feedback.incorrect).map((feedback, idx: number) => {
                 return (
                   <Editor
@@ -369,10 +378,6 @@ const MatchingEdit = ({
                   />
                 );
               })}
-              <CustomButton variant="outlined" type="button" color="error" onClick={() => handleDeleteItem(index)}>
-                Delete Item
-                <DeleteIcon sx={{ ml: 1 }} />
-              </CustomButton>
             </Box>
           </Box>
         );
@@ -405,7 +410,7 @@ const Matching = ({ idx, question, nodeId, sx, handleQuestion }: QuestionProps) 
     for (let i = 0; i < pairs.length; i++) {
       if (i === index) continue;
       pairs[i].feedback.incorrect[value] = pairs[i].feedback.incorrect[prevValue];
-      delete pairs[i].feedback.incorrect[prevValue];
+      delete pairs[i]?.feedback?.incorrect?.[prevValue];
     }
     setQuestionS({ ...questionS, pairs });
   };
@@ -459,7 +464,7 @@ const Matching = ({ idx, question, nodeId, sx, handleQuestion }: QuestionProps) 
   const handleDeleteItem = (index: number) => {
     const pairs = [...questionS.pairs];
     for (let i = 0; i < pairs.length; i++) {
-      delete pairs[i].feedback.incorrect[pairs[index].term];
+      delete pairs[i]?.feedback?.incorrect?.[pairs[index].term];
     }
     pairs.splice(index, 1);
     setQuestionS({ ...questionS, pairs });

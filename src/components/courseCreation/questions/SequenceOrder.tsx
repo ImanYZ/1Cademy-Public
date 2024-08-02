@@ -139,8 +139,10 @@ const SequenceOrder = ({ idx, nodeId, question, sx, handleQuestion }: QuestionPr
                 key={index}
                 sx={{
                   display: "flex",
+                  flexWrap: "wrap",
                   mb: 3,
                   p: 2,
+                  pt: 3,
                   background: theme =>
                     theme.palette.mode === "dark" ? DESIGN_SYSTEM_COLORS.notebookG600 : DESIGN_SYSTEM_COLORS.gray100,
                   borderLeft:
@@ -159,7 +161,12 @@ const SequenceOrder = ({ idx, nodeId, question, sx, handleQuestion }: QuestionPr
                 }}
                 onDragEnd={handleDragEnd}
               >
-                <DragIndicatorIcon />
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <DragIndicatorIcon />
+                  {option === "EDIT" && (
+                    <DeleteIcon sx={{ cursor: "pointer" }} onClick={() => handleDeleteItem(index)} />
+                  )}
+                </Box>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "15px", width: "90%" }}>
                   <Editor
                     label="Step"
@@ -169,6 +176,7 @@ const SequenceOrder = ({ idx, nodeId, question, sx, handleQuestion }: QuestionPr
                     showEditPreviewSection={false}
                     editOption={option}
                   />
+
                   {option === "EDIT" && (
                     <Editor
                       label="Feedback"
@@ -178,17 +186,6 @@ const SequenceOrder = ({ idx, nodeId, question, sx, handleQuestion }: QuestionPr
                       showEditPreviewSection={false}
                       editOption={option}
                     />
-                  )}
-                  {option === "EDIT" && (
-                    <CustomButton
-                      variant="outlined"
-                      type="button"
-                      color="error"
-                      onClick={() => handleDeleteItem(index)}
-                    >
-                      Delete Item
-                      <DeleteIcon sx={{ ml: 1 }} />
-                    </CustomButton>
                   )}
                 </Box>
               </Box>
