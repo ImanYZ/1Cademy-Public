@@ -183,6 +183,7 @@ interface Course {
   title: string;
   uname: string;
   updatedAt: Timestamp;
+  doneLoadingNodes: boolean;
 }
 
 // interface  {
@@ -2483,17 +2484,28 @@ const CourseComponent = () => {
                                       type="button"
                                       color="secondary"
                                       onClick={() => {
+                                        if (
+                                          loadingNodes.includes(tc.title) ||
+                                          (!courses[selectedCourseIdx].doneLoadingNodes &&
+                                            !(courses[selectedCourseIdx].nodes || {})[tc.title])
+                                        ) {
+                                          return;
+                                        }
                                         retrieveNodesForTopic(tc.title);
                                       }}
                                     >
-                                      {loadingNodes.includes(tc.title)
+                                      {loadingNodes.includes(tc.title) ||
+                                      (!courses[selectedCourseIdx]?.doneLoadingNodes &&
+                                        !(courses[selectedCourseIdx]?.nodes || {})[tc.title])
                                         ? "Retrieving Concept Cards"
                                         : `Retrieve ${
                                             ((courses[selectedCourseIdx].nodes || {})[tc.title] || []).length > 0
                                               ? "More"
                                               : ""
                                           } Concept Cards`}
-                                      {loadingNodes.includes(tc.title) ? (
+                                      {loadingNodes.includes(tc.title) ||
+                                      (!courses[selectedCourseIdx].doneLoadingNodes &&
+                                        !(courses[selectedCourseIdx].nodes || {})[tc.title]) ? (
                                         <CircularProgress sx={{ ml: 1 }} size={20} />
                                       ) : (
                                         <AutoFixHighIcon sx={{ ml: 1 }} />
