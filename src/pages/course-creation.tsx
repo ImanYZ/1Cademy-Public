@@ -1624,24 +1624,25 @@ const CourseComponent = () => {
           retrieveNodeQuestions(nodeId);
         }
 
-        if (!node?.updatedStr) {
-          setNodePublicViewLoader(true);
-          const nodeResponse = await getNodeDataForCourse(nodeId);
-          const updatedData = {
-            ...node,
-            createdStr,
-            updatedStr,
-            keywords,
-            children: nodeResponse.children,
-            parents: nodeResponse.parents,
-            contributors: nodeResponse.contributors,
-            institutions: nodeResponse.institutions,
-          };
-          course.nodes[topicTitle][idx] = updatedData;
-          setNodePublicView({ ...updatedData, topic: topicTitle });
-          updateCourses(course);
-          setNodePublicViewLoader(false);
-        }
+        // if (!node?.updatedStr) {
+        setNodePublicViewLoader(true);
+        const nodeResponse = await getNodeDataForCourse(nodeId);
+        const updatedData = {
+          ...node,
+          createdStr,
+          updatedStr,
+          keywords,
+          children: nodeResponse.children,
+          parents: nodeResponse.parents,
+          contributors: nodeResponse.contributors,
+          institutions: nodeResponse.institutions,
+          references: nodeResponse.references,
+        };
+        course.nodes[topicTitle][idx] = updatedData;
+        setNodePublicView({ ...updatedData, topic: topicTitle });
+        updateCourses(course);
+        setNodePublicViewLoader(false);
+        // }
       }
     },
     [courses, selectedCourseIdx, updateCourses]
@@ -1728,6 +1729,7 @@ const CourseComponent = () => {
       console.error(error);
     }
   };
+
   if (courses.length <= 0) {
     return (
       <Box
@@ -2880,12 +2882,12 @@ const CourseComponent = () => {
                       )}
                     </Grid>
                   )}
-                  {/* <Grid item xs={12} sm={12}>
-                    {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                  <Grid item xs={12} sm={12}>
+                    {(nodePublicView?.references || [])?.length > 0 && (
                       // <ReferencesList references={nodePublicView.references || []} sx={{ mt: 3 }} />
                       <LinkedNodes data={nodePublicView?.references || []} header="References" showIcon={false} />
                     )}
-                  </Grid> */}
+                  </Grid>
                   <Grid item xs={12} sm={12}>
                     <Card sx={{ mt: 3, p: 2 }}>
                       <CardHeader

@@ -103,8 +103,8 @@ export const getNodePageURLTitle = (title: string | undefined, id: string, type?
   return resTitleSlug;
 };
 
-export const getNodePageUrl = (title: string, id: string, type?: string) => {
-  return `${ROUTES.node}/${getNodePageURLTitle(title, id, type)}/${id}`;
+export const getNodePageUrl = (title: string, id: string, label: string = "", type?: string) => {
+  return label || `/${ROUTES.node}/${getNodePageURLTitle(title, id, type)}/${id}`;
 };
 
 export const getNodePageWithDomain = (title: string, id: string, type?: string) => {
