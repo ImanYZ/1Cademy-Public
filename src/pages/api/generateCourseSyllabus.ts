@@ -558,12 +558,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         const courseDoc = await t.get(courseRef);
         const courseData = courseDoc.data();
         courseData.done = true;
+        courseData.doneLoadingNodes = false;
         t.update(courseRef, courseData);
       });
 
       if (syllabus) {
-        const nodTopicsPromises = syllabus.map(async (category: any) => {
+        console.log("loading nodes");
+        for (let category of syllabus) {
           for (let topic of category.topics) {
+            console.log("loading nodes", topic);
             try {
               const nodes = await retrieveNodesForTopic(
                 tags,
@@ -574,6 +577,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 syllabus,
                 topic.title
               );
+              console.log("loadedÇ nodes", nodes);
               await db.runTransaction(async (t: any) => {
                 const courseDoc = await t.get(courseRef);
                 const courseData = courseDoc.data();
@@ -585,12 +589,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 t.update(courseRef, courseData);
               });
             } catch (error) {
-              console.log(error);
+              console.error(error);
             }
           }
-        });
-        await Promise.all(nodTopicsPromises);
+        }
       }
+      await db.runTransaction(async (t: any) => {
+        t.update(courseRef, { doneLoadingNodes: true });
+      });
     });
 
     return res.status(200).json({});
