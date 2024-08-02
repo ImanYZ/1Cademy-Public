@@ -97,13 +97,7 @@ const LinkedNodeItem: FC<Props> = ({
           </LinkNext>
         )}
         {openInNewTab && (
-          <ListItemButton
-            component="a"
-            href={`../${linkSrc}`}
-            rel="noreferrer"
-            target="_blank"
-            sx={{ ...sx, p: "16px" }}
-          >
+          <ListItemButton component="a" href={linkSrc} rel="noreferrer" target="_blank" sx={{ ...sx, p: "16px" }}>
             <ListItemText primary={<MarkdownRender text={title} />} disableTypography={true} />
           </ListItemButton>
         )}
