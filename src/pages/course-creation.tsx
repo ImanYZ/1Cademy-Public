@@ -1431,7 +1431,7 @@ const CourseComponent = () => {
       return !course.title.trim();
     }
     if (creatingCourseStep === 1) {
-      return course.hours === 0;
+      return course.hours === 0 || courses[selectedCourseIdx].classSessions === 0;
     }
     if (creatingCourseStep === 2) {
       return (course?.tags || []).length <= 0;
@@ -1931,7 +1931,7 @@ const CourseComponent = () => {
                 onChange={handleHoursChange}
                 margin="normal"
                 variant="outlined"
-                sx={{ width: "500px" }}
+                sx={{ width: "200px" }}
                 type="number"
                 inputProps={{ min: 0 }}
                 InputLabelProps={{
@@ -3037,7 +3037,7 @@ const CourseComponent = () => {
                               header="What to Learn Before"
                               showIcon={false}
                             />
-                            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                            <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
                               <CustomButton
                                 variant="contained"
                                 type="button"
