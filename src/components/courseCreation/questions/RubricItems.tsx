@@ -50,7 +50,7 @@ const RubricItems = ({
                   }}
                 >
                   <Editor
-                    label="Question Stem"
+                    label=""
                     value={rubric?.item}
                     setValue={value => handleRubricItem(value, index)}
                     showEditPreviewSection={false}
