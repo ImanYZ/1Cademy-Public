@@ -7,13 +7,14 @@ const improveCourseSyllabus = async (
   courseTitle: string,
   targetLearners: string,
   classSessions: number,
+  sessionHours: number,
   prerequisiteKnowledge: string,
   courseDescription: string,
   courseObjectives: string[],
   courseSkills: string[],
   syllabus: any[]
 ) => {
-  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of hour-long class sessions, objectives, skills, and current syllabus, your task is to provide very specific improvements to the syllabus to ensure that the topics are focused, consistent in size, and appropriate for the target students to achieve the course objectives. You can suggest adding, modifying, or deleting topics or categories to enhance the course's effectiveness. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, skills, and current syllabus, your task is to provide very specific improvements to the syllabus to ensure that the topics are focused, consistent in size, and appropriate for the target students to achieve the course objectives. You can suggest adding, modifying, or deleting topics or categories to enhance the course's effectiveness. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your recommended actions will be reviewed by a supervisory team. For every helpful recommended action, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
 **Input:**
@@ -21,11 +22,12 @@ Your recommended actions will be reviewed by a supervisory team. For every helpf
 1. **Course Title:** [Course Title goes here]
 2. **Course Description:** [Course Description goes here]
 3. **Target Learners:** [Target Learners Description goes here]
-4. **Number of Hour-long Class Sessions:** [Number of Class Sessions goes here]
-5. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
-6. **Objectives:** [Course Objectives go here]
-7. **Skills:** [Skills Gained from the Course go here]
-8. **Current Syllabus:** [Current Syllabus goes here]
+4. **Number of Class Sessions:** [Number of Class Sessions goes here]
+5. **Number of Hours Per Class Session:** [Number of Hours Per Class Session goes here]
+6. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
+7. **Objectives:** [Course Objectives go here]
+8. **Skills:** [Skills Gained from the Course go here]
+9. **Current Syllabus:** [Current Syllabus goes here]
 
 **Output:**
 
@@ -39,7 +41,7 @@ Your suggestions should:
 4. Identify and fill any gaps in the syllabus to ensure comprehensive coverage of the subject matter.
 5. Remove any redundant or irrelevant topics.
 6. Consider the sequence of topics to ensure a logical progression of learning.
-7. Consider the number of class sessions available and the level of detail appropriate for the target learners.
+7. Consider the number of class sessions, number of hours per class session, and the level of detail appropriate for the target learners.
 8. Provide clear rationales for each suggested change to the syllabus.
 9. Ensure that categories are well-structured and sequenced, and topics are appropriately grouped and organized.
 10. Ensure that the hours allocated to each topic are appropriate for the level of detail and complexity required.
@@ -104,7 +106,8 @@ Each action should be accompanied by:
   "Course Title": "Advanced Web Development",
   "Course Description": "This course covers advanced topics in web development, including modern JavaScript frameworks, server-side programming, database integration, and web security. It is intended for students with a basic understanding of web development.",
   "Target Learners": "Graduate students in computer science or related fields, with prior experience in basic web development.",
-  "Number of Hour-long Class Sessions": 16,
+  "Number of Class Sessions": 16,
+  "Number of Hours Per Class Session": 2,
   "Prerequisite Knowledge": [
     "HTML and CSS fundamentals",
     "JavaScript programming basics",
@@ -140,7 +143,7 @@ Each action should be accompanied by:
   ],
   "Current Syllabus": [
     {
-      "title": "Frontend Development",
+      "category": "Frontend Development",
       "description": "In-depth exploration of advanced frontend development techniques and frameworks.",
       "objectives": [
         "Master advanced HTML and CSS",
@@ -305,7 +308,7 @@ Each action should be accompanied by:
       ]
     },
     {
-      "title": "Backend Development",
+      "category": "Backend Development",
       "description": "Comprehensive coverage of backend development techniques, including server-side programming and database integration.",
       "objectives": [
         "Master server-side development with Node.js and Express.js",
@@ -471,7 +474,7 @@ Each action should be accompanied by:
       ]
     },
     {
-      "title": "Web Security",
+      "category": "Web Security",
       "description": "Focused exploration of web security principles and practices.",
       "objectives": [
         "Identify and mitigate common web security threats",
@@ -881,7 +884,8 @@ Each action should be accompanied by:
   const userPrompt = {
     "Course Title": courseTitle,
     "Target Learners": targetLearners,
-    "Number of Hour-long Class Sessions": classSessions,
+    "Number of Class Sessions": classSessions,
+    "Number of Hours Per Class Session": sessionHours,
     "Prerequisite Knowledge": prerequisiteKnowledge,
     "Current Description": courseDescription,
     "Course Objectives": courseObjectives,
@@ -905,14 +909,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       courseObjectives,
       prerequisiteKnowledge,
       courseSkills,
-      hours,
+      classSessions,
+      sessionHours,
       courseId,
     } = req.body;
 
     const suggestions = await improveCourseSyllabus(
       courseTitle,
       targetLearners,
-      hours,
+      classSessions,
+      sessionHours,
       prerequisiteKnowledge,
       courseDescription,
       courseObjectives,

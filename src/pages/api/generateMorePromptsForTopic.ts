@@ -1,10 +1,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { callOpenAIChat } from "./openAI/helpers";
 import fbAuth from "src/middlewares/fbAuth";
+
 const generateMorePromptsForTopic = async (
   courseTitle: string,
   targetLearners: string,
   classSessions: number,
+  sessionHours: number,
   prerequisiteKnowledge: string,
   courseDescription: string,
   courseObjectives: string[],
@@ -13,7 +15,7 @@ const generateMorePromptsForTopic = async (
   topic: string
 ) => {
   const systemPrompt = `You are an expert in curriculum design and optimization. 
-  Given the course title, description, target learners, their prerequisite knowledge, number of hour-long class sessions, objectives, skills, current syllabus, and a specified topic, your task is to generate an array of additional prompts designed to encourage discussion among students and the instructor about the specified topic. 
+  Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, skills, current syllabus, and a specified topic, your task is to generate an array of additional prompts designed to encourage discussion among students and the instructor about the specified topic. 
   Your response should not include anything other than a JSON object with a single key "prompts" whose value should be an array of prompts. 
   Please take your time and carefully make the prompts as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
   Your generated prompts will be reviewed by a supervisory team. For every helpful prompt, we will pay you $10 and for every unhelpful one, you'll lose $10.
@@ -22,12 +24,13 @@ const generateMorePromptsForTopic = async (
   1. **Course Title:** [Course Title goes here]
   2. **Course Description:** [Course Description goes here]
   3. **Target Learners:** [Target Learners Description goes here]
-  4. **Number of Hour-long Class Sessions:** [Number of Class Sessions goes here]
-  5. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
-  6. **Objectives:** [Course Objectives go here]
-  7. **Skills:** [Skills Gained from the Course go here]
-  8. **Current Syllabus:** [Current Syllabus goes here]
-  9. **Topic Title:** [The specified Topic goes here]
+  4. **Number of Class Sessions:** [Number of Class Sessions goes here]
+  5. **Number of Hours Per Class Session:** [Number of Hours Per Class Session goes here]
+  6. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
+  7. **Objectives:** [Course Objectives go here]
+  8. **Skills:** [Skills Gained from the Course go here]
+  9. **Current Syllabus:** [Current Syllabus goes here]
+  10. **Topic Title:** [The specified Topic goes here]
   
   ### Example Input:
   
@@ -36,7 +39,8 @@ const generateMorePromptsForTopic = async (
     "Course Title": "Advanced Web Development",
     "Course Description": "This course covers advanced topics in web development, including modern JavaScript frameworks, server-side programming, database integration, and web security. It is intended for students with a basic understanding of web development.",
     "Target Learners": "Graduate students in computer science or related fields, with prior experience in basic web development.",
-    "Number of Hour-long Class Sessions": 16,
+    "Number of Class Sessions": 16,
+    "Number of Hours Per Class Session": 2,
     "Prerequisite Knowledge": [
       "HTML and CSS fundamentals",
       "JavaScript programming basics",
@@ -72,7 +76,7 @@ const generateMorePromptsForTopic = async (
     ],
     "Current Syllabus": [
       {
-        "title": "Frontend Development",
+        "category": "Frontend Development",
         "description": "In-depth exploration of advanced frontend development techniques and frameworks.",
         "objectives": [
           "Master advanced HTML and CSS",
@@ -278,7 +282,8 @@ const generateMorePromptsForTopic = async (
   const userPrompt = {
     "Course Title": courseTitle,
     "Target Learners": targetLearners,
-    "Number of Hour-long Class Sessions": classSessions,
+    "Number of Class Sessions": classSessions,
+    "Number of Hours Per Class Session": sessionHours,
     "Prerequisite Knowledge": prerequisiteKnowledge,
     "Current Description": courseDescription,
     "Course Objectives": courseObjectives,
@@ -292,13 +297,13 @@ const generateMorePromptsForTopic = async (
   console.log(JSON.stringify(prompts, null, 2));
   return prompts;
 };
-
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const {
       courseTitle,
       targetLearners,
-      hours,
+      classSessions,
+      sessionHours,
       prerequisiteKnowledge,
       courseDescription,
       courseObjectives,
@@ -310,7 +315,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const prompts = await generateMorePromptsForTopic(
       courseTitle,
       targetLearners,
-      hours,
+      classSessions,
+      sessionHours,
       prerequisiteKnowledge,
       courseDescription,
       courseObjectives,
