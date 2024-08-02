@@ -2817,7 +2817,10 @@ const CourseComponent = () => {
                                 question={question}
                                 handleQuestion={handleQuestion}
                                 sx={{
-                                  backgroundColor: theme => (theme.palette.mode === "dark" ? "#1f1f1f" : "white"),
+                                  backgroundColor: theme =>
+                                    theme.palette.mode === "dark"
+                                      ? DESIGN_SYSTEM_COLORS.notebookG900
+                                      : DESIGN_SYSTEM_COLORS.baseWhite,
                                   mt: 2,
                                   p: "12px",
                                   pb: "65px",
@@ -3670,17 +3673,17 @@ const CourseComponent = () => {
                     <Typography sx={{ fontWeight: "bold" }}>Prompts:</Typography>
                     {(selectedTopic?.prompts || []).map((prompt: any, index: number) => (
                       <Box key={index}>
-                        <Box
+                        <Paper
                           sx={{
                             display: "flex",
                             flexDirection: "column",
                             gap: "15px",
-                            background: theme =>
+                            backgroundColor: theme =>
                               theme.palette.mode === "dark"
-                                ? DESIGN_SYSTEM_COLORS.notebookG600
-                                : DESIGN_SYSTEM_COLORS.gray100,
+                                ? DESIGN_SYSTEM_COLORS.notebookG900
+                                : DESIGN_SYSTEM_COLORS.baseWhite,
                             p: 2,
-                            borderRadius: "18px",
+                            borderRadius: "12px",
                           }}
                         >
                           <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -3846,7 +3849,7 @@ const CourseComponent = () => {
                               minRows={2}
                             />
                           )}
-                        </Box>
+                        </Paper>
                       </Box>
                     ))}
                     <Box sx={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: "10px" }}>
