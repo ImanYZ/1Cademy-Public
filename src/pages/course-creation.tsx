@@ -2484,13 +2484,6 @@ const CourseComponent = () => {
                                       type="button"
                                       color="secondary"
                                       onClick={() => {
-                                        if (
-                                          loadingNodes.includes(tc.title) ||
-                                          (!courses[selectedCourseIdx].doneLoadingNodes &&
-                                            !(courses[selectedCourseIdx].nodes || {})[tc.title])
-                                        ) {
-                                          return;
-                                        }
                                         retrieveNodesForTopic(tc.title);
                                       }}
                                     >
@@ -2503,10 +2496,12 @@ const CourseComponent = () => {
                                               ? "More"
                                               : ""
                                           } Concept Cards`}
-                                      {loadingNodes.includes(tc.title) ||
-                                      (!courses[selectedCourseIdx].doneLoadingNodes &&
-                                        !(courses[selectedCourseIdx].nodes || {})[tc.title]) ? (
-                                        <CircularProgress sx={{ ml: 1 }} size={20} />
+                                      {loadingNodes.includes(tc.title) ? (
+                                        /* (!courses[selectedCourseIdx].doneLoadingNodes &&
+                                        !(courses[selectedCourseIdx].nodes || {})[tc.title]) */ <CircularProgress
+                                          sx={{ ml: 1 }}
+                                          size={20}
+                                        />
                                       ) : (
                                         <AutoFixHighIcon sx={{ ml: 1 }} />
                                       )}
