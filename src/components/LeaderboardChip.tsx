@@ -14,6 +14,7 @@ type Props = {
   renderAsAvatar?: boolean;
   href: string;
   openUserInfo?: any;
+  readonly?: boolean;
 };
 
 const LeaderboardChip: FC<Props> = ({
@@ -24,6 +25,7 @@ const LeaderboardChip: FC<Props> = ({
   isChamp,
   renderAsAvatar = true,
   openUserInfo,
+  readonly,
 }) => {
   const renderChipComponent = () => (
     <Chip
@@ -71,9 +73,15 @@ const LeaderboardChip: FC<Props> = ({
     return <Box onClick={openUserInfo}>{renderChipComponent()}</Box>;
   }
   return (
-    <NextLink passHref href={href}>
-      {renderChipComponent()}
-    </NextLink>
+    <>
+      {readonly ? (
+        <Box>{renderChipComponent()}</Box>
+      ) : (
+        <NextLink passHref href={href}>
+          {renderChipComponent()}
+        </NextLink>
+      )}
+    </>
   );
 };
 

@@ -13,9 +13,10 @@ type Props = {
   contributors: KnowledgeNodeContributor[];
   institutions: KnowledgeNodeInstitution[];
   sx?: SxProps<Theme>;
+  readonly?: boolean;
 };
 
-const NodeItemContributors: FC<Props> = ({ contributors, institutions, sx }) => {
+const NodeItemContributors: FC<Props> = ({ contributors, institutions, sx, readonly = false }) => {
   const renderContributors = () => {
     return contributors.map((el, idx) => (
       <Grid item key={idx}>
@@ -26,6 +27,7 @@ const NodeItemContributors: FC<Props> = ({ contributors, institutions, sx }) => 
           reputation={el.reputation || 0}
           isChamp={idx === 0}
           href={`${ROUTES.home}?contributors=${el.username}`}
+          readonly={readonly}
         />
       </Grid>
     ));
@@ -42,6 +44,7 @@ const NodeItemContributors: FC<Props> = ({ contributors, institutions, sx }) => 
           isChamp={idx === 0}
           renderAsAvatar={false}
           href={`${ROUTES.search}?institutions=${el.id}`}
+          readonly={readonly}
         />
       </Grid>
     ));

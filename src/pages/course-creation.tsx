@@ -2890,7 +2890,7 @@ const CourseComponent = () => {
                   <Grid item xs={12} sm={12}>
                     {(nodePublicView?.references || [])?.length > 0 && (
                       // <ReferencesList references={nodePublicView.references || []} sx={{ mt: 3 }} />
-                      <LinkedNodes data={nodePublicView?.references || []} header="References" showIcon={false} />
+                      <LinkedNodes data={nodePublicView?.references || []} header="Source Material" showIcon={false} />
                     )}
                   </Grid>
                   <Grid item xs={12} sm={12}>
@@ -3041,6 +3041,7 @@ const CourseComponent = () => {
                             contributors={nodePublicView?.contributors || []}
                             institutions={nodePublicView?.institutions || []}
                             sx={{ my: 4 }}
+                            readonly={true}
                           />
                         </Card>
                       </Grid>
@@ -3051,6 +3052,7 @@ const CourseComponent = () => {
                               data={nodePublicView?.parents || []}
                               header="What to Learn Before"
                               showIcon={false}
+                              readonly={true}
                             />
                             <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
                               <CustomButton
@@ -3080,6 +3082,7 @@ const CourseComponent = () => {
                               data={nodePublicView?.children || []}
                               header="What to Learn After"
                               showIcon={false}
+                              readonly={true}
                             />
                             <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                               <CustomButton
