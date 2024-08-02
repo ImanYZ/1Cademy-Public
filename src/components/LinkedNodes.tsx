@@ -27,12 +27,13 @@ const LinkedNodes = ({ data, header, sx, showIcon = true }: LinkedNodesProps) =>
       <React.Fragment key={idx}>
         <LinkedNodeItem
           title={el.title || ""}
-          linkSrc={getNodePageUrl(el.title || "", el.node)}
+          linkSrc={getNodePageUrl(el.title || "", el.node, el.label || "")}
           nodeType={el.nodeType}
           nodeImageUrl={el.nodeImage}
           nodeContent={el.content}
           label={el.label || ""}
           sx={{ p: "20px" }}
+          openInNewTab={true}
           secondaryActions={
             <ListItemIcon>
               {showIcon && (

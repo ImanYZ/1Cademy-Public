@@ -224,7 +224,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
     });
   }
 
-  // Descendingly sort the contributors array based on the reputation points.
+  // Descending sort the contributors array based on the reputation points.
   const contributorsNodes: KnowledgeNodeContributor[] = Object.entries(nodeData.contributors || {})
     .sort(([, aObj], [, bObj]) => {
       return (bObj.reputation || 0) - (aObj.reputation || 0);
@@ -234,7 +234,7 @@ export const getNodeData = async (id: string): Promise<KnowledgeNode | null> => 
       []
     );
 
-  // Descendingly sort the contributors array based on the reputation points.
+  // Descending sort the contributors array based on the reputation points.
   const institObjs = Object.entries(nodeData.institutions || {}).sort(([, aObj], [, bObj]) => {
     return (bObj.reputation || 0) - (aObj.reputation || 0);
   });
@@ -344,6 +344,23 @@ export const getNodeDataForCourse = async (id: string): Promise<KnowledgeNode | 
     const logoURL = institutionDocs.docs.length > 0 ? institutionDoc.data().logoURL : "";
     institutionsNodes.push({ ...obj, logoURL, name, id: institutionDoc.id });
   }
+  const nodeReferences = getNodeReferences(nodeData);
+  const convertedReferences: LinkedKnowledgeNode[] = [];
+  for (let reference of nodeReferences) {
+    const referenceData = await retrieveNode(reference.node);
+    if (!referenceData) {
+      continue;
+    }
+    convertedReferences.push({
+      label: reference.label,
+      node: reference.node,
+      title: referenceData.title,
+      nodeSlug: (referenceData.nodeSlug || "") as string,
+      content: referenceData.content,
+      nodeImage: referenceData.nodeImage,
+      nodeType: referenceData.nodeType,
+    });
+  }
   const {
     /* eslint-disable */
     updatedAt,
@@ -363,6 +380,7 @@ export const getNodeDataForCourse = async (id: string): Promise<KnowledgeNode | 
     id,
     ...rest,
     ...convertDateFieldsToString(nodeData),
+    references: convertedReferences,
     children: childrenConverted,
     parents: parentsConverted,
     contributors: contributorsNodes,
