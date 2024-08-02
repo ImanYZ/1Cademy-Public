@@ -335,7 +335,7 @@ const MatchingEdit = ({
           >
             <Box sx={{ display: "flex", flexDirection: "column", gap: "15px", width: "100%" }}>
               <Editor
-                label="Definiition"
+                label="Definition"
                 value={pair?.definition}
                 setValue={value => handleDefinition(value, index)}
                 readOnly={option === "PREVIEW"}

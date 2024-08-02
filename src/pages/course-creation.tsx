@@ -1431,7 +1431,7 @@ const CourseComponent = () => {
       return !course.title.trim();
     }
     if (creatingCourseStep === 1) {
-      return course.hours === 0;
+      return course.hours === 0 || courses[selectedCourseIdx].classSessions === 0;
     }
     if (creatingCourseStep === 2) {
       return (course?.tags || []).length <= 0;
@@ -1620,7 +1620,7 @@ const CourseComponent = () => {
 
         const course = courses[selectedCourseIdx];
         setNodePublicView({ ...node, topic: topicTitle });
-        if (!courses[selectedCourseIdx]?.questions[nodeId]?.length) {
+        if (!(courses[selectedCourseIdx]?.questions || {})[nodeId]?.length) {
           retrieveNodeQuestions(nodeId);
         }
 
@@ -1925,13 +1925,13 @@ const CourseComponent = () => {
             )}
             {(!courses[selectedCourseIdx].new || creatingCourseStep >= 1) && (
               <TextField
-                label="Each Taking"
+                label="Hours Per Session"
                 fullWidth
                 value={courses[selectedCourseIdx].hours || ""}
                 onChange={handleHoursChange}
                 margin="normal"
                 variant="outlined"
-                sx={{ width: "500px" }}
+                sx={{ width: "200px" }}
                 type="number"
                 inputProps={{ min: 0 }}
                 InputLabelProps={{
@@ -2131,7 +2131,7 @@ const CourseComponent = () => {
               </Box>
             ))} */}
 
-          {creatingCourseStep >= 7 &&
+          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 7) &&
             (loadingCourseStructure ? (
               <LinearProgress />
             ) : (
@@ -2880,7 +2880,12 @@ const CourseComponent = () => {
                       )}
                     </Grid>
                   )}
-
+                  {/* <Grid item xs={12} sm={12}>
+                    {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
+                      // <ReferencesList references={nodePublicView.references || []} sx={{ mt: 3 }} />
+                      <LinkedNodes data={nodePublicView?.references || []} header="References" showIcon={false} />
+                    )}
+                  </Grid> */}
                   <Grid item xs={12} sm={12}>
                     <Card sx={{ mt: 3, p: 2 }}>
                       <CardHeader
@@ -3037,7 +3042,7 @@ const CourseComponent = () => {
                               header="What to Learn Before"
                               showIcon={false}
                             />
-                            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                            <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
                               <CustomButton
                                 variant="contained"
                                 type="button"
