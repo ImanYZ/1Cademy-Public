@@ -3882,36 +3882,34 @@ const CourseComponent = () => {
                           )}
 
                           {prompt.type === "Poll" && (
-                            <>
-                              <Typography gutterBottom>Choices:</Typography>
-                              <ChipInput
-                                tags={prompt.choices}
-                                selectedTags={() => {}}
-                                setTags={(newTags: string[]) => {
-                                  const updatedCourses = [...courses];
-                                  const currentTopic =
-                                    updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                      selectedTopic.topicIndex
-                                    ];
-                                  currentTopic.prompts[index].choices = newTags;
+                            <ChipInput
+                              label="Choices"
+                              tags={prompt.choices}
+                              selectedTags={() => {}}
+                              setTags={(newTags: string[]) => {
+                                const updatedCourses = [...courses];
+                                const currentTopic =
+                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                    selectedTopic.topicIndex
+                                  ];
+                                currentTopic.prompts[index].choices = newTags;
 
-                                  setCourses(updatedCourses);
-                                  setSelectedTopic({
-                                    categoryIndex: selectedTopic.categoryIndex,
-                                    topicIndex: selectedTopic.topicIndex,
-                                    ...currentTopic,
-                                  });
-                                  updateCourses({
-                                    id: updatedCourses[selectedCourseIdx].id,
-                                    syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                                  });
-                                }}
-                                fullWidth
-                                variant="outlined"
-                                readOnly={currentImprovement !== null}
-                                placeholder="Type a new choice and click enter ↵ to add it..."
-                              />
-                            </>
+                                setCourses(updatedCourses);
+                                setSelectedTopic({
+                                  categoryIndex: selectedTopic.categoryIndex,
+                                  topicIndex: selectedTopic.topicIndex,
+                                  ...currentTopic,
+                                });
+                                updateCourses({
+                                  id: updatedCourses[selectedCourseIdx].id,
+                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                });
+                              }}
+                              fullWidth
+                              variant="outlined"
+                              readOnly={currentImprovement !== null}
+                              placeholder="Type a new choice and click enter ↵ to add it..."
+                            />
                           )}
                           {currentImprovement !== null ? (
                             <Typography>{prompt.purpose}</Typography>

@@ -18,7 +18,7 @@ const useStyles: any = makeStyles(() => ({
 
 const ChipInput = ({ ...props }) => {
   const classes = useStyles();
-  const { selectedTags, placeholder, tags, readOnly, itemId, setTags, ...other }: any = props;
+  const { selectedTags, placeholder, tags, readOnly, itemId, setTags, label, ...other }: any = props;
   const [inputValue, setInputValue] = React.useState("");
 
   const handleKeyDown = (event: any) => {
@@ -79,6 +79,7 @@ const ChipInput = ({ ...props }) => {
             <div className="">
               {(tags.length > 0 || !readOnly) && (
                 <TextField
+                  label={label || ""}
                   className={classes.inputChip}
                   InputProps={{
                     startAdornment: tags.map((item: any) => (
