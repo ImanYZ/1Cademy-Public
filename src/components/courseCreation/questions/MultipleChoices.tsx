@@ -1,6 +1,6 @@
 // import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DeleteIcon from "@mui/icons-material/Delete";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, IconButton, Switch, Tooltip, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -61,7 +61,7 @@ const Choice = ({
           <Box>
             <Tooltip title={"Delete this choice from this question."}>
               <IconButton onClick={() => deleteChoice(idx)}>
-                <DeleteForeverIcon className="red-text" sx={{ fontSize: "28px" }} />
+                <DeleteIcon sx={{ fontSize: "28px" }} />
               </IconButton>
             </Tooltip>
           </Box>
