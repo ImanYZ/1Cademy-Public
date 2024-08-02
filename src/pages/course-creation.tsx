@@ -368,10 +368,6 @@ const CourseComponent = () => {
   const [prerequisitesLoader, setPrerequisitesLoader] = useState<string | null>(null);
 
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
-  useEffect(() => {
-    if (nodePublicView) {
-    }
-  }, [nodePublicView]);
 
   useEffect(() => {
     if (!user?.uname) return;
@@ -802,8 +798,9 @@ const CourseComponent = () => {
     }, 700);
     setCurrentImprovement(null);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       updateCourses(coursesCopy[selectedCourseIdx], false, true);
+      await triggerSlideAnimation();
       setImprovements((prev: any) => {
         prev.splice(currentChangeIndex, 1);
         return prev;
@@ -825,14 +822,14 @@ const CourseComponent = () => {
     if (newIndex !== -1) {
       setCurrentChangeIndex(newIndex);
       setCurrentImprovement(improvements[newIndex]);
-      triggerSlideAnimation();
     } else {
       setSidebarOpen(false);
       setCurrentImprovement(null);
     }
   };
-  const handleRejectChange = () => {
+  const handleRejectChange = async () => {
     // Skip the current change and move to the next one or close dialog
+    await triggerSlideAnimation();
     setDisplayCourses(null);
     setImprovements((prev: any) => {
       prev.splice(currentChangeIndex, 1);
@@ -1379,13 +1376,19 @@ const CourseComponent = () => {
     }, 700);
   };
   const triggerSlideAnimation = () => {
-    setSlideIn(false);
-    const timeoutId = setTimeout(() => {
-      setSlideDirection(prev => (prev === "right" ? "left" : "right"));
-      setSlideIn(true);
-    }, 1100);
+    return new Promise((resolve, reject) => {
+      setSlideIn(false);
+      const timeoutId = setTimeout(() => {
+        setSlideDirection(prev => (prev === "right" ? "left" : "right"));
+        setSlideIn(true);
+        resolve(true);
+      }, 1100);
 
-    return () => clearTimeout(timeoutId);
+      return () => {
+        clearTimeout(timeoutId);
+        reject(new Error("Animation cancelled"));
+      };
+    });
   };
   const getStepTitle = () => {
     if (creatingCourseStep === 0) {
@@ -2731,7 +2734,7 @@ const CourseComponent = () => {
               <CloseIcon />
             </IconButton>
           </Box>
-          {currentImprovement && (
+          {currentImprovement && Object.keys(improvements[currentChangeIndex] || {}).length > 0 && (
             <Paper sx={{ mx: "-10px", p: "6px" }}>
               <Typography variant="h6">
                 {Object.keys(improvements[currentChangeIndex] || {}).length > 0 ? "AI-Proposed Improvements" : ""}
@@ -2750,9 +2753,10 @@ const CourseComponent = () => {
                         ":hover": { backgroundColor: "#084694" },
                         zIndex: 99999,
                       }}
-                      onClick={() => {
+                      onClick={async () => {
                         setSlideDirection("left");
                         setDisplayCourses(null);
+                        await triggerSlideAnimation();
                         navigateChange(currentChangeIndex - 1);
                       }}
                       disabled={currentImprovement === null}
@@ -2793,9 +2797,10 @@ const CourseComponent = () => {
                     <Button
                       variant="contained"
                       sx={{ minWidth: "32px", p: 0, m: 0 /* , mr: "-14px" */ }}
-                      onClick={() => {
+                      onClick={async () => {
                         setSlideDirection("right");
                         setDisplayCourses(null);
+                        await triggerSlideAnimation();
                         navigateChange(currentChangeIndex + 1);
                       }}
                       disabled={currentImprovement === null}
@@ -3982,7 +3987,7 @@ const CourseComponent = () => {
                             syllabus: updatedCourses[selectedCourseIdx].syllabus,
                           });
                         }}
-                        sx={{ width: "210px" }}
+                        sx={{ width: "120px" }}
                       >
                         Add prompt
                       </CustomButton>
@@ -3993,7 +3998,7 @@ const CourseComponent = () => {
                         color="secondary"
                         onClick={generateMorePromptsForTopic}
                         disabled={loadingPrompt}
-                        sx={{ maxWidth: "45%", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                        sx={{ textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
                       >
                         <Typography
                           className="toolbarDescription"
