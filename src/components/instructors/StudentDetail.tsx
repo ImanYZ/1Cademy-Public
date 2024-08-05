@@ -148,16 +148,19 @@ const StudentDetailHoursTracking = ({
   // Function to check if an entry is paid
   const isPaid = (granularity: string) => {
     const startWeek = moment("10-06-2024", "DD-MM-YYYY");
-
     // Function to get the week number from the start date
 
     switch (selectedGranularity) {
       case "Month":
-        return trackingData.every(entry => {
-          const date = moment(entry.day, "DD-MM-YYYY");
-          const monthName = date.format("MMMM");
-          return monthName === granularity && entry.paid;
-        });
+        return trackingData
+          .filter(entry => {
+            const date = moment(entry.day, "DD-MM-YYYY");
+            const monthName = date.format("MMMM");
+            return monthName === granularity;
+          })
+          .every(entry => {
+            return entry.paid;
+          });
       case "Day":
         return trackingData.some(entry => {
           const date = moment(entry.day, "DD-MM-YYYY");
@@ -166,10 +169,14 @@ const StudentDetailHoursTracking = ({
         });
       case "Week":
         const weekNumber = parseInt(granularity);
-        return trackingData.every(entry => {
-          const date = moment(entry.day, "DD-MM-YYYY");
-          return getWeekNumberFromStart(startWeek.toDate(), date.toDate()) === weekNumber && entry.paid;
-        });
+        return trackingData
+          .filter(entry => {
+            const date = moment(entry.day, "DD-MM-YYYY");
+            getWeekNumberFromStart(startWeek.toDate(), date.toDate()) === weekNumber;
+          })
+          .every(entry => {
+            return entry.paid;
+          });
       default:
         return false;
     }

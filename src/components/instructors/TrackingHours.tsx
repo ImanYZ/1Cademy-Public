@@ -157,6 +157,9 @@ const TrackingHours = () => {
       });
       currentDate = index === 1 ? moment(periodStart).add(15, "days") : moment(periodStart).add(14, "days");
       index++;
+      if (index > 3) {
+        break;
+      }
     }
 
     return periods;
