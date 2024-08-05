@@ -901,6 +901,7 @@ const CourseComponent = () => {
   useEffect(() => {
     if (currentImprovement === null) return;
     let expandCategories = [];
+    let expandDetailsCategory: any = null;
     const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
 
     const currentImprovementCopy: Improvement = { ...currentImprovement };
@@ -986,6 +987,7 @@ const CourseComponent = () => {
       if (currentImprovementCopy.action === "add" && typeof currentImprovementCopy.new_category === "object") {
         const addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
         syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovementCopy.new_category, color: "add" });
+        expandDetailsCategory = { categoryIndex: addAfterIdx + 1, ...currentImprovementCopy.new_category };
         expandCategories.push(currentImprovementCopy.new_category.title);
       }
       if (currentImprovement.action === "modify" && typeof currentImprovement.new_category === "object") {
@@ -1018,6 +1020,9 @@ const CourseComponent = () => {
     if (expandCategories.length > 0) {
       scrollToCategory(expandCategories[0]);
     }
+
+    setSelectedOpenCategory(expandDetailsCategory);
+
     setExpanded(expandCategories || []);
     coursesCopy[selectedCourseIdx].syllabus = syllabus;
     setDisplayCourses(coursesCopy);
