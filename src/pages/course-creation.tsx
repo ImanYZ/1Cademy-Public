@@ -3837,42 +3837,47 @@ const CourseComponent = () => {
                               </Button>
                             )}
                           </Box>
-                          <Select
-                            labelId="type-label"
-                            value={prompt.type}
-                            onChange={e => {
-                              if (currentImprovement !== null) return;
-                              const updatedCourses = [...courses];
-                              const currentTopic =
-                                updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
-                                  selectedTopic.topicIndex
-                                ];
-                              currentTopic.prompts[index].type = e.target.value;
-                              if (e.target.value !== "Poll") {
-                                delete currentTopic.prompts[index].choices;
-                              }
-                              setCourses(updatedCourses);
-                              setSelectedTopic({
-                                categoryIndex: selectedTopic.categoryIndex,
-                                topicIndex: selectedTopic.topicIndex,
-                                ...currentTopic,
-                              });
-                              updateCourses({
-                                id: updatedCourses[selectedCourseIdx].id,
-                                syllabus: updatedCourses[selectedCourseIdx].syllabus,
-                              });
-                            }}
-                            label="type"
-                            MenuProps={{
-                              sx: {
-                                zIndex: "9999",
-                              },
-                            }}
-                            sx={{ mb: 2 }}
-                          >
-                            <MenuItem value="Poll">Poll</MenuItem>
-                            <MenuItem value="Open-Ended">Open-Ended</MenuItem>
-                          </Select>
+                          <FormControl sx={{ mb: 2, width: "100%" }}>
+                            <InputLabel id="type-label" sx={{ color: "blue" }}>
+                              Type
+                            </InputLabel>
+                            <Select
+                              labelId="type-label"
+                              value={prompt.type}
+                              onChange={e => {
+                                if (currentImprovement !== null) return;
+                                const updatedCourses = [...courses];
+                                const currentTopic =
+                                  updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[
+                                    selectedTopic.topicIndex
+                                  ];
+                                currentTopic.prompts[index].type = e.target.value;
+                                if (e.target.value !== "Poll") {
+                                  delete currentTopic.prompts[index].choices;
+                                }
+                                setCourses(updatedCourses);
+                                setSelectedTopic({
+                                  categoryIndex: selectedTopic.categoryIndex,
+                                  topicIndex: selectedTopic.topicIndex,
+                                  ...currentTopic,
+                                });
+                                updateCourses({
+                                  id: updatedCourses[selectedCourseIdx].id,
+                                  syllabus: updatedCourses[selectedCourseIdx].syllabus,
+                                });
+                              }}
+                              label="type"
+                              MenuProps={{
+                                sx: {
+                                  zIndex: "9999",
+                                },
+                              }}
+                              sx={{ mb: 2 }}
+                            >
+                              <MenuItem value="Poll">Poll</MenuItem>
+                              <MenuItem value="Open-Ended">Open-Ended</MenuItem>
+                            </Select>
+                          </FormControl>
                           {currentImprovement !== null ? (
                             <Typography>{prompt.text}</Typography>
                           ) : (
