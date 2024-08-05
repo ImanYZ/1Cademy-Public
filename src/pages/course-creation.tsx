@@ -902,6 +902,7 @@ const CourseComponent = () => {
     if (currentImprovement === null) return;
     let expandCategories = [];
     let expandDetailsCategory: any = null;
+    let expandDetailsTopic: any = null;
     const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
 
     const currentImprovementCopy: Improvement = { ...currentImprovement };
@@ -965,6 +966,8 @@ const CourseComponent = () => {
 
         const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
         syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
+        expandDetailsTopic = { categoryIndex, topicIndex: afterIndex + 1, ...newTopic };
+
         expandCategories.push(currentImprovementCopy.category);
       } else if (currentImprovementCopy.action === "modify") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
@@ -1022,6 +1025,7 @@ const CourseComponent = () => {
     }
 
     setSelectedOpenCategory(expandDetailsCategory);
+    setSelectedTopic(expandDetailsTopic);
 
     setExpanded(expandCategories || []);
     coursesCopy[selectedCourseIdx].syllabus = syllabus;
