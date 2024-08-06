@@ -418,6 +418,8 @@ const CourseComponent = () => {
   const [questionsLoader, setQuestionsLoader] = useState<boolean>(false);
   const [prerequisitesLoader, setPrerequisitesLoader] = useState<string | null>(null);
 
+  const [currentUsedPrompt, setCurrentUsedPrompt] = useState<string>("");
+
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
 
   useEffect(() => {
@@ -1174,14 +1176,15 @@ const CourseComponent = () => {
     const targetLearners = courses[selectedCourseIdx].learners;
     const classSessions = courses[selectedCourseIdx].classSessions;
     const sessionHours = courses[selectedCourseIdx].hours;
-    const response = await Post("/generateCoursePrerequisites", {
+    const response = (await Post("/generateCoursePrerequisites", {
       courseTitle,
       targetLearners,
       classSessions,
       sessionHours,
-    });
+    })) as { prompt: string; coursePrerequisites: string };
+    setCurrentUsedPrompt(response.prompt);
     setCourses((prev: any) => {
-      prev[selectedCourseIdx].prerequisiteKnowledge = response;
+      prev[selectedCourseIdx].prerequisiteKnowledge = response.coursePrerequisites;
       if (!prev[selectedCourseIdx].new) {
         updateCourses(prev[selectedCourseIdx]);
       }
@@ -1196,15 +1199,19 @@ const CourseComponent = () => {
     const sessionHours = courses[selectedCourseIdx].hours;
     const classSessions = courses[selectedCourseIdx].classSessions;
     const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
-    const response = await Post("/generateCourseDescription", {
+    const response = (await Post("/generateCourseDescription", {
       courseTitle,
       targetLearners,
       sessionHours,
       classSessions,
       prerequisiteKnowledge,
-    });
+    })) as {
+      description: string;
+      prompt: string;
+    };
+    setCurrentUsedPrompt(response.prompt);
     setCourses((prev: any) => {
-      prev[selectedCourseIdx].description = response;
+      prev[selectedCourseIdx].description = response.description;
       if (!prev[selectedCourseIdx].new) {
         updateCourses(prev[selectedCourseIdx]);
       }
@@ -1221,16 +1228,17 @@ const CourseComponent = () => {
     const sessionHours = courses[selectedCourseIdx].hours;
     const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
 
-    const response = await Post("/generateCourseObjectives", {
+    const response = (await Post("/generateCourseObjectives", {
       courseTitle,
       targetLearners,
       courseDescription,
       prerequisiteKnowledge,
       classSessions,
       sessionHours,
-    });
+    })) as { objectives: string[]; prompt: string };
+    setCurrentUsedPrompt(response.prompt);
     setCourses((prev: any) => {
-      prev[selectedCourseIdx].courseObjectives = response;
+      prev[selectedCourseIdx].courseObjectives = response.objectives;
       updateCourses(prev[selectedCourseIdx]);
       return prev;
     });
@@ -1281,7 +1289,7 @@ const CourseComponent = () => {
     const tags = courses[selectedCourseIdx].tags;
     const references = courses[selectedCourseIdx].references;
 
-    const response: any = await Post("/generateCourseSyllabus", {
+    const response = (await Post("/generateCourseSyllabus", {
       courseId: courses[selectedCourseIdx].id,
       courseTitle,
       targetLearners,
@@ -1293,11 +1301,12 @@ const CourseComponent = () => {
       classSessions,
       tags,
       references,
-    });
-
-    if (response.length > 0) {
+    })) as { categories: Category[]; prompt: string };
+    setCurrentUsedPrompt(response.prompt);
+    if (response && response.categories.length > 0) {
+      const scrollTo = (response.categories.at(-1) as Category).title;
       setTimeout(() => {
-        scrollToCategory(response.at(-1).category);
+        scrollToCategory(scrollTo);
       }, 1000);
     }
 
@@ -2627,6 +2636,21 @@ const CourseComponent = () => {
                   Continue
                 </LoadingButton>
               </Box>
+            </Box>
+          )}
+          {currentUsedPrompt && (
+            <Box>
+              <Typography sx={{ fontWeight: "bold" }}>Prompt:</Typography>
+              <Typography sx={{ mt: "15px" }}>
+                <MarkdownRender
+                  text={currentUsedPrompt || ""}
+                  sx={{
+                    fontSize: "16px",
+                    fontWeight: 400,
+                    letterSpacing: "inherit",
+                  }}
+                />
+              </Typography>
             </Box>
           )}
           <Dialog

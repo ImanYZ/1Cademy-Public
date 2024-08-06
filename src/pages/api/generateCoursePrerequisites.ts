@@ -6,7 +6,7 @@ const generateCoursePrerequisites = async (
   targetLearners: string,
   classSessions: number,
   sessionHours: number
-) => {
+): Promise<{ coursePrerequisites: string; prompt: string }> => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, target learners, number of class sessions, and number of hours per class session, your task is to generate the detailed prerequisite knowledge for taking the course, as a long string. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated prerequisites will be reviewed by a supervisory team. For helpful prerequisites, we will pay you $100 and for an unhelpful one, you'll lose $100.
 
@@ -45,22 +45,19 @@ Your generated prerequisites will be reviewed by a supervisory team. For helpful
   };
 
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
-  const prerequisiteKnowledge = response.prerequisiteKnowledge;
-  console.log(prerequisiteKnowledge);
-  return prerequisiteKnowledge;
+  const coursePrerequisites = response.prerequisiteKnowledge;
+  console.log(coursePrerequisites);
+  return { coursePrerequisites, prompt: systemPrompt };
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseTitle, targetLearners, classSessions, sessionHours } = req.body;
-    const coursePrerequisites = await generateCoursePrerequisites(
-      courseTitle,
-      targetLearners,
-      classSessions,
-      sessionHours
-    ).catch(console.error);
-    console.log("Prerequisites ==>", coursePrerequisites);
-    return res.status(200).json(coursePrerequisites);
+    const response = (await generateCoursePrerequisites(courseTitle, targetLearners, classSessions, sessionHours).catch(
+      console.error
+    )) as { coursePrerequisites: string; prompt: string };
+    console.log("Prerequisites ==>", response.coursePrerequisites);
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({});
   }
