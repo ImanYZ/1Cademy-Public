@@ -18,7 +18,18 @@ const useStyles: any = makeStyles(() => ({
 
 const ChipInput = ({ ...props }) => {
   const classes = useStyles();
-  const { selectedTags, placeholder, tags, readOnly, itemId, setTags, label, ...other }: any = props;
+  const {
+    selectedTags,
+    placeholder,
+    tags,
+    readOnly,
+    itemId,
+    setTags,
+    label,
+    added = [],
+    removed = [],
+    ...other
+  }: any = props;
   const [inputValue, setInputValue] = React.useState("");
 
   const handleKeyDown = (event: any) => {
@@ -82,22 +93,33 @@ const ChipInput = ({ ...props }) => {
                   label={label || ""}
                   className={classes.inputChip}
                   InputProps={{
-                    startAdornment: tags.map((item: any) => (
-                      <>
-                        {readOnly ? (
-                          <Chip key={item} tabIndex={-1} label={item} className={classes.innerChip} />
-                        ) : (
-                          <Chip
-                            key={item}
-                            tabIndex={-1}
-                            label={item}
-                            disabled={readOnly}
-                            className={classes.innerChip}
-                            onDelete={handleDelete(item)}
-                          />
-                        )}
-                      </>
-                    )),
+                    startAdornment: tags.map((item: any) => {
+                      const color = added.includes(item) ? "green" : removed.includes(item) ? "red" : "";
+                      return (
+                        <>
+                          {readOnly ? (
+                            <Chip
+                              sx={{
+                                backgroundColor: color,
+                              }}
+                              key={item}
+                              tabIndex={-1}
+                              label={item}
+                              className={classes.innerChip}
+                            />
+                          ) : (
+                            <Chip
+                              key={item}
+                              tabIndex={-1}
+                              label={item}
+                              disabled={readOnly}
+                              className={classes.innerChip}
+                              onDelete={handleDelete(item)}
+                            />
+                          )}
+                        </>
+                      );
+                    }),
                     onBlur,
                     onChange: event => {
                       handleInputChange(event);
