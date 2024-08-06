@@ -10,6 +10,8 @@ module.exports = {
       "1cademy.us",
       "randomuser.me",
       "img.freepik.com",
+      "storage.cloud.google.com",
+      "www.core-econ.org",
     ],
     minimumCacheTTL: 315360,
   },

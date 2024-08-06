@@ -61,6 +61,7 @@ import { QuestionProps } from "src/types";
 import { INode } from "src/types/INode";
 
 import ChipInput from "@/components/ChipInput";
+import PrerequisiteNodes from "@/components/courseCreation/PublicView/prerequisiteNodes";
 import CaseStudy from "@/components/courseCreation/questions/CaseStudy";
 import Essay from "@/components/courseCreation/questions/Essay";
 import FillInTheBlank from "@/components/courseCreation/questions/FillInTheBlank";
@@ -887,7 +888,9 @@ const CourseComponent = () => {
       prev.splice(currentChangeIndex, 1);
       return prev;
     });
-    navigateChange(currentChangeIndex);
+    setTimeout(() => {
+      navigateChange(currentChangeIndex);
+    }, 500);
   };
 
   /*  */
@@ -1699,25 +1702,25 @@ const CourseComponent = () => {
           retrieveNodeQuestions(nodeId);
         }
 
-        // if (!node?.updatedStr) {
-        setNodePublicViewLoader(true);
-        const nodeResponse = await getNodeDataForCourse(nodeId);
-        const updatedData = {
-          ...node,
-          createdStr,
-          updatedStr,
-          keywords,
-          children: nodeResponse.children,
-          parents: nodeResponse.parents,
-          contributors: nodeResponse.contributors,
-          institutions: nodeResponse.institutions,
-          references: nodeResponse.references,
-        };
-        course.nodes[topicTitle][idx] = updatedData;
-        setNodePublicView({ ...updatedData, topic: topicTitle });
-        updateCourses(course);
-        setNodePublicViewLoader(false);
-        // }
+        if (!("updatedStr" in (node ?? {}))) {
+          setNodePublicViewLoader(true);
+          const nodeResponse = await getNodeDataForCourse(nodeId);
+          const updatedData = {
+            ...node,
+            createdStr,
+            updatedStr,
+            keywords,
+            children: nodeResponse.children,
+            parents: nodeResponse.parents,
+            contributors: nodeResponse.contributors,
+            institutions: nodeResponse.institutions,
+            references: nodeResponse.references,
+          };
+          course.nodes[topicTitle][idx] = updatedData;
+          setNodePublicView({ ...updatedData, topic: topicTitle });
+          updateCourses(course);
+          setNodePublicViewLoader(false);
+        }
       }
     },
     [courses, selectedCourseIdx, updateCourses]
@@ -2953,7 +2956,12 @@ const CourseComponent = () => {
                   <Grid item xs={12} sm={12}>
                     {(nodePublicView?.references || [])?.length > 0 && (
                       // <ReferencesList references={nodePublicView.references || []} sx={{ mt: 3 }} />
-                      <LinkedNodes data={nodePublicView?.references || []} header="Source Material" showIcon={false} />
+                      <LinkedNodes
+                        data={nodePublicView?.references || []}
+                        header="Source Material"
+                        showIcon={false}
+                        openInNewTab={true}
+                      />
                     )}
                   </Grid>
                   <Grid item xs={12} sm={12}>
@@ -3108,15 +3116,10 @@ const CourseComponent = () => {
                           />
                         </Card>
                       </Grid>
-                      <Grid item xs={12} sm={12}>
+                      <Grid mt={2} item xs={12} sm={12}>
                         {nodePublicView?.parents && nodePublicView?.parents?.length > 0 && (
                           <>
-                            <LinkedNodes
-                              data={nodePublicView?.parents || []}
-                              header="What to Learn Before"
-                              showIcon={false}
-                              readonly={true}
-                            />
+                            <PrerequisiteNodes header="What to Learn Before" nodes={nodePublicView?.parents || []} />
                             <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
                               <CustomButton
                                 variant="contained"
@@ -3141,12 +3144,7 @@ const CourseComponent = () => {
                       <Grid item xs={12} sm={12}>
                         {nodePublicView?.children && nodePublicView?.children?.length > 0 && (
                           <>
-                            <LinkedNodes
-                              data={nodePublicView?.children || []}
-                              header="What to Learn After"
-                              showIcon={false}
-                              readonly={true}
-                            />
+                            <PrerequisiteNodes header="What to Learn After" nodes={nodePublicView?.children || []} />
                             <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                               <CustomButton
                                 variant="contained"
