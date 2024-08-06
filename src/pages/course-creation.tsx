@@ -887,7 +887,9 @@ const CourseComponent = () => {
       prev.splice(currentChangeIndex, 1);
       return prev;
     });
-    navigateChange(currentChangeIndex);
+    setTimeout(() => {
+      navigateChange(currentChangeIndex);
+    }, 500);
   };
 
   /*  */
