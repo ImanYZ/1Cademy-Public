@@ -62,6 +62,7 @@ import { INode } from "src/types/INode";
 
 import ChipInput from "@/components/ChipInput";
 import PrerequisiteNodes from "@/components/courseCreation/PublicView/prerequisiteNodes";
+import Topics from "@/components/courseCreation/PublicView/topics";
 import CaseStudy from "@/components/courseCreation/questions/CaseStudy";
 import Essay from "@/components/courseCreation/questions/Essay";
 import FillInTheBlank from "@/components/courseCreation/questions/FillInTheBlank";
@@ -187,6 +188,7 @@ interface Course {
   uname: string;
   updatedAt: Timestamp;
   doneLoadingNodes: boolean;
+  topics?: { [key: string]: string[] };
 }
 
 // interface  {
@@ -3076,6 +3078,14 @@ const CourseComponent = () => {
                         </CustomButton>
                       </Box>
                     </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={12}>
+                    {(courses[selectedCourseIdx]?.topics?.[nodePublicView?.node] || [])?.length > 0 && (
+                      <Topics
+                        topics={courses[selectedCourseIdx]?.topics?.[nodePublicView.node] || []}
+                        header="Topics"
+                      />
+                    )}
                   </Grid>
 
                   {/* <Grid item xs={12} sm={12}>

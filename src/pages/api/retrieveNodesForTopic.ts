@@ -137,6 +137,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       topic
     );
     await db.runTransaction(async (t: any) => {
+      const coursesRef = await t.get(db.collection("coursesAI").where("deleted", "==", false));
       const courseDoc = await t.get(db.collection("coursesAI").doc(courseId));
       const courseData = courseDoc.data();
       if (!!courseData?.nodes) {
@@ -144,7 +145,23 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       } else {
         courseData.nodes = { [topic]: nodes };
       }
+
       t.update(courseDoc.ref, courseData);
+
+      for (const doc of coursesRef.docs) {
+        const docData = doc.data();
+        const nodeTopics = docData?.topics || {};
+        let topics = {};
+        for (const node of nodes) {
+          const nodeExist = courseData.nodes[topic].find((n: any) => n.node === node.node);
+          if (nodeExist) {
+            topics = { ...topics, [node.node]: [...(nodeTopics?.[node.node] || []), topic] };
+          }
+        }
+        if (Object.keys(topics).length > 0) {
+          t.update(doc.ref, { topics });
+        }
+      }
     });
 
     console.log("nodes ==>", nodes);
