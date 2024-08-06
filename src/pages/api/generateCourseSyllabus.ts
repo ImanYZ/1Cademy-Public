@@ -17,7 +17,7 @@ const generateCourseSyllabus = async (
   courseDescription: string,
   courseObjectives: string[],
   courseSkills: string[]
-) => {
+): Promise<{ categories: any; prompt: string }> => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, and skills, your task is to generate a JSON object with an array of categories, where each category includes a title and an array of topic titles. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated categories and topics will be reviewed by a supervisory team. For every helpful category or topic, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
@@ -141,7 +141,7 @@ Generate a JSON object with an array of categories. Each category should include
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
   const categories = response.categories;
   console.log(JSON.stringify(categories, null, 2));
-  return categories;
+  return { categories, prompt: systemPrompt };
 };
 
 const generateCourseCategory = async (
@@ -502,7 +502,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       references,
     } = req.body;
 
-    const categories = await generateCourseSyllabus(
+    const { categories, prompt } = (await generateCourseSyllabus(
       courseTitle,
       targetLearners,
       hours,
@@ -511,7 +511,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       courseDescription,
       courseObjectives,
       courseSkills
-    ).catch(console.error);
+    ).catch(console.error)) as { categories: any; prompt: string };
 
     const courseRef = db.collection("coursesAI").doc(courseId);
     const _categories = JSON.parse(JSON.stringify(categories));
@@ -599,7 +599,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       });
     });
 
-    return res.status(200).json({});
+    return res.status(200).json({ prompt, categories });
   } catch (error) {
     console.log("error", error);
     return res.status(500).json({});
