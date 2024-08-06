@@ -129,6 +129,7 @@ interface Topic {
   imageUrl: string;
   color?: string;
   action?: string;
+  comparison?: any;
 }
 
 interface Improvement {
@@ -159,6 +160,7 @@ interface Category {
   imageUrl: string;
   color?: string;
   action?: string;
+  comparison?: any;
 }
 
 interface Course {
@@ -259,51 +261,99 @@ function getStyles(name: string, personName: string[], theme: Theme) {
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
+const getArrayDifferences = (oldArray: string[], newArray: string[]) => {
+  return {
+    added: newArray.filter(item => !oldArray.includes(item)),
+    removed: oldArray.filter(item => !newArray.includes(item)),
+  };
+};
 
-// const compareTopics = (oldTopic: Topic, newTopic: Topic) => {
-//   let differences: any = {};
+const getPromptsDifferences = (oldPrompts: Prompt[], newPrompts: Prompt[]) => {
+  const oldPromptsTexts = oldPrompts.map((p: Prompt) => p.text);
+  const newPromptTexts = newPrompts.map((p: Prompt) => p.text);
+  return {
+    added: newPromptTexts.filter(item => !oldPromptsTexts.includes(item)),
+    removed: oldPromptsTexts.filter(item => !newPromptTexts.includes(item)),
+  };
+};
+const compareTopics = (oldTopic: Topic, newTopic: Topic) => {
+  let differences: any = {};
 
-//   // Compare each attribute
-//   if (oldTopic.difficulty !== newTopic.difficulty) {
-//     differences.difficulty = { old: oldTopic.difficulty, new: newTopic.difficulty };
-//   }
+  if (oldTopic.difficulty !== newTopic.difficulty) {
+    differences.difficulty = {
+      old: oldTopic.difficulty,
+      new: newTopic.difficulty,
+    };
+  }
 
-//   if (oldTopic.hours !== newTopic.hours) {
-//     differences.hours = { old: oldTopic.hours, new: newTopic.hours };
-//   }
+  if (oldTopic.hours !== newTopic.hours) {
+    differences.hours = { old: oldTopic.hours, new: newTopic.hours };
+  }
 
-//   if (JSON.stringify(oldTopic.prerequisiteKnowledge) !== JSON.stringify(newTopic.prerequisiteKnowledge)) {
-//     differences.prerequisiteKnowledge = {
-//       old: oldTopic.prerequisiteKnowledge,
-//       new: newTopic.prerequisiteKnowledge,
-//     };
-//   }
+  if (JSON.stringify(oldTopic.prerequisiteKnowledge) !== JSON.stringify(newTopic.prerequisiteKnowledge)) {
+    differences.prerequisiteKnowledge = {
+      old: oldTopic.prerequisiteKnowledge,
+      new: newTopic.prerequisiteKnowledge,
+    };
+  }
 
-//   if (JSON.stringify(oldTopic.prompts) !== JSON.stringify(newTopic.prompts)) {
-//     differences.prompts = { old: oldTopic.prompts, new: newTopic.prompts };
-//   }
+  if (JSON.stringify(oldTopic.prompts) !== JSON.stringify(newTopic.prompts)) {
+    differences.prompts = getPromptsDifferences(oldTopic.prompts, newTopic.prompts);
+  }
 
-//   if (JSON.stringify(oldTopic.objectives) !== JSON.stringify(newTopic.objectives)) {
-//     differences.objectives = { old: oldTopic.objectives, new: newTopic.objectives };
-//   }
+  if (JSON.stringify(oldTopic.objectives) !== JSON.stringify(newTopic.objectives)) {
+    differences.objectives = getArrayDifferences(oldTopic.objectives, newTopic.objectives);
+  }
+  if (JSON.stringify(oldTopic.skills) !== JSON.stringify(newTopic.skills)) {
+    differences.skills = getArrayDifferences(oldTopic.skills, newTopic.skills);
+  }
 
-//   if (JSON.stringify(oldTopic.skills) !== JSON.stringify(newTopic.skills)) {
-//     differences.skills = { old: oldTopic.skills, new: newTopic.skills };
-//   }
+  if (oldTopic.title !== newTopic.title) {
+    differences.title = { old: oldTopic.title, new: newTopic.title };
+  }
 
-//   if (oldTopic.title !== newTopic.title) {
-//     differences.title = { old: oldTopic.title, new: newTopic.title };
-//   }
+  if (oldTopic.description !== newTopic.description) {
+    differences.description = {
+      old: oldTopic.description,
+      new: newTopic.description,
+    };
+  }
 
-//   if (oldTopic.description !== newTopic.description) {
-//     differences.description = {
-//       old: oldTopic.description,
-//       new: newTopic.description,
-//     };
-//   }
+  return differences;
+};
 
-//   return differences;
-// };
+const compareCategories = (oldCategory: Category, newCategory: Category) => {
+  let differences: any = {};
+
+  if (oldCategory.title !== newCategory.title) {
+    differences.title = { old: oldCategory.title, new: newCategory.title };
+  }
+
+  if (oldCategory.description !== newCategory.description) {
+    differences.description = { old: oldCategory.description, new: newCategory.description };
+  }
+
+  if (JSON.stringify(oldCategory.objectives) !== JSON.stringify(newCategory.objectives)) {
+    differences.objectives = getArrayDifferences(oldCategory.objectives, newCategory.objectives);
+  }
+
+  if (JSON.stringify(oldCategory.prerequisiteKnowledge) !== JSON.stringify(newCategory.prerequisiteKnowledge)) {
+    differences.prerequisiteKnowledge = getArrayDifferences(
+      oldCategory.prerequisiteKnowledge,
+      newCategory.prerequisiteKnowledge
+    );
+  }
+
+  if (JSON.stringify(oldCategory.skills) !== JSON.stringify(newCategory.skills)) {
+    differences.skills = getArrayDifferences(oldCategory.skills, newCategory.skills);
+  }
+
+  if (JSON.stringify(oldCategory.prompts) !== JSON.stringify(newCategory.prompts)) {
+    differences.prompts = getPromptsDifferences(oldCategory.prompts, newCategory.prompts);
+  }
+
+  return differences;
+};
 
 const CourseComponent = () => {
   const theme = useTheme();
@@ -817,9 +867,10 @@ const CourseComponent = () => {
     if (index >= improvements.length && improvements.length > 0) {
       newIndex = 0;
     }
-    if (index <= 0 && improvements.length > 0) {
+    if (index < 0 && improvements.length > 0) {
       newIndex = improvements.length - 1;
     }
+
     if (newIndex !== -1) {
       setCurrentChangeIndex(newIndex);
       setCurrentImprovement(improvements[newIndex]);
@@ -902,6 +953,7 @@ const CourseComponent = () => {
     if (currentImprovement === null) return;
     let expandCategories = [];
     let expandDetailsCategory: any = null;
+    let expandDetailsTopic: any = null;
     const coursesCopy: Course[] = JSON.parse(JSON.stringify(courses));
 
     const currentImprovementCopy: Improvement = { ...currentImprovement };
@@ -965,6 +1017,8 @@ const CourseComponent = () => {
 
         const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
         syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
+        expandDetailsTopic = { categoryIndex, topicIndex: afterIndex + 1, ...newTopic };
+
         expandCategories.push(currentImprovementCopy.category);
       } else if (currentImprovementCopy.action === "modify") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
@@ -972,11 +1026,15 @@ const CourseComponent = () => {
           const topicIdx = syllabus[categoryIdx].topics.findIndex(
             (tp: any) => tp.title === currentImprovement.old_topic
           );
+
           if (topicIdx !== -1) {
+            const comparison = compareTopics(syllabus[categoryIdx].topics[topicIdx], currentImprovement.new_topic);
             syllabus[categoryIdx].topics[topicIdx] = {
               ...currentImprovement.new_topic,
+              comparison,
               color: "change",
             };
+            expandDetailsTopic = { categoryIdx, topicIndex: topicIdx, comparison, ...currentImprovement.new_topic };
           }
         }
         expandCategories.push(currentImprovementCopy.category);
@@ -992,8 +1050,15 @@ const CourseComponent = () => {
       }
       if (currentImprovement.action === "modify" && typeof currentImprovement.new_category === "object") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.old_category);
+        const comparison = compareCategories(syllabus[categoryIdx], currentImprovementCopy.new_category as Category);
+
         if (categoryIdx !== -1) {
-          syllabus[categoryIdx] = currentImprovement.new_category;
+          syllabus[categoryIdx] = { ...currentImprovement.new_category, comparison, color: "change" };
+          expandDetailsCategory = {
+            categoryIndex: categoryIdx,
+            ...(currentImprovementCopy.new_category as Category),
+            comparison,
+          };
         }
         expandCategories.push(currentImprovement.old_category);
       }
@@ -1022,6 +1087,7 @@ const CourseComponent = () => {
     }
 
     setSelectedOpenCategory(expandDetailsCategory);
+    setSelectedTopic(expandDetailsTopic);
 
     setExpanded(expandCategories || []);
     coursesCopy[selectedCourseIdx].syllabus = syllabus;
@@ -2218,45 +2284,30 @@ const CourseComponent = () => {
                 >
                   <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
                     <DragIndicatorIcon />
-                    {currentImprovement !== null &&
-                    typeof currentImprovement.new_category === "object" &&
-                    currentImprovement.type === "category" &&
-                    currentImprovement.action === "modify" &&
-                    currentImprovement.old_category === category.title ? (
-                      <Box sx={{ display: "flex", gap: "5px", width: "100%", justifyContent: "space-between" }}>
-                        <Box sx={{ display: "flex", gap: "5px" }}>
-                          <Typography variant="h6" sx={{ textDecoration: "line-through" }}>
-                            {category.title}
-                          </Typography>
-                          <Typography variant="h6" sx={{ color: "green" }}>
-                            {currentImprovement.new_category.title}
-                          </Typography>
+
+                    <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          color: getColor(category.color),
+                        }}
+                      >
+                        {category.title}
+                      </Typography>
+                      {expanded.includes(category.title) && currentImprovement === null && (
+                        <Box sx={{ ml: "14px" }}>
+                          <Button
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleOpenDialog(categoryIndex);
+                            }}
+                          >
+                            Add topic
+                          </Button>
                         </Box>
-                      </Box>
-                    ) : (
-                      <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            color: getColor(category.color),
-                          }}
-                        >
-                          {category.title}
-                        </Typography>
-                        {expanded.includes(category.title) && currentImprovement === null && (
-                          <Box sx={{ ml: "14px" }}>
-                            <Button
-                              onClick={e => {
-                                e.stopPropagation();
-                                handleOpenDialog(categoryIndex);
-                              }}
-                            >
-                              Add topic
-                            </Button>
-                          </Box>
-                        )}
-                      </Box>
-                    )}
+                      )}
+                    </Box>
+
                     {!category.hasOwnProperty("topics") && !getCourses()[selectedCourseIdx].done && (
                       <LinearProgress sx={{ width: "100%" }} />
                     )}
@@ -3170,7 +3221,17 @@ const CourseComponent = () => {
               <Paper sx={{ mx: "-10px", p: "6px", display: selectedTopic || selectedOpenCategory ? "block" : "none" }}>
                 {selectedOpenCategory && (
                   <Box sx={{ display: "flex", flexDirection: "column", gap: "15px", p: "10px" }}>
-                    {currentImprovement !== null ? (
+                    {selectedOpenCategory.comparison && selectedOpenCategory.comparison.description ? (
+                      <Box>
+                        <Typography>Title:</Typography>
+                        <Typography sx={{ color: "red", textDecoration: "line-through" }}>
+                          {selectedOpenCategory.comparison.description?.old}
+                        </Typography>
+                        <Typography sx={{ color: "green" }}>
+                          {selectedOpenCategory.comparison.description?.new}
+                        </Typography>
+                      </Box>
+                    ) : currentImprovement !== null ? (
                       <Typography variant="h3">{selectedOpenCategory.title}</Typography>
                     ) : (
                       <TextField
@@ -3205,7 +3266,17 @@ const CourseComponent = () => {
                         }}
                       />
                     )}
-                    {currentImprovement !== null ? (
+                    {selectedOpenCategory.comparison && selectedOpenCategory.comparison.description ? (
+                      <Box>
+                        <Typography>Description:</Typography>
+                        <Typography sx={{ color: "red", textDecoration: "line-through" }}>
+                          {selectedOpenCategory.comparison.description?.old}
+                        </Typography>
+                        <Typography sx={{ color: "green" }}>
+                          {selectedOpenCategory.comparison.description?.new}
+                        </Typography>
+                      </Box>
+                    ) : currentImprovement !== null ? (
                       <Typography>{selectedOpenCategory?.description}</Typography>
                     ) : (
                       <TextField
@@ -3242,31 +3313,33 @@ const CourseComponent = () => {
                         }}
                       />
                     )}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <Typography sx={{ fontSize: "19px" }}>Category Image:</Typography>
-                      {loadingImage ? (
-                        <LinearProgress sx={{ width: "40px" }} />
-                      ) : (
-                        <AutoFixHighIcon
-                          sx={{
-                            // backgroundColor: "grey",
-                            // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
-                            color: "orange",
-                            borderRadius: "50%",
-                            ":hover": {
-                              backgroundColor: "black",
-                              display: "block",
-                            },
-                            zIndex: 10,
-                            padding: "5px",
-                            cursor: "pointer",
-                            fontSize: "30px",
-                            height: "100%",
-                          }}
-                          onClick={generateImageForCategory}
-                        />
-                      )}
-                    </Box>
+                    {currentImprovement === null && (
+                      <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                        <Typography sx={{ fontSize: "19px" }}>Category Image:</Typography>
+                        {loadingImage ? (
+                          <LinearProgress sx={{ width: "40px" }} />
+                        ) : (
+                          <AutoFixHighIcon
+                            sx={{
+                              // backgroundColor: "grey",
+                              // color: theme => (theme.palette.mode === "dark" ? "white" : "black"),
+                              color: "orange",
+                              borderRadius: "50%",
+                              ":hover": {
+                                backgroundColor: "black",
+                                display: "block",
+                              },
+                              zIndex: 10,
+                              padding: "5px",
+                              cursor: "pointer",
+                              fontSize: "30px",
+                              height: "100%",
+                            }}
+                            onClick={generateImageForCategory}
+                          />
+                        )}
+                      </Box>
+                    )}
                     {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
 
                     <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
@@ -3290,35 +3363,13 @@ const CourseComponent = () => {
                         });
                       }}
                       fullWidth
+                      added={selectedOpenCategory?.comparison?.objectives?.added || []}
+                      removed={selectedOpenCategory?.comparison?.objectives?.removed || []}
                       variant="outlined"
                       readOnly={currentImprovement !== null}
                       placeholder="Type a new skill and click enter ↵ to add it..."
                     />
-                    {/* <Typography sx={{ mt: "5px", fontWeight: "bold", mb: "3px" }}>Skills:</Typography>
-              <ChipInput
-                tags={selectedOpenCategory?.skills || []}
-                selectedTags={() => {}}
-                setTags={(newTags: string[]) => {
-                  const updatedCourses = [...courses];
-                  updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex] = {
-                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                    skills: newTags,
-                  };
-                  setSelectedOpenCategory({
-                    categoryIndex: selectedOpenCategory.categoryIndex,
-                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                  });
-                  setCourses(updatedCourses);
-                  updateCourses({
-                    id: updatedCourses[selectedCourse].id,
-                    syllabus: updatedCourses[selectedCourse].syllabus,
-                  });
-                }}
-                fullWidth
-                variant="outlined"
-                readOnly={false}
-                placeholder="Type a new skill and click enter ↵ to add it..."
-              /> */}
+
                     <Typography sx={{ fontWeight: "bold" }}>Prerequisite knowledge:</Typography>
                     <ChipInput
                       tags={selectedOpenCategory?.prerequisiteKnowledge || []}
@@ -3339,188 +3390,26 @@ const CourseComponent = () => {
                           syllabus: updatedCourses[selectedCourseIdx].syllabus,
                         });
                       }}
+                      added={selectedOpenCategory?.comparison?.prerequisiteKnowledge?.added || []}
+                      removed={selectedOpenCategory?.comparison?.prerequisiteKnowledge?.removed || []}
                       fullWidth
                       variant="outlined"
                       readOnly={currentImprovement !== null}
                       placeholder="Type a new prerequisite knowledge and click enter ↵ to add it..."
                     />
-                    {/* <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Prompts:</Typography>
-              {(selectedOpenCategory?.prompts || []).map((prompt: any, index: number) => (
-                <Box key={index}>
-                  <Box sx={{ marginTop: 4 }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Typography gutterBottom>Prompt {index + 1}:</Typography>
-                      <Button
-                        onClick={() => {
-                          const updatedCourses = [...courses];
-                          const currentTopic =
-                            updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                          currentTopic.prompts.splice(index, 1);
-
-                          setCourses(updatedCourses);
-                          setSelectedOpenCategory({
-                            categoryIndex: selectedOpenCategory.categoryIndex,
-                            ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                          });
-                          updateCourses({
-                            id: updatedCourses[selectedCourse].id,
-                            syllabus: updatedCourses[selectedCourse].syllabus,
-                          });
-                        }}
-                        sx={{ pb: "5px" }}
-                      >
-                        Delete
-                      </Button>
-                    </Box>
-                    <Select
-                      labelId="type-label"
-                      value={prompt.type}
-                      onChange={e => {
-                        const updatedCourses = [...courses];
-                        const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                        currentCat.prompts[index].type = e.target.value;
-                        if (e.target.value !== "Poll") {
-                          delete currentCat.prompts[index].choices;
-                        }
-                        setCourses(updatedCourses);
-                        setSelectedOpenCategory({
-                          categoryIndex: selectedOpenCategory.categoryIndex,
-                          ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                        });
-                        updateCourses({
-                          id: updatedCourses[selectedCourse].id,
-                          syllabus: updatedCourses[selectedCourse].syllabus,
-                        });
-                      }}
-                      label="type"
-                      MenuProps={{
-                        sx: {
-                          zIndex: "9999",
-                        },
-                      }}
-                      sx={{ mb: 2 }}
-                    >
-                      <MenuItem value="Poll">Poll</MenuItem>
-                      <MenuItem value="Open-Ended">Open-Ended</MenuItem>
-                    </Select>
-                    <TextField
-                      fullWidth
-                      multiline
-                      label="Text Prompt"
-                      variant="outlined"
-                      value={prompt.text}
-                      onChange={e => {
-                        const updatedCourses = [...courses];
-                        const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                        currentCat.prompts[index].text = e.target.value;
-
-                        setCourses(updatedCourses);
-                        setSelectedOpenCategory({
-                          categoryIndex: selectedOpenCategory.categoryIndex,
-                          ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                        });
-                        updateCourses({
-                          id: updatedCourses[selectedCourse].id,
-                          syllabus: updatedCourses[selectedCourse].syllabus,
-                        });
-                      }}
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{
-                        style: {
-                          color: "gray",
-                        },
-                      }}
-                    />
-                    <TextField
-                      label="Purpose"
-                      multiline
-                      fullWidth
-                      value={prompt.purpose}
-                      onChange={e => {
-                        const updatedCourses = [...courses];
-                        const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                        currentCat.prompts[index].purpose = e.target.value;
-
-                        setCourses(updatedCourses);
-                        setSelectedOpenCategory({
-                          categoryIndex: selectedOpenCategory.categoryIndex,
-                          ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                        });
-                        updateCourses({
-                          id: updatedCourses[selectedCourse].id,
-                          syllabus: updatedCourses[selectedCourse].syllabus,
-                        });
-                      }}
-                      margin="normal"
-                      variant="outlined"
-                      minRows={2}
-                      sx={{ backgroundColor: theme => (theme.palette.mode === "dark" ? "" : "white") }}
-                      InputLabelProps={{
-                        style: {
-                          color: "gray",
-                        },
-                      }}
-                    />
-                    <Typography gutterBottom>Choices:</Typography>
-                    {prompt.type === "Poll" && (
-                      <ChipInput
-                        tags={prompt.choices}
-                        selectedTags={() => {}}
-                        setTags={(newTags: string[]) => {
-                          const updatedCourses = [...courses];
-                          const currentCat =
-                            updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                          currentCat.prompts[index].choices = newTags;
-
-                          setCourses(updatedCourses);
-                          setSelectedOpenCategory({
-                            categoryIndex: selectedOpenCategory.categoryIndex,
-                            ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                          });
-                          updateCourses({
-                            id: updatedCourses[selectedCourse].id,
-                            syllabus: updatedCourses[selectedCourse].syllabus,
-                          });
-                        }}
-                        fullWidth
-                        variant="outlined"
-                        readOnly={false}
-                        placeholder="Type a new choice and click enter ↵ to add it..."
-                      />
-                    )}
-                  </Box>
-                </Box>
-              ))} */}
-                    {/* <Button
-                onClick={() => {
-                  const updatedCourses = [...courses];
-                  const currentCat = updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex];
-                  currentCat.prompts.push({
-                    type: "Poll",
-                    text: "",
-                    purpose: "",
-                  });
-                  if (!currentCat.prompts) {
-                    currentCat.prompts = [];
-                  }
-                  setCourses(updatedCourses);
-                  setSelectedOpenCategory({
-                    categoryIndex: selectedOpenCategory.categoryIndex,
-                    ...updatedCourses[selectedCourse].syllabus[selectedOpenCategory.categoryIndex],
-                  });
-                  updateCourses({
-                    id: updatedCourses[selectedCourse].id,
-                    syllabus: updatedCourses[selectedCourse].syllabus,
-                  });
-                }}
-              >
-                Add prompt
-              </Button> */}
                   </Box>
                 )}
                 {selectedTopic && (
                   <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                    {currentImprovement !== null ? (
+                    {selectedTopic.comparison && selectedTopic.comparison.title ? (
+                      <Box>
+                        <Typography>Title:</Typography>
+                        <Typography sx={{ color: "red", textDecoration: "line-through" }}>
+                          {selectedTopic.comparison.title?.old}
+                        </Typography>
+                        <Typography sx={{ color: "green" }}>{selectedTopic.comparison.title?.new}</Typography>
+                      </Box>
+                    ) : currentImprovement !== null ? (
                       <Typography variant="h3">{selectedTopic.title}</Typography>
                     ) : (
                       <TextField
@@ -3562,7 +3451,15 @@ const CourseComponent = () => {
                         }}
                       />
                     )}
-                    {currentImprovement !== null ? (
+                    {selectedTopic.comparison && selectedTopic.comparison.description ? (
+                      <Box>
+                        <Typography>Description:</Typography>
+                        <Typography sx={{ color: "red", textDecoration: "line-through" }}>
+                          {selectedTopic.comparison.description.old}
+                        </Typography>
+                        <Typography sx={{ color: "green" }}>{selectedTopic.comparison.description.new}</Typography>
+                      </Box>
+                    ) : currentImprovement !== null ? (
                       <Typography>{selectedTopic.description}</Typography>
                     ) : (
                       <TextField
@@ -3636,7 +3533,15 @@ const CourseComponent = () => {
                       )}
                     </Box>
                     {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
-                    {currentImprovement !== null ? (
+                    {selectedTopic.comparison && selectedTopic.comparison.difficulty ? (
+                      <Box sx={{ display: "flex" }}>
+                        <Typography>Difficulty:</Typography>
+                        <Typography sx={{ color: "red", textDecoration: "line-through" }}>
+                          {selectedTopic.comparison.difficulty.old}
+                        </Typography>
+                        <Typography sx={{ color: "green" }}>{selectedTopic.comparison.difficulty.new}</Typography>
+                      </Box>
+                    ) : currentImprovement !== null ? (
                       <Box sx={{ display: "flex", gap: "5px" }}>
                         <Typography>Difficulty:</Typography>
                         <Typography
@@ -3695,7 +3600,15 @@ const CourseComponent = () => {
                         </FormControl>
                       </Box>
                     )}
-                    {currentImprovement !== null ? (
+                    {selectedTopic.comparison && selectedTopic.comparison.hours ? (
+                      <Box sx={{ display: "flex", gap: "13px" }}>
+                        <Typography>Hours:</Typography>
+                        <Typography sx={{ color: "red", textDecoration: "line-through" }}>
+                          {selectedTopic.comparison.hours.old}
+                        </Typography>
+                        <Typography sx={{ color: "green" }}>{selectedTopic.comparison.hours.new}</Typography>
+                      </Box>
+                    ) : currentImprovement !== null ? (
                       <Box sx={{ display: "flex", gap: "5px" }}>
                         <Typography>Hours:</Typography>
                         <Typography>{selectedTopic.hours}</Typography>
@@ -3808,6 +3721,11 @@ const CourseComponent = () => {
                               theme.palette.mode === "dark"
                                 ? DESIGN_SYSTEM_COLORS.notebookG900
                                 : DESIGN_SYSTEM_COLORS.baseWhite,
+                            animation: (selectedTopic?.comparison?.prompts?.added || []).includes(prompt.text)
+                              ? `${glowGreen} 1.5s ease-in-out infinite`
+                              : (selectedTopic?.comparison?.prompts?.removed || []).includes(prompt.text)
+                              ? `${glowRed} 1.5s ease-in-out infinite`
+                              : "",
                             p: 2,
                             borderRadius: "12px",
                           }}
@@ -4050,46 +3968,6 @@ const CourseComponent = () => {
                   </Box>
                 )}
               </Paper>
-              {/* {selectedTopic && (
-            <Box sx={{ mx: "15px" }}>
-              <Typography sx={{ mt: "5px", fontWeight: "bold" }}>Skills:</Typography>
-              <ChipInput
-                tags={selectedTopic.skills}
-                selectedTags={() => {}}
-                setTags={(newTags: string[]) => {
-                  const updatedCourses = [...courses];
-                  updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex] = {
-                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex],
-                    prerequisiteKnowledge: newTags,
-                  };
-                  setCourses(updatedCourses);
-                  setSelectedTopic({
-                    categoryIndex: selectedTopic.categoryIndex,
-                    topicIndex: selectedTopic.topicIndex,
-                    ...updatedCourses[selectedCourse].syllabus[selectedTopic.categoryIndex].topics[
-                      selectedTopic.topicIndex
-                    ],
-                  });
-                  updateCourses({
-                    id: updatedCourses[selectedCourse].id,
-                    syllabus: updatedCourses[selectedCourse].syllabus,
-                  });
-                }}
-                fullWidth
-                variant="outlined"
-                readOnly={false}
-                placeholder="Type a new skill and click enter ↵ to add it..."
-              />
-            </Box>
-          )} */}
-
-              {/* {currentImprovement?.new_topic &&
-            Object.keys(currentImprovement.new_topic).map((key: string) => (
-              <Box key={key}>
-                <Typography>{key}:</Typography>
-                <Typography>{currentImprovement.new_topic.key}</Typography>
-              </Box>
-            ))} */}
             </Box>
           )}
         </Paper>
