@@ -4,6 +4,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
@@ -37,8 +38,10 @@ import {
   Paper,
   Select,
   Slide,
+  styled,
   TextField,
   Theme,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -111,6 +114,16 @@ const glowRed = keyframes`
     box-shadow: 0 0 5px red, 0 0 10px red, 0 0 20px red, 0 0 30px red;
   }
 `;
+
+const CodeContainer = styled(Box)({
+  backgroundColor: "grey",
+  border: "1px solid #ddd",
+  borderRadius: "4px",
+  padding: "16px",
+  overflowX: "auto",
+  fontFamily: "monospace",
+  fontSize: "14px",
+});
 
 type Prompt = {
   type: "Poll" | "Open-Ended";
@@ -420,6 +433,7 @@ const CourseComponent = () => {
   const [prerequisitesLoader, setPrerequisitesLoader] = useState<string | null>(null);
 
   const [currentUsedPrompt, setCurrentUsedPrompt] = useState<string>("");
+  const [copied, setCopied] = useState(false);
 
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
 
@@ -700,23 +714,22 @@ const CourseComponent = () => {
       const targetLearners = courses[selectedCourseIdx].learners;
       const syllabus = courses[selectedCourseIdx].syllabus;
       const prerequisiteKnowledge = courses[selectedCourseIdx].prerequisiteKnowledge;
-      const suggestions = courses[selectedCourseIdx].suggestions;
+
       const classSessions = courses[selectedCourseIdx].classSessions;
       const sessionHours = courses[selectedCourseIdx].hours;
-      let response: any = { suggestions };
-      if (!suggestions) {
-        response = await Post("/improveCourseSyllabus", {
-          courseTitle,
-          courseDescription,
-          targetLearners,
-          syllabus,
-          classSessions,
-          sessionHours,
-          prerequisiteKnowledge,
-          courseId: courses[selectedCourseIdx].id,
-        });
-      }
+      let response = (await Post("/improveCourseSyllabus", {
+        courseTitle,
+        courseDescription,
+        targetLearners,
+        syllabus,
+        classSessions,
+        sessionHours,
+        prerequisiteKnowledge,
+        courseId: courses[selectedCourseIdx].id,
+      })) as { suggestions: Improvement[]; prompt: string };
+
       setImprovements(response.suggestions);
+      setCurrentUsedPrompt(response.prompt);
       setSidebarOpen(true);
       if (response.suggestions.length > 0) {
         setCurrentImprovement(response.suggestions[0]);
@@ -1817,6 +1830,20 @@ const CourseComponent = () => {
     }
   };
 
+  const handleCopyClick = () => {
+    navigator.clipboard
+      .writeText(currentUsedPrompt)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => {
+          setCopied(false);
+        }, 400);
+      })
+      .catch((err: any) => {
+        console.error(err);
+        // alert("Failed to copy!");
+      });
+  };
   if (courses.length <= 0) {
     return (
       <Box
@@ -2640,19 +2667,24 @@ const CourseComponent = () => {
             </Box>
           )}
           {currentUsedPrompt && (
-            <Box>
-              <Typography sx={{ fontWeight: "bold" }}>Prompt:</Typography>
-              <Typography sx={{ mt: "15px" }}>
-                <MarkdownRender
-                  text={currentUsedPrompt || ""}
-                  sx={{
-                    fontSize: "16px",
-                    fontWeight: 400,
-                    letterSpacing: "inherit",
-                  }}
-                />
-              </Typography>
-            </Box>
+            <Paper sx={{ mt: "15px", p: "13px" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "13px", mb: "12px" }}>
+                <Typography variant="h2">LLM prompt:</Typography>
+                {copied ? (
+                  <Typography>Copied!</Typography>
+                ) : (
+                  <Tooltip title="Copy Prompt">
+                    <IconButton size="small" onClick={handleCopyClick}>
+                      <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
+
+              <CodeContainer>
+                <Typography component="pre">{currentUsedPrompt}</Typography>
+              </CodeContainer>
+            </Paper>
           )}
           <Dialog
             open={!!editCategory}
