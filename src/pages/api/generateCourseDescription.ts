@@ -8,7 +8,7 @@ const generateCourseDescription = async (
   classSessions: number,
   sessionHours: number,
   prerequisiteKnowledge: string
-) => {
+): Promise<{ description: string; prompt: string }> => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, target learners, their prerequisite knowledge, number of class sessions, and number of hours per class session, your task is to generate a detailed course description. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated description will be reviewed by a supervisory team. For a helpful description, we will pay you $1000 and for an unhelpful one, you'll lose $1000.
 
@@ -67,20 +67,20 @@ Your generated course description should:
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
   const description = response.description;
   console.log(JSON.stringify(description, null, 2));
-  return description;
+  return { description, prompt: systemPrompt };
 };
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseTitle, targetLearners, classSessions, sessionHours, prerequisiteKnowledge } = req.body;
-    const description = await generateCourseDescription(
+    const response = (await generateCourseDescription(
       courseTitle,
       targetLearners,
       classSessions,
       sessionHours,
       prerequisiteKnowledge
-    ).catch(console.error);
-    console.log("description ==>", description);
-    return res.status(200).json(description);
+    ).catch(console.error)) as { description: string; prompt: string };
+    console.log("description ==>", response.description);
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({});
   }

@@ -9,7 +9,7 @@ const generateCourseObjectives = async (
   sessionHours: number,
   prerequisiteKnowledge: string,
   courseDescription: string
-) => {
+): Promise<{ objectives: string[]; prompt: string }> => {
   const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, and number of hours per class session, your task is to generate a detailed list of course objectives. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated objectives will be reviewed by a supervisory team. For every helpful objective, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
@@ -84,23 +84,23 @@ Your generated list of objectives should:
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
   const objectives = response.objectives;
   console.log(JSON.stringify(objectives, null, 2));
-  return objectives;
+  return { objectives, prompt: systemPrompt };
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { courseTitle, targetLearners, courseDescription, prerequisiteKnowledge, classSessions, sessionHours } =
       req.body;
-    const courseObjectives = await generateCourseObjectives(
+    const response = (await generateCourseObjectives(
       courseTitle,
       targetLearners,
       classSessions,
       sessionHours,
       prerequisiteKnowledge,
       courseDescription
-    ).catch(console.error);
-    console.log("description ==>", courseObjectives);
-    return res.status(200).json(courseObjectives);
+    ).catch(console.error)) as { objectives: string[]; prompt: string };
+    console.log("objectives ==>", response.objectives);
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({});
   }
