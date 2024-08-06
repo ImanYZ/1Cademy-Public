@@ -1762,7 +1762,7 @@ const CourseComponent = () => {
           topic,
           courseId,
         });
-        setNodePublicView({ ...nodePublicView, [type]: [...nodePublicView[type], ...(result?.nodes || [])] });
+        setNodePublicView({ ...nodePublicView, [type]: result?.nodes || [] });
 
         setPrerequisitesLoader(null);
       } catch (error) {
