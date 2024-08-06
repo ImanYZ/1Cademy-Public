@@ -28,25 +28,42 @@ const compareNodes = async (courseNodes: any, nodes: any): Promise<any[]> => {
   return nonMatchingObjects;
 };
 
-const findPrerequisitesNodes = async (courseNodes: any[], nodes: any[] = [], type: string): Promise<any[]> => {
-  const latestNodes = await compareNodes(courseNodes, nodes);
-  if (latestNodes.length > 0) return latestNodes;
+const makeNodesTree = async (courseNode: any, nodes: any): Promise<any[]> => {
+  const prerequisites = [];
+  for (const node of nodes) {
+    if (node.type === "Concept" || node.type === "Relation") {
+      const nodeDoc = await db.collection("nodes").doc(node.node).get();
+      const nodeData = nodeDoc.data() as INode;
+      if (nodeData?.deleted) continue;
+      prerequisites.push({
+        ...node,
+        nodeType: node.type,
+        content: nodeData?.content,
+        nodeSlug: nodeData?.nodeSlug,
+      });
+    }
+    if (prerequisites.length > 0) {
+      courseNode["nodes"] = prerequisites;
+    }
+  }
+  return courseNode;
+};
 
-  const newNodes: any[] = [];
-
+const findPrerequisitesNodes = async (courseNodes: any[], type: string): Promise<any[]> => {
   for (const courseNode of courseNodes) {
     const nodeDoc = await db.collection("nodes").doc(courseNode.node).get();
     if (!nodeDoc.exists) continue;
     const nodeData = nodeDoc.data() as INode;
-    const relatedNodes = type === "parents" ? nodeData.parents : nodeData.children;
-    const latestNodes = await compareNodes(courseNodes, relatedNodes || []);
 
-    if (latestNodes.length > 0) {
-      newNodes.push(...latestNodes);
+    if (courseNode["nodes"]?.length > 0) {
+      console.log("Nodes in node");
+      await findPrerequisitesNodes(courseNode["nodes"], type);
+    } else {
+      const relatedNodes = type === "parents" ? nodeData.parents : nodeData.children;
+      await makeNodesTree(courseNode, relatedNodes);
     }
   }
-
-  return newNodes;
+  return courseNodes;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -74,7 +91,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const courseNodes = type === "parents" ? courseNode.parents : courseNode.children;
-    const prerequisitesNodes = await findPrerequisitesNodes(courseNodes, nodeData.children, type);
+    const nodesForCompare = type === "parents" ? nodeData.parents : nodeData.children;
+    const comparedNodes = await compareNodes(courseNodes, nodesForCompare);
+    const prerequisitesNodes = await findPrerequisitesNodes([...courseNodes, ...comparedNodes], type);
 
     if (prerequisitesNodes.length > 0) {
       await db.runTransaction(async (t: FirebaseFirestore.Transaction) => {
@@ -84,7 +103,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         if (!courseData.nodes?.[topic]?.[nodeIdx]?.[type]) {
           courseData.nodes[topic][nodeIdx][type] = [];
         }
-        courseData.nodes[topic][nodeIdx][type] = [...courseData.nodes[topic][nodeIdx][type], ...prerequisitesNodes];
+        courseData.nodes[topic][nodeIdx][type] = prerequisitesNodes;
         t.update(courseRef, courseData);
       });
     }
