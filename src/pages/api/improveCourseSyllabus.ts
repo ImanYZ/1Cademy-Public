@@ -911,10 +911,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       classSessions,
       sessionHours,
       courseId,
+      suggestions,
     } = req.body;
-    const courseData = (await db.collection("coursesAI").doc(courseId).get()).data() as { suggestions: any };
-    if (courseData.suggestions) {
-      return res.status(200).json({ suggestions: courseData.suggestions, prompt: systemPrompt });
+
+    if (suggestions.length > 0) {
+      return res.status(200).json({ suggestions, prompt: systemPrompt });
     }
     const response = await improveCourseSyllabus(
       courseTitle,
