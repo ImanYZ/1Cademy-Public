@@ -381,6 +381,7 @@ const CourseComponent = () => {
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
+  const sidebarContainerRef = useRef<any>(null);
 
   const dragTopicItem = useRef<any>(null);
   const dragOverTopicItem = useRef<any>(null);
@@ -977,6 +978,14 @@ const CourseComponent = () => {
     if (categoryElement) {
       categoryElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (sidebarContainerRef.current) {
+        sidebarContainerRef.current.scrollTop = sidebarContainerRef.current.scrollHeight;
+      }
+    }, 500);
   };
   useEffect(() => {
     if (currentImprovement === null) return;
@@ -1757,6 +1766,7 @@ const CourseComponent = () => {
         topicIndex: selectedTopic.topicIndex,
         ...currentTopic,
       });
+      scrollToBottom();
       updateCourses({
         id: updatedCourses[selectedCourseIdx].id,
         syllabus: updatedCourses[selectedCourseIdx].syllabus,
@@ -2907,6 +2917,7 @@ const CourseComponent = () => {
       </Box>
       {sidebarOpen && (
         <Paper
+          ref={sidebarContainerRef}
           sx={{
             height: "100vh",
             backgroundColor: "white",
