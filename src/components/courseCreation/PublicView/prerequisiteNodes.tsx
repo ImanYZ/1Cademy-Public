@@ -1,11 +1,15 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import { SxProps, Theme } from "@mui/system";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
 import React from "react";
+
+import HtmlTooltip from "@/components/HtmlTooltip";
+import MarkdownRender from "@/components/Markdown/MarkdownRender";
 
 import TypographyUnderlined from "../../TypographyUnderlined";
 
@@ -29,14 +33,26 @@ const PrerequisiteNodes = ({ nodes, sx, header }: PrerequisiteNodeProps) => {
   const renderPrerequisiteNodes = (nodes: PrerequisiteNodeFieldProps[]) => {
     return nodes.map((el, idx) => (
       <React.Fragment key={idx}>
-        <TreeItem
-          sx={{ "& .MuiTreeItem-content": { py: 3 } }}
-          label={el.title}
-          nodeId={`${el.title}-${idx}`}
-          key={`${el.title}-${idx}`}
+        <HtmlTooltip
+          sx={{ zIndex: 9999 }}
+          title={
+            <Box>
+              <Typography variant="body2" component="div">
+                <MarkdownRender text={el.content || ""} />
+              </Typography>
+            </Box>
+          }
+          placement="left"
         >
-          {el?.nodes && el?.nodes?.length > 0 && <>{renderPrerequisiteNodes(el.nodes)}</>}
-        </TreeItem>
+          <TreeItem
+            sx={{ "& .MuiTreeItem-content": { py: 3 } }}
+            label={el.title}
+            nodeId={`${el.title}-${idx}`}
+            key={`${el.title}-${idx}`}
+          >
+            {el?.nodes && el?.nodes?.length > 0 && <>{renderPrerequisiteNodes(el.nodes)}</>}
+          </TreeItem>
+        </HtmlTooltip>
       </React.Fragment>
     ));
   };

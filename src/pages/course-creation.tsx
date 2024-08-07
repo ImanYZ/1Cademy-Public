@@ -1792,8 +1792,12 @@ const CourseComponent = () => {
           topic,
           courseId,
         });
+        const course = courses[selectedCourseIdx];
+        const nodes = { ...course.nodes };
+        const nodeIdx = nodes[topic].findIndex((n: { node: string }) => n.node === nodeId);
+        course.nodes[topic][nodeIdx][type] = result?.nodes || [];
         setNodePublicView({ ...nodePublicView, [type]: result?.nodes || [] });
-
+        updateCourses(course);
         setPrerequisitesLoader(null);
       } catch (error) {
         setPrerequisitesLoader(null);
