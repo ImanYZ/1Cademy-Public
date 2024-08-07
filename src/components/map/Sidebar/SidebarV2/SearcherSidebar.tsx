@@ -3,6 +3,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import SearchIcon from "@mui/icons-material/Search";
 import {
+  Button,
   Checkbox,
   Chip,
   CircularProgress,
@@ -488,6 +489,13 @@ const SearcherSidebar = ({
     [onSearch, search, sortDirection, sortOption]
   );
 
+  const onUnselectAll = useCallback(() => {
+    setNodeTypes([]);
+    if (value === 0) {
+      onSearch(1, search, sortOption, sortDirection, []);
+    }
+  }, [onSearch, search, sortDirection, sortOption]);
+
   const contentSignalState = useMemo(() => {
     return { updated: true };
   }, [
@@ -752,6 +760,16 @@ const SearcherSidebar = ({
                               </ListItemIcon>
                             </MenuItem>
                           ))}
+                          <MenuItem sx={{ display: "flex", justifyContent: "center" }}>
+                            <Button
+                              disabled={!nodeTypes.length}
+                              variant="contained"
+                              fullWidth
+                              onClick={() => onUnselectAll()}
+                            >
+                              Unselect All
+                            </Button>
+                          </MenuItem>
                         </Select>
                       </InputAdornment>
                     ),
