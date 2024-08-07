@@ -156,7 +156,7 @@ const generateCourseCategory = async (
   categories: { title: string; topics: string[] }[],
   category: { title: string; topics: string[] }
 ) => {
-  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, skills, and the entire array of categories and their topic titles, along with the title of a specific category, your task is to generate a detailed syllabus for that specific category. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, and the entire array of categories and their topic titles, along with the title of a specific category, your task is to generate a detailed syllabus for that specific category. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your generated categories and topics will be reviewed by a supervisory team. For every helpful category or topic, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
 **Input:**
@@ -168,7 +168,6 @@ Your generated categories and topics will be reviewed by a supervisory team. For
 5. **Number of Hours Per Class Session:** [Number of Hours per Class Session goes here]
 6. **Prerequisite Knowledge:** [Description of the Prerequisite Knowledge for taking this course]
 7. **Objectives:** [Course Objectives go here]
-8. **Skills:** [Skills Gained from the Course go here]
 9. **Categories:** [Array of categories and their topic titles goes here]
 10. **Category Title:** [Title of the category to generate detailed data for]
 
@@ -193,7 +192,6 @@ Your generated syllabus should:
 13. Ensure each topic represents the exact learning objectives that the learners will achieve after completing the course.
 14. Include a "description" field for every topic.
 15. Include an "objectives" field, as an array of strings, for every topic.
-16. Include a "skills" field, as an array of strings, for every topic.
 17. Include a "prerequisiteKnowledge" field, as an array of strings, for every topic.
 18. Include a "prompts" field, as an array of objects, for every topic. Prompts are specific types of questions that encourage social learning. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 
@@ -231,18 +229,6 @@ Prompts can be of two types:
     "Master advanced frontend and backend web development techniques",
     "Understand and implement web security best practices",
     "Deploy web applications using modern tools and platforms"
-  ],
-  "Skills": [
-    "Advanced HTML and CSS",
-    "JavaScript ES6",
-    "React",
-    "Node.js",
-    "Express.js",
-    "RESTful APIs",
-    "MongoDB",
-    "Web Security",
-    "CI/CD",
-    "Docker"
   ],
   "Categories": [
     {
@@ -329,11 +315,6 @@ Prompts can be of two types:
           "Implement responsive design using advanced CSS techniques",
           "Create complex layouts using CSS Grid and Flexbox"
         ],
-        "skills": [
-          "Advanced HTML",
-          "Advanced CSS",
-          "Responsive Design"
-        ],
         "prerequisiteKnowledge": [
           "HTML and CSS fundamentals",
           "Basic knowledge of responsive design"
@@ -361,11 +342,6 @@ Prompts can be of two types:
           "Master new syntax and features in ES6",
           "Understand the use of promises and async/await for asynchronous programming",
           "Use modern JavaScript best practices for cleaner and more efficient code"
-        ],
-        "skills": [
-          "JavaScript ES6",
-          "Asynchronous Programming",
-          "Modern JavaScript Best Practices"
         ],
         "prerequisiteKnowledge": [
           "JavaScript programming basics",
@@ -395,11 +371,6 @@ Prompts can be of two types:
           "Build and manage stateful and stateless components",
           "Utilize JSX for rendering UI elements"
         ],
-        "skills": [
-          "React",
-          "Component-Based Architecture",
-          "JSX"
-        ],
         "prerequisiteKnowledge": [
           "JavaScript programming basics",
           "Understanding of DOM manipulation"
@@ -427,11 +398,6 @@ Prompts can be of two types:
           "Implement state management using React hooks",
           "Use Context API for global state management",
           "Integrate state management libraries like Redux"
-        ],
-        "skills": [
-          "React Hooks",
-          "Context API",
-          "Redux"
         ],
         "prerequisiteKnowledge": [
           "Introduction to React",
