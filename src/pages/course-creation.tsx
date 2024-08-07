@@ -4,6 +4,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CloseIcon from "@mui/icons-material/Close";
+import CollectionsIcon from "@mui/icons-material/Collections";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -58,6 +59,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { KnowledgeNode } from "src/knowledgeTypes";
 import { QuestionProps } from "src/types";
@@ -87,11 +89,12 @@ import { NodeItemFullEditor, ProposalFormValues } from "@/components/NodeItemFul
 import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
 import useConfirmDialog from "@/hooks/useConfirmDialog";
+import { useUploadImage } from "@/hooks/useUploadImage";
 import { getNodeDataForCourse } from "@/lib/knowledgeApi";
 import { Post } from "@/lib/mapApi";
 import { DESIGN_SYSTEM_COLORS } from "@/lib/theme/colors";
 import { newId } from "@/lib/utils/newFirestoreId";
-import { delay, escapeBreaksQuotes } from "@/lib/utils/utils";
+import { delay, escapeBreaksQuotes, isValidHttpUrl } from "@/lib/utils/utils";
 
 const glowGreen = keyframes`
   0% {
@@ -378,6 +381,7 @@ const CourseComponent = () => {
   const dragItem = useRef<any>(null);
   const dragOverItem = useRef<any>(null);
   const containerRef = useRef<any>(null);
+  const sidebarContainerRef = useRef<any>(null);
 
   const dragTopicItem = useRef<any>(null);
   const dragOverTopicItem = useRef<any>(null);
@@ -438,6 +442,11 @@ const CourseComponent = () => {
   const [copied, setCopied] = useState(false);
 
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
+
+  /* upload images hooks */
+  const storage = getStorage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
 
   useEffect(() => {
     if (!user?.uname) return;
@@ -969,6 +978,14 @@ const CourseComponent = () => {
     if (categoryElement) {
       categoryElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (sidebarContainerRef.current) {
+        sidebarContainerRef.current.scrollTop = sidebarContainerRef.current.scrollHeight;
+      }
+    }, 500);
   };
   useEffect(() => {
     if (currentImprovement === null) return;
@@ -1596,6 +1613,77 @@ const CourseComponent = () => {
       setExpandedNode(null);
     }
   };
+  const saveImageTopic = (imageUrl: string) => {
+    try {
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex] = {
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+        imageUrl,
+      };
+      setSelectedTopic({
+        categoryIndex: selectedTopic.categoryIndex,
+        topicIndex: selectedTopic.topicIndex,
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+      });
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourseIdx]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const removeImageTopic = () => {
+    try {
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex] = {
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+        imageUrl: "",
+      };
+      setSelectedTopic({
+        categoryIndex: selectedTopic.categoryIndex,
+        topicIndex: selectedTopic.topicIndex,
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
+      });
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourseIdx]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const saveImageCategory = (imageUrl: string) => {
+    try {
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+        imageUrl: imageUrl,
+      };
+      setSelectedOpenCategory({
+        categoryIndex: selectedOpenCategory.categoryIndex,
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+      });
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourseIdx]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const removeImageCategory = () => {
+    try {
+      const updatedCourses = [...courses];
+      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+        imageUrl: "",
+      };
+      setSelectedOpenCategory({
+        categoryIndex: selectedOpenCategory.categoryIndex,
+        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
+      });
+      setCourses(updatedCourses);
+      updateCourses(updatedCourses[selectedCourseIdx]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const generateImageForTopic = async () => {
     try {
@@ -1614,18 +1702,7 @@ const CourseComponent = () => {
         })) as { imageUrl: string };
 
         if (imageUrl) {
-          const updatedCourses = [...courses];
-          updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex] = {
-            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
-            imageUrl: imageUrl,
-          };
-          setSelectedTopic({
-            categoryIndex: selectedTopic.categoryIndex,
-            topicIndex: selectedTopic.topicIndex,
-            ...updatedCourses[selectedCourseIdx].syllabus[selectedTopic.categoryIndex].topics[selectedTopic.topicIndex],
-          });
-          setCourses(updatedCourses);
-          updateCourses(updatedCourses[selectedCourseIdx]);
+          saveImageTopic(imageUrl);
         }
         setLoadingImage(false);
       }
@@ -1648,17 +1725,7 @@ const CourseComponent = () => {
         sessions: courses[selectedCourseIdx].hours,
         objectives: selectedOpenCategory.objectives,
       })) as { imageUrl: string };
-      const updatedCourses = [...courses];
-      updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex] = {
-        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-        imageUrl: imageUrl,
-      };
-      setSelectedOpenCategory({
-        categoryIndex: selectedOpenCategory.categoryIndex,
-        ...updatedCourses[selectedCourseIdx].syllabus[selectedOpenCategory.categoryIndex],
-      });
-      setCourses(updatedCourses);
-      updateCourses(updatedCourses[selectedCourseIdx]);
+      saveImageCategory(imageUrl);
       setLoadingImage(false);
     }
   };
@@ -1699,6 +1766,7 @@ const CourseComponent = () => {
         topicIndex: selectedTopic.topicIndex,
         ...currentTopic,
       });
+      scrollToBottom();
       updateCourses({
         id: updatedCourses[selectedCourseIdx].id,
         syllabus: updatedCourses[selectedCourseIdx].syllabus,
@@ -1843,6 +1911,16 @@ const CourseComponent = () => {
       console.error(error);
     }
   };
+  const onUploadImage = useCallback((event: any, saveImage: (imageUrl: string) => void) => {
+    let bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET ?? "onecademy-dev.appspot.com";
+    if (isValidHttpUrl(bucket)) {
+      const { hostname } = new URL(bucket);
+      bucket = hostname;
+    }
+    const path = "https://storage.googleapis.com/" + bucket + `/chat-images`;
+    let imageFileName = new Date().toUTCString();
+    uploadImage({ event, path, imageFileName }).then(url => saveImage(url));
+  }, []);
 
   const handleCopyClick = () => {
     navigator.clipboard
@@ -2839,6 +2917,7 @@ const CourseComponent = () => {
       </Box>
       {sidebarOpen && (
         <Paper
+          ref={sidebarContainerRef}
           sx={{
             height: "100vh",
             backgroundColor: "white",
@@ -3419,9 +3498,60 @@ const CourseComponent = () => {
                             onClick={generateImageForCategory}
                           />
                         )}
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={e => {
+                            onUploadImage(e, saveImageCategory);
+                          }}
+                          hidden
+                        />
+
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          {isUploading ? (
+                            <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
+                              {percentageUploaded + "%"}
+                            </span>
+                          ) : (
+                            <Tooltip title={"Upload Image"}>
+                              <IconButton
+                                onClick={() => {
+                                  if (!fileInputRef.current) return;
+                                  fileInputRef.current.value = "";
+                                  fileInputRef.current.click();
+                                }}
+                              >
+                                <CollectionsIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Box>
                       </Box>
                     )}
-                    {selectedOpenCategory.imageUrl && <ImageSlider images={[selectedOpenCategory.imageUrl]} />}
+                    {selectedOpenCategory.imageUrl && (
+                      <Box>
+                        <CloseIcon
+                          className="close-icon"
+                          sx={{
+                            backgroundColor: "grey",
+                            color: "black",
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            ":hover": {
+                              backgroundColor: "black",
+                              color: "white",
+                            },
+                            zIndex: 10,
+                            position: "relative",
+                            top: "30px",
+                            right: "0px",
+                            padding: "5px",
+                          }}
+                          onClick={removeImageCategory}
+                        />
+                        <ImageSlider images={[selectedOpenCategory.imageUrl]} />{" "}
+                      </Box>
+                    )}
 
                     <Typography sx={{ fontWeight: "bold" }}>Objectives:</Typography>
                     <ChipInput
@@ -3612,8 +3742,59 @@ const CourseComponent = () => {
                           onClick={generateImageForTopic}
                         />
                       )}
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={e => {
+                          onUploadImage(e, saveImageTopic);
+                        }}
+                        hidden
+                      />
+
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {isUploading ? (
+                          <span style={{ width: "37px", fontSize: "11px", textAlign: "center" }}>
+                            {percentageUploaded + "%"}
+                          </span>
+                        ) : (
+                          <Tooltip title={"Upload Image"}>
+                            <IconButton
+                              onClick={() => {
+                                if (!fileInputRef.current) return;
+                                fileInputRef.current.value = "";
+                                fileInputRef.current.click();
+                              }}
+                            >
+                              <CollectionsIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
                     </Box>
-                    {selectedTopic.imageUrl && <ImageSlider images={[selectedTopic.imageUrl]} />}
+                    {selectedTopic.imageUrl && (
+                      <Box sx={{ mt: "-40px" }}>
+                        <CloseIcon
+                          className="close-icon"
+                          sx={{
+                            backgroundColor: "grey",
+                            color: "black",
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            ":hover": {
+                              backgroundColor: "black",
+                              color: "white",
+                            },
+                            zIndex: 10,
+                            position: "relative",
+                            top: "30px",
+                            right: "0px",
+                            padding: "5px",
+                          }}
+                          onClick={removeImageTopic}
+                        />
+                        <ImageSlider images={[selectedTopic.imageUrl]} />
+                      </Box>
+                    )}
                     {selectedTopic.comparison && selectedTopic.comparison.difficulty ? (
                       <Box sx={{ display: "flex" }}>
                         <Typography>Difficulty:</Typography>

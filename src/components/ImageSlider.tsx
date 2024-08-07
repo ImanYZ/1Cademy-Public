@@ -29,7 +29,13 @@ const ImageSlider = ({ images, removeImage, editMode = false }: props) => {
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
       <Box borderRadius="10px">
-        <img className="responsive-img" src={images[currentIndex]} alt={`Image ${currentIndex}`} width={"100%"} />
+        <img
+          className="responsive-img"
+          src={images[currentIndex]}
+          alt={`Image ${currentIndex}`}
+          width={"100%"}
+          style={{ borderRadius: "14px" }}
+        />
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center" }}>

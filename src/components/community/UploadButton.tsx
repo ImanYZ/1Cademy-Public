@@ -1,5 +1,6 @@
 import UploadIcon from "@mui/icons-material/Upload";
 import LoadingButton from "@mui/lab/LoadingButton";
+import { Box } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useState } from "react";
@@ -9,8 +10,16 @@ import { orangeDark } from "@/pages/home";
 import { appExp } from "../../lib/firestoreClient/firestoreClient.config";
 import PDFView from "./PDFView";
 
-const UploadButton = (props: any) => {
-  const fullname = props.fullname;
+const UploadButton = ({
+  fullname,
+  mimeTypes,
+  typeErrorMessage,
+  maxSize,
+  sizeErrorMessage,
+  storageFolder,
+  setFileUrl,
+  fileUrl,
+}: any) => {
   const [isUploading, setIsUploading] = useState(false);
   const [percentUploaded, setPercentUploaded] = useState(0);
   const [uploadError, setUploadError] = useState<any>(false);
@@ -19,13 +28,13 @@ const UploadButton = (props: any) => {
     try {
       event.preventDefault();
       const fil = event.target.files[0];
-      if (!props.mimeTypes.includes(fil.type)) {
-        setUploadError(props.typeErrorMessage);
-      } else if (fil.size > props.maxSize * 1024 * 1024) {
-        setUploadError(props.sizeErrorMessage);
+      if (!mimeTypes.includes(fil.type)) {
+        setUploadError(typeErrorMessage);
+      } else if (fil.size > maxSize * 1024 * 1024) {
+        setUploadError(sizeErrorMessage);
       } else {
         setIsUploading(true);
-        const filesFolder = props.storageFolder;
+        const filesFolder = storageFolder;
         const fileNameSplit = fil.name.split(".");
         const fileExtension = fileNameSplit[fileNameSplit.length - 1];
         let fileName = fullname + "/" + new Date().toString() + "." + fileExtension;
@@ -45,7 +54,7 @@ const UploadButton = (props: any) => {
           },
           async function complete() {
             const generatedUrl = await getDownloadURL(storageRef);
-            props.setFileUrl(props.name, generatedUrl);
+            setFileUrl(name, generatedUrl);
             setUploadError(false);
             setIsUploading(false);
             setPercentUploaded(100);
@@ -55,17 +64,17 @@ const UploadButton = (props: any) => {
     } catch (err) {
       console.error("Upload Error: ", err);
       setIsUploading(false);
-      setUploadError("Upload your " + props.name + "!");
+      setUploadError("Upload your " + name + "!");
     }
   };
 
   return (
-    <>
-      <label htmlFor={props.name + "File"}>
+    <Box>
+      <label htmlFor={name + "File"}>
         <input
           onChange={handleFileChange}
-          accept={props.mimeTypes.join(", ")}
-          id={props.name + "File"}
+          accept={mimeTypes.join(", ")}
+          id={name + "File"}
           type="file"
           style={{ display: "none" }}
         />
@@ -81,12 +90,12 @@ const UploadButton = (props: any) => {
             backgroundColor: orangeDark,
           }}
         >
-          {(isUploading ? percentUploaded + "% " : "") + "Upload " + props.name}
+          {(isUploading ? percentUploaded + "% " : "") + "Upload " + name}
         </LoadingButton>
       </label>
       {uploadError && <Alert severity="warning">{uploadError}</Alert>}
-      <PDFView fileUrl={props.fileUrl} height="500px" />
-    </>
+      <PDFView fileUrl={fileUrl} height="500px" />
+    </Box>
   );
 };
 

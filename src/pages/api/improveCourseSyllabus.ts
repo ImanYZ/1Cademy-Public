@@ -57,7 +57,6 @@ Each action should be accompanied by:
   - \`new_topic\` or \`new_category\`: Specifies the new content for the topic or category, including:
     - \`description\`: A clear and concise description.
     - \`objectives\`: An array of strings detailing the objectives.
-    - \`skills\`: An array of strings detailing the skills.
     - \`prerequisiteKnowledge\`: An array of strings detailing the prerequisite knowledge.
     - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 - For \`modify\` actions:
@@ -66,7 +65,6 @@ Each action should be accompanied by:
   - \`new_topic\` or \`new_category\`: Specifies the new content for the topic or category, including:
     - \`description\`: A clear and concise description.
     - \`objectives\`: An array of strings detailing the objectives.
-    - \`skills\`: An array of strings detailing the skills.
     - \`prerequisiteKnowledge\`: An array of strings detailing the prerequisite knowledge.
     - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 - For \`divide\` actions:
@@ -75,7 +73,6 @@ Each action should be accompanied by:
   - \`new_topics\` or \`new_categories\`: Specifies the new subtopics or subcategories, each including:
     - \`description\`: A clear and concise description.
     - \`objectives\`: An array of strings detailing the objectives.
-    - \`skills\`: An array of strings detailing the skills.
     - \`prerequisiteKnowledge\`: An array of strings detailing the prerequisite knowledge.
     - \`prompts\`: An array of objects for encouraging social learning, including "Poll" or "Open-Ended" questions. Prompts should be as subjective and engaging as possible to stimulate critical thinking and active participation in the discussion.
 - For \`move\` actions:
@@ -139,11 +136,6 @@ Each action should be accompanied by:
         "Learn modern JavaScript features",
         "Build dynamic user interfaces with React"
       ],
-      "skills": [
-        "Advanced HTML and CSS",
-        "JavaScript ES6",
-        "React"
-      ],
       "prerequisiteKnowledge": [
         "HTML and CSS fundamentals",
         "JavaScript programming basics"
@@ -171,11 +163,6 @@ Each action should be accompanied by:
             "Utilize advanced HTML elements and attributes",
             "Implement responsive design using advanced CSS techniques",
             "Create complex layouts using CSS Grid and Flexbox"
-          ],
-          "skills": [
-            "Advanced HTML",
-            "Advanced CSS",
-            "Responsive Design"
           ],
           "prerequisiteKnowledge": [
             "HTML and CSS fundamentals",
@@ -205,11 +192,6 @@ Each action should be accompanied by:
             "Understand the use of promises and async/await for asynchronous programming",
             "Use modern JavaScript best practices for cleaner and more efficient code"
           ],
-          "skills": [
-            "JavaScript ES6",
-            "Asynchronous Programming",
-            "Modern JavaScript Best Practices"
-          ],
           "prerequisiteKnowledge": [
             "JavaScript programming basics",
             "Understanding of DOM manipulation"
@@ -237,11 +219,6 @@ Each action should be accompanied by:
             "Understand the React component model",
             "Build and manage stateful and stateless components",
             "Utilize JSX for rendering UI elements"
-          ],
-          "skills": [
-            "React",
-            "Component-Based Architecture",
-            "JSX"
           ],
           "prerequisiteKnowledge": [
             "JavaScript programming basics",
@@ -271,11 +248,6 @@ Each action should be accompanied by:
             "Use Context API for global state management",
             "Integrate state management libraries like Redux"
           ],
-          "skills": [
-            "React Hooks",
-            "Context API",
-            "Redux"
-          ],
           "prerequisiteKnowledge": [
             "Introduction to React",
             "JavaScript programming basics"
@@ -303,12 +275,6 @@ Each action should be accompanied by:
         "Master server-side development with Node.js and Express.js",
         "Design and implement RESTful APIs",
         "Integrate databases with web applications"
-      ],
-      "skills": [
-        "Node.js",
-        "Express.js",
-        "RESTful APIs",
-        "MongoDB"
       ],
       "prerequisiteKnowledge": [
         "Basic knowledge of web servers and how they work",
@@ -338,11 +304,6 @@ Each action should be accompanied by:
             "Create RESTful services using Express.js",
             "Understand middleware and routing in Express.js"
           ],
-          "skills": [
-            "Node.js",
-            "Express.js",
-            "RESTful Services"
-          ],
           "prerequisiteKnowledge": [
             "Basic knowledge of web servers",
             "JavaScript programming basics"
@@ -370,11 +331,6 @@ Each action should be accompanied by:
             "Design and implement RESTful endpoints",
             "Understand CRUD operations and REST principles",
             "Implement API versioning and documentation"
-          ],
-          "skills": [
-            "RESTful API Design",
-            "CRUD Operations",
-            "API Documentation"
           ],
           "prerequisiteKnowledge": [
             "Basic concepts of API integration",
@@ -404,11 +360,6 @@ Each action should be accompanied by:
             "Perform CRUD operations with MongoDB",
             "Implement data models and schemas using Mongoose"
           ],
-          "skills": [
-            "MongoDB",
-            "Mongoose",
-            "Data Modeling"
-          ],
           "prerequisiteKnowledge": [
             "Basic knowledge of database management and SQL",
             "JavaScript programming basics"
@@ -436,11 +387,6 @@ Each action should be accompanied by:
             "Implement user authentication using JWT",
             "Set up role-based access control",
             "Secure endpoints using middleware"
-          ],
-          "skills": [
-            "JWT Authentication",
-            "Role-Based Access Control",
-            "Secure Middleware"
           ],
           "prerequisiteKnowledge": [
             "Basic knowledge of web security best practices",
@@ -470,11 +416,6 @@ Each action should be accompanied by:
         "Implement secure coding practices",
         "Utilize web application firewalls"
       ],
-      "skills": [
-        "Web Security",
-        "Secure Coding",
-        "Web Application Firewalls"
-      ],
       "prerequisiteKnowledge": [
         "Introductory knowledge of web security best practices",
         "Basic understanding of HTTP/HTTPS protocols"
@@ -502,11 +443,6 @@ Each action should be accompanied by:
             "Understand common security vulnerabilities (e.g., XSS, CSRF, SQL injection)",
             "Implement techniques to prevent and mitigate these threats",
             "Conduct security audits and code reviews"
-          ],
-          "skills": [
-            "Threat Identification",
-            "Security Mitigation",
-            "Security Audits"
           ],
           "prerequisiteKnowledge": [
             "Introductory knowledge of web security best practices",
@@ -536,11 +472,6 @@ Each action should be accompanied by:
             "Implement input validation and sanitization",
             "Utilize security headers and HTTPS"
           ],
-          "skills": [
-            "Secure Coding",
-            "Input Validation",
-            "Security Headers"
-          ],
           "prerequisiteKnowledge": [
             "Basic knowledge of web security best practices",
             "Understanding of client-server architecture"
@@ -568,11 +499,6 @@ Each action should be accompanied by:
             "Understand the role of web application firewalls",
             "Configure and deploy a web application firewall",
             "Monitor and respond to security alerts"
-          ],
-          "skills": [
-            "Web Application Firewalls",
-            "Firewall Configuration",
-            "Security Monitoring"
           ],
           "prerequisiteKnowledge": [
             "Basic knowledge of web security best practices",
@@ -616,11 +542,6 @@ Each action should be accompanied by:
           "Use Docker for containerization",
           "Deploy applications on cloud platforms"
         ],
-        "skills": [
-          "CI/CD",
-          "Docker",
-          "Cloud Deployment"
-        ],
         "prerequisiteKnowledge": [
           "Experience with version control systems (e.g., Git)",
           "Basic understanding of web servers and how they work"
@@ -648,11 +569,6 @@ Each action should be accompanied by:
               "Set up CI/CD pipelines using popular tools (e.g., Jenkins, GitHub Actions)",
               "Automate testing and deployment processes",
               "Monitor and troubleshoot CI/CD workflows"
-            ],
-            "skills": [
-              "CI/CD Pipelines",
-              "Automated Testing",
-              "Workflow Monitoring"
             ],
             "prerequisiteKnowledge": [
               "Experience with version control systems",
@@ -682,11 +598,6 @@ Each action should be accompanied by:
               "Write Dockerfiles for application deployment",
               "Use Docker Compose for multi-container applications"
             ],
-            "skills": [
-              "Docker Containers",
-              "Dockerfiles",
-              "Docker Compose"
-            ],
             "prerequisiteKnowledge": [
               "Basic knowledge of web servers",
               "Understanding of client-server architecture"
@@ -714,11 +625,6 @@ Each action should be accompanied by:
               "Understand different cloud service models (IaaS, PaaS, SaaS)",
               "Deploy applications on platforms like AWS, Azure, or Google Cloud",
               "Manage cloud resources and services"
-            ],
-            "skills": [
-              "Cloud Deployment",
-              "Cloud Service Management",
-              "Cloud Resource Management"
             ],
             "prerequisiteKnowledge": [
               "Basic knowledge of web servers",
@@ -757,10 +663,6 @@ Each action should be accompanied by:
             "Implement state management using Redux",
             "Understand the Redux workflow"
           ],
-          "skills": [
-            "State Management with Redux",
-            "Redux Workflow"
-          ],
           "prerequisiteKnowledge": [
             "Introduction to React",
             "JavaScript programming basics"
@@ -787,10 +689,6 @@ Each action should be accompanied by:
           "objectives": [
             "Implement state management using Context API",
             "Understand the benefits and limitations of Context API"
-          ],
-          "skills": [
-            "State Management with Context API",
-            "Context API Limitations"
           ],
           "prerequisiteKnowledge": [
             "Introduction to React",
@@ -844,7 +742,6 @@ Each action should be accompanied by:
           "Understand the principles of GraphQL",
           "Implement a GraphQL API"
         ],
-        "skills": ["GraphQL"],
         "prerequisiteKnowledge": [
           "RESTful API Design",
           "Understanding of client-server architecture"
