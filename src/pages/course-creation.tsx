@@ -117,7 +117,7 @@ const glowRed = keyframes`
 `;
 
 const CodeContainer = styled(Box)({
-  backgroundColor: "grey",
+  backgroundColor: "#1c1f24",
   border: "1px solid #ddd",
   borderRadius: "4px",
   padding: "16px",
@@ -979,7 +979,7 @@ const CourseComponent = () => {
     const currentImprovementCopy: Improvement = { ...currentImprovement };
     const selectedCourse = { ...coursesCopy[selectedCourseIdx] };
 
-    if (!selectedCourse) return;
+    if (!selectedCourse && !currentImprovementCopy) return;
 
     const syllabus = [...selectedCourse.syllabus];
     selectedCourse.syllabus = syllabus;
@@ -987,59 +987,65 @@ const CourseComponent = () => {
     if (currentImprovementCopy.type === "topic") {
       if (currentImprovementCopy.action === "move") {
         const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.current_category);
-        const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
-          s => s.title === currentImprovementCopy.title
-        );
-        const oldTopic = { ...syllabus[oldCategoryIndex].topics[oldTopicIndex] };
-        syllabus[oldCategoryIndex].color = "change";
+        if (oldCategoryIndex !== -1) {
+          const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
+            s => s.title === currentImprovementCopy.title
+          );
+          const oldTopic = { ...syllabus[oldCategoryIndex].topics[oldTopicIndex] };
+          syllabus[oldCategoryIndex].color = "change";
 
-        const newCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.new_category);
-        if (newCategoryIndex === -1) return;
+          const newCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.new_category);
+          if (newCategoryIndex === -1) return;
 
-        syllabus[newCategoryIndex].color = "change";
-        const afterIndex = syllabus[newCategoryIndex].topics.findIndex(
-          topic => topic.title === currentImprovementCopy.new_after
-        );
-        const alreadyExist = syllabus[newCategoryIndex].topics.findIndex(s => s.title === oldTopic.title);
+          syllabus[newCategoryIndex].color = "change";
+          const afterIndex = syllabus[newCategoryIndex].topics.findIndex(
+            topic => topic.title === currentImprovementCopy.new_after
+          );
+          const alreadyExist = syllabus[newCategoryIndex].topics.findIndex(s => s.title === oldTopic.title);
 
-        if (alreadyExist === -1) {
-          oldTopic.color = "delete";
-          oldTopic.action = "move";
-          syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
-        }
-        syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
-        syllabus[oldCategoryIndex].topics[oldTopicIndex].action = "move";
-        expandCategories.push(currentImprovementCopy.current_category);
+          if (alreadyExist === -1) {
+            oldTopic.color = "delete";
+            oldTopic.action = "move";
+            syllabus[newCategoryIndex].topics.splice(afterIndex + 1, 0, { ...oldTopic, color: "add" });
+          }
+          syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
+          syllabus[oldCategoryIndex].topics[oldTopicIndex].action = "move";
+          expandCategories.push(currentImprovementCopy.current_category);
 
-        if (typeof currentImprovementCopy.new_category === "string") {
-          expandCategories.push(currentImprovementCopy.new_category);
+          if (typeof currentImprovementCopy.new_category === "string") {
+            expandCategories.push(currentImprovementCopy.new_category);
+          }
         }
       } else if (currentImprovementCopy.action === "delete") {
         const oldCategoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         const oldTopicIndex = syllabus[oldCategoryIndex].topics.findIndex(
           s => s.title === currentImprovementCopy.title
         );
-
-        syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
-        expandCategories.push(currentImprovementCopy.category);
-        scrollToCategory(currentImprovementCopy.category);
+        if (oldTopicIndex !== -1) {
+          syllabus[oldCategoryIndex].topics[oldTopicIndex].color = "delete";
+          expandCategories.push(currentImprovementCopy.category);
+          scrollToCategory(currentImprovementCopy.category);
+        }
       } else if (currentImprovementCopy.action === "divide") {
         const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         const oldTopicIdx = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.old_topic);
-        syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
-        syllabus[categoryIndex].topics[oldTopicIdx].action = "divide";
-        const new_topics_copy = currentImprovementCopy.new_topics.map(t => ({ ...t, color: "add" }));
-        syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
-        expandCategories.push(currentImprovementCopy.category);
+
+        if (oldTopicIdx !== -1) {
+          syllabus[categoryIndex].topics[oldTopicIdx].action = "divide";
+          syllabus[categoryIndex].topics[oldTopicIdx].color = "delete";
+          const new_topics_copy = currentImprovementCopy.new_topics.map(t => ({ ...t, color: "add" }));
+          syllabus[categoryIndex].topics = [...syllabus[categoryIndex].topics, ...new_topics_copy];
+          expandCategories.push(currentImprovementCopy.category);
+        }
       } else if (currentImprovementCopy.action === "add") {
         const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
-        const afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
-
-        const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
-        syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
-        expandDetailsTopic = { categoryIndex, topicIndex: afterIndex + 1, ...newTopic };
-
-        expandCategories.push(currentImprovementCopy.category);
+        if (categoryIndex !== -1) {
+          const afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
+          const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
+          syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
+          expandDetailsTopic = { categoryIndex, topicIndex: afterIndex + 1, ...newTopic };
+          expandCategories.push(currentImprovementCopy.category);
+        }
       } else if (currentImprovementCopy.action === "modify") {
         const categoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.category);
         if (categoryIdx !== -1) {
@@ -2684,7 +2690,9 @@ const CourseComponent = () => {
               </Box>
 
               <CodeContainer>
-                <Typography component="pre">{currentUsedPrompt}</Typography>
+                <Typography component="pre" sx={{ color: "white" }}>
+                  {currentUsedPrompt}
+                </Typography>
               </CodeContainer>
             </Paper>
           )}
