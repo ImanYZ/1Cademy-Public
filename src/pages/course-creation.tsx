@@ -85,6 +85,7 @@ import MarkdownRender from "@/components/Markdown/MarkdownRender";
 import NodeItemContributors from "@/components/NodeItemContributors";
 import { NodeItemFull } from "@/components/NodeItemFull";
 import { NodeItemFullEditor, ProposalFormValues } from "@/components/NodeItemFullEditor";
+import SnackbarComp from "@/components/SnackbarComp";
 // import NodeTypeIcon from "@/components/NodeTypeIcon";
 import TypographyUnderlined from "@/components/TypographyUnderlined";
 import { useAuth } from "@/context/AuthContext";
@@ -447,6 +448,9 @@ const CourseComponent = () => {
   const storage = getStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, percentageUploaded, uploadImage } = useUploadImage({ storage });
+
+  /*  */
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     if (!user?.uname) return;
@@ -888,6 +892,7 @@ const CourseComponent = () => {
       setIsRemoved([]);
       navigateChange(currentChangeIndex);
     }, 3000);
+    setSnackbarMessage("Proposal implemented!");
   };
 
   const navigateChange = (index: any) => {
@@ -4235,6 +4240,7 @@ const CourseComponent = () => {
         </Paper>
       )}
       {ConfirmDialog}
+      <SnackbarComp newMessage={snackbarMessage} setNewMessage={setSnackbarMessage} />
     </Box>
   );
 };
