@@ -3,18 +3,7 @@ import { callOpenAIChat } from "./openAI/helpers";
 import fbAuth from "src/middlewares/fbAuth";
 import { db } from "@/lib/firestoreServer/admin";
 
-const improveCourseSyllabus = async (
-  courseTitle: string,
-  targetLearners: string,
-  classSessions: number,
-  sessionHours: number,
-  prerequisiteKnowledge: string,
-  courseDescription: string,
-  courseObjectives: string[],
-  courseSkills: string[],
-  syllabus: any[]
-) => {
-  const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, skills, and current syllabus, your task is to provide very specific improvements to the syllabus to ensure that the topics are focused, consistent in size, and appropriate for the target students to achieve the course objectives. You can suggest adding, modifying, or deleting topics or categories to enhance the course's effectiveness. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
+const systemPrompt = `You are an expert in curriculum design and optimization. Given the course title, description, target learners, their prerequisite knowledge, number of class sessions, number of hours per class session, objectives, skills, and current syllabus, your task is to provide very specific improvements to the syllabus to ensure that the topics are focused, consistent in size, and appropriate for the target students to achieve the course objectives. You can suggest adding, modifying, or deleting topics or categories to enhance the course's effectiveness. Your response should not include anything other than a JSON object. Please take your time to think carefully before responding.
 Your recommended actions will be reviewed by a supervisory team. For every helpful recommended action, we will pay you $10 and for every unhelpful one, you'll lose $10.
 
 **Input:**
@@ -880,7 +869,17 @@ Each action should be accompanied by:
 }
 \`\`\`
 `;
-
+const improveCourseSyllabus = async (
+  courseTitle: string,
+  targetLearners: string,
+  classSessions: number,
+  sessionHours: number,
+  prerequisiteKnowledge: string,
+  courseDescription: string,
+  courseObjectives: string[],
+  courseSkills: string[],
+  syllabus: any[]
+): Promise<{ prompt: string; suggestions: any }> => {
   const userPrompt = {
     "Course Title": courseTitle,
     "Target Learners": targetLearners,
@@ -896,7 +895,7 @@ Each action should be accompanied by:
   const response = await callOpenAIChat([], JSON.stringify(userPrompt), JSON.stringify(systemPrompt));
   const suggestions = response.suggestions;
   console.log(JSON.stringify(suggestions, null, 2));
-  return suggestions;
+  return { prompt: systemPrompt, suggestions };
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -913,8 +912,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       sessionHours,
       courseId,
     } = req.body;
-
-    const suggestions = await improveCourseSyllabus(
+    const courseData = (await db.collection("coursesAI").doc(courseId).get()).data() as { suggestions: any };
+    if (courseData.suggestions) {
+      return res.status(200).json({ suggestions: courseData.suggestions, prompt: systemPrompt });
+    }
+    const response = await improveCourseSyllabus(
       courseTitle,
       targetLearners,
       classSessions,
@@ -926,12 +928,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       syllabus
     );
     const courseRef = db.collection("coursesAI").doc(courseId);
-    console.log("==> courseRef ==>", courseRef);
     courseRef.update({
-      suggestions,
+      suggestions: response.suggestions,
+      prompt: systemPrompt,
     });
     // console.log("suggestions ==>", suggestions);
-    return res.status(200).json({ suggestions });
+    return res.status(200).json(response);
   } catch (error) {
     console.log(error);
     return res.status(500).json({});
