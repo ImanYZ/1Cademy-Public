@@ -1543,7 +1543,8 @@ const CourseComponent = () => {
       return course.hours === 0 || courses[selectedCourseIdx].classSessions === 0;
     }
     if (creatingCourseStep === 2) {
-      return (course?.tags || []).length <= 0;
+      return false;
+      // return (course?.tags || []).length <= 0;
     }
     if (creatingCourseStep === 3) {
       return !course.learners.trim();
@@ -2279,9 +2280,9 @@ const CourseComponent = () => {
               </Box>
             ))}
 
-          {(!courses[selectedCourseIdx].new || creatingCourseStep >= 7) && (
+          {
             <Box ref={containerRef} marginTop="20px">
-              {(getCourses()[selectedCourseIdx].syllabus || []).map((category: any, categoryIndex: any) => (
+              {(getCourses()[selectedCourseIdx]?.syllabus || []).map((category: any, categoryIndex: any) => (
                 <Accordion id={category.title} key={category.title} expanded={expanded.includes(category.title)}>
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
@@ -2582,37 +2583,38 @@ const CourseComponent = () => {
                                       )
                                     )}
                                   </Masonry>
-                                  {Object.keys(currentImprovement || {}).length <= 0 && (
-                                    <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
-                                      <CustomButton
-                                        variant="contained"
-                                        type="button"
-                                        color="secondary"
-                                        onClick={() => {
-                                          retrieveNodesForTopic(tc.title);
-                                        }}
-                                      >
-                                        {loadingNodes.includes(tc.title) ||
-                                        (!courses[selectedCourseIdx]?.doneLoadingNodes &&
-                                          !(courses[selectedCourseIdx]?.nodes || {})[tc.title])
-                                          ? "Retrieving Concept Cards"
-                                          : `Retrieve ${
-                                              ((courses[selectedCourseIdx].nodes || {})[tc.title] || []).length > 0
-                                                ? "More"
-                                                : ""
-                                            } Concept Cards`}
-                                        {loadingNodes.includes(tc.title) ? (
-                                          /* (!courses[selectedCourseIdx].doneLoadingNodes &&
+                                  {Object.keys(currentImprovement || {}).length <= 0 &&
+                                    getCourses()[selectedCourseIdx]?.tags.length > 0 && (
+                                      <Box mt={2} sx={{ display: "flex", justifyContent: "center" }}>
+                                        <CustomButton
+                                          variant="contained"
+                                          type="button"
+                                          color="secondary"
+                                          onClick={() => {
+                                            retrieveNodesForTopic(tc.title);
+                                          }}
+                                        >
+                                          {loadingNodes.includes(tc.title) ||
+                                          (!courses[selectedCourseIdx]?.doneLoadingNodes &&
+                                            !(courses[selectedCourseIdx]?.nodes || {})[tc.title])
+                                            ? "Retrieving Concept Cards"
+                                            : `Retrieve ${
+                                                ((courses[selectedCourseIdx].nodes || {})[tc.title] || []).length > 0
+                                                  ? "More"
+                                                  : ""
+                                              } Concept Cards`}
+                                          {loadingNodes.includes(tc.title) ? (
+                                            /* (!courses[selectedCourseIdx].doneLoadingNodes &&
                                         !(courses[selectedCourseIdx].nodes || {})[tc.title]) */ <CircularProgress
-                                            sx={{ ml: 1 }}
-                                            size={20}
-                                          />
-                                        ) : (
-                                          <AutoFixHighIcon sx={{ ml: 1 }} />
-                                        )}
-                                      </CustomButton>
-                                    </Box>
-                                  )}
+                                              sx={{ ml: 1 }}
+                                              size={20}
+                                            />
+                                          ) : (
+                                            <AutoFixHighIcon sx={{ ml: 1 }} />
+                                          )}
+                                        </CustomButton>
+                                      </Box>
+                                    )}
                                 </AccordionDetails>
                               </Accordion>
                             </Grid>
@@ -2624,7 +2626,7 @@ const CourseComponent = () => {
                 </Accordion>
               ))}
             </Box>
-          )}
+          }
 
           {(courses[selectedCourseIdx].syllabus || []).length > 0 && courses[selectedCourseIdx].done && (
             <Box
