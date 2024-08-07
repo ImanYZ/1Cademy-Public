@@ -7,8 +7,9 @@ import Slide from "@mui/material/Slide";
 import Toolbar from "@mui/material/Toolbar";
 import { TransitionProps } from "@mui/material/transitions";
 import Typography from "@mui/material/Typography";
-import Image from "next/image";
 import React, { FC } from "react";
+// @ts-ignore
+import { MapInteractionCSS } from "react-map-interaction";
 
 type Props = {
   onClose: () => void;
@@ -39,8 +40,11 @@ const FullScreenImage: FC<Props> = ({ src, open, onClose, alt }) => {
           </Typography>
         </Toolbar>
       </AppBar>
+
       <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
-        <Image alt={alt} src={src} layout="fill" objectFit="contain" quality={100} />
+        <MapInteractionCSS>
+          <img alt={alt} src={src} className="responsive-img" />
+        </MapInteractionCSS>
       </Box>
     </Dialog>
   );

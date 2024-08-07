@@ -94,19 +94,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const nodesForCompare = type === "parents" ? nodeData.parents : nodeData.children;
     const comparedNodes = await compareNodes(courseNodes, nodesForCompare);
     const prerequisitesNodes = await findPrerequisitesNodes([...courseNodes, ...comparedNodes], type);
-
-    if (prerequisitesNodes.length > 0) {
-      await db.runTransaction(async (t: FirebaseFirestore.Transaction) => {
-        const courseDoc = await t.get(courseRef);
-        const courseData = courseDoc.data() as FirebaseFirestore.DocumentData;
-        const nodeIdx = courseData.nodes[topic].findIndex((node: any) => node.node === nodeId);
-        if (!courseData.nodes?.[topic]?.[nodeIdx]?.[type]) {
-          courseData.nodes[topic][nodeIdx][type] = [];
-        }
-        courseData.nodes[topic][nodeIdx][type] = prerequisitesNodes;
-        t.update(courseRef, courseData);
-      });
-    }
     return res.status(200).json({ nodes: prerequisitesNodes });
   } catch (error) {
     console.log(error);
