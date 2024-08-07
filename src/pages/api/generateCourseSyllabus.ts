@@ -562,7 +562,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         t.update(courseRef, courseData);
       });
 
-      if (syllabus) {
+      if (syllabus && tags.length > 0) {
         console.log("loading nodes");
         for (let category of syllabus) {
           for (let topic of category.topics) {
