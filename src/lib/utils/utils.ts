@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { Timestamp } from "firebase/firestore";
 import { UserNodeFirestore } from "src/nodeBookTypes";
-import { URL } from "url";
+import { URL as ServerSideURL } from "url";
 
 import { ONECADEMY_DOMAIN } from "@/lib/utils/1cademyConfig";
 import ROUTES from "@/lib/utils/routes";
@@ -18,6 +18,21 @@ import {
 import { Post } from "../mapApi";
 
 export const isValidHttpUrl = (possibleUrl?: string) => {
+  let url;
+  if (!possibleUrl) {
+    return false;
+  }
+
+  try {
+    url = new ServerSideURL(possibleUrl);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+};
+
+export const isValidHttpUrlOnFrontend = (possibleUrl?: string) => {
   let url;
   if (!possibleUrl) {
     return false;
