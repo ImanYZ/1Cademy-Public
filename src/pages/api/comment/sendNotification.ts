@@ -47,7 +47,7 @@ const triggerNotifications = async (data: any) => {
           }),
         ];
       }
-      const combineMembers = [...instructors, ...members.filter((m: any) => m.id !== comment.sender)];
+      const combineMembers = [...instructors, ...members].filter((m: any) => m.id !== comment.sender);
       const _member = new Set();
       const invalidTokens: any = {};
       for (let member of combineMembers) {
