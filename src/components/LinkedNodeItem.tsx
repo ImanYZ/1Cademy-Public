@@ -8,7 +8,7 @@ import { FC } from "react";
 import { ReactNode } from "react-markdown/lib/react-markdown";
 
 // import { NodeType } from "src/types";
-import { isValidHttpUrl } from "@/lib/utils/utils";
+import { isValidHttpUrlOnFrontend } from "@/lib/utils/utils";
 
 import { NodeType } from "../knowledgeTypes";
 import HtmlTooltip from "./HtmlTooltip";
@@ -70,7 +70,7 @@ const LinkedNodeItem: FC<Props> = ({
         secondaryAction={
           <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", ...secondaryActionSx }}>
             {secondaryActions}
-            {isValidHttpUrl(label) && (
+            {isValidHttpUrlOnFrontend(label) && (
               <Tooltip title="Open the reference specified section in new tab">
                 <IconButton
                   target="_blank"
@@ -91,9 +91,13 @@ const LinkedNodeItem: FC<Props> = ({
           </Box>
         }
       >
-        {!openInNewTab && (
+        {openInNewTab && isValidHttpUrlOnFrontend(linkSrc) ? (
+          <ListItemButton component="a" href={linkSrc} rel="noreferrer" target="_blank" sx={{ ...sx, p: "16px" }}>
+            <ListItemText primary={<MarkdownRender text={title} />} disableTypography={true} />
+          </ListItemButton>
+        ) : (
           <>
-            {readonly ? (
+            {!isValidHttpUrlOnFrontend(linkSrc) || readonly ? (
               <ListItemText
                 sx={{
                   ...sx,
@@ -114,11 +118,6 @@ const LinkedNodeItem: FC<Props> = ({
               </LinkNext>
             )}
           </>
-        )}
-        {openInNewTab && (
-          <ListItemButton component="a" href={linkSrc} rel="noreferrer" target="_blank" sx={{ ...sx, p: "16px" }}>
-            <ListItemText primary={<MarkdownRender text={title} />} disableTypography={true} />
-          </ListItemButton>
         )}
       </ListItem>
     </HtmlTooltip>
