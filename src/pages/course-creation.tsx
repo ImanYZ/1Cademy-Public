@@ -1183,6 +1183,7 @@ const CourseComponent = () => {
     setNodePublicView(null);
     setSelectedTopic(null);
     setSelectedOpenCategory(null);
+    setCurrentUsedPrompt("");
     setTimeout(() => {
       setSelectedCourseIdx(courses.length);
     }, 1000);
@@ -1200,6 +1201,7 @@ const CourseComponent = () => {
       setSelectedCourseIdx(0);
       setSidebarOpen(false);
       setCurrentImprovement(null);
+      setCurrentUsedPrompt("");
     }
   };
   const cancelCreatingCourse = () => {
@@ -4023,9 +4025,7 @@ const CourseComponent = () => {
                             )}
                           </Box>
                           <FormControl sx={{ mb: 2, width: "100%" }}>
-                            <InputLabel id="type-label" sx={{ color: "blue" }}>
-                              Type
-                            </InputLabel>
+                            <InputLabel id="type-label">Type</InputLabel>
                             <Select
                               labelId="type-label"
                               value={prompt.type}
