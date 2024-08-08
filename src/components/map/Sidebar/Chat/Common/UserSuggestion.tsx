@@ -174,6 +174,7 @@ const UserSuggestion = ({
                 onClick={() => {
                   action(suggestion);
                   setShowSuggestions(false);
+                  setInputValue("");
                 }}
                 sx={{ height: "50px" }}
               >

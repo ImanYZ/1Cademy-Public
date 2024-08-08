@@ -50,7 +50,7 @@ jobs:
         node-version: [18.x]
     steps:
       - uses: actions/checkout@v2
-      - uses: isbang/compose-action@v1.3.2
+      - uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./docker-compose.dev.yml"
       - name: Use Node.js ${{ matrix.node-version }}
