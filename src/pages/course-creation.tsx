@@ -325,7 +325,7 @@ const compareTopics = (oldTopic: Topic, newTopic: Topic) => {
     differences.objectives = getArrayDifferences(oldTopic.objectives, newTopic.objectives);
   }
   if (JSON.stringify(oldTopic.skills) !== JSON.stringify(newTopic.skills)) {
-    differences.skills = getArrayDifferences(oldTopic.skills, newTopic.skills);
+    differences.skills = getArrayDifferences(oldTopic.skills || [], newTopic.skills || []);
   }
 
   if (oldTopic.title !== newTopic.title) {
@@ -841,7 +841,10 @@ const CourseComponent = () => {
 
     if (currentImprovement.type === "category") {
       if (currentImprovement.action === "add" && typeof currentImprovement.new_category === "object") {
-        const afterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.after);
+        let afterCategoryIdx = syllabus.findIndex((cat: any) => cat.title === currentImprovement.after);
+        if (afterCategoryIdx === -1) {
+          afterCategoryIdx = syllabus.length - 1;
+        }
         syllabus.splice(afterCategoryIdx + 1, 0, currentImprovement.new_category);
       }
 
@@ -1063,7 +1066,10 @@ const CourseComponent = () => {
       } else if (currentImprovementCopy.action === "add") {
         const categoryIndex = syllabus.findIndex(s => s.title === currentImprovementCopy.category);
         if (categoryIndex !== -1) {
-          const afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
+          let afterIndex = syllabus[categoryIndex].topics.findIndex(t => t.title === currentImprovementCopy.after);
+          if (afterIndex === -1) {
+            afterIndex = syllabus[categoryIndex].topics.length - 1;
+          }
           const newTopic = { ...currentImprovementCopy.new_topic, color: "add" };
           syllabus[categoryIndex].topics.splice(afterIndex + 1, 0, newTopic);
           expandDetailsTopic = { categoryIndex, topicIndex: afterIndex + 1, ...newTopic };
@@ -1092,7 +1098,10 @@ const CourseComponent = () => {
 
     if (currentImprovementCopy.type === "category") {
       if (currentImprovementCopy.action === "add" && typeof currentImprovementCopy.new_category === "object") {
-        const addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
+        let addAfterIdx = syllabus.findIndex(c => c.title === currentImprovementCopy.after);
+        if (addAfterIdx === -1) {
+          addAfterIdx = syllabus.length - 1;
+        }
         syllabus.splice(addAfterIdx + 1, 0, { ...currentImprovementCopy.new_category, color: "add" });
         expandDetailsCategory = { categoryIndex: addAfterIdx + 1, ...currentImprovementCopy.new_category };
         expandCategories.push(currentImprovementCopy.new_category.title);
@@ -1188,6 +1197,7 @@ const CourseComponent = () => {
     setNodePublicView(null);
     setSelectedTopic(null);
     setSelectedOpenCategory(null);
+    setCurrentUsedPrompt("");
     setTimeout(() => {
       setSelectedCourseIdx(courses.length);
     }, 1000);
@@ -1205,6 +1215,7 @@ const CourseComponent = () => {
       setSelectedCourseIdx(0);
       setSidebarOpen(false);
       setCurrentImprovement(null);
+      setCurrentUsedPrompt("");
     }
   };
   const cancelCreatingCourse = () => {
@@ -3616,7 +3627,7 @@ const CourseComponent = () => {
                   </Box>
                 )}
                 {selectedTopic && (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: "15px", p: 1 }}>
                     {selectedTopic.comparison && selectedTopic.comparison.title ? (
                       <Box>
                         <Typography>Title:</Typography>
@@ -4028,9 +4039,7 @@ const CourseComponent = () => {
                             )}
                           </Box>
                           <FormControl sx={{ mb: 2, width: "100%" }}>
-                            <InputLabel id="type-label" sx={{ color: "blue" }}>
-                              Type
-                            </InputLabel>
+                            <InputLabel id="type-label">Type</InputLabel>
                             <Select
                               labelId="type-label"
                               value={prompt.type}
