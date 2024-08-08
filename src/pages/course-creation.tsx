@@ -1197,6 +1197,7 @@ const CourseComponent = () => {
     setNodePublicView(null);
     setSelectedTopic(null);
     setSelectedOpenCategory(null);
+    setCurrentUsedPrompt("");
     setTimeout(() => {
       setSelectedCourseIdx(courses.length);
     }, 1000);
@@ -1214,6 +1215,7 @@ const CourseComponent = () => {
       setSelectedCourseIdx(0);
       setSidebarOpen(false);
       setCurrentImprovement(null);
+      setCurrentUsedPrompt("");
     }
   };
   const cancelCreatingCourse = () => {
