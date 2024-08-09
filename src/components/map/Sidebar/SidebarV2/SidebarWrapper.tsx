@@ -147,7 +147,7 @@ export const SidebarWrapper = ({
             {selectedChannel ? selectedChannel.title : "1Cademy Chat"}
           </Typography> */}
           {!!selectedChannel && (
-            <GroupAvatar membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
+            <GroupAvatar size={35} membersInfo={selectedChannel?.membersInfo} openDMChannel={openDMChannel} />
           )}
           {!!channelTitle && (
             <Typography
