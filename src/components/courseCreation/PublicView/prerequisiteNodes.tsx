@@ -6,7 +6,7 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import { SxProps, Theme } from "@mui/system";
 import { TreeItem, TreeView } from "@mui/x-tree-view";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import HtmlTooltip from "@/components/HtmlTooltip";
 import MarkdownRender from "@/components/Markdown/MarkdownRender";
@@ -30,29 +30,51 @@ type PrerequisiteNodeProps = {
 };
 
 const PrerequisiteNodes = ({ nodes, sx, header }: PrerequisiteNodeProps) => {
+  const [expanded, setExpanded] = useState<string[]>([]);
+
+  useEffect(() => {
+    const getAllNodeIds = (nodes: PrerequisiteNodeFieldProps[]) => {
+      let ids: string[] = [];
+      nodes.forEach(node => {
+        ids.push(node.title);
+        if (node.nodes) {
+          ids = ids.concat(getAllNodeIds(node.nodes));
+        }
+      });
+      return ids;
+    };
+
+    const allNodeIds = getAllNodeIds(nodes);
+    setExpanded(allNodeIds);
+  }, [nodes]);
+
+  const handleToggle = (event: React.SyntheticEvent<Element, Event>, nodeIds: string[]) => {
+    setExpanded(nodeIds);
+  };
   const renderPrerequisiteNodes = (nodes: PrerequisiteNodeFieldProps[]) => {
     return nodes.map((el, idx) => (
       <React.Fragment key={idx}>
-        <HtmlTooltip
-          sx={{ zIndex: 9999 }}
-          title={
-            <Box>
-              <Typography variant="body2" component="div">
-                <MarkdownRender text={el.content || ""} />
-              </Typography>
-            </Box>
+        <TreeItem
+          label={
+            <HtmlTooltip
+              sx={{ zIndex: 9999 }}
+              title={
+                <Box>
+                  <Typography variant="body2" component="div">
+                    <MarkdownRender text={el.content || ""} />
+                  </Typography>
+                </Box>
+              }
+              placement="left"
+            >
+              <Typography sx={{ py: 3, position: "relative", right: "35px", pl: "35px" }}>{el.title}</Typography>
+            </HtmlTooltip>
           }
-          placement="left"
+          nodeId={`${el.title}`}
+          key={`${el.title}-${idx}`}
         >
-          <TreeItem
-            sx={{ "& .MuiTreeItem-content": { py: 3 } }}
-            label={el.title}
-            nodeId={`${el.title}-${idx}`}
-            key={`${el.title}-${idx}`}
-          >
-            {el?.nodes && el?.nodes?.length > 0 && <>{renderPrerequisiteNodes(el.nodes)}</>}
-          </TreeItem>
-        </HtmlTooltip>
+          {el?.nodes && el?.nodes?.length > 0 && <>{renderPrerequisiteNodes(el.nodes)}</>}
+        </TreeItem>
       </React.Fragment>
     ));
   };
@@ -79,7 +101,21 @@ const PrerequisiteNodes = ({ nodes, sx, header }: PrerequisiteNodeProps) => {
           </Box>
         }
       ></CardHeader>
-      <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+      <TreeView
+        expanded={expanded}
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpandIcon={<ChevronRightIcon />}
+        onNodeToggle={handleToggle}
+        sx={{
+          "& .Mui-selected": {
+            backgroundColor: "transparent!important",
+          },
+          "& .Mui-selected:hover": {
+            backgroundColor: theme =>
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)!important" : "rgba(0, 0, 0, 0.04)!important",
+          },
+        }}
+      >
         {renderPrerequisiteNodes(nodes)}
       </TreeView>
     </Card>
